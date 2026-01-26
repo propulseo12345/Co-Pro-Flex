@@ -1,0 +1,423 @@
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+    color: var(--primary);
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Sections */
+.section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 1.25rem 0;
+}
+
+/* Radio Cards (Type d'ordre) */
+.radioCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.radioCard {
+    position: relative;
+    padding: 1.25rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--background);
+}
+
+.radioCard:hover {
+    border-color: var(--primary);
+    background: var(--surface);
+}
+
+.radioCardSelected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.radioInput {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.radioCardContent {
+    padding-right: 2rem;
+}
+
+.radioCardTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.radioCardDescription {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Provider Info Display */
+.providerInfo {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.infoRow {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.infoRow strong {
+    color: var(--text-main);
+    font-weight: 500;
+    min-width: 100px;
+}
+
+/* Form Elements */
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.inputError {
+    border-color: var(--danger) !important;
+}
+
+.inputError:focus {
+    border-color: var(--danger) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.errorText {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--danger);
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0;
+}
+
+.checkbox input[type="checkbox"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    cursor: pointer;
+}
+
+.checkbox label {
+    font-size: 0.875rem;
+    color: var(--text-main);
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Section description */
+.sectionDescription {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: -0.75rem 0 1.25rem 0;
+}
+
+/* Category info */
+.categoryInfo {
+    margin-top: 0.75rem;
+    padding: 0.625rem 1rem;
+    background: var(--primary-light);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: var(--primary);
+}
+
+/* Alerte de cohérence prestataire */
+.alerteCoherence {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    margin-top: 1rem;
+    padding: 0.875rem 1rem;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: #92400E;
+}
+
+.alerteCoherence svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+:global([data-theme="dark"]) .alerteCoherence {
+    background: rgba(252, 211, 77, 0.1);
+    border-color: rgba(252, 211, 77, 0.3);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .categoryInfo {
+    background: rgba(59, 130, 246, 0.1);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .section {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .sectionTitle {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .sectionDescription {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .radioCard {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .radioCard:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .radioCardSelected {
+    background: rgba(52, 211, 153, 0.1);
+    border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .radioCardTitle {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .radioCardDescription {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .providerInfo {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .infoRow {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .infoRow strong {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .label {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .dropdown {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme="dark"]) .dropdownItem {
+    border-bottom-color: var(--border);
+}
+
+:global([data-theme="dark"]) .dropdownItem:hover {
+    background: var(--surface-hover);
+}
+
+:global([data-theme="dark"]) .dropdownItem strong {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .dropdownMeta {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .clearButton:hover {
+    color: #F87171;
+}
+
+/* Search Container with Dropdown */
+.searchContainer {
+    position: relative;
+}
+
+.clearButton {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: color var(--transition-fast);
+}
+
+.clearButton:hover {
+    color: var(--danger);
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 0.25rem;
+}
+
+.dropdownItem {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-fast);
+}
+
+.dropdownItem:last-child {
+    border-bottom: none;
+}
+
+.dropdownItem:hover {
+    background: var(--primary-light);
+}
+
+.dropdownItem strong {
+    display: block;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.dropdownMeta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.dropdownMeta span {
+    display: inline;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 0;
+}
+
+.actions button {
+    min-width: 180px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .radioCards {
+        grid-template-columns: 1fr;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+}

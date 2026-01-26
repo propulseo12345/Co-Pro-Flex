@@ -1,0 +1,213 @@
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+}
+
+.backLink:hover {
+    color: var(--primary);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.statusBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.statusSuccess {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.statusError {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+.statusWarning {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+}
+
+.mainColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.infoLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.infoValue {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.infoValueAmount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.documentPreview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+.documentIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 8px;
+}
+
+.documentInfo {
+    flex: 1;
+}
+
+.documentName {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.documentSize {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.sidebarTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.actionButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.timelineItem {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+}
+
+.timelineItem:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 24px;
+    bottom: -16px;
+    width: 2px;
+    background: var(--border);
+}
+
+.timelineDot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 3px solid var(--primary);
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.timelineDotSuccess {
+    border-color: var(--success);
+}
+
+.timelineContent {
+    flex: 1;
+}
+
+.timelineTitle {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.timelineDate {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 1024px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+}

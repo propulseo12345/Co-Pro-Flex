@@ -1,0 +1,986 @@
+/* ========================================
+   MAIL COMPONENTS - Shared CSS Module
+   ======================================== */
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-color);
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--text-secondary);
+  font-size: 0.938rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--primary-color);
+}
+
+.tabActive {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.tabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #dc2626;
+  color: white;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.tabBadgeDraft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #f59e0b;
+  color: white;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.tabTrash {
+  margin-left: auto;
+}
+
+.tabBadgeTrash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Toolbar */
+.toolbar {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transform: translateY(-1px);
+}
+
+.select {
+  padding: 0.625rem 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* Bulk Actions */
+.bulkActions {
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bulkButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Email List */
+.emailList {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.emailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emailItem:hover {
+  background: var(--hover-bg);
+  transform: translateX(4px);
+}
+
+.emailItem.selected {
+  background: var(--primary-light);
+}
+
+.emailItem.unread {
+  background: #f0f9ff;
+  border-left: 3px solid var(--primary-color);
+}
+
+.emailItem.unread .emailSubject {
+  font-weight: 700;
+}
+
+.unreadDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.emailActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.25rem;
+  cursor: pointer;
+}
+
+.emailContent {
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.emailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.emailSubject {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.attachmentIcon {
+  color: var(--text-tertiary);
+}
+
+.emailDate {
+  font-size: 0.813rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.emailMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.recipients {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.templateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.emailPreview {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.emailFooter {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.813rem;
+  font-weight: 500;
+}
+
+.statusBadge.sent {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+.statusBadge.opened {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.statusBadge.received {
+  background: #dbeafe;
+  color: #0284c7;
+}
+
+.editBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editBtn:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+.downloadBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.downloadBtn:hover {
+  background: var(--hover-bg);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+/* Empty State */
+.emptyState {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.emptyState svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Trash Actions */
+.trashActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+}
+
+.trashInfo {
+  font-size: 0.813rem;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Folder Sidebar */
+.folderSidebar {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.folderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.folderHeader h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.addFolderBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addFolderBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.folderList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.folderItemWrapper {
+  position: relative;
+}
+
+.folderItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.folderItem:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.folderItem span:first-of-type {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folderItemActive {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.folderItemActive:hover {
+  background: var(--primary-light);
+}
+
+.folderCount {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  color: var(--text-tertiary);
+}
+
+.folderMenuBtn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.folderItemWrapper:hover .folderMenuBtn {
+  opacity: 1;
+}
+
+.folderMenuBtn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.folderMenu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  min-width: 140px;
+}
+
+.folderMenu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: transparent;
+  border: none;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.folderMenu button:hover {
+  background: var(--hover-bg);
+}
+
+.folderMenu .deleteOption {
+  color: #ef4444;
+}
+
+.folderMenu .deleteOption:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Folder Form */
+.folderFormGroup {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.folderFormGroup label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.folderInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.938rem;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  transition: all 0.2s;
+}
+
+.folderInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15);
+}
+
+.colorPicker {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.colorOption {
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.colorOption:hover {
+  transform: scale(1.1);
+}
+
+.colorOptionActive {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 3px var(--card-bg), 0 0 0 5px currentColor;
+}
+
+/* Folder Picker */
+.folderPickerList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.folderPickerItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.938rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.folderPickerItem:hover {
+  background: var(--hover-bg);
+  border-color: var(--primary-color);
+}
+
+.folderPickerItem span {
+  flex: 1;
+}
+
+.folderPickerArrow {
+  color: var(--text-tertiary);
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.2s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.modalClose:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.modalIcon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+}
+
+.modalText {
+  font-size: 0.938rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.modalActions button {
+  min-width: 120px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #059669;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+  z-index: 1001;
+  animation: toastSlideIn 0.3s ease;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.toastSuccess {
+  background: #059669;
+}
+
+.toastError {
+  background: #dc2626;
+}
+
+.toastInfo {
+  background: #2563eb;
+}
+
+.toastClose {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.toastClose:hover {
+  opacity: 1;
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+
+:global([data-theme="dark"]) .emailItem.unread {
+  background: rgba(129, 140, 248, 0.08);
+  border-left-color: #818cf8;
+}
+
+:global([data-theme="dark"]) .emailItem.unread:hover {
+  background: rgba(129, 140, 248, 0.12);
+}
+
+:global([data-theme="dark"]) .emailItem.selected {
+  background: rgba(129, 140, 248, 0.15);
+}
+
+:global([data-theme="dark"]) .emailItem:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .tabBadge {
+  background: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+:global([data-theme="dark"]) .tabBadgeDraft {
+  background: #f59e0b;
+  color: #1A1F2E;
+}
+
+:global([data-theme="dark"]) .trashActions {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+:global([data-theme="dark"]) .trashInfo {
+  color: #fca5a5;
+}
+
+:global([data-theme="dark"]) .templateBadge {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(129, 140, 248, 0.2);
+}
+
+:global([data-theme="dark"]) .statusBadge.sent {
+  background: rgba(129, 140, 248, 0.15);
+  color: #c7d2fe;
+}
+
+:global([data-theme="dark"]) .statusBadge.opened {
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
+}
+
+:global([data-theme="dark"]) .statusBadge.received {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+
+:global([data-theme="dark"]) .searchInput {
+  background: #1A1F2E;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+:global([data-theme="dark"]) .searchInput:focus {
+  background: #1E293B;
+  border-color: #818cf8;
+}
+
+:global([data-theme="dark"]) .select {
+  background: #1A1F2E;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+:global([data-theme="dark"]) .bulkActions {
+  background: rgba(129, 140, 248, 0.08);
+  border-color: rgba(129, 140, 248, 0.2);
+}
+
+:global([data-theme="dark"]) .editBtn,
+:global([data-theme="dark"]) .downloadBtn {
+  background: #1A1F2E;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .editBtn:hover {
+  background: #818cf8;
+  border-color: #818cf8;
+  color: white;
+}
+
+:global([data-theme="dark"]) .downloadBtn:hover {
+  background: rgba(129, 140, 248, 0.15);
+  border-color: #818cf8;
+  color: #a5b4fc;
+}
+
+:global([data-theme="dark"]) .tab {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .tab:hover {
+  color: #a5b4fc;
+  background: rgba(129, 140, 248, 0.08);
+}
+
+:global([data-theme="dark"]) .tabActive {
+  color: #a5b4fc;
+  border-bottom-color: #818cf8;
+}
+
+:global([data-theme="dark"]) .checkbox {
+  accent-color: #818cf8;
+}
+
+:global([data-theme="dark"]) .unreadDot {
+  background: #818cf8;
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
+}
+
+:global([data-theme="dark"]) .folderSidebar {
+  background: #1E293B;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .folderItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+:global([data-theme="dark"]) .folderItemActive {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
+}
+
+:global([data-theme="dark"]) .folderMenu {
+  background: #1E293B;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+:global([data-theme="dark"]) .folderInput {
+  background: #1A1F2E;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+:global([data-theme="dark"]) .folderPickerItem {
+  background: #1A1F2E;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .folderPickerItem:hover {
+  background: rgba(129, 140, 248, 0.1);
+  border-color: #818cf8;
+}
+
+:global([data-theme="dark"]) .modalIcon {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+:global([data-theme="dark"]) .toast {
+  background: #10b981;
+}
+
+:global([data-theme="dark"]) .emailItem {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .toolbar {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .tabs {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}

@@ -1,0 +1,26 @@
+.truncatedText {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.tooltip {
+    position: fixed;
+    z-index: 9999;
+    background-color: var(--text-primary, #1e293b);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md, 6px);
+    font-size: 0.8125rem;
+    max-width: 400px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+:global([data-theme="dark"]) .tooltip {
+    background-color: var(--background-tertiary, #374151);
+}

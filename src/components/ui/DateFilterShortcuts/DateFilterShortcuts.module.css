@@ -1,0 +1,186 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.compact {
+  gap: 8px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-600);
+  white-space: nowrap;
+}
+
+.shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shortcutButton {
+  padding: 6px 12px;
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-white);
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.shortcutButton:hover {
+  border-color: var(--color-gray-300);
+  background: var(--color-gray-50);
+  color: var(--color-gray-900);
+}
+
+.shortcutButton.active {
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary-700);
+}
+
+.shortcutButton.active:hover {
+  background: var(--color-primary-100);
+  border-color: var(--color-primary-300);
+}
+
+.compact .shortcutButton {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.selectedRange {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+  padding-left: 8px;
+  border-left: 1px solid var(--color-gray-200);
+}
+
+/* Period Navigator */
+.navigator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.navButton:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-900);
+}
+
+.periodLabel {
+  min-width: 100px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-gray-800);
+  padding: 0 8px;
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .label {
+  color: var(--color-gray-400);
+}
+
+:global([data-theme="dark"]) .shortcutButton {
+  border-color: var(--color-gray-700);
+  background: var(--color-gray-800);
+  color: var(--color-gray-300);
+}
+
+:global([data-theme="dark"]) .shortcutButton:hover {
+  border-color: var(--color-gray-600);
+  background: var(--color-gray-700);
+  color: var(--color-gray-100);
+}
+
+:global([data-theme="dark"]) .shortcutButton.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--color-primary-700);
+  color: var(--color-primary-400);
+}
+
+:global([data-theme="dark"]) .shortcutButton.active:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: var(--color-primary-600);
+}
+
+:global([data-theme="dark"]) .selectedRange {
+  color: var(--color-gray-500);
+  border-color: var(--color-gray-700);
+}
+
+:global([data-theme="dark"]) .navigator {
+  background: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+}
+
+:global([data-theme="dark"]) .navButton {
+  color: var(--color-gray-400);
+}
+
+:global([data-theme="dark"]) .navButton:hover {
+  background: var(--color-gray-700);
+  color: var(--color-gray-100);
+}
+
+:global([data-theme="dark"]) .periodLabel {
+  color: var(--color-gray-200);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .shortcuts {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .shortcutButton {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 6px;
+    text-align: center;
+  }
+
+  .selectedRange {
+    padding-left: 0;
+    border-left: none;
+    padding-top: 4px;
+  }
+}

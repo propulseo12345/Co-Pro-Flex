@@ -1,0 +1,792 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.statIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Toolbar */
+.toolbar {
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 300px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.938rem;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  cursor: pointer;
+  min-width: 150px;
+}
+
+/* Ventes List */
+.ventesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.venteCard {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.venteCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.venteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: #f8fafc;
+}
+
+.venteTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lotInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lotInfo h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.lotType {
+  padding: 0.25rem 0.75rem;
+  background: #e0e7ff;
+  color: #4f46e5;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statutBadge {
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.813rem;
+  font-weight: 600;
+}
+
+.venteActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.actionBtn:hover {
+  background: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+.venteContent {
+  padding: 1.5rem;
+}
+
+.venteInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.infoLabel {
+  font-weight: 500;
+}
+
+.infoValue {
+  color: var(--text-primary);
+}
+
+/* Workflow Section */
+.workflowSection {
+  padding: 1.25rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.workflowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.workflowLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.workflowProgress {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  transition: width 0.3s;
+}
+
+.workflowSteps {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.workflowStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  transition: all 0.2s;
+}
+
+.stepActive {
+  color: var(--primary-color);
+  background: #f0f9ff;
+}
+
+.stepCurrent {
+  background: #dbeafe;
+  font-weight: 600;
+}
+
+/* Alert Section */
+.alertSection {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  color: #92400e;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Empty State */
+.emptyState {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-tertiary);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.emptyState svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyState p {
+  font-size: 0.938rem;
+  margin: 0;
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+
+:global([data-theme="dark"]) .statCard {
+  background: var(--surface);
+  border-color: var(--border-color);
+}
+
+:global([data-theme="dark"]) .statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .searchInput {
+  background: var(--surface);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .searchInput:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+}
+
+:global([data-theme="dark"]) .select {
+  background: var(--surface);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .venteCard {
+  background: var(--surface);
+  border-color: var(--border-color);
+}
+
+:global([data-theme="dark"]) .venteCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .venteHeader {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+:global([data-theme="dark"]) .lotType {
+  background: rgba(129, 140, 248, 0.2);
+  color: #a5b4fc;
+}
+
+:global([data-theme="dark"]) .actionBtn {
+  background: var(--surface);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .actionBtn:hover {
+  background: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+:global([data-theme="dark"]) .workflowSection {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .progressBar {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+:global([data-theme="dark"]) .progressFill {
+  background: linear-gradient(90deg, #818cf8 0%, #a78bfa 100%);
+}
+
+:global([data-theme="dark"]) .stepActive {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+:global([data-theme="dark"]) .stepCurrent {
+  background: rgba(96, 165, 250, 0.25);
+}
+
+:global([data-theme="dark"]) .alertSection {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+}
+
+:global([data-theme="dark"]) .emptyState {
+  background: var(--surface);
+  border-color: var(--border-color);
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.closeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modalContent {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Export Modal */
+.exportDescription {
+  font-size: 0.938rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem 0;
+}
+
+.exportOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.exportOption {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.exportOption:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  background: rgba(79, 70, 229, 0.02);
+}
+
+.exportOption:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.exportIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.exportInfo {
+  flex: 1;
+}
+
+.exportInfo h4 {
+  font-size: 0.938rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.exportInfo p {
+  font-size: 0.813rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.loadingSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.exportFilters {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.exportFilters h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color);
+}
+
+.exportSuccess {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.exportSuccess .successIcon {
+  color: #10b981;
+  margin-bottom: 1rem;
+}
+
+.exportSuccess h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.exportSuccess p {
+  font-size: 0.938rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+}
+
+.downloadHint {
+  font-size: 0.813rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* History Modal */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.historyList::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--border-color);
+}
+
+.historyItem {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+  padding-bottom: 1.25rem;
+}
+
+.historyItem:last-child {
+  padding-bottom: 0;
+}
+
+.historyDot {
+  position: absolute;
+  left: -1.5rem;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 1;
+}
+
+.historyContent {
+  flex: 1;
+}
+
+.historyAction {
+  font-size: 0.938rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.375rem 0;
+}
+
+.historyMeta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.historyMeta span {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.813rem;
+  color: var(--text-tertiary);
+}
+
+.historyFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1.5rem;
+}
+
+/* Dark mode for modals */
+:global([data-theme="dark"]) .modal {
+  background: var(--surface);
+}
+
+:global([data-theme="dark"]) .modalHeader {
+  border-color: var(--border-color);
+}
+
+:global([data-theme="dark"]) .closeBtn:hover {
+  background: var(--hover-bg);
+}
+
+:global([data-theme="dark"]) .exportOption {
+  background: var(--surface);
+  border-color: var(--border-color);
+}
+
+:global([data-theme="dark"]) .exportOption:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  background: rgba(129, 140, 248, 0.1);
+}
+
+:global([data-theme="dark"]) .exportFilters {
+  border-color: var(--border-color);
+}
+
+:global([data-theme="dark"]) .historyList::before {
+  background: var(--border-color);
+}
+
+:global([data-theme="dark"]) .historyDot {
+  border-color: var(--surface);
+}
+
+:global([data-theme="dark"]) .historyFooter {
+  border-color: var(--border-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    min-width: 100%;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .select {
+    width: 100%;
+  }
+
+  .venteInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .workflowSteps {
+    flex-wrap: wrap;
+  }
+}

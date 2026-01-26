@@ -1,0 +1,149 @@
+.categoryBlock {
+    background: var(--color-surface, #ffffff);
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid var(--color-border, #e5e7eb);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.categoryBlock:hover {
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
+}
+
+.blockHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.blockIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md, 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.blockPrimary .blockIcon {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary, #3b82f6);
+}
+
+.blockSecondary .blockIcon {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success, #10b981);
+}
+
+.blockTertiary .blockIcon {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.blockInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.blockInfo h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: var(--color-text, #111827);
+}
+
+.blockInfo p {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #6b7280);
+    margin: 0;
+}
+
+.blockCount {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.countValue {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.blockPrimary .countValue {
+    color: var(--color-primary, #3b82f6);
+}
+
+.blockSecondary .countValue {
+    color: var(--color-success, #10b981);
+}
+
+.blockTertiary .countValue {
+    color: #8b5cf6;
+}
+
+.countLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.blockKpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-subtle, #f9fafb);
+}
+
+.kpiItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.kpiItem svg {
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.kpiLabel {
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.kpiValue {
+    font-weight: 600;
+    color: var(--color-text, #111827);
+}
+
+.blockAction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.blockPrimary .blockAction {
+    color: var(--color-primary, #3b82f6);
+}
+
+.blockSecondary .blockAction {
+    color: var(--color-success, #10b981);
+}
+
+.blockTertiary .blockAction {
+    color: #8b5cf6;
+}
+
+.blockAction:hover {
+    background: var(--color-bg-subtle, #f9fafb);
+}

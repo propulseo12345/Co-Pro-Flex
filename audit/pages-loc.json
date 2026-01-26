@@ -1,0 +1,352 @@
+[
+  {
+    "rank": 1,
+    "lines": 2729,
+    "file": "src/app/(dashboard)/finance/mouvements-bancaires/page.tsx",
+    "featureGuess": "finance/mouvements-bancaires",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 2,
+    "lines": 1994,
+    "file": "src/app/(dashboard)/ventes-impayes/impayes/page.tsx",
+    "featureGuess": "ventes-impayes/impayes",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 3,
+    "lines": 1786,
+    "file": "src/app/(dashboard)/ag/[id]/pv/page.tsx",
+    "featureGuess": "ag/[id]",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 4,
+    "lines": 1733,
+    "file": "src/app/(dashboard)/documents/ged/page.tsx",
+    "featureGuess": "documents/ged",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 5,
+    "lines": 1398,
+    "file": "src/app/(dashboard)/communication/mail/page.tsx",
+    "featureGuess": "communication/mail",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 6,
+    "lines": 1183,
+    "file": "src/app/(dashboard)/ag/new/page.tsx",
+    "featureGuess": "ag/new",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 7,
+    "lines": 990,
+    "file": "src/app/(dashboard)/documents/expenses/page.tsx",
+    "featureGuess": "documents/expenses",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 8,
+    "lines": 988,
+    "file": "src/app/(dashboard)/ag/[id]/session/page.tsx",
+    "featureGuess": "ag/[id]",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 9,
+    "lines": 943,
+    "file": "src/app/(dashboard)/finance/rapprochement-bancaire/page.tsx",
+    "featureGuess": "finance/rapprochement-bancaire",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 10,
+    "lines": 937,
+    "file": "src/app/(dashboard)/ag/resolutions/page.tsx",
+    "featureGuess": "ag/resolutions",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 11,
+    "lines": 908,
+    "file": "src/app/(dashboard)/communication/mail/[id]/page.tsx",
+    "featureGuess": "communication/mail",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 12,
+    "lines": 883,
+    "file": "src/app/(dashboard)/communication/evenements/nouveau/page.tsx",
+    "featureGuess": "communication/evenements",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 13,
+    "lines": 871,
+    "file": "src/app/(dashboard)/ag/[id]/edit/page.tsx",
+    "featureGuess": "ag/[id]",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 14,
+    "lines": 866,
+    "file": "src/app/(dashboard)/ventes-impayes/ventes/nouvelle/page.tsx",
+    "featureGuess": "ventes-impayes/ventes",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 15,
+    "lines": 837,
+    "file": "src/app/(dashboard)/communication/mail/nouveau/page.tsx",
+    "featureGuess": "communication/mail",
+    "bucket": "Critical"
+  },
+  {
+    "rank": 16,
+    "lines": 798,
+    "file": "src/app/(dashboard)/communication/mur/nouveau/page.tsx",
+    "featureGuess": "communication/mur",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 17,
+    "lines": 783,
+    "file": "src/app/(dashboard)/settings/templates/[id]/page.tsx",
+    "featureGuess": "settings/templates",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 18,
+    "lines": 775,
+    "file": "src/app/(dashboard)/maintenance/providers/[id]/page.tsx",
+    "featureGuess": "maintenance/providers",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 19,
+    "lines": 770,
+    "file": "src/app/(dashboard)/communication/mur/[id]/page.tsx",
+    "featureGuess": "communication/mur",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 20,
+    "lines": 748,
+    "file": "src/app/(dashboard)/communication/messagerie-privee/[id]/page.tsx",
+    "featureGuess": "communication/messagerie-privee",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 21,
+    "lines": 741,
+    "file": "src/app/(dashboard)/communication/evenements/page.tsx",
+    "featureGuess": "communication/evenements",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 22,
+    "lines": 717,
+    "file": "src/app/(dashboard)/maintenance/service-orders/[id]/page.tsx",
+    "featureGuess": "maintenance/service-orders",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 23,
+    "lines": 706,
+    "file": "src/app/(dashboard)/sales/page.tsx",
+    "featureGuess": "sales",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 24,
+    "lines": 702,
+    "file": "src/app/(dashboard)/maintenance/providers/coproflex/page.tsx",
+    "featureGuess": "maintenance/providers",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 25,
+    "lines": 693,
+    "file": "src/app/(dashboard)/maintenance/service-orders/new/page.tsx",
+    "featureGuess": "maintenance/service-orders",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 26,
+    "lines": 691,
+    "file": "src/app/(dashboard)/communication/evenements/[id]/page.tsx",
+    "featureGuess": "communication/evenements",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 27,
+    "lines": 684,
+    "file": "src/app/(dashboard)/maintenance/contracts/[id]/page.tsx",
+    "featureGuess": "maintenance/contracts",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 28,
+    "lines": 634,
+    "file": "src/app/(dashboard)/maintenance/providers/page.tsx",
+    "featureGuess": "maintenance/providers",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 29,
+    "lines": 616,
+    "file": "src/app/(dashboard)/communication/mur/page.tsx",
+    "featureGuess": "communication/mur",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 30,
+    "lines": 605,
+    "file": "src/app/(dashboard)/finance/budgets/[id]/page.tsx",
+    "featureGuess": "finance/budgets",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 31,
+    "lines": 598,
+    "file": "src/app/(dashboard)/communication/messagerie-privee/nouveau/page.tsx",
+    "featureGuess": "communication/messagerie-privee",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 32,
+    "lines": 560,
+    "file": "src/app/(dashboard)/ventes-impayes/page.tsx",
+    "featureGuess": "ventes-impayes",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 33,
+    "lines": 554,
+    "file": "src/app/(dashboard)/finance/etats-dates/page.tsx",
+    "featureGuess": "finance/etats-dates",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 34,
+    "lines": 552,
+    "file": "src/app/(dashboard)/dashboard/page.tsx",
+    "featureGuess": "dashboard",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 35,
+    "lines": 538,
+    "file": "src/app/(dashboard)/communication/messagerie-privee/page.tsx",
+    "featureGuess": "communication/messagerie-privee",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 36,
+    "lines": 526,
+    "file": "src/app/(dashboard)/ventes-impayes/ventes/page.tsx",
+    "featureGuess": "ventes-impayes/ventes",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 37,
+    "lines": 502,
+    "file": "src/app/(dashboard)/maintenance/logbook/assurances/[id]/page.tsx",
+    "featureGuess": "maintenance/logbook",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 38,
+    "lines": 484,
+    "file": "src/app/(dashboard)/documents/ledger/page.tsx",
+    "featureGuess": "documents/ledger",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 39,
+    "lines": 480,
+    "file": "src/app/(dashboard)/finance/factures/page.tsx",
+    "featureGuess": "finance/factures",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 40,
+    "lines": 474,
+    "file": "src/app/(dashboard)/settings/templates/page.tsx",
+    "featureGuess": "settings/templates",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 41,
+    "lines": 474,
+    "file": "src/app/(dashboard)/finance/factures/[id]/page.tsx",
+    "featureGuess": "finance/factures",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 42,
+    "lines": 436,
+    "file": "src/app/(dashboard)/coproprietaires/page.tsx",
+    "featureGuess": "coproprietaires",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 43,
+    "lines": 427,
+    "file": "src/app/(dashboard)/finance/cles-repartition/[id]/page.tsx",
+    "featureGuess": "finance/cles-repartition",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 44,
+    "lines": 420,
+    "file": "src/app/(dashboard)/finance/cles-repartition/page.tsx",
+    "featureGuess": "finance/cles-repartition",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 45,
+    "lines": 419,
+    "file": "src/app/(dashboard)/ag/[id]/projector/page.tsx",
+    "featureGuess": "ag/[id]",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 46,
+    "lines": 406,
+    "file": "src/app/(dashboard)/portefeuille/page.tsx",
+    "featureGuess": "portefeuille",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 47,
+    "lines": 406,
+    "file": "src/app/(dashboard)/finance/cles-repartition/new/page.tsx",
+    "featureGuess": "finance/cles-repartition",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 48,
+    "lines": 404,
+    "file": "src/app/(dashboard)/ag/[id]/agenda/page.tsx",
+    "featureGuess": "ag/[id]",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 49,
+    "lines": 404,
+    "file": "src/app/(dashboard)/maintenance/service-orders/page.tsx",
+    "featureGuess": "maintenance/service-orders",
+    "bucket": "Refactor"
+  },
+  {
+    "rank": 50,
+    "lines": 401,
+    "file": "src/app/(dashboard)/ag/[id]/envoi/page.tsx",
+    "featureGuess": "ag/[id]",
+    "bucket": "Refactor"
+  }
+]

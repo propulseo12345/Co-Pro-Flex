@@ -1,0 +1,190 @@
+/* ===== RoleSelect Component Styles ===== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.required {
+  color: var(--danger);
+  margin-left: var(--space-xs);
+}
+
+.selectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  padding-right: var(--space-2xl);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--text-main);
+  background-color: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
+.select:hover {
+  border-color: var(--primary);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.select:disabled {
+  background-color: var(--bg-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Option désactivée dans le select */
+.select option:disabled {
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  font-style: italic;
+}
+
+.optionDisabled {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Icône de type à droite */
+.typeIcon {
+  position: absolute;
+  right: var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  pointer-events: none;
+}
+
+/* Toast d'exclusion */
+.exclusionToast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin-top: var(--space-xs);
+  background: var(--warning-light);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--warning-dark, #92400e);
+  animation: slideIn 0.2s ease-out;
+}
+
+.exclusionToast svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Indicateur du type sélectionné */
+.typeIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-xs);
+}
+
+.typeIndicator.gestionnaire {
+  background: var(--info-light);
+  color: var(--info);
+}
+
+.typeIndicator.coproprietaire {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.typeIndicator.tiers {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+/* Compteur de disponibles */
+.availableCount {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-xs);
+}
+
+/* ===== Dark Mode ===== */
+
+:global([data-theme="dark"]) .select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%9ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+:global([data-theme="dark"]) .select:focus {
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+}
+
+:global([data-theme="dark"]) .exclusionToast {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #FCD34D;
+  color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .typeIndicator.gestionnaire {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .typeIndicator.coproprietaire {
+  background: rgba(52, 211, 153, 0.2);
+  color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .typeIndicator.tiers {
+  background: rgba(251, 191, 36, 0.2);
+  color: #FCD34D;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 768px) {
+  .select {
+    padding: var(--space-md);
+  }
+
+  .exclusionToast {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+}

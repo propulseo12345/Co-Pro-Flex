@@ -1,0 +1,148 @@
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+}
+
+.backLink:hover {
+    color: var(--primary);
+}
+
+.header {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.category {
+    background-color: #F3F4F6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.date {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.messagesList {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.messageItem {
+    display: flex;
+    gap: 1rem;
+    max-width: 80%;
+}
+
+.myMessage {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.messageAvatar {
+    width: 40px;
+    height: 40px;
+    background-color: #DBEAFE;
+    color: #1E40AF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.myMessage .messageAvatar {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.messageContent {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.myMessage .messageContent {
+    background-color: #F0F9FF;
+    border-color: #BAE6FD;
+}
+
+.messageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+}
+
+.messageAuthor {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.messageDate {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.messageText {
+    line-height: 1.6;
+}
+
+.replyBox {
+    position: sticky;
+    bottom: 2rem;
+}
+
+.replyTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.replyInputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.replyInput {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.replyInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}

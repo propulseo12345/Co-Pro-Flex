@@ -1,0 +1,298 @@
+/* Container */
+.container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-lg);
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.sendAllBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.sendAllBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.sendAllBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Stats Bar */
+.statsBar {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.statChip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.statChipPending {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.statChipSent {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.statChipFailed {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Recipients List */
+.recipientsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.recipientCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.recipientCard:hover {
+  border-color: var(--border-dark);
+}
+
+.recipientInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.recipientName {
+  display: block;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recipientEmail {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status */
+.recipientStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.statusPending {
+  background: var(--bg-main);
+  color: var(--text-secondary);
+}
+
+.statusSent {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.statusFailed {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.sentDate {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.errorText {
+  font-size: var(--text-xs);
+  color: var(--danger);
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Actions */
+.recipientActions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.sendBtn,
+.retryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.sendBtn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.retryBtn:hover {
+  background: var(--warning-light);
+  border-color: var(--warning);
+  color: var(--warning-dark);
+}
+
+/* Mock Notice */
+.mockNotice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--info-light);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--info);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.emptyState h3 {
+  margin: var(--space-md) 0 var(--space-sm) 0;
+  color: var(--text-main);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-md);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sendAllBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .recipientCard {
+    flex-wrap: wrap;
+  }
+
+  .recipientStatus {
+    align-items: flex-start;
+    width: 100%;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border);
+    margin-top: var(--space-sm);
+  }
+}
+
+/* Dark Mode */
+[data-theme="dark"] .recipientCard {
+  background: var(--surface-secondary);
+}
+
+[data-theme="dark"] .sendBtn,
+[data-theme="dark"] .retryBtn {
+  background: var(--bg-main);
+}

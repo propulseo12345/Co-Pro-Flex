@@ -1,0 +1,1 @@
+export { BibliothequeResolutions } from './BibliothequeResolutions';

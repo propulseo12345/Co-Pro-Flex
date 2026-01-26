@@ -1,0 +1,886 @@
+/* ===========================================================================
+   Pouvoirs Components Styles
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Powers Panel (Main Container)
+   --------------------------------------------------------------------------- */
+
+.powersPanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.dashboardRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+}
+
+/* ---------------------------------------------------------------------------
+   Stats Card
+   --------------------------------------------------------------------------- */
+
+.statsCard {
+    padding: var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.statItemError {
+    background: var(--danger-light);
+}
+
+.statItemError .statIcon {
+    color: var(--danger);
+}
+
+.statItemError .statValue {
+    color: var(--danger);
+}
+
+.statItemWarning {
+    background: var(--warning-light);
+}
+
+.statItemWarning .statIcon {
+    color: var(--warning);
+}
+
+.statItemWarning .statValue {
+    color: var(--warning);
+}
+
+.statIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+}
+
+.statContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.statValue {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.statLabel {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.statsWarning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--danger-light);
+    border-radius: var(--radius-md);
+    color: var(--danger);
+    font-size: var(--text-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Quorum Card
+   --------------------------------------------------------------------------- */
+
+.quorumCard {
+    padding: var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.quorumHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    color: var(--primary);
+}
+
+.quorumTitle {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.quorumMainStat {
+    margin-bottom: var(--space-md);
+}
+
+.quorumProgress {
+    height: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-sm);
+}
+
+.quorumProgressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--warning) 0%, var(--primary) 100%);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+.quorumProgressSuccess {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+}
+
+.quorumValues {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.quorumPercentage {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.quorumTantiemes {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.quorumDetails {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+}
+
+.quorumDetailItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+}
+
+.quorumDetailItem svg {
+    color: var(--text-tertiary);
+}
+
+.quorumDetailLabel {
+    flex: 1;
+    color: var(--text-secondary);
+}
+
+.quorumDetailValue {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.quorumSuccess {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--success-light);
+    border-radius: var(--radius-md);
+    color: var(--success);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+   Add Power Form
+   --------------------------------------------------------------------------- */
+
+.addForm {
+    padding: var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.addFormTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-lg) 0;
+}
+
+.addFormFields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 200px;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.formLabel {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.formLabelHint {
+    font-weight: 400;
+    color: var(--text-tertiary);
+}
+
+.searchSelectWrapper {
+    position: relative;
+}
+
+.searchInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon {
+    position: absolute;
+    left: var(--space-sm);
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) calc(var(--space-sm) + 24px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    background: var(--surface);
+    color: var(--text-main);
+    transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.searchInput:disabled {
+    background: var(--bg-secondary);
+    cursor: not-allowed;
+}
+
+.selectedValue {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--primary-light);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.pouvoirCount {
+    margin-left: var(--space-sm);
+    padding: 2px 6px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.clearButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clearButton:hover {
+    background: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    margin-top: 4px;
+}
+
+.dropdownEmpty {
+    padding: var(--space-md);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.dropdownItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdownItem:last-child {
+    border-bottom: none;
+}
+
+.dropdownItem:hover {
+    background: var(--bg-secondary);
+}
+
+.dropdownItemWarning {
+    background: var(--warning-light);
+}
+
+.dropdownItemName {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.dropdownItemMeta {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.dateInput {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    background: var(--surface);
+    color: var(--text-main);
+}
+
+.dateInput:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.formErrors {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--danger-light);
+    border-radius: var(--radius-md);
+    color: var(--danger);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+}
+
+.formErrorsList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Powers List
+   --------------------------------------------------------------------------- */
+
+.powersList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.powersListTitle {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.emptyList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3xl);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+.emptyList h4 {
+    margin: var(--space-md) 0 var(--space-xs) 0;
+    color: var(--text-main);
+}
+
+.emptyList p {
+    margin: 0;
+    font-size: var(--text-sm);
+}
+
+.mandataireGroup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.mandataireGroupError {
+    border-color: var(--danger);
+}
+
+.mandataireHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-secondary);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mandataireHeader:hover {
+    background: var(--bg-tertiary);
+}
+
+.mandataireInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.mandataireName {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.mandataireLot {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.mandataireStats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.pouvoirBadge {
+    padding: 4px 8px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.pouvoirBadgeWarning {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.pouvoirBadgeError {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.tantiemesBadge {
+    padding: 4px 8px;
+    background: var(--success-light);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--success);
+}
+
+.mandatairePouvoirs {
+    display: flex;
+    flex-direction: column;
+}
+
+.pouvoirItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--border);
+}
+
+.pouvoirMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.pouvoirMandant {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.pouvoirMandantLabel {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.pouvoirMandantName {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.pouvoirMandantDetails {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.pouvoirMeta {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.pouvoirDate {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.pouvoirJustificatif {
+    flex-shrink: 0;
+}
+
+.justificatifInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--success-light);
+    border-radius: var(--radius-sm);
+}
+
+.justificatifIcon {
+    color: var(--success);
+}
+
+.justificatifName {
+    font-size: var(--text-xs);
+    color: var(--text-main);
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.justificatifSize {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.justificatifActions {
+    display: flex;
+    gap: 4px;
+    margin-left: var(--space-xs);
+}
+
+.justificatifMissing {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--warning-light);
+    border-radius: var(--radius-sm);
+    color: var(--warning);
+    font-size: var(--text-xs);
+}
+
+.uploadLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: var(--space-sm);
+    padding: 2px 8px;
+    background: var(--surface);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-sm);
+    color: var(--warning);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.uploadLabel:hover {
+    background: var(--warning);
+    color: white;
+}
+
+.uploadInput {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.actionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.actionButton:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-main);
+}
+
+.actionButtonDanger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.uploadErrorBanner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--danger-light);
+    border-radius: var(--radius-md);
+    color: var(--danger);
+    font-size: var(--text-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Preview Modal
+   --------------------------------------------------------------------------- */
+
+.previewOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+}
+
+.previewModal {
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.previewHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border);
+}
+
+.previewTitle {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.previewClose {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.previewClose:hover {
+    background: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.previewContent {
+    flex: 1;
+    overflow: auto;
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.previewIframe {
+    width: 100%;
+    height: 70vh;
+    border: none;
+}
+
+.previewImage {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+}
+
+/* ---------------------------------------------------------------------------
+   Responsive
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+    .dashboardRow {
+        grid-template-columns: 1fr;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .addFormFields {
+        grid-template-columns: 1fr;
+    }
+
+    .pouvoirItem {
+        flex-wrap: wrap;
+    }
+
+    .pouvoirJustificatif {
+        width: 100%;
+        margin-top: var(--space-sm);
+    }
+}
+
+@media (max-width: 640px) {
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .mandataireHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+
+    .mandataireStats {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .pouvoirMandant {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Dark Mode
+   --------------------------------------------------------------------------- */
+
+:global([data-theme="dark"]) .statsCard,
+:global([data-theme="dark"]) .quorumCard,
+:global([data-theme="dark"]) .addForm,
+:global([data-theme="dark"]) .mandataireGroup {
+    background: var(--surface);
+}
+
+:global([data-theme="dark"]) .statItem,
+:global([data-theme="dark"]) .mandataireHeader {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+:global([data-theme="dark"]) .statItemError {
+    background: rgba(248, 113, 113, 0.15);
+}
+
+:global([data-theme="dark"]) .statItemWarning {
+    background: rgba(251, 191, 36, 0.15);
+}
+
+:global([data-theme="dark"]) .quorumProgressFill {
+    background: linear-gradient(90deg, #FCD34D 0%, #60A5FA 100%);
+}
+
+:global([data-theme="dark"]) .quorumProgressSuccess {
+    background: linear-gradient(90deg, #60A5FA 0%, #6EE7B7 100%);
+}
+
+:global([data-theme="dark"]) .selectedValue {
+    background: rgba(96, 165, 250, 0.2);
+}
+
+:global([data-theme="dark"]) .dropdown {
+    background: var(--surface);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+:global([data-theme="dark"]) .dropdownItemWarning {
+    background: rgba(251, 191, 36, 0.15);
+}

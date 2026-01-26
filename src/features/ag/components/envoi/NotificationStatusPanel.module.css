@@ -1,0 +1,410 @@
+/* ============================================================================
+   NotificationStatusPanel - Suivi des envois AG
+   NIVEAU 5A - CoProFlex
+   ============================================================================ */
+
+.container {
+  background: var(--color-bg-elevated, #fff);
+  border-radius: var(--radius-lg, 8px);
+  border: 1px solid var(--color-border, #e5e7eb);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4, 1rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-bg-subtle, #f9fafb);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2, 0.5rem);
+  margin: 0;
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 600;
+  color: var(--color-text, #111827);
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: var(--color-bg-hover, #f3f4f6);
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Stats Section */
+.statsSection {
+  padding: var(--spacing-4, 1rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-4, 1rem);
+  margin-bottom: var(--spacing-3, 0.75rem);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.statValue {
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.statValueSuccess {
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--color-success, #22c55e);
+}
+
+.statValueWarning {
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--color-warning, #f59e0b);
+}
+
+.statLabel {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Progress Bar */
+.progressContainer {
+  margin-top: var(--spacing-2, 0.5rem);
+}
+
+.progressBar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-bg-subtle, #f3f4f6);
+}
+
+.progressSegment {
+  transition: width 0.3s ease;
+}
+
+.progressLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3, 0.75rem);
+  margin-top: var(--spacing-2, 0.5rem);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2, 0.5rem);
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-bg-subtle, #f9fafb);
+}
+
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  background: var(--color-bg-elevated, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterBtn:hover {
+  border-color: var(--color-primary-300, #93c5fd);
+}
+
+.filterBtnActive {
+  background: var(--color-primary-100, #dbeafe);
+  border-color: var(--color-primary-500, #3b82f6);
+  color: var(--color-primary-700, #1d4ed8);
+}
+
+.filterDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Relance Bar */
+.relanceBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+  background: var(--color-primary-50, #eff6ff);
+  border-bottom: 1px solid var(--color-primary-200, #bfdbfe);
+}
+
+.relanceActions {
+  display: flex;
+  gap: var(--spacing-2, 0.5rem);
+}
+
+.clearBtn {
+  padding: var(--spacing-1, 0.25rem) var(--spacing-3, 0.75rem);
+  font-size: var(--font-size-sm, 0.875rem);
+  background: transparent;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+}
+
+.relanceBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  padding: var(--spacing-1, 0.25rem) var(--spacing-3, 0.75rem);
+  font-size: var(--font-size-sm, 0.875rem);
+  background: var(--color-primary-600, #2563eb);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.relanceBtn:hover:not(:disabled) {
+  background: var(--color-primary-700, #1d4ed8);
+}
+
+.relanceBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Recipients List */
+.recipientsList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.emptyState,
+.loadingState {
+  padding: var(--spacing-8, 2rem);
+  text-align: center;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.recipientRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3, 0.75rem);
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+  border-bottom: 1px solid var(--color-border-subtle, #f3f4f6);
+  transition: background 0.2s ease;
+}
+
+.recipientRow:hover {
+  background: var(--color-bg-hover, #f9fafb);
+}
+
+.recipientRowSelected {
+  background: var(--color-primary-50, #eff6ff);
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary-600, #2563eb);
+}
+
+.recipientInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recipientName {
+  font-weight: 500;
+  color: var(--color-text, #111827);
+}
+
+.recipientMeta {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+}
+
+.recipientEmail {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  font-family: monospace;
+}
+
+/* Status Badges */
+.statusBadgeContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2, 0.5rem);
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 500;
+  color: white;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.noEmailBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 500;
+  color: var(--color-warning, #f59e0b);
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.notSentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 500;
+  color: var(--color-text-muted, #6b7280);
+  background: var(--color-bg-subtle, #f3f4f6);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.relanceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--spacing-2, 0.5rem);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-primary-600, #2563eb);
+  background: var(--color-primary-50, #eff6ff);
+  border: 1px solid var(--color-primary-200, #bfdbfe);
+  border-radius: var(--radius-full, 9999px);
+}
+
+/* Status Icons */
+.iconPending { color: var(--color-text-muted, #6b7280); }
+.iconSent { color: #8b5cf6; }
+.iconDelivered { color: #22c55e; }
+.iconOpened { color: #10b981; }
+.iconBounced { color: #f59e0b; }
+.iconFailed { color: #ef4444; }
+.iconCancelled { color: #9ca3af; }
+
+/* Quick Actions */
+.quickActions {
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-bg-subtle, #f9fafb);
+}
+
+.quickActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1, 0.25rem);
+  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  background: var(--color-bg-elevated, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quickActionBtn:hover {
+  border-color: var(--color-primary-300, #93c5fd);
+  background: var(--color-primary-50, #eff6ff);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .container {
+  background: var(--color-bg-elevated-dark, #1f2937);
+  border-color: var(--color-border-dark, #374151);
+}
+
+[data-theme="dark"] .header {
+  background: var(--color-bg-subtle-dark, #111827);
+  border-color: var(--color-border-dark, #374151);
+}
+
+[data-theme="dark"] .title {
+  color: var(--color-text-dark, #f9fafb);
+}
+
+[data-theme="dark"] .recipientRow {
+  border-color: var(--color-border-dark, #374151);
+}
+
+[data-theme="dark"] .recipientRow:hover {
+  background: var(--color-bg-hover-dark, #374151);
+}
+
+[data-theme="dark"] .recipientName {
+  color: var(--color-text-dark, #f9fafb);
+}

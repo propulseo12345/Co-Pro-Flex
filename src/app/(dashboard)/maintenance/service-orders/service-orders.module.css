@@ -1,0 +1,549 @@
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-xl, 1.5rem);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-2xl, 2rem);
+    gap: var(--space-lg, 1.25rem);
+}
+
+.title {
+    font-size: var(--text-3xl, 1.875rem);
+    font-weight: 700;
+    margin: 0 0 var(--space-xs, 0.375rem) 0;
+    color: var(--text-main, #111827);
+}
+
+.subtitle {
+    color: var(--text-secondary, #6b7280);
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    gap: var(--space-sm, 0.5rem);
+}
+
+.headerActions button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs, 0.375rem);
+}
+
+/* Stats */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md, 1rem);
+    margin-bottom: var(--space-xl, 1.5rem);
+}
+
+.statCard {
+    padding: var(--space-md, 1rem);
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: var(--radius-lg, 0.75rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs, 0.375rem);
+}
+
+.statValue {
+    font-size: var(--text-2xl, 1.5rem);
+    font-weight: 700;
+    color: var(--primary, #10b981);
+}
+
+.statLabel {
+    font-size: var(--text-sm, 0.875rem);
+    color: var(--text-secondary, #6b7280);
+    font-weight: 500;
+}
+
+/* Stat cards cliquables */
+.statCardClickable {
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms);
+    border: 2px solid transparent;
+}
+
+.statCardClickable:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.statCardActive {
+    border-color: var(--primary, #10b981);
+    background: var(--primary-light, #ecfdf5);
+}
+
+/* Variantes colorées par statut */
+.statCardBrouillon .statValue {
+    color: #9ca3af;
+}
+
+.statCardBrouillon:hover,
+.statCardBrouillon.statCardActive {
+    border-color: #9ca3af;
+    background: #f9fafb;
+}
+
+.statCardEnAttente .statValue {
+    color: #f59e0b;
+}
+
+.statCardEnAttente:hover,
+.statCardEnAttente.statCardActive {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.statCardProgrammee .statValue {
+    color: #3b82f6;
+}
+
+.statCardProgrammee:hover,
+.statCardProgrammee.statCardActive {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.statCardRealisee .statValue {
+    color: #10b981;
+}
+
+.statCardRealisee:hover,
+.statCardRealisee.statCardActive {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.statCardCloture .statValue {
+    color: #6b7280;
+}
+
+.statCardCloture:hover,
+.statCardCloture.statCardActive {
+    border-color: #6b7280;
+    background: #f3f4f6;
+}
+
+/* Table */
+.tableContainer {
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: var(--radius-lg, 0.75rem);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: var(--space-md, 1rem);
+    background: var(--background-secondary, #f9fafb);
+    color: var(--text-secondary, #6b7280);
+    font-weight: 600;
+    font-size: var(--text-xs, 0.75rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.tableRow {
+    transition: background-color var(--transition-fast, 150ms);
+}
+
+.tableRow:hover {
+    background: var(--background-hover, #f9fafb);
+}
+
+.tableCell {
+    padding: var(--space-md, 1rem);
+    border-bottom: 1px solid var(--border, #e5e7eb);
+    font-size: var(--text-sm, 0.875rem);
+}
+
+.titleCell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs, 0.375rem);
+}
+
+.titre {
+    font-weight: 500;
+    color: var(--text-main, #111827);
+}
+
+.contratBadge {
+    display: inline-block;
+    font-size: var(--text-xs, 0.75rem);
+    color: var(--text-secondary, #9ca3af);
+    background: var(--background-secondary, #f3f4f6);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm, 0.375rem);
+}
+
+/* Type badges */
+.typeBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full, 9999px);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 600;
+}
+
+.typeClassique {
+    background: #E0E7FF;
+    color: #4338CA;
+}
+
+.typeContractuel {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+/* Text alignment */
+.textRight {
+    text-align: right;
+}
+
+.textCenter {
+    text-align: center;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    gap: var(--space-xs, 0.375rem);
+    justify-content: center;
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary, #6b7280);
+    border-radius: var(--radius-sm, 0.375rem);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms);
+}
+
+.iconButton:hover {
+    background: var(--background-hover, #f3f4f6);
+    color: var(--primary, #10b981);
+}
+
+.dangerButton:hover {
+    background: var(--danger-light, #fee2e2);
+    color: var(--danger, #ef4444);
+}
+
+/* Facture link */
+.factureCell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs, 0.25rem);
+}
+
+.factureLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs, 0.25rem);
+    color: var(--primary, #10b981);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--transition-fast, 150ms);
+}
+
+.factureLink:hover {
+    color: var(--primary-dark, #059669);
+    text-decoration: underline;
+}
+
+.factureMontant {
+    font-size: var(--text-xs, 0.75rem);
+    color: var(--text-secondary, #6b7280);
+}
+
+.factureEcart {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs, 0.125rem);
+    font-size: var(--text-xs, 0.75rem);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm, 0.25rem);
+}
+
+.factureEcartPositif {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.factureEcartNegatif {
+    background: #ecfdf5;
+    color: #16a34a;
+}
+
+.factureEcartAlerte {
+    background: #fef2f2;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.factureStatut {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-full, 9999px);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 500;
+}
+
+.factureStatutAPayer {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.factureStatutPayee {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.factureStatutEnCours {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.noFacture {
+    color: var(--text-tertiary, #9ca3af);
+    font-size: var(--text-xs, 0.75rem);
+}
+
+/* Empty state */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2xl, 2rem);
+    gap: var(--space-md, 1rem);
+    color: var(--text-secondary, #9ca3af);
+}
+
+.emptyState svg {
+    color: var(--text-secondary, #d1d5db);
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: var(--text-base, 1rem);
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .table {
+        font-size: var(--text-xs, 0.75rem);
+    }
+
+    .tableCell {
+        padding: var(--space-sm, 0.5rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: var(--space-lg, 1.25rem);
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerActions {
+        flex-direction: column;
+    }
+
+    .headerActions button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .tableContainer {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+}
+
+/* Dark mode optimizations */
+:global([data-theme="dark"]) .tableContainer {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .table th {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-bottom-color: var(--border);
+}
+
+:global([data-theme="dark"]) .tableRow:hover {
+    background: var(--surface-hover);
+}
+
+:global([data-theme="dark"]) .tableCell {
+    border-bottom-color: var(--border);
+}
+
+:global([data-theme="dark"]) .titre {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .contratBadge {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+:global([data-theme="dark"]) .typeClassique {
+    background: rgba(99, 102, 241, 0.2);
+    color: #A5B4FC;
+}
+
+:global([data-theme="dark"]) .typeContractuel {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .statCard {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .iconButton {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .iconButton:hover {
+    background: var(--surface-hover);
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .dangerButton:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171;
+}
+
+:global([data-theme="dark"]) .emptyState {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .emptyState svg {
+    color: var(--text-tertiary);
+}
+
+/* Dark mode pour les stat cards cliquables */
+:global([data-theme="dark"]) .statCardClickable:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .statCardBrouillon:hover,
+:global([data-theme="dark"]) .statCardBrouillon.statCardActive {
+    border-color: #6b7280;
+    background: rgba(107, 114, 128, 0.1);
+}
+
+:global([data-theme="dark"]) .statCardEnAttente:hover,
+:global([data-theme="dark"]) .statCardEnAttente.statCardActive {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+:global([data-theme="dark"]) .statCardProgrammee:hover,
+:global([data-theme="dark"]) .statCardProgrammee.statCardActive {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+:global([data-theme="dark"]) .statCardRealisee:hover,
+:global([data-theme="dark"]) .statCardRealisee.statCardActive {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+:global([data-theme="dark"]) .statCardCloture:hover,
+:global([data-theme="dark"]) .statCardCloture.statCardActive {
+    border-color: #4b5563;
+    background: rgba(75, 85, 99, 0.1);
+}
+
+/* Dark mode pour les factures */
+:global([data-theme="dark"]) .factureLink {
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .factureLink:hover {
+    color: var(--primary-light);
+}
+
+:global([data-theme="dark"]) .factureMontant {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .factureEcartPositif {
+    background: rgba(220, 38, 38, 0.15);
+    color: #f87171;
+}
+
+:global([data-theme="dark"]) .factureEcartNegatif {
+    background: rgba(22, 163, 74, 0.15);
+    color: #4ade80;
+}
+
+:global([data-theme="dark"]) .factureEcartAlerte {
+    background: rgba(220, 38, 38, 0.2);
+    color: #f87171;
+}
+
+:global([data-theme="dark"]) .factureStatutAPayer {
+    background: rgba(180, 83, 9, 0.15);
+    color: #fbbf24;
+}
+
+:global([data-theme="dark"]) .factureStatutPayee {
+    background: rgba(5, 150, 105, 0.15);
+    color: #34d399;
+}
+
+:global([data-theme="dark"]) .factureStatutEnCours {
+    background: rgba(29, 78, 216, 0.15);
+    color: #60a5fa;
+}
+
+:global([data-theme="dark"]) .noFacture {
+    color: var(--text-tertiary);
+}

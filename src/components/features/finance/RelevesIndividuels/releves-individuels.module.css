@@ -1,0 +1,893 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.headerLeft h1 {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.exportAllButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--success);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.exportAllButton:hover:not(:disabled) {
+  background: var(--success-dark);
+  transform: translateY(-1px);
+}
+
+.exportAllButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Stats */
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.statCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--radius-md);
+}
+
+.statIconSuccess {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.statIconDanger {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.statValue {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.statLabel {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.statSuccess { color: var(--success) !important; }
+.statDanger { color: var(--danger) !important; }
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.searchBox {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.searchBox:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.searchBox input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+}
+
+.searchBox input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.filterLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.filterSelect {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.filterButtons {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.filterButton {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.filterButton:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.filterButtonActive {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Table */
+.tableContainer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: var(--bg-secondary);
+}
+
+.table th {
+  padding: var(--space-md);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+}
+
+.table tbody tr {
+  transition: background var(--transition-base);
+}
+
+.table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.textRight { text-align: right !important; }
+.textCenter { text-align: center !important; }
+
+.checkboxCell {
+  width: 40px;
+  padding: var(--space-sm) !important;
+}
+
+.checkboxButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+}
+
+.checkboxButton:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.checkboxChecked {
+  color: var(--primary);
+}
+
+.coproInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.coproNom {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.coproEmail {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.lotsCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.lotBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.tantiemes {
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.montant {
+  font-weight: 500;
+  font-family: monospace;
+}
+
+.variation {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.variationUp { color: var(--danger); }
+.variationDown { color: var(--success); }
+
+.soldeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.badgeDebiteur {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.badgeCrediteur {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.badgeEquilibre {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-xs);
+  justify-content: center;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.actionButton:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl);
+  color: var(--text-secondary);
+}
+
+.emptyState p {
+  margin-top: var(--space-md);
+  font-size: var(--text-md);
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 20px;
+}
+
+.modalContentLarge {
+  background: var(--surface);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 4px 0;
+}
+
+.modalSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.exportButton:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.modalClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.modalClose:hover {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+}
+
+.modalBody {
+  padding: 24px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Modal Sections */
+.section {
+  margin-bottom: var(--space-2xl);
+}
+
+.sectionTitle {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.infoLabel {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoValue {
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* Synthèse */
+.syntheseGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+.syntheseCard {
+  background: var(--bg-secondary);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.syntheseCardHighlight {
+  background: var(--primary-light);
+  border: 2px solid var(--primary);
+}
+
+.syntheseLabel {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.syntheseValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.syntheseVariation {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.soldeDebiteur { color: var(--danger); }
+.soldeCrediteur { color: var(--success); }
+.soldeEquilibre { color: var(--text-secondary); }
+
+.soldeStatut {
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+/* Clés de répartition */
+.clesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.cleCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.cleHeader:hover {
+  background: var(--surface);
+}
+
+.cleHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cleNom {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.cleTantiemes {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.cleHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.cleMontant {
+  font-weight: 600;
+  font-size: var(--text-md);
+}
+
+.cleVariation {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.clePostes {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.postesTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.postesTable th {
+  padding: var(--space-sm);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.postesTable td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.postesTable tfoot td {
+  border-bottom: none;
+  background: var(--bg-secondary);
+}
+
+/* Appels Table */
+.appelTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appelTable th {
+  padding: var(--space-md);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.appelTable td {
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.appelStatut {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.appelStatutPAYE {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.appelStatutPARTIELLEMENTPAYE {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.appelStatutNONPAYE {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.appelStatutENATTENTE {
+  background: var(--info-light);
+  color: var(--info);
+}
+
+/* Comparatif */
+.comparatifGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.comparatifItem {
+  background: var(--bg-secondary);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.comparatifLabel {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.comparatifValue {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.comparatifPercent {
+  display: block;
+  font-size: var(--text-sm);
+  margin-top: var(--space-xs);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .statsContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .syntheseGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-md);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .exportAllButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .statsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchBox {
+    min-width: auto;
+  }
+
+  .filterButtons {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 900px;
+  }
+
+  .modalOverlay {
+    padding: var(--space-md);
+  }
+
+  .modalHeader,
+  .modalBody {
+    padding: var(--space-md);
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .syntheseGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparatifGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) {
+  .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .modalContentLarge {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .lotBadge {
+    background: rgba(37, 99, 235, 0.2);
+  }
+
+  .badgeDebiteur {
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  .badgeCrediteur {
+    background: rgba(34, 197, 94, 0.2);
+  }
+
+  .badgeEquilibre {
+    background: rgba(148, 163, 184, 0.2);
+  }
+
+  .appelStatutPAYE {
+    background: rgba(34, 197, 94, 0.2);
+  }
+
+  .appelStatutPARTIELLEMENTPAYE {
+    background: rgba(245, 158, 11, 0.2);
+  }
+
+  .appelStatutNONPAYE {
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  .appelStatutENATTENTE {
+    background: rgba(59, 130, 246, 0.2);
+  }
+}

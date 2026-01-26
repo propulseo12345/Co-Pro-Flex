@@ -1,0 +1,98 @@
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+}
+
+.backLink:hover {
+    color: var(--primary);
+}
+
+.header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.messagesList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 5rem;
+}
+
+.messageItem {
+    display: flex;
+    max-width: 70%;
+}
+
+.myMessage {
+    align-self: flex-end;
+    justify-content: flex-end;
+}
+
+.messageContent {
+    background-color: #F3F4F6;
+    padding: 1rem;
+    border-radius: 12px;
+    border-bottom-left-radius: 2px;
+}
+
+.myMessage .messageContent {
+    background-color: var(--primary);
+    color: white;
+    border-radius: 12px;
+    border-bottom-right-radius: 2px;
+}
+
+.messageText {
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
+}
+
+.messageDate {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    display: block;
+    text-align: right;
+}
+
+.replyBox {
+    position: fixed;
+    bottom: 0;
+    left: 280px;
+    /* Sidebar width */
+    right: 0;
+    padding: 1.5rem;
+    background-color: white;
+    border-top: 1px solid var(--border);
+}
+
+.replyInputWrapper {
+    display: flex;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.replyInput {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-family: inherit;
+}
+
+.replyInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}

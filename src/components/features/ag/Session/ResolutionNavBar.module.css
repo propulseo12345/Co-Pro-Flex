@@ -1,0 +1,253 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  margin-bottom: var(--space-lg);
+}
+
+/* Boutons flèches */
+.arrowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+}
+
+.arrowBtn:hover:not(:disabled) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.arrowBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Barre scrollable */
+.navBar {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  flex: 1;
+  padding: var(--space-xs);
+  scroll-behavior: smooth;
+
+  /* Masquer la scrollbar mais garder le scroll */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.navBar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Item de navigation (numéro de résolution) */
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.navItem:hover:not(:disabled) {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.navItem.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.navItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.numero {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Indicateur de statut (point coloré) */
+.statusDot {
+  position: absolute;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+
+/* Statuts des résolutions */
+.navItem.a_voter .statusDot {
+  background: var(--text-tertiary);
+}
+
+.navItem.en_cours .statusDot {
+  background: var(--warning);
+  animation: pulse 1.5s infinite;
+}
+
+.navItem.vote .statusDot {
+  background: var(--success);
+}
+
+.navItem.reporte .statusDot {
+  background: var(--danger);
+}
+
+/* Animation pulse pour résolution en cours */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.3); }
+}
+
+/* Indicateur de position (X/N) */
+.positionIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.separator {
+  color: var(--text-tertiary);
+}
+
+/* Aide raccourcis clavier */
+.keyboardHint {
+  display: none;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
+}
+
+.keyboardHint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--space-xs);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.keyboardHint span {
+  margin-right: var(--space-sm);
+}
+
+/* Afficher l'aide clavier sur desktop */
+@media (min-width: 1200px) {
+  .keyboardHint {
+    display: flex;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-sm);
+    gap: var(--space-xs);
+  }
+
+  .navItem {
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .arrowBtn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .positionIndicator {
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    flex-wrap: wrap;
+  }
+
+  .navBar {
+    order: 1;
+    width: 100%;
+    margin-top: var(--space-sm);
+  }
+
+  .positionIndicator {
+    margin-left: auto;
+  }
+}
+
+/* Dark mode overrides */
+:global([data-theme="dark"]) .navItem.active {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .navItem:hover:not(:disabled):not(.active) {
+  background: rgba(96, 165, 250, 0.2);
+  color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .navItem.vote .statusDot {
+  background: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .navItem.en_cours .statusDot {
+  background: #FCD34D;
+}
+
+:global([data-theme="dark"]) .navItem.reporte .statusDot {
+  background: #F87171;
+}
+
+:global([data-theme="dark"]) .arrowBtn:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.2);
+  color: #93C5FD;
+  border-color: #93C5FD;
+}

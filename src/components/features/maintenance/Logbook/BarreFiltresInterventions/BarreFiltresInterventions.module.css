@@ -1,0 +1,286 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: var(--color-bg-primary, white);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.lignePrincipale {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Recherche */
+.recherche {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.iconeRecherche {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary, #9ca3af);
+    pointer-events: none;
+}
+
+.inputRecherche {
+    width: 100%;
+    padding: 0.5rem 2.25rem;
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--color-text-primary, #111827);
+    background-color: var(--color-bg-primary, white);
+    transition: border-color 150ms, box-shadow 150ms;
+}
+
+.inputRecherche:focus {
+    outline: none;
+    border-color: var(--color-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputRecherche::placeholder {
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.btnClear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary, #9ca3af);
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: color 150ms;
+}
+
+.btnClear:hover {
+    color: var(--color-text-primary, #374151);
+}
+
+/* Bouton filtres */
+.btnFiltres {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-bg-primary, white);
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary, #374151);
+    cursor: pointer;
+    transition: all 150ms;
+}
+
+.btnFiltres:hover {
+    background-color: var(--color-bg-secondary, #f9fafb);
+}
+
+.btnFiltresActif {
+    border-color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #3b82f6);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 0.375rem;
+    background-color: var(--color-primary, #3b82f6);
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: white;
+}
+
+.chevronOuvert {
+    transform: rotate(180deg);
+    transition: transform 150ms;
+}
+
+.btnReset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: color 150ms;
+}
+
+.btnReset:hover {
+    color: var(--color-danger, #dc2626);
+}
+
+/* Chips statut */
+.filtresStatut {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chipStatut {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    background-color: var(--color-bg-secondary, #f3f4f6);
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-secondary, #6b7280);
+    cursor: pointer;
+    transition: all 150ms;
+}
+
+.chipStatut:hover {
+    background-color: var(--color-bg-tertiary, #e5e7eb);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-text-disabled, #d1d5db);
+    flex-shrink: 0;
+}
+
+/* Panneau avancé */
+.panneauAvance {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.filtreGroupe {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.filtreLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.select {
+    padding: 0.5rem;
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary, #111827);
+    background-color: var(--color-bg-primary, white);
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--color-primary, #3b82f6);
+}
+
+.dateRange {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dateSeparator {
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.inputDate {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--color-text-primary, #111827);
+    background-color: var(--color-bg-primary, white);
+}
+
+.inputDate:focus {
+    outline: none;
+    border-color: var(--color-primary, #3b82f6);
+}
+
+/* Dark mode support */
+:global([data-theme="dark"]) .container {
+    background-color: var(--color-bg-primary-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+}
+
+:global([data-theme="dark"]) .inputRecherche {
+    background-color: var(--color-bg-secondary-dark, #111827);
+    border-color: var(--color-border-dark, #374151);
+    color: var(--color-text-primary-dark, #f3f4f6);
+}
+
+:global([data-theme="dark"]) .btnFiltres {
+    background-color: var(--color-bg-secondary-dark, #111827);
+    border-color: var(--color-border-dark, #374151);
+    color: var(--color-text-primary-dark, #f3f4f6);
+}
+
+:global([data-theme="dark"]) .btnFiltres:hover {
+    background-color: var(--color-bg-tertiary-dark, #374151);
+}
+
+:global([data-theme="dark"]) .chipStatut {
+    background-color: var(--color-bg-secondary-dark, #374151);
+    color: var(--color-text-secondary-dark, #9ca3af);
+}
+
+:global([data-theme="dark"]) .panneauAvance {
+    border-top-color: var(--color-border-dark, #374151);
+}
+
+:global([data-theme="dark"]) .select,
+:global([data-theme="dark"]) .inputDate {
+    background-color: var(--color-bg-secondary-dark, #111827);
+    border-color: var(--color-border-dark, #374151);
+    color: var(--color-text-primary-dark, #f3f4f6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .panneauAvance {
+        grid-template-columns: 1fr;
+    }
+
+    .lignePrincipale {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .recherche {
+        max-width: none;
+    }
+}

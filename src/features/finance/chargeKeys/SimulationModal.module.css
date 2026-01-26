@@ -1,0 +1,143 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  max-width: 500px;
+  width: 90%;
+}
+
+.simulationModal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  margin-bottom: var(--spacing-4);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.modalSubtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.simulationInput {
+  margin-bottom: var(--spacing-4);
+}
+
+.simulationInput label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  margin-bottom: var(--spacing-2);
+}
+
+.inputGroup {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.inputGroup input {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+}
+
+.inputSuffix {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.repartitionResult {
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-4);
+}
+
+.repartitionSummary {
+  display: flex;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.summaryValue {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.repartitionTable {
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.repartitionTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.repartitionTable th,
+.repartitionTable td {
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.repartitionTable th {
+  background: var(--bg-secondary);
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+}
+
+.textRight {
+  text-align: right;
+}
+
+.lotNumero {
+  font-weight: 600;
+  margin-right: var(--spacing-2);
+}
+
+.lotType {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border-color);
+}

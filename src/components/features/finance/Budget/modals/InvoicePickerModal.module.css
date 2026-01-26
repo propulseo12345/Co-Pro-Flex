@@ -1,0 +1,228 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    padding: var(--space-lg);
+}
+
+.modalContent {
+    background: var(--bg-main);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-xl);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--border);
+}
+
+.modalTitle {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-sm);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+
+.closeButton:hover {
+    background: var(--bg-secondary);
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    padding: var(--space-md) var(--space-xl);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.searchIcon {
+    color: var(--text-secondary);
+    margin-right: var(--space-sm);
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    outline: none;
+}
+
+.searchInput::placeholder {
+    color: var(--text-tertiary);
+}
+
+.facturesList {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-md);
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xxl);
+    color: var(--text-secondary);
+}
+
+.emptyIcon {
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-md);
+}
+
+.factureItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.factureItem:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary);
+}
+
+.factureItem.selected {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.factureIcon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+}
+
+.factureItem.selected .factureIcon {
+    background: var(--primary);
+    color: white;
+}
+
+.factureInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.factureHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: 2px;
+}
+
+.factureFournisseur {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.factureStatut {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+}
+
+.statutAPayer {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.statutEnAttente {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.statutPayeeEnAttente {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.statutPayeeCategorisee {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.factureDetails {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.factureReference {
+    font-family: monospace;
+}
+
+.factureSeparator {
+    color: var(--text-tertiary);
+}
+
+.factureMontant {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.checkMark {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    padding: var(--space-lg) var(--space-xl);
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+}

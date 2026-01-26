@@ -1,0 +1,193 @@
+.container {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Headers */
+.header,
+.sortableHeader {
+  padding: 0;
+  background: var(--bg-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.header {
+  padding: 12px 16px;
+}
+
+.sortableHeader {
+  padding: 0;
+}
+
+.headerButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.headerButton:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+}
+
+.sortableHeader.active .headerButton {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+}
+
+.headerLabel {
+  flex: 1;
+  text-align: inherit;
+}
+
+.sortIcon {
+  display: flex;
+  align-items: center;
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.sortableHeader.active .sortIcon {
+  color: var(--primary);
+}
+
+/* Alignment */
+.alignLeft {
+  text-align: left;
+}
+
+.alignLeft .headerButton {
+  justify-content: flex-start;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignCenter .headerButton {
+  justify-content: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignRight .headerButton {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+/* Sticky header */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.stickyHeader th {
+  background: var(--bg-secondary);
+}
+
+/* Rows */
+.row {
+  transition: background var(--transition-fast);
+}
+
+.row:hover {
+  background: var(--surface-hover);
+}
+
+.row.clickable {
+  cursor: pointer;
+}
+
+.row.clickable:hover {
+  background: var(--primary-light);
+}
+
+/* Cells */
+.cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.row:last-child .cell {
+  border-bottom: none;
+}
+
+.emptyCell {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--text-base);
+}
+
+/* Truncated text with tooltip */
+.truncated {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .header,
+:global([data-theme="dark"]) .sortableHeader {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .stickyHeader th {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .headerButton:hover {
+  background: var(--surface-hover);
+}
+
+:global([data-theme="dark"]) .sortableHeader.active .headerButton {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--primary);
+}
+
+:global([data-theme="dark"]) .sortableHeader.active .sortIcon {
+  color: var(--primary);
+}
+
+:global([data-theme="dark"]) .row:hover {
+  background: var(--surface-hover);
+}
+
+:global([data-theme="dark"]) .row.clickable:hover {
+  background: rgba(52, 211, 153, 0.1);
+}
+
+:global([data-theme="dark"]) .cell {
+  border-color: var(--border);
+}

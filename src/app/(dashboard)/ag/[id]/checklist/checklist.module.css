@@ -1,0 +1,125 @@
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+}
+
+.backLink:hover {
+    color: var(--primary);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.agInfo {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #F3F4F6;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+}
+
+.agInfoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.progressWrapper {
+    margin-bottom: 2rem;
+}
+
+.progressLabel {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.progressBar {
+    height: 8px;
+    background-color: #F3F4F6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.taskList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.taskItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.taskItem:hover {
+    background-color: #F9FAFB;
+    border-color: var(--primary);
+}
+
+.taskDone {
+    background-color: #F0FDF4;
+    border-color: #86EFAC;
+}
+
+.checkbox {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+}
+
+.checkIcon {
+    color: #16A34A;
+}
+
+.taskContent {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.taskLabel {
+    font-weight: 500;
+}
+
+.taskDeadline {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background-color: #F3F4F6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}

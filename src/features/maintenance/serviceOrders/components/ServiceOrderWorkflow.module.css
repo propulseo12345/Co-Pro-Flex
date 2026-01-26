@@ -1,0 +1,180 @@
+.card {
+    background: var(--color-bg-card, #fff);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-lg, 8px);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text, #111827);
+    margin: 0 0 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.workflowProgressContainer {
+    padding: 1rem 0;
+}
+
+.workflowSteps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.workflowStepContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.workflowStepItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md, 6px);
+    background: var(--color-bg-subtle, #f9fafb);
+    border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.workflowStepCompleted {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--color-success, #10b981);
+}
+
+.workflowStepActive {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--color-primary, #3b82f6);
+}
+
+.workflowStepPending {
+    opacity: 0.5;
+}
+
+.workflowStepNumber {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.workflowStepCompleted .workflowStepNumber {
+    color: var(--color-success, #10b981);
+}
+
+.workflowStepActive .workflowStepNumber {
+    background: var(--color-primary, #3b82f6);
+    color: white;
+}
+
+.workflowStepPending .workflowStepNumber {
+    background: var(--color-border, #e5e7eb);
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.workflowStepInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.workflowStepLabel {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text, #111827);
+}
+
+.workflowStepDescription {
+    font-size: 0.6875rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.workflowConnector {
+    width: 20px;
+    height: 2px;
+    background: var(--color-border, #e5e7eb);
+}
+
+.workflowConnectorCompleted {
+    background: var(--color-success, #10b981);
+}
+
+@media (max-width: 768px) {
+    .workflowSteps {
+        flex-direction: column;
+    }
+
+    .workflowConnector {
+        width: 2px;
+        height: 20px;
+        margin-left: 1rem;
+    }
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .card {
+    background: var(--surface, #1E293B);
+    border-color: var(--border, #334155);
+}
+
+:global([data-theme="dark"]) .cardTitle {
+    color: var(--text-main, #F1F5F9);
+    border-bottom-color: var(--border, #334155);
+}
+
+:global([data-theme="dark"]) .workflowStepItem {
+    background: var(--bg-secondary, #1A1F2E);
+    border-color: var(--border, #334155);
+}
+
+:global([data-theme="dark"]) .workflowStepCompleted {
+    background: rgba(52, 211, 153, 0.1);
+    border-color: var(--success, #34D399);
+}
+
+:global([data-theme="dark"]) .workflowStepActive {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: var(--secondary, #60A5FA);
+}
+
+:global([data-theme="dark"]) .workflowStepCompleted .workflowStepNumber {
+    color: #34D399;
+}
+
+:global([data-theme="dark"]) .workflowStepActive .workflowStepNumber {
+    background: var(--secondary, #60A5FA);
+    color: white;
+}
+
+:global([data-theme="dark"]) .workflowStepPending .workflowStepNumber {
+    background: var(--bg-secondary, #1A1F2E);
+    color: var(--text-tertiary, #64748B);
+    border: 1px solid var(--border, #334155);
+}
+
+:global([data-theme="dark"]) .workflowStepLabel {
+    color: var(--text-main, #F1F5F9);
+}
+
+:global([data-theme="dark"]) .workflowStepDescription {
+    color: var(--text-secondary, #94A3B8);
+}
+
+:global([data-theme="dark"]) .workflowConnector {
+    background: var(--border, #334155);
+}
+
+:global([data-theme="dark"]) .workflowConnectorCompleted {
+    background: var(--success, #34D399);
+}

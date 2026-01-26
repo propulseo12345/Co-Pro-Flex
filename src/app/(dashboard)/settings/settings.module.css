@@ -1,0 +1,133 @@
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+}
+
+.section {
+    margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+}
+
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.cardIcon {
+    width: 48px;
+    height: 48px;
+    background-color: #ECFDF5;
+    color: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cardContent {
+    flex: 1;
+}
+
+.cardContent h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.cardContent p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.chevron {
+    color: var(--text-secondary);
+}
+
+.sidebarTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.coproName {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.coproAddress {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--border);
+    margin: 1rem 0;
+}
+
+.link {
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.banner {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    margin-top: 1.5rem;
+}
+
+.banner h3 {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+}
+
+.banner p {
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.banner :global(.btn-primary) {
+    background-color: white;
+    color: var(--primary);
+}
+
+.banner :global(.btn-primary):hover {
+    background-color: #F3F4F6;
+}

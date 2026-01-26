@@ -1,0 +1,108 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.summaryCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chartContainer {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.pieChart {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ECFDF5;
+    border-radius: 50%;
+    color: var(--primary);
+}
+
+.percentage {
+    position: absolute;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.budgetFigures {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.realise {
+    color: var(--primary);
+}
+
+.separator {
+    color: var(--text-secondary);
+    margin: 0 0.5rem;
+    font-weight: 400;
+}
+
+.total {
+    color: var(--text-secondary);
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.itemHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.values {
+    font-family: monospace;
+    color: var(--text-secondary);
+}
+
+.progressBarBg {
+    height: 8px;
+    background-color: #F3F4F6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressBarFill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-out;
+}

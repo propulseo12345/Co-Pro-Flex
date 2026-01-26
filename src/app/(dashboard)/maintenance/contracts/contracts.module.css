@@ -1,0 +1,1623 @@
+/* En-tête */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.subtitle {
+    margin: 0.5rem 0 0 0;
+    color: var(--text-secondary);
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* ========================================
+   KPI / SYNTHESE
+   ======================================== */
+
+.kpiContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.kpiCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.kpiIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.kpiIconSuccess {
+    background: #D1FAE5;
+    color: #047857;
+}
+
+.kpiIconWarning {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.kpiIconPrimary {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.kpiContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.kpiValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.kpiLabel {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* KPI Syndic Card */
+.kpiSyndicCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.kpiSyndicActif {
+    border-color: #10B981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+}
+
+.kpiSyndicWarning {
+    border-color: #F59E0B;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
+}
+
+.kpiSyndicResilie {
+    border-color: #6B7280;
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.05) 0%, rgba(107, 114, 128, 0.02) 100%);
+}
+
+.kpiSyndicMain {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+    min-width: 300px;
+}
+
+.kpiSyndicIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-md);
+    background: var(--primary-light);
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.kpiSyndicInfo {
+    flex: 1;
+}
+
+.kpiSyndicHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+}
+
+.kpiSyndicHeader h3 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.kpiSyndicStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.kpiSyndicActif .kpiSyndicStatus {
+    background: #D1FAE5;
+    color: #047857;
+}
+
+.kpiSyndicWarning .kpiSyndicStatus {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.kpiSyndicResilie .kpiSyndicStatus {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.kpiSyndicName {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.kpiSyndicMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.kpiSyndicMeta span {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.kpiSyndicMeta svg {
+    color: var(--text-tertiary);
+}
+
+.kpiSyndicDays {
+    font-weight: 600;
+}
+
+.kpiSyndicWarning .kpiSyndicDays {
+    color: #92400E !important;
+}
+
+.kpiSyndicActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Onglets Syndic */
+.syndicTabs {
+    display: flex;
+    gap: 0.25rem;
+    margin: 1rem 0 0.75rem 0;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 0.25rem;
+    border-radius: var(--radius-md);
+}
+
+.syndicTab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.syndicTab:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.syndicTabActive {
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Documents Syndic */
+.syndicDocuments {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.syndicDocument {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-md);
+}
+
+.syndicDocument svg {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.syndicDocInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.syndicDocName {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.syndicDocMeta {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.125rem;
+}
+
+/* Historique Syndic */
+.syndicHistorique {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.historiqueItem {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-md);
+}
+
+.historiqueDate {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    white-space: nowrap;
+    padding-top: 0.125rem;
+}
+
+.historiqueContent {
+    flex: 1;
+}
+
+.historiqueContent strong {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.125rem;
+}
+
+.historiqueContent span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+/* Dark theme for syndic tabs */
+:global([data-theme="dark"]) .syndicTabs {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme="dark"]) .syndicTab:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .syndicTabActive {
+    background: var(--surface);
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .syndicDocument,
+:global([data-theme="dark"]) .historiqueItem {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Section Alertes */
+.alertsSection {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.alertsHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: #92400E;
+}
+
+.alertsHeader h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.alertsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.alertItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--radius-md);
+}
+
+.alertItemUrgent {
+    background: #FEE2E2;
+    border-color: #EF4444;
+}
+
+.alertItemIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+}
+
+.alertItem .alertItemIcon {
+    color: #92400E;
+}
+
+.alertItemUrgent .alertItemIcon {
+    color: #DC2626;
+}
+
+.alertItemContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.alertItemContent strong {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.125rem;
+}
+
+.alertItemContent span {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .alertsSection {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .alertsHeader {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .alertItem {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+:global([data-theme="dark"]) .alertItemUrgent {
+    background: rgba(248, 113, 113, 0.15);
+    border-color: rgba(248, 113, 113, 0.5);
+}
+
+:global([data-theme="dark"]) .alertItem .alertItemIcon {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .alertItemUrgent .alertItemIcon {
+    color: #F87171;
+}
+
+/* Section Contrat du Syndic */
+.syndicSection {
+    background: linear-gradient(135deg, var(--primary-light) 0%, #E0E7FF 100%);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.syndicHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.syndicTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--primary);
+}
+
+.syndicTitle h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.syndicContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.syndicMain {
+    flex: 1;
+    min-width: 300px;
+}
+
+.syndicInfo h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.syndicCabinet {
+    margin: 0 0 0.25rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.syndicNumero {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    font-family: monospace;
+}
+
+.syndicDetails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.syndicDetail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--surface);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+}
+
+.syndicDetail svg {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.syndicActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Section Liste des contrats */
+.contractsSection {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+}
+
+.sectionTitle {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Barre de filtres */
+.filtersBar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.searchWrapper {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    transition: border-color var(--transition-base);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.filterSelect {
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    background: var(--surface);
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Tableau */
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border);
+    background: var(--surface-secondary, #F9FAFB);
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.tableRow {
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+}
+
+.tableRow:hover {
+    background-color: var(--surface-secondary, #F9FAFB);
+}
+
+.rowReglementaire {
+    border-left: 3px solid #1E40AF;
+}
+
+.cellLibelle {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.contratNom {
+    font-weight: 500;
+}
+
+.cellMontant {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Cellule échéance */
+.echeanceCell {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.echeanceProche {
+    color: #92400E;
+    font-weight: 500;
+}
+
+.echeanceUrgent {
+    color: #DC2626;
+    font-weight: 600;
+}
+
+.echeanceUrgent svg {
+    color: #DC2626;
+}
+
+.joursRestants {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+:global([data-theme="dark"]) .echeanceProche {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .echeanceUrgent {
+    color: #F87171;
+}
+
+:global([data-theme="dark"]) .echeanceUrgent svg {
+    color: #F87171;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badgeActif {
+    background: #D1FAE5;
+    color: #047857;
+}
+
+.badgeRenouveler {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badgeResilie {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.badgeBrouillon {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.badgeReglementaire {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+/* Actions Dropdown */
+.actionsDropdown {
+    position: relative;
+}
+
+.actionsBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-base);
+}
+
+.actionsBtn:hover {
+    background: var(--surface-secondary, #F3F4F6);
+    color: var(--text-main);
+}
+
+.dropdownOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+}
+
+.dropdownMenu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.25rem;
+    min-width: 160px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 20;
+    overflow: hidden;
+}
+
+.dropdownMenu button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--transition-base);
+}
+
+.dropdownMenu button:hover {
+    background: var(--surface-secondary, #F3F4F6);
+}
+
+.dangerAction {
+    color: #DC2626 !important;
+}
+
+.dangerAction:hover {
+    background: #FEF2F2 !important;
+}
+
+/* Export Dropdown */
+.exportDropdown {
+    position: relative;
+}
+
+.exportDropdown .dropdownMenu {
+    right: 0;
+    left: auto;
+}
+
+/* État vide */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+.emptyState svg {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.emptyState p {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.emptyState span {
+    font-size: 0.875rem;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+}
+
+.modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modalClose {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+
+.modalClose:hover {
+    background: var(--surface-secondary, #F3F4F6);
+    color: var(--text-main);
+}
+
+.modalContent {
+    padding: 1.5rem;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.formGroup.fullWidth {
+    grid-column: span 2;
+}
+
+.formGroup label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    transition: border-color var(--transition-base);
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.formGroup textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.formGroup input[type="file"] {
+    padding: 0.5rem;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 400 !important;
+    padding-top: 1.5rem;
+}
+
+.checkboxLabel input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+/* File Upload */
+.fileUpload {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fileInput {
+    display: none;
+}
+
+.fileUploadLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: var(--surface-secondary, #F9FAFB);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    transition: all var(--transition-base);
+    flex: 1;
+}
+
+.fileUploadLabel:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.fileUploadLabel svg {
+    flex-shrink: 0;
+}
+
+.fileClear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    background: #FEE2E2;
+    color: #DC2626;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.fileClear:hover {
+    background: #FECACA;
+}
+
+:global([data-theme="dark"]) .fileUploadLabel {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .fileUploadLabel:hover {
+    border-color: var(--primary);
+    background: rgba(52, 211, 153, 0.1);
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .fileClear {
+    background: rgba(248, 113, 113, 0.2);
+    color: #F87171;
+}
+
+:global([data-theme="dark"]) .fileClear:hover {
+    background: rgba(248, 113, 113, 0.3);
+}
+
+/* Modal small */
+.modalSmall {
+    max-width: 480px;
+}
+
+/* Warning box */
+.warningBox {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.warningBox svg {
+    color: #92400E;
+    flex-shrink: 0;
+}
+
+.warningBox p {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    color: #92400E;
+}
+
+.warningBox p:last-child {
+    margin-bottom: 0;
+}
+
+/* Input error */
+.inputError {
+    border-color: #EF4444 !important;
+}
+
+.errorText {
+    font-size: 0.75rem;
+    color: #EF4444;
+    margin-top: 0.25rem;
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast span {
+    font-size: 0.875rem;
+    color: var(--text-main);
+}
+
+.toast button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.toast button:hover {
+    background: var(--surface-secondary, #F3F4F6);
+    color: var(--text-main);
+}
+
+.toastSuccess {
+    border-left: 4px solid #10B981;
+}
+
+.toastSuccess svg:first-child {
+    color: #10B981;
+}
+
+.toastError {
+    border-left: 4px solid #EF4444;
+}
+
+.toastError svg:first-child {
+    color: #EF4444;
+}
+
+.toastInfo {
+    border-left: 4px solid #3B82F6;
+}
+
+.toastInfo svg:first-child {
+    color: #3B82F6;
+}
+
+/* ========================================
+   DARK THEME
+   ======================================== */
+
+:global([data-theme="dark"]) .syndicSection {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(96, 165, 250, 0.1) 100%);
+    border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .syndicTitle {
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .syndicInfo h3 {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .syndicDetail {
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .syndicDetail svg {
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .contractsSection {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .searchInput {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .searchInput::placeholder {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .filterSelect {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .table th {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .table td {
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .tableRow:hover {
+    background-color: var(--surface-hover);
+}
+
+:global([data-theme="dark"]) .rowReglementaire {
+    border-left-color: #60A5FA;
+}
+
+/* Badges dark theme */
+:global([data-theme="dark"]) .badgeActif {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .badgeRenouveler {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .badgeResilie {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94A3B8;
+}
+
+:global([data-theme="dark"]) .badgeBrouillon {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .badgeReglementaire {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
+}
+
+/* Actions dark theme */
+:global([data-theme="dark"]) .actionsBtn {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .actionsBtn:hover {
+    background: var(--surface-hover);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .dropdownMenu {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+:global([data-theme="dark"]) .dropdownMenu button {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .dropdownMenu button:hover {
+    background: var(--surface-hover);
+}
+
+:global([data-theme="dark"]) .dangerAction {
+    color: #F87171 !important;
+}
+
+:global([data-theme="dark"]) .dangerAction:hover {
+    background: rgba(248, 113, 113, 0.15) !important;
+}
+
+/* Empty state dark theme */
+:global([data-theme="dark"]) .emptyState {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .emptyState p {
+    color: var(--text-secondary);
+}
+
+/* Modal dark theme */
+:global([data-theme="dark"]) .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+:global([data-theme="dark"]) .modal {
+    background: var(--surface);
+}
+
+:global([data-theme="dark"]) .modalHeader {
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .modalHeader h2 {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .modalClose {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .modalClose:hover {
+    background: var(--surface-hover);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .formGroup label {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .formGroup input,
+:global([data-theme="dark"]) .formGroup select,
+:global([data-theme="dark"]) .formGroup textarea {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .formGroup input::placeholder,
+:global([data-theme="dark"]) .formGroup textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .formGroup input:focus,
+:global([data-theme="dark"]) .formGroup select:focus,
+:global([data-theme="dark"]) .formGroup textarea:focus {
+    border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .modalActions {
+    border-color: var(--border);
+}
+
+/* Warning box dark theme */
+:global([data-theme="dark"]) .warningBox {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+:global([data-theme="dark"]) .warningBox svg {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .warningBox p {
+    color: #FCD34D;
+}
+
+/* Toast dark theme */
+:global([data-theme="dark"]) .toast {
+    background: var(--surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+:global([data-theme="dark"]) .toast span {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .toast button {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .toast button:hover {
+    background: var(--surface-hover);
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .toastSuccess {
+    border-left-color: #34D399;
+}
+
+:global([data-theme="dark"]) .toastSuccess svg:first-child {
+    color: #34D399;
+}
+
+:global([data-theme="dark"]) .toastError {
+    border-left-color: #F87171;
+}
+
+:global([data-theme="dark"]) .toastError svg:first-child {
+    color: #F87171;
+}
+
+:global([data-theme="dark"]) .toastInfo {
+    border-left-color: #60A5FA;
+}
+
+:global([data-theme="dark"]) .toastInfo svg:first-child {
+    color: #60A5FA;
+}
+
+/* Input error dark theme */
+:global([data-theme="dark"]) .inputError {
+    border-color: #F87171 !important;
+}
+
+:global([data-theme="dark"]) .errorText {
+    color: #F87171;
+}
+
+/* KPI dark theme */
+:global([data-theme="dark"]) .kpiCard {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .kpiIconSuccess {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .kpiIconWarning {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .kpiIconPrimary {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .kpiValue {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .kpiLabel {
+    color: var(--text-secondary);
+}
+
+/* KPI Syndic dark theme */
+:global([data-theme="dark"]) .kpiSyndicCard {
+    background: var(--surface);
+}
+
+:global([data-theme="dark"]) .kpiSyndicActif {
+    border-color: #34D399;
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.02) 100%);
+}
+
+:global([data-theme="dark"]) .kpiSyndicWarning {
+    border-color: #FBBF24;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 191, 36, 0.02) 100%);
+}
+
+:global([data-theme="dark"]) .kpiSyndicResilie {
+    border-color: #6B7280;
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(107, 114, 128, 0.02) 100%);
+}
+
+:global([data-theme="dark"]) .kpiSyndicIcon {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--primary);
+}
+
+:global([data-theme="dark"]) .kpiSyndicHeader h3 {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .kpiSyndicActif .kpiSyndicStatus {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .kpiSyndicWarning .kpiSyndicStatus {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .kpiSyndicResilie .kpiSyndicStatus {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9CA3AF;
+}
+
+:global([data-theme="dark"]) .kpiSyndicName {
+    color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .kpiSyndicMeta span {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .kpiSyndicMeta svg {
+    color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .kpiSyndicWarning .kpiSyndicDays {
+    color: #FCD34D !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions {
+        justify-content: flex-end;
+    }
+
+    /* KPI Responsive */
+    .kpiGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .kpiSyndicCard {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .kpiSyndicMain {
+        min-width: auto;
+    }
+
+    .kpiSyndicActions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .kpiSyndicMeta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .syndicContent {
+        flex-direction: column;
+    }
+
+    .syndicActions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .filtersBar {
+        flex-direction: column;
+    }
+
+    .filters {
+        width: 100%;
+    }
+
+    .filterSelect {
+        flex: 1;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .formGroup.fullWidth {
+        grid-column: span 1;
+    }
+
+    .table th:nth-child(3),
+    .table td:nth-child(3),
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+    .kpiGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

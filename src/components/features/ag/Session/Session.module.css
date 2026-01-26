@@ -1,0 +1,1857 @@
+.header {
+    margin-bottom: var(--space-lg);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-sm);
+    margin-left: calc(var(--space-sm) * -1);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    margin-bottom: var(--space-sm);
+}
+
+.backButton:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.startScreen {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sectionTitle {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.sectionDescription {
+    font-size: var(--text-md);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+}
+
+.checklist {
+    margin-bottom: var(--space-2xl);
+}
+
+.checklistHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.checklist h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.selectAllPresencesButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+    font-weight: 500;
+}
+
+.selectAllPresencesButton:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.checklistDescription {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.presenceList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.presenceItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.presenceItem:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.presenceItem input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.presenceInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.presenceName {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.presenceDetails {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.presenceStats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-light) 100%);
+    border-radius: var(--radius-md);
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* ===== Synthèse des tantièmes ===== */
+.syntheseTantiemes {
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.syntheseHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    color: var(--primary);
+}
+
+.syntheseHeader h3 {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.syntheseContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.syntheseStats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.syntheseStatMain {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.syntheseStatValue {
+    font-size: var(--text-4xl);
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.syntheseStatSeparator {
+    font-size: var(--text-2xl);
+    color: var(--text-tertiary);
+}
+
+.syntheseStatTotal {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.syntheseStatLabel {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    margin-left: var(--space-xs);
+}
+
+.syntheseStatSecondary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.synthesePourcentage {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--success);
+    background: var(--success-light);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+}
+
+.syntheseStatDetail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+}
+
+/* Barre de progression */
+.progressContainer {
+    padding: var(--space-md) 0;
+}
+
+.progressBar {
+    position: relative;
+    height: 24px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    overflow: visible;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+    border-radius: var(--radius-lg);
+    transition: width 0.3s ease;
+}
+
+.progressMarker {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+}
+
+.progressMarkerLine {
+    width: 2px;
+    height: 24px;
+    background: var(--text-tertiary);
+}
+
+.progressMarkerLabel {
+    margin-top: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Seuils de majorité */
+.seuilsContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+.seuilItem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    transition: all var(--transition-base);
+}
+
+.seuilAtteint {
+    background: var(--success-light);
+    border-color: var(--success);
+}
+
+.seuilNonAtteint {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+
+.seuilHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.seuilArticle {
+    font-weight: 700;
+    font-size: var(--text-sm);
+}
+
+.seuilAtteint .seuilArticle {
+    color: var(--success);
+}
+
+.seuilNonAtteint .seuilArticle {
+    color: var(--text-secondary);
+}
+
+.seuilStatus {
+    font-size: var(--text-lg);
+}
+
+.seuilAtteint .seuilStatus {
+    color: var(--success);
+}
+
+.seuilNonAtteint .seuilStatus {
+    color: var(--text-tertiary);
+}
+
+.seuilDescription {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.seuilValeur {
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.seuilAtteint .seuilValeur {
+    color: var(--success);
+}
+
+.seuilNonAtteint .seuilValeur {
+    color: var(--text-tertiary);
+}
+
+/* Avertissement de quorum */
+.syntheseWarning {
+    padding: var(--space-md);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    color: var(--warning-dark, #92400e);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+/* Bouton de démarrage */
+.startButtonContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+}
+
+.quorumWarning {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    color: var(--warning-dark, #92400e);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-align: center;
+    margin: 0;
+}
+
+/* Style pour les items de présence cochés */
+.presenceItemChecked {
+    background: var(--success-light);
+    border-color: var(--success);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.resolutionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--border);
+}
+
+.resolutionNumber {
+    font-size: var(--text-sm);
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+}
+
+.resolutionTitle {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.majorityBadge {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.resolutionText {
+    font-size: var(--text-md);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-lg);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.liveStats {
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-xl);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--surface) 100%);
+    border-radius: var(--radius-lg);
+}
+
+.liveStats h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.statsBar {
+    display: flex;
+    height: 40px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+}
+
+.statsBarPour {
+    background-color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    transition: width 0.3s ease;
+}
+
+.statsBarContre {
+    background-color: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    transition: width 0.3s ease;
+}
+
+.statsBarAbstention {
+    background-color: var(--warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    transition: width 0.3s ease;
+}
+
+.statsDetails {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.statDetail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.votingSection {
+    margin-bottom: var(--space-2xl);
+}
+
+.votingSection h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+.votingTable {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.votingTableHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border);
+}
+
+.votingTableHeaderCell {
+    padding: var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+    text-align: center;
+}
+
+.votingTableHeaderCell:first-child {
+    text-align: left;
+}
+
+.votingTableHeaderContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.selectAllButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.selectAllButton:hover {
+    background: var(--primary-light);
+}
+
+.votingTableBody {
+    display: flex;
+    flex-direction: column;
+}
+
+.votingTableRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border-light);
+    transition: background var(--transition-base);
+}
+
+.votingTableRow:last-child {
+    border-bottom: none;
+}
+
+.votingTableRow:hover {
+    background: var(--bg-secondary);
+}
+
+.votingTableCell {
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.votingTableCell:first-child {
+    justify-content: flex-start;
+}
+
+.coproList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.coproCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    gap: var(--space-lg);
+}
+
+.coproInfo {
+    flex: 1;
+}
+
+.coproName {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-xs);
+}
+
+.coproDetails {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.voteButtons {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.voteButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+.voteButtonPour:hover {
+    border-color: var(--success);
+    background-color: var(--success-light);
+    color: var(--success);
+}
+
+.voteButtonPour.voteButtonActive {
+    border-color: var(--success);
+    background-color: var(--success);
+    color: white;
+}
+
+.voteButtonContre:hover {
+    border-color: var(--danger);
+    background-color: var(--danger-light);
+    color: var(--danger);
+}
+
+.voteButtonContre.voteButtonActive {
+    border-color: var(--danger);
+    background-color: var(--danger);
+    color: white;
+}
+
+.voteButtonAbstention:hover {
+    border-color: var(--warning);
+    background-color: var(--warning-light);
+    color: var(--warning);
+}
+
+.voteButtonAbstention.voteButtonActive {
+    border-color: var(--warning);
+    background-color: var(--warning);
+    color: white;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+}
+
+.navigationRight {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.sidebarTitle {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.progressBar {
+    height: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: var(--space-sm);
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+    transition: width 0.3s ease;
+}
+
+.progressText {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.presentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.presentItem {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-sm);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.presentName {
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.presentTantiemes {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 968px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .resolutionHeader {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .coproCard {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .voteButtons {
+        width: 100%;
+    }
+
+    .voteButton {
+        flex: 1;
+    }
+
+    .votingTableHeader,
+    .votingTableRow {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+    }
+
+    .votingTableHeaderCell,
+    .votingTableCell {
+        padding: var(--space-sm);
+    }
+
+    .votingTableHeaderContent {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .statsDetails {
+        grid-template-columns: 1fr;
+    }
+
+    .navigation {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .navigation button {
+        width: 100%;
+    }
+
+    .footer {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .footer button {
+        width: 100%;
+    }
+
+    .navigationRight {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navigationRight button {
+        width: 100%;
+    }
+}
+
+/* Modal de résultat */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+}
+
+.modalContent {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modalTitle {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: var(--space-xl);
+    text-align: center;
+}
+
+.modalResolutionInfo {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--border);
+}
+
+.modalResolutionInfo h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.modalMajorityInfo {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.modalMajorityInfo strong {
+    color: var(--text-main);
+}
+
+.modalStats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.modalStatItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.modalResult {
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.modalResultAdopted {
+    background: linear-gradient(135deg, var(--success-light) 0%, var(--success) 100%);
+    color: white;
+}
+
+.modalResultRejected {
+    background: linear-gradient(135deg, var(--danger-light) 0%, var(--danger) 100%);
+    color: white;
+}
+
+.modalResult h3 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin: var(--space-md) 0;
+}
+
+.modalResultReason {
+    font-size: var(--text-sm);
+    margin-top: var(--space-md);
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+.modalActions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .modalContent {
+        padding: var(--space-lg);
+    }
+
+    .modalStats {
+        grid-template-columns: 1fr;
+    }
+
+    .modalActions {
+        flex-direction: column;
+    }
+
+    .modalActions button {
+        width: 100%;
+    }
+}
+
+/* Passerelle 25-1 Styles */
+.passerelleAlert {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.passerelleExplanation {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    line-height: 1.6;
+}
+
+.passerelleExplanation p {
+    margin-bottom: var(--space-md);
+    color: var(--text-secondary);
+}
+
+.passerelleExplanation ul {
+    margin: var(--space-md) 0;
+    padding-left: var(--space-xl);
+}
+
+.passerelleExplanation li {
+    margin-bottom: var(--space-sm);
+    color: var(--text-main);
+}
+
+.secondVoteBanner {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    color: white;
+}
+
+.secondVoteBanner strong {
+    display: block;
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xs);
+}
+
+.secondVoteBanner p {
+    margin: 0;
+    margin-bottom: var(--space-xs);
+    font-size: var(--text-sm);
+    opacity: 0.95;
+}
+
+.warningText {
+    margin-top: var(--space-sm) !important;
+    font-weight: 600;
+    opacity: 1 !important;
+}
+
+/* Votes par correspondance - Row grisée */
+.votingTableRowDisabled {
+    opacity: 0.7;
+    background: var(--bg-secondary);
+}
+
+.votingTableRowDisabled:hover {
+    background: var(--bg-secondary);
+}
+
+.votingTableRowDisabled .voteButton {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.votingTableRowDisabled .voteButton:hover {
+    border-color: var(--border);
+    background: var(--surface);
+    color: inherit;
+}
+
+/* Badge vote par correspondance */
+.correspondanceBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: var(--space-sm);
+    padding: 2px 8px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--info);
+    background: var(--info-light);
+    border-radius: var(--radius-full);
+}
+
+.coproName {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+/* Variables cliquables dans le texte */
+.variableButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    margin: 0 2px;
+    font-size: inherit;
+    font-family: inherit;
+    background: var(--warning-light);
+    border: 1px dashed var(--warning);
+    border-radius: var(--radius-sm);
+    color: var(--warning);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.variableButton:hover {
+    background: var(--warning);
+    color: white;
+    border-style: solid;
+}
+
+.variableButtonFilled {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    border-style: solid;
+    color: var(--primary);
+}
+
+.variableButtonFilled:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Wrapper pour variable avec dropdown préremplissage */
+.variableWrapper {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+}
+
+.prefillDropdownWrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.prefillButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-light);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    cursor: pointer;
+    margin-left: 2px;
+    transition: all var(--transition-base);
+}
+
+.prefillButton:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.prefillDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    min-width: 180px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
+}
+
+.prefillDropdownHeader {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+}
+
+.prefillDropdownItem {
+    display: block;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.prefillDropdownItem:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Modal d'avertissement de validation */
+.warningModalContent {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.warningHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.warningTitle {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.warningDescription {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.warningList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-lg) 0;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.warningListItem {
+    padding: var(--space-xs) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.warningListItem::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--warning);
+    border-radius: 50%;
+}
+
+.warningVariable {
+    font-family: monospace;
+    font-size: var(--text-sm);
+    color: var(--warning);
+    background: var(--warning-light);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.warningQuestion {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+/* Modal formulaire variable */
+.variableForm {
+    margin: var(--space-xl) 0;
+}
+
+.variableLabel {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.variableInput {
+    width: 100%;
+    padding: var(--space-md);
+    font-size: var(--text-base);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-main);
+    transition: all var(--transition-base);
+}
+
+.variableInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.modalTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+/* Dark mode overrides */
+
+/* Synthèse des tantièmes - Dark mode */
+:global([data-theme="dark"]) .syntheseTantiemes {
+    background: var(--surface-secondary);
+    border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .syntheseStatValue {
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .synthesePourcentage {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .progressBar {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .progressFill {
+    background: linear-gradient(90deg, #60a5fa 0%, #6EE7B7 100%);
+}
+
+:global([data-theme="dark"]) .progressMarkerLine {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+:global([data-theme="dark"]) .seuilAtteint {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .seuilNonAtteint {
+    background: var(--surface);
+}
+
+:global([data-theme="dark"]) .seuilAtteint .seuilArticle,
+:global([data-theme="dark"]) .seuilAtteint .seuilStatus,
+:global([data-theme="dark"]) .seuilAtteint .seuilValeur {
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .syntheseWarning,
+:global([data-theme="dark"]) .quorumWarning {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: #FCD34D;
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .presenceItemChecked {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+:global([data-theme="dark"]) .majorityBadge {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .statsBarPour {
+    background: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .statsBarContre {
+    background: #F87171;
+}
+
+:global([data-theme="dark"]) .statsBarAbstention {
+    background: #FCD34D;
+}
+
+:global([data-theme="dark"]) .voteButtonPour:hover {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .voteButtonPour.voteButtonActive {
+    background: var(--success);
+    color: white;
+}
+
+:global([data-theme="dark"]) .voteButtonContre:hover {
+    background: rgba(248, 113, 113, 0.2);
+    color: #F87171;
+}
+
+:global([data-theme="dark"]) .voteButtonContre.voteButtonActive {
+    background: var(--danger);
+    color: white;
+}
+
+:global([data-theme="dark"]) .voteButtonAbstention:hover {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .voteButtonAbstention.voteButtonActive {
+    background: var(--warning);
+    color: white;
+}
+
+:global([data-theme="dark"]) .modalResultAdopted {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, var(--success) 100%);
+}
+
+:global([data-theme="dark"]) .modalResultRejected {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.3) 0%, var(--danger) 100%);
+}
+
+:global([data-theme="dark"]) .secondVoteBanner {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, #ff9800 100%);
+}
+
+:global([data-theme="dark"]) .correspondanceBadge {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .variableButton {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+    border-color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .variableButton:hover {
+    background: var(--warning);
+    color: white;
+}
+
+:global([data-theme="dark"]) .variableButtonFilled {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
+    border-color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .variableButtonFilled:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* ===== Votes par correspondance - Styles ===== */
+
+.correspondanceBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    color: var(--text-main);
+}
+
+.correspondanceBanner svg {
+    flex-shrink: 0;
+    color: var(--info);
+    margin-top: 2px;
+}
+
+.correspondanceBanner strong {
+    display: block;
+    font-size: var(--text-md);
+    margin-bottom: var(--space-xs);
+    color: var(--text-main);
+}
+
+.correspondanceBanner p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.correspondanceHint {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.presenceLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    flex: 1;
+}
+
+.presenceItemCorrespondance {
+    background: linear-gradient(135deg, var(--info-light) 0%, var(--primary-light) 100%);
+    border-color: var(--info);
+    cursor: default;
+}
+
+.presenceItemCorrespondance:hover {
+    background: linear-gradient(135deg, var(--info-light) 0%, var(--primary-light) 100%);
+    border-color: var(--info);
+}
+
+.presenceCorrespondanceRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: var(--space-md);
+}
+
+.correspondanceBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--info);
+    background: var(--surface);
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-sm);
+    border: 1px solid var(--info);
+}
+
+.presentBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--success);
+    background: var(--success-light);
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-sm);
+}
+
+.neutraliseBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--warning);
+    background: var(--warning-light);
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-xs);
+}
+
+.basculerPresentBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--success);
+    background: var(--surface);
+    border: 1px solid var(--success);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.basculerPresentBtn:hover {
+    background: var(--success);
+    color: white;
+}
+
+.annulerBasculeBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.annulerBasculeBtn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.syntheseStatDetails {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+/* Dark mode - Votes par correspondance */
+:global([data-theme="dark"]) .correspondanceBanner {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--info);
+}
+
+:global([data-theme="dark"]) .presenceItemCorrespondance {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.1) 100%);
+}
+
+:global([data-theme="dark"]) .correspondanceBadge {
+    background: var(--surface-secondary);
+    border-color: var(--info);
+}
+
+:global([data-theme="dark"]) .basculerPresentBtn {
+    background: var(--surface-secondary);
+}
+
+:global([data-theme="dark"]) .annulerBasculeBtn {
+    background: var(--surface-secondary);
+}
+
+/* ===== Sidebar - Synthèse des participants ===== */
+
+.participantsSynthese {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border);
+}
+
+.syntheseTotal {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.syntheseTotalValue {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.syntheseTotalLabel {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+/* Ventilation par type */
+.syntheseByType {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.syntheseTypeItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+}
+
+.syntheseTypeIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.syntheseTypeInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.syntheseTypeLabel {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.syntheseTypeValue {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Couleurs par type */
+.syntheseTypePresent .syntheseTypeIcon {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.syntheseTypeRepresente .syntheseTypeIcon {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.syntheseTypeCorrespondance .syntheseTypeIcon {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.syntheseTypeAbsent .syntheseTypeIcon {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+
+.syntheseTypeAbsent {
+    opacity: 0.7;
+}
+
+/* Liste des participants groupée */
+.participantsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.participantsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.participantsGroupHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+}
+
+.headerPresent {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.headerRepresente {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.headerCorrespondance {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.participantsGroupList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.participantItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.participantName {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.participantTantiemes {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.neutraliseBadgeSmall {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--warning);
+    background: var(--warning-light);
+    padding: 1px 4px;
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-xs);
+}
+
+/* Dark mode - Sidebar synthèse */
+:global([data-theme="dark"]) .syntheseTotalValue {
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .syntheseTypePresent .syntheseTypeIcon {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .syntheseTypeRepresente .syntheseTypeIcon {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .syntheseTypeCorrespondance .syntheseTypeIcon {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .headerPresent {
+    background: rgba(52, 211, 153, 0.15);
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .headerRepresente {
+    background: rgba(251, 191, 36, 0.15);
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .headerCorrespondance {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .neutraliseBadgeSmall {
+    background: rgba(251, 191, 36, 0.15);
+    color: #FCD34D;
+}

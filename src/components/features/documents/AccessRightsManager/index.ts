@@ -1,0 +1,1 @@
+export { AccessRightsManager } from './AccessRightsManager';

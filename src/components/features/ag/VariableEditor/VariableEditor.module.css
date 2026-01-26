@@ -1,0 +1,514 @@
+.editorContainer {
+    background: var(--surface);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 280px;
+    max-width: 400px;
+}
+
+.editorHeader {
+    margin-bottom: var(--space-sm);
+}
+
+.label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.required {
+    color: var(--danger);
+}
+
+.editorContent {
+    margin-bottom: var(--space-md);
+}
+
+.editorActions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+}
+
+.saveButton,
+.cancelButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: none;
+}
+
+.saveButton {
+    background: var(--success);
+    color: white;
+}
+
+.saveButton:hover {
+    background: var(--success-dark, #16a34a);
+}
+
+.cancelButton {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.cancelButton:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-main);
+}
+
+/* ===== Inputs communs ===== */
+.textInput,
+.dateInput,
+.numeroInput,
+.selectInput {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.textInput:focus,
+.dateInput:focus,
+.numeroInput:focus,
+.selectInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* ===== Textarea ===== */
+.textareaInput {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: all var(--transition-base);
+}
+
+.textareaInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* ===== Date input ===== */
+.dateInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dateIcon {
+    position: absolute;
+    left: var(--space-sm);
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.dateInput {
+    padding-left: calc(var(--space-sm) + 20px + var(--space-xs));
+}
+
+/* ===== DatePicker wrapper ===== */
+.datePickerWrapper {
+    width: 100%;
+}
+
+/* ===== Montant input ===== */
+.montantInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.montantInput {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    padding-right: calc(var(--space-md) + 20px);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: right;
+    transition: all var(--transition-base);
+}
+
+.montantInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.montantSuffix {
+    position: absolute;
+    right: var(--space-md);
+    color: var(--text-secondary);
+    font-weight: 500;
+    pointer-events: none;
+}
+
+/* ===== Pourcentage input ===== */
+.pourcentageInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 120px;
+}
+
+.pourcentageInput {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    padding-right: calc(var(--space-md) + 16px);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: right;
+    transition: all var(--transition-base);
+}
+
+.pourcentageInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.pourcentageSuffix {
+    position: absolute;
+    right: var(--space-md);
+    color: var(--text-secondary);
+    font-weight: 500;
+    pointer-events: none;
+}
+
+/* ===== Durée input ===== */
+.dureeInputWrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.dureeInput {
+    width: 80px;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    transition: all var(--transition-base);
+}
+
+.dureeInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.dureeSuffix {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+}
+
+.dureeHint {
+    display: block;
+    width: 100%;
+    margin-top: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* ===== Dropdown pour copropriétaires ===== */
+.dropdownContainer {
+    position: relative;
+}
+
+.searchInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon {
+    position: absolute;
+    left: var(--space-sm);
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.chevronIcon {
+    position: absolute;
+    right: var(--space-sm);
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    padding-left: calc(var(--space-sm) + 20px + var(--space-xs));
+    padding-right: calc(var(--space-sm) + 20px + var(--space-xs));
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.dropdownItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--transition-base);
+}
+
+.dropdownItem:hover {
+    background: var(--bg-secondary);
+}
+
+.dropdownEmpty {
+    padding: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.coproName {
+    font-weight: 500;
+}
+
+.presenceBadge {
+    font-size: var(--text-xs);
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    font-weight: 500;
+}
+
+.presencePRESENT {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.presenceREPRESENTE {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.presenceVOTE_CORRESPONDANCE {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.presenceABSENT {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+
+/* ===== Message d'avertissement ===== */
+.warningMessage {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-sm);
+    color: var(--warning-dark, #92400e);
+    font-size: var(--text-sm);
+}
+
+.warningMessage svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ===== Select input ===== */
+.selectInput {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-sm) center;
+    padding-right: calc(var(--space-md) + 20px);
+}
+
+/* ===== Dark mode ===== */
+:global([data-theme="dark"]) .editorContainer {
+    background: var(--surface-secondary);
+}
+
+:global([data-theme="dark"]) .textInput,
+:global([data-theme="dark"]) .dateInput,
+:global([data-theme="dark"]) .montantInput,
+:global([data-theme="dark"]) .pourcentageInput,
+:global([data-theme="dark"]) .dureeInput,
+:global([data-theme="dark"]) .numeroInput,
+:global([data-theme="dark"]) .textareaInput,
+:global([data-theme="dark"]) .searchInput,
+:global([data-theme="dark"]) .selectInput {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .dropdown {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .dropdownItem:hover {
+    background: var(--surface-secondary);
+}
+
+:global([data-theme="dark"]) .cancelButton {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .warningMessage {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+:global([data-theme="dark"]) .selectInput {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* ===== Rôles AG - Sélection avec options ===== */
+.roleSelectionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.gestionnaireOption {
+    padding: var(--space-md);
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: var(--radius-sm);
+}
+
+.gestionnaireCheckbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.gestionnaireCheckbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.gestionnaireCheckbox svg {
+    color: var(--info);
+    flex-shrink: 0;
+}
+
+.gestionnaireHint {
+    margin: var(--space-sm) 0 0 calc(18px + var(--space-sm));
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.gestionnaireSelected {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--success-light);
+    border: 1px solid var(--success);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--success);
+}
+
+.gestionnaireSelected svg {
+    flex-shrink: 0;
+}
+
+.coproIcon {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    margin-right: var(--space-xs);
+}
+
+/* ===== Dark mode - Rôles AG ===== */
+:global([data-theme="dark"]) .gestionnaireOption {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--info);
+}
+
+:global([data-theme="dark"]) .gestionnaireSelected {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .gestionnaireCheckbox svg {
+    color: #93C5FD;
+}

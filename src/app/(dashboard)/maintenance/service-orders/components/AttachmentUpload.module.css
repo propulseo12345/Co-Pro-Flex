@@ -1,0 +1,207 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md, 1rem);
+}
+
+.uploadZone {
+  position: relative;
+  border: 2px dashed var(--border, #e5e7eb);
+  border-radius: var(--radius-lg, 0.75rem);
+  padding: var(--space-2xl, 2rem);
+  text-align: center;
+  transition: all var(--transition-base, 200ms);
+  background: var(--surface, #ffffff);
+}
+
+.uploadZone:hover:not(.disabled) {
+  border-color: var(--primary, #10b981);
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.uploadZone.dragActive {
+  border-color: var(--primary, #10b981);
+  background: rgba(16, 185, 129, 0.05);
+  transform: scale(1.01);
+}
+
+.uploadZone.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--background-disabled, #f9fafb);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md, 1rem);
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+}
+
+.uploadZone.disabled .uploadLabel {
+  cursor: not-allowed;
+}
+
+.uploadLabel svg {
+  color: var(--primary, #10b981);
+}
+
+.uploadText {
+  margin: 0;
+  font-size: var(--text-base, 1rem);
+  color: var(--text-main, #111827);
+}
+
+.uploadText strong {
+  color: var(--primary, #10b981);
+  font-weight: 600;
+}
+
+.uploadHint {
+  margin: 0;
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--text-secondary, #9ca3af);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border, #e5e7eb);
+  border-top-color: var(--primary, #10b981);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.attachmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 0.375rem);
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-sm, 0.5rem);
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.listTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 0.375rem);
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--text-main, #111827);
+}
+
+.listTitle svg {
+  color: var(--text-secondary, #6b7280);
+}
+
+.attachmentItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  padding: var(--space-sm, 0.5rem);
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-md, 0.5rem);
+  transition: all var(--transition-fast, 150ms);
+}
+
+.attachmentItem:hover {
+  background: var(--background-hover, #f9fafb);
+  border-color: var(--primary-light, #6ee7b7);
+}
+
+.attachmentIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--background-secondary, #f3f4f6);
+  border-radius: var(--radius-md, 0.5rem);
+  color: var(--text-secondary, #6b7280);
+  flex-shrink: 0;
+}
+
+.attachmentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachmentName {
+  margin: 0;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--text-main, #111827);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachmentMeta {
+  margin: 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-secondary, #9ca3af);
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+  border-radius: var(--radius-sm, 0.375rem);
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms);
+  flex-shrink: 0;
+}
+
+.removeButton:hover:not(:disabled) {
+  background: var(--danger-light, #fee2e2);
+  color: var(--danger, #ef4444);
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .uploadZone {
+    padding: var(--space-lg, 1.25rem);
+  }
+
+  .uploadLabel svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .uploadText {
+    font-size: var(--text-sm, 0.875rem);
+  }
+
+  .uploadHint {
+    font-size: var(--text-xs, 0.75rem);
+  }
+}

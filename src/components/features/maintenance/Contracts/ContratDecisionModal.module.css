@@ -1,0 +1,499 @@
+/* Overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+/* Modal */
+.modal {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem;
+    background: #FEF3C7;
+    border-bottom: 1px solid var(--border);
+}
+
+.header.relance {
+    background: #FEF3C7;
+}
+
+.header.urgence {
+    background: #FEE2E2;
+}
+
+.header.critique {
+    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+}
+
+.header.tresCritique {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    color: white;
+}
+
+.header.tresCritique .title,
+.header.tresCritique .subtitle {
+    color: white;
+}
+
+.headerContent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.headerContent svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.closeBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background-color 0.15s;
+}
+
+.closeBtn:hover {
+    background: var(--hover-bg);
+}
+
+/* Infos contrat */
+.contratInfo {
+    padding: 1rem 1.25rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.contratHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.contratHeader svg {
+    color: var(--text-secondary);
+}
+
+.contratNom {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.contratFournisseur {
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.contratMeta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+}
+
+.contratMeta span {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+/* Choix Container */
+.choixContainer {
+    padding: 1.25rem;
+}
+
+.choixIntro {
+    margin: 0 0 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+}
+
+.actionsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.actionCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.actionCard:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.actionRenouveler:hover {
+    border-color: #059669;
+    background: rgba(5, 150, 105, 0.05);
+}
+
+.actionResilier:hover {
+    border-color: #DC2626;
+    background: rgba(220, 38, 38, 0.05);
+}
+
+.actionIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+}
+
+.actionRenouveler .actionIcon {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.actionResilier .actionIcon {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.actionContent h4 {
+    margin: 0 0 0.375rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.actionContent p {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+/* Suggestion Box */
+.suggestionBox {
+    padding: 1rem;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--radius-md);
+}
+
+.suggestionBox h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #92400E;
+}
+
+.suggestionBox ul {
+    margin: 0;
+    padding: 0 0 0 1.25rem;
+    list-style: disc;
+}
+
+.suggestionBox li {
+    margin-bottom: 0.375rem;
+    font-size: 0.8125rem;
+    color: #78350F;
+}
+
+/* Form Container */
+.formContainer {
+    padding: 1.25rem;
+}
+
+.backBtn {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.375rem 0;
+    background: none;
+    border: none;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.backBtn:hover {
+    color: var(--primary);
+}
+
+.formTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.formGroup {
+    margin-bottom: 1.25rem;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.input,
+.textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus,
+.textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.hint {
+    margin: 0.375rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+}
+
+/* Raisons Grid */
+.raisonsGrid {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.raisonOption {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.raisonOption:hover {
+    background: var(--hover-bg);
+}
+
+.raisonOption.selected {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.raisonOption input {
+    margin-top: 0.125rem;
+}
+
+.raisonOption strong {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.raisonOption span {
+    display: block;
+    margin-top: 0.125rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.checkboxLabel {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.checkboxLabel input {
+    width: 18px;
+    height: 18px;
+}
+
+/* Summary */
+.summary {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.25rem;
+}
+
+.summary h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.summary ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.summary li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.summary li svg {
+    color: var(--text-tertiary);
+}
+
+/* Warning Box */
+.warningBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.25rem;
+}
+
+.warningBox svg {
+    flex-shrink: 0;
+    color: #F59E0B;
+    margin-top: 0.125rem;
+}
+
+.warningBox p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #78350F;
+}
+
+/* Form Actions */
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+/* Dark theme */
+:global([data-theme="dark"]) .header {
+    background: rgba(251, 191, 36, 0.15);
+}
+
+:global([data-theme="dark"]) .header.urgence {
+    background: rgba(220, 38, 38, 0.15);
+}
+
+:global([data-theme="dark"]) .header.critique {
+    background: rgba(220, 38, 38, 0.2);
+}
+
+:global([data-theme="dark"]) .suggestionBox {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+:global([data-theme="dark"]) .suggestionBox h4 {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .suggestionBox li {
+    color: #FBBF24;
+}
+
+:global([data-theme="dark"]) .warningBox {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+:global([data-theme="dark"]) .warningBox p {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .actionRenouveler .actionIcon {
+    background: rgba(5, 150, 105, 0.2);
+}
+
+:global([data-theme="dark"]) .actionResilier .actionIcon {
+    background: rgba(220, 38, 38, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .modal {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .actionsGrid {
+        grid-template-columns: 1fr;
+    }
+}

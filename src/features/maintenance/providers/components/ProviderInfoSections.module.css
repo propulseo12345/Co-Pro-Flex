@@ -1,0 +1,391 @@
+.section {
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-lg, 12px);
+    padding: 1.5rem;
+}
+
+.sectionFull {
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-lg, 12px);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: var(--color-text, #111827);
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.infoGrid {
+    display: grid;
+    gap: 1rem;
+}
+
+.infoItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.infoItem svg {
+    color: var(--color-text-tertiary, #9ca3af);
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.infoItem > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.infoLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary, #9ca3af);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.infoItem a {
+    color: var(--color-primary, #3b82f6);
+    text-decoration: none;
+}
+
+.infoItem a:hover {
+    text-decoration: underline;
+}
+
+.certifications {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.certifBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    background: rgba(245, 158, 11, 0.1);
+    color: #D97706;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--color-bg-subtle, #f9fafb);
+    border-radius: var(--radius-md, 8px);
+}
+
+.statValue {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text, #111827);
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.contrats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contratCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-bg-subtle, #f9fafb);
+    border-radius: var(--radius-md, 8px);
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.contratCard:hover {
+    background: var(--color-border, #e5e7eb);
+}
+
+.contratCard svg {
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.contratInfo {
+    flex: 1;
+}
+
+.contratInfo h4 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text, #111827);
+}
+
+.contratInfo p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.contratStatus {
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.contratActif {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success, #10b981);
+}
+
+.contratRenouveler {
+    background: rgba(245, 158, 11, 0.1);
+    color: #D97706;
+}
+
+.contratResilie {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.interventionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.interventionCard {
+    padding: 1.25rem;
+    background: var(--color-bg-subtle, #f9fafb);
+    border-radius: var(--radius-md, 8px);
+    border-left: 4px solid var(--color-primary, #3b82f6);
+}
+
+.interventionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.interventionDate {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.interventionBadges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.statusBadge,
+.typeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.statusCompleted {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success, #10b981);
+}
+
+.statusInProgress {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary, #3b82f6);
+}
+
+.statusPlanned {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.typeEntretien {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+}
+
+.typeReparation {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error, #ef4444);
+}
+
+.typeAmelioration {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success, #10b981);
+}
+
+.interventionTitle {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text, #111827);
+}
+
+.interventionDesc {
+    margin: 0 0 1rem 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #6b7280);
+    line-height: 1.5;
+}
+
+.interventionFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.interventionMeta {
+    display: flex;
+    gap: 1rem;
+}
+
+.interventionMontant {
+    font-weight: 600;
+    color: var(--color-text, #111827);
+}
+
+.interventionDomaine {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.interventionActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.interventionLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-primary, #3b82f6);
+    background: none;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.interventionLink:hover {
+    background: var(--color-bg-subtle, #f9fafb);
+}
+
+.interventionComments {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.emptyState svg {
+    margin-bottom: 1rem;
+}
+
+.emptyState p {
+    margin: 0 0 1rem 0;
+}
+
+.avisList {
+    display: grid;
+    gap: 1rem;
+}
+
+.avisCard {
+    padding: 1.25rem;
+    background: var(--color-bg-subtle, #f9fafb);
+    border-radius: var(--radius-md, 8px);
+}
+
+.avisHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.avisNote {
+    display: flex;
+    gap: 0.125rem;
+}
+
+.avisDate {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.avisComment {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9375rem;
+    color: var(--color-text, #111827);
+    line-height: 1.5;
+}
+
+.avisAuteur {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #6b7280);
+    font-style: italic;
+}
+
+.notes {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--color-text, #111827);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}

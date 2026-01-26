@@ -1,0 +1,212 @@
+.tableContainer {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table thead {
+    background: var(--background);
+    border-bottom: 2px solid var(--border);
+}
+
+.table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--background);
+}
+
+.table td {
+    padding: 1rem;
+}
+
+.row.clickable {
+    cursor: pointer;
+}
+
+.row.clickable:hover {
+    background: var(--primary-light);
+}
+
+.dateCell {
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.titreCell {
+    min-width: 200px;
+}
+
+.titreWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.titre {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.description {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+
+.prestataireCell {
+    color: var(--text-main);
+    min-width: 150px;
+}
+
+.montantCell {
+    text-align: right;
+    font-weight: 500;
+    min-width: 100px;
+}
+
+.montant {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--text-main);
+}
+
+.montantInclus {
+    color: var(--text-tertiary);
+    font-style: italic;
+    font-size: 0.8125rem;
+}
+
+.statutCell {
+    min-width: 120px;
+}
+
+.statutBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.statutTerminee {
+    background: #D1FAE5;
+    color: #047857;
+}
+
+.statutEnCours {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.statutPlanifiee {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.statutAnnulee {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.iconTerminee {
+    color: #047857;
+}
+
+.iconEnCours {
+    color: #1E40AF;
+}
+
+.iconPlanifiee {
+    color: #92400E;
+}
+
+.iconAnnulee {
+    color: #6B7280;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    color: var(--text-tertiary);
+    text-align: center;
+    gap: 1rem;
+}
+
+.emptyState svg {
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .statutTerminee {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6EE7B7;
+}
+
+[data-theme="dark"] .statutEnCours {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
+}
+
+[data-theme="dark"] .statutPlanifiee {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+[data-theme="dark"] .statutAnnulee {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9CA3AF;
+}
+
+[data-theme="dark"] .iconTerminee {
+    color: #6EE7B7;
+}
+
+[data-theme="dark"] .iconEnCours {
+    color: #93C5FD;
+}
+
+[data-theme="dark"] .iconPlanifiee {
+    color: #FCD34D;
+}
+
+[data-theme="dark"] .iconAnnulee {
+    color: #9CA3AF;
+}

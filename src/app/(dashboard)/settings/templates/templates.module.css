@@ -1,0 +1,505 @@
+/* ============================================
+   PAGE TEMPLATES DE PV
+   ============================================ */
+
+.container {
+    padding: var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Loading */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-4xl);
+    color: var(--text-secondary);
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-xl);
+    gap: var(--space-lg);
+}
+
+.headerLeft {
+    flex: 1;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 var(--space-xs);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* Buttons */
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btnPrimary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--surface);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btnSecondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-hover);
+}
+
+.btnDanger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btnDanger:hover {
+    background: var(--danger-hover);
+}
+
+.btnIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btnIcon:hover {
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+/* Error Banner */
+.errorBanner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--danger-light);
+    color: var(--danger);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    font-size: 0.875rem;
+}
+
+/* Template Grid */
+.templateGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* Template Card */
+.templateCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.templateCard:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.defaultCard {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.systemCard {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-secondary) 100%);
+}
+
+/* Card Badges */
+.cardBadges {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.badgeSystem,
+.badgeDefault,
+.badgeDraft {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badgeSystem {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.badgeDefault {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.badgeDraft {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+/* Card Content */
+.cardContent {
+    padding: var(--space-lg);
+    padding-top: var(--space-xl);
+    flex: 1;
+}
+
+.cardTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-xs);
+}
+
+.cardDescription {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-md);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cardMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-md);
+}
+
+/* Card Validation */
+.cardValidation {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+}
+
+.validationValid {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.validationWarning {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.validationError {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+/* Card Actions */
+.cardActions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+    gap: var(--space-xs);
+}
+
+/* Menu Container */
+.menuContainer {
+    position: relative;
+}
+
+.menu {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.menu button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: none;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu button:hover {
+    background: var(--bg-secondary);
+}
+
+.menu button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.menu hr {
+    margin: var(--space-xs) 0;
+    border: none;
+    border-top: 1px solid var(--border);
+}
+
+.menuDanger {
+    color: var(--danger) !important;
+}
+
+.menuDanger:hover {
+    background: var(--danger-light) !important;
+}
+
+.menuBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+}
+
+/* New Template Card */
+.newTemplateCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    min-height: 200px;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.newTemplateCard:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.newTemplateCard span {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+}
+
+.modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-lg);
+}
+
+.modal p {
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-lg);
+    line-height: 1.5;
+}
+
+.formGroup {
+    margin-bottom: var(--space-lg);
+}
+
+.formGroup label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: var(--space-xs);
+}
+
+.formGroup input,
+.formGroup textarea {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--text-main);
+    background: var(--surface);
+    transition: border-color var(--transition-base);
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.codeInput {
+    font-family: monospace;
+    font-size: 0.8rem !important;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}
+
+/* Dark Mode */
+:global([data-theme="dark"]) .templateCard {
+    background: var(--surface);
+}
+
+:global([data-theme="dark"]) .systemCard {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,255,255,0.05) 100%);
+}
+
+:global([data-theme="dark"]) .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--space-md);
+    }
+
+    .header {
+        flex-direction: column;
+    }
+
+    .headerActions {
+        width: 100%;
+    }
+
+    .headerActions button {
+        flex: 1;
+    }
+
+    .templateGrid {
+        grid-template-columns: 1fr;
+    }
+}

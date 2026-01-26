@@ -1,0 +1,468 @@
+/* ===== DesignationMultiplePanel Styles ===== */
+
+.container {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.header h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.compteur {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.compteur .ok {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.compteur .warning {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.compteur .max {
+  color: var(--text-tertiary);
+}
+
+/* ===== Start Panel ===== */
+.startPanel {
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.startPanel p {
+  margin: 0 0 var(--space-md);
+  color: var(--text-secondary);
+}
+
+/* ===== Navigation des sous-résolutions ===== */
+.sousResolutionNav {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  min-width: 60px;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.navItem:hover {
+  border-color: var(--primary-light);
+}
+
+.navItem.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.navItem.votee {
+  opacity: 0.8;
+}
+
+.navNumero {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+}
+
+.navNom {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.iconOk {
+  color: var(--success);
+}
+
+.iconKo {
+  color: var(--danger);
+}
+
+.navItemAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--border);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.navItemAdd:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+/* ===== Panel courant ===== */
+.currentPanel {
+  padding: var(--space-md);
+}
+
+.resolutionHeader {
+  margin-bottom: var(--space-md);
+}
+
+.numero {
+  font-size: var(--text-sm);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.resolutionHeader h3 {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-base);
+  color: var(--text-main);
+}
+
+/* ===== Section vote ===== */
+.voteSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.selectionSection {
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.sectionLabel {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.voteButtons {
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.voteQuestion {
+  margin: 0 0 var(--space-md);
+  color: var(--text-main);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+}
+
+.voteAdopte {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--success);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.voteAdopte:hover:not(:disabled) {
+  background: var(--success-dark);
+}
+
+.voteAdopte:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.voteRejete {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.voteRejete:hover:not(:disabled) {
+  background: var(--danger-dark);
+}
+
+.voteRejete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Résultat ===== */
+.resultatSection {
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.resultatBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+
+.resultatBadge.adopte {
+  background: var(--success-light);
+  color: var(--success-dark);
+}
+
+.resultatBadge.rejete {
+  background: var(--danger-light);
+  color: var(--danger-dark);
+}
+
+.designeInfo {
+  margin: var(--space-md) 0;
+  color: var(--text-main);
+}
+
+.votesDetail {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.pour {
+  color: var(--success);
+}
+
+.contre {
+  color: var(--danger);
+}
+
+.abstention {
+  color: var(--warning);
+}
+
+/* ===== Liste des désignés ===== */
+.designeesList {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+.designeesList h4 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.designeesList ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.designeesList li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--success-light);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.designeeNumero {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.designeeNom {
+  color: var(--text-main);
+}
+
+/* ===== Footer ===== */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.warningMsg {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--warning);
+  font-size: var(--text-sm);
+}
+
+.footerActions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.primaryBtn:hover {
+  background: var(--primary-dark);
+}
+
+.secondaryBtn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.secondaryBtn:hover {
+  background: var(--bg-tertiary);
+}
+
+/* ===== Dark Mode ===== */
+
+:global([data-theme="dark"]) .container {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .header {
+  background: var(--bg-tertiary);
+}
+
+:global([data-theme="dark"]) .navItem {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .navItem.active {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: var(--primary);
+}
+
+:global([data-theme="dark"]) .resultatBadge.adopte {
+  background: rgba(52, 211, 153, 0.2);
+  color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .resultatBadge.rejete {
+  background: rgba(248, 113, 113, 0.2);
+  color: #FCA5A5;
+}
+
+:global([data-theme="dark"]) .designeesList li {
+  background: rgba(52, 211, 153, 0.2);
+}
+
+:global([data-theme="dark"]) .designeeNumero {
+  color: #6EE7B7;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: flex-start;
+  }
+
+  .sousResolutionNav {
+    padding: var(--space-sm);
+  }
+
+  .navItem {
+    min-width: 50px;
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+  }
+
+  .footerActions {
+    flex-direction: column;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

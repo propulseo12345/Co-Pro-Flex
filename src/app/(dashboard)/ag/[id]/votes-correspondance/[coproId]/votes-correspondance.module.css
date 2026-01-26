@@ -1,0 +1,276 @@
+.header {
+    margin-bottom: var(--space-2xl);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-sm);
+    margin-left: calc(var(--space-sm) * -1);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    margin-bottom: var(--space-md);
+}
+
+.backButton:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin: var(--space-xs) 0 0 0;
+}
+
+/* Progression */
+.progressCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.progressHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.progressLabel {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.progressValue {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.progressBar {
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-sm);
+}
+
+.progressFill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-base);
+}
+
+.progressPercentage {
+    text-align: right;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Banners */
+.valideBanner,
+.savedBanner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-xl);
+}
+
+.valideBanner {
+    background: var(--success-light);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.savedBanner {
+    background: var(--primary-light);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+/* Liste des résolutions */
+.resolutionsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.resolutionCard {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    transition: all var(--transition-base);
+}
+
+.resolutionVoted {
+    border-color: var(--success);
+    background: var(--success-light);
+}
+
+.resolutionHeader {
+    margin-bottom: var(--space-md);
+}
+
+.resolutionNumber {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+    padding: var(--space-xs) var(--space-md);
+    background: var(--primary-light);
+    border-radius: var(--radius-full);
+}
+
+.checkIcon {
+    color: var(--success);
+}
+
+.resolutionTitle {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-md) 0;
+}
+
+.resolutionText {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--space-xl) 0;
+    white-space: pre-wrap;
+}
+
+/* Boutons de vote */
+.voteButtons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+.voteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    font-size: var(--text-base);
+    font-weight: 600;
+    border: 2px solid;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.votePour {
+    background: var(--surface);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.votePour:hover:not(:disabled) {
+    background: var(--success);
+    color: white;
+}
+
+.votePour.voteButtonActive {
+    background: var(--success);
+    color: white;
+}
+
+.voteContre {
+    background: var(--surface);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.voteContre:hover:not(:disabled) {
+    background: var(--danger);
+    color: white;
+}
+
+.voteContre.voteButtonActive {
+    background: var(--danger);
+    color: white;
+}
+
+.voteAbstention {
+    background: var(--surface);
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+.voteAbstention:hover:not(:disabled) {
+    background: var(--text-secondary);
+    color: white;
+}
+
+.voteAbstention.voteButtonActive {
+    background: var(--text-secondary);
+    color: white;
+}
+
+.voteButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.voteDate {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    padding: var(--space-xl);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    position: sticky;
+    bottom: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+    .voteButtons {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+}

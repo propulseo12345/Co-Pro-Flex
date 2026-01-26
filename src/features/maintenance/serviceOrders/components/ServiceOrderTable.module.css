@@ -1,0 +1,266 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.table th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--color-text-secondary, #6b7280);
+    background: var(--color-bg-subtle, #f9fafb);
+}
+
+.row {
+    transition: background 0.2s;
+}
+
+.row:hover {
+    background: var(--color-bg-subtle, #f9fafb);
+}
+
+.textRight {
+    text-align: right;
+}
+
+.textCenter {
+    text-align: center;
+}
+
+.typeBadge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm, 4px);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.typeClassique {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary, #3b82f6);
+}
+
+.typeContractuel {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.titleCell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.titre {
+    font-weight: 500;
+    color: var(--color-text, #111827);
+}
+
+.contratBadge {
+    font-size: 0.6875rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.noFacture {
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.factureCell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.factureLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-primary, #3b82f6);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.factureLink:hover {
+    text-decoration: underline;
+}
+
+.factureEcart {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
+}
+
+.ecartPositif {
+    color: var(--color-error, #ef4444);
+}
+
+.ecartNegatif {
+    color: var(--color-success, #10b981);
+}
+
+.ecartAlerte {
+    font-weight: 600;
+}
+
+.factureStatut {
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+.statutPayee {
+    color: var(--color-success, #10b981);
+}
+
+.statutAPayer {
+    color: #f59e0b;
+}
+
+.statutEnCours {
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    color: var(--color-text-secondary, #6b7280);
+    transition: background 0.2s, color 0.2s;
+}
+
+.iconButton:hover {
+    background: var(--color-bg-subtle, #f9fafb);
+    color: var(--color-primary, #3b82f6);
+}
+
+.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error, #ef4444);
+    border-color: var(--color-error, #ef4444);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--color-text-tertiary, #9ca3af);
+}
+
+.emptyState svg {
+    margin-bottom: 1rem;
+}
+
+.emptyState p {
+    margin-bottom: 1rem;
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .table th,
+:global([data-theme="dark"]) .table td {
+    border-bottom-color: var(--border, #334155);
+}
+
+:global([data-theme="dark"]) .table th {
+    color: var(--text-secondary, #94A3B8);
+    background: var(--bg-secondary, #1A1F2E);
+}
+
+:global([data-theme="dark"]) .row:hover {
+    background: var(--surface-hover, #2D3748);
+}
+
+:global([data-theme="dark"]) .typeBadge {
+    border: 1px solid transparent;
+}
+
+:global([data-theme="dark"]) .typeClassique {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60A5FA;
+}
+
+:global([data-theme="dark"]) .typeContractuel {
+    background: rgba(139, 92, 246, 0.15);
+    color: #A78BFA;
+}
+
+:global([data-theme="dark"]) .titre {
+    color: var(--text-main, #F1F5F9);
+}
+
+:global([data-theme="dark"]) .contratBadge {
+    color: var(--text-tertiary, #64748B);
+}
+
+:global([data-theme="dark"]) .noFacture {
+    color: var(--text-tertiary, #64748B);
+}
+
+:global([data-theme="dark"]) .factureLink {
+    color: var(--primary, #34D399);
+}
+
+:global([data-theme="dark"]) .factureLink:hover {
+    color: var(--primary-dark, #6EE7B7);
+}
+
+:global([data-theme="dark"]) .ecartPositif {
+    color: #F87171;
+}
+
+:global([data-theme="dark"]) .ecartNegatif {
+    color: #34D399;
+}
+
+:global([data-theme="dark"]) .statutPayee {
+    color: #34D399;
+}
+
+:global([data-theme="dark"]) .statutAPayer {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .statutEnCours {
+    color: var(--text-secondary, #94A3B8);
+}
+
+:global([data-theme="dark"]) .iconButton {
+    border-color: var(--border, #334155);
+    color: var(--text-secondary, #94A3B8);
+}
+
+:global([data-theme="dark"]) .iconButton:hover {
+    background: var(--surface-hover, #2D3748);
+    color: var(--primary, #34D399);
+    border-color: var(--primary, #34D399);
+}
+
+:global([data-theme="dark"]) .danger:hover {
+    background: rgba(248, 113, 113, 0.15);
+    color: #F87171;
+    border-color: rgba(248, 113, 113, 0.5);
+}
+
+:global([data-theme="dark"]) .emptyState {
+    color: var(--text-tertiary, #64748B);
+}

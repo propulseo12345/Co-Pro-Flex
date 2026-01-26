@@ -1,0 +1,125 @@
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.toolbar {
+    margin-bottom: 1.5rem;
+}
+
+.searchWrapper {
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.conversationList {
+    display: flex;
+    flex-direction: column;
+}
+
+.conversationItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.conversationItem:last-child {
+    border-bottom: none;
+}
+
+.conversationItem:hover {
+    background-color: #F9FAFB;
+}
+
+.unread {
+    background-color: #F0F9FF;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    background-color: #E5E7EB;
+    color: #6B7280;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conversationContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.conversationHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.participants {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.lastMessage {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unread .lastMessage {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.unreadDot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary);
+    border-radius: 50%;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}

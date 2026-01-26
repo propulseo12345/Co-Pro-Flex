@@ -1,0 +1,194 @@
+/* === Item standard === */
+.item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    background-color: var(--color-bg-secondary, #f9fafb);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 0.5rem;
+    transition: all 150ms;
+}
+
+.item:hover {
+    background-color: var(--color-bg-hover, #f3f4f6);
+    border-color: var(--color-border-hover, #d1d5db);
+}
+
+/* Icône type */
+.iconeWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+.typePdf {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.typeImage {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+.typeAutre {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Infos */
+.infos {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.nom {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-text-primary, #111827);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meta {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btnAction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    border-radius: 0.375rem;
+    color: var(--color-text-secondary, #6b7280);
+    cursor: pointer;
+    transition: all 150ms;
+    text-decoration: none;
+}
+
+.btnAction:hover:not(:disabled) {
+    background-color: var(--color-bg-hover, #e5e7eb);
+    color: var(--color-text-primary, #374151);
+}
+
+.btnAction:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnDanger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.btnDanger:hover {
+    background-color: #fecaca;
+    color: #b91c1c;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* === Item compact === */
+.itemCompact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    background-color: var(--color-bg-secondary, #f3f4f6);
+    border-radius: 0.375rem;
+}
+
+.lienCompact {
+    background: none;
+    border: none;
+    font-size: 0.8125rem;
+    color: var(--color-primary, #3b82f6);
+    cursor: pointer;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.lienCompact:hover {
+    text-decoration: underline;
+}
+
+.btnIcone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary, #6b7280);
+    cursor: pointer;
+}
+
+.btnIcone:hover {
+    color: var(--color-text-primary, #374151);
+}
+
+.btnIcone:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Dark mode */
+:global([data-theme='dark']) .item {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+}
+
+:global([data-theme='dark']) .item:hover {
+    background-color: var(--color-bg-hover);
+}
+
+:global([data-theme='dark']) .typePdf {
+    background-color: rgba(220, 38, 38, 0.15);
+}
+
+:global([data-theme='dark']) .typeImage {
+    background-color: rgba(37, 99, 235, 0.15);
+}
+
+:global([data-theme='dark']) .typeAutre {
+    background-color: rgba(107, 114, 128, 0.15);
+}
+
+:global([data-theme='dark']) .itemCompact {
+    background-color: var(--color-bg-secondary);
+}
+
+:global([data-theme='dark']) .btnAction:hover:not(:disabled) {
+    background-color: var(--color-bg-hover);
+}

@@ -1,0 +1,174 @@
+.card {
+  display: block;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.lotInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lotIcon {
+  color: var(--color-primary-500);
+}
+
+.lotRef {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.lotType {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.parties {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.party {
+  flex: 1;
+}
+
+.partyLabel {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.partyName {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.partyName svg {
+  color: var(--color-text-tertiary);
+}
+
+.arrow {
+  color: var(--color-text-tertiary);
+  font-size: 1.25rem;
+}
+
+.meta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.metaItem svg {
+  color: var(--color-text-tertiary);
+}
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.alertError {
+  background: var(--color-error-50, #fee2e2);
+  color: var(--color-error-700, #991b1b);
+}
+
+.alertWarning {
+  background: var(--color-warning-50, #fef3c7);
+  color: var(--color-warning-700, #92400e);
+}
+
+.alertInfo {
+  background: var(--color-info-50, #dbeafe);
+  color: var(--color-info-700, #1d4ed8);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.viewLink {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-primary-600);
+}
+
+/* Dark mode */
+[data-theme="dark"] .alertError {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .alertWarning {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .alertInfo {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}

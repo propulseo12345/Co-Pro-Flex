@@ -1,0 +1,115 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+/* Tooltip personnalisé */
+.tooltip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+
+.tooltipColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltipLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.tooltipValue {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.tooltipPercent {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+/* Légende */
+.legendItem {
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  transition: all var(--transition-base);
+}
+
+.legendItem:hover {
+  color: var(--primary);
+}
+
+/* Infos du poste sélectionné */
+.selectedInfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  margin-top: var(--space-md);
+}
+
+.selectedInfo strong {
+  font-weight: 600;
+}
+
+/* Instructions */
+.instructions {
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-sm);
+}
+
+/* État vide */
+.noData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  color: var(--text-tertiary);
+}
+
+/* Animation du graphique */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.container :global(.recharts-pie) {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .tooltip {
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}

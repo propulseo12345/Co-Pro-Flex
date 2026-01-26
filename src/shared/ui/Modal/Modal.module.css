@@ -1,0 +1,242 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn var(--transition-fast) ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  position: relative;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2 * var(--space-md));
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  animation: slideIn var(--transition-base) ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Sizes */
+.sm {
+  width: 100%;
+  max-width: 400px;
+}
+
+.md {
+  width: 100%;
+  max-width: 560px;
+}
+
+.lg {
+  width: 100%;
+  max-width: 720px;
+}
+
+.xl {
+  width: 100%;
+  max-width: 960px;
+}
+
+.full {
+  width: calc(100vw - 2 * var(--space-md));
+  max-width: none;
+  height: calc(100vh - 2 * var(--space-md));
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.closeButton:hover {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+/* Footer */
+.footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.alignLeft {
+  justify-content: flex-start;
+}
+
+.alignCenter {
+  justify-content: center;
+}
+
+.alignRight {
+  justify-content: flex-end;
+}
+
+.alignBetween {
+  justify-content: space-between;
+}
+
+/* Confirm modal */
+.confirmMessage {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.cancelButton {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-dark);
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmButton {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmButton.danger {
+  background: var(--danger);
+}
+
+.confirmButton.danger:hover:not(:disabled) {
+  background: var(--red-600);
+}
+
+.confirmButton.warning {
+  background: var(--warning);
+  color: var(--text-main);
+}
+
+.confirmButton.warning:hover:not(:disabled) {
+  background: var(--amber-600);
+}
+
+.confirmButton.info {
+  background: var(--info);
+}
+
+.confirmButton.info:hover:not(:disabled) {
+  background: var(--blue-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .overlay {
+    padding: var(--space-sm);
+  }
+
+  .modal {
+    max-height: calc(100vh - 2 * var(--space-sm));
+  }
+
+  .sm,
+  .md,
+  .lg,
+  .xl {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+:global([data-theme="dark"]) .closeButton:hover {
+  background: var(--surface-hover);
+}

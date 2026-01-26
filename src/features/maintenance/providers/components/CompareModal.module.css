@@ -1,0 +1,134 @@
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+}
+
+.modal {
+    background: var(--color-surface, #ffffff);
+    border-radius: var(--radius-lg, 12px);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalLarge {
+    max-width: 900px;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.modalHeader h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modalClose {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary, #6b7280);
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compareTable {
+    overflow-x: auto;
+    padding: 1.5rem;
+}
+
+.compareTable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.compareTable th,
+.compareTable td {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.compareTable th:first-child,
+.compareTable td:first-child {
+    font-weight: 500;
+    color: var(--color-text-secondary, #6b7280);
+    width: 160px;
+}
+
+.compareTable td:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compareTable td:first-child svg {
+    flex-shrink: 0;
+}
+
+.compareHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.compareHeader span:first-child {
+    font-weight: 600;
+    color: var(--color-text, #111827);
+}
+
+.labelBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+.compareValue {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.noteHighlight {
+    font-weight: 600;
+    color: #F59E0B;
+}
+
+.avisCount {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+}

@@ -1,0 +1,185 @@
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.header {
+  padding: 12px 16px;
+  background: var(--color-gray-50);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-gray-700);
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.sortableHeader {
+  padding: 0;
+  background: var(--color-gray-50);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.headerButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.headerButton:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-900);
+}
+
+.sortableHeader.active .headerButton {
+  color: var(--color-primary-700);
+  background: var(--color-primary-50);
+}
+
+.headerLabel {
+  flex: 1;
+  text-align: inherit;
+}
+
+.sortIcon {
+  display: flex;
+  align-items: center;
+  color: var(--color-gray-400);
+  transition: color 0.15s ease;
+}
+
+.sortableHeader.active .sortIcon {
+  color: var(--color-primary-600);
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignLeft .headerButton {
+  justify-content: flex-start;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignCenter .headerButton {
+  justify-content: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignRight .headerButton {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+.row {
+  transition: background 0.15s ease;
+}
+
+.row:hover {
+  background: var(--color-gray-50);
+}
+
+.row.clickable {
+  cursor: pointer;
+}
+
+.row.clickable:hover {
+  background: var(--color-primary-50);
+}
+
+.cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-gray-100);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-900);
+}
+
+.emptyCell {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--color-gray-500);
+  font-size: var(--font-size-base);
+}
+
+/* Sort indicators */
+.indicatorActive {
+  color: var(--color-primary-600);
+}
+
+.indicatorInactive {
+  color: var(--color-gray-400);
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .header,
+:global([data-theme="dark"]) .sortableHeader {
+  background: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+}
+
+:global([data-theme="dark"]) .headerButton {
+  color: var(--color-gray-300);
+}
+
+:global([data-theme="dark"]) .headerButton:hover {
+  background: var(--color-gray-700);
+  color: var(--color-gray-100);
+}
+
+:global([data-theme="dark"]) .sortableHeader.active .headerButton {
+  color: var(--color-primary-400);
+  background: rgba(59, 130, 246, 0.2);
+}
+
+:global([data-theme="dark"]) .sortIcon {
+  color: var(--color-gray-600);
+}
+
+:global([data-theme="dark"]) .sortableHeader.active .sortIcon {
+  color: var(--color-primary-400);
+}
+
+:global([data-theme="dark"]) .row:hover {
+  background: var(--color-gray-800);
+}
+
+:global([data-theme="dark"]) .row.clickable:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+:global([data-theme="dark"]) .cell {
+  border-color: var(--color-gray-800);
+  color: var(--color-gray-100);
+}
+
+:global([data-theme="dark"]) .emptyCell {
+  color: var(--color-gray-500);
+}
+
+:global([data-theme="dark"]) .indicatorActive {
+  color: var(--color-primary-400);
+}
+
+:global([data-theme="dark"]) .indicatorInactive {
+  color: var(--color-gray-600);
+}

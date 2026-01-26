@@ -1,0 +1,116 @@
+.container {
+  width: 100%;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: var(--space-xl);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.dropzone:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.dropzone:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.dropzone.dragging {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  border-style: solid;
+}
+
+.dropzone.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dropzone.hasError {
+  border-color: var(--danger);
+}
+
+.input {
+  display: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.icon {
+  color: var(--text-tertiary);
+  transition: color var(--transition-base);
+}
+
+.dropzone:hover:not(.disabled) .icon {
+  color: var(--primary);
+}
+
+.iconActive {
+  color: var(--primary);
+  animation: bounce 0.5s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.text {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.textSecondary {
+  color: var(--text-tertiary);
+}
+
+.textActive {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.formats {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--danger-bg);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--danger);
+  white-space: pre-line;
+}
+
+.error svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

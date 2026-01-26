@@ -1,0 +1,228 @@
+.item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+
+.item:hover {
+    border-color: var(--primary-light);
+}
+
+.item.dragging {
+    opacity: 0.5;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 40px 50px 1fr auto 120px 100px 70px 40px;
+    align-items: center;
+    padding: var(--space-md) var(--space-sm);
+    cursor: pointer;
+    transition: background var(--transition-base);
+    gap: var(--space-sm);
+}
+
+.row:hover {
+    background: var(--bg-secondary);
+}
+
+/* Handle de drag */
+.dragHandle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--text-secondary);
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.dragHandle:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.dragHandle:active {
+    cursor: grabbing;
+}
+
+/* Numéro */
+.number {
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    font-size: var(--text-base);
+}
+
+/* Titre */
+.title {
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Catégorie (thème) */
+.categorie {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+}
+
+/* Majorité */
+.majority {
+    text-align: center;
+}
+
+.majorityBadge {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+/* Statut */
+.status {
+    text-align: center;
+}
+
+.statusComplete {
+    color: var(--success);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.statusIncomplete {
+    color: var(--warning);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+/* Boutons de réordonnancement */
+.reorderButtons {
+    display: flex;
+    gap: 2px;
+}
+
+.reorderBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-base);
+}
+
+.reorderBtn:hover:not(:disabled) {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.reorderBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Expand toggle */
+.expandToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+/* Contenu étendu */
+.expandedContent {
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+}
+
+.resolutionText {
+    line-height: 1.8;
+    font-size: var(--text-base);
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.expandedActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+}
+
+.deleteBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--danger-light);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--danger);
+    font-size: var(--text-sm);
+    transition: all var(--transition-base);
+}
+
+.deleteBtn:hover {
+    background: var(--danger-light);
+}
+
+/* Dark mode overrides */
+:global([data-theme="dark"]) .majorityBadge {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
+}
+
+:global([data-theme="dark"]) .statusComplete {
+    color: #6EE7B7;
+}
+
+:global([data-theme="dark"]) .statusIncomplete {
+    color: #FCD34D;
+}
+
+:global([data-theme="dark"]) .categorie {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .row {
+        grid-template-columns: 36px 40px 1fr 100px 80px 60px 36px;
+    }
+
+    .categorie {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .row {
+        grid-template-columns: 36px 36px 1fr 60px 36px;
+    }
+
+    .majority,
+    .status {
+        display: none;
+    }
+}

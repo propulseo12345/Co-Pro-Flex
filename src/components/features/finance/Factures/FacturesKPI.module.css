@@ -1,0 +1,300 @@
+/* Wrapper global */
+.kpiWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+/* Ligne principale - 4 grandes cartes */
+.kpiMainRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+}
+
+/* Ligne secondaire - workflow horizontal */
+.kpiSecondaryRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+/* Carte KPI large */
+.kpiCard {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-align: left;
+    width: 100%;
+}
+
+.kpiCard:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.kpiCardActive {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.kpiCardLarge {
+    min-height: 100px;
+}
+
+/* Variantes de couleur */
+.kpiCardPrimary {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--surface) 100%);
+    border-color: var(--primary);
+}
+
+.kpiCardPrimary .kpiIcon {
+    background: var(--primary);
+    color: white;
+}
+
+.kpiCardDanger {
+    background: linear-gradient(135deg, var(--danger-light) 0%, var(--surface) 100%);
+    border-color: var(--danger);
+}
+
+.kpiCardDanger .kpiIcon {
+    background: var(--danger);
+    color: white;
+    animation: pulseIcon 2s ease-in-out infinite;
+}
+
+.kpiCardWarning {
+    background: linear-gradient(135deg, var(--warning-light) 0%, var(--surface) 100%);
+    border-color: var(--warning);
+}
+
+.kpiCardWarning .kpiIcon {
+    background: var(--warning);
+    color: white;
+}
+
+/* Icône KPI */
+.kpiIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    transition: all var(--transition-base);
+}
+
+/* Contenu KPI */
+.kpiContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.kpiLabel {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.kpiValue {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.kpiValueDanger {
+    color: var(--danger);
+}
+
+.kpiSubtext {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.kpiSubtextDanger {
+    font-size: var(--text-xs);
+    color: var(--danger);
+    font-weight: 500;
+}
+
+.kpiSubtextWarning {
+    font-size: var(--text-xs);
+    color: var(--warning-dark, #b45309);
+    font-weight: 500;
+}
+
+.kpiSubtextSuccess {
+    font-size: var(--text-xs);
+    color: var(--success);
+    font-weight: 500;
+}
+
+/* Cartes workflow (petites) */
+.kpiCardSmall {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.kpiCardSmall:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.kpiCardSmallActive {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}
+
+.kpiCardSmallActive .kpiSmallLabel,
+.kpiCardSmallActive .kpiSmallValue {
+    color: white;
+}
+
+.kpiCardSmallInfo {
+    border-color: var(--info);
+    background: var(--info-light);
+}
+
+.kpiCardSmallInfo:hover {
+    background: var(--info);
+    color: white;
+}
+
+.kpiCardSmallSuccess {
+    border-color: var(--success);
+    background: var(--success-light);
+}
+
+.kpiCardSmallSuccess .kpiSmallValue {
+    color: var(--success);
+}
+
+.kpiSmallLabel {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.kpiSmallValue {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Flèches de workflow */
+.kpiArrow {
+    color: var(--text-tertiary);
+    font-size: var(--text-lg);
+    flex-shrink: 0;
+}
+
+/* Total */
+.kpiTotal {
+    margin-left: auto;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Animation pulse pour les alertes */
+@keyframes pulseIcon {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .kpiMainRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .kpiMainRow {
+        grid-template-columns: 1fr;
+    }
+
+    .kpiSecondaryRow {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .kpiArrow {
+        display: none;
+    }
+
+    .kpiTotal {
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+        margin-top: var(--space-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .kpiCard {
+        padding: var(--space-md);
+    }
+
+    .kpiIcon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .kpiValue {
+        font-size: var(--text-xl);
+    }
+}
+
+/* Dark mode */
+[data-theme="dark"] .kpiCardPrimary {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, var(--surface) 100%);
+}
+
+[data-theme="dark"] .kpiCardDanger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, var(--surface) 100%);
+}
+
+[data-theme="dark"] .kpiCardWarning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, var(--surface) 100%);
+}

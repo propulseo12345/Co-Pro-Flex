@@ -1,0 +1,113 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.container {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 3px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-tertiary);
+}
+
+/* Tableau enfant */
+.container table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Indicateurs de scroll */
+.indicateur {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--text-main);
+}
+
+.indicateur:hover {
+  background-color: var(--bg-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+.indicateur:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.indicateurGauche {
+  left: 4px;
+}
+
+.indicateurDroite {
+  right: 4px;
+}
+
+/* Ombres de défilement */
+.ombreDroite,
+.ombreGauche {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.ombreDroite {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
+}
+
+.ombreGauche {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .indicateur {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .ombreDroite {
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.15), transparent);
+}
+
+:global([data-theme="dark"]) .ombreGauche {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.15), transparent);
+}

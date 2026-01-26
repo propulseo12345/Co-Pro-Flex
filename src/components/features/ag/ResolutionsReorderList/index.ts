@@ -1,0 +1,1 @@
+export { ResolutionsReorderList } from './ResolutionsReorderList';

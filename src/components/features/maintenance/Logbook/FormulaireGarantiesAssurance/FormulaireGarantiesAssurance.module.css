@@ -1,0 +1,289 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Résumé */
+.resume {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-primary-50, #eff6ff);
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--color-primary-200, #bfdbfe);
+}
+
+.resumeCount {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary-600, #2563eb);
+}
+
+.resumeLabel {
+  font-size: 0.875rem;
+  color: var(--color-primary-700, #1d4ed8);
+}
+
+/* Catégorie */
+.categorie {
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  overflow: hidden;
+}
+
+.categorieHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-bg-secondary, #f9fafb);
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.categorieHeader:hover {
+  background-color: var(--color-bg-tertiary, #f3f4f6);
+}
+
+.categorieTitre {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-text-primary, #111827);
+}
+
+.categorieCount {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+  background-color: var(--color-bg-primary, #fff);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Liste de garanties */
+.garantiesListe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: var(--color-bg-primary, #fff);
+}
+
+/* Chip garantie */
+.garantieChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--color-bg-secondary, #f9fafb);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.garantieChip:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary, #f3f4f6);
+  border-color: var(--color-border-hover, #d1d5db);
+}
+
+.garantieChip:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.garantieChipActive {
+  background-color: var(--color-primary-100, #dbeafe);
+  border-color: var(--color-primary-300, #93c5fd);
+  color: var(--color-primary-700, #1d4ed8);
+}
+
+.garantieChipActive:hover:not(:disabled) {
+  background-color: var(--color-primary-200, #bfdbfe);
+}
+
+/* Garantie personnalisée */
+.garantiePersonnalisee {
+  background-color: var(--color-success-50, #f0fdf4);
+  border-color: var(--color-success-300, #86efac);
+  color: var(--color-success-700, #15803d);
+}
+
+.garantiePersonnalisee:hover:not(:disabled) {
+  background-color: var(--color-success-100, #dcfce7);
+}
+
+.btnSupprimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 150ms;
+}
+
+.btnSupprimer:hover {
+  opacity: 1;
+}
+
+/* Ajout personnalisée */
+.ajoutPersonnalisee {
+  padding-top: 0.5rem;
+}
+
+.btnAjouterPersonnalisee {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px dashed var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.btnAjouterPersonnalisee:hover {
+  border-color: var(--color-primary-400, #60a5fa);
+  color: var(--color-primary-600, #2563eb);
+  background-color: var(--color-primary-50, #eff6ff);
+}
+
+/* Formulaire d'ajout */
+.formulaireAjout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inputAjout {
+  flex: 1;
+  max-width: 250px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.875rem;
+}
+
+.inputAjout:focus {
+  outline: none;
+  border-color: var(--color-primary-400, #60a5fa);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btnValider,
+.btnAnnuler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.btnValider {
+  background-color: var(--color-success-500, #22c55e);
+  color: white;
+}
+
+.btnValider:hover:not(:disabled) {
+  background-color: var(--color-success-600, #16a34a);
+}
+
+.btnValider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnAnnuler {
+  background-color: var(--color-bg-secondary, #f9fafb);
+  color: var(--color-text-muted, #6b7280);
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.btnAnnuler:hover {
+  background-color: var(--color-error-50, #fef2f2);
+  color: var(--color-error-600, #dc2626);
+  border-color: var(--color-error-300, #fca5a5);
+}
+
+/* Dark mode */
+:global([data-theme='dark']) .resume {
+  background-color: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+:global([data-theme='dark']) .resumeCount {
+  color: var(--color-primary-400, #60a5fa);
+}
+
+:global([data-theme='dark']) .resumeLabel {
+  color: var(--color-primary-300, #93c5fd);
+}
+
+:global([data-theme='dark']) .categorieHeader {
+  background-color: var(--color-bg-secondary);
+}
+
+:global([data-theme='dark']) .categorieHeader:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+:global([data-theme='dark']) .garantieChip {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+}
+
+:global([data-theme='dark']) .garantieChipActive {
+  background-color: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: var(--color-primary-300);
+}
+
+:global([data-theme='dark']) .garantiePersonnalisee {
+  background-color: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: var(--color-success-400);
+}
+
+:global([data-theme='dark']) .inputAjout {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .garantiesListe {
+    gap: 0.375rem;
+  }
+
+  .garantieChip {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .formulaireAjout {
+    flex-wrap: wrap;
+  }
+
+  .inputAjout {
+    max-width: none;
+    width: 100%;
+  }
+}

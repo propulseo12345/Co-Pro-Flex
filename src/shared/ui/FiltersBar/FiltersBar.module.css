@@ -1,0 +1,224 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* Search */
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  background: var(--surface);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.clearButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clearButton:hover {
+  background: var(--border);
+  color: var(--text-main);
+}
+
+/* Date Presets */
+.datePresetWrapper {
+  position: relative;
+}
+
+.datePresetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.datePresetButton:hover {
+  border-color: var(--border-dark);
+  background: var(--surface-hover);
+}
+
+.datePresetButton.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.datePresetButton svg:last-child {
+  transition: transform var(--transition-fast);
+}
+
+.rotated {
+  transform: rotate(180deg);
+}
+
+.datePresetMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: var(--z-dropdown);
+  min-width: 160px;
+  padding: var(--space-xs);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.datePresetOption {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.datePresetOption:hover {
+  background: var(--bg-secondary);
+}
+
+.datePresetOption.selected {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+/* Chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 8px 4px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+}
+
+.chipLabel {
+  color: var(--text-secondary);
+}
+
+.chipValue {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.chipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chipRemove:hover {
+  background: var(--border);
+  color: var(--text-main);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .searchWrapper {
+    max-width: 100%;
+    order: -1;
+    flex-basis: 100%;
+  }
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .searchInput:focus {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+}
+
+:global([data-theme="dark"]) .datePresetButton.active {
+  background: rgba(52, 211, 153, 0.15);
+}
+
+:global([data-theme="dark"]) .datePresetOption.selected {
+  background: rgba(52, 211, 153, 0.15);
+}
+
+:global([data-theme="dark"]) .datePresetMenu {
+  background: var(--surface);
+  border-color: var(--border);
+}

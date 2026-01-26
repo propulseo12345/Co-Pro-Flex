@@ -1,0 +1,205 @@
+.container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  z-index: 1;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  width: 100%;
+  justify-content: center;
+}
+
+.addButton:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.addButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.chevron {
+  margin-left: auto;
+  transition: transform var(--transition-base);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  right: 0;
+  min-width: 220px;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1001;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.15s ease-out;
+  margin-top: var(--space-xs);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownSection {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.sectionLabel {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.dropdownItem:hover {
+  background: var(--bg-secondary);
+}
+
+.dropdownItem:focus-visible {
+  outline: none;
+  background: var(--bg-secondary);
+}
+
+.posteColor {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-xs) 0;
+}
+
+.customItem {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.customItem:hover {
+  background: var(--primary-light);
+}
+
+.customInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.customInput {
+  flex: 1;
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  background: var(--surface);
+}
+
+.customInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.customInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.confirmButton,
+.cancelButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.confirmButton {
+  color: var(--success);
+}
+
+.confirmButton:hover:not(:disabled) {
+  background: var(--success-light);
+}
+
+.confirmButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  color: var(--text-tertiary);
+}
+
+.cancelButton:hover {
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .dropdown {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .dropdownItem:hover {
+  background: var(--bg-tertiary);
+}
+
+:global([data-theme="dark"]) .customInput {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}

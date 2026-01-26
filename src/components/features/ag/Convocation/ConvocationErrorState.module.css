@@ -1,0 +1,125 @@
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: var(--space-xl);
+}
+
+.errorCard {
+  max-width: 500px;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.errorIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-lg);
+  color: var(--danger);
+}
+
+.errorTitle {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.errorDetails {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-md) 0;
+  line-height: 1.5;
+}
+
+.errorCode {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-xl);
+}
+
+.errorCode code {
+  background: var(--bg-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+}
+
+.errorActions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.retryButton,
+.backButton,
+.downloadButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.retryButton {
+  background: var(--primary);
+  border: none;
+  color: white;
+}
+
+.retryButton:hover {
+  background: var(--primary-hover);
+}
+
+.backButton {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+
+.backButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-dark);
+}
+
+.degradedSection {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--border);
+}
+
+.degradedText {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.downloadButton {
+  background: var(--warning-light);
+  border: 1px solid var(--warning);
+  color: var(--warning-dark);
+}
+
+.downloadButton:hover {
+  background: var(--warning);
+  color: white;
+}
+
+/* Dark mode */
+[data-theme="dark"] .errorCard {
+  background: var(--surface-secondary);
+}
+
+[data-theme="dark"] .errorCode code {
+  background: var(--bg-tertiary);
+}

@@ -1,0 +1,154 @@
+.header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.headerText {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.presidentInfo {
+    margin-top: 0.5rem;
+}
+
+.content {
+    max-width: 1200px;
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+}
+
+.searchBar input {
+    border: none;
+    background: transparent;
+    flex: 1;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.statItem {}
+
+.statLabel {
+    color: var(--text-secondary);
+}
+
+.statValue {
+    font-weight: 600;
+}
+
+.resolutionSelector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.resolutionSelector select {
+    flex: 1;
+    max-width: 400px;
+}
+
+.voteTable {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.tableHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    background: var(--bg-secondary);
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.headerCell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.headerLink {
+    color: var(--primary);
+    font-weight: 400;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.headerLink:hover {
+    text-decoration: underline;
+}
+
+.tableBody {}
+
+.voteRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+}
+
+.voteRow:last-child {
+    border-bottom: none;
+}
+
+.voteName {
+    font-weight: 500;
+}
+
+.voteOption {
+    display: flex;
+    justify-content: center;
+}
+
+.voteOption input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.radioGreen:checked {
+    accent-color: var(--success);
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+@media (max-width: 768px) {
+
+    .tableHeader,
+    .voteRow {
+        grid-template-columns: 1.5fr 1fr 1fr 1fr;
+        font-size: 0.75rem;
+    }
+
+    .stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

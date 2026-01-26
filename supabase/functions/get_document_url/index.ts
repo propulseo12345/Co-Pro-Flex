@@ -1,0 +1,380 @@
+// ============================================================================
+// Edge Function: get_document_url
+// Génère des URLs signées sécurisées pour les documents GED
+// CoProFlex - Niveau 6C
+// Vérifie les droits d'accès avant de fournir l'URL
+// ============================================================================
+
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface GetDocumentUrlRequest {
+  document_id?: string;
+  file_path?: string;
+  copro_id: string;
+  expires_in?: number;
+  action?: "view" | "download";
+}
+
+interface GetDocumentUrlResponse {
+  success: boolean;
+  error?: string;
+  signed_url?: string;
+  expires_at?: string;
+  file_name?: string;
+  mime_type?: string;
+  confidentiality?: string;
+}
+
+interface DocumentInfo {
+  id: string;
+  copro_id: string;
+  file_path: string;
+  file_name: string;
+  mime_type: string | null;
+  confidentiality: string;
+  status: string;
+  deletion_blocked: boolean;
+}
+
+// ============================================================================
+// VALIDATION
+// ============================================================================
+
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
+// ============================================================================
+// ACCESS CHECK
+// ============================================================================
+
+async function checkDocumentAccess(
+  supabase: SupabaseClient,
+  userId: string,
+  documentId: string,
+  coproId: string
+): Promise<{ allowed: boolean; reason?: string; doc?: DocumentInfo }> {
+  // Fetch document
+  const { data: doc, error: docError } = await supabase
+    .from("documents")
+    .select("id, copro_id, file_path, file_name, mime_type, confidentiality, status, deletion_blocked")
+    .eq("id", documentId)
+    .single();
+
+  if (docError || !doc) {
+    return { allowed: false, reason: "Document non trouvé" };
+  }
+
+  // Verify copro match
+  if (doc.copro_id !== coproId) {
+    return { allowed: false, reason: "Document non accessible pour cette copropriété" };
+  }
+
+  // Check document status
+  if (doc.status === "archived" || doc.status === "expired") {
+    // Only managers can access archived docs
+    const { data: membership } = await supabase
+      .from("memberships")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("copro_id", coproId)
+      .single();
+
+    if (!membership || !["gestionnaire", "admin"].includes(membership.role)) {
+      return { allowed: false, reason: "Document archivé - accès réservé aux gestionnaires" };
+    }
+  }
+
+  // Check membership
+  const { data: membership, error: membershipError } = await supabase
+    .from("memberships")
+    .select("role, coproprietaire_id")
+    .eq("user_id", userId)
+    .eq("copro_id", coproId)
+    .single();
+
+  if (membershipError || !membership) {
+    return { allowed: false, reason: "Non membre de cette copropriété" };
+  }
+
+  // Check confidentiality level
+  const confidentiality = doc.confidentiality || "public";
+  const role = membership.role;
+
+  if (confidentiality === "restricted") {
+    // Only admins and specific grants
+    if (role !== "admin" && role !== "gestionnaire") {
+      // Check document_access table
+      const { data: accessGrant } = await supabase
+        .from("document_access")
+        .select("can_view")
+        .eq("document_id", documentId)
+        .eq("user_id", userId)
+        .single();
+
+      if (!accessGrant?.can_view) {
+        return { allowed: false, reason: "Accès restreint - document confidentiel" };
+      }
+    }
+  } else if (confidentiality === "manager") {
+    // Only gestionnaires and admins
+    if (!["gestionnaire", "admin"].includes(role)) {
+      return { allowed: false, reason: "Accès réservé aux gestionnaires" };
+    }
+  } else if (confidentiality === "council") {
+    // Gestionnaires, admins, and conseil syndical members
+    if (!["gestionnaire", "admin", "conseil"].includes(role)) {
+      return { allowed: false, reason: "Accès réservé au conseil syndical et gestionnaires" };
+    }
+  }
+  // 'public' is accessible to all members
+
+  return { allowed: true, doc: doc as DocumentInfo };
+}
+
+async function checkPathAccess(
+  supabase: SupabaseClient,
+  userId: string,
+  filePath: string,
+  coproId: string
+): Promise<{ allowed: boolean; reason?: string }> {
+  // Extract copro_id from path: ged/{copro_id}/...
+  const pathParts = filePath.split("/");
+  if (pathParts.length < 2 || pathParts[0] !== "ged") {
+    return { allowed: false, reason: "Chemin de fichier invalide" };
+  }
+
+  const pathCoproId = pathParts[1];
+
+  // Verify copro match
+  if (pathCoproId !== coproId) {
+    return { allowed: false, reason: "Chemin non accessible pour cette copropriété" };
+  }
+
+  // Check membership
+  const { data: membership, error } = await supabase
+    .from("memberships")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("copro_id", coproId)
+    .single();
+
+  if (error || !membership) {
+    return { allowed: false, reason: "Non membre de cette copropriété" };
+  }
+
+  return { allowed: true };
+}
+
+// ============================================================================
+// LOG ACCESS
+// ============================================================================
+
+async function logDocumentAccess(
+  supabase: SupabaseClient,
+  documentId: string | null,
+  userId: string,
+  action: string,
+  success: boolean,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  try {
+    // Log to access table if exists
+    await supabase.from("document_access_logs").insert({
+      document_id: documentId,
+      user_id: userId,
+      action,
+      success,
+      metadata,
+      created_at: new Date().toISOString(),
+    });
+  } catch {
+    // Ignore logging errors - table may not exist
+    console.log("Access logging skipped");
+  }
+}
+
+// ============================================================================
+// MAIN HANDLER
+// ============================================================================
+
+Deno.serve(async (req: Request) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    if (req.method !== "POST") {
+      return new Response(
+        JSON.stringify({ success: false, error: "Method not allowed. Use POST." } as GetDocumentUrlResponse),
+        { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const params: GetDocumentUrlRequest = await req.json();
+
+    // Validation
+    if (!params.copro_id || !isValidUUID(params.copro_id)) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid or missing copro_id" } as GetDocumentUrlResponse),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!params.document_id && !params.file_path) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Must provide document_id or file_path" } as GetDocumentUrlResponse),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (params.document_id && !isValidUUID(params.document_id)) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid document_id format" } as GetDocumentUrlResponse),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Auth
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing Authorization header" } as GetDocumentUrlResponse),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    // Client with user auth for queries
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    // Get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: "User not authenticated" } as GetDocumentUrlResponse),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Determine file path
+    let filePath: string;
+    let docInfo: DocumentInfo | undefined;
+
+    if (params.document_id) {
+      // Check document access and get path
+      const accessCheck = await checkDocumentAccess(
+        supabase,
+        user.id,
+        params.document_id,
+        params.copro_id
+      );
+
+      if (!accessCheck.allowed) {
+        await logDocumentAccess(supabase, params.document_id, user.id, params.action || "view", false, {
+          reason: accessCheck.reason,
+        });
+
+        return new Response(
+          JSON.stringify({ success: false, error: accessCheck.reason } as GetDocumentUrlResponse),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      filePath = accessCheck.doc!.file_path;
+      docInfo = accessCheck.doc;
+    } else {
+      // Check path-based access
+      const pathCheck = await checkPathAccess(
+        supabase,
+        user.id,
+        params.file_path!,
+        params.copro_id
+      );
+
+      if (!pathCheck.allowed) {
+        await logDocumentAccess(supabase, null, user.id, params.action || "view", false, {
+          reason: pathCheck.reason,
+          file_path: params.file_path,
+        });
+
+        return new Response(
+          JSON.stringify({ success: false, error: pathCheck.reason } as GetDocumentUrlResponse),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      filePath = params.file_path!;
+    }
+
+    // Admin client for storage
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Calculate expiration (default 1 hour, max 24 hours)
+    const defaultExpiry = 3600; // 1 hour
+    const maxExpiry = 86400; // 24 hours
+    const expiresIn = Math.min(Math.max(params.expires_in || defaultExpiry, 60), maxExpiry);
+
+    // Generate signed URL
+    const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
+      .from("documents")
+      .createSignedUrl(filePath, expiresIn);
+
+    if (signedUrlError) {
+      console.error("Signed URL error:", signedUrlError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Erreur génération URL: ${signedUrlError.message}`,
+        } as GetDocumentUrlResponse),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Log successful access
+    await logDocumentAccess(supabase, params.document_id || null, user.id, params.action || "view", true, {
+      file_path: filePath,
+      expires_in: expiresIn,
+    });
+
+    const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        signed_url: signedUrlData.signedUrl,
+        expires_at: expiresAt,
+        file_name: docInfo?.file_name,
+        mime_type: docInfo?.mime_type || undefined,
+        confidentiality: docInfo?.confidentiality,
+      } as GetDocumentUrlResponse),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: `Erreur inattendue: ${err instanceof Error ? err.message : String(err)}`,
+      } as GetDocumentUrlResponse),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});

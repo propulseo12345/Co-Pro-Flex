@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "mcp__plugin_supabase_supabase__get_project",
+      "mcp__plugin_supabase_supabase__get_project_url",
+      "mcp__plugin_supabase_supabase__get_publishable_keys",
+      "Bash(npm run dev)",
+      "Bash(taskkill:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(npm run build:*)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "mcp__plugin_supabase_supabase__list_migrations",
+      "mcp__plugin_supabase_supabase__list_edge_functions",
+      "mcp__plugin_supabase_supabase__generate_typescript_types",
+      "Bash(powershell -Command \"$content = Get-Content ''src/types/supabase.ts'' -Raw | ConvertFrom-Json; $content.types | Set-Content ''src/types/supabase.ts'' -NoNewline\")",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "Bash(python3:*)",
+      "Bash(node -e:*)",
+      "mcp__plugin_supabase_supabase__list_tables",
+      "mcp__plugin_supabase_supabase__get_advisors",
+      "Bash(done)"
+    ]
+  }
+}

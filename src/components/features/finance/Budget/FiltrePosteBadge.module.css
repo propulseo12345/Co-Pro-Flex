@@ -1,0 +1,73 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: color-mix(in srgb, var(--badge-color) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--badge-color) 30%, transparent);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--badge-color);
+  flex-shrink: 0;
+}
+
+.label {
+  color: var(--text-main);
+}
+
+.label strong {
+  color: var(--badge-color);
+  font-weight: 600;
+}
+
+.stats {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.removeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-left: var(--space-xs);
+  border: none;
+  background: color-mix(in srgb, var(--badge-color) 20%, transparent);
+  color: var(--badge-color);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.removeBtn:hover {
+  background: color-mix(in srgb, var(--badge-color) 30%, transparent);
+}
+
+.removeBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--badge-color) 30%, transparent);
+}
+
+/* Support pour navigateurs plus anciens sans color-mix */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .badge {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+  }
+
+  .removeBtn {
+    background: var(--bg-secondary);
+  }
+
+  .removeBtn:hover {
+    background: var(--bg-tertiary);
+  }
+}

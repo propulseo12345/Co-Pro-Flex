@@ -1,0 +1,1 @@
+export { FormulaireGarantiesAssurance } from './FormulaireGarantiesAssurance';

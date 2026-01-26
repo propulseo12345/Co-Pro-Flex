@@ -1,0 +1,415 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-xl);
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+/* Deadline Counter */
+.deadlineCounter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--warning-light);
+    color: var(--warning);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+/* Priority Section */
+.prioritySection {
+    margin-bottom: var(--space-xl);
+}
+
+.prioritySectionTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+.priorityGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+}
+
+.priorityCard {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-lg);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.priorityCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.priorityCardUrgent {
+    border-color: var(--danger);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--surface) 100%);
+}
+
+.priorityCardUrgent:hover {
+    border-color: var(--danger);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+}
+
+.priorityCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-md);
+}
+
+.priorityIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+}
+
+.iconUrgent {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.iconWarning {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.priorityBadge {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badgeUrgent {
+    background: var(--danger);
+    color: white;
+    animation: pulseBadge 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseBadge {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.badgeWeek {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.priorityCardTitle {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.priorityCardDesc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    flex: 1;
+}
+
+.priorityCardArrow {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    transition: all 0.2s ease;
+}
+
+.priorityCard:hover .priorityCardArrow {
+    color: var(--primary);
+    transform: translateY(-50%) translateX(4px);
+}
+
+/* Toggle Secondary */
+.toggleSecondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggleSecondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.toggleSecondary svg {
+    transition: transform 0.2s ease;
+}
+
+.toggleSecondary.expanded svg {
+    transform: rotate(180deg);
+}
+
+/* Secondary Section */
+.secondarySection {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+    max-height: 1000px;
+    opacity: 1;
+}
+
+.secondarySection.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+}
+
+/* Section Alertes */
+.alertsSection {
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-xl);
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.alertsSectionTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+.alertGroup {
+    margin-bottom: var(--space-lg);
+}
+
+.alertGroup:last-child {
+    margin-bottom: 0;
+}
+
+.alertGroupTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-md);
+}
+
+.alertDotError {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+}
+
+.alertDotWarning {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warning);
+}
+
+.alertCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+}
+
+.alertCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all var(--transition-base);
+}
+
+.alertCardError {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+}
+
+.alertCardError:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateX(4px);
+}
+
+.alertCardWarning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid var(--warning);
+}
+
+.alertCardWarning:hover {
+    background: rgba(245, 158, 11, 0.2);
+    transform: translateX(4px);
+}
+
+.alertCardContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.alertCardTitle {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.alertCardMessage {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.alertCardArrow {
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+/* Grille des sections */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.cardTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.cardDesc {
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .alertCards {
+        grid-template-columns: 1fr;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode overrides */
+:global([data-theme="dark"]) {
+    .card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .alertCardError {
+        background: rgba(248, 113, 113, 0.2);
+    }
+
+    .alertCardError:hover {
+        background: rgba(248, 113, 113, 0.3);
+    }
+
+    .alertCardWarning {
+        background: rgba(251, 191, 36, 0.2);
+    }
+
+    .alertCardWarning:hover {
+        background: rgba(251, 191, 36, 0.3);
+    }
+
+    .priorityCardUrgent {
+        background: linear-gradient(135deg, rgba(248, 113, 113, 0.1) 0%, var(--surface) 100%);
+    }
+
+    .deadlineCounter {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fcd34d;
+    }
+
+    .badgeWeek {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fcd34d;
+    }
+}

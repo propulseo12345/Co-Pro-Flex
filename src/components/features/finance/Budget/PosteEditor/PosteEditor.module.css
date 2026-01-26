@@ -1,0 +1,314 @@
+.posteRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.posteRow:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.posteRow.dragging {
+  opacity: 0.5;
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.posteRow.dragOver {
+  border-color: var(--primary);
+  border-style: dashed;
+  transform: translateY(2px);
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--text-tertiary);
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-base);
+}
+
+.dragHandle:hover {
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.libelleInput {
+  flex: 1;
+  min-width: 150px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  transition: all var(--transition-base);
+}
+
+.libelleInput:hover {
+  background: var(--bg-secondary);
+}
+
+.libelleInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface);
+}
+
+.libelleInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.montantWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 120px;
+}
+
+.montantInput {
+  width: 100px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  transition: all var(--transition-base);
+}
+
+.montantInput:hover {
+  background: var(--bg-secondary);
+}
+
+.montantInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface);
+}
+
+.montantInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.euroSymbol {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.deleteButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.deleteButton:hover {
+  color: var(--danger);
+  background: var(--danger-light);
+}
+
+.deleteButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .posteRow {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .posteRow:hover {
+  border-color: var(--border-hover);
+}
+
+:global([data-theme="dark"]) .libelleInput:hover,
+:global([data-theme="dark"]) .montantInput:hover {
+  background: var(--bg-tertiary);
+}
+
+:global([data-theme="dark"]) .dragHandle:hover {
+  background: var(--bg-tertiary);
+}
+
+/* PostesListEditor styles */
+.listEditorContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.postesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-md);
+}
+
+.emptyText {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.addPosteWrapper {
+  margin-top: var(--space-sm);
+}
+
+.totalSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-md);
+}
+
+.totalLabel {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.totalAmount {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* Clé de répartition select */
+.cleSelect {
+  min-width: 160px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.cleSelect:hover {
+  background: var(--bg-secondary);
+}
+
+.cleSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface);
+}
+
+/* Poste alert (>10% of budget) */
+.posteAlert {
+  border-color: var(--warning) !important;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.alertBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--warning-light);
+  color: var(--warning);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Dark mode for new elements */
+:global([data-theme="dark"]) .cleSelect {
+  background: transparent;
+  color: var(--text-main);
+}
+
+:global([data-theme="dark"]) .cleSelect:hover {
+  background: var(--bg-tertiary);
+}
+
+:global([data-theme="dark"]) .posteAlert {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* Alert banner for >10% postes */
+.alertBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--warning-light);
+  color: var(--warning);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-top: var(--space-md);
+}
+
+/* Total section with actions */
+.totalActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.simulateButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.simulateButton:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.simulateButton:active {
+  transform: translateY(0);
+}

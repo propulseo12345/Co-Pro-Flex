@@ -1,0 +1,101 @@
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.movementsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.movementRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: #F9FAFB;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    gap: 2rem;
+}
+
+.movementInfo {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 100px 1fr 100px;
+    align-items: center;
+    gap: 1rem;
+}
+
+.date {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.libelle {
+    font-weight: 500;
+}
+
+.amount {
+    font-family: monospace;
+    font-weight: 600;
+    text-align: right;
+}
+
+.categorization {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.arrow {
+    color: var(--text-secondary);
+}
+
+.selectWrapper {
+    position: relative;
+    flex: 1;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.accountSelect {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.25rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background-color: white;
+}
+
+.accountSelect:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}

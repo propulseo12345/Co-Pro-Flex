@@ -1,0 +1,576 @@
+.container {
+  padding: var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: all 0.15s ease;
+}
+
+.backBtn:hover {
+  background: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+  margin: var(--spacing-1) 0 0 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: var(--spacing-6);
+  align-items: start;
+}
+
+.mainPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  position: sticky;
+  top: var(--spacing-6);
+}
+
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.cardTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.cardHeader .cardTitle {
+  margin: 0;
+}
+
+.totalBadge {
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.totalBadge strong {
+  font-weight: 700;
+}
+
+/* Form */
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-4);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.formGroup.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formGroup label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  background: var(--color-white);
+  transition: border-color 0.15s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.codeInput {
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--spacing-5));
+  padding: 0 var(--spacing-5);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.table th {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-gray-600);
+  background: var(--color-gray-50);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--color-gray-50);
+}
+
+.table tfoot {
+  background: var(--color-gray-50);
+}
+
+.table tfoot td {
+  border-top: 2px solid var(--color-gray-200);
+}
+
+.textRight {
+  text-align: right !important;
+}
+
+.lotNumero {
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.lotType {
+  font-size: 11px;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  background: var(--color-gray-100);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.tantiemesInput {
+  width: 100px;
+  padding: var(--spacing-1) var(--spacing-2) !important;
+  text-align: right;
+  font-size: var(--font-size-sm) !important;
+  border: 1px solid var(--color-gray-200) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.tantiemesInput:focus {
+  border-color: var(--color-primary-500) !important;
+}
+
+.percentage {
+  color: var(--color-gray-500);
+  font-size: var(--font-size-sm);
+}
+
+/* Validation */
+.validationContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.validationStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+.validationStatus.valid {
+  background: var(--color-success-light, #dcfce7);
+  color: var(--color-success);
+}
+
+.validationStatus.invalid {
+  background: var(--color-warning-light, #fef3c7);
+  color: var(--color-warning);
+}
+
+.warningsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.warningItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-warning);
+  background: var(--color-warning-light, #fef3c7);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.warningItem svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.validationStats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-md);
+}
+
+.validationStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.validationStat.ecart {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.validationLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+.validationValue {
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.validationStat.ecart .validationValue {
+  color: var(--color-error);
+}
+
+/* Simulation */
+.simulationInput {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.simulationInput label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.inputGroup {
+  display: flex;
+}
+
+.inputGroup input {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  font-size: var(--font-size-base);
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  z-index: 1;
+}
+
+.inputSuffix {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-3);
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+}
+
+.simulationResult {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.simulationTable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.simulationRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-sm);
+}
+
+.simulationLot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.simulationCopro {
+  font-size: 11px;
+  color: var(--color-gray-500);
+}
+
+.simulationMontant {
+  font-weight: 600;
+  color: var(--color-gray-900);
+  font-size: var(--font-size-sm);
+}
+
+.simulationMore {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+  padding: var(--spacing-2);
+}
+
+.simulationTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3);
+  background: var(--color-primary-50);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-700);
+}
+
+/* Loading & Error */
+.loading,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  text-align: center;
+  color: var(--color-gray-500);
+  gap: var(--spacing-4);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-gray-200);
+  border-top-color: var(--color-primary-600);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .backBtn,
+:global([data-theme="dark"]) .card {
+  background: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+}
+
+:global([data-theme="dark"]) .backBtn {
+  color: var(--color-gray-300);
+}
+
+:global([data-theme="dark"]) .backBtn:hover {
+  background: var(--color-gray-700);
+}
+
+:global([data-theme="dark"]) .title,
+:global([data-theme="dark"]) .cardTitle,
+:global([data-theme="dark"]) .lotNumero,
+:global([data-theme="dark"]) .validationValue,
+:global([data-theme="dark"]) .simulationMontant {
+  color: var(--color-gray-100);
+}
+
+:global([data-theme="dark"]) .subtitle,
+:global([data-theme="dark"]) .formGroup label,
+:global([data-theme="dark"]) .simulationInput label {
+  color: var(--color-gray-400);
+}
+
+:global([data-theme="dark"]) .formGroup input,
+:global([data-theme="dark"]) .formGroup select,
+:global([data-theme="dark"]) .formGroup textarea,
+:global([data-theme="dark"]) .inputGroup input,
+:global([data-theme="dark"]) .tantiemesInput {
+  background: var(--color-gray-900) !important;
+  border-color: var(--color-gray-600) !important;
+  color: var(--color-gray-100);
+}
+
+:global([data-theme="dark"]) .table th {
+  background: var(--color-gray-900);
+  color: var(--color-gray-400);
+}
+
+:global([data-theme="dark"]) .table tbody tr:hover {
+  background: var(--color-gray-700);
+}
+
+:global([data-theme="dark"]) .table tfoot {
+  background: var(--color-gray-900);
+}
+
+:global([data-theme="dark"]) .lotType {
+  background: var(--color-gray-700);
+  color: var(--color-gray-400);
+}
+
+:global([data-theme="dark"]) .totalBadge {
+  background: var(--color-primary-900);
+  color: var(--color-primary-300);
+}
+
+:global([data-theme="dark"]) .validationStats,
+:global([data-theme="dark"]) .simulationRow {
+  background: var(--color-gray-900);
+}
+
+:global([data-theme="dark"]) .inputSuffix {
+  background: var(--color-gray-700);
+  border-color: var(--color-gray-600);
+  color: var(--color-gray-400);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidePanel {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidePanel .card {
+    flex: 1;
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-4);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: stretch;
+  }
+
+  .headerActions button {
+    flex: 1;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidePanel {
+    flex-direction: column;
+  }
+
+  .sidePanel .card {
+    min-width: 0;
+  }
+}

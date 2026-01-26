@@ -1,0 +1,27 @@
+'use client';
+
+import { ArrowLeft, Home } from 'lucide-react';
+import styles from '../../../../app/(dashboard)/ag/[id]/pv/pv.module.css';
+
+interface FooterProps {
+  isSigned: boolean;
+  onBack: () => void;
+  onFinish: () => void;
+}
+
+export function Footer({ isSigned, onBack, onFinish }: FooterProps) {
+  return (
+    <div className={styles.footer}>
+      <button onClick={onBack} className="btn btn-secondary">
+        <ArrowLeft size={16} aria-hidden="true" />
+        Retour à la session
+      </button>
+      {isSigned && (
+        <button onClick={onFinish} className="btn btn-primary">
+          Terminer
+          <Home size={16} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+}

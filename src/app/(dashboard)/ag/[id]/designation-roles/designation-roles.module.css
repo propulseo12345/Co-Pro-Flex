@@ -1,0 +1,387 @@
+.header {
+    margin-bottom: var(--space-2xl);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-sm);
+    margin-left: calc(var(--space-sm) * -1);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    margin-bottom: var(--space-md);
+}
+
+.backButton:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin: var(--space-xs) 0 0 0;
+}
+
+/* Warning */
+.warning {
+    padding: var(--space-xl);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.warning p {
+    margin: 0 0 var(--space-lg) 0;
+    color: var(--text-main);
+}
+
+/* Section */
+.section {
+    margin-bottom: var(--space-3xl);
+}
+
+.sectionTitle {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-lg) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.sectionTitle::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+}
+
+/* Role Cards */
+.roleCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-lg);
+}
+
+.roleCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+}
+
+.roleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.roleTitle {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.roleCheck {
+    color: var(--success);
+}
+
+.roleContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.roleName {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.gestionnaireBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--info-light);
+    color: var(--info);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    border-radius: var(--radius-full);
+}
+
+.representeSyndic {
+    font-size: var(--text-sm);
+    color: var(--info);
+    font-style: italic;
+    margin-top: var(--space-xs);
+}
+
+.roleDate {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+/* Conseil syndical */
+.conseilSection {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+}
+
+.conseilActions {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.membresList {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.membreCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.membreInfo {
+    flex: 1;
+}
+
+.membreName {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.membreType {
+    font-size: var(--text-sm);
+    color: var(--primary);
+    margin-top: var(--space-xs);
+}
+
+.membreDate {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.emptyState {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--text-secondary);
+}
+
+.emptyState svg {
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: var(--text-base);
+}
+
+/* Success Banner */
+.successBanner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--success-light);
+    border: 1px solid var(--success);
+    border-radius: var(--radius-lg);
+    color: var(--success);
+    font-weight: 600;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+}
+
+.modalContent {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modalTitle {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--border);
+}
+
+.modalBody {
+    padding: var(--space-xl);
+}
+
+.modalSubtitle {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 var(--space-md) 0;
+}
+
+.modalDescription {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-md) 0;
+}
+
+.coproList {
+    display: grid;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+}
+
+.coproButton {
+    display: block;
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.coproButton:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.coproName {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.coproEmail {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.divider {
+    text-align: center;
+    margin: var(--space-xl) 0;
+    color: var(--text-secondary);
+    font-weight: 600;
+    position: relative;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 30px);
+    height: 1px;
+    background: var(--border);
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+.customForm {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.customInput {
+    flex: 1;
+    padding: var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    color: var(--text-main);
+    background: var(--surface);
+    transition: all var(--transition-base);
+}
+
+.customInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+@media (max-width: 768px) {
+    .roleCards {
+        grid-template-columns: 1fr;
+    }
+
+    .conseilActions {
+        flex-direction: column;
+    }
+
+    .conseilActions button {
+        width: 100%;
+    }
+
+    .membreCard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+    }
+
+    .customForm {
+        flex-direction: column;
+    }
+
+    .customForm button {
+        width: 100%;
+    }
+}

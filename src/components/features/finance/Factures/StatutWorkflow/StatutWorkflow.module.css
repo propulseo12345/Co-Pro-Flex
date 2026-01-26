@@ -1,0 +1,206 @@
+/**
+ * Styles du workflow de statut
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg, 1rem);
+}
+
+/* === Workflow horizontal === */
+.workflow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  padding: var(--space-lg, 1rem);
+  background-color: var(--bg-secondary, #f9fafb);
+  border-radius: var(--radius-lg, 0.75rem);
+  overflow-x: auto;
+}
+
+.etape {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  min-width: 80px;
+  transition: all 200ms ease-in-out;
+}
+
+.iconeWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  transition: all 200ms ease-in-out;
+}
+
+.libelle {
+  font-size: var(--text-xs, 0.75rem);
+  text-align: center;
+  white-space: nowrap;
+  transition: all 200ms ease-in-out;
+}
+
+.fleche {
+  flex-shrink: 0;
+  transition: color 200ms ease-in-out;
+}
+
+/* === Etats des etapes === */
+.etapeActuelle .iconeWrapper {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  transform: scale(1.1);
+}
+
+.etapePassee .iconeWrapper {
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.etapeFuture {
+  opacity: 0.6;
+}
+
+/* Icones */
+.iconeActuelle {
+  background: var(--info-light, #dbeafe);
+}
+
+.iconePassee {
+  background: var(--success-light, #dcfce7);
+}
+
+.iconeFuture {
+  background: var(--bg-tertiary, #e5e7eb);
+}
+
+.iconeActuelleIcon {
+  color: var(--info, #2563eb);
+}
+
+.iconePasseeIcon {
+  color: var(--success, #16a34a);
+}
+
+.iconeFutureIcon {
+  color: var(--text-tertiary, #9ca3af);
+}
+
+/* Libelles */
+.libelleActuel {
+  color: var(--text-main, #111827);
+  font-weight: 600;
+}
+
+.libellePasse {
+  color: var(--success, #16a34a);
+}
+
+.libelleFutur {
+  color: var(--text-tertiary, #9ca3af);
+}
+
+/* Fleches */
+.flechePassee {
+  color: var(--success, #16a34a);
+}
+
+.flecheFuture {
+  color: var(--text-tertiary, #d1d5db);
+}
+
+/* === Historique === */
+.historique {
+  padding: var(--space-md, 0.75rem);
+  background-color: var(--surface, white);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-md, 0.5rem);
+}
+
+.historiqueTitle {
+  margin: 0 0 var(--space-sm, 0.625rem) 0;
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: 600;
+  color: var(--text-secondary, #374151);
+}
+
+.historiqueList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 0.5rem);
+}
+
+.historiqueItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.625rem);
+  padding: var(--space-xs, 0.375rem) 0;
+  font-size: var(--text-xs, 0.75rem);
+  border-bottom: 1px solid var(--border-light, #f3f4f6);
+}
+
+.historiqueItem:last-child {
+  border-bottom: none;
+}
+
+.historiqueDate {
+  flex-shrink: 0;
+  min-width: 90px;
+  color: var(--text-tertiary, #6b7280);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.historiqueTexte {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 0.25rem);
+  flex: 1;
+}
+
+.statutPrecedent {
+  color: var(--text-tertiary, #6b7280);
+}
+
+.flecheHistorique {
+  color: var(--text-tertiary, #9ca3af);
+}
+
+.statutNouveau {
+  color: var(--text-main, #111827);
+}
+
+.statutAnnulation {
+  color: var(--warning, #d97706);
+}
+
+.historiqueUser {
+  color: var(--text-tertiary, #9ca3af);
+  font-style: italic;
+}
+
+/* === Responsive === */
+@media (max-width: 640px) {
+  .workflow {
+    gap: var(--space-xs, 0.25rem);
+    padding: var(--space-md, 0.75rem);
+  }
+
+  .etape {
+    min-width: 60px;
+  }
+
+  .iconeWrapper {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .libelle {
+    font-size: 0.625rem;
+  }
+}

@@ -1,0 +1,938 @@
+[
+  {
+    "path": "src/app/(dashboard)/settings/info/page.tsx",
+    "type": "page",
+    "lines": 399,
+    "loc": 365,
+    "feature": "settings",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/resolutions/new/page.tsx",
+    "type": "page",
+    "lines": 388,
+    "loc": 346,
+    "feature": "ag",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/designation-roles/page.tsx",
+    "type": "page",
+    "lines": 365,
+    "loc": 332,
+    "feature": "ag",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/recherche/page.tsx",
+    "type": "page",
+    "lines": 355,
+    "loc": 328,
+    "feature": "communication",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/feuille-presence/page.tsx",
+    "type": "page",
+    "lines": 339,
+    "loc": 302,
+    "feature": "ag",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/preparation/page.tsx",
+    "type": "page",
+    "lines": 348,
+    "loc": 301,
+    "feature": "ag",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/fonds-alur/page.tsx",
+    "type": "page",
+    "lines": 315,
+    "loc": 297,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/calls/page.tsx",
+    "type": "page",
+    "lines": 298,
+    "loc": 283,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/budgets/page.tsx",
+    "type": "page",
+    "lines": 320,
+    "loc": 278,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/tantiemes/page.tsx",
+    "type": "page",
+    "lines": 298,
+    "loc": 277,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/dashboard/page.tsx",
+    "type": "page",
+    "lines": 312,
+    "loc": 272,
+    "feature": "ag",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/appels-fonds/page.tsx",
+    "type": "page",
+    "lines": 316,
+    "loc": 263,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/budgets/validation/page.tsx",
+    "type": "page",
+    "lines": 292,
+    "loc": 261,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/mouvements-bancaires/page.tsx",
+    "type": "page",
+    "lines": 288,
+    "loc": 259,
+    "feature": "finance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/logbook/page.tsx",
+    "type": "page",
+    "lines": 287,
+    "loc": 258,
+    "feature": "maintenance",
+    "status": "WARNING"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/factures/new/page.tsx",
+    "type": "page",
+    "lines": 269,
+    "loc": 244,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/votes-correspondance/[coproId]/page.tsx",
+    "type": "page",
+    "lines": 271,
+    "loc": 232,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/convocation/page.tsx",
+    "type": "page",
+    "lines": 261,
+    "loc": 229,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/resolutions/page.tsx",
+    "type": "page",
+    "lines": 247,
+    "loc": 229,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/mail/[id]/page.tsx",
+    "type": "page",
+    "lines": 250,
+    "loc": 227,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/balance/page.tsx",
+    "type": "page",
+    "lines": 254,
+    "loc": 226,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/contracts/page.tsx",
+    "type": "page",
+    "lines": 258,
+    "loc": 221,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/conseil-syndical/page.tsx",
+    "type": "page",
+    "lines": 238,
+    "loc": 219,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/pv/page.tsx",
+    "type": "page",
+    "lines": 242,
+    "loc": 216,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/contracts/[id]/page.tsx",
+    "type": "page",
+    "lines": 236,
+    "loc": 210,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/comptabilite/page.tsx",
+    "type": "page",
+    "lines": 252,
+    "loc": 209,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/mail/page.tsx",
+    "type": "page",
+    "lines": 233,
+    "loc": 204,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/providers/coproflex/page.tsx",
+    "type": "page",
+    "lines": 218,
+    "loc": 201,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/agenda/page.tsx",
+    "type": "page",
+    "lines": 212,
+    "loc": 196,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/page.tsx",
+    "type": "page",
+    "lines": 211,
+    "loc": 194,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/providers/copro/page.tsx",
+    "type": "page",
+    "lines": 207,
+    "loc": 190,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/providers/syndic/page.tsx",
+    "type": "page",
+    "lines": 207,
+    "loc": 190,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/session/page.tsx",
+    "type": "page",
+    "lines": 201,
+    "loc": 179,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ventes-impayes/ventes/page.tsx",
+    "type": "page",
+    "lines": 188,
+    "loc": 175,
+    "feature": "ventes-impayes",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/evenements/nouveau/page.tsx",
+    "type": "page",
+    "lines": 192,
+    "loc": 174,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ventes-impayes/impayes/page.tsx",
+    "type": "page",
+    "lines": 188,
+    "loc": 171,
+    "feature": "ventes-impayes",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/edit/page.tsx",
+    "type": "page",
+    "lines": 184,
+    "loc": 169,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/mur/nouveau/page.tsx",
+    "type": "page",
+    "lines": 185,
+    "loc": 168,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/page.tsx",
+    "type": "page",
+    "lines": 180,
+    "loc": 168,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/mail/nouveau/page.tsx",
+    "type": "page",
+    "lines": 179,
+    "loc": 163,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/invoices/[id]/page.tsx",
+    "type": "page",
+    "lines": 173,
+    "loc": 160,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ventes-impayes/ventes/[id]/page.tsx",
+    "type": "page",
+    "lines": 187,
+    "loc": 156,
+    "feature": "ventes-impayes",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/unpaid/reminders/page.tsx",
+    "type": "page",
+    "lines": 163,
+    "loc": 153,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/releves-individuels/page.tsx",
+    "type": "page",
+    "lines": 177,
+    "loc": 151,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/evenements/[id]/page.tsx",
+    "type": "page",
+    "lines": 164,
+    "loc": 149,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/mur/[id]/page.tsx",
+    "type": "page",
+    "lines": 166,
+    "loc": 149,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/ged/page.tsx",
+    "type": "page",
+    "lines": 171,
+    "loc": 148,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/minutes/page.tsx",
+    "type": "page",
+    "lines": 160,
+    "loc": 141,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/factures/[id]/page.tsx",
+    "type": "page",
+    "lines": 149,
+    "loc": 137,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/envoi/page.tsx",
+    "type": "page",
+    "lines": 149,
+    "loc": 136,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/unpaid/page.tsx",
+    "type": "page",
+    "lines": 144,
+    "loc": 135,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/new/page.tsx",
+    "type": "page",
+    "lines": 149,
+    "loc": 131,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/budgets/[id]/page.tsx",
+    "type": "page",
+    "lines": 141,
+    "loc": 131,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/rapprochement-bancaire/page.tsx",
+    "type": "page",
+    "lines": 157,
+    "loc": 130,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/expenses/page.tsx",
+    "type": "page",
+    "lines": 147,
+    "loc": 129,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/analytics/page.tsx",
+    "type": "page",
+    "lines": 138,
+    "loc": 126,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/service-orders/[id]/page.tsx",
+    "type": "page",
+    "lines": 135,
+    "loc": 124,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/providers/[id]/page.tsx",
+    "type": "page",
+    "lines": 138,
+    "loc": 122,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/invoices/new/page.tsx",
+    "type": "page",
+    "lines": 135,
+    "loc": 121,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/projector/page.tsx",
+    "type": "page",
+    "lines": 131,
+    "loc": 120,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/legal/disputes/page.tsx",
+    "type": "page",
+    "lines": 132,
+    "loc": 119,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/assemblees/page.tsx",
+    "type": "page",
+    "lines": 128,
+    "loc": 116,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/invoices/page.tsx",
+    "type": "page",
+    "lines": 125,
+    "loc": 115,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/etats-dates/page.tsx",
+    "type": "page",
+    "lines": 120,
+    "loc": 113,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/budget-works/page.tsx",
+    "type": "page",
+    "lines": 130,
+    "loc": 110,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/ledger/full/page.tsx",
+    "type": "page",
+    "lines": 128,
+    "loc": 109,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/resolutions/select-ag/page.tsx",
+    "type": "page",
+    "lines": 118,
+    "loc": 108,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/service-orders/new/page.tsx",
+    "type": "page",
+    "lines": 120,
+    "loc": 107,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ventes-impayes/page.tsx",
+    "type": "page",
+    "lines": 115,
+    "loc": 106,
+    "feature": "ventes-impayes",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/cles-repartition/[id]/page.tsx",
+    "type": "page",
+    "lines": 116,
+    "loc": 105,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/settings/templates/[id]/page.tsx",
+    "type": "page",
+    "lines": 116,
+    "loc": 104,
+    "feature": "settings",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/evenements/page.tsx",
+    "type": "page",
+    "lines": 106,
+    "loc": 98,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/logbook/assurances/[id]/page.tsx",
+    "type": "page",
+    "lines": 109,
+    "loc": 98,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/providers/page.tsx",
+    "type": "page",
+    "lines": 108,
+    "loc": 98,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/mur/page.tsx",
+    "type": "page",
+    "lines": 108,
+    "loc": 96,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/events/new/page.tsx",
+    "type": "page",
+    "lines": 107,
+    "loc": 96,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/contracts/new/page.tsx",
+    "type": "page",
+    "lines": 111,
+    "loc": 95,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/sales/page.tsx",
+    "type": "page",
+    "lines": 104,
+    "loc": 95,
+    "feature": "sales",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/dashboard/page.tsx",
+    "type": "page",
+    "lines": 102,
+    "loc": 92,
+    "feature": "dashboard",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/cles-repartition/new/page.tsx",
+    "type": "page",
+    "lines": 102,
+    "loc": 91,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/service-orders/page.tsx",
+    "type": "page",
+    "lines": 97,
+    "loc": 89,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/ledger/page.tsx",
+    "type": "page",
+    "lines": 97,
+    "loc": 88,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/conseil-syndical/rapport/[id]/page.tsx",
+    "type": "page",
+    "lines": 95,
+    "loc": 85,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/transactions/page.tsx",
+    "type": "page",
+    "lines": 90,
+    "loc": 82,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/transfer/page.tsx",
+    "type": "page",
+    "lines": 92,
+    "loc": 82,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ventes-impayes/ventes/nouvelle/page.tsx",
+    "type": "page",
+    "lines": 89,
+    "loc": 81,
+    "feature": "ventes-impayes",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/[id]/checklist/page.tsx",
+    "type": "page",
+    "lines": 91,
+    "loc": 80,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/settings/templates/page.tsx",
+    "type": "page",
+    "lines": 89,
+    "loc": 78,
+    "feature": "settings",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/factures/page.tsx",
+    "type": "page",
+    "lines": 77,
+    "loc": 72,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/forum/page.tsx",
+    "type": "page",
+    "lines": 78,
+    "loc": 72,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/forum/new/page.tsx",
+    "type": "page",
+    "lines": 79,
+    "loc": 70,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/dossiers/page.tsx",
+    "type": "page",
+    "lines": 81,
+    "loc": 69,
+    "feature": "dossiers",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/bank-movements/page.tsx",
+    "type": "page",
+    "lines": 78,
+    "loc": 69,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/cles-repartition/page.tsx",
+    "type": "page",
+    "lines": 81,
+    "loc": 69,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/forum/[id]/page.tsx",
+    "type": "page",
+    "lines": 76,
+    "loc": 67,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/budget-current/page.tsx",
+    "type": "page",
+    "lines": 73,
+    "loc": 64,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/settings/page.tsx",
+    "type": "page",
+    "lines": 71,
+    "loc": 63,
+    "feature": "settings",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/events/page.tsx",
+    "type": "page",
+    "lines": 71,
+    "loc": 63,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/directory/page.tsx",
+    "type": "page",
+    "lines": 67,
+    "loc": 60,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/invoices/payment/[id]/page.tsx",
+    "type": "page",
+    "lines": 66,
+    "loc": 57,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/page.tsx",
+    "type": "page",
+    "lines": 57,
+    "loc": 52,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/maintenance/page.tsx",
+    "type": "page",
+    "lines": 57,
+    "loc": 52,
+    "feature": "maintenance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/messages/page.tsx",
+    "type": "page",
+    "lines": 58,
+    "loc": 52,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/coproprietaires/page.tsx",
+    "type": "page",
+    "lines": 59,
+    "loc": 50,
+    "feature": "coproprietaires",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/messages/[id]/page.tsx",
+    "type": "page",
+    "lines": 56,
+    "loc": 47,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/portefeuille/page.tsx",
+    "type": "page",
+    "lines": 55,
+    "loc": 46,
+    "feature": "portefeuille",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/social/page.tsx",
+    "type": "page",
+    "lines": 51,
+    "loc": 46,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/invoices/payment/page.tsx",
+    "type": "page",
+    "lines": 47,
+    "loc": 41,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/ag/page.tsx",
+    "type": "page",
+    "lines": 45,
+    "loc": 40,
+    "feature": "ag",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/layout.tsx",
+    "type": "layout",
+    "lines": 41,
+    "loc": 38,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/messagerie-privee/[id]/page.tsx",
+    "type": "page",
+    "lines": 38,
+    "loc": 35,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/messagerie-privee/nouveau/page.tsx",
+    "type": "page",
+    "lines": 38,
+    "loc": 35,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/communication/messagerie-privee/page.tsx",
+    "type": "page",
+    "lines": 38,
+    "loc": 35,
+    "feature": "communication",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/documents/closing/page.tsx",
+    "type": "page",
+    "lines": 42,
+    "loc": 35,
+    "feature": "documents",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/(dashboard)/finance/invoices/payment/confirmation/page.tsx",
+    "type": "page",
+    "lines": 34,
+    "loc": 31,
+    "feature": "finance",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/layout.tsx",
+    "type": "layout",
+    "lines": 35,
+    "loc": 30,
+    "feature": "autres",
+    "status": "OK"
+  },
+  {
+    "path": "src/app/page.tsx",
+    "type": "page",
+    "lines": 8,
+    "loc": 4,
+    "feature": "autres",
+    "status": "OK"
+  }
+]

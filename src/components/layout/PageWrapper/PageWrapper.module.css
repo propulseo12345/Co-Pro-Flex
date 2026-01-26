@@ -1,0 +1,39 @@
+.wrapper {
+  padding: var(--spacing-6, 1.5rem);
+  max-width: var(--max-content-width, 1400px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-6, 1.5rem);
+  gap: var(--spacing-4, 1rem);
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.title {
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: var(--font-size-base, 1rem);
+  color: var(--color-text-secondary);
+  margin: var(--spacing-1, 0.25rem) 0 0;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-2, 0.5rem);
+  flex-shrink: 0;
+}
+
+.content {
+  /* Le contenu de la page */
+}

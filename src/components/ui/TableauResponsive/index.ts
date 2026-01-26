@@ -1,0 +1,1 @@
+export { TableauResponsive } from './TableauResponsive';

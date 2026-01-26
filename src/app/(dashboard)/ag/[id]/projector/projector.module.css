@@ -1,0 +1,532 @@
+/* ============================================
+   MODE PROJECTEUR - Styles grande lisibilité
+   Optimisé pour affichage sur projecteur/écran
+   ============================================ */
+
+/* Container principal - plein écran */
+.projectorContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2xl);
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+/* Header */
+.projectorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-xl);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.agTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.coproprieteNom {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}
+
+/* Indicateur de synchronisation */
+.syncIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.syncDotConnected {
+  color: var(--success);
+}
+
+.syncDotStale {
+  color: var(--warning);
+  animation: pulse 2s infinite;
+}
+
+.syncDotDisconnected {
+  color: var(--danger);
+}
+
+.syncDotConnecting {
+  color: var(--text-secondary);
+  animation: spin 1s linear infinite;
+}
+
+.syncTime {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Contenu principal */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Header de résolution */
+.resolutionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.resolutionNumber {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Badge de statut - GRANDE TAILLE */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-xl);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusInProgress {
+  background: var(--warning-light);
+  color: var(--warning);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.statusClosed {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.statusInformation {
+  background: var(--info-light);
+  color: var(--info);
+}
+
+/* Titre de résolution - TRÈS GRANDE TAILLE */
+.resolutionTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin: 0 0 var(--space-lg) 0;
+  max-width: 90%;
+}
+
+/* Info majorité */
+.majorityInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.majorityBadge {
+  display: inline-flex;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--secondary-light);
+  color: var(--secondary);
+  border-radius: var(--radius-lg);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.majorityDescription {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+}
+
+/* Container des barres de vote */
+.voteStatsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+/* Section de barre de vote */
+.voteBarSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.voteLabelContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.voteLabelName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.voteLabelValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* Barres de vote - GRANDE HAUTEUR */
+.voteBar {
+  height: 60px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  overflow: hidden;
+  position: relative;
+}
+
+.voteBarFill {
+  height: 100%;
+  border-radius: var(--radius-lg);
+  transition: width 0.5s ease-out;
+  min-width: 4px;
+}
+
+.voteBarPour {
+  background: linear-gradient(90deg, var(--success), #34D399);
+}
+
+.voteBarContre {
+  background: linear-gradient(90deg, var(--danger), #F87171);
+}
+
+.voteBarAbstention {
+  background: linear-gradient(90deg, var(--warning), #FBBF24);
+}
+
+/* Résultat du vote */
+.voteResult {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.voteResultAdopted {
+  background: var(--success-light);
+  color: var(--success);
+  border: 3px solid var(--success);
+}
+
+.voteResultRejected {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 3px solid var(--danger);
+}
+
+.voteResultText {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* Quorum */
+.quorumContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  padding: var(--space-lg) var(--space-xl);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--border);
+}
+
+.quorumReached {
+  border-color: var(--success);
+}
+
+.quorumReached .quorumCurrent {
+  color: var(--success);
+}
+
+.quorumNotReached {
+  border-color: var(--warning);
+}
+
+.quorumNotReached .quorumCurrent {
+  color: var(--warning);
+}
+
+.quorumInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.quorumValues {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.quorumCurrent {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.quorumSeparator {
+  font-size: 1.5rem;
+  color: var(--text-tertiary);
+}
+
+.quorumRequired {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.quorumUnit {
+  font-size: 1rem;
+  color: var(--text-tertiary);
+  margin-left: var(--space-sm);
+}
+
+.quorumLabel {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.quorumPercentage {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+/* États d'attente */
+.waitingContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-lg);
+}
+
+.waitingTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.waitingMessage {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.waitingIcon {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.successIcon {
+  color: var(--success);
+}
+
+.errorIcon {
+  color: var(--danger);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary);
+}
+
+.progressInfo {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-top: var(--space-md);
+}
+
+/* Bannière information */
+.informationBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  background: var(--info-light);
+  color: var(--info);
+  border-radius: var(--radius-xl);
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+.informationBanner p {
+  margin: 0;
+}
+
+/* Contrôles */
+.controlsBar {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  display: flex;
+  gap: var(--space-md);
+  opacity: 0.4;
+  transition: opacity var(--transition-base);
+}
+
+.controlsBar:hover {
+  opacity: 1;
+}
+
+.controlButton {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--text-main);
+}
+
+.controlButton:hover {
+  background: var(--bg-secondary);
+  transform: scale(1.05);
+}
+
+/* ============== DARK MODE ============== */
+
+:global([data-theme="dark"]) .projectorContainer {
+  background: #0a0a0a;
+}
+
+:global([data-theme="dark"]) .voteBar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .voteBarFill {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .quorumContainer {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+:global([data-theme="dark"]) .quorumPercentage {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .syncIndicator {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .controlButton {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:global([data-theme="dark"]) .controlButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============== RESPONSIVE ============== */
+
+@media (max-width: 1200px) {
+  .resolutionTitle {
+    font-size: 2.5rem;
+  }
+
+  .voteLabelName,
+  .voteLabelValue {
+    font-size: 1.25rem;
+  }
+
+  .voteBar {
+    height: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .projectorContainer {
+    padding: var(--space-lg);
+  }
+
+  .resolutionTitle {
+    font-size: 2rem;
+  }
+
+  .waitingTitle {
+    font-size: 2rem;
+  }
+
+  .waitingMessage {
+    font-size: 1.25rem;
+  }
+
+  .voteBar {
+    height: 40px;
+  }
+
+  .voteResultText {
+    font-size: 2rem;
+  }
+
+  .quorumCurrent,
+  .quorumPercentage {
+    font-size: 1.5rem;
+  }
+}

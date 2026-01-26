@@ -1,0 +1,649 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.iconBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.closeBtn:hover {
+  background: var(--bg-secondary);
+}
+
+/* Templates */
+.templatesSection {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.templatesSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.textBtn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-left: auto;
+}
+
+.textBtn:hover {
+  text-decoration: underline;
+}
+
+.templatesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.templateCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.templateCard:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.templateTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.templateCategory {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Form */
+.form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hint {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 200px;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.inputSmall,
+.selectSmall {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.inputSmall:focus,
+.selectSmall:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Legal Warning */
+.legalWarning {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--warning-light);
+  border: 1px solid var(--warning);
+  border-radius: 8px;
+  color: var(--warning);
+}
+
+.legalWarning svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.legalWarning p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.legalWarning p + p {
+  margin-top: 0.5rem;
+}
+
+/* Undefined Variables */
+.undefinedVars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--info-light);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--info);
+}
+
+.undefinedVarsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.undefinedVarBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--info);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--info);
+  cursor: pointer;
+}
+
+.undefinedVarBtn:hover {
+  background: var(--info);
+  color: white;
+}
+
+/* Variables Section */
+.variablesSection {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.sectionHeader span {
+  flex: 1;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  background: var(--primary-dark);
+}
+
+.variableForm {
+  padding: 1rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.varFormRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.confirmBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: var(--success);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.confirmBtn:hover {
+  background: var(--success-dark);
+}
+
+.variablesList {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.variableItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+}
+
+.varInsertBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.varInsertBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.varKey {
+  font-family: monospace;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+.varLabel {
+  flex: 1;
+  color: var(--text);
+}
+
+.varType {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
+.varRequired {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.varDeleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.varDeleteBtn:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Scope Options */
+.scopeOptions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.scopeOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.15s;
+}
+
+.scopeOption:hover {
+  border-color: var(--primary);
+}
+
+.scopeOption input[type="radio"] {
+  margin-top: 2px;
+}
+
+.scopeOption input[type="radio"]:checked + div .scopeLabel {
+  color: var(--primary);
+}
+
+.scopeLabel {
+  display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.scopeDesc {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 0.125rem;
+}
+
+/* Tags */
+.tagsInput {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.tagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.tag button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.tag button:hover {
+  color: var(--danger);
+}
+
+.tagInputField {
+  flex: 1;
+  min-width: 100px;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--text);
+  outline: none;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cancelBtn {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: var(--bg-secondary);
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dark Mode */
+:global([data-theme="dark"]) .templatesSection {
+  background: var(--surface);
+}
+
+:global([data-theme="dark"]) .templateCard {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .templateCard:hover {
+  background: rgba(96, 165, 250, 0.15);
+}
+
+:global([data-theme="dark"]) .input,
+:global([data-theme="dark"]) .select,
+:global([data-theme="dark"]) .textarea,
+:global([data-theme="dark"]) .inputSmall,
+:global([data-theme="dark"]) .selectSmall {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .variableForm {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .variableItem {
+  background: var(--surface);
+}
+
+:global([data-theme="dark"]) .varInsertBtn {
+  background: var(--surface);
+}
+
+:global([data-theme="dark"]) .tag {
+  background: var(--surface);
+}
+
+:global([data-theme="dark"]) .tagsInput {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .scopeOption {
+  border-color: var(--border);
+}
+
+:global([data-theme="dark"]) .scopeOption:hover {
+  background: rgba(96, 165, 250, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .scopeOptions {
+    flex-direction: column;
+  }
+
+  .varFormRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .saveBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
