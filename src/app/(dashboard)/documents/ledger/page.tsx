@@ -3,9 +3,10 @@
 import { FileText, Download, List, Info, RefreshCw, AlertCircle } from 'lucide-react';
 import { useLedger } from '@/hooks/modules/useLedger';
 import { LedgerFilters, LedgerTree, EcrituresModal } from '@/components/features/finance/Ledger';
+import { getExerciceActuel } from '@/lib/dates';
 import styles from '@/components/features/finance/Ledger/Ledger.module.css';
 
-const ANNEE_EXERCICE = '2024';
+const ANNEE_EXERCICE = getExerciceActuel().toString();
 
 export default function LedgerPage() {
     const {

@@ -12,11 +12,12 @@ import {
     CLASSES_COMPTABLES,
     formatCurrency
 } from '@/components/features/finance/Comptabilite/utils';
+import { getExerciceActuel } from '@/lib/dates';
 import type { LigneBalance } from '@/components/features/finance/Comptabilite/types';
 import type { TrialBalanceEntry } from '@/lib/finance/api';
 
-// Année de l'exercice actuel (à synchroniser avec les données)
-const ANNEE_EXERCICE = '2024';
+// Année de l'exercice actuel (dynamique via lib/dates)
+const ANNEE_EXERCICE = getExerciceActuel().toString();
 
 // Map Supabase account_type to local TypeCompte
 type TypeCompte = 'ACTIF' | 'PASSIF' | 'CHARGE' | 'PRODUIT';

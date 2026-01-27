@@ -1243,3 +1243,112 @@
 :global([data-theme="dark"]) .infoBoxUrgent {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   États de chargement et sauvegarde
+   ═══════════════════════════════════════════════════════════════ */
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: var(--space-lg);
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loadingContainer p {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+}
+
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: var(--space-lg);
+    text-align: center;
+}
+
+.errorText {
+    font-size: var(--text-base);
+    color: var(--danger);
+    max-width: 400px;
+}
+
+.retryButton {
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.retryButton:hover {
+    background: var(--primary-dark);
+}
+
+.savingIndicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--info);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.savingDot {
+    width: 8px;
+    height: 8px;
+    background: var(--info);
+    border-radius: 50%;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+/* Dark mode */
+:global([data-theme="dark"]) .loadingContainer p {
+    color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .savingIndicator {
+    background: rgba(59, 130, 246, 0.15);
+}

@@ -1,8 +1,12 @@
 'use client';
 
 import { Download, Plus } from 'lucide-react';
+import { getExercicesList } from '@/lib/dates';
 import { BudgetTab } from './types';
 import styles from './Budget.module.css';
+
+// Liste des années disponibles (dynamique)
+const AVAILABLE_YEARS = getExercicesList(4).map(y => parseInt(y));
 
 interface BudgetHeaderProps {
   selectedYear: number;
@@ -34,9 +38,9 @@ export function BudgetHeader({
             onChange={(e) => onYearChange(Number(e.target.value))}
             className={styles.yearSelect}
           >
-            <option value={2025}>2025</option>
-            <option value={2024}>2024</option>
-            <option value={2023}>2023</option>
+            {AVAILABLE_YEARS.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
           <button
             className="btn btn-secondary"

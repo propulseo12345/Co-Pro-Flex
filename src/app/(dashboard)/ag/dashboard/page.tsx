@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Calendar, Users, FileText, Plus, Mail, Play, ClipboardList, Copy, Eye, Download } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
+import { Calendar, Users, FileText, Plus, Mail, Play, ClipboardList, Copy, Eye, Download, Edit3, Trash2 } from 'lucide-react';
 import { AGQuickActions } from '@/components/features/ag/Dashboard';
 import { AgDocumentQuickActions } from '@/components/features/ag';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
@@ -11,6 +11,16 @@ import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
 import styles from './dashboard.module.css';
 import clsx from 'clsx';
 import Link from 'next/link';
+
+// Type for localStorage draft AG
+interface LocalStorageDraft {
+  id: string;
+  type: string;
+  date: string;
+  heure?: string;
+  lieu?: string;
+  adresse?: string;
+}
 
 // Helper to map backend meeting_type to display label
 function getTypeLabel(type: AgMeetingType): string {
@@ -165,6 +175,87 @@ function NextAgCard({ ag, isConvoked }: { ag: AgOverview; isConvoked: boolean })
   );
 }
 
+// Component for displaying a draft AG item (from Supabase)
+function AgBrouillonItem({ ag }: { ag: AgOverview }) {
+  const typeLabel = getTypeLabel(ag.meeting_type);
+
+  return (
+    <div className={styles.brouillonItem}>
+      <div className={styles.brouillonIcon}>
+        <Edit3 size={20} aria-hidden="true" />
+      </div>
+      <div className={styles.brouillonContent}>
+        <div className={styles.brouillonTitle}>
+          {ag.title || `AG ${typeLabel}`}
+        </div>
+        <div className={styles.brouillonMeta}>
+          {ag.meeting_date ? (
+            <>Prévue le {new Date(ag.meeting_date).toLocaleDateString('fr-FR')}</>
+          ) : (
+            <>Date non définie</>
+          )}
+          {ag.location && ` • ${ag.location}`}
+          {` • ${ag.resolutions_count || 0} résolution(s)`}
+        </div>
+      </div>
+      <div className={styles.brouillonActions}>
+        <Link href={`/ag/${ag.id}/edit`} className={styles.brouillonLink} title="Continuer la préparation">
+          <Edit3 size={16} aria-hidden="true" />
+          <span>Continuer</span>
+        </Link>
+        <Link href={`/ag/${ag.id}/agenda`} className={styles.brouillonLink} title="Ordre du jour">
+          <ClipboardList size={16} aria-hidden="true" />
+          <span>Agenda</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// Component for displaying a localStorage draft AG item
+function LocalStorageBrouillonItem({ draft, onDelete }: { draft: LocalStorageDraft; onDelete: (id: string) => void }) {
+  const typeLabel = draft.type === 'EXTRAORDINAIRE' ? 'Extraordinaire' : 'Ordinaire';
+
+  return (
+    <div className={styles.brouillonItem}>
+      <div className={styles.brouillonIcon}>
+        <Edit3 size={20} aria-hidden="true" />
+      </div>
+      <div className={styles.brouillonContent}>
+        <div className={styles.brouillonTitle}>
+          AG {typeLabel}
+        </div>
+        <div className={styles.brouillonMeta}>
+          {draft.date ? (
+            <>Prévue le {new Date(draft.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</>
+          ) : (
+            <>Date non définie</>
+          )}
+          {draft.heure && ` à ${draft.heure}`}
+          {draft.adresse && ` • ${draft.adresse}`}
+        </div>
+      </div>
+      <div className={styles.brouillonActions}>
+        <Link href={`/ag/${draft.id}/edit`} className={styles.brouillonLink} title="Continuer la préparation">
+          <Edit3 size={16} aria-hidden="true" />
+          <span>Continuer</span>
+        </Link>
+        <Link href={`/ag/${draft.id}/agenda`} className={styles.brouillonLink} title="Ordre du jour">
+          <ClipboardList size={16} aria-hidden="true" />
+          <span>Agenda</span>
+        </Link>
+        <button
+          onClick={() => onDelete(draft.id)}
+          className={styles.brouillonLinkDanger}
+          title="Supprimer le brouillon"
+        >
+          <Trash2 size={16} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Component for displaying past AG history
 function AgHistoryItem({ ag }: { ag: AgOverview }) {
   const typeLabel = getTypeLabel(ag.meeting_type);
@@ -208,11 +299,67 @@ export default function AGDashboardPage() {
   const { currentCoproId, isManager } = useCopro();
   const { meetings, nextMeeting, pastMeetings, isLoading, error, refresh } = useAgMeetings();
 
+  // State for localStorage drafts
+  const [localStorageDrafts, setLocalStorageDrafts] = useState<LocalStorageDraft[]>([]);
+
+  // Load localStorage drafts on mount
+  useEffect(() => {
+    const loadLocalStorageDrafts = () => {
+      if (typeof window === 'undefined') return;
+
+      const agKeys = Object.keys(localStorage).filter(key => key.startsWith('ag-draft-'));
+      const drafts: LocalStorageDraft[] = [];
+
+      for (const key of agKeys) {
+        const agId = key.replace('ag-draft-', '');
+        const isCompleted = localStorage.getItem(`ag-completed-${agId}`);
+
+        if (!isCompleted) {
+          try {
+            const draftData = JSON.parse(localStorage.getItem(key) || '{}');
+            drafts.push({
+              id: agId,
+              type: draftData.type || 'ORDINAIRE',
+              date: draftData.date || '',
+              heure: draftData.heure,
+              lieu: draftData.lieu,
+              adresse: draftData.adresse,
+            });
+          } catch { /* ignore invalid JSON */ }
+        }
+      }
+
+      // Sort by date
+      drafts.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      setLocalStorageDrafts(drafts);
+    };
+
+    loadLocalStorageDrafts();
+  }, []);
+
+  // Delete a localStorage draft
+  const handleDeleteLocalDraft = (draftId: string) => {
+    if (confirm('Supprimer ce brouillon ?')) {
+      localStorage.removeItem(`ag-draft-${draftId}`);
+      localStorage.removeItem(`ag-resolutions-${draftId}`);
+      localStorage.removeItem(`ag-resolutions-created-${draftId}`);
+      setLocalStorageDrafts(prev => prev.filter(d => d.id !== draftId));
+    }
+  };
+
   // Determine if the next meeting is convoked
   const isConvoked = useMemo(() => {
     if (!nextMeeting) return false;
     return nextMeeting.status === 'convoked' || nextMeeting.status === 'in_progress';
   }, [nextMeeting]);
+
+  // Get all draft meetings from Supabase (brouillons)
+  const draftMeetings = useMemo(() => {
+    return meetings.filter((m) => m.status === 'draft');
+  }, [meetings]);
+
+  // Total drafts count (Supabase + localStorage)
+  const totalDraftsCount = draftMeetings.length + localStorageDrafts.length;
 
   // Mode Single Copro: si pas encore chargé, afficher loading
   if (!currentCoproId) {
@@ -265,6 +412,44 @@ export default function AGDashboardPage() {
                 )}
               </div>
             )}
+
+            {/* Section Brouillons - toujours visible */}
+            <div className="card">
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>
+                  <Edit3 size={20} style={{ marginRight: 8 }} aria-hidden="true" />
+                  Brouillons ({totalDraftsCount})
+                </h3>
+                {isManager && (
+                  <Link href="/ag/new" className={styles.newBrouillonBtn}>
+                    <Plus size={16} aria-hidden="true" />
+                    Nouvelle AG
+                  </Link>
+                )}
+              </div>
+              {totalDraftsCount > 0 ? (
+                <div className={styles.brouillonList}>
+                  {/* Brouillons Supabase */}
+                  {draftMeetings.map((ag) => (
+                    <AgBrouillonItem key={ag.id} ag={ag} />
+                  ))}
+                  {/* Brouillons localStorage */}
+                  {localStorageDrafts.map((draft) => (
+                    <LocalStorageBrouillonItem
+                      key={draft.id}
+                      draft={draft}
+                      onDelete={handleDeleteLocalDraft}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.emptyBrouillons}>
+                  <Edit3 size={24} aria-hidden="true" />
+                  <p>Aucun brouillon en cours</p>
+                  <span>Les AG en préparation apparaîtront ici</span>
+                </div>
+              )}
+            </div>
 
             <div className="card">
               <h3 className={styles.sectionTitle}>Historique ({pastMeetings.length} AG)</h3>

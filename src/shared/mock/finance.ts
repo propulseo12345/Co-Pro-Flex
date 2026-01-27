@@ -472,9 +472,9 @@ export const MOCK_CLES_REPARTITION: MockCleRepartition[] = [
 // ============================================
 
 export const MOCK_EXERCICES: MockExercice[] = [
-  { id: 'ex-2023', coproprieteId: 'copro-1', annee: 2023, dateDebut: '2023-01-01', dateFin: '2023-12-31', statut: ExerciceStatut.CLOTURE },
-  { id: 'ex-2024', coproprieteId: 'copro-1', annee: 2024, dateDebut: '2024-01-01', dateFin: '2024-12-31', statut: ExerciceStatut.ARRETE },
-  { id: 'ex-2025', coproprieteId: 'copro-1', annee: 2025, dateDebut: '2025-01-01', dateFin: '2025-12-31', statut: ExerciceStatut.EN_COURS },
+  { id: 'ex-2024', coproprieteId: 'copro-1', annee: 2024, dateDebut: '2024-01-01', dateFin: '2024-12-31', statut: ExerciceStatut.CLOTURE },
+  { id: 'ex-2025', coproprieteId: 'copro-1', annee: 2025, dateDebut: '2025-01-01', dateFin: '2025-12-31', statut: ExerciceStatut.ARRETE },
+  { id: 'ex-2026', coproprieteId: 'copro-1', annee: 2026, dateDebut: '2026-01-01', dateFin: '2026-12-31', statut: ExerciceStatut.EN_COURS },
 ];
 
 // ============================================

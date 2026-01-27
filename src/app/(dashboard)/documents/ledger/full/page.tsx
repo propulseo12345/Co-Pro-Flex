@@ -13,10 +13,11 @@ import {
     CLASSES_COMPTABLES,
     formatCurrency
 } from '@/components/features/finance/Comptabilite/utils';
+import { getExerciceActuel } from '@/lib/dates';
 import type { LigneBalance } from '@/components/features/finance/Comptabilite/types';
 
-// Année de l'exercice actuel
-const ANNEE_EXERCICE = '2024';
+// Année de l'exercice actuel (dynamique via lib/dates)
+const ANNEE_EXERCICE = getExerciceActuel().toString();
 
 export default function FullLedgerPage() {
     // Calculer la balance à partir des opérations comptables (SOURCE UNIQUE)

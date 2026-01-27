@@ -12,6 +12,7 @@ import {
   printReleve,
   downloadMultipleRelevesAsZip
 } from '@/components/features/finance/RelevesIndividuels';
+import { getExercicesList } from '@/lib/dates';
 import type {
   ReleveIndividuel,
   RelevesFiltersType,
@@ -19,13 +20,13 @@ import type {
 } from '@/components/features/finance/RelevesIndividuels';
 import styles from './releves-individuels.module.css';
 
-const EXERCICES = ['2025', '2024', '2023'];
+const EXERCICES = getExercicesList(3);
 
 export default function RelevesIndividuelsPage() {
   const [releves] = useState<ReleveIndividuel[]>(MOCK_RELEVES);
   const [filters, setFilters] = useState<RelevesFiltersType>({
     search: '',
-    exercice: '2025',
+    exercice: EXERCICES[0], // Exercice actuel (dynamique)
     statutSolde: 'tous',
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

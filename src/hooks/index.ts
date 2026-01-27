@@ -7,3 +7,5 @@ export * from './modules/useCouncilData';
 export * from './modules/useCommunicationData';
 export * from './modules/useMailData';
 export * from './modules/useDocumentsData';
+export * from './modules/useAgDrafts';
+export * from './modules/useAgDraftEdit';

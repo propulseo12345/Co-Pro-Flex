@@ -23,7 +23,14 @@
       "mcp__plugin_supabase_supabase__get_advisors",
       "Bash(done)",
       "Bash(npx supabase:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)",
+      "Bash(tasklist:*)",
+      "Bash(find:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git fsck:*)"
     ]
   }
 }

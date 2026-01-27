@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { MOCK_DEPENSES_BUDGETS, DepenseEtendue } from '@/data/mock';
+import { getExerciceActuel } from '@/lib/dates';
 import {
   BudgetTab,
   PosteBudget,
@@ -294,7 +295,7 @@ export interface BudgetWithStatus {
 export function useBudget() {
   // États UI
   const [activeTab, setActiveTab] = useState<BudgetTab>('fonctionnement');
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(getExerciceActuel());
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [selectedBudgetTravaux, setSelectedBudgetTravaux] = useState<string | null>(null);
   const [selectedPoste, setSelectedPoste] = useState<PosteBudget | null>(null);

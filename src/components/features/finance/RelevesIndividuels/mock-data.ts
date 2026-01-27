@@ -286,22 +286,22 @@ function generateAppelsFonds(montantBase: number, solde: number): LigneAppelFond
   const appels: LigneAppelFonds[] = [
     {
       id: 'appel-t1',
-      description: 'Appel de fonds T1 2025',
-      periode: 'Janvier - Mars 2025',
-      dateEcheance: '2025-01-15',
+      description: 'Appel de fonds T1 2026',
+      periode: 'Janvier - Mars 2026',
+      dateEcheance: '2026-01-15',
       montantDu: montantBase,
       montantPaye: montantBase,
-      datePaiement: '2025-01-10',
+      datePaiement: '2026-01-10',
       statut: 'PAYE'
     },
     {
       id: 'appel-t2',
-      description: 'Appel de fonds T2 2025',
-      periode: 'Avril - Juin 2025',
-      dateEcheance: '2025-04-15',
+      description: 'Appel de fonds T2 2026',
+      periode: 'Avril - Juin 2026',
+      dateEcheance: '2026-04-15',
       montantDu: montantBase,
       montantPaye: solde <= 0 ? montantBase + solde : montantBase,
-      datePaiement: solde >= 0 ? '2025-04-12' : undefined,
+      datePaiement: solde >= 0 ? '2026-04-12' : undefined,
       statut: solde >= 0 ? 'PAYE' : (solde > -montantBase ? 'PARTIELLEMENT_PAYE' : 'NON_PAYE')
     }
   ];
@@ -309,7 +309,7 @@ function generateAppelsFonds(montantBase: number, solde: number): LigneAppelFond
   return appels;
 }
 
-export function generateReleveIndividuel(coproprietaire: CoproprietaireReleve, exercice: string = '2025'): ReleveIndividuel {
+export function generateReleveIndividuel(coproprietaire: CoproprietaireReleve, exercice: string = '2026'): ReleveIndividuel {
   const lot = coproprietaire.lots[0];
   const lignesCharges = generateLignesCharges(lot.tantiemesGeneraux, lot.tantiemesAscenseur, lot.tantiemesChauffage);
   const detailParCle = generateDetailParCle(lot.tantiemesGeneraux, lot.tantiemesAscenseur, lot.tantiemesChauffage);
@@ -339,4 +339,4 @@ export function generateReleveIndividuel(coproprietaire: CoproprietaireReleve, e
   };
 }
 
-export const MOCK_RELEVES: ReleveIndividuel[] = MOCK_COPROPRIETAIRES_RELEVE.map(c => generateReleveIndividuel(c, '2025'));
+export const MOCK_RELEVES: ReleveIndividuel[] = MOCK_COPROPRIETAIRES_RELEVE.map(c => generateReleveIndividuel(c, '2026'));
