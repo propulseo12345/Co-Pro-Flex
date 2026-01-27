@@ -12,7 +12,7 @@ import {
     useRunPaymentReminders,
     type UnpaidWithReminder,
 } from '@/hooks/modules/useFinanceData';
-import { LoadingState, ErrorState, EmptyState, NoCoproSelected } from '@/components/ui/DataState';
+import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState';
 
 type TabType = 'unpaid' | 'history';
 
@@ -456,13 +456,9 @@ export default function RemindersPage() {
         return true;
     });
 
-    // Loading/error states
-    if (!currentCoproId) {
-        return <NoCoproSelected />;
-    }
-
-    if (isLoading) {
-        return <LoadingState message="Chargement des impayes..." />;
+    // Mode Single Copro: si pas encore chargé ou en cours de chargement
+    if (!currentCoproId || isLoading) {
+        return <LoadingState message="Chargement des impayés..." />;
     }
 
     if (error) {

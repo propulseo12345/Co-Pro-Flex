@@ -15,16 +15,11 @@ import type {
   SuggestionCategorie,
   SuggestionRapprochement,
   EntiteLiee,
-  ErreurCoherence,
 } from '../domain/types';
+// Import only constants that are still needed - NOT MOCK data
 import {
-  MOCK_MOUVEMENTS_BASE,
-  MOCK_ECRITURES_COMPTABLES,
-  MOCK_STATUT_CONNEXION,
-  MOCK_HISTORIQUE_SYNC,
   MOCK_COMPTE_COURANT,
   MOCK_COMPTE_TRAVAUX,
-  MOCK_APPELS_EN_ATTENTE,
   COMPTES_CHARGE,
   COMPTES_PRODUIT,
 } from '../domain/constants';
@@ -50,6 +45,12 @@ export function useMouvementsBancairesPage() {
   const importMutation = useImportBankMovement();
   const reconcileMutation = useReconcileBankMovement();
 
+  // Enhanced refresh that updates timestamp
+  const refreshWithTimestamp = useCallback(async () => {
+    await refresh();
+    setLastRefresh(new Date());
+  }, [refresh]);
+
   // Convert Supabase data to local format
   const supabaseMouvements: MouvementBancaireBase[] = useMemo(() => {
     if (!supabaseBankMovements) return [];
@@ -67,18 +68,13 @@ export function useMouvementsBancairesPage() {
 
   const [compteActif, setCompteActif] = useState<TypeCompte>('courant');
 
-  // Use Supabase data if available, otherwise fall back to mock
-  const initialMouvements = currentCoproId && supabaseMouvements.length > 0 ? supabaseMouvements : MOCK_MOUVEMENTS_BASE;
-  const [mouvementsBase, setMouvementsBase] = useState<MouvementBancaireBase[]>(initialMouvements);
+  // Use Supabase data only - no mock fallback
+  const [mouvementsBase, setMouvementsBase] = useState<MouvementBancaireBase[]>([]);
 
   // Update mouvements when Supabase data changes
   useEffect(() => {
-    if (currentCoproId && supabaseMouvements.length > 0) {
-      setMouvementsBase(supabaseMouvements);
-    } else if (!currentCoproId) {
-      setMouvementsBase(MOCK_MOUVEMENTS_BASE);
-    }
-  }, [currentCoproId, supabaseMouvements]);
+    setMouvementsBase(supabaseMouvements);
+  }, [supabaseMouvements]);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'TOUS' | TypeMouvement>('TOUS');
   const [categorieFilter, setCategorieFilter] = useState<'TOUS' | 'CATEGORISE' | 'NON_CATEGORISE'>('TOUS');
@@ -92,8 +88,19 @@ export function useMouvementsBancairesPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedEntite, setSelectedEntite] = useState<{ mouvement: MouvementBancaire; entite: EntiteLiee } | null>(null);
 
-  const [statutConnexion, setStatutConnexion] = useState<StatutConnexionBancaire>(MOCK_STATUT_CONNEXION);
-  const [historiqueSync, setHistoriqueSync] = useState<HistoriqueSynchronisation[]>(MOCK_HISTORIQUE_SYNC);
+  // Initialize with default values instead of MOCK
+  const [statutConnexion, setStatutConnexion] = useState<StatutConnexionBancaire>({
+    statut: 'connecte',
+    banque: 'Connexion Supabase',
+    derniereSynchronisation: new Date().toISOString(),
+    prochaineSynchronisation: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    modeActif: 'manuel',
+    comptesConnectes: 1,
+    comptesTotal: 1,
+  });
+  const [historiqueSync, setHistoriqueSync] = useState<HistoriqueSynchronisation[]>([]);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [isMutating, setIsMutating] = useState(false);
   const [showHistoriqueSync, setShowHistoriqueSync] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importType, setImportType] = useState<TypeImport>('csv');
@@ -102,7 +109,8 @@ export function useMouvementsBancairesPage() {
   const [alerteNouveauxMouvements, setAlerteNouveauxMouvements] = useState<number | null>(null);
 
   const [ongletActif, setOngletActif] = useState<OngletActif>('mouvements');
-  const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>(MOCK_ECRITURES_COMPTABLES);
+  // Initialize with empty array - will be populated from Supabase ledger entries
+  const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>([]);
   const [selectedMouvementRapprochement, setSelectedMouvementRapprochement] = useState<MouvementBancaire | null>(null);
   const [suggestionsRapprochement, setSuggestionsRapprochement] = useState<SuggestionRapprochement[]>([]);
   const [showRapprochementModal, setShowRapprochementModal] = useState(false);
@@ -390,8 +398,10 @@ export function useMouvementsBancairesPage() {
     setSelectedCompte(suggestion.compte);
   }, []);
 
-  const handleSaveCategorie = useCallback(() => {
+  const handleSaveCategorie = useCallback(async () => {
     if (!selectedMouvement || !selectedCompte) return;
+
+    setIsMutating(true);
 
     const compteLabel = selectedCategorie === 'charge'
       ? COMPTES_CHARGE.find(c => c.code === selectedCompte)?.label
@@ -410,11 +420,7 @@ export function useMouvementsBancairesPage() {
           : ref.type === 'facture'
           ? `FAC-${ref.nom.toUpperCase()}-${new Date().getFullYear()}`
           : undefined,
-        details: ref.type === 'appel_fonds'
-          ? {
-              periode: MOCK_APPELS_EN_ATTENTE.find(a => a.id === ref.id)?.periode,
-            }
-          : ref.type === 'facture'
+        details: ref.type === 'facture'
           ? {
               statut: 'PAYEE',
               dateEcheance: new Date().toISOString().split('T')[0]
@@ -423,24 +429,43 @@ export function useMouvementsBancairesPage() {
       };
     }
 
-    setMouvementsBase(prev =>
-      prev.map(m =>
-        m.id === selectedMouvement.id
-          ? {
-              ...m,
-              categorise: true,
-              categorie: selectedCategorie,
-              compteComptable: `${selectedCompte} - ${compteLabel}`,
-              entiteLiee: entiteLiee || m.entiteLiee
-            }
-          : m
-      )
-    );
+    try {
+      // Call Supabase reconcile API to categorize the movement
+      const result = await reconcileMutation.mutate({
+        bank_movement_id: selectedMouvement.id,
+        target_type: 'other',
+        target_id: selectedCompte, // Account code as target
+      });
+
+      if (result.error) {
+        console.error('Categorize error:', result.error);
+      }
+
+      // Update local state optimistically
+      setMouvementsBase(prev =>
+        prev.map(m =>
+          m.id === selectedMouvement.id
+            ? {
+                ...m,
+                categorise: true,
+                categorie: selectedCategorie,
+                compteComptable: `${selectedCompte} - ${compteLabel}`,
+                entiteLiee: entiteLiee || m.entiteLiee
+              }
+            : m
+        )
+      );
+
+      // Refresh from Supabase to ensure consistency
+      await refreshWithTimestamp();
+    } finally {
+      setIsMutating(false);
+    }
 
     setShowCategorieModal(false);
     setSelectedMouvement(null);
     setSelectedSuggestion(null);
-  }, [selectedMouvement, selectedCompte, selectedCategorie, selectedSuggestion]);
+  }, [selectedMouvement, selectedCompte, selectedCategorie, selectedSuggestion, reconcileMutation, refreshWithTimestamp]);
 
   const handleOpenEntityDetail = useCallback((mouvement: MouvementBancaire) => {
     if (mouvement.entiteLiee) {
@@ -475,21 +500,42 @@ export function useMouvementsBancairesPage() {
     setShowRapprochementModal(true);
   }, [ecrituresComptables]);
 
-  const handleRapprocher = useCallback((ecritureId: string) => {
+  const handleRapprocher = useCallback(async (ecritureId: string) => {
     if (!selectedMouvementRapprochement) return;
 
-    setEcrituresComptables(prev =>
-      prev.map(ec =>
-        ec.id === ecritureId
-          ? { ...ec, rapproche: true, mouvementRapproche: selectedMouvementRapprochement.id }
-          : ec
-      )
-    );
+    setIsMutating(true);
+
+    try {
+      // Call Supabase reconcile API
+      const result = await reconcileMutation.mutate({
+        bank_movement_id: selectedMouvementRapprochement.id,
+        target_type: 'other', // Could be 'payment' or 'supplier_payment' based on ecriture type
+        target_id: ecritureId,
+      });
+
+      if (result.error) {
+        console.error('Reconcile error:', result.error);
+      }
+
+      // Update local state
+      setEcrituresComptables(prev =>
+        prev.map(ec =>
+          ec.id === ecritureId
+            ? { ...ec, rapproche: true, mouvementRapproche: selectedMouvementRapprochement.id }
+            : ec
+        )
+      );
+
+      // Refresh from Supabase
+      await refreshWithTimestamp();
+    } finally {
+      setIsMutating(false);
+    }
 
     setShowRapprochementModal(false);
     setSelectedMouvementRapprochement(null);
     setSuggestionsRapprochement([]);
-  }, [selectedMouvementRapprochement]);
+  }, [selectedMouvementRapprochement, reconcileMutation, refreshWithTimestamp]);
 
   const handleAnnulerRapprochement = useCallback((ecritureId: string) => {
     setEcrituresComptables(prev =>
@@ -526,6 +572,15 @@ export function useMouvementsBancairesPage() {
   }, []);
 
   return {
+    // Data loading state
+    isLoading,
+    isMutating,
+    error,
+    refreshData: refreshWithTimestamp,
+    lastRefresh,
+    currentCoproId,
+    hasData: mouvements.length > 0,
+
     // State
     compteActif,
     mouvements,

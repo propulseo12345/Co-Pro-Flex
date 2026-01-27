@@ -516,6 +516,98 @@ export async function listLots(coproId: string): Promise<ApiResult<Array<{ id: s
 }
 
 // ============================================================================
+// GENERAL LEDGER (GRAND LIVRE)
+// ============================================================================
+
+export interface GeneralLedgerEntry {
+  entry_id: string;
+  tx_id: string;
+  copro_id: string;
+  period_id: string;
+  tx_date: string;
+  tx_label: string;
+  source_type: string | null;
+  source_id: string | null;
+  status: string;
+  posted_at: string | null;
+  account_id: string;
+  account_code: string;
+  account_name: string;
+  account_type: string;
+  lot_id: string | null;
+  lot_ref: string | null;
+  direction: 'debit' | 'credit';
+  amount: number;
+  entry_label: string | null;
+}
+
+export async function getGeneralLedger(
+  coproId: string,
+  options?: { periodId?: string; status?: string }
+): Promise<ApiResult<GeneralLedgerEntry[]>> {
+  const supabase = getSupabaseClient();
+
+  let query = supabase
+    .from('v_general_ledger')
+    .select('*')
+    .eq('copro_id', coproId);
+
+  if (options?.periodId) {
+    query = query.eq('period_id', options.periodId);
+  }
+
+  if (options?.status) {
+    query = query.eq('status', options.status);
+  }
+
+  const { data, error } = await query.order('tx_date', { ascending: false });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as GeneralLedgerEntry[], error: null };
+}
+
+// ============================================================================
+// TRIAL BALANCE (BALANCE COMPTABLE)
+// ============================================================================
+
+export interface TrialBalanceEntry {
+  copro_id: string;
+  period_id: string;
+  period_name: string;
+  account_id: string;
+  account_code: string;
+  account_name: string;
+  account_type: string;
+  account_parent_id: string | null;
+  total_debit: number;
+  total_credit: number;
+  balance: number;
+}
+
+export async function getTrialBalance(
+  coproId: string,
+  periodId: string
+): Promise<ApiResult<TrialBalanceEntry[]>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('v_trial_balance')
+    .select('*')
+    .eq('copro_id', coproId)
+    .eq('period_id', periodId)
+    .order('account_code');
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as TrialBalanceEntry[], error: null };
+}
+
+// ============================================================================
 // PAYMENT REMINDERS (RELANCES IMPAYÉS)
 // ============================================================================
 

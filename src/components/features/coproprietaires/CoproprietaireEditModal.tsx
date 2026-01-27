@@ -10,9 +10,10 @@ interface CoproprietaireEditModalProps {
   onFormChange: (form: Partial<Coproprietaire>) => void;
   onClose: () => void;
   onSave: () => void;
+  isSaving?: boolean;
 }
 
-export function CoproprietaireEditModal({ copro, form, onFormChange, onClose, onSave }: CoproprietaireEditModalProps) {
+export function CoproprietaireEditModal({ copro, form, onFormChange, onClose, onSave, isSaving = false }: CoproprietaireEditModalProps) {
   if (!copro) return null;
 
   return (
@@ -47,7 +48,7 @@ export function CoproprietaireEditModal({ copro, form, onFormChange, onClose, on
           </div>
           <div className={styles.modalFooter}>
             <button className="btn btn-secondary" onClick={onClose}>Annuler</button>
-            <button className="btn btn-primary" onClick={onSave} disabled={!form.nom || !form.email}><Save size={16} aria-hidden="true" />Enregistrer</button>
+            <button className="btn btn-primary" onClick={onSave} disabled={!form.nom || !form.email || isSaving}><Save size={16} aria-hidden="true" />{isSaving ? 'Enregistrement...' : 'Enregistrer'}</button>
           </div>
         </div>
       </div>

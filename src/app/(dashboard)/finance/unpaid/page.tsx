@@ -5,7 +5,7 @@ import styles from './unpaid.module.css';
 import Link from 'next/link';
 import { useCopro } from '@/providers/CoproContext';
 import { useUnpaid } from '@/hooks/modules/useFinanceData';
-import { LoadingState, ErrorState, EmptyState, NoCoproSelected } from '@/components/ui/DataState';
+import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState';
 
 export default function UnpaidPage() {
   const { currentCoproId, isManager } = useCopro();
@@ -39,12 +39,8 @@ export default function UnpaidPage() {
     }
   };
 
-  // Loading state
-  if (!currentCoproId) {
-    return <NoCoproSelected />;
-  }
-
-  if (isLoading) {
+  // Mode Single Copro: si pas encore chargé ou en cours de chargement
+  if (!currentCoproId || isLoading) {
     return <LoadingState message="Chargement des impayés..." />;
   }
 

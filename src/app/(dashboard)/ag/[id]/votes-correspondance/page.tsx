@@ -188,13 +188,14 @@ export default function VotesCorrespondancePage() {
     return existingVote?.vote || null;
   };
 
+  // Mode Single Copro: si pas encore chargé, afficher un spinner
   if (!currentCoproId) {
     return (
       <div className="container">
         <div className={styles.emptyState}>
-          <AlertCircle size={48} />
-          <h3>Aucune copropriété sélectionnée</h3>
-          <p>Veuillez sélectionner une copropriété pour accéder aux votes par correspondance.</p>
+          <div style={{ animation: 'spin 1s linear infinite', width: 48, height: 48, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-primary)', borderRadius: '50%' }} />
+          <h3>Chargement...</h3>
+          <p>Chargement de la copropriété en cours.</p>
         </div>
       </div>
     );

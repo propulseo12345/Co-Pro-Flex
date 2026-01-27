@@ -1,25 +1,58 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { FileText, Download, AlertTriangle, CheckCircle, Eye, EyeOff, Search, Filter, TrendingUp, TrendingDown, Minus, Info } from 'lucide-react';
+import { FileText, Download, AlertTriangle, CheckCircle, Eye, EyeOff, Search, Filter, TrendingUp, TrendingDown, Minus, Info, RefreshCw, Building2, AlertCircle } from 'lucide-react';
 import styles from './balance.module.css';
 
-// Import des données et fonctions de Finance/Comptabilité (SOURCE UNIQUE)
-import { MOCK_OPERATIONS } from '@/components/features/finance/Comptabilite/data';
+import { useCopro } from '@/providers/CoproContext';
+import { useTrialBalance, useOpenPeriod } from '@/hooks/modules/useFinanceData';
 import {
-    calculateBalance,
     filterBalance,
     calculateBalanceTotals,
     CLASSES_COMPTABLES,
     formatCurrency
 } from '@/components/features/finance/Comptabilite/utils';
 import type { LigneBalance } from '@/components/features/finance/Comptabilite/types';
+import type { TrialBalanceEntry } from '@/lib/finance/api';
 
 // Année de l'exercice actuel (à synchroniser avec les données)
 const ANNEE_EXERCICE = '2024';
-const ANNEE_N1 = 2023;
+
+// Map Supabase account_type to local TypeCompte
+type TypeCompte = 'ACTIF' | 'PASSIF' | 'CHARGE' | 'PRODUIT';
+function mapAccountType(accountType: string): TypeCompte {
+    switch (accountType) {
+        case 'asset': return 'ACTIF';
+        case 'liability': return 'PASSIF';
+        case 'equity': return 'PASSIF';
+        case 'revenue': return 'PRODUIT';
+        case 'expense': return 'CHARGE';
+        default: return 'ACTIF';
+    }
+}
+
+// Transform Supabase trial balance to local format
+function transformToLigneBalance(entries: TrialBalanceEntry[]): LigneBalance[] {
+    return entries.map(entry => ({
+        compte: entry.account_code,
+        compteLabel: entry.account_name,
+        typeCompte: mapAccountType(entry.account_type),
+        classe: entry.account_code.charAt(0),
+        soldeOuvertureDebit: 0,
+        soldeOuvertureCredit: 0,
+        mouvementDebit: Number(entry.total_debit),
+        mouvementCredit: Number(entry.total_credit),
+        soldeClotureDebit: Number(entry.balance) > 0 ? Number(entry.balance) : 0,
+        soldeClotureCredit: Number(entry.balance) < 0 ? -Number(entry.balance) : 0,
+        variationPourcent: undefined,
+    }));
+}
 
 export default function BalancePage() {
+    const { currentCoproId } = useCopro();
+    const { data: openPeriod, isLoading: periodLoading } = useOpenPeriod();
+    const { data: trialBalanceData, isLoading, error, refresh } = useTrialBalance(openPeriod?.id || null);
+
     // Par défaut, masquer les comptes à solde nul pour une lecture allégée
     const [masquerSoldesNuls, setMasquerSoldesNuls] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -28,10 +61,11 @@ export default function BalancePage() {
 
     const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Calculer la balance à partir des opérations comptables (SOURCE UNIQUE)
+    // Transform Supabase data to local format
     const balanceData = useMemo(() => {
-        return calculateBalance(MOCK_OPERATIONS);
-    }, []);
+        if (!trialBalanceData || trialBalanceData.length === 0) return [];
+        return transformToLigneBalance(trialBalanceData);
+    }, [trialBalanceData]);
 
     // Appliquer les filtres
     const filteredBalance = useMemo(() => {
@@ -54,16 +88,94 @@ export default function BalancePage() {
     // Stats
     const comptesAvecSolde = balanceData.filter(l => l.soldeClotureDebit !== 0 || l.soldeClotureCredit !== 0).length;
 
+    // Mode Single Copro: si pas encore chargé ou en cours de chargement
+    if (!currentCoproId || isLoading || periodLoading) {
+        return (
+            <div className="container">
+                <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
+                    <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--color-primary)' }} />
+                    <p style={{ marginTop: '1rem' }}>Chargement de la balance comptable...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // No period found
+    if (!openPeriod) {
+        return (
+            <div className="container">
+                <div className={styles.header}>
+                    <div>
+                        <h1 className={styles.title}>Balance Comptable</h1>
+                        <p className={styles.subtitle}>Exercice {ANNEE_EXERCICE} - Vue au {today}</p>
+                    </div>
+                </div>
+                <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
+                    <AlertCircle size={48} style={{ color: 'var(--color-warning)', marginBottom: '1rem' }} />
+                    <h2>Aucune période comptable ouverte</h2>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>
+                        Veuillez créer ou ouvrir une période comptable pour afficher la balance.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="container">
+                <div className="card" style={{ padding: '2rem', textAlign: 'center', borderColor: 'var(--color-error)' }}>
+                    <AlertCircle size={32} style={{ color: 'var(--color-error)', marginBottom: '1rem' }} />
+                    <h2>Erreur de chargement</h2>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>{error}</p>
+                    <button className="btn btn-primary" onClick={refresh} style={{ marginTop: '1rem' }}>
+                        <RefreshCw size={16} style={{ marginRight: 8 }} /> Réessayer
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Empty state
+    if (balanceData.length === 0) {
+        return (
+            <div className="container">
+                <div className={styles.header}>
+                    <div>
+                        <h1 className={styles.title}>Balance Comptable</h1>
+                        <p className={styles.subtitle}>Exercice {ANNEE_EXERCICE} - Vue au {today}</p>
+                    </div>
+                    <div className={styles.actions}>
+                        <button className="btn btn-secondary" onClick={refresh}>
+                            <RefreshCw size={16} style={{ marginRight: 8 }} /> Actualiser
+                        </button>
+                    </div>
+                </div>
+                <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
+                    <FileText size={48} style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem' }} />
+                    <h2>Aucune écriture comptable</h2>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>
+                        Il n&apos;y a pas encore d&apos;écritures comptables pour cette période.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="container">
             <div className={styles.header}>
                 <div>
                     <h1 className={styles.title}>Balance Comptable</h1>
                     <p className={styles.subtitle}>
-                        Exercice {ANNEE_EXERCICE} - Vue au {today}
+                        {openPeriod?.name || `Exercice ${ANNEE_EXERCICE}`} - Vue au {today}
                     </p>
                 </div>
                 <div className={styles.actions}>
+                    <button className="btn btn-secondary" onClick={refresh} title="Actualiser les données">
+                        <RefreshCw size={16} style={{ marginRight: 8 }} aria-hidden="true" /> Actualiser
+                    </button>
                     <button className="btn btn-secondary"><Download size={16} aria-hidden="true" /> Export Excel</button>
                     <button className="btn btn-secondary"><FileText size={16} aria-hidden="true" /> Export PDF</button>
                 </div>
@@ -72,7 +184,7 @@ export default function BalancePage() {
             {/* Bandeau d'information sur la source des données */}
             <div className={styles.infoSource}>
                 <Info size={16} />
-                <span>Ce document est généré automatiquement à partir des écritures comptables du module Finance</span>
+                <span>Ce document est généré automatiquement à partir des écritures comptables de Supabase</span>
             </div>
 
             {/* Filtres */}

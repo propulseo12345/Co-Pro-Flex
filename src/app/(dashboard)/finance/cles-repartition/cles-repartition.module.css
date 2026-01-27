@@ -29,6 +29,22 @@
   margin: 0;
 }
 
+.headerActions {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+/* Spinning animation for refresh button */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

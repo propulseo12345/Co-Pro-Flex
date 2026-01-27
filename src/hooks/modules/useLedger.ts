@@ -1,15 +1,110 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { MOCK_OPERATIONS } from '@/components/features/finance/Comptabilite/data';
-import { calculateBalance, filterBalance, CLASSES_COMPTABLES } from '@/components/features/finance/Comptabilite/utils';
+import { useState, useMemo, useCallback } from 'react';
+import { useCopro } from '@/providers/CoproContext';
+import { useGeneralLedger, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+import { filterBalance, CLASSES_COMPTABLES } from '@/components/features/finance/Comptabilite/utils';
 import type { LigneBalance, OperationComptable } from '@/components/features/finance/Comptabilite/types';
+import type { GeneralLedgerEntry } from '@/lib/finance/api';
 
 export type SortField = 'date' | 'compte' | 'libelle' | 'debit' | 'credit' | 'numeroPiece';
 export type SortOrder = 'asc' | 'desc';
 export type GroupBy = 'compte' | 'mois';
 
+// Map Supabase account_type to local TypeCompte for operations
+function mapAccountTypeToTypeCompte(accountType: string): TypeCompte {
+    switch (accountType) {
+        case 'asset': return 'ACTIF';
+        case 'liability': return 'PASSIF';
+        case 'equity': return 'PASSIF';
+        case 'revenue': return 'PRODUIT';
+        case 'expense': return 'CHARGE';
+        default: return 'ACTIF';
+    }
+}
+
+// Transform Supabase data to local format
+function transformToOperations(entries: GeneralLedgerEntry[]): OperationComptable[] {
+    return entries.map(entry => ({
+        id: entry.entry_id,
+        date: entry.tx_date,
+        compte: entry.account_code,
+        compteLabel: entry.account_name,
+        typeCompte: mapAccountTypeToTypeCompte(entry.account_type),
+        libelle: entry.tx_label + (entry.entry_label ? ` - ${entry.entry_label}` : ''),
+        debit: entry.direction === 'debit' ? Number(entry.amount) : 0,
+        credit: entry.direction === 'credit' ? Number(entry.amount) : 0,
+        numeroPiece: entry.source_id?.slice(0, 8) || undefined,
+    }));
+}
+
+// Map account class to TypeCompte
+type TypeCompte = 'ACTIF' | 'PASSIF' | 'CHARGE' | 'PRODUIT';
+function getTypeCompteFromClasse(classe: string): TypeCompte {
+    switch (classe) {
+        case '1': return 'PASSIF';  // Capitaux
+        case '2': return 'ACTIF';   // Immobilisations
+        case '3': return 'ACTIF';   // Stocks
+        case '4': return 'ACTIF';   // Tiers (créances par défaut)
+        case '5': return 'ACTIF';   // Trésorerie
+        case '6': return 'CHARGE';  // Charges
+        case '7': return 'PRODUIT'; // Produits
+        default: return 'ACTIF';
+    }
+}
+
+// Calculate balance from operations
+function calculateBalanceFromOperations(operations: OperationComptable[]): LigneBalance[] {
+    const compteMap = new Map<string, {
+        compte: string;
+        compteLabel: string;
+        classe: string;
+        mouvementDebit: number;
+        mouvementCredit: number;
+    }>();
+
+    operations.forEach(op => {
+        const existing = compteMap.get(op.compte);
+        if (existing) {
+            existing.mouvementDebit += op.debit;
+            existing.mouvementCredit += op.credit;
+        } else {
+            compteMap.set(op.compte, {
+                compte: op.compte,
+                compteLabel: op.compteLabel,
+                classe: op.compte.charAt(0),
+                mouvementDebit: op.debit,
+                mouvementCredit: op.credit,
+            });
+        }
+    });
+
+    return Array.from(compteMap.values()).map(c => ({
+        compte: c.compte,
+        compteLabel: c.compteLabel,
+        typeCompte: getTypeCompteFromClasse(c.classe),
+        classe: c.classe,
+        soldeOuvertureDebit: 0,
+        soldeOuvertureCredit: 0,
+        mouvementDebit: c.mouvementDebit,
+        mouvementCredit: c.mouvementCredit,
+        soldeClotureDebit: Math.max(0, c.mouvementDebit - c.mouvementCredit),
+        soldeClotureCredit: Math.max(0, c.mouvementCredit - c.mouvementDebit),
+        variationPourcent: undefined,
+    })).sort((a, b) => a.compte.localeCompare(b.compte));
+}
+
 export function useLedger() {
+    const { currentCoproId } = useCopro();
+    const { data: openPeriod } = useOpenPeriod();
+    const { data: ledgerEntries, isLoading, error, refresh } = useGeneralLedger({ status: 'posted' });
+
+    // Transform Supabase data to operations
+    const operations = useMemo(() => {
+        if (!ledgerEntries || ledgerEntries.length === 0) return [];
+        return transformToOperations(ledgerEntries);
+    }, [ledgerEntries]);
+
     const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set(['1', '4', '5', '6', '7']));
     const [searchTerm, setSearchTerm] = useState('');
     const [classeFilter, setClasseFilter] = useState('TOUTES');
@@ -24,7 +119,7 @@ export function useLedger() {
     const [groupBy, setGroupBy] = useState<GroupBy>('compte');
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-    const balanceData = useMemo(() => calculateBalance(MOCK_OPERATIONS), []);
+    const balanceData = useMemo(() => calculateBalanceFromOperations(operations), [operations]);
 
     const filteredBalance = useMemo(() => {
         return filterBalance(balanceData, { masquerSoldesNuls: false, classeFilter, searchTerm });
@@ -41,12 +136,12 @@ export function useLedger() {
 
     const comptesUniques = useMemo(() => {
         const comptes = new Set<string>();
-        MOCK_OPERATIONS.forEach(op => comptes.add(op.compte));
+        operations.forEach(op => comptes.add(op.compte));
         return Array.from(comptes).sort();
-    }, []);
+    }, [operations]);
 
     const filteredEcritures = useMemo(() => {
-        let result = [...MOCK_OPERATIONS];
+        let result = [...operations];
 
         if (ecrituresSearch) {
             const search = ecrituresSearch.toLowerCase();
@@ -79,7 +174,7 @@ export function useLedger() {
         });
 
         return result;
-    }, [ecrituresSearch, ecrituresCompteFilter, ecrituresDateDebut, ecrituresDateFin, sortField, sortOrder]);
+    }, [operations, ecrituresSearch, ecrituresCompteFilter, ecrituresDateDebut, ecrituresDateFin, sortField, sortOrder]);
 
     const groupedEcritures = useMemo(() => {
         const groups: Record<string, { entries: OperationComptable[]; totalDebit: number; totalCredit: number; label: string }> = {};
@@ -109,39 +204,43 @@ export function useLedger() {
         return filteredEcritures.reduce((acc, op) => ({ debit: acc.debit + op.debit, credit: acc.credit + op.credit }), { debit: 0, credit: 0 });
     }, [filteredEcritures]);
 
-    const toggleClasse = (classe: string) => {
-        const newExpanded = new Set(expandedClasses);
-        if (newExpanded.has(classe)) newExpanded.delete(classe);
-        else newExpanded.add(classe);
-        setExpandedClasses(newExpanded);
-    };
+    const toggleClasse = useCallback((classe: string) => {
+        setExpandedClasses(prev => {
+            const newExpanded = new Set(prev);
+            if (newExpanded.has(classe)) newExpanded.delete(classe);
+            else newExpanded.add(classe);
+            return newExpanded;
+        });
+    }, []);
 
-    const toggleGroup = (groupKey: string) => {
-        const newExpanded = new Set(expandedGroups);
-        if (newExpanded.has(groupKey)) newExpanded.delete(groupKey);
-        else newExpanded.add(groupKey);
-        setExpandedGroups(newExpanded);
-    };
+    const toggleGroup = useCallback((groupKey: string) => {
+        setExpandedGroups(prev => {
+            const newExpanded = new Set(prev);
+            if (newExpanded.has(groupKey)) newExpanded.delete(groupKey);
+            else newExpanded.add(groupKey);
+            return newExpanded;
+        });
+    }, []);
 
-    const expandAllGroups = () => setExpandedGroups(new Set(Object.keys(groupedEcritures)));
-    const collapseAllGroups = () => setExpandedGroups(new Set());
+    const expandAllGroups = useCallback(() => setExpandedGroups(new Set(Object.keys(groupedEcritures))), [groupedEcritures]);
+    const collapseAllGroups = useCallback(() => setExpandedGroups(new Set()), []);
 
-    const getClasseSolde = (comptes: LigneBalance[]) => {
+    const getClasseSolde = useCallback((comptes: LigneBalance[]) => {
         return comptes.reduce((sum, c) => sum + (c.soldeClotureDebit - c.soldeClotureCredit), 0);
-    };
+    }, []);
 
-    const handleSort = (field: SortField) => {
-        if (sortField === field) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    const handleSort = useCallback((field: SortField) => {
+        if (sortField === field) setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         else { setSortField(field); setSortOrder('asc'); }
-    };
+    }, [sortField]);
 
-    const openEcrituresForCompte = (compte: string) => {
+    const openEcrituresForCompte = useCallback((compte: string) => {
         setEcrituresCompteFilter(compte);
         setExpandedGroups(new Set([compte]));
         setShowEcritures(true);
-    };
+    }, []);
 
-    const setQuickDateFilter = (period: 'month' | 'quarter' | 'year') => {
+    const setQuickDateFilter = useCallback((period: 'month' | 'quarter' | 'year') => {
         const now = new Date();
         let start: Date;
         switch (period) {
@@ -151,16 +250,23 @@ export function useLedger() {
         }
         setEcrituresDateDebut(start.toISOString().split('T')[0]);
         setEcrituresDateFin(now.toISOString().split('T')[0]);
-    };
+    }, []);
 
-    const resetEcrituresFilters = () => {
+    const resetEcrituresFilters = useCallback(() => {
         setEcrituresSearch('');
         setEcrituresCompteFilter('TOUS');
         setEcrituresDateDebut('');
         setEcrituresDateFin('');
-    };
+    }, []);
 
     return {
+        // Data loading state
+        isLoading,
+        error,
+        refresh,
+        currentCoproId,
+        hasData: operations.length > 0,
+
         // Balance state
         expandedClasses, searchTerm, setSearchTerm, classeFilter, setClasseFilter,
         groupedByClasse, toggleClasse, getClasseSolde,

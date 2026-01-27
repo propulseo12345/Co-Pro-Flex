@@ -1,59 +1,83 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { clesRepartitionApi, type ValidationResult } from '@/shared/services';
-import type { MockCleRepartition } from '@/shared/mock/finance';
+import { useCopro } from '@/providers/CoproContext';
+import { useRepartitionKeys, type RepartitionKeyWithTotals, type ValidationResult } from '@/hooks/modules/useLotsData';
+import * as lotsApi from '@/lib/lots/api';
 
-export interface CleWithValidation extends MockCleRepartition {
+export interface CleWithValidation extends RepartitionKeyWithTotals {
   validation?: ValidationResult;
 }
 
+/**
+ * Hook pour la page des clés de répartition
+ * P0#2: Migration Mock → Supabase
+ */
 export function useClesRepartitionPage() {
   const router = useRouter();
-  const [cles, setCles] = useState<CleWithValidation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { currentCoproId, isManager } = useCopro();
+  const { keys, isLoading, error, refresh, deleteKey, isMutating } = useRepartitionKeys();
+
+  const [clesWithValidation, setClesWithValidation] = useState<CleWithValidation[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [simulationModal, setSimulationModal] = useState<{ cle: MockCleRepartition; montant: number } | null>(null);
+  const [simulationModal, setSimulationModal] = useState<{ cle: RepartitionKeyWithTotals; montant: number } | null>(null);
   const [montantSimulation, setMontantSimulation] = useState<string>('10000');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  const loadCles = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const result = await clesRepartitionApi.list({ sortBy: 'nom', sortOrder: 'asc' });
-      if (result.success && result.data) {
-        const clesWithValidation = await Promise.all(
-          result.data.data.map(async (cle: MockCleRepartition) => {
-            const validation = await clesRepartitionApi.validerTantiemes(cle.id);
-            return { ...cle, validation: validation.data };
-          })
-        );
-        setCles(clesWithValidation);
-      }
-    } catch {
-      setError('Erreur lors du chargement des clés de répartition');
-    } finally {
-      setIsLoading(false);
+  // Load validations for all keys
+  const loadValidations = useCallback(async () => {
+    if (!currentCoproId || keys.length === 0) {
+      setClesWithValidation([]);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    loadCles();
-  }, [loadCles]);
+    try {
+      const validations = await Promise.all(
+        keys.map(async (key) => {
+          const { data: validation } = await lotsApi.validateRepartitionKey(currentCoproId, key.key_id);
+          return {
+            ...key,
+            validation: validation || undefined,
+          };
+        })
+      );
+      setClesWithValidation(validations);
+    } catch (e) {
+      setValidationError(e instanceof Error ? e.message : 'Erreur validation');
+    }
+  }, [currentCoproId, keys]);
+
+  // Trigger validation load when keys change
+  useState(() => {
+    if (keys.length > 0) {
+      loadValidations();
+    }
+  });
+
+  // Reload everything
+  const loadCles = useCallback(async () => {
+    await refresh();
+    await loadValidations();
+  }, [refresh, loadValidations]);
 
   const handleDelete = useCallback(async (id: string) => {
-    const result = await clesRepartitionApi.delete(id);
-    if (result.success) {
-      setCles(prev => prev.filter(c => c.id !== id));
+    if (!isManager) {
+      alert('Seuls les gestionnaires peuvent supprimer une clé');
+      return;
+    }
+
+    const success = await deleteKey(id);
+    if (success) {
       setDeleteConfirm(null);
+      await loadValidations();
     } else {
-      alert(result.error || 'Erreur lors de la suppression');
+      alert('Erreur lors de la suppression');
       setDeleteConfirm(null);
     }
-  }, []);
+  }, [deleteKey, isManager, loadValidations]);
 
-  const handleSimulation = useCallback((cle: MockCleRepartition) => {
+  const handleSimulation = useCallback((cle: RepartitionKeyWithTotals) => {
     setSimulationModal({ cle, montant: parseFloat(montantSimulation) || 10000 });
   }, [montantSimulation]);
 
@@ -63,16 +87,19 @@ export function useClesRepartitionPage() {
   const closeDeleteConfirm = useCallback(() => setDeleteConfirm(null), []);
   const closeSimulationModal = useCallback(() => setSimulationModal(null), []);
 
+  // Use keys directly, with validation data when available
+  const cles = clesWithValidation.length > 0 ? clesWithValidation : keys.map(k => ({ ...k } as CleWithValidation));
+
   const stats = {
     total: cles.length,
-    valid: cles.filter(c => c.validation?.isValid).length,
-    withAlerts: cles.filter(c => !c.validation?.isValid).length,
+    valid: cles.filter(c => c.validation?.isValid ?? c.is_complete).length,
+    withAlerts: cles.filter(c => !(c.validation?.isValid ?? c.is_complete)).length,
   };
 
   return {
     cles,
     isLoading,
-    error,
+    error: error || validationError,
     deleteConfirm,
     simulationModal,
     montantSimulation,
@@ -86,5 +113,8 @@ export function useClesRepartitionPage() {
     openDeleteConfirm,
     closeDeleteConfirm,
     closeSimulationModal,
+    isManager,
+    currentCoproId,
+    isMutating,
   };
 }

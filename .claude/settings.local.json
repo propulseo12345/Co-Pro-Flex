@@ -21,7 +21,9 @@
       "Bash(node -e:*)",
       "mcp__plugin_supabase_supabase__list_tables",
       "mcp__plugin_supabase_supabase__get_advisors",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npx supabase:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

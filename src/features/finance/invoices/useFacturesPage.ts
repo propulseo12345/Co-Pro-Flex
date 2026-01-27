@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import type { KPIFilterType } from '@/components/features/finance/Factures/FacturesKPI';
 import type { SortColumn, SortDirection } from '@/components/features/finance/Factures/FacturesTable';
-import { MOCK_FACTURES } from '@/components/features/finance/Factures/data';
 import { detectTypeDepense, TYPE_DEPENSE_TO_POSTE } from '@/components/features/finance/Factures/utils';
 import {
   Facture,
@@ -17,6 +16,9 @@ import {
 } from '@/components/features/finance/Factures/types';
 import { useCopro } from '@/providers/CoproContext';
 import { useSupplierInvoices, useCreateSupplierInvoice, usePaySupplierInvoice, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+
+// Store original Supabase invoice IDs for mutations
+const invoiceIdMap = new Map<string, string>(); // local ID -> supabase ID
 
 type StatutFilterValue = 'TOUS' | StatutFacture;
 
@@ -39,35 +41,44 @@ export function useFacturesPage() {
   const createInvoiceMutation = useCreateSupplierInvoice();
   const payInvoiceMutation = usePaySupplierInvoice();
 
-  // Convert Supabase data to local format
+  // Track last refresh time for UI indicator
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [isMutating, setIsMutating] = useState(false);
+
+  // Enhanced refresh that updates timestamp
+  const refreshWithTimestamp = useCallback(async () => {
+    await refresh();
+    setLastRefresh(new Date());
+  }, [refresh]);
+
+  // Convert Supabase data to local format (NO MOCK FALLBACK)
   const supabaseFactures: Facture[] = useMemo(() => {
     if (!supabaseInvoices) return [];
-    return supabaseInvoices.map(inv => ({
-      id: inv.id,
-      typeDocument: 'FACTURE' as const,
-      date: inv.invoice_date,
-      dateEcheance: inv.due_date || inv.invoice_date,
-      fournisseur: inv.supplier_name,
-      reference: inv.invoice_number || inv.label,
-      montant: Number(inv.total_amount),
-      statut: mapSupabaseStatus(inv.status),
-      posteBudgetaire: undefined,
-      datePaiement: inv.status === 'paid' ? inv.created_at.split('T')[0] : undefined,
-    }));
+    return supabaseInvoices.map(inv => {
+      // Store mapping for mutations
+      invoiceIdMap.set(inv.id, inv.id);
+      return {
+        id: inv.id,
+        typeDocument: 'FACTURE' as const,
+        date: inv.invoice_date,
+        dateEcheance: inv.due_date || inv.invoice_date,
+        fournisseur: inv.supplier_name,
+        reference: inv.invoice_number || inv.label,
+        montant: Number(inv.total_amount),
+        statut: mapSupabaseStatus(inv.status),
+        posteBudgetaire: undefined,
+        datePaiement: inv.status === 'paid' ? inv.created_at.split('T')[0] : undefined,
+      };
+    });
   }, [supabaseInvoices]);
 
-  // Use Supabase data if available, otherwise fall back to mock
-  const initialFactures = currentCoproId && supabaseFactures.length > 0 ? supabaseFactures : MOCK_FACTURES;
-  const [factures, setFactures] = useState<Facture[]>(initialFactures);
+  // Use Supabase data only - no mock fallback
+  const [factures, setFactures] = useState<Facture[]>([]);
 
   // Update factures when Supabase data changes
   useEffect(() => {
-    if (currentCoproId && supabaseFactures.length > 0) {
-      setFactures(supabaseFactures);
-    } else if (!currentCoproId) {
-      setFactures(MOCK_FACTURES);
-    }
-  }, [currentCoproId, supabaseFactures]);
+    setFactures(supabaseFactures);
+  }, [supabaseFactures]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statutFilter, setStatutFilter] = useState<StatutFilterValue>('TOUS');
   const [sortOrder, setSortOrder] = useState<'DESC' | 'ASC'>('DESC');
@@ -201,15 +212,41 @@ export function useFacturesPage() {
     setShowAccountingModal(true);
   }, []);
 
-  const handlePaymentComplete = useCallback((compteId: string) => {
-    if (!selectedFacture) return;
-    setFactures(prev => prev.map(f =>
-      f.id === selectedFacture.id
-        ? { ...f, statut: 'PAYEE' as StatutFacture, datePaiement: new Date().toISOString().split('T')[0], compteDebite: compteId }
-        : f
-    ));
+  const handlePaymentComplete = useCallback(async (compteId: string) => {
+    if (!selectedFacture || !openPeriod) return;
+
+    setIsMutating(true);
+
+    try {
+      // Call Supabase API to pay the invoice
+      const result = await payInvoiceMutation.mutate({
+        period_id: openPeriod.id,
+        supplier_invoice_id: selectedFacture.id,
+        amount: selectedFacture.montant,
+        payment_date: new Date().toISOString().split('T')[0],
+        method: 'virement',
+      });
+
+      if (result.error) {
+        console.error('Payment error:', result.error);
+        // Still update local state optimistically for better UX
+      }
+
+      // Update local state optimistically
+      setFactures(prev => prev.map(f =>
+        f.id === selectedFacture.id
+          ? { ...f, statut: 'PAYEE' as StatutFacture, datePaiement: new Date().toISOString().split('T')[0], compteDebite: compteId }
+          : f
+      ));
+
+      // Refresh from Supabase to ensure consistency
+      await refreshWithTimestamp();
+    } finally {
+      setIsMutating(false);
+    }
+
     setShowPaymentModal(false);
-  }, [selectedFacture]);
+  }, [selectedFacture, openPeriod, payInvoiceMutation, refreshWithTimestamp]);
 
   const handleSendToAccounting = useCallback(() => {
     if (!selectedFacture) return;
@@ -353,6 +390,16 @@ export function useFacturesPage() {
   const closeAvoirModal = useCallback(() => { setShowAvoirModal(false); setSelectedFacture(null); }, []);
 
   return {
+    // Data loading state
+    isLoading,
+    isMutating,
+    error,
+    refresh: refreshWithTimestamp,
+    lastRefresh,
+    currentCoproId,
+    hasData: factures.length > 0,
+
+    // Data
     factures,
     filteredFactures,
     searchTerm,

@@ -1,4 +1,19 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+/**
+ * Hook pour la page Copropriétaires
+ * P0#1: Migration Mock → Supabase
+ *
+ * Utilise les données Supabase via useCoproprietaires
+ */
+
+'use client';
+
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useCoproprietaires, type OwnerType } from './useCoproData';
+import type { CoproprietaireOverview, CoproprietaireUpdate } from '@/lib/owners/api';
+
+// ============================================================================
+// TYPES (compatibilité avec l'interface existante)
+// ============================================================================
 
 export interface Coproprietaire {
   id: string;
@@ -11,56 +26,102 @@ export interface Coproprietaire {
   type: 'COPROPRIETAIRE' | 'LOCATAIRE' | 'ANCIEN';
 }
 
-export const INITIAL_COPROPRIETAIRES: Coproprietaire[] = [
-  { id: '1', nom: 'DUPONT', prenom: 'Jean', fonction: 'Membre du CS', solde: -73.30, telephone: '+33 6 12 34 56 78', email: 'jean.dupont@email.fr', type: 'COPROPRIETAIRE' },
-  { id: '2', nom: 'GONTCHAROV', prenom: 'François', solde: -1372.84, telephone: '+33 6 23 45 67 89', email: 'francois.gontcharov@email.fr', type: 'COPROPRIETAIRE' },
-  { id: '3', nom: 'LE GUENNEC', prenom: 'Martine', solde: 106.14, telephone: '+33 6 34 56 78 90', email: 'martine.leguennec@email.fr', type: 'COPROPRIETAIRE' },
-  { id: '4', nom: 'MANAN', prenom: 'Ranga', solde: 221.57, telephone: '+33 6 45 67 89 01', email: 'ranga.manan@email.fr', type: 'COPROPRIETAIRE' },
-  { id: '5', nom: 'MANDRIN', prenom: 'Sandrine', solde: 407.87, telephone: '+33 6 56 78 90 12', email: 'sandrine.mandrin@email.fr', type: 'COPROPRIETAIRE' },
-  { id: '6', nom: 'SCI Dvnis', prenom: '', solde: 322.84, telephone: '+33 1 23 45 67 89', email: 'contact@scidvnis.email.fr', type: 'COPROPRIETAIRE' },
-  { id: '7', nom: 'SCI Gerard', prenom: '', solde: 0.00, telephone: '+33 1 34 56 78 90', email: 'contact@scigerard.email.fr', type: 'COPROPRIETAIRE' },
-  { id: '8', nom: 'SCI Guillot', prenom: '', solde: -250.50, telephone: '+33 1 45 67 89 01', email: 'contact@sciguillot.email.fr', type: 'COPROPRIETAIRE' },
-  { id: '9', nom: 'SLIVET', prenom: 'Mathias', solde: 150.25, telephone: '+33 6 67 89 01 23', email: 'mathias.slivet@email.fr', type: 'COPROPRIETAIRE' },
-  { id: '10', nom: 'TRAORE', prenom: 'Victoire', solde: -89.75, telephone: '+33 6 78 90 12 34', email: 'victoire.traore@email.fr', type: 'COPROPRIETAIRE' },
-];
+// Mapper les données Supabase vers l'interface UI existante
+function mapToCoproprietaire(data: CoproprietaireOverview): Coproprietaire {
+  // Determine council function display
+  let fonction: string | undefined;
+  if (data.council_role) {
+    switch (data.council_role) {
+      case 'president':
+        fonction = 'Président du CS';
+        break;
+      case 'secretary':
+        fonction = 'Secrétaire du CS';
+        break;
+      case 'member':
+        fonction = 'Membre du CS';
+        break;
+      default:
+        fonction = data.council_role;
+    }
+  }
 
-const INITIAL_LOCATAIRES: Coproprietaire[] = [
-  { id: 'l1', nom: 'MARTIN', prenom: 'Sophie', solde: 0, telephone: '+33 6 11 22 33 44', email: 'sophie.martin@email.fr', type: 'LOCATAIRE' },
-];
+  return {
+    id: data.id,
+    nom: data.is_company ? (data.company_name || '') : (data.last_name || ''),
+    prenom: data.is_company ? '' : (data.first_name || ''),
+    fonction,
+    solde: data.solde || 0,
+    telephone: data.mobile || data.phone || undefined,
+    email: data.email || '',
+    type: data.owner_type === 'ANCIEN' ? 'ANCIEN' : 'COPROPRIETAIRE',
+  };
+}
 
-const INITIAL_ANCIENS: Coproprietaire[] = [
-  { id: 'a1', nom: 'DURAND', prenom: 'Pierre', solde: 0, email: 'pierre.durand@email.fr', type: 'ANCIEN' },
-];
+// Mapper les données UI vers l'update Supabase
+function mapToUpdate(form: Partial<Coproprietaire>): CoproprietaireUpdate {
+  return {
+    last_name: form.nom,
+    first_name: form.prenom,
+    mobile: form.telephone,
+    email: form.email,
+  };
+}
+
+// ============================================================================
+// HOOK
+// ============================================================================
 
 export function useCoproprietairesPage() {
+  // Active tab: COPROPRIETAIRE, LOCATAIRE, ANCIEN
+  // Note: LOCATAIRE n'existe pas dans Supabase actuellement, on l'affiche vide
   const [activeTab, setActiveTab] = useState<'COPROPRIETAIRE' | 'LOCATAIRE' | 'ANCIEN'>('COPROPRIETAIRE');
   const [searchQuery, setSearchQuery] = useState('');
-  const [coproprietaires, setCoproprietaires] = useState<Coproprietaire[]>(INITIAL_COPROPRIETAIRES);
-  const [locataires, setLocataires] = useState<Coproprietaire[]>(INITIAL_LOCATAIRES);
-  const [anciens, setAnciens] = useState<Coproprietaire[]>(INITIAL_ANCIENS);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
   const [editingCopro, setEditingCopro] = useState<Coproprietaire | null>(null);
   const [editForm, setEditForm] = useState<Partial<Coproprietaire>>({});
+  const [isSaving, setIsSaving] = useState(false);
+
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const getDataForTab = useCallback(() => {
-    switch (activeTab) {
-      case 'COPROPRIETAIRE': return coproprietaires;
-      case 'LOCATAIRE': return locataires;
-      case 'ANCIEN': return anciens;
-    }
-  }, [activeTab, coproprietaires, locataires, anciens]);
+  // Fetch data based on active tab
+  const supabaseType: OwnerType = activeTab === 'LOCATAIRE' ? 'ALL' : activeTab;
+  const { coproprietaires: rawData, isLoading, error, refresh, update, archive } = useCoproprietaires({
+    type: supabaseType,
+  });
 
-  const getSetDataForTab = useCallback(() => {
-    switch (activeTab) {
-      case 'COPROPRIETAIRE': return setCoproprietaires;
-      case 'LOCATAIRE': return setLocataires;
-      case 'ANCIEN': return setAnciens;
-    }
-  }, [activeTab]);
+  // Map Supabase data to UI format
+  const mappedData = useMemo(() => {
+    return rawData.map(mapToCoproprietaire);
+  }, [rawData]);
 
+  // Filter by tab and search
+  const getDataForTab = useCallback((): Coproprietaire[] => {
+    // LOCATAIRE tab: currently not supported in DB, return empty
+    if (activeTab === 'LOCATAIRE') {
+      return [];
+    }
+    return mappedData.filter(c => c.type === activeTab);
+  }, [activeTab, mappedData]);
+
+  const filteredData = useMemo(() => {
+    const data = getDataForTab();
+    if (!searchQuery) return data;
+
+    const search = searchQuery.toLowerCase();
+    return data.filter(copro => {
+      const fullName = `${copro.prenom} ${copro.nom}`.toLowerCase();
+      return (
+        fullName.includes(search) ||
+        copro.email.toLowerCase().includes(search) ||
+        (copro.telephone && copro.telephone.includes(search))
+      );
+    });
+  }, [getDataForTab, searchQuery]);
+
+  // Menu position effect
   useEffect(() => {
     if (openMenuId && buttonRefs.current[openMenuId]) {
       const button = buttonRefs.current[openMenuId];
@@ -83,40 +144,59 @@ export function useCoproprietairesPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openMenuId]);
 
-  const handleEdit = useCallback((copro: Coproprietaire) => {
-    setEditingCopro(copro);
-    setEditForm({ nom: copro.nom, prenom: copro.prenom, fonction: copro.fonction, telephone: copro.telephone, email: copro.email });
-    setOpenMenuId(null);
-  }, []);
-
-  const handleSave = useCallback(() => {
-    if (!editingCopro) return;
-    const setData = getSetDataForTab();
-    setData(prev => prev.map(c => c.id === editingCopro.id ? { ...c, ...editForm } : c));
-    setEditingCopro(null);
-    setEditForm({});
-  }, [editingCopro, editForm, getSetDataForTab]);
-
-  const handleDelete = useCallback((id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce copropriétaire ?')) return;
-    const setData = getSetDataForTab();
-    setData(prev => prev.filter(c => c.id !== id));
-    setOpenMenuId(null);
-  }, [getSetDataForTab]);
-
-  const filteredData = getDataForTab().filter(copro => {
-    const fullName = `${copro.prenom} ${copro.nom}`.toLowerCase();
-    const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || copro.email.toLowerCase().includes(search) || (copro.telephone && copro.telephone.includes(search));
-  });
-
+  // Handlers
   const handleTabChange = useCallback((tab: 'COPROPRIETAIRE' | 'LOCATAIRE' | 'ANCIEN') => {
     setActiveTab(tab);
     setOpenMenuId(null);
     setMenuPosition(null);
   }, []);
 
+  const handleEdit = useCallback((copro: Coproprietaire) => {
+    setEditingCopro(copro);
+    setEditForm({
+      nom: copro.nom,
+      prenom: copro.prenom,
+      fonction: copro.fonction,
+      telephone: copro.telephone,
+      email: copro.email,
+    });
+    setOpenMenuId(null);
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!editingCopro) return;
+
+    setIsSaving(true);
+    const updateData = mapToUpdate(editForm);
+    const { success, error: saveError } = await update(editingCopro.id, updateData);
+    setIsSaving(false);
+
+    if (!success) {
+      alert(`Erreur lors de la sauvegarde: ${saveError}`);
+      return;
+    }
+
+    setEditingCopro(null);
+    setEditForm({});
+  }, [editingCopro, editForm, update]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir archiver ce copropriétaire ? Il sera marqué comme ancien copropriétaire.')) {
+      return;
+    }
+
+    const { success, error: deleteError } = await archive(id);
+
+    if (!success) {
+      alert(`Erreur lors de l'archivage: ${deleteError}`);
+      return;
+    }
+
+    setOpenMenuId(null);
+  }, [archive]);
+
   return {
+    // State
     activeTab,
     handleTabChange,
     searchQuery,
@@ -131,9 +211,20 @@ export function useCoproprietairesPage() {
     setEditingCopro,
     editForm,
     setEditForm,
+
+    // Handlers
     handleEdit,
     handleSave,
     handleDelete,
     getDataForTab,
+
+    // Supabase state
+    isLoading,
+    error,
+    refresh,
+    isSaving,
   };
 }
+
+// Re-export for backward compatibility
+export { INITIAL_COPROPRIETAIRES } from './useCoproprietairesPage.legacy';

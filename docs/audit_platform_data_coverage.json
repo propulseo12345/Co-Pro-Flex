@@ -1,0 +1,571 @@
+{
+  "metadata": {
+    "audit_date": "2026-01-27",
+    "backend_status": "Supabase deployed (132/132 PASS)",
+    "frontend_status": "Partial migration in progress"
+  },
+  "summary": {
+    "total_routes": 120,
+    "supabase_connected_pct": 65,
+    "mock_data_pct": 25,
+    "mixed_pct": 10,
+    "mock_files_count": 124,
+    "mock_records_count": 440,
+    "critical_localstorage_keys": 12,
+    "supabase_views_count": 50,
+    "edge_functions_count": 20,
+    "rpc_functions_count": 20
+  },
+  "module_coverage": {
+    "ag_meetings": { "coverage_pct": 85, "status": "good" },
+    "ag_session_votes": { "coverage_pct": 40, "status": "critical_localstorage" },
+    "finance_calls": { "coverage_pct": 90, "status": "good" },
+    "finance_comptabilite": { "coverage_pct": 30, "status": "mock_heavy" },
+    "coproprietaires": { "coverage_pct": 95, "status": "complete" },
+    "lots_tantiemes": { "coverage_pct": 90, "status": "good" },
+    "documents_ged": { "coverage_pct": 80, "status": "good" },
+    "maintenance": { "coverage_pct": 50, "status": "mixed" },
+    "communication": { "coverage_pct": 40, "status": "mixed" },
+    "dashboard": { "coverage_pct": 0, "status": "full_mock" },
+    "settings": { "coverage_pct": 10, "status": "mostly_mock" }
+  },
+  "routes": [
+    {
+      "path": "/dashboard",
+      "module": "dashboard",
+      "data_source": "mock",
+      "backend_object": "DASHBOARD_* from mock",
+      "risk": "P1",
+      "action": "create_kpi_views"
+    },
+    {
+      "path": "/finance/calls",
+      "module": "finance",
+      "data_source": "supabase",
+      "backend_object": "v_calls_overview, useCalls()",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/finance/appels-fonds",
+      "module": "finance",
+      "data_source": "supabase",
+      "backend_object": "useAppelsFonds()",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/finance/budgets",
+      "module": "finance",
+      "data_source": "mixed",
+      "backend_object": "useBudget() + MOCK_POSTES",
+      "risk": "P0",
+      "action": "connect_postes"
+    },
+    {
+      "path": "/finance/comptabilite",
+      "module": "finance",
+      "data_source": "mock",
+      "backend_object": "MOCK_OPERATIONS, MOCK_DEPENSES",
+      "risk": "P0",
+      "action": "connect_v_general_ledger"
+    },
+    {
+      "path": "/finance/factures",
+      "module": "finance",
+      "data_source": "mock",
+      "backend_object": "MOCK_FACTURES",
+      "risk": "P0",
+      "action": "connect_v_supplier_invoices"
+    },
+    {
+      "path": "/finance/tantiemes",
+      "module": "finance",
+      "data_source": "supabase",
+      "backend_object": "v_lots_with_owners",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/finance/unpaid",
+      "module": "finance",
+      "data_source": "supabase",
+      "backend_object": "v_unpaid_by_lot",
+      "risk": "P1",
+      "action": "ok"
+    },
+    {
+      "path": "/finance/cles-repartition",
+      "module": "finance",
+      "data_source": "supabase",
+      "backend_object": "v_repartition_key_*",
+      "risk": "P1",
+      "action": "ok"
+    },
+    {
+      "path": "/documents/ledger",
+      "module": "finance",
+      "data_source": "mock",
+      "backend_object": "MOCK_OPERATIONS",
+      "risk": "P0",
+      "action": "connect_v_general_ledger"
+    },
+    {
+      "path": "/documents/balance",
+      "module": "finance",
+      "data_source": "mock",
+      "backend_object": "Frontend calculation",
+      "risk": "P0",
+      "action": "connect_v_trial_balance"
+    },
+    {
+      "path": "/ag/dashboard",
+      "module": "ag",
+      "data_source": "supabase",
+      "backend_object": "v_ag_overview",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/ag/[id]/session",
+      "module": "ag",
+      "data_source": "mixed",
+      "backend_object": "localStorage + Supabase",
+      "risk": "P0",
+      "action": "migrate_to_ag_session_drafts"
+    },
+    {
+      "path": "/ag/[id]/feuille-presence",
+      "module": "ag",
+      "data_source": "localstorage",
+      "backend_object": "feuille-presence-${agId}",
+      "risk": "P0",
+      "action": "migrate_to_db"
+    },
+    {
+      "path": "/ag/[id]/votes-correspondance",
+      "module": "ag",
+      "data_source": "mixed",
+      "backend_object": "votes + localStorage drafts",
+      "risk": "P0",
+      "action": "migrate_drafts_to_db"
+    },
+    {
+      "path": "/ag/[id]/designation-roles",
+      "module": "ag",
+      "data_source": "localstorage",
+      "backend_object": "roles-ag-${agId}",
+      "risk": "P1",
+      "action": "migrate_to_db"
+    },
+    {
+      "path": "/coproprietaires",
+      "module": "owners",
+      "data_source": "supabase",
+      "backend_object": "v_coproprietaires_overview",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/documents/ged",
+      "module": "documents",
+      "data_source": "supabase",
+      "backend_object": "v_documents_*",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/maintenance/logbook",
+      "module": "maintenance",
+      "data_source": "mock",
+      "backend_object": "useLogbook() MOCK",
+      "risk": "P1",
+      "action": "connect_v_logbook_overview"
+    },
+    {
+      "path": "/maintenance/contracts",
+      "module": "maintenance",
+      "data_source": "supabase",
+      "backend_object": "v_contracts_overview",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/communication/mail",
+      "module": "communication",
+      "data_source": "supabase",
+      "backend_object": "v_mail_*",
+      "risk": "P1",
+      "action": "ok"
+    },
+    {
+      "path": "/communication/mur",
+      "module": "communication",
+      "data_source": "supabase",
+      "backend_object": "v_wall_feed",
+      "risk": "P2",
+      "action": "ok"
+    },
+    {
+      "path": "/settings",
+      "module": "settings",
+      "data_source": "mock",
+      "backend_object": "MOCK_PARAMETRES",
+      "risk": "P1",
+      "action": "create_settings_table"
+    }
+  ],
+  "mock_files": {
+    "critical": [
+      {
+        "path": "src/shared/mock/finance.ts",
+        "lines": 870,
+        "content": "Full finance dataset",
+        "impact": "finance"
+      },
+      {
+        "path": "src/components/features/finance/AppelsFonds/mock-data.ts",
+        "content": "MOCK_APPELS, MOCK_COPROPRIETAIRES_APPEL",
+        "impact": "finance"
+      },
+      {
+        "path": "src/components/features/finance/Budget/mock-data.ts",
+        "content": "MOCK_POSTES_BUDGET",
+        "impact": "finance"
+      },
+      {
+        "path": "src/components/features/finance/Comptabilite/data.ts",
+        "content": "MOCK_OPERATIONS, MOCK_DEPENSES",
+        "impact": "finance"
+      },
+      {
+        "path": "src/lib/mock-data/entities/assemblees.ts",
+        "content": "7 assemblies + 48 votes",
+        "impact": "ag"
+      }
+    ],
+    "high": [
+      {
+        "path": "src/lib/mock-data/index.ts",
+        "records": 308,
+        "content": "Central mock data export"
+      },
+      {
+        "path": "src/data/mock/index.ts",
+        "content": "Legacy mock data"
+      },
+      {
+        "path": "src/data/mock/dashboard.mock.ts",
+        "content": "Dashboard KPIs and tasks"
+      }
+    ],
+    "central_mock_location": "src/lib/mock-data/entities/",
+    "total_entities": 27
+  },
+  "localstorage_keys": {
+    "critical_ag_session": [
+      {
+        "key_pattern": "ag-resolutions-${agId}",
+        "usage": "Resolution list draft",
+        "files": ["src/app/(dashboard)/ag/[id]/resolutions/new/page.tsx"]
+      },
+      {
+        "key_pattern": "vote-correspondance-${agId}-${coproId}",
+        "usage": "Correspondence vote drafts",
+        "files": ["src/app/(dashboard)/ag/[id]/votes-correspondance/[coproId]/page.tsx", "src/hooks/modules/useVotesCorrespondance.ts"]
+      },
+      {
+        "key_pattern": "feuille-presence-${agId}",
+        "usage": "Attendance sheet draft",
+        "files": ["src/app/(dashboard)/ag/[id]/feuille-presence/page.tsx"]
+      },
+      {
+        "key_pattern": "roles-ag-${agId}",
+        "usage": "Role designation draft",
+        "files": ["src/app/(dashboard)/ag/[id]/designation-roles/page.tsx"]
+      }
+    ],
+    "ui_state": [
+      { "key": "theme", "usage": "Dark/light mode" },
+      { "key": "sidebar-width", "usage": "Sidebar resize" },
+      { "key": "current-user-id", "usage": "Selected user" },
+      { "key": "current-copro-id", "usage": "Selected copropriete" }
+    ]
+  },
+  "supabase_api_modules": [
+    {
+      "module": "ag",
+      "file": "src/lib/ag/api.ts",
+      "views": ["v_ag_overview", "v_ag_resolutions_results", "v_ag_attendance_summary", "v_ag_votes_detailed", "v_ag_documents"],
+      "tables": ["ag_meetings", "ag_resolutions", "ag_attendance", "ag_votes"],
+      "edge_functions": ["ag_create", "ag_add_resolution", "ag_register_attendance", "ag_cast_vote", "ag_close", "ag_generate_document"]
+    },
+    {
+      "module": "finance",
+      "file": "src/lib/finance/api.ts",
+      "views": ["v_calls_overview", "v_call_lines_detailed", "v_unpaid_by_lot", "v_payments_overview", "v_unpaid_with_reminders", "v_supplier_invoices_overview", "v_bank_movements_overview"],
+      "tables": ["call_for_funds", "call_lines", "payments", "supplier_invoices", "bank_movements", "repartition_keys"],
+      "edge_functions": ["generate_call_for_funds", "record_payment", "create_supplier_invoice", "pay_supplier_invoice", "import_bank_movement", "reconcile_bank_movement"]
+    },
+    {
+      "module": "documents",
+      "file": "src/lib/documents/api.ts",
+      "views": ["v_folders_with_counts", "v_documents_with_folder", "v_recent_documents", "v_document_versions", "v_documents_stats"],
+      "tables": ["documents", "document_folders", "document_links", "document_access"]
+    },
+    {
+      "module": "owners",
+      "file": "src/lib/owners/api.ts",
+      "views": ["v_coproprietaires_overview"],
+      "tables": ["coproprietaires", "lot_owners"]
+    },
+    {
+      "module": "lots",
+      "file": "src/lib/lots/api.ts",
+      "views": ["v_lots_with_owners", "v_repartition_key_totals", "v_repartition_key_lines_detailed"],
+      "tables": ["lots", "repartition_keys", "repartition_key_lines"]
+    },
+    {
+      "module": "communication",
+      "file": "src/lib/communication/api.ts",
+      "views": ["v_wall_feed", "v_events_overview", "v_conversations_overview", "v_conversation_messages"],
+      "tables": ["wall_posts", "wall_comments", "calendar_events", "conversations", "messages"]
+    },
+    {
+      "module": "mail",
+      "file": "src/lib/mail/api.ts",
+      "views": ["v_mail_campaigns_overview", "v_mail_inbox_overview"],
+      "tables": ["mail_templates", "mail_campaigns", "mail_recipients", "mail_inbox"]
+    },
+    {
+      "module": "council",
+      "file": "src/lib/council/api.ts",
+      "views": ["v_council_members", "v_council_decisions_overview", "v_council_documents_overview"],
+      "tables": ["council_members", "council_decisions", "council_votes"]
+    }
+  ],
+  "business_logic_frontend": {
+    "critical_to_migrate": [
+      {
+        "name": "Vote Majority Calculations (Art. 24-26)",
+        "file": "src/components/features/ag/Session/utils.ts",
+        "data_source": "MOCK_COPROPRIETAIRES",
+        "action": "Create fn_calculate_article_*_result(ag_id)"
+      },
+      {
+        "name": "Repartition Simulation",
+        "file": "src/features/finance/chargeKeys/SimulationModal.tsx",
+        "data_source": "Repartition keys",
+        "action": "Create fn_simulate_repartition(copro_id, cle_id, montant)"
+      },
+      {
+        "name": "Recovery Rate Calculation",
+        "file": "src/lib/utils/alerts.ts",
+        "data_source": "MOCK_APPELS",
+        "action": "Create v_recouvrement_stats"
+      },
+      {
+        "name": "Budget Overspend Alerts",
+        "file": "src/lib/utils/alerts.ts",
+        "data_source": "MOCK_DEPENSES_BUDGETS",
+        "action": "Create fn_get_budget_alerts(copro_id, year_id)"
+      },
+      {
+        "name": "Payment Reminder Escalation",
+        "file": "src/lib/utils/alerts.ts",
+        "data_source": "Impaye records",
+        "action": "Create fn_get_reminder_escalation_level(lot_id)"
+      },
+      {
+        "name": "Running Balance Calculation",
+        "file": "src/components/features/finance/Comptabilite/utils.ts",
+        "data_source": "MOCK_OPERATIONS",
+        "action": "Create v_ledger_running_balance"
+      }
+    ]
+  },
+  "checklist": {
+    "p0_blocking": [
+      {
+        "id": "AG-001",
+        "task": "Create useAGSessionPersistence hook using ag_session_drafts",
+        "module": "ag"
+      },
+      {
+        "id": "AG-002",
+        "task": "Migrate feuille-presence-${agId} to ag_attendance + draft",
+        "module": "ag"
+      },
+      {
+        "id": "AG-003",
+        "task": "Migrate vote-correspondance-${agId}-${coproId} to ag_votes draft",
+        "module": "ag"
+      },
+      {
+        "id": "AG-004",
+        "task": "Migrate roles-ag-${agId} to ag_meetings.roles JSON",
+        "module": "ag"
+      },
+      {
+        "id": "AG-005",
+        "task": "Create RPC fn_calculate_article_*_result(ag_id) for majorities",
+        "module": "ag"
+      },
+      {
+        "id": "FIN-001",
+        "task": "Connect /finance/comptabilite to v_general_ledger",
+        "module": "finance"
+      },
+      {
+        "id": "FIN-002",
+        "task": "Connect /documents/ledger to v_general_ledger",
+        "module": "finance"
+      },
+      {
+        "id": "FIN-003",
+        "task": "Connect /documents/balance to v_trial_balance",
+        "module": "finance"
+      },
+      {
+        "id": "FIN-004",
+        "task": "Replace MOCK_OPERATIONS with Supabase calls",
+        "module": "finance"
+      },
+      {
+        "id": "FIN-005",
+        "task": "Connect /finance/factures to v_supplier_invoices_overview",
+        "module": "finance"
+      },
+      {
+        "id": "BUD-001",
+        "task": "Create budget_postes table if missing",
+        "module": "finance"
+      },
+      {
+        "id": "BUD-002",
+        "task": "Replace MOCK_POSTES_BUDGET with v_budget_postes view",
+        "module": "finance"
+      },
+      {
+        "id": "BUD-003",
+        "task": "Create fn_get_budget_alerts(copro_id, year_id)",
+        "module": "finance"
+      }
+    ],
+    "p1_important": [
+      {
+        "id": "DASH-001",
+        "task": "Create v_dashboard_kpis view",
+        "module": "dashboard"
+      },
+      {
+        "id": "DASH-002",
+        "task": "Create v_dashboard_tasks view",
+        "module": "dashboard"
+      },
+      {
+        "id": "DASH-003",
+        "task": "Connect useDashboardPage to new views",
+        "module": "dashboard"
+      },
+      {
+        "id": "MAINT-001",
+        "task": "Replace mock in useLogbook with v_logbook_overview",
+        "module": "maintenance"
+      },
+      {
+        "id": "COMM-001",
+        "task": "Replace hardcoded MODULES with DB config",
+        "module": "communication"
+      },
+      {
+        "id": "SET-001",
+        "task": "Create copropriete_settings table",
+        "module": "settings"
+      },
+      {
+        "id": "SET-002",
+        "task": "Replace MOCK_PARAMETRES with DB query",
+        "module": "settings"
+      },
+      {
+        "id": "CALC-001",
+        "task": "Create fn_simulate_repartition(copro_id, cle_id, montant)",
+        "module": "finance"
+      },
+      {
+        "id": "CALC-002",
+        "task": "Create v_recouvrement_stats view",
+        "module": "finance"
+      },
+      {
+        "id": "CALC-003",
+        "task": "Create fn_get_reminder_escalation_level(lot_id)",
+        "module": "finance"
+      }
+    ],
+    "p2_nice_to_have": [
+      {
+        "id": "OPT-001",
+        "task": "Replace running balance calculations with materialized view",
+        "module": "finance"
+      },
+      {
+        "id": "OPT-002",
+        "task": "Create views for etats dates",
+        "module": "finance"
+      },
+      {
+        "id": "OPT-003",
+        "task": "Optimize contract alerts with dedicated view",
+        "module": "maintenance"
+      }
+    ]
+  },
+  "migration_plan": {
+    "sprint_1": {
+      "duration": "2 weeks",
+      "tasks": [
+        "AG localStorage -> ag_session_drafts",
+        "Comptabilite pages -> v_general_ledger, v_trial_balance"
+      ]
+    },
+    "sprint_2": {
+      "duration": "2 weeks",
+      "tasks": [
+        "Budget postes -> DB",
+        "Factures -> v_supplier_invoices_overview"
+      ]
+    },
+    "sprint_3": {
+      "duration": "2 weeks",
+      "tasks": [
+        "Dashboard KPIs -> dedicated views",
+        "Maintenance logbook -> v_logbook_overview"
+      ]
+    },
+    "sprint_4": {
+      "duration": "1 week",
+      "tasks": [
+        "Settings -> DB",
+        "Communication hub -> DB config",
+        "Mock files cleanup"
+      ]
+    }
+  },
+  "files_to_delete_post_migration": [
+    "src/shared/mock/finance.ts",
+    "src/data/mock/index.ts",
+    "src/data/mock/dashboard.mock.ts",
+    "src/data/mock/documents-ged.ts",
+    "src/data/mock/nouvelle-vente.mock.ts",
+    "src/lib/mock-data/index.ts",
+    "src/lib/mock-data/entities/*.ts",
+    "src/components/features/finance/AppelsFonds/mock-data.ts",
+    "src/components/features/finance/Budget/mock-data.ts",
+    "src/components/features/finance/Comptabilite/data.ts",
+    "src/components/features/finance/RelevesIndividuels/mock-data.ts",
+    "src/components/features/finance/Factures/data.ts",
+    "src/hooks/modules/useCoproprietairesPage.legacy.ts"
+  ]
+}

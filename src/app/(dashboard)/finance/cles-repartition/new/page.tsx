@@ -1,22 +1,22 @@
 'use client';
 
-import { ArrowLeft, Save, Key, AlertTriangle, Building2, Thermometer, ArrowUpDown, MoreVertical, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, Key, AlertTriangle, MoreVertical, RefreshCw } from 'lucide-react';
 import { useNewClePage } from '@/features/finance';
-import type { MockCleRepartition } from '@/shared/mock/finance';
+import { LoadingState } from '@/components/ui/DataState/DataState';
 import styles from '../[id]/cle-detail.module.css';
 
-const TYPE_OPTIONS: Array<{ value: MockCleRepartition['type']; label: string; icon: React.ReactNode }> = [
-  { value: 'GENERALE', label: 'Générale', icon: <Key size={16} /> },
-  { value: 'ASCENSEUR', label: 'Ascenseur', icon: <ArrowUpDown size={16} /> },
-  { value: 'CHAUFFAGE', label: 'Chauffage', icon: <Thermometer size={16} /> },
-  { value: 'BATIMENT', label: 'Bâtiment', icon: <Building2 size={16} /> },
+type CleType = 'GENERALE' | 'PERSONNALISEE';
+
+const TYPE_OPTIONS: Array<{ value: CleType; label: string; icon: React.ReactNode }> = [
+  { value: 'GENERALE', label: 'Tantièmes généraux', icon: <Key size={16} /> },
   { value: 'PERSONNALISEE', label: 'Personnalisée', icon: <MoreVertical size={16} /> },
 ];
 
 export default function NewClePage() {
   const page = useNewClePage();
 
-  if (page.isLoading) {
+  // Mode Single Copro: si pas encore chargé ou en cours de chargement
+  if (!page.currentCoproId || page.isLoading) {
     return <div className={styles.container}><div className={styles.loading}><div className={styles.spinner} /><p>Chargement des lots...</p></div></div>;
   }
 
@@ -39,7 +39,7 @@ export default function NewClePage() {
             <div className={styles.formGrid}>
               <div className={styles.formGroup}><label>Nom de la clé *</label><input type="text" value={page.nom} onChange={e => page.setNom(e.target.value)} placeholder="Ex: Charges générales" /></div>
               <div className={styles.formGroup}><label>Code *</label><input type="text" value={page.code} onChange={e => page.setCode(e.target.value.toUpperCase())} placeholder="Ex: CLE-GEN" className={styles.codeInput} /></div>
-              <div className={styles.formGroup}><label>Type</label><select value={page.type} onChange={e => page.setType(e.target.value as MockCleRepartition['type'])}>{TYPE_OPTIONS.map(opt => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}</select></div>
+              <div className={styles.formGroup}><label>Type</label><select value={page.type} onChange={e => page.setType(e.target.value as CleType)}>{TYPE_OPTIONS.map(opt => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}</select></div>
               <div className={`${styles.formGroup} ${styles.fullWidth}`}><label>Description</label><textarea value={page.description} onChange={e => page.setDescription(e.target.value)} placeholder="Description optionnelle..." rows={2} /></div>
             </div>
           </div>

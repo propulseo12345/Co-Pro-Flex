@@ -85,17 +85,24 @@ export function EmptyState({
 
 // ============================================================================
 // NO COPRO SELECTED
+// Mode Single Copro: ce composant ne devrait plus s'afficher
+// car le bootstrap garantit toujours une copro active.
+// Il est conservé pour compatibilité et affiche un état de chargement.
 // ============================================================================
 
-export function NoCoproSelected() {
+interface NoCoproSelectedProps {
+  /** Message optionnel à afficher */
+  message?: string;
+}
+
+export function NoCoproSelected({ message }: NoCoproSelectedProps = {}) {
+  // En mode Single Copro, si on arrive ici c'est que le chargement est en cours
+  // ou qu'il y a une erreur. Afficher un état de chargement par défaut.
   return (
     <div className={styles.container}>
-      <div className={styles.iconWarning}>
-        <AlertTriangle size={48} />
-      </div>
-      <h3 className={styles.title}>Aucune copropriété sélectionnée</h3>
+      <div className={styles.spinner} />
       <p className={styles.message}>
-        Veuillez sélectionner une copropriété pour accéder à cette fonctionnalité.
+        {message || 'Chargement de la copropriété...'}
       </p>
     </div>
   );

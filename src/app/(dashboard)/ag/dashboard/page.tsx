@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { Calendar, Users, FileText, Plus, Mail, Play, ClipboardList, Copy, Eye, Download } from 'lucide-react';
 import { AGQuickActions } from '@/components/features/ag/Dashboard';
 import { AgDocumentQuickActions } from '@/components/features/ag';
-import { DataState, NoCoproSelected } from '@/components/ui/DataState/DataState';
+import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgMeetings } from '@/hooks/modules/useAgData';
 import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
@@ -214,9 +214,9 @@ export default function AGDashboardPage() {
     return nextMeeting.status === 'convoked' || nextMeeting.status === 'in_progress';
   }, [nextMeeting]);
 
-  // No copro selected
+  // Mode Single Copro: si pas encore chargé, afficher loading
   if (!currentCoproId) {
-    return <NoCoproSelected />;
+    return <LoadingState message="Chargement de la copropriété..." />;
   }
 
   return (

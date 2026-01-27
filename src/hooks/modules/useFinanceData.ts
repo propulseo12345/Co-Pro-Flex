@@ -160,6 +160,82 @@ export function useBankMovements(status?: 'unmatched' | 'matched' | 'ignored') {
 }
 
 // ============================================================================
+// GENERAL LEDGER (GRAND LIVRE)
+// ============================================================================
+
+export function useGeneralLedger(options?: { periodId?: string; status?: string }) {
+  const { currentCoproId } = useCopro();
+  const [data, setData] = useState<financeApi.GeneralLedgerEntry[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!currentCoproId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const result = await financeApi.getGeneralLedger(currentCoproId, options);
+
+    if (result.error) {
+      setError(result.error);
+      setData(null);
+    } else {
+      setData(result.data);
+    }
+
+    setIsLoading(false);
+  }, [currentCoproId, options?.periodId, options?.status]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { data, isLoading, error, refresh };
+}
+
+// ============================================================================
+// TRIAL BALANCE (BALANCE COMPTABLE)
+// ============================================================================
+
+export function useTrialBalance(periodId: string | null) {
+  const { currentCoproId } = useCopro();
+  const [data, setData] = useState<financeApi.TrialBalanceEntry[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!currentCoproId || !periodId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const result = await financeApi.getTrialBalance(currentCoproId, periodId);
+
+    if (result.error) {
+      setError(result.error);
+      setData(null);
+    } else {
+      setData(result.data);
+    }
+
+    setIsLoading(false);
+  }, [currentCoproId, periodId]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { data, isLoading, error, refresh };
+}
+
+// ============================================================================
 // REFERENCE DATA
 // ============================================================================
 

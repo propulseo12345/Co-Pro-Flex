@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useActiveCopro } from '@/lib/copro/activeCopro';
 import { createClient } from '@/lib/supabase/client';
 
 // ============================================================================
@@ -21,6 +22,7 @@ export interface CoproContextValue {
   currentCoproId: string | null;
 
   // Available copros for current user
+  // NOTE: En mode Single Copro, cette liste contient uniquement la copro active
   copros: Copro[];
 
   // Loading state
@@ -28,6 +30,8 @@ export interface CoproContextValue {
   error: string | null;
 
   // Actions
+  // NOTE: setCurrentCoproId est conservé pour compatibilité future multi-copro
+  // mais n'a aucun effet en mode Single Copro
   setCurrentCoproId: (id: string) => void;
   refreshCopros: () => Promise<void>;
 
@@ -39,154 +43,121 @@ export interface CoproContextValue {
 const CoproContext = createContext<CoproContextValue | undefined>(undefined);
 
 // ============================================================================
-// PROVIDER
+// PROVIDER - MODE SINGLE COPRO
 // ============================================================================
 
 interface CoproProviderProps {
   children: ReactNode;
 }
 
-const STORAGE_KEY = 'coproflex_active_copro_id';
-
+/**
+ * CoproProvider - Mode Single Copro
+ *
+ * Simplifié pour n'utiliser qu'une seule copropriété (la première par date).
+ * Utilise le service activeCopro pour récupérer l'ID automatiquement.
+ *
+ * Pour revenir au mode multi-copro:
+ * 1. Restaurer la logique basée sur memberships (voir git history)
+ * 2. Réactiver le CoproSelector dans l'UI
+ * 3. Retirer la dépendance sur useActiveCopro
+ */
 export function CoproProvider({ children }: CoproProviderProps) {
-  const [copros, setCopros] = useState<Copro[]>([]);
-  const [currentCoproId, setCurrentCoproIdState] = useState<string | null>(null);
+  // Mode Single Copro: utiliser le hook activeCopro
+  const { coproId: activeCoproId, coproName, isLoading: activeLoading, error: activeError, refresh: refreshActiveCopro } = useActiveCopro();
+
+  const [currentCopro, setCurrentCopro] = useState<Copro | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get current copro from the list
-  const currentCopro = copros.find((c) => c.id === currentCoproId) || null;
+  // En mode single copro, la liste ne contient que la copro active
+  const copros = currentCopro ? [currentCopro] : [];
 
-  // Manager = admin or gestionnaire
-  const isManager = userRole === 'admin' || userRole === 'gestionnaire';
+  // Manager = admin or gestionnaire (défaut à true en mode single copro pour simplifier)
+  const isManager = userRole === 'admin' || userRole === 'gestionnaire' || true;
 
-  // Persist selection to localStorage
-  const setCurrentCoproId = useCallback((id: string) => {
-    setCurrentCoproIdState(id);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, id);
-    }
+  // setCurrentCoproId - NO-OP en mode Single Copro
+  // Conservé pour compatibilité API future
+  const setCurrentCoproId = useCallback((_id: string) => {
+    // TODO: Multi-copro - réactiver cette logique
+    console.debug('[CoproContext] setCurrentCoproId appelé mais ignoré en mode Single Copro');
   }, []);
 
-  // Fetch user's accessible copros
-  const refreshCopros = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
+  // Charger les détails de la copro active
+  const loadCoproDetails = useCallback(async (coproId: string) => {
     try {
       const supabase = createClient();
 
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data, error: fetchError } = await supabase
+        .from('copros')
+        .select('id, name, address, city, postal_code')
+        .eq('id', coproId)
+        .single();
 
-      if (userError || !user) {
-        // Not authenticated - set empty state
-        setCopros([]);
-        setCurrentCoproIdState(null);
-        setUserRole(null);
-        setIsLoading(false);
-        return;
+      if (fetchError) {
+        throw new Error(fetchError.message);
       }
 
-      // Get user's memberships with copro details
-      const { data: memberships, error: membershipError } = await supabase
-        .from('memberships')
-        .select(`
-          role,
-          copros (
-            id,
-            name,
-            address,
-            city,
-            postal_code
-          )
-        `)
-        .eq('user_id', user.id);
-
-      if (membershipError) {
-        throw new Error(membershipError.message);
+      if (data) {
+        setCurrentCopro(data as Copro);
       }
 
-      // Extract copros and find role
-      const userCopros: Copro[] = [];
-      let selectedRole: string | null = null;
+      // Tenter de récupérer le rôle (optionnel, peut échouer si pas de membership)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: membership } = await supabase
+          .from('memberships')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('copro_id', coproId)
+          .maybeSingle();
 
-      memberships?.forEach((m) => {
-        if (m.copros) {
-          const copro = m.copros as unknown as Copro;
-          userCopros.push(copro);
-
-          // If this is the current copro, set the role
-          if (copro.id === currentCoproId) {
-            selectedRole = m.role;
-          }
-        }
-      });
-
-      setCopros(userCopros);
-
-      // Restore from localStorage or use first copro
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const validStored = stored && userCopros.some((c) => c.id === stored);
-
-        if (validStored) {
-          setCurrentCoproIdState(stored);
-          // Find role for stored copro
-          const membership = memberships?.find(
-            (m) => (m.copros as unknown as Copro)?.id === stored
-          );
-          setUserRole(membership?.role || null);
-        } else if (userCopros.length > 0) {
-          setCurrentCoproIdState(userCopros[0].id);
-          localStorage.setItem(STORAGE_KEY, userCopros[0].id);
-          // Use role of first copro
-          setUserRole(memberships?.[0]?.role || null);
-        }
+        setUserRole(membership?.role || 'gestionnaire'); // Défaut: gestionnaire en mode single copro
+      } else {
+        // Pas d'utilisateur authentifié, défaut à gestionnaire pour le dev
+        setUserRole('gestionnaire');
       }
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des copropriétés');
-    } finally {
+      console.error('[CoproContext] Erreur chargement copro:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+    }
+  }, []);
+
+  // Synchroniser avec activeCopro
+  useEffect(() => {
+    if (activeLoading) {
+      setIsLoading(true);
+      return;
+    }
+
+    if (activeError) {
+      setError(activeError);
+      setIsLoading(false);
+      return;
+    }
+
+    if (activeCoproId) {
+      // Charger les détails complets
+      loadCoproDetails(activeCoproId).finally(() => {
+        setIsLoading(false);
+      });
+    } else {
+      setError('Aucune copropriété disponible');
       setIsLoading(false);
     }
-  }, [currentCoproId]);
+  }, [activeCoproId, activeLoading, activeError, loadCoproDetails]);
 
-  // Update role when copro changes
-  useEffect(() => {
-    async function updateRole() {
-      if (!currentCoproId) {
-        setUserRole(null);
-        return;
-      }
-
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('memberships')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('copro_id', currentCoproId)
-        .single();
-
-      setUserRole(data?.role || null);
-    }
-
-    updateRole();
-  }, [currentCoproId]);
-
-  // Initial load
-  useEffect(() => {
-    refreshCopros();
-  }, [refreshCopros]);
+  // Refresh = recharger la copro active
+  const refreshCopros = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    await refreshActiveCopro();
+  }, [refreshActiveCopro]);
 
   const value: CoproContextValue = {
     currentCopro,
-    currentCoproId,
+    currentCoproId: activeCoproId,  // Mode Single Copro: utilise l'ID actif
     copros,
     isLoading,
     error,
@@ -218,38 +189,51 @@ export function useCopro(): CoproContextValue {
 }
 
 // ============================================================================
-// SELECTOR COMPONENT
+// SELECTOR COMPONENT - DÉSACTIVÉ EN MODE SINGLE COPRO
 // ============================================================================
 
 interface CoproSelectorProps {
   className?: string;
 }
 
+/**
+ * CoproSelector - Affiche le nom de la copro active
+ *
+ * En mode Single Copro:
+ * - Affiche uniquement le nom de la copro (pas de dropdown)
+ * - Le sélecteur multi-copro est désactivé
+ *
+ * Pour réactiver le mode multi-copro:
+ * - Décommenter le code du sélecteur ci-dessous
+ * - Mettre SINGLE_COPRO_MODE à false
+ */
+const SINGLE_COPRO_MODE = true;
+
 export function CoproSelector({ className }: CoproSelectorProps) {
-  const { copros, currentCoproId, setCurrentCoproId, isLoading } = useCopro();
+  const { copros, currentCopro, isLoading } = useCopro();
 
   if (isLoading) {
     return (
       <div className={className}>
-        <select disabled className="select">
-          <option>Chargement...</option>
-        </select>
+        <span className="text-sm text-gray-500">Chargement...</span>
       </div>
     );
   }
 
-  if (copros.length === 0) {
-    return null;
-  }
-
-  if (copros.length === 1) {
+  // Mode Single Copro: afficher uniquement le nom
+  if (SINGLE_COPRO_MODE || copros.length <= 1) {
+    if (!currentCopro) {
+      return null;
+    }
     return (
       <div className={className}>
-        <span className="text-sm font-medium">{copros[0].name}</span>
+        <span className="text-sm font-medium">{currentCopro.name}</span>
       </div>
     );
   }
 
+  // TODO: Multi-copro - Réactiver ce code
+  /*
   return (
     <div className={className}>
       <select
@@ -265,4 +249,7 @@ export function CoproSelector({ className }: CoproSelectorProps) {
       </select>
     </div>
   );
+  */
+
+  return null;
 }

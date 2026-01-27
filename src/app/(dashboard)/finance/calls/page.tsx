@@ -1,13 +1,35 @@
 'use client';
 
 import { useState } from 'react';
-import { MOCK_APPELS_FONDS, MOCK_EXERCICE_ACTUEL } from '@/data/mock';
-import { AppelFonds } from '@/types';
-import { CheckCircle, Info, RotateCcw, Zap, X, Settings, FileText } from 'lucide-react';
+import { CheckCircle, Info, RotateCcw, Zap, X, Settings, FileText, Clock, AlertTriangle } from 'lucide-react';
+import { useCopro } from '@/providers/CoproContext';
+import { useCalls, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState';
 import styles from './calls.module.css';
-import clsx from 'clsx';
+
+// Helper to get status display info
+function getStatusDisplay(status: string, linesPaidCount: number, linesCount: number) {
+    switch (status) {
+        case 'paid':
+            return { icon: <CheckCircle size={16} className={styles.successIcon} aria-hidden="true" />, label: `Soldé (${linesPaidCount}/${linesCount})` };
+        case 'partially_paid':
+            return { icon: <Clock size={16} className={styles.warningIcon} aria-hidden="true" />, label: `Partiellement payé (${linesPaidCount}/${linesCount})` };
+        case 'issued':
+            return { icon: <CheckCircle size={16} className={styles.successIcon} aria-hidden="true" />, label: `Envoyé (${linesCount})` };
+        case 'draft':
+            return { icon: <AlertTriangle size={16} className={styles.warningIcon} aria-hidden="true" />, label: 'Brouillon' };
+        case 'cancelled':
+            return { icon: <X size={16} className={styles.errorIcon} aria-hidden="true" />, label: 'Annulé' };
+        default:
+            return { icon: null, label: status };
+    }
+}
 
 export default function FundCallsPage() {
+    const { currentCoproId, isManager } = useCopro();
+    const { data: calls, isLoading, error, refresh } = useCalls();
+    const { data: openPeriod } = useOpenPeriod();
+
     const [showAutomationModal, setShowAutomationModal] = useState(false);
     const [showRulesModal, setShowRulesModal] = useState(false);
     const [showPaymentInfoModal, setShowPaymentInfoModal] = useState(false);
@@ -33,104 +55,150 @@ export default function FundCallsPage() {
         setShowCancelModal(false);
     };
 
+    // Mode Single Copro: le contexte charge automatiquement la copro active
+    // Si pas encore chargé ou pas de copro, afficher loading
+    if (!currentCoproId || isLoading) {
+        return <LoadingState message="Chargement des appels de fonds..." />;
+    }
+
+    // Handle error state
+    if (error) {
+        return <ErrorState message={error} onRetry={refresh} />;
+    }
+
+    const callsList = calls || [];
+
+    // Derive period info from data or open period
+    const periodName = openPeriod?.name || new Date().getFullYear().toString();
+    const periodStart = openPeriod?.start_date;
+    const periodEnd = openPeriod?.end_date;
+
     return (
         <div className="container">
             <div className={styles.header}>
                 <div>
-                    <h1 className={styles.title}>Appels de fonds de l'exercice {MOCK_EXERCICE_ACTUEL.annee}</h1>
-                    <p className={styles.subtitle}>
-                        Exercice du {new Date(MOCK_EXERCICE_ACTUEL.dateDebut).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} au {new Date(MOCK_EXERCICE_ACTUEL.dateFin).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                    </p>
+                    <h1 className={styles.title}>Appels de fonds de l'exercice {periodName}</h1>
+                    {periodStart && periodEnd && (
+                        <p className={styles.subtitle}>
+                            Exercice du {new Date(periodStart).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} au {new Date(periodEnd).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                        </p>
+                    )}
                 </div>
-                <button
-                    className="btn btn-primary"
-                    onClick={isAutomationEnabled ? handleDisableAutomation : handleEnableAutomation}
-                >
-                    <CheckCircle size={16} style={{ marginRight: 8 }} aria-hidden="true" />
-                    {isAutomationEnabled ? 'Désactiver la génération' : 'Autoriser la génération'}
-                </button>
+                {isManager && (
+                    <button
+                        className="btn btn-primary"
+                        onClick={isAutomationEnabled ? handleDisableAutomation : handleEnableAutomation}
+                    >
+                        <CheckCircle size={16} style={{ marginRight: 8 }} aria-hidden="true" />
+                        {isAutomationEnabled ? 'Désactiver la génération' : 'Autoriser la génération'}
+                    </button>
+                )}
             </div>
 
-            <div className={styles.automationCard}>
-                <div className={styles.automationIcon}><Zap size={24} aria-hidden="true" /></div>
-                <div className={styles.automationContent}>
-                    <h3>Gagnez du temps et gardez l'esprit léger</h3>
-                    <p>CoProFlex génère et envoie automatiquement vos appels de fonds en temps et en heure !</p>
-                    <div className={styles.automationLinks}>
-                        <button
-                            className={styles.linkBtn}
-                            onClick={() => setShowAutomationModal(true)}
-                        >
-                            Découvrir l'automatisation des appels de fonds
-                        </button>
-                        <span className={styles.separator}>|</span>
-                        <button
-                            className={styles.linkBtn}
-                            onClick={() => setShowRulesModal(true)}
-                        >
-                            Modifier les règles d'automatisation
-                        </button>
-                        <span className={styles.separator}>|</span>
-                        <button
-                            className={styles.linkBtn}
-                            onClick={() => setShowPaymentInfoModal(true)}
-                        >
-                            Modifier les informations de paiement
-                        </button>
+            {isManager && (
+                <div className={styles.automationCard}>
+                    <div className={styles.automationIcon}><Zap size={24} aria-hidden="true" /></div>
+                    <div className={styles.automationContent}>
+                        <h3>Gagnez du temps et gardez l'esprit léger</h3>
+                        <p>CoProFlex génère et envoie automatiquement vos appels de fonds en temps et en heure !</p>
+                        <div className={styles.automationLinks}>
+                            <button
+                                className={styles.linkBtn}
+                                onClick={() => setShowAutomationModal(true)}
+                            >
+                                Découvrir l'automatisation des appels de fonds
+                            </button>
+                            <span className={styles.separator}>|</span>
+                            <button
+                                className={styles.linkBtn}
+                                onClick={() => setShowRulesModal(true)}
+                            >
+                                Modifier les règles d'automatisation
+                            </button>
+                            <span className={styles.separator}>|</span>
+                            <button
+                                className={styles.linkBtn}
+                                onClick={() => setShowPaymentInfoModal(true)}
+                            >
+                                Modifier les informations de paiement
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            <div className="card">
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Date d'exigibilité</th>
-                            <th>Statut</th>
-                            <th className="text-right">Montant</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {MOCK_APPELS_FONDS.map((appel) => (
-                            <tr key={appel.id}>
-                                <td>
-                                    <div className={styles.dateCell}>
-                                        {new Date(appel.dateExigibilite).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                        <Info size={14} className={styles.infoIcon} aria-hidden="true" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className={styles.statusCell}>
-                                        <CheckCircle size={16} className={styles.successIcon} aria-hidden="true" />
-                                        <span>Envoyé (10/10)</span>
-                                    </div>
-                                </td>
-                                <td className={styles.amount}>
-                                    {appel.montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-                                </td>
+            {callsList.length === 0 ? (
+                <EmptyState
+                    title="Aucun appel de fonds"
+                    message="Aucun appel de fonds n'a été créé pour cette copropriété."
+                />
+            ) : (
+                <div className="card">
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Date d'exigibilité</th>
+                                <th>Libellé</th>
+                                <th>Statut</th>
+                                <th className="text-right">Montant total</th>
+                                <th className="text-right">Encaissé</th>
+                                <th className="text-right">Reste à percevoir</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {callsList.map((call) => {
+                                const statusInfo = getStatusDisplay(call.status, call.lines_paid_count, call.lines_count);
+                                return (
+                                    <tr key={call.id}>
+                                        <td>
+                                            <div className={styles.dateCell}>
+                                                {new Date(call.due_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                <Info size={14} className={styles.infoIcon} aria-hidden="true" />
+                                            </div>
+                                        </td>
+                                        <td>{call.label}</td>
+                                        <td>
+                                            <div className={styles.statusCell}>
+                                                {statusInfo.icon}
+                                                <span>{statusInfo.label}</span>
+                                            </div>
+                                        </td>
+                                        <td className={styles.amount}>
+                                            {Number(call.total_amount).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                                        </td>
+                                        <td className={styles.amount}>
+                                            {Number(call.total_paid).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                                        </td>
+                                        <td className={styles.amount}>
+                                            {Number(call.total_unpaid).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
-            <div className={styles.footerActions}>
-                <button
-                    className="btn btn-secondary"
-                    onClick={handleCancelLastCall}
-                >
-                    <RotateCcw size={16} style={{ marginRight: 8 }} aria-hidden="true" />
-                    Annuler la génération du dernier appel de fonds
-                </button>
-            </div>
+            {isManager && callsList.length > 0 && (
+                <div className={styles.footerActions}>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={handleCancelLastCall}
+                    >
+                        <RotateCcw size={16} style={{ marginRight: 8 }} aria-hidden="true" />
+                        Annuler la génération du dernier appel de fonds
+                    </button>
+                </div>
+            )}
 
             {/* Modal - Découvrir l'automatisation */}
             {showAutomationModal && (
                 <div className={styles.modalOverlay} aria-hidden="true" onClick={() => setShowAutomationModal(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
+                        role="dialog"
+                        aria-modal="true"
+                    >
                         <div className={styles.modalHeader}>
                             <h2><Zap size={20} aria-hidden="true" /> Automatisation des appels de fonds</h2>
                             <button onClick={() => setShowAutomationModal(false)} className={styles.closeBtn}>
@@ -147,10 +215,10 @@ export default function FundCallsPage() {
                                 <li>Relancer automatiquement les impayés</li>
                             </ul>
                             <h3>Avantages</h3>
-                            <p>✅ Gain de temps considérable<br/>
-                            ✅ Réduction des erreurs<br/>
-                            ✅ Meilleure traçabilité<br/>
-                            ✅ Copropriétaires informés en temps réel</p>
+                            <p>Gain de temps considérable<br/>
+                            Réduction des erreurs<br/>
+                            Meilleure traçabilité<br/>
+                            Copropriétaires informés en temps réel</p>
                         </div>
                         <div className={styles.modalFooter}>
                             <button className="btn btn-secondary" onClick={() => setShowAutomationModal(false)}>
@@ -171,9 +239,9 @@ export default function FundCallsPage() {
             {showRulesModal && (
                 <div className={styles.modalOverlay} aria-hidden="true" onClick={() => setShowRulesModal(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
+                        role="dialog"
+                        aria-modal="true"
+                    >
                         <div className={styles.modalHeader}>
                             <h2><Settings size={20} aria-hidden="true" /> Règles d'automatisation</h2>
                             <button onClick={() => setShowRulesModal(false)} className={styles.closeBtn}>
@@ -222,9 +290,9 @@ export default function FundCallsPage() {
             {showPaymentInfoModal && (
                 <div className={styles.modalOverlay} aria-hidden="true" onClick={() => setShowPaymentInfoModal(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
+                        role="dialog"
+                        aria-modal="true"
+                    >
                         <div className={styles.modalHeader}>
                             <h2><FileText size={20} aria-hidden="true" /> Informations de paiement</h2>
                             <button onClick={() => setShowPaymentInfoModal(false)} className={styles.closeBtn}>
@@ -268,9 +336,9 @@ export default function FundCallsPage() {
             {showCancelModal && (
                 <div className={styles.modalOverlay} aria-hidden="true" onClick={() => setShowCancelModal(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
+                        role="dialog"
+                        aria-modal="true"
+                    >
                         <div className={styles.modalHeader}>
                             <h2>Confirmer l'annulation</h2>
                             <button onClick={() => setShowCancelModal(false)} className={styles.closeBtn}>

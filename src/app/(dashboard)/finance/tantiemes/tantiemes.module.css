@@ -389,3 +389,40 @@
         gap: var(--space-xs);
     }
 }
+
+/* Spinning animation for refresh button */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* Additional styles for lots display */
+.lotCell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.lotIcon {
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+.typeBadge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-sm);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.noOwner {
+    color: var(--text-tertiary);
+    font-style: italic;
+}

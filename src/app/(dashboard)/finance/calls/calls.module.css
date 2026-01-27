@@ -124,6 +124,14 @@
     color: var(--success);
 }
 
+.warningIcon {
+    color: var(--warning);
+}
+
+.errorIcon {
+    color: var(--error);
+}
+
 .amount {
     text-align: right;
     font-family: monospace;

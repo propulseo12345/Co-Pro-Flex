@@ -17,7 +17,7 @@ import {
     type PaymentReminderRule,
     type EmailTemplate,
 } from '@/hooks/modules/useFinanceData';
-import { LoadingState, ErrorState, NoCoproSelected } from '@/components/ui/DataState';
+import { LoadingState, ErrorState } from '@/components/ui/DataState';
 
 interface TemplateEditModalProps {
     template: EmailTemplate;
@@ -253,12 +253,8 @@ export default function ReminderSettingsPage() {
         }
     };
 
-    // Loading states
-    if (!currentCoproId) {
-        return <NoCoproSelected />;
-    }
-
-    if (loadingSettings || loadingRules || loadingTemplates) {
+    // Mode Single Copro: si pas encore chargé ou en cours de chargement
+    if (!currentCoproId || loadingSettings || loadingRules || loadingTemplates) {
         return <LoadingState message="Chargement de la configuration..." />;
     }
 
