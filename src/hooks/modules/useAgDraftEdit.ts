@@ -237,13 +237,23 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
     try {
       const supabase = createUntypedClient();
 
-      const updates = {
+      // meeting_date est NOT NULL dans la DB, on ne met à jour que si on a une date valide
+      const meetingDate = combineDateAndTime(formData.date, formData.heure);
+
+      // Construire l'objet de mise à jour
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updates: Record<string, any> = {
         meeting_type: TYPE_MAPPING_TO_DB[formData.type],
-        meeting_date: combineDateAndTime(formData.date, formData.heure) || null,
         location: formData.adresseComplete || formData.lieu || null,
         opening_notes: serializeMetadata(formData),
         updated_at: new Date().toISOString(),
       };
+
+      // Ne mettre à jour meeting_date que si on a une date valide
+      // (car c'est NOT NULL dans la base)
+      if (meetingDate) {
+        updates.meeting_date = meetingDate;
+      }
 
       const { error: updateError } = await supabase
         .from('ag_meetings')
@@ -347,6 +357,15 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
 }
 
 /**
+ * Génère une date par défaut pour un nouveau brouillon (dans 30 jours)
+ */
+function getDefaultMeetingDate(): string {
+  const date = new Date();
+  date.setDate(date.getDate() + 30); // 30 jours dans le futur par défaut
+  return date.toISOString();
+}
+
+/**
  * Hook pour la création/reprise automatique d'un brouillon d'AG
  * À utiliser sur /ag/new pour la logique de reprise
  */
@@ -384,11 +403,12 @@ export function useAgDraftAutoCreate() {
           // Reprendre le brouillon existant
           setDraftId(existingDrafts[0].id);
         } else {
-          // Créer un nouveau brouillon
+          // Créer un nouveau brouillon avec une date par défaut (meeting_date est NOT NULL)
           const newDraft = {
             copro_id: currentCoproId,
             title: `AG ${new Date().toLocaleDateString('fr-FR')}`,
             meeting_type: 'ordinary',
+            meeting_date: getDefaultMeetingDate(),
             status: 'draft',
           };
 

@@ -52,6 +52,15 @@ export interface CreateDraftInput {
 }
 
 /**
+ * Génère une date par défaut pour un nouveau brouillon (dans 30 jours)
+ */
+function getDefaultMeetingDate(): string {
+  const date = new Date();
+  date.setDate(date.getDate() + 30); // 30 jours dans le futur par défaut
+  return date.toISOString();
+}
+
+/**
  * Calcule l'étape suggérée basée sur les données existantes
  */
 function calculateSuggestedStep(draft: {
@@ -186,11 +195,12 @@ export function useAgDrafts(): UseAgDraftsReturn {
     try {
       const supabase = createUntypedClient();
 
+      // meeting_date est NOT NULL dans la DB, on doit toujours fournir une valeur
       const newDraft = {
         copro_id: currentCoproId,
         title: data.title || `AG ${new Date().toLocaleDateString('fr-FR')}`,
         meeting_type: data.meeting_type || 'ordinary',
-        meeting_date: data.meeting_date || null,
+        meeting_date: data.meeting_date || getDefaultMeetingDate(),
         location: data.location || null,
         status: 'draft',
       };
