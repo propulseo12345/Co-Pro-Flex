@@ -34,6 +34,7 @@ import {
     ContratAssurance,
     ContratSyndic
 } from '@/types';
+import type { PosteBudget } from '@/components/features/finance/Budget/types';
 
 
 export interface AdressePostale {
@@ -358,7 +359,7 @@ export type TauxTVA = 20 | 10 | 5.5 | 2.1 | 0;
 
 // Étendu avec un champ "poste" pour lier aux postes budgétaires
 export interface DepenseEtendue extends Depense {
-    poste?: 'eau' | 'electricite' | 'assurance' | 'menage' | 'ascenseur' | 'espaces_verts' | 'divers';
+    poste?: PosteBudget;
     // Détail TVA
     montantHT?: number;
     tauxTVA?: TauxTVA;

@@ -5,7 +5,7 @@ import { Clock, ArrowRight, Home, AlertTriangle, CheckCircle2 } from 'lucide-rea
 import styles from '../../../app/(dashboard)/ventes-impayes/ventes-impayes.module.css';
 
 interface Activity {
-  id: number;
+  id: string | number;
   type: string;
   title: string;
   description: string;

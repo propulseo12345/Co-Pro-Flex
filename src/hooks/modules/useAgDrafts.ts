@@ -3,16 +3,41 @@
 /**
  * Hook pour gérer les brouillons d'AG (status = 'draft')
  * Source de vérité : Supabase uniquement
+ *
+ * OPTIMISATION 2026-01-28: Utilise v_ag_drafts_progress pour éviter N+1 queries
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
-import type { AgOverview, AgMeeting } from '@/lib/ag/types';
+import { getCurrentBusinessYear } from '@/lib/time/period';
 
 // Helper: Create untyped client for tables/views not yet in generated types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
+
+/**
+ * Type pour les données retournées par v_ag_drafts_progress
+ */
+interface AgDraftProgress {
+  ag_id: string;
+  copro_id: string;
+  title: string;
+  meeting_type: 'ordinary' | 'extraordinary' | 'mixed';
+  meeting_date: string | null;
+  location: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  resolutions_count: number;
+  attendance_count: number;
+  votes_count: number;
+  has_resolutions: boolean;
+  has_attendance: boolean;
+  has_votes: boolean;
+  completion_ratio: number;
+  last_activity_at: string;
+}
 
 export interface AgDraft {
   id: string;
@@ -32,6 +57,10 @@ export interface AgDraft {
   votesCount: number;
   // Étape suggérée
   suggestedStep: number;
+  // Nouveau: ratio de complétion (0..1)
+  completionRatio: number;
+  // Nouveau: dernière activité
+  lastActivityAt: string;
 }
 
 interface UseAgDraftsReturn {
@@ -83,6 +112,37 @@ function calculateSuggestedStep(draft: {
   return 1; // Doit remplir infos de base
 }
 
+/**
+ * Convertit les données de la vue en AgDraft
+ */
+function mapProgressToDraft(row: AgDraftProgress): AgDraft {
+  return {
+    id: row.ag_id,
+    title: row.title,
+    meeting_type: row.meeting_type,
+    meeting_date: row.meeting_date,
+    location: row.location,
+    status: 'draft',
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    hasResolutions: row.has_resolutions,
+    resolutionsCount: row.resolutions_count,
+    hasAttendance: row.has_attendance,
+    attendanceCount: row.attendance_count,
+    hasVotes: row.has_votes,
+    votesCount: row.votes_count,
+    suggestedStep: calculateSuggestedStep({
+      hasResolutions: row.has_resolutions,
+      hasAttendance: row.has_attendance,
+      hasVotes: row.has_votes,
+      meeting_date: row.meeting_date,
+      location: row.location,
+    }),
+    completionRatio: row.completion_ratio,
+    lastActivityAt: row.last_activity_at,
+  };
+}
+
 export function useAgDrafts(): UseAgDraftsReturn {
   const { currentCoproId } = useCopro();
   const [drafts, setDrafts] = useState<AgDraft[]>([]);
@@ -91,6 +151,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
 
   /**
    * Charge tous les brouillons d'AG pour la copro actuelle
+   * OPTIMISÉ: utilise v_ag_drafts_progress (1 seule requête)
    */
   const loadDrafts = useCallback(async () => {
     if (!currentCoproId) {
@@ -105,76 +166,26 @@ export function useAgDrafts(): UseAgDraftsReturn {
     try {
       const supabase = createUntypedClient();
 
-      // 1. Récupérer toutes les AG en status draft
-      const { data: meetings, error: meetingsError } = await supabase
-        .from('ag_meetings')
+      // Une seule requête via la vue agrégée
+      const { data: progressData, error: queryError } = await supabase
+        .from('v_ag_drafts_progress')
         .select('*')
         .eq('copro_id', currentCoproId)
         .eq('status', 'draft')
-        .order('updated_at', { ascending: false });
+        .order('last_activity_at', { ascending: false });
 
-      if (meetingsError) throw new Error(meetingsError.message);
+      if (queryError) throw new Error(queryError.message);
 
-      if (!meetings || meetings.length === 0) {
+      if (!progressData || progressData.length === 0) {
         setDrafts([]);
         setIsLoading(false);
         return;
       }
 
-      // 2. Pour chaque draft, récupérer les compteurs
-      const draftsWithProgress: AgDraft[] = await Promise.all(
-        meetings.map(async (meeting: AgMeeting) => {
-          // Compter les résolutions
-          const { count: resolutionsCount } = await supabase
-            .from('ag_resolutions')
-            .select('*', { count: 'exact', head: true })
-            .eq('ag_id', meeting.id);
+      // Mapper les données vers le format AgDraft
+      const mappedDrafts = (progressData as AgDraftProgress[]).map(mapProgressToDraft);
+      setDrafts(mappedDrafts);
 
-          // Compter les présences
-          const { count: attendanceCount } = await supabase
-            .from('ag_attendance')
-            .select('*', { count: 'exact', head: true })
-            .eq('ag_id', meeting.id);
-
-          // Compter les votes (sur toutes les résolutions de cette AG)
-          const { count: votesCount } = await supabase
-            .from('ag_votes')
-            .select('*, ag_resolutions!inner(ag_id)', { count: 'exact', head: true })
-            .eq('ag_resolutions.ag_id', meeting.id);
-
-          const hasResolutions = (resolutionsCount || 0) > 0;
-          const hasAttendance = (attendanceCount || 0) > 0;
-          const hasVotes = (votesCount || 0) > 0;
-
-          const draft: AgDraft = {
-            id: meeting.id,
-            title: meeting.title,
-            meeting_type: meeting.meeting_type,
-            meeting_date: meeting.meeting_date,
-            location: meeting.location,
-            status: 'draft',
-            created_at: meeting.created_at,
-            updated_at: meeting.updated_at,
-            hasResolutions,
-            resolutionsCount: resolutionsCount || 0,
-            hasAttendance,
-            attendanceCount: attendanceCount || 0,
-            hasVotes,
-            votesCount: votesCount || 0,
-            suggestedStep: calculateSuggestedStep({
-              hasResolutions,
-              hasAttendance,
-              hasVotes,
-              meeting_date: meeting.meeting_date,
-              location: meeting.location,
-            }),
-          };
-
-          return draft;
-        })
-      );
-
-      setDrafts(draftsWithProgress);
     } catch (err) {
       console.error('[useAgDrafts] Error loading drafts:', err);
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des brouillons');
@@ -194,11 +205,12 @@ export function useAgDrafts(): UseAgDraftsReturn {
 
     try {
       const supabase = createUntypedClient();
+      const year = getCurrentBusinessYear();
 
       // meeting_date est NOT NULL dans la DB, on doit toujours fournir une valeur
       const newDraft = {
         copro_id: currentCoproId,
-        title: data.title || `AG ${new Date().toLocaleDateString('fr-FR')}`,
+        title: data.title || `AG ${year}`,
         meeting_type: data.meeting_type || 'ordinary',
         meeting_date: data.meeting_date || getDefaultMeetingDate(),
         location: data.location || null,
@@ -282,7 +294,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
    */
   const getLatestDraft = useCallback((): AgDraft | null => {
     if (drafts.length === 0) return null;
-    return drafts[0]; // Déjà trié par updated_at desc
+    return drafts[0]; // Déjà trié par last_activity_at desc
   }, [drafts]);
 
   // Charger les drafts au montage et quand la copro change

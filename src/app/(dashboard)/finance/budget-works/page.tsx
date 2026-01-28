@@ -41,7 +41,7 @@ export default function WorksBudgetPage() {
   } = useBudget();
 
   // Récupérer le budget N-1 pour la reprise
-  const budgetN1 = getBudgetN1(selectedYear);
+  const budgetN1 = getBudgetN1();
 
   // Forcer l'onglet travaux lors de l'ouverture du modal
   const handleOpenCreateModal = () => {

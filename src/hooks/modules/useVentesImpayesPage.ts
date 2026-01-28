@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
 export interface VenteRecente {
-  id: number;
+  id: string | number;
   lot: string;
   vendeur: string;
   acquereur: string;
@@ -31,7 +31,7 @@ export interface ImpayeBreakdown {
 }
 
 export interface RecentActivity {
-  id: number;
+  id: string | number;
   type: string;
   title: string;
   description: string;

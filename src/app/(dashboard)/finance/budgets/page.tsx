@@ -34,6 +34,10 @@ export default function BudgetsPage() {
   const router = useRouter();
 
   const {
+    // Loading state
+    isLoading,
+    error,
+
     // État UI
     activeTab,
     setActiveTab,
@@ -103,7 +107,29 @@ export default function BudgetsPage() {
   } = useBudget();
 
   // Récupérer le budget N-1 pour la reprise
-  const budgetN1 = getBudgetN1(selectedYear);
+  const budgetN1 = getBudgetN1();
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container">
+        <div className={styles.loadingState}>
+          <p>Chargement des budgets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="container">
+        <div className={styles.errorState}>
+          <p>Erreur: {error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">

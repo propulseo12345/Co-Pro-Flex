@@ -1,4 +1,3 @@
-export { DashboardKpis } from './DashboardKpis';
-export { DashboardAlerts } from './DashboardAlerts';
-export { DashboardTasks } from './DashboardTasks';
-export { DashboardSidebar } from './DashboardSidebar';
+// Dashboard components have been simplified into the main page
+// This file is kept for potential future component extraction
+export {};
