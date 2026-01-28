@@ -72,7 +72,7 @@ function getContratProgress(dateDebut: string, dateFin: string): ContratProgress
 
 interface ContractsStatsProps {
     contrats: ContratDetaille[];
-    contratSyndic: ContratSyndic;
+    contratSyndic: ContratSyndic | null;
     onSyndicAction: () => void;
     onEditSyndic: () => void;
     onManageSyndicDocuments?: () => void;
@@ -89,7 +89,7 @@ export default function ContractsStats({
     const [showMontantDetail, setShowMontantDetail] = useState(false);
 
     // Documents du syndic (depuis le contrat ou tableau vide)
-    const syndicDocuments = contratSyndic.documents || [];
+    const syndicDocuments = contratSyndic?.documents || [];
 
     // Handler pour télécharger un document syndic
     const handleDownloadSyndicDoc = (doc: DocumentSyndic) => {
@@ -100,16 +100,16 @@ export default function ContractsStats({
 
 Type de document : ${SYNDIC_DOC_LABELS[doc.type] || doc.type}
 Date d'upload : ${formatDate(doc.dateUpload)}
-Syndic : ${contratSyndic.nomSyndic}
-Cabinet : ${contratSyndic.cabinetNom || 'N/A'}
-Numéro de contrat : ${contratSyndic.numeroContrat}
+Syndic : ${contratSyndic?.nomSyndic || 'N/A'}
+Cabinet : ${contratSyndic?.cabinetNom || 'N/A'}
+Numéro de contrat : ${contratSyndic?.numeroContrat || 'N/A'}
 
 --------------------------------------------------------------------------------
 INFORMATIONS CONTRAT SYNDIC
 --------------------------------------------------------------------------------
-Période : Du ${formatDate(contratSyndic.dateDebut)} au ${formatDate(contratSyndic.dateFin)}
-Montant annuel : ${formatMontant(contratSyndic.montantAnnuel)}
-Tacite reconduction : ${contratSyndic.taciteReconduction ? 'Oui' : 'Non'}
+Période : Du ${formatDate(contratSyndic?.dateDebut || '')} au ${formatDate(contratSyndic?.dateFin || '')}
+Montant annuel : ${formatMontant(contratSyndic?.montantAnnuel || 0)}
+Tacite reconduction : ${contratSyndic?.taciteReconduction ? 'Oui' : 'Non'}
 
 --------------------------------------------------------------------------------
 CONTENU
@@ -145,7 +145,7 @@ CoProFlex - Gestion de copropriété
 
         // Montant total des contrats actifs et à renouveler (excluant expirés)
         const montantTotal = contratsInclus.reduce((sum, c) => sum + c.coutAnnuel, 0);
-        const montantSyndic = contratSyndic.montantAnnuel;
+        const montantSyndic = contratSyndic?.montantAnnuel || 0;
         const montantTotalAvecSyndic = montantTotal + montantSyndic;
 
         // Compter les assurances expirées (critique)
@@ -164,11 +164,14 @@ CoProFlex - Gestion de copropriété
         };
     }, [contrats, contratSyndic]);
 
-    const syndicJoursRestants = getJoursAvantEcheance(contratSyndic.dateFin);
+    const syndicJoursRestants = contratSyndic ? getJoursAvantEcheance(contratSyndic.dateFin) : 0;
     const syndicAlerte = syndicJoursRestants <= 180 && syndicJoursRestants > 0;
-    const syndicProgress = getContratProgress(contratSyndic.dateDebut, contratSyndic.dateFin);
+    const syndicProgress = contratSyndic ? getContratProgress(contratSyndic.dateDebut, contratSyndic.dateFin) : null;
 
     const getSyndicStatusConfig = () => {
+        if (!contratSyndic) {
+            return { label: 'Non configuré', className: styles.kpiSyndicResilie, icon: XCircle };
+        }
         if (contratSyndic.statut === 'RESILIE') {
             return { label: 'Résilié', className: styles.kpiSyndicResilie, icon: XCircle };
         }
@@ -268,7 +271,7 @@ CoProFlex - Gestion de copropriété
                             </div>
                             <div className={styles.montantDetailItemInfo}>
                                 <span className={styles.montantDetailItemName}>
-                                    Contrat Syndic - {contratSyndic.nomSyndic}
+                                    Contrat Syndic - {contratSyndic?.nomSyndic || 'Non configuré'}
                                 </span>
                                 <span className={styles.montantDetailItemMeta}>
                                     Mandat de gestion
@@ -332,7 +335,7 @@ CoProFlex - Gestion de copropriété
                                 <span>{syndicConfig.label}</span>
                             </div>
                         </div>
-                        <p className={styles.kpiSyndicName}>{contratSyndic.nomSyndic}</p>
+                        <p className={styles.kpiSyndicName}>{contratSyndic?.nomSyndic || 'Non configuré'}</p>
 
                         {/* Onglets */}
                         <div className={styles.syndicTabs}>
@@ -357,13 +360,13 @@ CoProFlex - Gestion de copropriété
                         </div>
 
                         {/* Contenu des onglets */}
-                        {syndicTab === 'infos' && (
+                        {syndicTab === 'infos' && contratSyndic && (
                             <div className={styles.kpiSyndicMeta}>
                                 <span><Euro size={14} aria-hidden="true" /> {formatMontant(contratSyndic.montantAnnuel)}/an</span>
                                 <span><Calendar size={14} aria-hidden="true" /> Du {formatDate(contratSyndic.dateDebut)} au {formatDate(contratSyndic.dateFin)}</span>
 
                                 {/* Année en cours et progression */}
-                                {syndicProgress.anneesTotales > 1 && (
+                                {syndicProgress && syndicProgress.anneesTotales > 1 && (
                                     <div className={styles.contratProgressSection}>
                                         <div className={styles.contratProgressHeader}>
                                             <span className={styles.contratProgressLabel}>
@@ -399,7 +402,7 @@ CoProFlex - Gestion de copropriété
                                 )}
 
                                 {/* Si contrat d'1 an, afficher simplement les jours restants */}
-                                {syndicProgress.anneesTotales === 1 && syndicJoursRestants > 0 && (
+                                {syndicProgress && syndicProgress.anneesTotales === 1 && syndicJoursRestants > 0 && (
                                     <span className={styles.kpiSyndicDays}>
                                         <Clock size={14} aria-hidden="true" /> {syndicJoursRestants} jours restants
                                     </span>
@@ -414,6 +417,11 @@ CoProFlex - Gestion de copropriété
                                 {contratSyndic.email && (
                                     <span><Mail size={14} aria-hidden="true" /> {contratSyndic.email}</span>
                                 )}
+                            </div>
+                        )}
+                        {syndicTab === 'infos' && !contratSyndic && (
+                            <div className={styles.kpiSyndicMeta}>
+                                <span>Aucun contrat syndic configuré</span>
                             </div>
                         )}
 
@@ -481,7 +489,7 @@ CoProFlex - Gestion de copropriété
                     </div>
                 </div>
                 <div className={styles.kpiSyndicActions}>
-                    {contratSyndic.statut !== 'RESILIE' && syndicAlerte && (
+                    {contratSyndic && contratSyndic.statut !== 'RESILIE' && syndicAlerte && (
                         <button className="btn btn-warning" onClick={onSyndicAction}>
                             <RefreshCw size={16} aria-hidden="true" /> Préparer le renouvellement
                         </button>

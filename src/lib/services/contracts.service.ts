@@ -4,11 +4,10 @@
  * Service de gestion des contrats
  * Centralise l'état des contrats pour synchroniser liste et détail
  *
- * Note: En production, ce sera remplacé par des appels Supabase
+ * NEUTRALIZED: Mock data removed - will be replaced by Supabase queries
  */
 
 import { ContratDetaille, ContratSyndic } from '@/types';
-import { MOCK_CONTRATS_DETAILLES, MOCK_CONTRAT_SYNDIC } from '@/data/mock';
 
 // Seuils pour la mise à jour automatique des statuts
 const SEUIL_A_RENOUVELER = 60; // Passe à "À renouveler" à J-60
@@ -75,10 +74,9 @@ function updateContratStatuts(contrats: ContratDetaille[]): ContratDetaille[] {
     });
 }
 
-// État global partagé (simulant une base de données)
-// On applique la mise à jour automatique des statuts au chargement initial
-let contratsState: ContratDetaille[] = updateContratStatuts([...MOCK_CONTRATS_DETAILLES]);
-let contratSyndicState: ContratSyndic = { ...MOCK_CONTRAT_SYNDIC };
+// État global partagé - NEUTRALIZED: empty state, will be replaced by Supabase
+let contratsState: ContratDetaille[] = [];
+let contratSyndicState: ContratSyndic | null = null;
 
 // Cache pour éviter les nouvelles références à chaque appel
 let cachedContrats: ContratDetaille[] | null = null;
@@ -162,9 +160,12 @@ export function deleteContrat(id: string): void {
 
 /**
  * Récupérer le contrat syndic
- * Le résultat est mis en cache pour éviter les nouvelles références à chaque appel
+ * NEUTRALIZED: Returns null when no data - will be replaced by Supabase
  */
-export function getContratSyndic(): ContratSyndic {
+export function getContratSyndic(): ContratSyndic | null {
+    if (contratSyndicState === null) {
+        return null;
+    }
     if (cachedContratSyndic === null) {
         cachedContratSyndic = { ...contratSyndicState };
     }
@@ -251,9 +252,10 @@ export function getJoursDepuisExpiration(dateFin: string): number {
 
 /**
  * Réinitialiser l'état (utile pour les tests)
+ * NEUTRALIZED: Resets to empty state
  */
 export function resetContratsState(): void {
-    contratsState = [...MOCK_CONTRATS_DETAILLES];
-    contratSyndicState = { ...MOCK_CONTRAT_SYNDIC };
+    contratsState = [];
+    contratSyndicState = null;
     notifyListeners();
 }

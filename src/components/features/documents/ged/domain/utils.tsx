@@ -20,8 +20,7 @@ import {
   User,
   Link2,
 } from 'lucide-react';
-import { DOCUMENT_CATEGORIES } from '@/data/mock/documents-ged';
-import { CATEGORY_COLORS } from './constants';
+import { DOCUMENT_CATEGORIES, CATEGORY_COLORS } from './constants';
 import type { SearchFilters, DocumentWithRelevance } from './types';
 import type { LinkedEntityType } from '@/lib/services/document-linking.service';
 

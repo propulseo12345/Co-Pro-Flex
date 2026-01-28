@@ -2,7 +2,7 @@
 
 import { CheckCircle, XCircle } from 'lucide-react';
 import clsx from 'clsx';
-import { DOCUMENTS_OBLIGATOIRES_CHECKLIST } from '@/data/mock/documents-ged';
+import { DOCUMENTS_OBLIGATOIRES_CHECKLIST } from '../domain/constants';
 import { getCategoryLabel } from '../domain/utils';
 import styles from '../../../../../app/(dashboard)/documents/ged/ged.module.css';
 

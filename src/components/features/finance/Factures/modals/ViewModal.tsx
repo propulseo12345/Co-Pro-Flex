@@ -6,7 +6,6 @@ import { Facture, StatutFacture } from '../types';
 import { getStatutBadgeClass, getStatutLabel, formatCurrency, formatDate } from '../utils';
 import { MOCK_COMPTES, TYPE_DEPENSE_LABELS } from '../data';
 import { getEntityDocuments } from '@/lib/services/document-linking.service';
-import { MOCK_DOCUMENTS_GED } from '@/data/mock/documents-ged';
 import styles from '../Factures.module.css';
 
 interface ViewModalProps {
@@ -34,10 +33,6 @@ export function ViewModal({ facture, onClose }: ViewModalProps) {
 
   // Récupérer les documents GED liés à cette facture
   const linkedDocuments = getEntityDocuments('FACTURE', facture.id);
-  const gedDocuments = linkedDocuments.map(link => {
-    const doc = MOCK_DOCUMENTS_GED.find(d => d.id === link.documentId);
-    return doc ? { ...doc, link } : null;
-  }).filter(Boolean);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -130,20 +125,19 @@ export function ViewModal({ facture, onClose }: ViewModalProps) {
           </div>
 
           {/* Documents GED liés */}
-          {gedDocuments.length > 0 && (
+          {linkedDocuments.length > 0 && (
             <div className={styles.linkedDocsSection}>
               <div className={styles.linkedDocsHeader}>
                 <FolderOpen size={18} aria-hidden="true" />
                 <h3>Documents liés (GED)</h3>
               </div>
               <div className={styles.linkedDocsList}>
-                {gedDocuments.map((doc) => (
-                  <div key={doc!.id} className={styles.linkedDocItem}>
+                {linkedDocuments.map((link) => (
+                  <div key={link.documentId} className={styles.linkedDocItem}>
                     <FileText size={16} aria-hidden="true" />
-                    <span className={styles.linkedDocName}>{doc!.nom}</span>
-                    <span className={styles.linkedDocMeta}>{doc!.taille}</span>
+                    <span className={styles.linkedDocName}>Document #{link.documentId.slice(0, 8)}</span>
                     <Link
-                      href={`/documents/ged?doc=${doc!.id}`}
+                      href={`/documents/ged?doc=${link.documentId}`}
                       className={styles.linkedDocLink}
                     >
                       Voir dans la GED
@@ -156,7 +150,7 @@ export function ViewModal({ facture, onClose }: ViewModalProps) {
           )}
 
           {/* Message si aucun document lié */}
-          {gedDocuments.length === 0 && (
+          {linkedDocuments.length === 0 && (
             <div className={styles.noLinkedDocs}>
               <Link2 size={16} aria-hidden="true" />
               <span>Aucun document GED lié à cette facture</span>

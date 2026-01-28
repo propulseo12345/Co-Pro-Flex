@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useMemo, useRef } from 'react';
-import { useCurrentUser } from '@/providers/CurrentUserProvider';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import { UserRole, NiveauConfidentialite, ROLE_PERMISSIONS } from '@/types/enums';
 import type {
   IDocumentAccessConfig,
@@ -18,11 +19,55 @@ const accessConfigsStore: Record<string, IDocumentAccessConfig> = {};
 const accessLogsStore: IDocumentAccessLog[] = [];
 
 /**
+ * User info for permissions
+ */
+interface PermissionUser {
+  id: string;
+  nom: string;
+  prenom: string;
+  role: UserRole;
+}
+
+/**
  * Hook de gestion des permissions documents
  */
 export function useDocumentPermissions() {
-  const { currentUser } = useCurrentUser();
+  const { userRole } = useCopro();
+  const [currentUser, setCurrentUser] = useState<PermissionUser | null>(null);
   const idCounter = useRef(0);
+
+  // Fetch user info from Supabase
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        const fullName = profile?.full_name || user.email || 'Utilisateur';
+        const [prenom, ...nomParts] = fullName.split(' ');
+
+        // Map userRole to UserRole enum
+        const mappedRole = userRole === 'admin' ? UserRole.ADMIN
+          : userRole === 'gestionnaire' ? UserRole.SYNDIC
+          : UserRole.COPROPRIETAIRE;
+
+        setCurrentUser({
+          id: user.id,
+          prenom: prenom || '',
+          nom: nomParts.join(' ') || '',
+          role: mappedRole,
+        });
+      }
+    };
+
+    fetchUser();
+  }, [userRole]);
 
   const generateId = useCallback(() => {
     idCounter.current += 1;

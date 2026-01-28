@@ -8,7 +8,7 @@
  * et adapte les données DB aux types frontend.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { getCurrentBusinessYear } from '@/lib/time/period';
 import { useBudgetData } from './useBudgetData';
 import { useBudgetMutations } from './useBudgetMutations';
@@ -469,6 +469,16 @@ export function useBudget() {
   const handleRejectDepense = useCallback(async (depenseId: string, comment: string) => {
     await mutations.rejectExpense(depenseId, comment);
   }, [mutations]);
+
+  // Auto-load budget lines for fonctionnement budget on initial load
+  useEffect(() => {
+    const fonctionnementBudget = rawBudgets.find(b => b.budget_type === 'current');
+    if (fonctionnementBudget && !isLoading) {
+      // Load lines and expenses for the default tab (fonctionnement)
+      loadBudgetLines(fonctionnementBudget.id);
+      loadBudgetExpenses(fonctionnementBudget.id);
+    }
+  }, [rawBudgets, isLoading, loadBudgetLines, loadBudgetExpenses]);
 
   // Load budget details when tab changes
   const handleSetActiveTab = useCallback(async (tab: BudgetTab) => {

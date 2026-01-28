@@ -1,5 +1,6 @@
 // Types for Events (Evenements)
-export type EventCategory = 'reunion' | 'fete' | 'travaux' | 'collecte' | 'ag';
+// DB enums: ag, reunion_cs, travaux, intervention, fete, autre
+export type EventCategory = string;
 
 export interface EventParticipantStats {
   confirmed: number;
@@ -8,7 +9,7 @@ export interface EventParticipantStats {
 }
 
 export interface Event {
-  id: number;
+  id: string;
   title: string;
   category: EventCategory;
   date: string;
@@ -23,7 +24,7 @@ export interface Event {
 }
 
 export interface Participant {
-  id: number;
+  id: string;
   name: string;
   status: 'confirmed' | 'declined' | 'pending';
   role: string;
@@ -46,11 +47,12 @@ export interface CategoryInfo {
 }
 
 // Types for Wall (Mur)
-export type PublicationCategory = 'travaux' | 'social' | 'securite' | 'evenements' | 'annonce';
-export type AuthorRole = 'syndic' | 'copropriétaire' | 'conseil';
+// DB enums: information, urgent, question, event, other
+export type PublicationCategory = string;
+export type AuthorRole = string;
 
 export interface Publication {
-  id: number;
+  id: string;
   author: string;
   authorRole: AuthorRole;
   title: string;
@@ -63,6 +65,7 @@ export interface Publication {
   comments: number;
   hasAttachment: boolean;
   tags?: string[];
+  isLikedByMe?: boolean;
 }
 
 export interface PublicationDraft extends Publication {
@@ -77,6 +80,7 @@ export interface Comment {
   date: string;
   likes: number;
   isLiked: boolean;
+  parentId?: string | null;
 }
 
 export interface PublicationDetail extends Omit<Publication, 'comments'> {
@@ -115,3 +119,21 @@ export interface Coproprietaire {
   lot: string;
   email: string;
 }
+
+// Category mappings (DB enum -> UI label)
+export const WALL_CATEGORY_MAP: Record<string, { label: string; color: string }> = {
+  information: { label: 'Information', color: '#10b981' },
+  urgent: { label: 'Urgent', color: '#ef4444' },
+  question: { label: 'Question', color: '#8b5cf6' },
+  event: { label: 'Événement', color: '#3b82f6' },
+  other: { label: 'Autre', color: '#6b7280' },
+};
+
+export const EVENT_TYPE_MAP: Record<string, { label: string; color: string }> = {
+  ag: { label: 'Assemblée Générale', color: '#4f46e5' },
+  reunion_cs: { label: 'Réunion CS', color: '#0284c7' },
+  travaux: { label: 'Travaux', color: '#f59e0b' },
+  intervention: { label: 'Intervention', color: '#ef4444' },
+  fete: { label: 'Fête', color: '#8b5cf6' },
+  autre: { label: 'Autre', color: '#6b7280' },
+};

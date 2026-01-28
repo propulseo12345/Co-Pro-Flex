@@ -186,11 +186,15 @@ CoProFlex - Gestion de copropriété
 
     // Télécharger PDF syndic
     const handleDownloadSyndicPDF = useCallback(() => {
+        if (!contratSyndic) {
+            showToast('Aucun contrat syndic configuré', 'error');
+            return;
+        }
         showToast(`Téléchargement de ${contratSyndic.fichierPDF || 'contrat_syndic.pdf'}...`, 'info');
         setTimeout(() => {
             showToast('Fichier téléchargé avec succès', 'success');
         }, 1500);
-    }, [contratSyndic.fichierPDF, showToast]);
+    }, [contratSyndic, showToast]);
 
     // Modifier le contrat syndic
     const handleSaveSyndic = useCallback((updated: ContratSyndic) => {

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Send, AlertCircle, X, FileText, Paperclip, Bell, User, Save, Download, Check, Search, Image, File } from 'lucide-react';
 import clsx from 'clsx';
-import { useEventEditorPage, CATEGORIES, ORGANISATEURS, COPROPRIETAIRES } from '@/features/communication/hooks';
+import { useEventEditorPage, CATEGORIES, ORGANISATEURS } from '@/features/communication/hooks';
 import styles from './nouveau-evenement.module.css';
 
 export default function NouvelEvenementPage() {

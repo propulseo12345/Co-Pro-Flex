@@ -440,7 +440,7 @@ export async function uploadDocument(
 
   // Upload le fichier
   const { error: uploadError } = await supabase.storage
-    .from('documents')
+    .from('ged')
     .upload(path, file);
 
   if (uploadError) throw uploadError;
@@ -469,7 +469,7 @@ export async function uploadDocument(
 export async function getDocumentUrl(filePath: string, expiresIn = 3600): Promise<string> {
   const supabase = createUntypedClient();
   const { data, error } = await supabase.storage
-    .from('documents')
+    .from('ged')
     .createSignedUrl(filePath, expiresIn);
 
   if (error) throw error;
@@ -479,7 +479,7 @@ export async function getDocumentUrl(filePath: string, expiresIn = 3600): Promis
 export async function downloadDocument(filePath: string): Promise<Blob> {
   const supabase = createUntypedClient();
   const { data, error } = await supabase.storage
-    .from('documents')
+    .from('ged')
     .download(filePath);
 
   if (error) throw error;

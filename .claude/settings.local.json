@@ -30,7 +30,8 @@
       "Bash(find:*)",
       "Bash(git checkout:*)",
       "Bash(git restore:*)",
-      "Bash(git fsck:*)"
+      "Bash(git fsck:*)",
+      "mcp__plugin_supabase_supabase__list_extensions"
     ]
   }
 }

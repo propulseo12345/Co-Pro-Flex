@@ -1,15 +1,24 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Shield, Globe, Lock, Users, UserPlus, UserMinus, Eye, Download,
   History, X, Check, AlertTriangle, Search, Printer, Share2
 } from 'lucide-react';
 import { useDocumentPermissions } from '@/hooks/modules/useDocumentPermissions';
-import { useCurrentUser, MOCK_USERS } from '@/providers/CurrentUserProvider';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import { NiveauConfidentialite, UserRole } from '@/types/enums';
 import type { DocumentAccessActionType } from '@/types/models/document-access';
 import styles from './AccessRightsManager.module.css';
+
+interface CoproUser {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  role: UserRole;
+}
 
 interface AccessRightsManagerProps {
   documentId: string;
@@ -46,7 +55,7 @@ export function AccessRightsManager({
   onClose,
   onSave,
 }: AccessRightsManagerProps) {
-  const { currentUser } = useCurrentUser();
+  const { currentCoproId } = useCopro();
   const {
     canManageAccess,
     getDocumentAccessConfig,
@@ -62,6 +71,7 @@ export function AccessRightsManager({
   const [activeTab, setActiveTab] = useState<'access' | 'users' | 'history'>('access');
   const [searchQuery, setSearchQuery] = useState('');
   const [addUserReason, setAddUserReason] = useState('');
+  const [availableUsers, setAvailableUsers] = useState<CoproUser[]>([]);
 
   const accessConfig = useMemo(
     () => getDocumentAccessConfig(documentId),
@@ -73,15 +83,39 @@ export function AccessRightsManager({
     [documentId, getDocumentAccessLogs]
   );
 
-  // Utilisateurs disponibles pour l'ajout (exclure syndic et admin, et deja autorises)
+  // Fetch users from Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!currentCoproId) return;
+
+      const supabase = createClient();
+
+      // Fetch coproprietaires for this copro
+      const { data: coproprietaires } = await supabase
+        .from('coproprietaires')
+        .select('id, first_name, last_name, email')
+        .eq('copro_id', currentCoproId);
+
+      if (coproprietaires) {
+        const users: CoproUser[] = coproprietaires.map(c => ({
+          id: c.id,
+          nom: c.last_name || '',
+          prenom: c.first_name || '',
+          email: c.email || '',
+          role: UserRole.COPROPRIETAIRE,
+        }));
+        setAvailableUsers(users);
+      }
+    };
+
+    fetchUsers();
+  }, [currentCoproId]);
+
+  // Utilisateurs disponibles pour l'ajout (exclure deja autorises)
   const availableUsersForAdd = useMemo(() => {
     const authorizedIds = accessConfig?.authorizedUsers.map(u => u.userId) || [];
-    return MOCK_USERS.filter(u =>
-      u.role !== UserRole.ADMIN &&
-      u.role !== UserRole.SYNDIC &&
-      !authorizedIds.includes(u.id)
-    );
-  }, [accessConfig]);
+    return availableUsers.filter(u => !authorizedIds.includes(u.id));
+  }, [accessConfig, availableUsers]);
 
   const filteredUsers = useMemo(() => {
     if (!searchQuery) return availableUsersForAdd;

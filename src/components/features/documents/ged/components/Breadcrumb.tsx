@@ -2,7 +2,7 @@
 
 import { Home, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
-import type { GEDFolder } from '@/data/mock/documents-ged';
+import type { GEDFolder } from '../domain/types';
 import styles from '../../../../../app/(dashboard)/documents/ged/ged.module.css';
 
 interface BreadcrumbProps {

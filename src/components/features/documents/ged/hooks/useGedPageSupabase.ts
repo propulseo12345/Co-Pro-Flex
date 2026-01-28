@@ -2,25 +2,13 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useCopro } from '@/providers/CoproContext';
-import { useSupabase } from '@/hooks/useSupabase';
-import { useGedPage as useGedPageData } from '@/hooks/modules/useDocumentsData';
 import * as documentsApi from '@/lib/documents/api';
-import type { Document, DocumentFolder, DocumentCategory } from '@/lib/documents/api';
-import {
-  MOCK_DOCUMENTS_GED,
-  GED_FOLDERS,
-  getFolderPath as getMockFolderPath,
-  getSubFolders as getMockSubFolders,
-  getDocumentsInFolder as getMockDocumentsInFolder,
-  type DocumentWithFolder,
-  type GEDFolder,
-} from '@/data/mock/documents-ged';
+import type { Document, DocumentFolder, DocumentCategory, DocumentStats } from '@/lib/documents/api';
 import {
   detectDocumentEntityType,
   extractDataFromFileName,
   getLinkableModule,
 } from '@/lib/services/document-linking.service';
-import { getDocumentsNeedingAttention } from '@/lib/services/document-versioning.service';
 import { useDocumentPermissions } from '@/hooks/modules/useDocumentPermissions';
 import type {
   SortField,
@@ -32,12 +20,14 @@ import type {
   DetectedEntityType,
   LinkedEntityType,
   ExtractedDocumentData,
+  GEDFolder,
+  DocumentWithFolder,
 } from '../domain/types';
-import { ITEMS_PER_PAGE } from '../domain/constants';
-import { fuzzyMatch, calculateRelevanceScore, getCategoryLabel, hasActiveFilters } from '../domain/utils';
+import { ITEMS_PER_PAGE, CATEGORY_LABELS } from '../domain/constants';
 
-type UnifiedDocument = DocumentWithFolder | (Document & { relevanceScore?: number });
-type UnifiedFolder = GEDFolder | DocumentFolder;
+// ============================================================================
+// NORMALIZERS
+// ============================================================================
 
 function normalizeDocument(doc: Document): DocumentWithFolder {
   return {
@@ -50,12 +40,12 @@ function normalizeDocument(doc: Document): DocumentWithFolder {
     type: doc.mime_type?.includes('pdf') ? 'PDF' : doc.mime_type?.includes('image') ? 'IMAGE' : 'AUTRE',
     categorie: (doc.category || 'autre').toUpperCase(),
     tags: doc.tags || [],
-    dossierId: doc.folder_id,
+    dossierId: doc.folder_id || null,
     confidentialite: doc.confidentiality,
     coproprieteId: doc.copro_id,
     url: doc.file_path,
     annee: doc.year || new Date(doc.created_at).getFullYear(),
-  } as DocumentWithFolder;
+  };
 }
 
 function normalizeFolder(folder: DocumentFolder): GEDFolder {
@@ -66,13 +56,78 @@ function normalizeFolder(folder: DocumentFolder): GEDFolder {
     icon: folder.icon,
     color: folder.color,
     ordre: folder.sort_order,
+    description: folder.description,
+    documentCount: folder.document_count,
+    subfolderCount: folder.subfolder_count,
   };
 }
 
-export function useGedPageSupabase() {
-  const { currentCoproId, isManager } = useCopro();
-  const { isConnected, isLoading: authLoading } = useSupabase();
+// ============================================================================
+// UTILS
+// ============================================================================
 
+function fuzzyMatch(str: string, pattern: string): { matches: boolean; score: number } {
+  const lowerStr = str.toLowerCase();
+  const lowerPattern = pattern.toLowerCase();
+  if (lowerStr.includes(lowerPattern)) return { matches: true, score: 100 };
+  // Simple fuzzy: check if all chars are in order
+  let j = 0;
+  for (let i = 0; i < lowerStr.length && j < lowerPattern.length; i++) {
+    if (lowerStr[i] === lowerPattern[j]) j++;
+  }
+  return { matches: j === lowerPattern.length, score: j === lowerPattern.length ? 50 : 0 };
+}
+
+function getCategoryLabel(category: string): string {
+  return CATEGORY_LABELS[category] || CATEGORY_LABELS[category.toLowerCase()] || category;
+}
+
+function hasActiveFilters(filters: SearchFilters): boolean {
+  return (
+    filters.categories.length > 0 ||
+    filters.dateFrom !== '' ||
+    filters.dateTo !== '' ||
+    filters.sizeMin !== '' ||
+    filters.sizeMax !== '' ||
+    filters.fileTypes.length > 0
+  );
+}
+
+function calculateRelevanceScore(doc: DocumentWithFolder, query: string, filters: SearchFilters): number {
+  let score = 0;
+  if (!query) return score;
+
+  const lowerQuery = query.toLowerCase();
+  const lowerName = doc.nom.toLowerCase();
+  const lowerTitle = (doc.titre || '').toLowerCase();
+
+  // Exact match in name
+  if (lowerName === lowerQuery) score += 100;
+  else if (lowerName.includes(lowerQuery)) score += 80;
+
+  // Match in title
+  if (lowerTitle.includes(lowerQuery)) score += 60;
+
+  // Category match
+  if (getCategoryLabel(doc.categorie).toLowerCase().includes(lowerQuery)) score += 40;
+
+  // Recent bonus
+  const docDate = new Date(doc.dateAjout);
+  const daysSinceUpload = (Date.now() - docDate.getTime()) / (1000 * 60 * 60 * 24);
+  if (daysSinceUpload < 30) score += 20;
+  else if (daysSinceUpload < 90) score += 10;
+
+  return score;
+}
+
+// ============================================================================
+// HOOK
+// ============================================================================
+
+export function useGedPageSupabase() {
+  const { currentCoproId } = useCopro();
+
+  // UI State
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortField, setSortField] = useState<SortField>('dateAjout');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -82,119 +137,130 @@ export function useGedPageSupabase() {
   const [navigationMode, setNavigationMode] = useState<NavigationMode>('folders');
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
+  // Link modal
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [selectedDocForLink, setSelectedDocForLink] = useState<DocumentWithFolder | null>(null);
   const [detectedEntityType, setDetectedEntityType] = useState<DetectedEntityType | null>(null);
   const [extractedData, setExtractedData] = useState<ExtractedDocumentData>({});
 
+  // Preview
   const [previewDocument, setPreviewDocument] = useState<DocumentWithFolder | null>(null);
   const [showVersioningAlerts, setShowVersioningAlerts] = useState(true);
   const [showAccessRightsModal, setShowAccessRightsModal] = useState(false);
   const [selectedDocForAccess, setSelectedDocForAccess] = useState<DocumentWithFolder | null>(null);
 
-  const [supabaseDocuments, setSupabaseDocuments] = useState<Document[]>([]);
-  const [supabaseFolders, setSupabaseFolders] = useState<DocumentFolder[]>([]);
-  const [dataLoading, setDataLoading] = useState(false);
-  const [dataError, setDataError] = useState<string | null>(null);
+  // Data state
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [folders, setFolders] = useState<DocumentFolder[]>([]);
+  const [stats, setStats] = useState<DocumentStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { filterAccessibleDocuments, canManageAccess, logAccessAction } = useDocumentPermissions();
 
-  const useSupabaseData = isConnected && currentCoproId && !authLoading;
+  // ============================================================================
+  // DATA LOADING
+  // ============================================================================
 
   useEffect(() => {
-    if (!useSupabaseData || !currentCoproId) return;
+    if (!currentCoproId) {
+      setDocuments([]);
+      setFolders([]);
+      setStats(null);
+      setIsLoading(false);
+      return;
+    }
 
-    const loadSupabaseData = async () => {
-      setDataLoading(true);
-      setDataError(null);
+    const loadData = async () => {
+      setIsLoading(true);
+      setError(null);
 
       try {
-        const [docs, folders] = await Promise.all([
+        const [docsData, foldersData, statsData] = await Promise.all([
           documentsApi.getDocuments(currentCoproId),
           documentsApi.getFolders(currentCoproId),
+          documentsApi.getDocumentStats(currentCoproId),
         ]);
 
-        setSupabaseDocuments(docs);
-        setSupabaseFolders(folders);
+        setDocuments(docsData);
+        setFolders(foldersData);
+        setStats(statsData);
       } catch (err) {
-        setDataError(err instanceof Error ? err.message : 'Erreur de chargement');
         console.error('Error loading GED data:', err);
+        // Extract more details from Supabase error
+        const errorMessage = err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null
+            ? JSON.stringify(err)
+            : 'Erreur de chargement';
+        setError(`Erreur: ${errorMessage}. Vérifiez que vous êtes connecté et membre de cette copropriété.`);
       } finally {
-        setDataLoading(false);
+        setIsLoading(false);
       }
     };
 
-    loadSupabaseData();
-  }, [useSupabaseData, currentCoproId]);
+    loadData();
+  }, [currentCoproId]);
 
-  const normalizedDocuments = useMemo(() => {
-    if (useSupabaseData && supabaseDocuments.length > 0) {
-      return supabaseDocuments.map(normalizeDocument);
-    }
-    return MOCK_DOCUMENTS_GED;
-  }, [useSupabaseData, supabaseDocuments]);
+  // ============================================================================
+  // NORMALIZED DATA
+  // ============================================================================
 
-  const normalizedFolders = useMemo(() => {
-    if (useSupabaseData && supabaseFolders.length > 0) {
-      return supabaseFolders.map(normalizeFolder);
-    }
-    return GED_FOLDERS;
-  }, [useSupabaseData, supabaseFolders]);
+  const normalizedDocuments = useMemo(() => documents.map(normalizeDocument), [documents]);
+  const normalizedFolders = useMemo(() => folders.map(normalizeFolder), [folders]);
 
-  const documentsNeedingAttention = useMemo(() => getDocumentsNeedingAttention(), []);
+  // Documents needing attention (expiring soon) - empty for now, could be fetched from v_documents_expiring
+  const documentsNeedingAttention = useMemo(() => ({
+    obsolete: [] as DocumentWithFolder[],
+    overdue: [] as DocumentWithFolder[],
+  }), []);
 
+  // Current folder
   const currentFolder = useMemo(() => {
     return currentFolderId ? normalizedFolders.find((f) => f.id === currentFolderId) : null;
   }, [currentFolderId, normalizedFolders]);
 
+  // Breadcrumb
   const breadcrumb = useMemo(() => {
     if (!currentFolderId) return [];
 
-    if (useSupabaseData) {
-      const path: GEDFolder[] = [];
-      let id: string | null = currentFolderId;
-      while (id) {
-        const folder = normalizedFolders.find((f) => f.id === id);
-        if (folder) {
-          path.unshift(folder);
-          id = folder.parentId;
-        } else {
-          break;
-        }
+    const path: GEDFolder[] = [];
+    let id: string | null = currentFolderId;
+    while (id) {
+      const folder = normalizedFolders.find((f) => f.id === id);
+      if (folder) {
+        path.unshift(folder);
+        id = folder.parentId;
+      } else {
+        break;
       }
-      return path;
     }
+    return path;
+  }, [currentFolderId, normalizedFolders]);
 
-    return getMockFolderPath(currentFolderId);
-  }, [currentFolderId, useSupabaseData, normalizedFolders]);
-
+  // Sub-folders
   const subFolders = useMemo(() => {
-    if (useSupabaseData) {
-      return normalizedFolders
-        .filter((f) => f.parentId === currentFolderId)
-        .sort((a, b) => a.ordre - b.ordre);
-    }
-    return getMockSubFolders(currentFolderId);
-  }, [currentFolderId, useSupabaseData, normalizedFolders]);
+    return normalizedFolders
+      .filter((f) => f.parentId === currentFolderId)
+      .sort((a, b) => a.ordre - b.ordre);
+  }, [currentFolderId, normalizedFolders]);
 
+  // Root folders
   const rootFolders = useMemo(() => {
-    if (useSupabaseData) {
-      return normalizedFolders
-        .filter((f) => !f.parentId)
-        .sort((a, b) => a.ordre - b.ordre);
-    }
-    return getMockSubFolders(null);
-  }, [useSupabaseData, normalizedFolders]);
+    return normalizedFolders
+      .filter((f) => !f.parentId)
+      .sort((a, b) => a.ordre - b.ordre);
+  }, [normalizedFolders]);
 
+  // Documents in current folder
   const currentFolderDocuments = useMemo(() => {
     if (!currentFolderId) return [];
+    return normalizedDocuments.filter((d) => d.dossierId === currentFolderId);
+  }, [currentFolderId, normalizedDocuments]);
 
-    if (useSupabaseData) {
-      return normalizedDocuments.filter((d) => d.dossierId === currentFolderId);
-    }
-
-    return getMockDocumentsInFolder(currentFolderId);
-  }, [currentFolderId, useSupabaseData, normalizedDocuments]);
+  // ============================================================================
+  // FILTERING & SORTING
+  // ============================================================================
 
   const getFilteredDocuments = useCallback(
     (searchQuery: string, filters: SearchFilters): DocumentWithRelevance[] => {
@@ -284,6 +350,10 @@ export function useGedPageSupabase() {
     return Math.ceil(totalDocuments / ITEMS_PER_PAGE);
   }, []);
 
+  // ============================================================================
+  // NAVIGATION
+  // ============================================================================
+
   const navigateToFolder = useCallback((folderId: string | null) => {
     setCurrentFolderId(folderId);
     setCurrentPage(1);
@@ -301,6 +371,10 @@ export function useGedPageSupabase() {
     setCurrentPage(1);
   }, []);
 
+  // ============================================================================
+  // DRAG AND DROP UPLOAD
+  // ============================================================================
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -317,37 +391,37 @@ export function useGedPageSupabase() {
       setIsDragOver(false);
       const files = Array.from(e.dataTransfer.files);
 
-      if (files.length === 0) return;
+      if (files.length === 0 || !currentCoproId) return;
 
-      if (useSupabaseData && currentCoproId) {
-        try {
-          for (const file of files) {
-            const category: DocumentCategory = currentFolder?.icon === 'Users' ? 'pv_ag' :
-              currentFolder?.icon === 'Receipt' ? 'facture' :
-              currentFolder?.icon === 'FileSignature' ? 'contrat' : 'autre';
+      try {
+        for (const file of files) {
+          // Determine category based on folder
+          const category: DocumentCategory = currentFolder?.icon === 'Users' ? 'pv_ag' :
+            currentFolder?.icon === 'Receipt' ? 'facture' :
+            currentFolder?.icon === 'FileSignature' ? 'contrat' : 'autre';
 
-            await documentsApi.uploadDocument(file, currentCoproId, category, {
-              folderId: currentFolderId || undefined,
-              title: file.name,
-            });
-          }
-
-          const docs = await documentsApi.getDocuments(currentCoproId);
-          setSupabaseDocuments(docs);
-
-          alert(`${files.length} fichier(s) importé(s) avec succès.`);
-        } catch (err) {
-          alert(`Erreur d'import: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+          await documentsApi.uploadDocument(file, currentCoproId, category, {
+            folderId: currentFolderId || undefined,
+            title: file.name,
+          });
         }
-      } else {
-        const folderName = currentFolder?.nom || 'Racine';
-        alert(
-          `${files.length} fichier(s) sélectionné(s) pour import dans "${folderName}".\n\nConnectez-vous pour activer l'upload Supabase.`
-        );
+
+        // Refresh documents
+        const docsData = await documentsApi.getDocuments(currentCoproId);
+        setDocuments(docsData);
+
+        alert(`${files.length} fichier(s) importé(s) avec succès.`);
+      } catch (err) {
+        console.error('Upload error:', err);
+        alert(`Erreur d'import: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
       }
     },
-    [currentFolder, currentFolderId, currentCoproId, useSupabaseData]
+    [currentFolder, currentFolderId, currentCoproId]
   );
+
+  // ============================================================================
+  // LINK MODAL
+  // ============================================================================
 
   const handleOpenLinkModal = useCallback((doc: DocumentWithFolder) => {
     setSelectedDocForLink(doc);
@@ -369,7 +443,7 @@ export function useGedPageSupabase() {
     async (entityType: LinkedEntityType, entityId?: string) => {
       const module = getLinkableModule(entityType);
 
-      if (module && selectedDocForLink && useSupabaseData) {
+      if (module && selectedDocForLink) {
         try {
           await documentsApi.linkDocumentToEntity(
             selectedDocForLink.id,
@@ -377,20 +451,19 @@ export function useGedPageSupabase() {
             entityId || '',
             'related'
           );
-          alert(`Liaison créée avec succès.`);
+          alert('Liaison créée avec succès.');
         } catch (err) {
           alert(`Erreur: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
         }
         handleCloseLinkModal();
-      } else if (module && selectedDocForLink) {
-        alert(
-          `Liaison créée !\n\nDocument : ${selectedDocForLink.nom}\nType : ${module.label}\n${entityId ? `Entité : ${entityId}` : 'Nouvelle entité à créer'}\n\nCette fonctionnalité sera pleinement opérationnelle après connexion.`
-        );
-        handleCloseLinkModal();
       }
     },
-    [selectedDocForLink, handleCloseLinkModal, useSupabaseData]
+    [selectedDocForLink, handleCloseLinkModal]
   );
+
+  // ============================================================================
+  // PREVIEW
+  // ============================================================================
 
   const handlePreviewDocument = useCallback(
     (doc: DocumentWithFolder) => {
@@ -404,6 +477,10 @@ export function useGedPageSupabase() {
     setPreviewDocument(null);
   }, []);
 
+  // ============================================================================
+  // ACCESS RIGHTS
+  // ============================================================================
+
   const handleOpenAccessRights = useCallback((doc: DocumentWithFolder) => {
     setSelectedDocForAccess(doc);
     setShowAccessRightsModal(true);
@@ -414,7 +491,12 @@ export function useGedPageSupabase() {
     setShowAccessRightsModal(false);
   }, []);
 
+  // ============================================================================
+  // RETURN
+  // ============================================================================
+
   return {
+    // UI State
     viewMode,
     setViewMode,
     sortField,
@@ -430,30 +512,40 @@ export function useGedPageSupabase() {
     setNavigationMode,
     currentFolderId,
 
+    // Link modal
     showLinkModal,
     selectedDocForLink,
     detectedEntityType,
     extractedData,
 
+    // Preview
     previewDocument,
 
+    // Versioning
     showVersioningAlerts,
     setShowVersioningAlerts,
     documentsNeedingAttention,
 
+    // Access rights
     showAccessRightsModal,
     selectedDocForAccess,
     canManageAccess,
 
+    // Data
+    documents: normalizedDocuments,
+    folders: normalizedFolders,
     currentFolder,
     breadcrumb,
     subFolders,
     rootFolders,
+    stats,
 
-    isLoading: dataLoading || authLoading,
-    error: dataError,
-    isConnected: useSupabaseData,
+    // Loading state
+    isLoading,
+    error,
+    isConnected: !!currentCoproId,
 
+    // Methods
     getFilteredDocuments,
     getPaginatedDocuments,
     getTotalPages,

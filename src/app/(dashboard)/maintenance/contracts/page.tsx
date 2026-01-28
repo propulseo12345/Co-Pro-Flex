@@ -225,7 +225,7 @@ export default function ContractsPage() {
             />
 
             {/* Modal Modification Syndic */}
-            {isEditSyndicModalOpen && (
+            {isEditSyndicModalOpen && contratSyndic && (
                 <EditSyndicModal
                     contrat={contratSyndic}
                     onSave={handleSaveSyndic}

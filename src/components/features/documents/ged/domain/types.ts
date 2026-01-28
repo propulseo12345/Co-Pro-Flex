@@ -1,5 +1,46 @@
-import type { DocumentWithFolder } from '@/data/mock/documents-ged';
 import type { LinkedEntityType, ExtractedDocumentData } from '@/lib/services/document-linking.service';
+import type { NiveauConfidentialite } from '@/types/enums/misc';
+
+// ============================================================================
+// GED FOLDER TYPE
+// ============================================================================
+
+export interface GEDFolder {
+  id: string;
+  nom: string;
+  parentId: string | null;
+  icon?: string;
+  color?: string;
+  ordre: number;
+  description?: string;
+  documentCount?: number;
+  subfolderCount?: number;
+}
+
+// ============================================================================
+// DOCUMENT TYPE
+// ============================================================================
+
+export interface DocumentWithFolder {
+  id: string;
+  nom: string;
+  titre?: string;
+  description?: string;
+  dateAjout: string;
+  taille: string;
+  type: 'PDF' | 'IMAGE' | 'AUTRE';
+  categorie: string;
+  tags?: string[];
+  dossierId?: string | null;
+  confidentialite?: NiveauConfidentialite | string;
+  coproprieteId?: string;
+  url?: string;
+  annee?: number;
+}
+
+// ============================================================================
+// PAGE STATE TYPES
+// ============================================================================
 
 export type SortField = 'nom' | 'dateAjout' | 'taille' | 'categorie' | 'pertinence';
 export type SortOrder = 'asc' | 'desc';
@@ -31,4 +72,4 @@ export interface DocumentWithRelevance extends DocumentWithFolder {
   relevanceScore?: number;
 }
 
-export { DocumentWithFolder, LinkedEntityType, ExtractedDocumentData };
+export { LinkedEntityType, ExtractedDocumentData };

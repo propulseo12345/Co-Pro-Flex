@@ -1,7 +1,13 @@
-import { MOCK_DEPENSES_BUDGETS, MOCK_IMPAYES, MOCK_CONTRATS_DETAILLES, MOCK_ORDRES_SERVICE } from '@/data/mock';
+// NEUTRALIZED: Mock imports removed - will be replaced by Supabase data
 import { Impaye, ContratDetaille, OrdreService } from '@/types';
-import { MOCK_APPELS } from '@/components/features/finance/AppelsFonds/mock-data';
 import { getAllInterventions, getInterventionAlerts } from '@/lib/services/interventions.service';
+
+// Placeholder empty arrays until Supabase integration
+const MOCK_DEPENSES_BUDGETS: Array<{ poste: string; montant: number }> = [];
+const MOCK_IMPAYES: Impaye[] = [];
+const MOCK_CONTRATS_DETAILLES: ContratDetaille[] = [];
+const MOCK_ORDRES_SERVICE: OrdreService[] = [];
+const MOCK_APPELS: Array<{ montantTotal: number; montantEncaisse?: number }> = [];
 
 export type AlertType =
     | 'BUDGET_DEPASSEMENT'

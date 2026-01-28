@@ -23,7 +23,7 @@ export default function GEDPage() {
     showLinkModal, selectedDocForLink, detectedEntityType, extractedData,
     previewDocument, showVersioningAlerts, setShowVersioningAlerts, documentsNeedingAttention,
     showAccessRightsModal, selectedDocForAccess, canManageAccess,
-    currentFolder, breadcrumb, subFolders, rootFolders,
+    documents, folders, currentFolder, breadcrumb, subFolders, rootFolders, stats,
     isLoading, error, isConnected,
     getFilteredDocuments, getPaginatedDocuments, getTotalPages, navigateToFolder, handleModeChange,
     handleDragOver, handleDragLeave, handleDrop, handleOpenLinkModal, handleCloseLinkModal, handleCreateLink,
@@ -36,7 +36,7 @@ export default function GEDPage() {
     searchHistory, setIsSearchFocused, searchSuggestions, activeFilters,
     saveToHistory, removeFromHistory, handleClearFilters, handleCategoryFilter, handleFileTypeFilter,
     updateDateFrom, updateDateTo, updateSizeMin, updateSizeMax,
-  } = useDocumentSearch();
+  } = useDocumentSearch({ documents, folders });
 
   const filteredDocuments = useMemo(() => getFilteredDocuments(searchQuery, filters), [getFilteredDocuments, searchQuery, filters]);
   const paginatedDocuments = useMemo(() => getPaginatedDocuments(filteredDocuments), [getPaginatedDocuments, filteredDocuments]);
@@ -75,7 +75,7 @@ export default function GEDPage() {
   if (isLoading) {
     return (
       <div className="container">
-        <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} />
+        <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} stats={null} rootFolderCount={0} />
         <LoadingState message="Chargement des documents..." />
       </div>
     );
@@ -84,7 +84,7 @@ export default function GEDPage() {
   if (error) {
     return (
       <div className="container">
-        <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} />
+        <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} stats={null} rootFolderCount={0} />
         <ErrorState message={error} />
       </div>
     );
@@ -92,7 +92,7 @@ export default function GEDPage() {
 
   return (
     <div className="container">
-      <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} />
+      <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} stats={stats} rootFolderCount={rootFolders.length} />
 
       {isConnected ? (
         <div className={styles.connectionBadge} data-connected="true">
@@ -188,8 +188,9 @@ export default function GEDPage() {
       )}
       {previewDocument && (
         <DocumentViewerModal
-          document={{ id: previewDocument.id, nom: previewDocument.nom, type: previewDocument.type as 'PDF' | 'IMAGE' | 'AUTRE', categorie: previewDocument.categorie, dateAjout: previewDocument.dateAjout, taille: previewDocument.taille, dossierId: previewDocument.dossierId }}
+          document={{ id: previewDocument.id, nom: previewDocument.nom, type: previewDocument.type as 'PDF' | 'IMAGE' | 'AUTRE', categorie: previewDocument.categorie, dateAjout: previewDocument.dateAjout, taille: previewDocument.taille, dossierId: previewDocument.dossierId || undefined }}
           onClose={handleClosePreview}
+          folders={folders}
         />
       )}
       {showAccessRightsModal && selectedDocForAccess && (

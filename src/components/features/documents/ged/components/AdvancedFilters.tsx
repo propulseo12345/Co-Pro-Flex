@@ -2,7 +2,7 @@
 
 import { Filter, Tag, Calendar, HardDrive, FileType } from 'lucide-react';
 import clsx from 'clsx';
-import { DOCUMENT_CATEGORIES } from '@/data/mock/documents-ged';
+import { DOCUMENT_CATEGORIES } from '../domain/constants';
 import type { SearchFilters } from '../domain/types';
 import { FILE_TYPES } from '../domain/constants';
 import { getCategoryColor } from '../domain/utils';

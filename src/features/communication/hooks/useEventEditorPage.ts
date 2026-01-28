@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import type { Attachment, InvitationType, CategoryInfo, Organizer, Coproprietaire } from '../types';
-
-const EVENTS_STORAGE_KEY = 'evenements-copro-data';
 
 export const CATEGORIES: CategoryInfo[] = [
   { id: 'ag', label: 'Assemblée Générale', color: '#4f46e5' },
@@ -15,32 +15,14 @@ export const CATEGORIES: CategoryInfo[] = [
 ];
 
 export const ORGANISATEURS: Organizer[] = [
-  { id: 'syndic', name: 'Syndic - Cabinet Gestion Immo', role: 'Syndic' },
-  { id: 'president', name: 'Jean DUPONT', role: 'Président CS' },
-  { id: 'secretaire', name: 'Marie MARTIN', role: 'Secrétaire CS' },
-  { id: 'tresorier', name: 'Pierre DURAND', role: 'Trésorier CS' },
+  { id: 'syndic', name: 'Syndic', role: 'Syndic' },
+  { id: 'conseil', name: 'Conseil Syndical', role: 'Conseil Syndical' },
 ];
-
-export const COPROPRIETAIRES: Coproprietaire[] = [
-  { id: 'u1', name: 'Marie Martin', lot: 'Lot 12', email: 'marie.martin@email.com' },
-  { id: 'u2', name: 'Jean-Pierre Dubois', lot: 'Lot 8', email: 'jp.dubois@email.com' },
-  { id: 'u3', name: 'Sophie Leroy', lot: 'Lot 3', email: 's.leroy@email.com' },
-  { id: 'u4', name: 'Paul Bernard', lot: 'Lot 15', email: 'p.bernard@email.com' },
-  { id: 'u5', name: 'Claire Moreau', lot: 'Lot 7', email: 'c.moreau@email.com' },
-  { id: 'u6', name: 'Thomas Petit', lot: 'Lot 22', email: 't.petit@email.com' },
-  { id: 'u7', name: 'Isabelle Durand', lot: 'Lot 5', email: 'i.durand@email.com' },
-  { id: 'u8', name: 'François Robert', lot: 'Lot 18', email: 'f.robert@email.com' },
-];
-
-const MOCK_EVENTS_DETAIL: Record<string, { id: number; title: string; category: string; date: string; endDate?: string; time: string; endTime?: string; location: string; organizer: string; fullDescription: string; attachments: { name: string; size: string }[]; hasInvitations: boolean; reminders: string[] }> = {
-  '1': { id: 1, title: 'Assemblée Générale Ordinaire', category: 'ag', date: '2025-12-15', time: '18:00', endTime: '21:00', location: 'Salle de réunion - RDC', organizer: 'syndic', fullDescription: `L'Assemblée Générale Ordinaire de la copropriété se tiendra le 15 décembre 2025.\n\n**Ordre du jour :**\n1. Approbation des comptes de l'exercice 2025\n2. Vote du budget prévisionnel 2026\n3. Travaux de réfection de la toiture\n4. Questions diverses`, attachments: [{ name: 'Convocation_AG_2025.pdf', size: '450 Ko' }, { name: 'Comptes_annuels_2025.pdf', size: '1.2 Mo' }], hasInvitations: true, reminders: ['3'] },
-  '2': { id: 2, title: 'Fête des Voisins 2026', category: 'fete', date: '2026-05-23', time: '14:00', endTime: '22:00', location: 'Jardin commun', organizer: 'secretaire', fullDescription: `Retrouvons-nous pour la traditionnelle Fête des Voisins !\n\n**Programme prévu :**\n- 14h00 : Installation et préparatifs\n- 15h00 : Animations pour les enfants\n- 17h00 : Apéritif commun`, attachments: [], hasInvitations: true, reminders: ['7'] },
-  '3': { id: 3, title: 'Début travaux toiture', category: 'travaux', date: '2026-01-15', endDate: '2026-02-28', time: '08:00', endTime: '17:00', location: 'Toiture - Bâtiment A', organizer: 'syndic', fullDescription: `Les travaux de réfection de la toiture débuteront le 15 janvier 2026.\n\n**Informations importantes :**\n- Durée estimée : 6 semaines\n- Horaires d'intervention : Lundi au vendredi, 8h - 17h`, attachments: [{ name: 'Planning_travaux.pdf', size: '320 Ko' }], hasInvitations: false, reminders: [] }
-};
 
 export function useEventEditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { currentCoproId } = useCopro();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editId = searchParams.get('edit');
@@ -67,51 +49,76 @@ export function useEventEditorPage() {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(isEditMode);
+  const [coproprietaires, setCoproprietaires] = useState<Coproprietaire[]>([]);
 
+  // Fetch coproprietaires for invitations
   useEffect(() => {
-    if (!isEditMode || !editId) return;
+    const fetchCoproprietaires = async () => {
+      if (!currentCoproId) return;
 
-    const stored = localStorage.getItem(EVENTS_STORAGE_KEY);
-    let eventData = null;
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('coproprietaires')
+        .select('id, first_name, last_name, email')
+        .eq('copro_id', currentCoproId);
 
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        if (data.events && data.events[editId]) eventData = data.events[editId];
-      } catch (e) { /* ignore */ }
-    }
-
-    if (!eventData && MOCK_EVENTS_DETAIL[editId]) eventData = MOCK_EVENTS_DETAIL[editId];
-
-    if (eventData) {
-      setTitle(eventData.title || '');
-      setCategory(eventData.category || 'reunion');
-      setDate(eventData.date || '');
-      setEndDate(eventData.endDate || '');
-      setTime(eventData.time || '');
-      setEndTime(eventData.endTime || '');
-      setLocation(eventData.location || '');
-      setOrganizer(eventData.organizer || 'syndic');
-      setDescription(eventData.fullDescription || eventData.description || '');
-      setSendInvitations(eventData.hasInvitations ?? true);
-      if (eventData.reminders && eventData.reminders.length > 0) {
-        setSendReminder(true);
-        const match = eventData.reminders[0].match(/(\d+)/);
-        if (match) setReminderDays(match[1]);
-      }
-      if (eventData.attachments) {
-        setAttachments(eventData.attachments.map((a: { name: string; size: string }) => ({
-          id: `existing-${a.name}`,
-          name: a.name,
-          size: a.size,
-          type: a.name.endsWith('.pdf') ? 'pdf' as const : 'document' as const
+      if (data) {
+        setCoproprietaires(data.map(c => ({
+          id: c.id,
+          name: `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Sans nom',
+          lot: '', // TODO: Add lot info
+          email: c.email || '',
         })));
       }
-    }
-    setIsLoading(false);
-  }, [isEditMode, editId]);
+    };
 
-  const filteredParticipants = COPROPRIETAIRES.filter(user =>
+    fetchCoproprietaires();
+  }, [currentCoproId]);
+
+  // Load existing event for edit mode from Supabase
+  useEffect(() => {
+    if (!isEditMode || !editId || !currentCoproId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchEvent = async () => {
+      const supabase = createClient();
+      const { data, error: fetchError } = await supabase
+        .from('v_events_overview')
+        .select('*')
+        .eq('id', editId)
+        .eq('copro_id', currentCoproId)
+        .single();
+
+      if (fetchError || !data) {
+        console.error('Error fetching event for edit:', fetchError);
+        setIsLoading(false);
+        return;
+      }
+
+      const startsAt = data.starts_at ? new Date(data.starts_at) : null;
+      const endsAt = data.ends_at ? new Date(data.ends_at) : null;
+
+      setTitle(data.title || '');
+      setCategory(data.event_type || 'reunion');
+      if (startsAt) {
+        setDate(startsAt.toISOString().split('T')[0]);
+        setTime(startsAt.toTimeString().slice(0, 5));
+      }
+      if (endsAt) {
+        setEndDate(endsAt.toISOString().split('T')[0]);
+        setEndTime(endsAt.toTimeString().slice(0, 5));
+      }
+      setLocation(data.location || '');
+      setDescription(data.description || '');
+      setIsLoading(false);
+    };
+
+    fetchEvent();
+  }, [isEditMode, editId, currentCoproId]);
+
+  const filteredParticipants = coproprietaires.filter(user =>
     user.name.toLowerCase().includes(participantSearch.toLowerCase()) ||
     user.lot.toLowerCase().includes(participantSearch.toLowerCase())
   );
@@ -154,12 +161,12 @@ export function useEventEditorPage() {
 
   const getParticipantCount = useCallback((): number => {
     switch (invitationType) {
-      case 'all': return 42;
-      case 'cs': return 5;
+      case 'all': return coproprietaires.length;
+      case 'cs': return 5; // Approximate CS size
       case 'custom': return selectedParticipants.length;
       default: return 0;
     }
-  }, [invitationType, selectedParticipants]);
+  }, [invitationType, selectedParticipants, coproprietaires.length]);
 
   const validateForm = useCallback((): boolean => {
     if (!title.trim()) { setError('Veuillez saisir un titre pour l\'événement'); return false; }
@@ -173,74 +180,114 @@ export function useEventEditorPage() {
   const handleCreate = useCallback(async () => {
     setError(null);
     if (!validateForm()) return;
+    if (!currentCoproId) { setError('Copropriété non trouvée'); return; }
 
     setIsCreating(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const selectedOrg = ORGANISATEURS.find(o => o.id === organizer);
-    const stored = localStorage.getItem(EVENTS_STORAGE_KEY);
-    const data = stored ? JSON.parse(stored) : { list: [], events: {} };
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-    if (isEditMode && editId) {
-      if (data.list) {
-        data.list = data.list.map((e: { id: number | string }) => {
-          if (e.id.toString() === editId) {
-            return { ...e, title: title.trim(), category, date, endDate: endDate || undefined, time, location: location.trim(), organizer: selectedOrg?.name || 'Organisateur', description: description.trim().substring(0, 100) + (description.length > 100 ? '...' : ''), hasInvitations: sendInvitations };
-          }
-          return e;
-        });
+      if (!user) {
+        setError('Vous devez être connecté');
+        setIsCreating(false);
+        return;
       }
-      data.events = data.events || {};
-      data.events[editId] = {
-        ...data.events[editId],
-        id: parseInt(editId),
-        title: title.trim(),
-        category,
-        date,
-        endDate: endDate || undefined,
-        time,
-        endTime: endTime || undefined,
-        location: location.trim(),
-        organizer: selectedOrg?.name || 'Organisateur',
-        organizerRole: 'syndic',
-        description: description.trim().substring(0, 100) + (description.length > 100 ? '...' : ''),
-        fullDescription: description.trim(),
-        participants: data.events[editId]?.participants || [],
-        attachments: attachments.map(a => ({ name: a.name, size: a.size })),
-        hasInvitations: sendInvitations,
-        isPast: false,
-        userStatus: 'pending',
-        reminders: sendReminder ? [`${reminderDays} jour(s) avant`] : []
+
+      // Build starts_at timestamp
+      const startsAt = new Date(`${date}T${time}:00`);
+
+      // Build ends_at timestamp (optional)
+      let endsAt: Date | null = null;
+      if (endDate && endTime) {
+        endsAt = new Date(`${endDate}T${endTime}:00`);
+      } else if (endTime) {
+        endsAt = new Date(`${date}T${endTime}:00`);
+      }
+
+      // Map visibility
+      const visibilityMap: Record<string, 'all_members' | 'council_only' | 'managers_only'> = {
+        'all': 'all_members',
+        'cs': 'council_only',
+        'custom': 'all_members',
       };
-      localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(data));
+
+      // Map frontend category to DB enum
+      const categoryMap: Record<string, 'ag' | 'reunion_cs' | 'fete' | 'travaux' | 'intervention' | 'autre'> = {
+        'ag': 'ag',
+        'reunion': 'reunion_cs',
+        'reunion_cs': 'reunion_cs',
+        'fete': 'fete',
+        'travaux': 'travaux',
+        'intervention': 'intervention',
+        'collecte': 'autre',
+        'autre': 'autre',
+      };
+
+      if (isEditMode && editId) {
+        // Update existing event
+        const { error: updateError } = await supabase
+          .from('events')
+          .update({
+            title: title.trim(),
+            description: description.trim(),
+            event_type: categoryMap[category] || 'autre',
+            location: location.trim(),
+            starts_at: startsAt.toISOString(),
+            ends_at: endsAt?.toISOString() || null,
+            visibility: visibilityMap[invitationType] || 'all_members',
+          })
+          .eq('id', editId);
+
+        if (updateError) {
+          console.error('Error updating event:', updateError);
+          setError('Erreur lors de la modification');
+          setIsCreating(false);
+          return;
+        }
+
+        setIsCreating(false);
+        router.push(`/communication/evenements/${editId}?updated=1`);
+      } else {
+        // Create new event
+        const { data: newEvent, error: insertError } = await supabase
+          .from('events')
+          .insert({
+            copro_id: currentCoproId,
+            created_by: user.id,
+            title: title.trim(),
+            description: description.trim(),
+            event_type: categoryMap[category] || 'autre',
+            location: location.trim(),
+            starts_at: startsAt.toISOString(),
+            ends_at: endsAt?.toISOString() || null,
+            all_day: false,
+            visibility: visibilityMap[invitationType] || 'all_members',
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating event:', insertError);
+          setError('Erreur lors de la création');
+          setIsCreating(false);
+          return;
+        }
+
+        setIsCreating(false);
+        router.push('/communication/evenements?success=1');
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      setError('Erreur inattendue');
       setIsCreating(false);
-      router.push(`/communication/evenements/${editId}?updated=1`);
-    } else {
-      const newId = Date.now();
-      let participantCount = 0;
-      if (invitationType === 'all') participantCount = 42;
-      else if (invitationType === 'cs') participantCount = 5;
-      else participantCount = selectedParticipants.length;
-
-      const newEvent = { id: newId, title: title.trim(), category, date, endDate: endDate || undefined, time, location: location.trim(), organizer: selectedOrg?.name || 'Organisateur', description: description.trim().substring(0, 100) + (description.length > 100 ? '...' : ''), participants: { confirmed: 0, declined: 0, pending: participantCount }, hasInvitations: sendInvitations, isPast: false };
-      const newEventDetail = { id: newId, title: title.trim(), category, date, endDate: endDate || undefined, time, endTime: endTime || undefined, location: location.trim(), organizer: selectedOrg?.name || 'Organisateur', organizerRole: 'syndic', description: description.trim().substring(0, 100) + (description.length > 100 ? '...' : ''), fullDescription: description.trim(), participants: [], attachments: attachments.map(a => ({ name: a.name, size: a.size })), hasInvitations: sendInvitations, isPast: false, userStatus: 'pending', reminders: sendReminder ? [`${reminderDays} jour(s) avant`] : [] };
-
-      data.list = [newEvent, ...(data.list || [])];
-      data.events = data.events || {};
-      data.events[newId.toString()] = newEventDetail;
-
-      localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(data));
-      setIsCreating(false);
-      router.push('/communication/evenements?success=1');
     }
-  }, [validateForm, organizer, isEditMode, editId, title, category, date, endDate, time, endTime, location, description, sendInvitations, attachments, sendReminder, reminderDays, invitationType, selectedParticipants, router]);
+  }, [validateForm, currentCoproId, isEditMode, editId, title, description, category, location, date, time, endDate, endTime, invitationType, router]);
 
   const handleSaveDraft = useCallback(async () => {
-    setIsSavingDraft(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
+    setError('Les brouillons ne sont pas encore supportés');
     setIsSavingDraft(false);
-    router.push('/communication/evenements?draft=1');
-  }, [router]);
+  }, []);
 
   const handleExportICS = useCallback(() => {
     if (!title || !date || !time) {

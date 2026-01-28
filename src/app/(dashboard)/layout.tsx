@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { ThemeProvider } from '@/providers/ThemeProvider';
-import { CurrentUserProvider } from '@/providers/CurrentUserProvider';
 import { VentesProvider } from '@/providers/VentesProvider';
 import { CoproProvider } from '@/providers/CoproContext';
 
@@ -21,10 +20,9 @@ export default function DashboardLayout({
 }) {
   return (
     <ThemeProvider>
-      <CurrentUserProvider>
-        <CoproProvider>
-          <VentesProvider>
-            <div className="app-container">
+      <CoproProvider>
+        <VentesProvider>
+          <div className="app-container">
             <Sidebar aria-hidden="true" />
             <div className="main-wrapper">
               <Header />
@@ -35,9 +33,8 @@ export default function DashboardLayout({
               </main>
             </div>
           </div>
-          </VentesProvider>
-        </CoproProvider>
-      </CurrentUserProvider>
+        </VentesProvider>
+      </CoproProvider>
     </ThemeProvider>
   );
 }

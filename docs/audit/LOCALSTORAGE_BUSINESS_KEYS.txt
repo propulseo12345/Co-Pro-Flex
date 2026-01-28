@@ -1,0 +1,109 @@
+# LOCALSTORAGE_BUSINESS_KEYS.txt
+# Liste des 33 clés localStorage de type BUSINESS_DATA à migrer vers Supabase
+# Une clé par ligne (patterns avec {agId} sont des templates)
+#
+# Validation: pour chaque clé, rg doit retourner 0 occurrences après migration
+# Commande: voir section VALIDATION COMMANDS ci-dessous
+
+coproflex-current-user
+coproflex-finance-data
+coproflex-budgets
+mail-copro-data
+mur-communautaire
+coproflex-events
+custom_ordres_service
+ag-draft-{agId}
+ag-resolutions-{agId}
+ag-sent-{agId}
+ag-presences-{agId}
+ag-session-{agId}
+ag-votes-{agId}
+ag-variables-{agId}
+ag-signataires-{agId}
+ag-completed-{agId}
+feuille-presence-{agId}
+roles-ag-{agId}
+vote-correspondance-{agId}-{coproId}
+ag-jalons-completes-{agId}
+ag-donnees-partagees-{agId}
+custom-resolutions-library
+coproflex-pv-templates
+pv-signatures-{agId}
+coproflex-pv-documents
+coproflex-ged-documents
+coproflex-signature-requests
+coproflex-pieces-justificatives
+coproflex-factures-pj
+coproflex-mails
+coproflex-pouvoirs-{agId}
+coproflex-notifications
+coproflex-dossiers
+
+# ============================================
+# VALIDATION COMMANDS
+# ============================================
+# Exécuter après migration pour vérifier que chaque clé est supprimée du code
+# (exclut docs/audit/ des résultats)
+
+# Clés fixes:
+# rg "coproflex-current-user" src --type ts
+# rg "coproflex-finance-data" src --type ts
+# rg "coproflex-budgets" src --type ts
+# rg "mail-copro-data" src --type ts
+# rg "mur-communautaire" src --type ts
+# rg "coproflex-events" src --type ts
+# rg "custom_ordres_service" src --type ts
+# rg "custom-resolutions-library" src --type ts
+# rg "coproflex-pv-templates" src --type ts
+# rg "coproflex-pv-documents" src --type ts
+# rg "coproflex-ged-documents" src --type ts
+# rg "coproflex-signature-requests" src --type ts
+# rg "coproflex-pieces-justificatives" src --type ts
+# rg "coproflex-factures-pj" src --type ts
+# rg "coproflex-mails" src --type ts
+# rg "coproflex-notifications" src --type ts
+# rg "coproflex-dossiers" src --type ts
+
+# Clés dynamiques (patterns):
+# rg "ag-draft-" src --type ts
+# rg "ag-resolutions-" src --type ts
+# rg "ag-sent-" src --type ts
+# rg "ag-presences-" src --type ts
+# rg "ag-session-" src --type ts
+# rg "ag-votes-" src --type ts
+# rg "ag-variables-" src --type ts
+# rg "ag-signataires-" src --type ts
+# rg "ag-completed-" src --type ts
+# rg "feuille-presence-" src --type ts
+# rg "roles-ag-" src --type ts
+# rg "vote-correspondance-" src --type ts
+# rg "ag-jalons-completes-" src --type ts
+# rg "ag-donnees-partagees-" src --type ts
+# rg "pv-signatures-" src --type ts
+# rg "coproflex-pouvoirs-" src --type ts
+
+# ============================================
+# SCRIPT DE VALIDATION COMPLET
+# ============================================
+# #!/bin/bash
+# KEYS=(
+#   "coproflex-current-user" "coproflex-finance-data" "coproflex-budgets"
+#   "mail-copro-data" "mur-communautaire" "coproflex-events"
+#   "custom_ordres_service" "custom-resolutions-library" "coproflex-pv-templates"
+#   "coproflex-pv-documents" "coproflex-ged-documents" "coproflex-signature-requests"
+#   "coproflex-pieces-justificatives" "coproflex-factures-pj" "coproflex-mails"
+#   "coproflex-notifications" "coproflex-dossiers"
+#   "ag-draft-" "ag-resolutions-" "ag-sent-" "ag-presences-"
+#   "ag-session-" "ag-votes-" "ag-variables-" "ag-signataires-"
+#   "ag-completed-" "feuille-presence-" "roles-ag-" "vote-correspondance-"
+#   "ag-jalons-completes-" "ag-donnees-partagees-" "pv-signatures-" "coproflex-pouvoirs-"
+# )
+# FAIL=0
+# for key in "${KEYS[@]}"; do
+#   count=$(rg -c "$key" src --type ts 2>/dev/null | awk -F: '{sum+=$2} END {print sum+0}')
+#   if [ "$count" -gt 0 ]; then
+#     echo "FAIL: $key found $count times"
+#     FAIL=1
+#   fi
+# done
+# [ $FAIL -eq 0 ] && echo "ALL PASS" || echo "SOME FAILED"

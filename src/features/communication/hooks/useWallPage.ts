@@ -1,176 +1,227 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import type { Publication, PublicationDraft, RoleBadge } from '../types';
-
-const MUR_STORAGE_KEY = 'mur-copro-data';
-
-const MOCK_PUBLICATIONS: Publication[] = [
-  {
-    id: 1,
-    author: 'Syndic - Jean DUPONT',
-    authorRole: 'syndic',
-    title: 'Travaux de réfection de la toiture - Planning',
-    content: 'Suite à la décision de l\'AG, les travaux de réfection de la toiture débuteront le 15 janvier 2026. L\'entreprise Toiture Pro interviendra du lundi au vendredi de 8h à 17h...',
-    category: 'travaux',
-    date: '2025-11-28T10:00:00',
-    isPinned: true,
-    isLocked: false,
-    likes: 12,
-    comments: 5,
-    hasAttachment: true,
-    tags: ['Toiture', 'Travaux 2026']
-  },
-  {
-    id: 2,
-    author: 'Marie MARTIN',
-    authorRole: 'conseil',
-    title: 'Organisation Fête des Voisins 2026',
-    content: 'Bonjour à tous, comme chaque année, nous aimerions organiser la Fête des Voisins. Qui serait intéressé pour participer à l\'organisation ?',
-    category: 'social',
-    date: '2025-11-27T14:30:00',
-    isPinned: false,
-    isLocked: false,
-    likes: 24,
-    comments: 18,
-    hasAttachment: false,
-    tags: ['Événement', 'Convivialité']
-  },
-  {
-    id: 3,
-    author: 'Pierre LEBLANC',
-    authorRole: 'copropriétaire',
-    title: 'Rappel - Code d\'accès immeuble',
-    content: 'Merci de ne pas communiquer le code d\'accès de l\'immeuble à des personnes extérieures. Plusieurs livraisons ont été laissées dans le hall sans autorisation.',
-    category: 'securite',
-    date: '2025-11-26T16:45:00',
-    isPinned: true,
-    isLocked: true,
-    likes: 8,
-    comments: 3,
-    hasAttachment: false,
-    tags: ['Sécurité']
-  }
-];
+import { WALL_CATEGORY_MAP } from '../types';
 
 export const WALL_CATEGORIES = [
   { id: 'tous', label: 'Tous', icon: 'MessageSquare' },
-  { id: 'travaux', label: 'Travaux', icon: 'AlertCircle' },
-  { id: 'social', label: 'Social', icon: 'MessageCircle' },
-  { id: 'securite', label: 'Sécurité', icon: 'Lock' },
-  { id: 'evenements', label: 'Événements', icon: 'Clock' },
-  { id: 'annonce', label: 'Annonces', icon: 'Pin' }
+  { id: 'information', label: 'Information', icon: 'Info' },
+  { id: 'urgent', label: 'Urgent', icon: 'AlertCircle' },
+  { id: 'question', label: 'Question', icon: 'HelpCircle' },
+  { id: 'event', label: 'Événement', icon: 'Calendar' },
+  { id: 'other', label: 'Autre', icon: 'MoreHorizontal' }
 ];
+
+interface WallPostRow {
+  id: string | null;
+  author_id: string | null;
+  author_name: string | null;
+  author_role: string | null;
+  title: string | null;
+  content: string | null;
+  category: string | null;
+  is_pinned: boolean | null;
+  likes_count: number | null;
+  comments_count: number | null;
+  is_liked_by_me: boolean | null;
+  attachment_id: string | null;
+  created_at: string | null;
+}
+
+function mapPostToPublication(post: WallPostRow): Publication {
+  return {
+    id: post.id || '',
+    author: post.author_name || 'Anonyme',
+    authorRole: post.author_role || 'copropriétaire',
+    title: post.title || '',
+    content: post.content || '',
+    category: post.category || 'information',
+    date: post.created_at || new Date().toISOString(),
+    isPinned: post.is_pinned || false,
+    isLocked: false,
+    likes: post.likes_count || 0,
+    comments: post.comments_count || 0,
+    hasAttachment: !!post.attachment_id,
+    tags: [],
+    isLikedByMe: post.is_liked_by_me || false,
+  };
+}
 
 export function useWallPage() {
   const router = useRouter();
+  const { currentCoproId } = useCopro();
   const [selectedCategory, setSelectedCategory] = useState('tous');
   const [searchQuery, setSearchQuery] = useState('');
-  const [publications, setPublications] = useState<Publication[]>(MOCK_PUBLICATIONS);
-  const [drafts, setDrafts] = useState<PublicationDraft[]>([]);
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [drafts] = useState<PublicationDraft[]>([]);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch posts from Supabase
+  const fetchPosts = useCallback(async () => {
+    if (!currentCoproId) {
+      setPublications([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const supabase = createClient();
+      const { data, error: fetchError } = await supabase
+        .from('v_wall_feed')
+        .select('*')
+        .eq('copro_id', currentCoproId)
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (fetchError) {
+        console.error('Error fetching wall posts:', fetchError);
+        setError('Erreur lors du chargement du mur');
+        setPublications([]);
+      } else {
+        setPublications((data || []).map(mapPostToPublication));
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      setError('Erreur inattendue');
+      setPublications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCoproId]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(MUR_STORAGE_KEY);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        if (data.list && Array.isArray(data.list)) {
-          setPublications([...data.list, ...MOCK_PUBLICATIONS]);
-        }
-        if (data.drafts && Array.isArray(data.drafts)) {
-          setDrafts(data.drafts);
-        }
-      } catch (e) { /* ignore */ }
-    }
-  }, []);
+    fetchPosts();
+  }, [fetchPosts]);
 
-  const handleDeletePublication = useCallback((id: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) {
-      setPublications(prev => prev.filter(p => p.id !== id));
-      const stored = localStorage.getItem(MUR_STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.list) data.list = data.list.filter((p: { id: number }) => p.id !== id);
-        if (data.publications && data.publications[id.toString()]) delete data.publications[id.toString()];
-        localStorage.setItem(MUR_STORAGE_KEY, JSON.stringify(data));
+  // Like/Unlike a post
+  const handleLikePublication = useCallback(async (id: string) => {
+    if (!currentCoproId) return;
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const post = publications.find(p => p.id === id);
+    if (!post) return;
+
+    try {
+      if (post.isLikedByMe) {
+        // Unlike - delete the like
+        await supabase
+          .from('wall_likes')
+          .delete()
+          .eq('copro_id', currentCoproId)
+          .eq('post_id', id)
+          .eq('user_id', user.id);
+      } else {
+        // Like - insert new like (ignore duplicate key error)
+        await supabase
+          .from('wall_likes')
+          .insert({
+            copro_id: currentCoproId,
+            post_id: id,
+            user_id: user.id,
+          });
       }
-    }
-  }, []);
 
-  const handleLikePublication = useCallback((id: number) => {
-    const stored = localStorage.getItem(MUR_STORAGE_KEY);
-    const data = stored ? JSON.parse(stored) : { list: [], publications: {}, likes: {} };
-    data.likes = data.likes || {};
-    const wasLiked = data.likes[id];
-    data.likes[id] = !wasLiked;
-    if (data.list) {
-      data.list = data.list.map((p: { id: number; likes: number }) => {
-        if (p.id === id) return { ...p, likes: wasLiked ? p.likes - 1 : p.likes + 1 };
-        return p;
-      });
+      // Refetch to update counts and is_liked_by_me
+      await fetchPosts();
+    } catch (err) {
+      console.error('Error toggling like:', err);
     }
-    localStorage.setItem(MUR_STORAGE_KEY, JSON.stringify(data));
-  }, []);
+  }, [currentCoproId, publications, fetchPosts]);
 
-  const handleTogglePin = useCallback((id: number) => {
-    setPublications(prev => prev.map(p => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
-    const stored = localStorage.getItem(MUR_STORAGE_KEY);
-    const data = stored ? JSON.parse(stored) : { list: [], publications: {} };
-    if (data.list) {
-      data.list = data.list.map((p: { id: number; isPinned: boolean }) => p.id === id ? { ...p, isPinned: !p.isPinned } : p);
-    }
-    if (data.publications && data.publications[id.toString()]) {
-      data.publications[id.toString()].isPinned = !data.publications[id.toString()].isPinned;
-    }
-    localStorage.setItem(MUR_STORAGE_KEY, JSON.stringify(data));
-  }, []);
+  // Toggle pin on a post
+  const handleTogglePin = useCallback(async (id: string) => {
+    const post = publications.find(p => p.id === id);
+    if (!post) return;
 
-  const handleDeleteDraft = useCallback((id: number) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce brouillon ?')) {
-      setDrafts(prev => prev.filter(d => d.id !== id));
-      const stored = localStorage.getItem(MUR_STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.drafts) data.drafts = data.drafts.filter((d: { id: number }) => d.id !== id);
-        localStorage.setItem(MUR_STORAGE_KEY, JSON.stringify(data));
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const newPinnedState = !post.isPinned;
+
+    try {
+      await supabase
+        .from('wall_posts')
+        .update({
+          is_pinned: newPinnedState,
+          pinned_at: newPinnedState ? new Date().toISOString() : null,
+          pinned_by: newPinnedState ? user.id : null,
+        })
+        .eq('id', id);
+
+      await fetchPosts();
+    } catch (err) {
+      console.error('Error toggling pin:', err);
+    }
+  }, [publications, fetchPosts]);
+
+  // Delete a post
+  const handleDeletePublication = useCallback(async (id: string) => {
+    if (!currentCoproId) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) return;
+
+    const supabase = createClient();
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('wall_posts')
+        .delete()
+        .eq('id', id)
+        .eq('copro_id', currentCoproId);
+
+      if (!deleteError) {
+        setPublications(prev => prev.filter(p => p.id !== id));
       }
+    } catch (err) {
+      console.error('Error deleting post:', err);
     }
+  }, [currentCoproId]);
+
+  const handleDeleteDraft = useCallback((id: string) => {
+    console.log('Delete draft:', id);
   }, []);
 
-  const handleEditPublication = useCallback((id: number) => {
+  const handleEditPublication = useCallback((id: string) => {
     router.push(`/communication/mur/nouveau?edit=${id}`);
   }, [router]);
 
-  const filteredPublications = publications.filter(pub => {
-    const matchesCategory = selectedCategory === 'tous' || pub.category === selectedCategory;
-    const matchesSearch =
-      pub.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pub.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pub.author.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredPublications = useMemo(() => {
+    return publications.filter(pub => {
+      const matchesCategory = selectedCategory === 'tous' || pub.category === selectedCategory;
+      const matchesSearch =
+        pub.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pub.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pub.author.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [publications, selectedCategory, searchQuery]);
 
-  const pinnedPubs = filteredPublications.filter(pub => pub.isPinned);
-  const regularPubs = filteredPublications.filter(pub => !pub.isPinned);
+  const pinnedPubs = useMemo(() => filteredPublications.filter(pub => pub.isPinned), [filteredPublications]);
+  const regularPubs = useMemo(() => filteredPublications.filter(pub => !pub.isPinned), [filteredPublications]);
 
   const getCategoryColor = useCallback((category: string) => {
-    const colors: Record<string, string> = {
-      travaux: '#f59e0b',
-      social: '#8b5cf6',
-      securite: '#ef4444',
-      evenements: '#3b82f6',
-      annonce: '#10b981'
-    };
-    return colors[category] || '#6b7280';
+    return WALL_CATEGORY_MAP[category]?.color || '#6b7280';
   }, []);
 
   const getRoleBadge = useCallback((role: string): RoleBadge => {
     const badges: Record<string, RoleBadge> = {
       syndic: { label: 'Syndic', color: '#4f46e5' },
       conseil: { label: 'Conseil Syndical', color: '#059669' },
-      copropriétaire: { label: 'Copropriétaire', color: '#6b7280' }
+      copropriétaire: { label: 'Copropriétaire', color: '#6b7280' },
+      gestionnaire: { label: 'Gestionnaire', color: '#4f46e5' },
+      admin: { label: 'Admin', color: '#ef4444' }
     };
     return badges[role] || badges.copropriétaire;
   }, []);
@@ -195,5 +246,8 @@ export function useWallPage() {
     handleTogglePin,
     handleDeleteDraft,
     handleEditPublication,
+    isLoading,
+    error,
+    refetch: fetchPosts,
   };
 }

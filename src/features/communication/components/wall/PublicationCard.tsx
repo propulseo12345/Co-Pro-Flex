@@ -12,9 +12,9 @@ interface PublicationCardProps {
   publication: Publication;
   getCategoryColor: (cat: string) => string;
   getRoleBadge: (role: string) => RoleBadge;
-  onDelete: (id: number) => void;
-  onLike: (id: number) => void;
-  onTogglePin: (id: number) => void;
+  onDelete: (id: string) => void;
+  onLike: (id: string) => void;
+  onTogglePin: (id: string) => void;
 }
 
 export function PublicationCard({ publication, getCategoryColor, getRoleBadge, onDelete, onLike, onTogglePin }: PublicationCardProps) {

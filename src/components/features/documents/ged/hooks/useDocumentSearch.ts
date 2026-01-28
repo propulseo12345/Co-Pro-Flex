@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { MOCK_DOCUMENTS_GED, DOCUMENT_CATEGORIES, GED_FOLDERS } from '@/data/mock/documents-ged';
-import type { SearchFilters, SearchSuggestion, NavigationMode, SortField } from '../domain/types';
-import { DEFAULT_FILTERS, MAX_SEARCH_HISTORY, SEARCH_HISTORY_KEY } from '../domain/constants';
+import type { SearchFilters, SearchSuggestion, GEDFolder, DocumentWithFolder } from '../domain/types';
+import { DEFAULT_FILTERS, MAX_SEARCH_HISTORY, SEARCH_HISTORY_KEY, DOCUMENT_CATEGORIES } from '../domain/constants';
 import { fuzzyMatch, getCategoryColor, hasActiveFilters } from '../domain/utils';
 
-export function useDocumentSearch() {
+interface UseDocumentSearchProps {
+  documents: DocumentWithFolder[];
+  folders: GEDFolder[];
+}
+
+export function useDocumentSearch(props: UseDocumentSearchProps) {
+  const { documents = [], folders = [] } = props || {};
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -73,7 +78,8 @@ export function useDocumentSearch() {
     });
 
     // Folder suggestions
-    GED_FOLDERS.filter((f) => f.nom.toLowerCase().includes(query))
+    folders
+      .filter((f) => f.nom.toLowerCase().includes(query))
       .slice(0, 3)
       .forEach((folder) => {
         suggestions.push({
@@ -85,7 +91,8 @@ export function useDocumentSearch() {
       });
 
     // Document suggestions
-    MOCK_DOCUMENTS_GED.filter((d) => fuzzyMatch(d.nom, searchQuery).matches)
+    documents
+      .filter((d) => fuzzyMatch(d.nom, searchQuery).matches)
       .slice(0, 5)
       .forEach((doc) => {
         suggestions.push({
@@ -97,7 +104,7 @@ export function useDocumentSearch() {
       });
 
     return suggestions.slice(0, 8);
-  }, [searchQuery]);
+  }, [searchQuery, documents, folders]);
 
   const activeFilters = useMemo(() => hasActiveFilters(filters), [filters]);
 

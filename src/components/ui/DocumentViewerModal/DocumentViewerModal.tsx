@@ -44,8 +44,17 @@ import {
   formatDateTime,
   DocumentActionType,
 } from '@/lib/services/document-metadata.service';
-import { GED_FOLDERS, getFolderPath, MOCK_DOCUMENTS_GED } from '@/data/mock/documents-ged';
 import styles from './DocumentViewerModal.module.css';
+
+// Type pour les dossiers GED
+interface GEDFolder {
+  id: string;
+  nom: string;
+  parentId: string | null;
+  icon?: string;
+  color?: string;
+  ordre: number;
+}
 
 // Type pour les documents avec métadonnées complètes
 export interface DocumentForViewer {
@@ -65,6 +74,27 @@ interface DocumentViewerModalProps {
   onMove?: (doc: DocumentForViewer, newFolderId: string) => void;
   onDelete?: (doc: DocumentForViewer) => void;
   onShare?: (doc: DocumentForViewer) => void;
+  folders?: GEDFolder[];
+}
+
+// Helper function to compute folder path from folder list
+function computeFolderPath(folderId: string | undefined, folders: GEDFolder[]): GEDFolder[] {
+  if (!folderId || folders.length === 0) return [];
+
+  const path: GEDFolder[] = [];
+  let currentId: string | null = folderId;
+
+  while (currentId) {
+    const folder = folders.find(f => f.id === currentId);
+    if (folder) {
+      path.unshift(folder);
+      currentId = folder.parentId;
+    } else {
+      break;
+    }
+  }
+
+  return path;
 }
 
 // Historique de consultation simulé
@@ -125,6 +155,7 @@ export default function DocumentViewerModal({
   onMove,
   onDelete,
   onShare,
+  folders = [],
 }: DocumentViewerModalProps) {
   // États de l'interface
   const [zoom, setZoom] = useState(100);
@@ -181,11 +212,8 @@ export default function DocumentViewerModal({
 
   // Chemin du dossier
   const folderPath = useMemo(() => {
-    if (document.dossierId) {
-      return getFolderPath(document.dossierId);
-    }
-    return [];
-  }, [document.dossierId]);
+    return computeFolderPath(document.dossierId, folders);
+  }, [document.dossierId, folders]);
 
   // Handlers
   const handleZoomIn = useCallback(() => {
@@ -240,14 +268,14 @@ export default function DocumentViewerModal({
   }, [document, newName, onRename]);
 
   const handleMove = useCallback((folderId: string) => {
-    const folder = GED_FOLDERS.find(f => f.id === folderId);
+    const folder = folders.find(f => f.id === folderId);
     if (onMove) {
       onMove(document, folderId);
     } else {
       alert(`Document déplacé vers "${folder?.nom || folderId}"\n\nFonctionnalité disponible après intégration Supabase.`);
     }
     setShowMoveModal(false);
-  }, [document, onMove]);
+  }, [document, onMove, folders]);
 
   const handleDelete = useCallback(() => {
     if (window.confirm(`Voulez-vous vraiment supprimer "${document.nom}" ?`)) {
@@ -715,51 +743,45 @@ export default function DocumentViewerModal({
                     Documents liés
                   </h3>
                   <div className={styles.relationsContainer}>
-                    {documentRelations.asSource.map((relation) => {
-                      const targetDoc = MOCK_DOCUMENTS_GED.find(d => d.id === relation.targetDocumentId);
-                      return (
-                        <div key={relation.id} className={styles.relationItem}>
-                          <div
-                            className={styles.relationBadge}
-                            style={{
-                              backgroundColor: `${getRelationTypeColor(relation.relationType)}15`,
-                              color: getRelationTypeColor(relation.relationType),
-                            }}
-                          >
-                            <ArrowRight size={12} />
-                            {getRelationTypeLabel(relation.relationType)}
-                          </div>
-                          <span className={styles.relationDocName}>
-                            {targetDoc?.nom || relation.targetDocumentId}
-                          </span>
-                          {relation.description && (
-                            <span className={styles.relationDescription}>{relation.description}</span>
-                          )}
+                    {documentRelations.asSource.map((relation) => (
+                      <div key={relation.id} className={styles.relationItem}>
+                        <div
+                          className={styles.relationBadge}
+                          style={{
+                            backgroundColor: `${getRelationTypeColor(relation.relationType)}15`,
+                            color: getRelationTypeColor(relation.relationType),
+                          }}
+                        >
+                          <ArrowRight size={12} />
+                          {getRelationTypeLabel(relation.relationType)}
                         </div>
-                      );
-                    })}
-                    {documentRelations.asTarget.map((relation) => {
-                      const sourceDoc = MOCK_DOCUMENTS_GED.find(d => d.id === relation.sourceDocumentId);
-                      return (
-                        <div key={relation.id} className={styles.relationItem}>
-                          <div
-                            className={styles.relationBadge}
-                            style={{
-                              backgroundColor: `${getRelationTypeColor(relation.relationType)}15`,
-                              color: getRelationTypeColor(relation.relationType),
-                            }}
-                          >
-                            {getRelationTypeLabel(relation.relationType)} par
-                          </div>
-                          <span className={styles.relationDocName}>
-                            {sourceDoc?.nom || relation.sourceDocumentId}
-                          </span>
-                          {relation.description && (
-                            <span className={styles.relationDescription}>{relation.description}</span>
-                          )}
+                        <span className={styles.relationDocName}>
+                          {relation.targetDocumentId}
+                        </span>
+                        {relation.description && (
+                          <span className={styles.relationDescription}>{relation.description}</span>
+                        )}
+                      </div>
+                    ))}
+                    {documentRelations.asTarget.map((relation) => (
+                      <div key={relation.id} className={styles.relationItem}>
+                        <div
+                          className={styles.relationBadge}
+                          style={{
+                            backgroundColor: `${getRelationTypeColor(relation.relationType)}15`,
+                            color: getRelationTypeColor(relation.relationType),
+                          }}
+                        >
+                          {getRelationTypeLabel(relation.relationType)} par
                         </div>
-                      );
-                    })}
+                        <span className={styles.relationDocName}>
+                          {relation.sourceDocumentId}
+                        </span>
+                        {relation.description && (
+                          <span className={styles.relationDescription}>{relation.description}</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -1148,16 +1170,20 @@ export default function DocumentViewerModal({
               <div className={styles.subModalContent}>
                 <p>Sélectionnez le dossier de destination :</p>
                 <div className={styles.folderList}>
-                  {GED_FOLDERS.filter(f => f.parentId === null).map(folder => (
-                    <button
-                      key={folder.id}
-                      className={styles.folderItem}
-                      onClick={() => handleMove(folder.id)}
-                    >
-                      <FolderOpen size={18} style={{ color: folder.color }} />
-                      <span>{folder.nom}</span>
-                    </button>
-                  ))}
+                  {folders.length > 0 ? (
+                    folders.filter(f => f.parentId === null).map(folder => (
+                      <button
+                        key={folder.id}
+                        className={styles.folderItem}
+                        onClick={() => handleMove(folder.id)}
+                      >
+                        <FolderOpen size={18} style={{ color: folder.color }} />
+                        <span>{folder.nom}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className={styles.noFolders}>Aucun dossier disponible</p>
+                  )}
                 </div>
               </div>
             </div>

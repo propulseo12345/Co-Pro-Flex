@@ -23,50 +23,7 @@ export interface BudgetWithStatus {
   }>;
 }
 
-const DEFAULT_BUDGETS: BudgetWithStatus[] = [
-  {
-    id: 'budget-2025-fonct',
-    nom: 'Budget previsionnel 2025',
-    type: 'fonctionnement',
-    annee: 2025,
-    montantTotal: 87500,
-    statut: BudgetStatut.APPROUVE,
-    resolutionId: 'res-1',
-    lignesBudget: [
-      { poste: 'Eau', montantN: 12000, montantN1: 11500, evolution: 4.3 },
-      { poste: 'Électricité', montantN: 8500, montantN1: 8200, evolution: 3.7 },
-      { poste: 'Assurance', montantN: 18500, montantN1: 18000, evolution: 2.8 },
-      { poste: 'Ménage', montantN: 15000, montantN1: 14500, evolution: 3.4 },
-      { poste: 'Ascenseur', montantN: 12000, montantN1: 11800, evolution: 1.7 },
-      { poste: 'Espaces verts', montantN: 11000, montantN1: 10500, evolution: 4.8 },
-      { poste: 'Divers', montantN: 10500, montantN1: 10000, evolution: 5.0 }
-    ]
-  },
-  {
-    id: 'budget-2025-travaux',
-    nom: 'Ravalement facade',
-    type: 'travaux',
-    annee: 2025,
-    montantTotal: 45000,
-    statut: BudgetStatut.APPROUVE,
-    resolutionId: 'res-2',
-    lignesBudget: [
-      { poste: 'Echafaudages', montantN: 8000, montantN1: 0, evolution: 0 },
-      { poste: 'Nettoyage facade', montantN: 12000, montantN1: 0, evolution: 0 },
-      { poste: 'Reparation fissures', montantN: 10000, montantN1: 0, evolution: 0 },
-      { poste: 'Peinture', montantN: 15000, montantN1: 0, evolution: 0 }
-    ]
-  },
-  {
-    id: 'budget-2026-fonct',
-    nom: 'Budget previsionnel 2026',
-    type: 'fonctionnement',
-    annee: 2026,
-    montantTotal: 0,
-    statut: BudgetStatut.BROUILLON,
-    lignesBudget: []
-  }
-];
+// NEUTRALIZED: No more mock data fallback - will be replaced by Supabase queries
 
 interface UseBudgetDetailPageProps {
   budgetId: string;
@@ -89,49 +46,10 @@ export function useBudgetDetailPage({ budgetId }: UseBudgetDetailPageProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const loadBudget = () => {
-      try {
-        let budgets: BudgetWithStatus[] = [];
-        const saved = localStorage.getItem('coproflex-budgets');
-
-        if (saved) {
-          budgets = JSON.parse(saved);
-          let needsUpdate = false;
-          budgets = budgets.map(b => {
-            const defaultBudget = DEFAULT_BUDGETS.find(db => db.id === b.id);
-            if (defaultBudget && (!b.lignesBudget || b.lignesBudget.length === 0) && defaultBudget.lignesBudget) {
-              needsUpdate = true;
-              return { ...b, lignesBudget: defaultBudget.lignesBudget, montantTotal: defaultBudget.montantTotal };
-            }
-            return b;
-          });
-          if (needsUpdate) {
-            localStorage.setItem('coproflex-budgets', JSON.stringify(budgets));
-          }
-        } else {
-          budgets = DEFAULT_BUDGETS;
-          localStorage.setItem('coproflex-budgets', JSON.stringify(budgets));
-        }
-
-        const found = budgets.find(b => b.id === budgetId);
-        if (found) {
-          setBudget(found);
-          if (found.lignesBudget && found.lignesBudget.length > 0) {
-            setPostes(found.lignesBudget.map((l, i) => ({
-              id: `poste-${i}`,
-              libelle: l.poste,
-              montant: l.montantN,
-              posteId: l.poste,
-            })));
-          }
-        }
-      } catch (e) {
-        console.error('Erreur lors du chargement du budget:', e);
-      }
-      setIsLoading(false);
-    };
-
-    loadBudget();
+    // NEUTRALIZED: Will be replaced by Supabase query
+    // For now, just set loading to false - UI will show empty state
+    setIsLoading(false);
+    // TODO: Replace with Supabase query to v_budgets_summary
   }, [budgetId]);
 
   const isBrouillon = budget?.statut === BudgetStatut.BROUILLON;
@@ -147,42 +65,29 @@ export function useBudgetDetailPage({ budgetId }: UseBudgetDetailPageProps) {
     if (!budget) return;
     setIsSaving(true);
     try {
-      const saved = localStorage.getItem('coproflex-budgets');
-      if (saved) {
-        const budgets: BudgetWithStatus[] = JSON.parse(saved);
-        const total = postes.reduce((sum, p) => sum + p.montant, 0);
-        const updated = budgets.map(b => {
-          if (b.id === budgetId) {
-            return {
-              ...b,
-              montantTotal: total,
-              lignesBudget: postes.map(p => ({ poste: p.libelle, montantN: p.montant, montantN1: 0, evolution: 0 })),
-            };
-          }
-          return b;
-        });
-        localStorage.setItem('coproflex-budgets', JSON.stringify(updated));
-        setBudget(prev => prev ? {
-          ...prev,
-          montantTotal: total,
-          lignesBudget: postes.map(p => ({ poste: p.libelle, montantN: p.montant, montantN1: 0, evolution: 0 })),
-        } : null);
+      // NEUTRALIZED: Will be replaced by Supabase mutation
+      // TODO: Replace with Supabase update to budgets + budget_lines
+      const total = postes.reduce((sum, p) => sum + p.montant, 0);
+      setBudget(prev => prev ? {
+        ...prev,
+        montantTotal: total,
+        lignesBudget: postes.map(p => ({ poste: p.libelle, montantN: p.montant, montantN1: 0, evolution: 0 })),
+      } : null);
 
-        const budgetNom = budget.nom || `Budget ${budget.type} ${budget.annee}`;
-        const notifParams = NotificationHelpers.budgetModifie(budgetNom, total);
-        await createNotificationWithMail(notifParams);
-        setShowMailToast(true);
-        setTimeout(() => setShowMailToast(false), 5000);
-        setHasChanges(false);
-        setIsEditing(false);
-      }
+      const budgetNom = budget.nom || `Budget ${budget.type} ${budget.annee}`;
+      const notifParams = NotificationHelpers.budgetModifie(budgetNom, total);
+      await createNotificationWithMail(notifParams);
+      setShowMailToast(true);
+      setTimeout(() => setShowMailToast(false), 5000);
+      setHasChanges(false);
+      setIsEditing(false);
     } catch (e) {
       console.error('Erreur lors de la sauvegarde:', e);
       alert('Erreur lors de la sauvegarde du budget.');
     } finally {
       setIsSaving(false);
     }
-  }, [budget, budgetId, postes, createNotificationWithMail]);
+  }, [budget, postes, createNotificationWithMail]);
 
   const handleDelete = useCallback(() => {
     if (!budget) return;
@@ -195,18 +100,14 @@ export function useBudgetDetailPage({ budgetId }: UseBudgetDetailPageProps) {
     );
     if (!confirmer) return;
     try {
-      const saved = localStorage.getItem('coproflex-budgets');
-      if (saved) {
-        const budgets: BudgetWithStatus[] = JSON.parse(saved);
-        const updated = budgets.filter(b => b.id !== budgetId);
-        localStorage.setItem('coproflex-budgets', JSON.stringify(updated));
-        router.push('/finance/budgets');
-      }
+      // NEUTRALIZED: Will be replaced by Supabase delete
+      // TODO: Replace with Supabase delete from budgets
+      router.push('/finance/budgets');
     } catch (e) {
       console.error('Erreur lors de la suppression:', e);
       alert('Erreur lors de la suppression du budget.');
     }
-  }, [budget, budgetId, router]);
+  }, [budget, router]);
 
   const handlePostesChange = useCallback((newPostes: PosteEditorData[]) => {
     setPostes(newPostes);
@@ -216,24 +117,15 @@ export function useBudgetDetailPage({ budgetId }: UseBudgetDetailPageProps) {
   const handleLinkToAG = useCallback((resolutionId: string) => {
     if (!budget) return;
     try {
-      const saved = localStorage.getItem('coproflex-budgets');
-      if (saved) {
-        const budgets: BudgetWithStatus[] = JSON.parse(saved);
-        const updated = budgets.map(b => {
-          if (b.id === budgetId) {
-            return { ...b, statut: BudgetStatut.EN_ATTENTE_APPROBATION, resolutionId };
-          }
-          return b;
-        });
-        localStorage.setItem('coproflex-budgets', JSON.stringify(updated));
-        setBudget(prev => prev ? { ...prev, statut: BudgetStatut.EN_ATTENTE_APPROBATION, resolutionId } : null);
-        setShowLinkToAGModal(false);
-      }
+      // NEUTRALIZED: Will be replaced by Supabase update
+      // TODO: Replace with Supabase update to budgets.resolution_id
+      setBudget(prev => prev ? { ...prev, statut: BudgetStatut.EN_ATTENTE_APPROBATION, resolutionId } : null);
+      setShowLinkToAGModal(false);
     } catch (e) {
       console.error('Erreur lors de la liaison:', e);
       alert('Erreur lors de la liaison a la resolution.');
     }
-  }, [budget, budgetId]);
+  }, [budget]);
 
   const goBack = useCallback(() => router.push('/finance/budgets'), [router]);
 

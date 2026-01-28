@@ -1,66 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import type { Event, CategoryInfo } from '../types';
-
-const EVENTS_STORAGE_KEY = 'evenements-copro-data';
-
-const MOCK_EVENTS: Event[] = [
-  {
-    id: 1,
-    title: 'Assemblée Générale Ordinaire',
-    category: 'ag',
-    date: '2025-12-15',
-    time: '18:00',
-    location: 'Salle de réunion - RDC',
-    organizer: 'Syndic - Jean DUPONT',
-    description: 'Assemblée Générale Ordinaire pour l\'exercice 2025. Ordre du jour : approbation des comptes, vote du budget 2026, travaux de réfection.',
-    participants: { confirmed: 12, declined: 2, pending: 8 },
-    hasInvitations: true,
-    isPast: false
-  },
-  {
-    id: 2,
-    title: 'Fête des Voisins 2026',
-    category: 'fete',
-    date: '2026-05-23',
-    time: '14:00',
-    endDate: '2026-05-23',
-    location: 'Jardin commun',
-    organizer: 'Marie MARTIN',
-    description: 'Retrouvons-nous pour la traditionnelle Fête des Voisins. Apportez vos spécialités à partager !',
-    participants: { confirmed: 18, declined: 1, pending: 12 },
-    hasInvitations: true,
-    isPast: false
-  },
-  {
-    id: 3,
-    title: 'Début travaux toiture',
-    category: 'travaux',
-    date: '2026-01-15',
-    time: '08:00',
-    endDate: '2026-02-28',
-    location: 'Toiture - Bâtiment A',
-    organizer: 'Toiture Pro',
-    description: 'Début des travaux de réfection de la toiture. Présence du lundi au vendredi de 8h à 17h.',
-    participants: { confirmed: 0, declined: 0, pending: 0 },
-    hasInvitations: false,
-    isPast: false
-  },
-  {
-    id: 4,
-    title: 'Réunion Conseil Syndical',
-    category: 'reunion',
-    date: '2025-11-20',
-    time: '19:00',
-    location: 'Salle de réunion',
-    organizer: 'Conseil Syndical',
-    description: 'Réunion mensuelle du Conseil Syndical',
-    participants: { confirmed: 5, declined: 0, pending: 0 },
-    hasInvitations: false,
-    isPast: true
-  }
-];
 
 export const CATEGORIES: CategoryInfo[] = [
   { id: 'tous', label: 'Tous', color: '#6b7280' },
@@ -71,38 +14,99 @@ export const CATEGORIES: CategoryInfo[] = [
   { id: 'collecte', label: 'Collecte', color: '#10b981' }
 ];
 
+interface EventRow {
+  id: string | null;
+  copro_id: string | null;
+  title: string | null;
+  description: string | null;
+  event_type: string | null;
+  location: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  all_day: boolean | null;
+  visibility: string | null;
+  created_by: string | null;
+  creator_name: string | null;
+  is_past: boolean | null;
+  is_today: boolean | null;
+}
+
+function mapEventRowToEvent(row: EventRow): Event {
+  const startsAt = row.starts_at ? new Date(row.starts_at) : new Date();
+
+  return {
+    id: row.id || '',
+    title: row.title || 'Sans titre',
+    category: row.event_type || 'reunion',
+    date: startsAt.toISOString().split('T')[0],
+    time: startsAt.toTimeString().slice(0, 5),
+    endDate: row.ends_at ? new Date(row.ends_at).toISOString().split('T')[0] : undefined,
+    location: row.location || 'Non précisé',
+    organizer: row.creator_name || 'Organisateur',
+    description: row.description || '',
+    participants: { confirmed: 0, declined: 0, pending: 0 }, // TODO: Add participant tracking
+    hasInvitations: false,
+    isPast: row.is_past || false,
+  };
+}
+
 export function useEventsPage() {
+  const { currentCoproId } = useCopro();
   const [selectedCategory, setSelectedCategory] = useState('tous');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch events from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem(EVENTS_STORAGE_KEY);
-    let deletedIds: string[] = [];
-    let customEvents: Event[] = [];
+    const fetchEvents = async () => {
+      if (!currentCoproId) {
+        setEvents([]);
+        setIsLoading(false);
+        return;
+      }
 
-    if (stored) {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        const data = JSON.parse(stored);
-        if (data.list && Array.isArray(data.list)) customEvents = data.list;
-        if (data.deletedIds && Array.isArray(data.deletedIds)) deletedIds = data.deletedIds;
-      } catch (e) { /* ignore */ }
-    }
+        const supabase = createClient();
+        const { data, error: fetchError } = await supabase
+          .from('v_events_overview')
+          .select('*')
+          .eq('copro_id', currentCoproId)
+          .order('starts_at', { ascending: true });
 
-    const filteredMockEvents = MOCK_EVENTS.filter(
-      event => !deletedIds.includes(event.id.toString())
-    );
-    setEvents([...customEvents, ...filteredMockEvents]);
-  }, []);
+        if (fetchError) {
+          console.error('Error fetching events:', fetchError);
+          setError('Erreur lors du chargement des événements');
+          setEvents([]);
+        } else {
+          setEvents((data || []).map(mapEventRowToEvent));
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setError('Erreur inattendue');
+        setEvents([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const filteredEvents = events.filter(event => {
-    if (selectedCategory === 'tous') return true;
-    return event.category === selectedCategory;
-  });
+    fetchEvents();
+  }, [currentCoproId]);
 
-  const upcomingEvents = filteredEvents.filter(e => !e.isPast);
-  const pastEvents = filteredEvents.filter(e => e.isPast);
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      if (selectedCategory === 'tous') return true;
+      return event.category === selectedCategory;
+    });
+  }, [events, selectedCategory]);
+
+  const upcomingEvents = useMemo(() => filteredEvents.filter(e => !e.isPast), [filteredEvents]);
+  const pastEvents = useMemo(() => filteredEvents.filter(e => e.isPast), [filteredEvents]);
 
   const getCategoryColor = useCallback((category: string) => {
     return CATEGORIES.find(c => c.id === category)?.color || '#6b7280';
@@ -184,5 +188,7 @@ export function useEventsPage() {
     handleExportICS,
     handleExportPDF,
     handleSendGroupInvitations,
+    isLoading,
+    error,
   };
 }

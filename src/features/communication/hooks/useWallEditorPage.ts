@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import type { Attachment, VisibilityType, CategoryInfo } from '../types';
-
-const MUR_STORAGE_KEY = 'mur-copro-data';
 
 export const WALL_CATEGORIES: (CategoryInfo & { icon: string })[] = [
   { id: 'annonce', label: 'Annonce', color: '#10b981', icon: 'MessageSquare' },
@@ -33,15 +33,10 @@ export const ETAGES_BATIMENTS = [
   { id: 'etage-6', label: 'Étage 6' },
 ];
 
-const MOCK_PUBLICATIONS = [
-  { id: 1, author: 'Syndic - Jean DUPONT', authorRole: 'syndic' as const, title: 'Travaux de réfection de la toiture - Planning', content: 'Suite à la décision de l\'AG, les travaux de réfection de la toiture débuteront le 15 janvier 2026. L\'entreprise Toiture Pro interviendra du lundi au vendredi de 8h à 17h...', category: 'travaux' as const, date: '2025-11-28T10:00:00', isPinned: true, isLocked: false, likes: 12, comments: 5, hasAttachment: true, tags: ['Toiture', 'Travaux 2026'] },
-  { id: 2, author: 'Marie MARTIN', authorRole: 'conseil' as const, title: 'Organisation Fête des Voisins 2026', content: 'Bonjour à tous, comme chaque année, nous aimerions organiser la Fête des Voisins. Qui serait intéressé pour participer à l\'organisation ?', category: 'social' as const, date: '2025-11-27T14:30:00', isPinned: false, isLocked: false, likes: 24, comments: 18, hasAttachment: false, tags: ['Événement', 'Convivialité'] },
-  { id: 3, author: 'Pierre LEBLANC', authorRole: 'copropriétaire' as const, title: 'Rappel - Code d\'accès immeuble', content: 'Merci de ne pas communiquer le code d\'accès de l\'immeuble à des personnes extérieures. Plusieurs livraisons ont été laissées dans le hall sans autorisation.', category: 'securite' as const, date: '2025-11-26T16:45:00', isPinned: true, isLocked: true, likes: 8, comments: 3, hasAttachment: false, tags: ['Sécurité'] }
-];
-
 export function useWallEditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { currentCoproId } = useCopro();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editId = searchParams.get('edit');
@@ -62,38 +57,38 @@ export function useWallEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(isEditMode);
 
+  // Load existing post for edit mode from Supabase
   useEffect(() => {
-    if (!isEditMode || !editId) return;
-
-    let publication = null;
-    const stored = localStorage.getItem(MUR_STORAGE_KEY);
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.drafts) publication = data.drafts.find((p: { id: number }) => p.id === parseInt(editId));
-      if (!publication && data.list) publication = data.list.find((p: { id: number }) => p.id === parseInt(editId));
-      if (!publication && data.publications && data.publications[editId]) publication = data.publications[editId];
+    if (!isEditMode || !editId || !currentCoproId) {
+      setIsLoading(false);
+      return;
     }
 
-    if (!publication) publication = MOCK_PUBLICATIONS.find(p => p.id === parseInt(editId));
+    const fetchPost = async () => {
+      const supabase = createClient();
+      const { data: post, error: fetchError } = await supabase
+        .from('v_wall_feed')
+        .select('*')
+        .eq('id', editId)
+        .eq('copro_id', currentCoproId)
+        .single();
 
-    if (publication) {
-      setTitle(publication.title || '');
-      setContent(publication.content || '');
-      setCategory(publication.category || 'annonce');
-      setTags(publication.tags || []);
-      setIsPinned(publication.isPinned || false);
-      setIsLocked(publication.isLocked || false);
-      if (publication.attachments) {
-        setAttachments(publication.attachments.map((a: { id?: string; name: string; type?: string; size?: string }) => ({
-          id: a.id || `${Date.now()}-${a.name}`,
-          name: a.name,
-          type: a.type || 'document',
-          size: a.size || 'N/A'
-        })));
+      if (fetchError || !post) {
+        console.error('Error fetching post for edit:', fetchError);
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
-  }, [isEditMode, editId]);
+
+      setTitle(post.title || '');
+      setContent(post.content || '');
+      setCategory(post.category || 'annonce');
+      setIsPinned(post.is_pinned || false);
+      // TODO: Load attachments when document system is connected
+      setIsLoading(false);
+    };
+
+    fetchPost();
+  }, [isEditMode, editId, currentCoproId]);
 
   const handleTagToggle = useCallback((tag: string) => {
     setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -152,64 +147,100 @@ export function useWallEditorPage() {
     if (!title.trim()) { setError('Veuillez saisir un titre'); return; }
     if (!content.trim()) { setError('Veuillez saisir le contenu de votre publication'); return; }
     if (visibility === 'etage' && selectedGroups.length === 0) { setError('Veuillez sélectionner au moins un groupe'); return; }
+    if (!currentCoproId) { setError('Copropriété non trouvée'); return; }
 
     setIsPublishing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const stored = localStorage.getItem(MUR_STORAGE_KEY);
-    const data = stored ? JSON.parse(stored) : { list: [], publications: {}, comments: {}, drafts: [] };
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-    if (isEditMode && editId) {
-      const pubId = parseInt(editId);
-      if (data.list) {
-        data.list = data.list.map((p: { id: number }) => {
-          if (p.id === pubId) {
-            return { ...p, title: title.trim(), content: content.trim(), category, isPinned, isLocked, hasAttachment: attachments.length > 0, tags, updatedAt: new Date().toISOString() };
-          }
-          return p;
-        });
+      if (!user) {
+        setError('Vous devez être connecté');
+        setIsPublishing(false);
+        return;
       }
-      if (data.publications && data.publications[editId]) {
-        data.publications[editId] = { ...data.publications[editId], title: title.trim(), content: content.trim(), category, isPinned, isLocked, tags, attachments: attachments.map(a => ({ id: a.id, name: a.name, type: a.type, size: a.size, url: '#' })), updatedAt: new Date().toISOString() };
-      }
-      if (data.drafts) data.drafts = data.drafts.filter((d: { id: number }) => d.id !== pubId);
-    } else {
-      const newId = Date.now();
-      const newPublication = { id: newId, author: 'Moi', authorRole: 'copropriétaire' as const, title: title.trim(), content: content.trim(), category: category as 'travaux' | 'social' | 'securite' | 'evenements' | 'annonce', date: new Date().toISOString(), isPinned, isLocked, likes: 0, comments: 0, hasAttachment: attachments.length > 0, tags };
-      const fullPublication = { ...newPublication, isLiked: false, attachments: attachments.map(a => ({ id: a.id, name: a.name, type: a.type, size: a.size, url: '#' })), comments: [] };
 
-      data.list = [newPublication, ...(data.list || [])];
-      data.publications = data.publications || {};
-      data.publications[newId.toString()] = fullPublication;
+      // Map visibility to enum
+      const visibilityMap: Record<string, 'all_members' | 'council_only' | 'managers_only'> = {
+        'tous': 'all_members',
+        'conseil': 'council_only',
+        'etage': 'all_members', // TODO: Handle group visibility
+      };
+
+      // Map frontend category to DB enum
+      const categoryMap: Record<string, 'information' | 'urgent' | 'question' | 'event' | 'other'> = {
+        'annonce': 'information',
+        'travaux': 'urgent',
+        'social': 'other',
+        'securite': 'urgent',
+        'evenements': 'event',
+        'information': 'information',
+        'urgent': 'urgent',
+        'question': 'question',
+        'event': 'event',
+        'other': 'other',
+      };
+
+      if (isEditMode && editId) {
+        // Update existing post
+        const { error: updateError } = await supabase
+          .from('wall_posts')
+          .update({
+            title: title.trim(),
+            content: content.trim(),
+            category: categoryMap[category] || 'information',
+            is_pinned: isPinned,
+            visibility: visibilityMap[visibility] || 'all_members',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editId);
+
+        if (updateError) {
+          console.error('Error updating post:', updateError);
+          setError('Erreur lors de la modification');
+          setIsPublishing(false);
+          return;
+        }
+      } else {
+        // Create new post
+        const { error: insertError } = await supabase
+          .from('wall_posts')
+          .insert({
+            copro_id: currentCoproId,
+            author_id: user.id,
+            title: title.trim(),
+            content: content.trim(),
+            category: categoryMap[category] || 'information',
+            is_pinned: isPinned,
+            visibility: visibilityMap[visibility] || 'all_members',
+          });
+
+        if (insertError) {
+          console.error('Error creating post:', insertError);
+          setError('Erreur lors de la création');
+          setIsPublishing(false);
+          return;
+        }
+      }
+
+      setIsPublishing(false);
+      router.push('/communication/mur?success=1');
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      setError('Erreur inattendue');
+      setIsPublishing(false);
     }
-
-    localStorage.setItem(MUR_STORAGE_KEY, JSON.stringify(data));
-    setIsPublishing(false);
-    router.push('/communication/mur?success=1');
-  }, [title, content, visibility, selectedGroups, isEditMode, editId, category, isPinned, isLocked, attachments, tags, router]);
+  }, [title, content, visibility, selectedGroups, isEditMode, editId, category, isPinned, currentCoproId, router]);
 
   const handleSaveDraft = useCallback(async () => {
     setError(null);
     if (!title.trim()) { setError('Veuillez saisir au moins un titre pour enregistrer le brouillon'); return; }
 
-    setIsSavingDraft(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const stored = localStorage.getItem(MUR_STORAGE_KEY);
-    const data = stored ? JSON.parse(stored) : { list: [], publications: {}, comments: {}, drafts: [] };
-
-    data.drafts = data.drafts || [];
-    const draftId = isEditMode && editId ? parseInt(editId) : Date.now();
-    const draft = { id: draftId, author: 'Moi', authorRole: 'copropriétaire' as const, title: title.trim(), content: content.trim(), category: category as 'travaux' | 'social' | 'securite' | 'evenements' | 'annonce', date: new Date().toISOString(), isPinned, isLocked, hasAttachment: attachments.length > 0, tags, attachments: attachments.map(a => ({ id: a.id, name: a.name, type: a.type, size: a.size })), isDraft: true };
-
-    const existingIndex = data.drafts.findIndex((d: { id: number }) => d.id === draftId);
-    if (existingIndex >= 0) data.drafts[existingIndex] = draft;
-    else data.drafts.unshift(draft);
-
-    localStorage.setItem(MUR_STORAGE_KEY, JSON.stringify(data));
+    // Drafts not yet supported in Supabase - show message
+    setError('Les brouillons ne sont pas encore supportés');
     setIsSavingDraft(false);
-    router.push('/communication/mur?draft=1');
-  }, [title, content, category, isPinned, isLocked, attachments, tags, isEditMode, editId, router]);
+  }, [title]);
 
   const selectedCategory = WALL_CATEGORIES.find(c => c.id === category);
 

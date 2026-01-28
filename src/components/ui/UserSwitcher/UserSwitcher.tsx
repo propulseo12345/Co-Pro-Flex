@@ -1,45 +1,48 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { User, ChevronDown, Check, Shield } from 'lucide-react';
-import { useCurrentUser } from '@/providers/CurrentUserProvider';
-import { UserRole } from '@/types/enums';
+import { useState, useEffect } from 'react';
+import { User, LogOut } from 'lucide-react';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import styles from './UserSwitcher.module.css';
 
-const ROLE_LABELS: Record<UserRole, string> = {
-  [UserRole.ADMIN]: 'Admin',
-  [UserRole.SYNDIC]: 'Syndic',
-  [UserRole.PRESIDENT_CS]: 'President CS',
-  [UserRole.MEMBRE_CS]: 'Membre CS',
-  [UserRole.COPROPRIETAIRE]: 'Coproprietaire',
-  [UserRole.LOCATAIRE]: 'Locataire',
-};
-
-const ROLE_COLORS: Record<UserRole, string> = {
-  [UserRole.ADMIN]: '#EF4444',
-  [UserRole.SYNDIC]: '#2563EB',
-  [UserRole.PRESIDENT_CS]: '#F59E0B',
-  [UserRole.MEMBRE_CS]: '#F59E0B',
-  [UserRole.COPROPRIETAIRE]: '#10B981',
-  [UserRole.LOCATAIRE]: '#6B7280',
-};
-
 export function UserSwitcher() {
-  const { currentUser, availableUsers, switchUser, mounted } = useCurrentUser();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { userRole, isLoading } = useCopro();
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+    setMounted(true);
+
+    // Fetch user info from Supabase auth
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserEmail(user.email || null);
+        // Try to get name from profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        setUserName(profile?.full_name || user.email?.split('@')[0] || 'Utilisateur');
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    };
+
+    fetchUser();
   }, []);
 
-  if (!mounted || !currentUser) {
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/auth/login';
+  };
+
+  if (!mounted || isLoading) {
     return (
       <div className={styles.skeleton}>
         <div className={styles.skeletonIcon} />
@@ -48,73 +51,35 @@ export function UserSwitcher() {
     );
   }
 
-  const roleColor = ROLE_COLORS[currentUser.role as UserRole] || '#6B7280';
+  const roleLabel = userRole === 'admin' ? 'Admin'
+    : userRole === 'gestionnaire' ? 'Gestionnaire'
+    : userRole || 'Utilisateur';
+
+  const roleColor = userRole === 'admin' ? '#EF4444' : '#2563EB';
 
   return (
-    <div className={styles.container} ref={dropdownRef}>
-      <button
-        className={styles.trigger}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-      >
+    <div className={styles.container}>
+      <div className={styles.trigger}>
         <div className={styles.userAvatar} style={{ backgroundColor: `${roleColor}20`, color: roleColor }}>
           <User size={14} />
         </div>
         <div className={styles.userInfo}>
           <span className={styles.userName}>
-            {currentUser.prenom} {currentUser.nom}
+            {userName || 'Chargement...'}
           </span>
           <span className={styles.userRole} style={{ color: roleColor }}>
-            {ROLE_LABELS[currentUser.role as UserRole]}
+            {roleLabel}
           </span>
         </div>
-        <ChevronDown size={14} className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} />
-      </button>
-
-      {isOpen && (
-        <div className={styles.dropdown} role="listbox">
-          <div className={styles.dropdownHeader}>
-            <Shield size={14} />
-            <span>Changer de profil (dev)</span>
-          </div>
-          <div className={styles.dropdownList}>
-            {availableUsers.map(user => {
-              const userRoleColor = ROLE_COLORS[user.role as UserRole] || '#6B7280';
-              const isSelected = user.id === currentUser.id;
-
-              return (
-                <button
-                  key={user.id}
-                  className={`${styles.userOption} ${isSelected ? styles.userOptionActive : ''}`}
-                  onClick={() => {
-                    switchUser(user.id);
-                    setIsOpen(false);
-                  }}
-                  role="option"
-                  aria-selected={isSelected}
-                >
-                  <div
-                    className={styles.optionAvatar}
-                    style={{ backgroundColor: `${userRoleColor}20`, color: userRoleColor }}
-                  >
-                    <User size={12} />
-                  </div>
-                  <div className={styles.optionInfo}>
-                    <span className={styles.optionName}>
-                      {user.prenom} {user.nom}
-                    </span>
-                    <span className={styles.optionRole} style={{ color: userRoleColor }}>
-                      {ROLE_LABELS[user.role as UserRole]}
-                    </span>
-                  </div>
-                  {isSelected && <Check size={14} className={styles.checkIcon} />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+        <button
+          onClick={handleLogout}
+          className={styles.logoutBtn}
+          title="Se déconnecter"
+          aria-label="Se déconnecter"
+        >
+          <LogOut size={14} />
+        </button>
+      </div>
     </div>
   );
 }

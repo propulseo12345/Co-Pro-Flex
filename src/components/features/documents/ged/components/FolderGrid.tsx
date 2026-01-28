@@ -1,8 +1,7 @@
 'use client';
 
 import { Folder, FolderTree, ChevronRight } from 'lucide-react';
-import type { GEDFolder } from '@/data/mock/documents-ged';
-import { getSubFolders, countDocumentsInFolderRecursive } from '@/data/mock/documents-ged';
+import type { GEDFolder } from '../domain/types';
 import { getFolderIcon } from '../domain/utils';
 import styles from '../../../../../app/(dashboard)/documents/ged/ged.module.css';
 
@@ -24,8 +23,8 @@ export function FolderGrid({ folders, title, icon = 'folder', onFolderClick }: F
       </div>
       <div className={styles.foldersGrid}>
         {folders.map((folder) => {
-          const docCount = countDocumentsInFolderRecursive(folder.id);
-          const subFolderCount = getSubFolders(folder.id).length;
+          const docCount = folder.documentCount || 0;
+          const subFolderCount = folder.subfolderCount || 0;
           return (
             <button
               key={folder.id}
