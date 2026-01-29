@@ -12,6 +12,8 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { getCurrentBusinessYear } from '@/lib/time/period';
 import { useBudgetData } from './useBudgetData';
 import { useBudgetMutations } from './useBudgetMutations';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import type { BudgetOverview, BudgetLineOverview, ExpenseDetail, BudgetType } from '@/lib/budget/api';
 import { mapBudgetStatusFromDb, mapExpenseStatusFromDb } from '@/lib/budget/api';
 import {
@@ -118,11 +120,24 @@ function mapExpenseToDepense(expense: ExpenseDetail): DepenseEtendue {
 // Hook principal
 // ============================================================================
 
+// Default copro ID for development (from seed data)
+const DEV_COPRO_ID = '11111111-aaaa-bbbb-cccc-111111111111';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
+
 export function useBudget() {
+  // ============================================================================
+  // Context
+  // ============================================================================
+  const { currentCoproId: contextCoproId } = useCopro();
+  const currentCoproId = contextCoproId || DEV_COPRO_ID;
+
   // ============================================================================
   // Data from Supabase
   // ============================================================================
   const [selectedYear, setSelectedYear] = useState(getCurrentBusinessYear());
+  const [coproprietairesALUR, setCoproprietairesALUR] = useState<CoproprietaireALUR[]>([]);
 
   const {
     budgets: rawBudgets,
@@ -137,6 +152,71 @@ export function useBudget() {
   } = useBudgetData({ periodYear: selectedYear });
 
   const mutations = useBudgetMutations({ onSuccess: refresh });
+
+  // ============================================================================
+  // Load ALUR Copropriétaires
+  // ============================================================================
+  const loadCoproprietairesALUR = useCallback(async () => {
+    if (!currentCoproId) {
+      setCoproprietairesALUR([]);
+      return;
+    }
+
+    const supabase = createUntypedClient();
+
+    try {
+      const { data, error: queryError } = await supabase
+        .from('v_alur_lot_contributions')
+        .select('*')
+        .eq('copro_id', currentCoproId)
+        .order('lot_ref', { ascending: true });
+
+      if (queryError) {
+        console.error('[useBudget] Error loading ALUR copropriétaires:', queryError);
+        setCoproprietairesALUR([]);
+        return;
+      }
+
+      // Map to CoproprietaireALUR type
+      const mapped: CoproprietaireALUR[] = (data || []).map((row: Record<string, unknown>) => {
+        const cotisation = Number(row.lot_cotisation_annuelle) || 0;
+        const solde = Number(row.lot_solde_alur) || 0;
+        const year = Number(row.period_year) || new Date().getFullYear();
+
+        // Determine status based on balance vs expected contribution
+        // If solde >= cotisation, payment is up to date
+        const statut: 'PAYEE' | 'EN_ATTENTE' | 'EN_RETARD' =
+          solde >= cotisation ? 'PAYEE' :
+          solde > 0 ? 'EN_ATTENTE' : 'EN_RETARD';
+
+        return {
+          id: row.lot_id as string,
+          nom: row.owner_name as string || 'Non assigné',
+          lot: row.lot_ref as string,
+          tantiemes: Number(row.tantiemes_generaux) || 0,
+          cotisationAnnuelle: cotisation,
+          totalContributions: solde,
+          historiqueContributions: [{
+            id: `${row.lot_id}-${year}`,
+            date: new Date().toISOString().split('T')[0],
+            montant: cotisation,
+            periode: `${year}`,
+            statut,
+          }],
+          historiqueProprietaires: [{
+            proprietaire: row.owner_name as string || 'Non assigné',
+            dateDebut: '2024-01-01',
+            contributionsCumulees: solde,
+          }],
+        };
+      });
+
+      setCoproprietairesALUR(mapped);
+    } catch (err) {
+      console.error('[useBudget] Error loading ALUR copropriétaires:', err);
+      setCoproprietairesALUR([]);
+    }
+  }, [currentCoproId]);
 
   // ============================================================================
   // UI State
@@ -500,6 +580,11 @@ export function useBudget() {
   const handleSetActiveTab = useCallback(async (tab: BudgetTab) => {
     setActiveTab(tab);
 
+    // Load ALUR copropriétaires when switching to ALUR tab
+    if (tab === 'alur') {
+      await loadCoproprietairesALUR();
+    }
+
     // Load lines for the appropriate budget
     const budget = rawBudgets.find(b => {
       if (tab === 'fonctionnement') return b.budget_type === 'current';
@@ -514,7 +599,7 @@ export function useBudget() {
         loadBudgetExpenses(budget.id),
       ]);
     }
-  }, [rawBudgets, loadBudgetLines, loadBudgetExpenses]);
+  }, [rawBudgets, loadBudgetLines, loadBudgetExpenses, loadCoproprietairesALUR]);
 
   // ============================================================================
   // Return
@@ -562,7 +647,7 @@ export function useBudget() {
     budgetsTravaux,
     setBudgetsTravaux: () => {}, // No-op, data comes from Supabase
     fondsALUR,
-    coproprietairesALUR: [], // TODO: Implement from lot_owners with their ALUR contributions
+    coproprietairesALUR,
     resolutionsAG: [],
     dernieresDepenses,
 

@@ -35,7 +35,9 @@
       "Bash(npx eslint:*)",
       "Bash(rg:*)",
       "Bash(npx next build:*)",
-      "mcp__plugin_supabase_supabase__get_logs"
+      "mcp__plugin_supabase_supabase__get_logs",
+      "Bash(head:*)",
+      "Bash(npm run css:ag:check:*)"
     ]
   }
 }

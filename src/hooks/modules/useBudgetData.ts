@@ -75,14 +75,25 @@ export function useBudgetData(options: UseBudgetDataOptions = {}): UseBudgetData
     setError(null);
 
     try {
-      let data = await budgetApi.listBudgets(currentCoproId, periodYear);
+      // If a specific budgetId is provided, load it directly (regardless of year)
+      if (options.budgetId) {
+        const budget = await budgetApi.getBudget(currentCoproId, options.budgetId);
+        if (budget) {
+          setBudgets([budget]);
+        } else {
+          setBudgets([]);
+        }
+      } else {
+        // Otherwise, load all budgets for the period
+        let data = await budgetApi.listBudgets(currentCoproId, periodYear);
 
-      // Filter by budget type if specified
-      if (options.budgetType) {
-        data = data.filter(b => b.budget_type === options.budgetType);
+        // Filter by budget type if specified
+        if (options.budgetType) {
+          data = data.filter(b => b.budget_type === options.budgetType);
+        }
+
+        setBudgets(data);
       }
-
-      setBudgets(data);
     } catch (err) {
       console.error('[useBudgetData] Error loading budgets:', err);
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des budgets');
@@ -90,7 +101,7 @@ export function useBudgetData(options: UseBudgetDataOptions = {}): UseBudgetData
     } finally {
       setIsLoading(false);
     }
-  }, [currentCoproId, periodYear, options.budgetType]);
+  }, [currentCoproId, periodYear, options.budgetType, options.budgetId]);
 
   // ============================================================================
   // Load budget lines
