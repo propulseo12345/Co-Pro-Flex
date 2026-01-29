@@ -23,7 +23,7 @@ interface AgDraftProgress {
   ag_id: string;
   copro_id: string;
   title: string;
-  meeting_type: 'ordinary' | 'extraordinary' | 'mixed';
+  meeting_type: 'ordinary' | 'extraordinary' | 'special';
   meeting_date: string | null;
   location: string | null;
   status: string;
@@ -42,7 +42,7 @@ interface AgDraftProgress {
 export interface AgDraft {
   id: string;
   title: string;
-  meeting_type: 'ordinary' | 'extraordinary' | 'mixed';
+  meeting_type: 'ordinary' | 'extraordinary' | 'special';
   meeting_date: string | null;
   location: string | null;
   status: 'draft';
@@ -75,7 +75,7 @@ interface UseAgDraftsReturn {
 
 export interface CreateDraftInput {
   title?: string;
-  meeting_type?: 'ordinary' | 'extraordinary' | 'mixed';
+  meeting_type?: 'ordinary' | 'extraordinary' | 'special';
   meeting_date?: string;
   location?: string;
 }
@@ -151,7 +151,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
 
   /**
    * Charge tous les brouillons d'AG pour la copro actuelle
-   * OPTIMISÉ: utilise v_ag_drafts_progress (1 seule requête)
+   * Essaie d'abord la vue optimisée, puis fallback sur ag_meetings directement
    */
   const loadDrafts = useCallback(async () => {
     if (!currentCoproId) {
@@ -166,15 +166,78 @@ export function useAgDrafts(): UseAgDraftsReturn {
     try {
       const supabase = createUntypedClient();
 
-      // Une seule requête via la vue agrégée
-      const { data: progressData, error: queryError } = await supabase
-        .from('v_ag_drafts_progress')
-        .select('*')
-        .eq('copro_id', currentCoproId)
-        .eq('status', 'draft')
-        .order('last_activity_at', { ascending: false });
+      // Essayer d'abord la vue agrégée optimisée
+      let progressData: AgDraftProgress[] | null = null;
+      let useViewFailed = false;
 
-      if (queryError) throw new Error(queryError.message);
+      try {
+        const { data, error: viewError } = await supabase
+          .from('v_ag_drafts_progress')
+          .select('*')
+          .eq('copro_id', currentCoproId)
+          .order('last_activity_at', { ascending: false });
+
+        if (viewError) {
+          console.warn('[useAgDrafts] View query failed, using fallback:', viewError.message);
+          useViewFailed = true;
+        } else {
+          progressData = data as AgDraftProgress[];
+        }
+      } catch {
+        console.warn('[useAgDrafts] View not available, using fallback');
+        useViewFailed = true;
+      }
+
+      // Fallback: requête directe sur ag_meetings
+      if (useViewFailed || !progressData) {
+        const { data: meetings, error: meetingsError } = await supabase
+          .from('ag_meetings')
+          .select('*')
+          .eq('copro_id', currentCoproId)
+          .eq('status', 'draft')
+          .order('updated_at', { ascending: false });
+
+        if (meetingsError) throw new Error(meetingsError.message);
+
+        if (!meetings || meetings.length === 0) {
+          setDrafts([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Mapper les meetings en format AgDraft (sans les stats avancées)
+        const fallbackDrafts: AgDraft[] = meetings.map((m: {
+          id: string;
+          title: string;
+          meeting_type: 'ordinary' | 'extraordinary' | 'special';
+          meeting_date: string | null;
+          location: string | null;
+          created_at: string;
+          updated_at: string;
+        }) => ({
+          id: m.id,
+          title: m.title,
+          meeting_type: m.meeting_type,
+          meeting_date: m.meeting_date,
+          location: m.location,
+          status: 'draft' as const,
+          created_at: m.created_at,
+          updated_at: m.updated_at,
+          hasResolutions: false,
+          resolutionsCount: 0,
+          hasAttendance: false,
+          attendanceCount: 0,
+          hasVotes: false,
+          votesCount: 0,
+          suggestedStep: 1,
+          completionRatio: 0,
+          lastActivityAt: m.updated_at,
+        }));
+
+        setDrafts(fallbackDrafts);
+        setIsLoading(false);
+        return;
+      }
 
       if (!progressData || progressData.length === 0) {
         setDrafts([]);
@@ -183,7 +246,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
       }
 
       // Mapper les données vers le format AgDraft
-      const mappedDrafts = (progressData as AgDraftProgress[]).map(mapProgressToDraft);
+      const mappedDrafts = progressData.map(mapProgressToDraft);
       setDrafts(mappedDrafts);
 
     } catch (err) {
@@ -237,46 +300,32 @@ export function useAgDrafts(): UseAgDraftsReturn {
   }, [currentCoproId, loadDrafts]);
 
   /**
-   * Supprime un brouillon d'AG
+   * Supprime un brouillon d'AG via la RPC Supabase
+   * La RPC gère atomiquement :
+   * - Vérification que l'AG est bien un brouillon
+   * - Suppression de toutes les données liées (votes, résolutions, présences, etc.)
+   * - Archivage des documents associés
    */
   const deleteDraft = useCallback(async (agId: string): Promise<boolean> => {
     try {
       const supabase = createUntypedClient();
 
-      // Supprimer les votes liés (via résolutions)
-      const { data: resolutions } = await supabase
-        .from('ag_resolutions')
-        .select('id')
-        .eq('ag_id', agId);
+      // Appeler la RPC qui gère la suppression atomique
+      const { data, error: rpcError } = await supabase.rpc('delete_ag_draft', {
+        p_ag_id: agId,
+      });
 
-      if (resolutions && resolutions.length > 0) {
-        const resolutionIds = resolutions.map((r: { id: string }) => r.id);
-        await supabase
-          .from('ag_votes')
-          .delete()
-          .in('resolution_id', resolutionIds);
+      if (rpcError) {
+        throw new Error(rpcError.message);
       }
 
-      // Supprimer les résolutions
-      await supabase
-        .from('ag_resolutions')
-        .delete()
-        .eq('ag_id', agId);
+      // La RPC retourne un objet JSON avec { success, error?, ... }
+      if (!data?.success) {
+        const errorMessage = data?.error || 'Erreur lors de la suppression du brouillon';
+        throw new Error(errorMessage);
+      }
 
-      // Supprimer les présences
-      await supabase
-        .from('ag_attendance')
-        .delete()
-        .eq('ag_id', agId);
-
-      // Supprimer l'AG elle-même
-      const { error: deleteError } = await supabase
-        .from('ag_meetings')
-        .delete()
-        .eq('id', agId)
-        .eq('status', 'draft'); // Sécurité: ne supprimer que les drafts
-
-      if (deleteError) throw new Error(deleteError.message);
+      console.log('[useAgDrafts] Draft deleted successfully:', data.deleted_counts);
 
       // Rafraîchir la liste
       await loadDrafts();

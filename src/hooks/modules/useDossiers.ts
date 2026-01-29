@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
 import {
   IDossier,
   DossierCategorie,
@@ -9,84 +11,22 @@ import {
   DossierFormData
 } from '@/types/models/dossier';
 
-const STORAGE_KEY = 'coproflex-dossiers';
-const DEFAULT_COPRO_ID = 'copro-mock-001';
+// Row type for dossiers table (not in generated types yet)
+interface DossierRow {
+  id: string;
+  titre: string;
+  description: string | null;
+  categorie: string;
+  statut: string;
+  priorite: string;
+  deadline: string | null;
+  copro_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
-// Données mockées initiales
-const MOCK_DOSSIERS: IDossier[] = [
-  {
-    id: 'dossier-001',
-    titre: 'Préparer appels de fonds T2',
-    description: 'Générer et envoyer les appels de fonds du 2ème trimestre',
-    categorie: DossierCategorie.FINANCE,
-    statut: DossierStatut.EN_COURS,
-    priorite: DossierPriorite.HAUTE,
-    deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    coproprieteId: DEFAULT_COPRO_ID,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'dossier-002',
-    titre: 'Convoquer AG Ordinaire 2025',
-    description: 'Préparer et envoyer les convocations pour l\'AG annuelle',
-    categorie: DossierCategorie.AG,
-    statut: DossierStatut.A_FAIRE,
-    priorite: DossierPriorite.URGENTE,
-    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    coproprieteId: DEFAULT_COPRO_ID,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'dossier-003',
-    titre: 'Renouvellement contrat ascenseur',
-    description: 'Négocier et signer le nouveau contrat de maintenance ascenseur',
-    categorie: DossierCategorie.MAINTENANCE,
-    statut: DossierStatut.BLOQUE,
-    priorite: DossierPriorite.HAUTE,
-    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    coproprieteId: DEFAULT_COPRO_ID,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'dossier-004',
-    titre: 'Archiver PV AG 2024',
-    description: 'Scanner et archiver le procès-verbal de l\'AG 2024',
-    categorie: DossierCategorie.DOCUMENTS,
-    statut: DossierStatut.TERMINE,
-    priorite: DossierPriorite.BASSE,
-    deadline: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    coproprieteId: DEFAULT_COPRO_ID,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'dossier-005',
-    titre: 'Relancer impayés > 60 jours',
-    description: 'Envoyer les mises en demeure pour les impayés de plus de 60 jours',
-    categorie: DossierCategorie.FINANCE,
-    statut: DossierStatut.A_FAIRE,
-    priorite: DossierPriorite.NORMALE,
-    deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    coproprieteId: DEFAULT_COPRO_ID,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'dossier-006',
-    titre: 'Devis ravalement façade',
-    description: 'Collecter 3 devis pour le ravalement de la façade sud',
-    categorie: DossierCategorie.MAINTENANCE,
-    statut: DossierStatut.EN_COURS,
-    priorite: DossierPriorite.NORMALE,
-    deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    coproprieteId: DEFAULT_COPRO_ID,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
+// Constante pour cleanup legacy localStorage (one-shot en dev)
+const LEGACY_STORAGE_KEY = 'coproflex-dossiers';
 
 export interface DossiersFilters {
   categorie: DossierCategorie | 'TOUS';
@@ -98,8 +38,16 @@ export interface UseDossiersOptions {
   coproprieteId?: string;
 }
 
+/**
+ * Hook de gestion des dossiers (tâches métier)
+ * VERSION SUPABASE - Utilise la table dossiers
+ *
+ * Note: Si la table dossiers n'existe pas encore, le hook retourne un empty state.
+ * Les données de démonstration ne sont plus stockées en localStorage.
+ */
 export function useDossiers(options: UseDossiersOptions = {}) {
-  const coproprieteId = options.coproprieteId || DEFAULT_COPRO_ID;
+  const { currentCoproId } = useCopro();
+  const coproprieteId = options.coproprieteId || currentCoproId || '';
 
   // États
   const [dossiers, setDossiers] = useState<IDossier[]>([]);
@@ -111,59 +59,118 @@ export function useDossiers(options: UseDossiersOptions = {}) {
     search: ''
   });
 
-  // Chargement depuis localStorage
+  // Cleanup legacy localStorage au montage (one-shot)
   useEffect(() => {
-    const loadDossiers = () => {
+    if (typeof window !== 'undefined') {
+      const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyData) {
+        console.warn('[useDossiers] Suppression données localStorage legacy');
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  // Chargement depuis Supabase
+  useEffect(() => {
+    const loadDossiers = async () => {
+      if (!coproprieteId) {
+        setDossiers([]);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
-      // Simulation d'un délai de chargement
-      setTimeout(() => {
-        try {
-          if (typeof window === 'undefined') {
-            setDossiers(MOCK_DOSSIERS.filter(d => d.coproprieteId === coproprieteId));
-            setIsLoading(false);
-            return;
-          }
+      try {
+        const supabase = createClient();
 
-          const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) {
-            const allDossiers = JSON.parse(stored) as IDossier[];
-            setDossiers(allDossiers.filter(d => d.coproprieteId === coproprieteId));
+        // Essayer de charger depuis la table dossiers
+        // Note: Si la table n'existe pas, on retourne un tableau vide
+        // Table dossiers may not exist - query avec types explicites
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const client = supabase as any;
+        const { data, error: supabaseError } = await client
+          .from('dossiers')
+          .select('*')
+          .eq('copro_id', coproprieteId)
+          .order('deadline', { ascending: true }) as { data: DossierRow[] | null; error: { code?: string; message: string } | null };
+
+        if (supabaseError) {
+          // Si la table n'existe pas (code 42P01), retourner empty state sans erreur
+          if (supabaseError.code === '42P01') {
+            console.info('[useDossiers] Table dossiers non disponible - mode empty state');
+            setDossiers([]);
           } else {
-            // Initialiser avec les données mockées
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_DOSSIERS));
-            setDossiers(MOCK_DOSSIERS.filter(d => d.coproprieteId === coproprieteId));
+            throw supabaseError;
           }
-        } catch (e) {
-          setError('Erreur lors du chargement des dossiers');
-          setDossiers([]);
-        } finally {
-          setIsLoading(false);
+        } else {
+          // Mapper les données Supabase vers IDossier
+          const mappedDossiers: IDossier[] = (data || []).map((d: DossierRow) => ({
+            id: d.id,
+            titre: d.titre,
+            description: d.description ?? undefined,
+            categorie: d.categorie as DossierCategorie,
+            statut: d.statut as DossierStatut,
+            priorite: d.priorite as DossierPriorite,
+            deadline: d.deadline || new Date().toISOString(),
+            coproprieteId: d.copro_id,
+            createdAt: d.created_at,
+            updatedAt: d.updated_at,
+          }));
+          setDossiers(mappedDossiers);
         }
-      }, 300);
+      } catch (e) {
+        console.error('[useDossiers] Erreur chargement:', e);
+        setError('Erreur lors du chargement des dossiers');
+        setDossiers([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadDossiers();
   }, [coproprieteId]);
 
-  // Sauvegarder dans localStorage
-  const saveDossiers = useCallback((newDossiers: IDossier[]) => {
-    if (typeof window === 'undefined') return;
-
+  // Sauvegarder dans Supabase
+  const saveDossier = useCallback(async (dossier: IDossier): Promise<boolean> => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const allDossiers = stored ? JSON.parse(stored) as IDossier[] : [];
+      const supabase = createClient();
 
-      // Supprimer les dossiers de cette copropriété et ajouter les nouveaux
-      const otherDossiers = allDossiers.filter(d => d.coproprieteId !== coproprieteId);
-      const updatedAll = [...otherDossiers, ...newDossiers];
+      // Table dossiers may not exist - cast to any for upsert
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = supabase as any;
+      const { error: supabaseError } = await client
+        .from('dossiers')
+        .upsert({
+          id: dossier.id,
+          titre: dossier.titre,
+          description: dossier.description,
+          categorie: dossier.categorie,
+          statut: dossier.statut,
+          priorite: dossier.priorite,
+          deadline: dossier.deadline,
+          copro_id: dossier.coproprieteId,
+          created_at: dossier.createdAt,
+          updated_at: new Date().toISOString(),
+        });
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedAll));
+      if (supabaseError) {
+        // Si la table n'existe pas, log et return false
+        if (supabaseError.code === '42P01') {
+          console.warn('[useDossiers] Table dossiers non disponible - sauvegarde impossible');
+          return false;
+        }
+        throw supabaseError;
+      }
+
+      return true;
     } catch (e) {
+      console.error('[useDossiers] Erreur sauvegarde:', e);
       setError('Erreur lors de la sauvegarde');
+      return false;
     }
-  }, [coproprieteId]);
+  }, []);
 
   // Dossiers filtrés et triés par deadline
   const filteredDossiers = useMemo(() => {
@@ -231,7 +238,7 @@ export function useDossiers(options: UseDossiersOptions = {}) {
   }), [dossiers]);
 
   // Créer un dossier
-  const createDossier = useCallback((data: DossierFormData): IDossier => {
+  const createDossier = useCallback(async (data: DossierFormData): Promise<IDossier | null> => {
     const now = new Date().toISOString();
     const newDossier: IDossier = {
       id: `dossier-${Date.now()}`,
@@ -242,35 +249,59 @@ export function useDossiers(options: UseDossiersOptions = {}) {
       updatedAt: now
     };
 
-    const newDossiers = [...dossiers, newDossier];
-    setDossiers(newDossiers);
-    saveDossiers(newDossiers);
+    const success = await saveDossier(newDossier);
+    if (success) {
+      setDossiers(prev => [...prev, newDossier]);
+      return newDossier;
+    }
 
+    // En mode dégradé (sans table), on ajoute quand même en local pour la session
+    setDossiers(prev => [...prev, newDossier]);
     return newDossier;
-  }, [dossiers, coproprieteId, saveDossiers]);
+  }, [coproprieteId, saveDossier]);
 
   // Mettre à jour un dossier
-  const updateDossier = useCallback((id: string, data: Partial<IDossier>) => {
-    const newDossiers = dossiers.map(d =>
-      d.id === id
-        ? { ...d, ...data, updatedAt: new Date().toISOString() }
-        : d
-    );
-    setDossiers(newDossiers);
-    saveDossiers(newDossiers);
-  }, [dossiers, saveDossiers]);
+  const updateDossier = useCallback(async (id: string, data: Partial<IDossier>) => {
+    const dossier = dossiers.find(d => d.id === id);
+    if (!dossier) return;
+
+    const updatedDossier = {
+      ...dossier,
+      ...data,
+      updatedAt: new Date().toISOString()
+    };
+
+    await saveDossier(updatedDossier);
+    setDossiers(prev => prev.map(d => d.id === id ? updatedDossier : d));
+  }, [dossiers, saveDossier]);
 
   // Marquer comme terminé
-  const markAsComplete = useCallback((id: string) => {
-    updateDossier(id, { statut: DossierStatut.TERMINE });
+  const markAsComplete = useCallback(async (id: string) => {
+    await updateDossier(id, { statut: DossierStatut.TERMINE });
   }, [updateDossier]);
 
   // Supprimer un dossier
-  const deleteDossier = useCallback((id: string) => {
-    const newDossiers = dossiers.filter(d => d.id !== id);
-    setDossiers(newDossiers);
-    saveDossiers(newDossiers);
-  }, [dossiers, saveDossiers]);
+  const deleteDossier = useCallback(async (id: string) => {
+    try {
+      const supabase = createClient();
+
+      // Table dossiers may not exist - cast to any for delete
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = supabase as any;
+      const { error: supabaseError } = await client
+        .from('dossiers')
+        .delete()
+        .eq('id', id);
+
+      if (supabaseError && supabaseError.code !== '42P01') {
+        throw supabaseError;
+      }
+    } catch (e) {
+      console.error('[useDossiers] Erreur suppression:', e);
+    }
+
+    setDossiers(prev => prev.filter(d => d.id !== id));
+  }, []);
 
   // Mettre à jour les filtres
   const updateFilters = useCallback((newFilters: Partial<DossiersFilters>) => {

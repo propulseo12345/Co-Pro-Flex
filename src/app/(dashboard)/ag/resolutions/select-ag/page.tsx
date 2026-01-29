@@ -1,19 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, Users, FileText, ArrowRight } from 'lucide-react';
-import { MOCK_ASSEMBLEES } from '@/data/mock';
+import { ArrowLeft, Calendar, FileText, ArrowRight, Loader2 } from 'lucide-react';
+import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
 import styles from './select-ag.module.css';
 
 export default function SelectAGForResolutionPage() {
     const router = useRouter();
     const [selectedAgId, setSelectedAgId] = useState<string>('');
+    const { drafts, isLoading } = useAgDrafts();
 
-    // Filtrer les AG qui peuvent recevoir des résolutions (planifiées, convoquées, ou en cours)
-    const availableAGs = MOCK_ASSEMBLEES.filter(
-        ag => ag.statut === 'PLANIFIEE' || ag.statut === 'CONVOQUEE' || ag.statut === 'EN_COURS'
-    );
+    // Mapper les brouillons Supabase vers le format attendu
+    const availableAGs = useMemo(() => {
+        const today = new Date().toISOString().split('T')[0];
+
+        return drafts
+            .filter(draft => {
+                // Inclure les AG avec une date future ou sans date
+                if (!draft.meeting_date) return true;
+                const draftDate = draft.meeting_date.split('T')[0];
+                return draftDate >= today;
+            })
+            .map(draft => ({
+                id: draft.id,
+                type: draft.meeting_type === 'ordinary' ? 'ORDINAIRE' as const : 'EXTRAORDINAIRE' as const,
+                date: draft.meeting_date || '',
+                statut: 'PLANIFIEE' as const,
+                resolutionsCount: draft.resolutionsCount,
+            }));
+    }, [drafts]);
 
     const handleContinue = () => {
         if (!selectedAgId) {
@@ -22,6 +38,25 @@ export default function SelectAGForResolutionPage() {
         }
         router.push(`/ag/${selectedAgId}/resolutions/new`);
     };
+
+    if (isLoading) {
+        return (
+            <div className="container">
+                <div className={styles.header}>
+                    <button onClick={() => router.push('/ag/dashboard')} className={styles.backButton}>
+                        <ArrowLeft size={20} aria-hidden="true" />
+                        Retour au dashboard AG
+                    </button>
+                </div>
+                <div className={styles.content}>
+                    <div className={styles.emptyState}>
+                        <Loader2 size={48} className={styles.spinner} aria-hidden="true" />
+                        <p>Chargement des assemblées générales...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container">
@@ -69,24 +104,22 @@ export default function SelectAGForResolutionPage() {
                                             </h3>
                                             <p className={styles.agDate}>
                                                 <Calendar size={16} aria-hidden="true" />
-                                                {new Date(ag.date).toLocaleDateString('fr-FR', {
+                                                {ag.date ? new Date(ag.date).toLocaleDateString('fr-FR', {
                                                     weekday: 'long',
                                                     year: 'numeric',
                                                     month: 'long',
                                                     day: 'numeric'
-                                                })}
+                                                }) : 'Date non définie'}
                                             </p>
                                         </div>
                                         <div className={styles.agBadge}>
-                                            {ag.statut === 'PLANIFIEE' ? 'Planifiée' :
-                                             ag.statut === 'CONVOQUEE' ? 'Convoquée' :
-                                             ag.statut === 'EN_COURS' ? 'En cours' : ag.statut}
+                                            En préparation
                                         </div>
                                     </div>
-                                    {ag.ordreDuJour && ag.ordreDuJour.length > 0 && (
+                                    {ag.resolutionsCount > 0 && (
                                         <div className={styles.agResolutions}>
                                             <FileText size={14} aria-hidden="true" />
-                                            <span>{ag.ordreDuJour.length} résolution(s) déjà ajoutée(s)</span>
+                                            <span>{ag.resolutionsCount} résolution(s) déjà ajoutée(s)</span>
                                         </div>
                                     )}
                                 </div>

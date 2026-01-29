@@ -26,7 +26,7 @@ export default function GEDPage() {
     documents, folders, currentFolder, breadcrumb, subFolders, rootFolders, stats,
     isLoading, error, isConnected,
     getFilteredDocuments, getPaginatedDocuments, getTotalPages, navigateToFolder, handleModeChange,
-    handleDragOver, handleDragLeave, handleDrop, handleOpenLinkModal, handleCloseLinkModal, handleCreateLink,
+    handleDragOver, handleDragLeave, handleDrop, handleFilesSelected, handleOpenLinkModal, handleCloseLinkModal, handleCreateLink,
     handlePreviewDocument, handleClosePreview, handleOpenAccessRights, handleCloseAccessRights,
   } = useGedPageSupabase();
 
@@ -137,7 +137,7 @@ export default function GEDPage() {
       ) : (
         <>
           <ModeSwitch navigationMode={navigationMode} onModeChange={handleModeChange} />
-          <DropZone isDragOver={isDragOver} currentFolder={currentFolder ?? null} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} />
+          <DropZone isDragOver={isDragOver} currentFolder={currentFolder ?? null} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} onFilesSelected={handleFilesSelected} />
         </>
       )}
 
@@ -188,7 +188,7 @@ export default function GEDPage() {
       )}
       {previewDocument && (
         <DocumentViewerModal
-          document={{ id: previewDocument.id, nom: previewDocument.nom, type: previewDocument.type as 'PDF' | 'IMAGE' | 'AUTRE', categorie: previewDocument.categorie, dateAjout: previewDocument.dateAjout, taille: previewDocument.taille, dossierId: previewDocument.dossierId || undefined }}
+          document={{ id: previewDocument.id, nom: previewDocument.nom, type: previewDocument.type as 'PDF' | 'IMAGE' | 'AUTRE', categorie: previewDocument.categorie, dateAjout: previewDocument.dateAjout, taille: previewDocument.taille, dossierId: previewDocument.dossierId || undefined, filePath: previewDocument.url }}
           onClose={handleClosePreview}
           folders={folders}
         />

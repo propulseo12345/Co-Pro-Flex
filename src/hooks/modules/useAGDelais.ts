@@ -1,21 +1,29 @@
 /**
  * Hook de gestion des délais légaux AG
  *
- * Calcule et surveille les jalons, génère des alertes proactives
+ * ARCHITECTURE PRODUCTION:
+ * - Source de vérité : Supabase (ag_milestones)
+ * - AUCUN localStorage pour les données métier
+ * - Calcule et surveille les jalons, génère des alertes proactives
  */
 
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import {
     calculerJalonsAG,
     verifierDateAGValide,
     verifierEnvoiConvocationPossible,
     calculerDateAGMinimum,
     type JalonAG,
+    type JalonType,
     type JalonStatus,
     DELAIS_LEGAUX,
 } from '@/lib/constants/ag-delais-legaux';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
@@ -120,34 +128,46 @@ export function useAGDelais({
     const [jalonsCompletes, setJalonsCompletes] = useState<Set<JalonAG['type']>>(new Set());
     const [alertesDismissed, setAlertesDismissed] = useState<Set<string>>(new Set());
     const [now, setNow] = useState(() => new Date());
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Charger les jalons complétés depuis localStorage
+    // Vérifier si l'ID est un UUID valide (Supabase AG)
+    const isValidUUID = useCallback((id: string): boolean => {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        return uuidRegex.test(id);
+    }, []);
+
+    // Charger les jalons complétés depuis Supabase
     useEffect(() => {
         if (!agId || typeof window === 'undefined') return;
+        if (!isValidUUID(agId)) return; // Skip pour les AG legacy
 
-        const saved = localStorage.getItem(`ag-jalons-completes-${agId}`);
-        if (saved) {
+        const loadMilestones = async () => {
+            setIsLoading(true);
             try {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed)) {
-                    setJalonsCompletes(new Set(parsed));
+                const supabase = createUntypedClient();
+                const { data: milestones, error } = await supabase
+                    .from('ag_milestones')
+                    .select('milestone_type')
+                    .eq('ag_id', agId);
+
+                if (error) {
+                    console.error('[useAGDelais] Error loading milestones:', error);
+                    return;
+                }
+
+                if (milestones && Array.isArray(milestones)) {
+                    const types = milestones.map((m: { milestone_type: string }) => m.milestone_type as JalonType);
+                    setJalonsCompletes(new Set(types));
                 }
             } catch (error) {
-                console.error('Erreur chargement jalons:', error);
+                console.error('[useAGDelais] Error loading milestones:', error);
+            } finally {
+                setIsLoading(false);
             }
-        }
-    }, [agId]);
+        };
 
-    // Sauvegarder les jalons complétés
-    useEffect(() => {
-        if (!agId || typeof window === 'undefined') return;
-        if (jalonsCompletes.size === 0) return;
-
-        localStorage.setItem(
-            `ag-jalons-completes-${agId}`,
-            JSON.stringify([...jalonsCompletes])
-        );
-    }, [agId, jalonsCompletes]);
+        loadMilestones();
+    }, [agId, isValidUUID]);
 
     // Rafraîchir "now" toutes les minutes pour mettre à jour les statuts
     useEffect(() => {
@@ -341,13 +361,31 @@ export function useAGDelais({
     }, [dateAGParsed, now]);
 
     // Actions
-    const marquerJalonComplete = useCallback((jalonType: JalonAG['type']) => {
+    const marquerJalonComplete = useCallback(async (jalonType: JalonAG['type']) => {
+        // Mettre à jour l'état local immédiatement pour UX réactive
         setJalonsCompletes(prev => {
             const newSet = new Set(prev);
             newSet.add(jalonType);
             return newSet;
         });
-    }, []);
+
+        // Sauvegarder dans Supabase si c'est une AG valide
+        if (agId && isValidUUID(agId)) {
+            try {
+                const supabase = createUntypedClient();
+                const { error } = await supabase.rpc('save_ag_milestone', {
+                    p_ag_id: agId,
+                    p_milestone_type: jalonType,
+                });
+
+                if (error) {
+                    console.error('[useAGDelais] Error saving milestone:', error);
+                }
+            } catch (error) {
+                console.error('[useAGDelais] Error saving milestone:', error);
+            }
+        }
+    }, [agId, isValidUUID]);
 
     const dismissAlerte = useCallback((alerteId: string) => {
         setAlertesDismissed(prev => {

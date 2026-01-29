@@ -1,12 +1,17 @@
 /**
  * Hook de gestion du workflow AG
  *
+ * ARCHITECTURE PRODUCTION:
+ * - Source unique de vérité : Supabase (via useAgWizardState)
+ * - AUCUN localStorage pour les données métier
+ * - Persistance automatique de l'état du wizard
+ *
  * Gère le mode (Guidé/Expert), la navigation, et le suivi de progression
  */
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
     AG_WORKFLOW_STEPS,
     EXPERT_GROUPS,
@@ -17,16 +22,12 @@ import {
     type ExpertGroupId,
     getStepById,
     getStepByNumber,
-    canAccessStep,
-    hasStepData,
     getNextAvailableStep,
     getPreviousStep,
     calculateProgressPercentage,
     calculateRemainingTime,
 } from '@/lib/constants/ag-workflow';
-
-// Clé localStorage pour la préférence de mode
-const WORKFLOW_MODE_KEY = 'ag-workflow-mode-preference';
+import { useAgWizardState } from './useAgWizardState';
 
 export interface StepWithStatus extends WorkflowStep {
     status: StepStatus;
@@ -61,15 +62,16 @@ export interface UseAGWorkflowReturn {
     lastSavedAt: string | null;
     completedSteps: string[];
     skippedSteps: string[];
+    isLoading: boolean;
 
     // Actions
-    setMode: (mode: WorkflowMode) => void;
+    setMode: (mode: WorkflowMode) => Promise<void>;
     goToStep: (stepId: string) => boolean;
     nextStep: () => void;
     prevStep: () => void;
-    completeStep: (stepId: string) => void;
-    skipStep: (stepId: string) => boolean;
-    resetWorkflow: () => void;
+    completeStep: (stepId: string) => Promise<void>;
+    skipStep: (stepId: string) => Promise<boolean>;
+    resetWorkflow: () => Promise<void>;
 
     // Utilitaires
     canNavigateTo: (stepId: string) => boolean;
@@ -77,108 +79,105 @@ export interface UseAGWorkflowReturn {
     getStepStatus: (stepId: string) => StepStatus;
 }
 
+// Mapping numéro d'étape -> ID d'étape
+const STEP_NUMBER_TO_ID: Record<number, string> = {
+    1: 'planification',
+    2: 'ordre_du_jour',
+    3: 'convocation',
+    4: 'envoi',
+    5: 'votes_correspondance',
+    6: 'session_ag',
+    7: 'proces_verbal',
+};
+
+const STEP_ID_TO_NUMBER: Record<string, number> = {
+    'planification': 1,
+    'ordre_du_jour': 2,
+    'convocation': 3,
+    'envoi': 4,
+    'votes_correspondance': 5,
+    'session_ag': 6,
+    'proces_verbal': 7,
+};
+
 /**
  * Hook pour gérer le workflow AG
+ * Source de vérité : Supabase uniquement
  *
- * @param agId - ID de l'AG (optionnel, pour la persistance)
- * @param initialStepNumber - Numéro d'étape initial (1-7)
+ * @param agId - ID de l'AG (obligatoire pour la persistance)
+ * @param initialStepNumber - Numéro d'étape initial (1-7), ignoré si agId fourni (on utilise current_step de la DB)
  */
 export function useAGWorkflow(
     agId?: string,
     initialStepNumber: number = 1
 ): UseAGWorkflowReturn {
-    // Mode de workflow (guidé ou expert)
-    const [mode, setModeState] = useState<WorkflowMode>('guided');
+    // Hook central pour l'état du wizard (Supabase)
+    const wizard = useAgWizardState(agId || null);
 
-    // Étape courante (par ID)
-    const [currentStepId, setCurrentStepId] = useState<string>(() => {
-        const step = getStepByNumber(initialStepNumber);
-        return step?.id || 'planification';
-    });
-
-    // Étapes complétées
-    const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-
-    // Étapes ignorées (optionnelles)
-    const [skippedSteps, setSkippedSteps] = useState<string[]>([]);
-
-    // Timestamp de dernière sauvegarde
-    const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
-
-    // Charger la préférence de mode depuis localStorage
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedMode = localStorage.getItem(WORKFLOW_MODE_KEY);
-            if (savedMode === 'guided' || savedMode === 'expert') {
-                setModeState(savedMode);
-            }
+    // Déterminer l'étape courante (depuis Supabase ou initialStepNumber)
+    const currentStepNumber = useMemo(() => {
+        if (agId && wizard.state) {
+            return wizard.currentStep;
         }
-    }, []);
+        return initialStepNumber;
+    }, [agId, wizard.state, wizard.currentStep, initialStepNumber]);
 
-    // Charger l'état du workflow depuis localStorage si agId fourni
-    useEffect(() => {
-        if (!agId || typeof window === 'undefined') return;
+    // ID de l'étape courante
+    const currentStepId = useMemo(() => {
+        return STEP_NUMBER_TO_ID[currentStepNumber] || 'planification';
+    }, [currentStepNumber]);
 
-        const savedState = localStorage.getItem(`ag-workflow-state-${agId}`);
-        if (savedState) {
-            try {
-                const parsed = JSON.parse(savedState);
-                if (Array.isArray(parsed.completedSteps)) {
-                    setCompletedSteps(parsed.completedSteps);
-                }
-                if (Array.isArray(parsed.skippedSteps)) {
-                    setSkippedSteps(parsed.skippedSteps);
-                }
-                if (parsed.lastSavedAt) {
-                    setLastSavedAt(parsed.lastSavedAt);
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement de l\'état du workflow:', error);
-            }
-        }
-    }, [agId]);
+    // Extraire les étapes complétées depuis step_data
+    const completedSteps = useMemo((): string[] => {
+        if (!wizard.stepData) return [];
+        return Object.entries(wizard.stepData)
+            .filter(([, info]) => info.status === 'completed')
+            .map(([stepNum]) => STEP_NUMBER_TO_ID[parseInt(stepNum)])
+            .filter(Boolean);
+    }, [wizard.stepData]);
 
-    // Sauvegarder l'état du workflow dans localStorage
-    useEffect(() => {
-        if (!agId || typeof window === 'undefined') return;
-        if (completedSteps.length === 0 && skippedSteps.length === 0) return;
-
-        const state = {
-            completedSteps,
-            skippedSteps,
-            lastSavedAt: new Date().toISOString(),
-        };
-
-        localStorage.setItem(`ag-workflow-state-${agId}`, JSON.stringify(state));
-        setLastSavedAt(state.lastSavedAt);
-    }, [agId, completedSteps, skippedSteps]);
-
-    // Mettre à jour currentStepId quand initialStepNumber change
-    useEffect(() => {
-        const step = getStepByNumber(initialStepNumber);
-        if (step) {
-            setCurrentStepId(step.id);
-        }
-    }, [initialStepNumber]);
+    // Extraire les étapes ignorées depuis step_data
+    const skippedSteps = useMemo((): string[] => {
+        if (!wizard.stepData) return [];
+        return Object.entries(wizard.stepData)
+            .filter(([, info]) => info.status === 'skipped')
+            .map(([stepNum]) => STEP_NUMBER_TO_ID[parseInt(stepNum)])
+            .filter(Boolean);
+    }, [wizard.stepData]);
 
     // Calculer le statut de chaque étape
     const getStepStatus = useCallback((stepId: string): StepStatus => {
-        if (completedSteps.includes(stepId)) {
-            return 'completed';
+        const stepNumber = STEP_ID_TO_NUMBER[stepId];
+        if (!stepNumber) return 'locked';
+
+        // Vérifier dans step_data
+        const stepInfo = wizard.stepData[stepNumber.toString()];
+        if (stepInfo?.status === 'completed') return 'completed';
+        if (stepInfo?.status === 'skipped') return 'skipped';
+
+        // Étape courante = in_progress
+        if (stepId === currentStepId) return 'in_progress';
+
+        // Vérifier l'accessibilité basée sur les données
+        if (!wizard.state) return stepNumber === 1 ? 'available' : 'locked';
+
+        const stats = wizard.stats;
+        if (!stats) return stepNumber === 1 ? 'available' : 'locked';
+
+        // Logique d'accessibilité basée sur les données existantes
+        switch (stepNumber) {
+            case 1: return 'available';
+            case 2: return 'available'; // Toujours accessible après étape 1
+            case 3: return stats.resolutions_count > 0 ? 'available' : 'locked';
+            case 4: return stats.resolutions_count > 0 ? 'available' : 'locked';
+            case 5: return stats.resolutions_count > 0 ? 'available' : 'locked';
+            case 6: return stats.resolutions_count > 0 ? 'available' : 'locked';
+            case 7:
+                const step6Info = wizard.stepData['6'];
+                return step6Info?.status === 'completed' ? 'available' : 'locked';
+            default: return 'locked';
         }
-        if (skippedSteps.includes(stepId)) {
-            return 'skipped';
-        }
-        // Permettre l'accès si l'étape a des données sauvegardées (navigation libre)
-        const hasData = agId && typeof window !== 'undefined' && hasStepData(stepId, agId);
-        if (!hasData && !canAccessStep(stepId, completedSteps)) {
-            return 'locked';
-        }
-        if (stepId === currentStepId) {
-            return 'in_progress';
-        }
-        return 'available';
-    }, [completedSteps, skippedSteps, currentStepId, agId]);
+    }, [wizard.stepData, wizard.state, wizard.stats, currentStepId]);
 
     // Liste des étapes avec leur statut
     const steps = useMemo((): StepWithStatus[] => {
@@ -251,92 +250,90 @@ export function useAGWorkflow(
 
     // Vérifier si une étape est accessible
     const isStepAccessible = useCallback((stepId: string): boolean => {
-        return canAccessStep(stepId, completedSteps);
-    }, [completedSteps]);
+        const status = getStepStatus(stepId);
+        return status !== 'locked';
+    }, [getStepStatus]);
 
-    // Changer de mode
-    const setMode = useCallback((newMode: WorkflowMode) => {
-        setModeState(newMode);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem(WORKFLOW_MODE_KEY, newMode);
+    // Changer de mode (persiste dans Supabase)
+    const setMode = useCallback(async (newMode: WorkflowMode) => {
+        if (agId) {
+            await wizard.setWizardMode(newMode);
         }
-    }, []);
+    }, [agId, wizard]);
 
-    // Naviguer vers une étape
+    // Naviguer vers une étape (persiste dans Supabase)
     const goToStep = useCallback((stepId: string): boolean => {
         if (!canNavigateTo(stepId)) {
             return false;
         }
-        setCurrentStepId(stepId);
+
+        const stepNumber = STEP_ID_TO_NUMBER[stepId];
+        if (stepNumber && agId) {
+            wizard.goToStep(stepNumber);
+        }
+
         return true;
-    }, [canNavigateTo]);
+    }, [canNavigateTo, agId, wizard]);
 
     // Aller à l'étape suivante
     const nextStep = useCallback(() => {
         const next = getNextAvailableStep(currentStepId, completedSteps);
         if (next) {
-            setCurrentStepId(next.id);
+            goToStep(next.id);
         }
-    }, [currentStepId, completedSteps]);
+    }, [currentStepId, completedSteps, goToStep]);
 
     // Aller à l'étape précédente
     const prevStep = useCallback(() => {
         const prev = getPreviousStep(currentStepId);
         if (prev) {
-            setCurrentStepId(prev.id);
+            goToStep(prev.id);
         }
-    }, [currentStepId]);
+    }, [currentStepId, goToStep]);
 
-    // Marquer une étape comme complétée
-    const completeStep = useCallback((stepId: string) => {
-        setCompletedSteps(prev => {
-            if (prev.includes(stepId)) return prev;
-            return [...prev, stepId];
-        });
+    // Marquer une étape comme complétée (persiste dans Supabase)
+    const completeStep = useCallback(async (stepId: string) => {
+        const stepNumber = STEP_ID_TO_NUMBER[stepId];
+        if (stepNumber && agId) {
+            await wizard.completeStep(stepNumber);
+        }
+    }, [agId, wizard]);
 
-        // Retirer des étapes ignorées si présent
-        setSkippedSteps(prev => prev.filter(id => id !== stepId));
-    }, []);
-
-    // Ignorer une étape optionnelle
-    const skipStep = useCallback((stepId: string): boolean => {
+    // Ignorer une étape optionnelle (persiste dans Supabase)
+    const skipStep = useCallback(async (stepId: string): Promise<boolean> => {
         const step = getStepById(stepId);
         if (!step || step.obligatoire) {
             return false;
         }
 
-        setSkippedSteps(prev => {
-            if (prev.includes(stepId)) return prev;
-            return [...prev, stepId];
-        });
+        const stepNumber = STEP_ID_TO_NUMBER[stepId];
+        if (stepNumber && agId) {
+            await wizard.skipStep(stepNumber);
+        }
 
-        // Aller à l'étape suivante
-        nextStep();
         return true;
-    }, [nextStep]);
+    }, [agId, wizard]);
 
     // Réinitialiser le workflow
-    const resetWorkflow = useCallback(() => {
-        setCompletedSteps([]);
-        setSkippedSteps([]);
-        setCurrentStepId('planification');
-
-        if (agId && typeof window !== 'undefined') {
-            localStorage.removeItem(`ag-workflow-state-${agId}`);
+    const resetWorkflow = useCallback(async () => {
+        if (agId) {
+            // Reset dans Supabase en mettant step_data à vide et current_step à 1
+            await wizard.goToStep(1);
         }
-    }, [agId]);
+    }, [agId, wizard]);
 
     return {
         // État
-        mode,
+        mode: wizard.wizardMode,
         currentStepId,
         currentStep,
         steps,
         expertGroups,
         progress,
-        lastSavedAt,
+        lastSavedAt: wizard.state?.updated_at || null,
         completedSteps,
         skippedSteps,
+        isLoading: wizard.isLoading,
 
         // Actions
         setMode,

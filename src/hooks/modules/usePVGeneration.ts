@@ -20,6 +20,7 @@ import {
     type PVJobStatus,
     type PVDocumentStatus,
 } from '@/lib/services/pv-generation.service';
+import { useCopro } from '@/providers/CoproContext';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
@@ -27,6 +28,8 @@ import {
 
 export interface UsePVGenerationOptions {
     agId: string;
+    /** ID de la copropriété (optionnel, utilise le contexte si non fourni) */
+    coproId?: string;
     /** Intervalle de polling en ms (défaut: 1000) */
     pollingInterval?: number;
     /** Activer le polling automatique (défaut: true) */
@@ -66,9 +69,13 @@ export interface UsePVGenerationReturn {
 
 export function usePVGeneration({
     agId,
+    coproId: coproIdProp,
     pollingInterval = 1000,
     autoPolling = true,
 }: UsePVGenerationOptions): UsePVGenerationReturn {
+    const { currentCoproId } = useCopro();
+    const coproId = coproIdProp || currentCoproId || '';
+
     const [job, setJob] = useState<PVJob | null>(null);
     const [document, setDocument] = useState<PVDocument | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -87,23 +94,28 @@ export function usePVGeneration({
 
     // Charger le job et document existants au montage
     useEffect(() => {
-        const existingJob = pvGenerationService.getLatestJobForAG(agId);
-        const existingDoc = pvGenerationService.getDocumentForAG(agId);
+        const loadInitialState = async () => {
+            const existingJob = pvGenerationService.getLatestJobForAG(agId);
+            const existingDoc = coproId
+                ? await pvGenerationService.getDocumentForAG(agId, coproId)
+                : null;
 
-        if (existingJob) {
-            setJob(existingJob);
-            if (existingJob.error) {
-                setError(existingJob.error);
+            if (existingJob) {
+                setJob(existingJob);
+                if (existingJob.error) {
+                    setError(existingJob.error);
+                }
             }
-        }
 
-        if (existingDoc) {
-            setDocument(existingDoc);
-        }
-    }, [agId]);
+            if (existingDoc) {
+                setDocument(existingDoc);
+            }
+        };
+        loadInitialState();
+    }, [agId, coproId]);
 
     // Fonction de polling
-    const pollJobStatus = useCallback(() => {
+    const pollJobStatus = useCallback(async () => {
         if (!job?.id) return;
 
         const updatedJob = pvGenerationService.getJob(job.id);
@@ -111,7 +123,7 @@ export function usePVGeneration({
             setJob(updatedJob);
 
             if (updatedJob.status === 'succeeded' && updatedJob.pvDocumentId) {
-                const doc = pvGenerationService.getDocument(updatedJob.pvDocumentId);
+                const doc = await pvGenerationService.getDocument(updatedJob.pvDocumentId);
                 if (doc) {
                     setDocument(doc);
                 }
@@ -171,7 +183,7 @@ export function usePVGeneration({
 
             // Si le job est déjà terminé (document existant), charger le document
             if (newJob.status === 'succeeded' && newJob.pvDocumentId) {
-                const doc = pvGenerationService.getDocument(newJob.pvDocumentId);
+                const doc = await pvGenerationService.getDocument(newJob.pvDocumentId);
                 if (doc) {
                     setDocument(doc);
                 }
@@ -216,7 +228,7 @@ export function usePVGeneration({
             const gedId = await pvGenerationService.archiveToGED(document.id);
 
             // Recharger le document mis à jour
-            const updatedDoc = pvGenerationService.getDocument(document.id);
+            const updatedDoc = await pvGenerationService.getDocument(document.id);
             if (updatedDoc) {
                 setDocument(updatedDoc);
             }
@@ -239,7 +251,7 @@ export function usePVGeneration({
             const result = await pvGenerationService.sendToCoproprietaires(document.id, recipientIds);
 
             // Recharger le document mis à jour
-            const updatedDoc = pvGenerationService.getDocument(document.id);
+            const updatedDoc = await pvGenerationService.getDocument(document.id);
             if (updatedDoc) {
                 setDocument(updatedDoc);
             }

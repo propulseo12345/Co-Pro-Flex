@@ -4,13 +4,14 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MajorityType, TypeAG, ResolutionTemplate } from '@/lib/constants/resolutions';
 import { getResolutionById, generateEcheancesDates, getResolutionsObligatoires } from '@/lib/constants/resolutions';
-import { ajouterResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
+import { genererResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
 import { extractVariableNames, formatDateFR, formatMontant } from '@/lib/utils/resolution-variables';
 import { MOCK_CONTRAT_SYNDIC, MOCK_PARAMETRES } from '@/data/mock';
 import type { Resolution } from '@/components/features/ag';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgDetail, useAddResolution, useDeleteResolution, useReorderResolutions, useEligibleVoters } from '@/hooks/modules/useAgData';
 import type { AgResolutionResult, MajorityType as DbMajorityType } from '@/lib/ag/types';
+import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 
 interface AGFormData {
   type: 'ORDINAIRE' | 'EXTRAORDINAIRE';
@@ -98,20 +99,25 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const [useSupabase, setUseSupabase] = useState(false);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
-  // Check if AG exists in Supabase
-  useEffect(() => {
-    if (meeting && meeting.id === agId) {
-      setUseSupabase(true);
-    }
-  }, [meeting, agId]);
+  // Check if AG exists in Supabase (UUID = Supabase AG)
+  const isSupabaseAg = useMemo(() => {
+    return isValidUUID(agId) && meeting && meeting.id === agId;
+  }, [agId, meeting]);
 
-  // Load AG form data from localStorage (for draft or as fallback)
   useEffect(() => {
-    const savedAgData = localStorage.getItem(`ag-draft-${agId}`);
-    if (savedAgData) {
-      try { setAgFormData(JSON.parse(savedAgData) as AGFormData); } catch { /* ignore */ }
-    } else if (meeting) {
-      // Convert from Supabase meeting to AGFormData
+    if (isSupabaseAg) {
+      setUseSupabase(true);
+      // Écrire un marqueur localStorage pour le workflow
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`ag-supabase-${agId}`, 'true');
+      }
+    }
+  }, [isSupabaseAg, agId]);
+
+  // Load AG form data - prioritize Supabase meeting data over localStorage
+  useEffect(() => {
+    // If we have a Supabase meeting, use it as source of truth
+    if (meeting && meeting.id === agId) {
       setAgFormData({
         type: meeting.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE',
         date: meeting.meeting_date?.split('T')[0] || '',
@@ -123,16 +129,48 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         budgetExercice: (new Date().getFullYear() + 1).toString(),
         budgetPostes: [],
       });
+    } else {
+      // Fallback to loadDraft (localStorage) for non-Supabase AGs
+      const loadFallback = async () => {
+        const { data: savedAgData } = await loadDraft<AGFormData>(agId, 'session', `ag-draft-${agId}`);
+        if (savedAgData) {
+          setAgFormData(savedAgData);
+        }
+      };
+      loadFallback();
     }
 
-    const savedRoles = localStorage.getItem(`roles-ag-${agId}`);
-    if (savedRoles) {
-      try { setRoles(JSON.parse(savedRoles)); } catch { /* ignore */ }
-    }
-    const savedPresences = localStorage.getItem(`ag-presences-${agId}`);
-    if (savedPresences) {
-      try { setPresences(JSON.parse(savedPresences)); } catch { /* ignore */ }
-    }
+    // Load roles from Supabase draft or localStorage
+    const loadRolesAndPresences = async () => {
+      if (isValidUUID(agId)) {
+        // Try Supabase first
+        const rolesResult = await loadDraft<RolesAG>(agId, 'roles', `roles-ag-${agId}`);
+        if (rolesResult.data) {
+          setRoles(rolesResult.data);
+        }
+
+        const presencesResult = await loadDraft<Record<string, 'PRESENT' | 'REPRESENTE' | 'ABSENT' | 'VOTE_CORRESPONDANCE'>>(
+          agId, 'attendance', `ag-presences-${agId}`
+        );
+        if (presencesResult.data) {
+          setPresences(presencesResult.data);
+        }
+      } else {
+        // Non-UUID AG, use loadDraft (localStorage fallback)
+        const { data: savedRoles } = await loadDraft<RolesAG>(agId, 'roles', `roles-ag-${agId}`);
+        if (savedRoles) {
+          setRoles(savedRoles);
+        }
+        const { data: savedPresences } = await loadDraft<Record<string, 'PRESENT' | 'REPRESENTE' | 'ABSENT' | 'VOTE_CORRESPONDANCE'>>(
+          agId, 'attendance', `ag-presences-${agId}`
+        );
+        if (savedPresences) {
+          setPresences(savedPresences);
+        }
+      }
+    };
+
+    loadRolesAndPresences();
   }, [agId, meeting]);
 
   const getGlobalSuggestions = useCallback((variableNames: string[]): Record<string, string> => {
@@ -211,40 +249,40 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       return;
     }
 
-    // Otherwise, use localStorage
+    // Otherwise, use loadDraft (localStorage fallback)
     if (!useSupabase || (dbLoading === false && dbResolutions.length === 0)) {
-      const loadResolutions = () => {
+      const loadResolutions = async () => {
         try {
-          const savedResolutions = localStorage.getItem(`ag-resolutions-${agId}`);
-          if (savedResolutions) {
-            const loaded = JSON.parse(savedResolutions);
-            if (Array.isArray(loaded) && loaded.length > 0) {
-              setResolutions(loaded);
-              const wasJustCreated = sessionStorage.getItem(`ag-resolutions-created-${agId}`);
-              if (wasJustCreated) {
-                setSuccessMessageCount(loaded.length);
-                setShowSuccessMessage(true);
-                sessionStorage.removeItem(`ag-resolutions-created-${agId}`);
-                setTimeout(() => setShowSuccessMessage(false), 5000);
-              }
-              setIsLoading(false);
-              return;
+          const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', `ag-resolutions-${agId}`);
+          if (savedResolutions && Array.isArray(savedResolutions) && savedResolutions.length > 0) {
+            setResolutions(savedResolutions);
+            const { data: wasJustCreated } = await loadDraft<{ resolutionsCreated: boolean }>(agId, 'milestones', `ag-resolutions-created-${agId}`);
+            if (wasJustCreated?.resolutionsCreated) {
+              setSuccessMessageCount(savedResolutions.length);
+              setShowSuccessMessage(true);
+              // Clear the milestone
+              await saveDraft(agId, 'milestones', { resolutionsCreated: false }, `ag-resolutions-created-${agId}`);
+              setTimeout(() => setShowSuccessMessage(false), 5000);
             }
+            setIsLoading(false);
+            return;
           }
           let agType = agFormData?.type;
           if (!agType) {
-            const savedAgData = localStorage.getItem(`ag-draft-${agId}`);
+            const { data: savedAgData } = await loadDraft<AGFormData>(agId, 'session', `ag-draft-${agId}`);
             if (savedAgData) {
-              try { agType = JSON.parse(savedAgData).type; } catch { /* ignore */ }
+              agType = savedAgData.type;
             }
           }
           if (agType === 'ORDINAIRE') {
-            const generated = ajouterResolutionsAGOrdinaire(agId);
+            const generated = genererResolutionsAGOrdinaire();
             if (generated && generated.length > 0) {
+              // Sauvegarder dans Supabase (pas localStorage)
+              await saveDraft(agId, 'resolutions', generated, `ag-resolutions-${agId}`);
               setResolutions(generated);
               setSuccessMessageCount(generated.length);
               setShowSuccessMessage(true);
-              sessionStorage.setItem(`ag-resolutions-created-${agId}`, 'true');
+              await saveDraft(agId, 'milestones', { resolutionsCreated: true }, `ag-resolutions-created-${agId}`);
               setTimeout(() => setShowSuccessMessage(false), 5000);
             }
           }
@@ -261,10 +299,19 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     }
   }, [roles, agFormData, prefillResolutionVariables, resolutions]);
 
-  // Save resolutions to localStorage (as backup / for draft AGs)
+  // Save resolutions via saveDraft as backup (for non-Supabase AGs or offline fallback)
+  // Note: For Supabase AGs, resolutions are primarily saved via addResolutionMutation
   useEffect(() => {
-    if (resolutions.length > 0) localStorage.setItem(`ag-resolutions-${agId}`, JSON.stringify(resolutions));
-  }, [resolutions, agId]);
+    if (resolutions.length > 0) {
+      if (!useSupabase) {
+        saveDraft(agId, 'resolutions', resolutions, `ag-resolutions-${agId}`);
+      }
+      // Écrire le compte de résolutions pour le workflow (même pour Supabase)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`ag-supabase-resolutions-count-${agId}`, String(resolutions.length));
+      }
+    }
+  }, [resolutions, agId, useSupabase]);
 
   const handleAddFromBank = useCallback(async (template: ResolutionTemplate) => {
     const variableNames = extractVariableNames(template.texte);

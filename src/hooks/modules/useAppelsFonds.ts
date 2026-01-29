@@ -17,37 +17,148 @@ import type {
   RelanceAppel
 } from '@/components/features/finance/AppelsFonds/types';
 import type { NouveauPaiement, PaiementHistorique } from '@/components/features/finance/AppelsFonds/modals';
-import { MOCK_APPELS, MOCK_COPROPRIETAIRES_APPEL } from '@/components/features/finance/AppelsFonds/mock-data';
 import {
   getDefaultNewAppelForm,
   calculerToutesAlertes,
   calculerStatsAlertes,
   genererDatesSuggerees
 } from '@/components/features/finance/AppelsFonds/utils';
+import {
+  useCalls,
+  useCallLines,
+  useCreateCall,
+  useRecordPayment,
+  useOpenPeriod,
+  useRepartitionKeys,
+} from '@/hooks/modules/useFinanceData';
+import type { CallForFundsOverview, CallLineDetailed } from '@/lib/finance/api';
 
-// Mock historique des paiements
-const MOCK_PAIEMENTS_HISTORIQUE: Record<string, PaiementHistorique[]> = {
-  '1': [
-    { id: 'p1', montant: 1562.50, datePaiement: '2025-01-10', modePaiement: 'VIREMENT', reference: 'VIR-2025-001' }
-  ],
-  '2': [
-    { id: 'p2', montant: 500, datePaiement: '2025-01-08', modePaiement: 'CHEQUE', reference: 'CHQ-12345' },
-    { id: 'p3', montant: 300, datePaiement: '2025-01-12', modePaiement: 'VIREMENT', reference: 'VIR-2025-002' }
-  ],
-  '4': [
-    { id: 'p4', montant: 1562.50, datePaiement: '2025-01-08', modePaiement: 'CHEQUE', reference: 'CHQ-67890' }
-  ],
-  '6': [
-    { id: 'p5', montant: 1875.00, datePaiement: '2025-01-11', modePaiement: 'PRELEVEMENT' }
-  ]
-};
+// ============================================================================
+// MAPPERS: Supabase → UI Types
+// ============================================================================
+
+function mapCallStatusToUI(status: CallForFundsOverview['status']): StatutAppel {
+  switch (status) {
+    case 'draft':
+      return 'A_GENERER';
+    case 'issued':
+      return 'ENVOYE';
+    case 'partially_paid':
+      return 'ENVOYE'; // Keep as ENVOYE, payment status shown elsewhere
+    case 'paid':
+      return 'SOLDE';
+    case 'cancelled':
+      return 'ANNULE';
+    default:
+      return 'A_GENERER';
+  }
+}
+
+function mapCallToAppelFonds(call: CallForFundsOverview): AppelFonds {
+  // Extract year from period or issue_date
+  const year = new Date(call.issue_date).getFullYear();
+  const trimesterLabel = call.trimester ? `T${call.trimester} ${year}` : '';
+
+  return {
+    id: call.id,
+    dateExigibilite: call.due_date,
+    dateEmission: call.issue_date,
+    dateLimiteReglement: call.due_date,
+    statut: mapCallStatusToUI(call.status),
+    montantTotal: Number(call.total_amount),
+    montantEncaisse: Number(call.total_paid),
+    description: call.label,
+    periode: trimesterLabel || call.label,
+    type: call.budget_id ? 'travaux' : 'fonctionnement',
+    budgetTravauxId: call.budget_id || undefined,
+    cleRepartitionId: call.repartition_key_id,
+    historiqueRelances: [], // TODO: Load from separate table if needed
+  };
+}
+
+function mapLineStatusToPayment(status: CallLineDetailed['status']): StatutPaiement {
+  switch (status) {
+    case 'paid':
+      return 'PAYE';
+    case 'partial':
+      return 'PARTIELLEMENT_PAYE';
+    case 'unpaid':
+    default:
+      return 'NON_PAYE';
+  }
+}
+
+function mapCallLineToCoprprietaire(line: CallLineDetailed, callStatus: string): CoproprietaireAppel {
+  const isIssued = callStatus !== 'draft';
+
+  return {
+    id: line.id, // Use line ID for unique identification
+    nom: line.owner_name || 'Propriétaire inconnu',
+    lot: line.lot_ref,
+    tantiemes: 0, // Tantièmes would need separate lookup from repartition_key_lines
+    montantIndividuel: Number(line.amount_due),
+    modeEnvoiRecommande: 'email', // Default mode
+    envoye: isIssued,
+    paiement: {
+      montantDu: Number(line.amount_due),
+      montantPaye: Number(line.amount_paid),
+      statutPaiement: mapLineStatusToPayment(line.status),
+    },
+  };
+}
 
 export function useAppelsFonds() {
-  // État principal
-  const [appels, setAppels] = useState<AppelFonds[]>(MOCK_APPELS);
-  const [selectedAppel, setSelectedAppel] = useState<AppelFonds | null>(null);
-  const [coproprietaires, setCoproprietaires] = useState<CoproprietaireAppel[]>(MOCK_COPROPRIETAIRES_APPEL);
+  // ============================================================================
+  // Supabase Data Hooks
+  // ============================================================================
+  const { data: callsData, isLoading: isLoadingCalls, refresh: refreshCalls } = useCalls();
+  const { data: openPeriod } = useOpenPeriod();
+  const { data: repartitionKeys } = useRepartitionKeys();
+  const createCallMutation = useCreateCall();
+  const recordPaymentMutation = useRecordPayment();
+
+  // ============================================================================
+  // État principal - Now derived from Supabase data
+  // ============================================================================
+  const [selectedAppelId, setSelectedAppelId] = useState<string | null>(null);
   const [sendingInProgress, setSendingInProgress] = useState(false);
+
+  // Load call lines when an appel is selected
+  const { data: callLinesData, isLoading: isLoadingLines, refresh: refreshLines } = useCallLines(selectedAppelId);
+
+  // Map Supabase data to UI types
+  const appels = useMemo<AppelFonds[]>(() => {
+    if (!callsData) return [];
+    return callsData.map(mapCallToAppelFonds);
+  }, [callsData]);
+
+  // Find selected appel from mapped data
+  const selectedAppel = useMemo<AppelFonds | null>(() => {
+    if (!selectedAppelId) return null;
+    return appels.find(a => a.id === selectedAppelId) || null;
+  }, [appels, selectedAppelId]);
+
+  // Map call lines to coproprietaires (base data from Supabase)
+  const baseCoproprietaires = useMemo<CoproprietaireAppel[]>(() => {
+    if (!callLinesData || !selectedAppel) return [];
+    const callData = callsData?.find(c => c.id === selectedAppelId);
+    const callStatus = callData?.status || 'draft';
+    return callLinesData.map(line => mapCallLineToCoprprietaire(line, callStatus));
+  }, [callLinesData, selectedAppel, callsData, selectedAppelId]);
+
+  // Local UI modifications (modeEnvoiValide, envoye) - keyed by coproprietaire ID
+  const [localModifications, setLocalModifications] = useState<Record<string, Partial<CoproprietaireAppel>>>({});
+
+  // Merge base data with local modifications
+  const coproprietaires = useMemo<CoproprietaireAppel[]>(() => {
+    return baseCoproprietaires.map(copro => ({
+      ...copro,
+      ...localModifications[copro.id],
+    }));
+  }, [baseCoproprietaires, localModifications]);
+
+  // Paiements historique - stored locally for now (could be loaded from Supabase payments)
+  const [paiementsHistorique, setPaiementsHistorique] = useState<Record<string, PaiementHistorique[]>>({});
 
   // Filtres principaux
   const [searchTerm, setSearchTerm] = useState('');
@@ -65,9 +176,6 @@ export function useAppelsFonds() {
   const [showRelancesModal, setShowRelancesModal] = useState(false);
   const [showExportAvisModal, setShowExportAvisModal] = useState(false);
   const [selectedCoproprietaire, setSelectedCoproprietaire] = useState<CoproprietaireAppel | null>(null);
-
-  // Historique des paiements (mock)
-  const [paiementsHistorique, setPaiementsHistorique] = useState<Record<string, PaiementHistorique[]>>(MOCK_PAIEMENTS_HISTORIQUE);
 
   // Filtres modal gestion
   const [searchCopro, setSearchCopro] = useState('');
@@ -129,21 +237,22 @@ export function useAppelsFonds() {
 
   // Handlers
   const handleGestionClick = useCallback((appel: AppelFonds) => {
-    setSelectedAppel(appel);
-    setCoproprietaires(MOCK_COPROPRIETAIRES_APPEL.map(c => ({ ...c, envoye: false })));
+    setSelectedAppelId(appel.id);
+    // Call lines will be loaded automatically via useCallLines hook
     setShowGestionModal(true);
   }, []);
 
   const handleMontantClick = useCallback((appel: AppelFonds) => {
-    setSelectedAppel(appel);
-    setCoproprietaires(MOCK_COPROPRIETAIRES_APPEL);
+    setSelectedAppelId(appel.id);
+    // Call lines will be loaded automatically via useCallLines hook
     setShowMontantModal(true);
   }, []);
 
   const handleModeEnvoiChange = useCallback((coproId: string, mode: ModeEnvoi) => {
-    setCoproprietaires(prev =>
-      prev.map(c => c.id === coproId ? { ...c, modeEnvoiValide: mode } : c)
-    );
+    setLocalModifications(prev => ({
+      ...prev,
+      [coproId]: { ...prev[coproId], modeEnvoiValide: mode },
+    }));
   }, []);
 
   const handleEnvoyerAppel = useCallback(async (coproId: string) => {
@@ -152,10 +261,12 @@ export function useAppelsFonds() {
 
     setSendingInProgress(true);
 
+    // TODO: Implement actual sending via Supabase Edge Function
     setTimeout(() => {
-      setCoproprietaires(prev =>
-        prev.map(c => c.id === coproId ? { ...c, envoye: true } : c)
-      );
+      setLocalModifications(prev => ({
+        ...prev,
+        [coproId]: { ...prev[coproId], envoye: true },
+      }));
       setSendingInProgress(false);
     }, 1500);
   }, [coproprietaires]);
@@ -163,27 +274,32 @@ export function useAppelsFonds() {
   const handleEnvoyerTous = useCallback(async () => {
     setSendingInProgress(true);
 
-    setTimeout(() => {
-      setCoproprietaires(prev =>
-        prev.map(c => ({ ...c, envoye: true, modeEnvoiValide: c.modeEnvoiValide || c.modeEnvoiRecommande }))
-      );
+    // TODO: Implement actual sending via Supabase Edge Function
+    setTimeout(async () => {
+      // Mark all as sent with their validated or recommended mode
+      const newMods: Record<string, Partial<CoproprietaireAppel>> = {};
+      coproprietaires.forEach(c => {
+        newMods[c.id] = {
+          ...localModifications[c.id],
+          envoye: true,
+          modeEnvoiValide: c.modeEnvoiValide || c.modeEnvoiRecommande,
+        };
+      });
+      setLocalModifications(newMods);
       setSendingInProgress(false);
 
-      if (selectedAppel) {
-        setAppels(prev =>
-          prev.map(a => a.id === selectedAppel.id ? { ...a, statut: 'ENVOYE' as StatutAppel } : a)
-        );
-      }
+      // Refresh data from Supabase after status change
+      await refreshCalls();
     }, 2000);
-  }, [selectedAppel]);
+  }, [coproprietaires, localModifications, refreshCalls]);
 
   const handleViewAppel = useCallback((appel: AppelFonds) => {
-    setSelectedAppel(appel);
+    setSelectedAppelId(appel.id);
     setShowDetailModal(true);
   }, []);
 
   const handleEditAppel = useCallback((appel: AppelFonds) => {
-    setSelectedAppel(appel);
+    setSelectedAppelId(appel.id);
     setNewAppelForm({
       description: appel.description,
       periode: appel.periode,
@@ -199,13 +315,15 @@ export function useAppelsFonds() {
     setShowEditModal(true);
   }, []);
 
-  const handleDeleteAppel = useCallback((appel: AppelFonds) => {
+  const handleDeleteAppel = useCallback(async (appel: AppelFonds) => {
     if (confirm(`Êtes-vous sûr de vouloir supprimer l'appel de fonds "${appel.description}" ?`)) {
-      setAppels(prev => prev.filter(a => a.id !== appel.id));
+      // TODO: Implement delete via Supabase
+      // For now, just refresh to reflect any backend changes
+      await refreshCalls();
     }
-  }, []);
+  }, [refreshCalls]);
 
-  const handleUpdateAppel = useCallback(() => {
+  const handleUpdateAppel = useCallback(async () => {
     if (!selectedAppel) return;
 
     if (!newAppelForm.description || !newAppelForm.periode || !newAppelForm.dateExigibilite || !newAppelForm.dateEmission || !newAppelForm.dateLimiteReglement || !newAppelForm.montantTotal) {
@@ -213,57 +331,45 @@ export function useAppelsFonds() {
       return;
     }
 
-    const updatedAppel: AppelFonds = {
-      ...selectedAppel,
-      description: newAppelForm.description,
-      periode: newAppelForm.periode,
-      dateExigibilite: newAppelForm.dateExigibilite,
-      dateEmission: newAppelForm.dateEmission,
-      dateLimiteReglement: newAppelForm.dateLimiteReglement,
-      type: newAppelForm.type,
-      montantTotal: parseFloat(newAppelForm.montantTotal),
-      cleRepartitionId: newAppelForm.cleRepartitionId || undefined,
-      ...(newAppelForm.type === 'travaux' && {
-        budgetTravauxId: newAppelForm.budgetTravauxId,
-        projetNom: newAppelForm.projetNom
-      })
-    };
-
-    setAppels(prev => prev.map(a => a.id === selectedAppel.id ? updatedAppel : a));
+    // TODO: Implement update via Supabase
+    // For now, just refresh data
+    await refreshCalls();
     setNewAppelForm(getDefaultNewAppelForm());
     setShowEditModal(false);
-    setSelectedAppel(null);
-  }, [selectedAppel, newAppelForm]);
+    setSelectedAppelId(null);
+  }, [selectedAppel, newAppelForm, refreshCalls]);
 
-  const handleNewAppelSubmit = useCallback(() => {
+  const handleNewAppelSubmit = useCallback(async () => {
     if (!newAppelForm.description || !newAppelForm.periode || !newAppelForm.dateExigibilite || !newAppelForm.dateEmission || !newAppelForm.dateLimiteReglement || !newAppelForm.montantTotal) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    const newAppel: AppelFonds = {
-      id: String(appels.length + 1),
-      dateExigibilite: newAppelForm.dateExigibilite,
-      dateEmission: newAppelForm.dateEmission,
-      dateLimiteReglement: newAppelForm.dateLimiteReglement,
-      statut: 'A_GENERER',
-      montantTotal: parseFloat(newAppelForm.montantTotal),
-      montantEncaisse: 0,
-      description: newAppelForm.description,
-      periode: newAppelForm.periode,
-      type: newAppelForm.type,
-      cleRepartitionId: newAppelForm.cleRepartitionId || undefined,
-      historiqueRelances: [],
-      ...(newAppelForm.type === 'travaux' && {
-        budgetTravauxId: newAppelForm.budgetTravauxId,
-        projetNom: newAppelForm.projetNom
-      })
-    };
+    if (!openPeriod || !newAppelForm.cleRepartitionId) {
+      alert('Période comptable ou clé de répartition manquante');
+      return;
+    }
 
-    setAppels([newAppel, ...appels]);
+    // Create call via Supabase
+    const result = await createCallMutation.mutate({
+      period_id: openPeriod.id,
+      repartition_key_id: newAppelForm.cleRepartitionId,
+      label: newAppelForm.description,
+      issue_date: newAppelForm.dateEmission,
+      due_date: newAppelForm.dateExigibilite,
+      total_amount: parseFloat(newAppelForm.montantTotal),
+    });
+
+    if (result.error) {
+      alert(`Erreur lors de la création: ${result.error}`);
+      return;
+    }
+
+    // Refresh data from Supabase
+    await refreshCalls();
     setNewAppelForm(getDefaultNewAppelForm());
     setShowNewAppelModal(false);
-  }, [appels, newAppelForm]);
+  }, [newAppelForm, openPeriod, createCallMutation, refreshCalls]);
 
   const handleNewAppelCancel = useCallback(() => {
     setShowNewAppelModal(false);
@@ -272,7 +378,7 @@ export function useAppelsFonds() {
 
   const handleCloseEditModal = useCallback(() => {
     setShowEditModal(false);
-    setSelectedAppel(null);
+    setSelectedAppelId(null);
     setNewAppelForm(getDefaultNewAppelForm());
   }, []);
 
@@ -293,8 +399,31 @@ export function useAppelsFonds() {
     }
   }, [coproprietaires]);
 
-  const handleSubmitPaiement = useCallback((coproId: string, paiement: NouveauPaiement) => {
-    // Créer le nouveau paiement dans l'historique
+  const handleSubmitPaiement = useCallback(async (coproId: string, paiement: NouveauPaiement) => {
+    // Find the call line to get lot_id
+    const callLine = callLinesData?.find(l => l.id === coproId);
+    if (!callLine || !openPeriod) {
+      alert('Données manquantes pour enregistrer le paiement');
+      return;
+    }
+
+    // Record payment via Supabase
+    const result = await recordPaymentMutation.mutate({
+      period_id: openPeriod.id,
+      lot_id: callLine.lot_id,
+      amount: paiement.montant,
+      payment_date: paiement.datePaiement,
+      method: paiement.modePaiement,
+      reference: paiement.reference,
+      call_line_ids: [coproId], // Allocate to this specific call line
+    });
+
+    if (result.error) {
+      alert(`Erreur lors de l'enregistrement du paiement: ${result.error}`);
+      return;
+    }
+
+    // Keep local historique for UI display
     const nouveauPaiement: PaiementHistorique = {
       id: `p${Date.now()}`,
       montant: paiement.montant,
@@ -309,49 +438,13 @@ export function useAppelsFonds() {
       [coproId]: [...(prev[coproId] || []), nouveauPaiement]
     }));
 
-    // Mettre à jour le copropriétaire
-    setCoproprietaires(prev => prev.map(c => {
-      if (c.id !== coproId) return c;
-
-      const nouveauMontantPaye = (c.paiement?.montantPaye || 0) + paiement.montant;
-      const resteADu = c.montantIndividuel - nouveauMontantPaye;
-
-      let nouveauStatut: StatutPaiement = 'NON_PAYE';
-      if (resteADu <= 0) {
-        nouveauStatut = 'PAYE';
-      } else if (nouveauMontantPaye > 0) {
-        nouveauStatut = 'PARTIELLEMENT_PAYE';
-      }
-
-      return {
-        ...c,
-        paiement: {
-          montantDu: c.montantIndividuel,
-          montantPaye: nouveauMontantPaye,
-          statutPaiement: nouveauStatut,
-          datePaiement: paiement.datePaiement,
-          modePaiement: paiement.modePaiement as 'VIREMENT' | 'CHEQUE' | 'PRELEVEMENT' | 'ESPECES',
-        }
-      };
-    }));
-
-    // Recalculer le montant encaissé de l'appel
-    if (selectedAppel) {
-      const totalEncaisse = coproprietaires.reduce((sum, c) => {
-        if (c.id === coproId) {
-          return sum + (c.paiement?.montantPaye || 0) + paiement.montant;
-        }
-        return sum + (c.paiement?.montantPaye || 0);
-      }, 0);
-
-      setAppels(prev => prev.map(a =>
-        a.id === selectedAppel.id ? { ...a, montantEncaisse: totalEncaisse } : a
-      ));
-    }
+    // Refresh data from Supabase to get updated payment status
+    await refreshCalls();
+    await refreshLines();
 
     setShowPaiementModal(false);
     setSelectedCoproprietaire(null);
-  }, [coproprietaires, selectedAppel]);
+  }, [callLinesData, openPeriod, recordPaymentMutation, refreshCalls, refreshLines]);
 
   const handleClosePaiementModal = useCallback(() => {
     setShowPaiementModal(false);
@@ -370,50 +463,35 @@ export function useAppelsFonds() {
 
   // Handlers pour les modals relances et export
   const handleVoirRelances = useCallback((appel: AppelFonds) => {
-    setSelectedAppel(appel);
+    setSelectedAppelId(appel.id);
     setShowRelancesModal(true);
   }, []);
 
   const handleCloseRelancesModal = useCallback(() => {
     setShowRelancesModal(false);
-    setSelectedAppel(null);
+    setSelectedAppelId(null);
   }, []);
 
-  const handleNouvelleRelance = useCallback((relance: Omit<RelanceAppel, 'id'>) => {
+  const handleNouvelleRelance = useCallback(async (relance: Omit<RelanceAppel, 'id'>) => {
     if (!selectedAppel) return;
 
-    const nouvelleRelance: RelanceAppel = {
-      ...relance,
-      id: `rel-${Date.now()}`,
-    };
+    // TODO: Implement relance creation via Supabase (payment_reminders table)
+    // For now, just refresh data
+    void relance; // Placeholder until Supabase implementation
 
-    setAppels(prev => prev.map(a => {
-      if (a.id !== selectedAppel.id) return a;
-      return {
-        ...a,
-        historiqueRelances: [...(a.historiqueRelances || []), nouvelleRelance]
-      };
-    }));
-
-    // Mettre à jour l'appel sélectionné pour rafraîchir le modal
-    setSelectedAppel(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        historiqueRelances: [...(prev.historiqueRelances || []), nouvelleRelance]
-      };
-    });
-  }, [selectedAppel]);
+    // Refresh data from Supabase
+    await refreshCalls();
+  }, [selectedAppel, refreshCalls]);
 
   const handleVoirExportAvis = useCallback((appel: AppelFonds) => {
-    setSelectedAppel(appel);
-    setCoproprietaires(MOCK_COPROPRIETAIRES_APPEL);
+    setSelectedAppelId(appel.id);
+    // Call lines will be loaded automatically via useCallLines hook
     setShowExportAvisModal(true);
   }, []);
 
   const handleCloseExportAvisModal = useCallback(() => {
     setShowExportAvisModal(false);
-    setSelectedAppel(null);
+    setSelectedAppelId(null);
   }, []);
 
   // Handler pour les actions des alertes
@@ -449,8 +527,9 @@ export function useAppelsFonds() {
   const exportToExcel = useCallback(() => {
     if (!selectedAppel) return;
 
+    const exportData = coproprietaires;
     const headers = ['Copropriétaire', 'Lot', 'Tantièmes', 'Montant appelé', 'Montant payé', 'Reste à devoir', 'Statut'];
-    const rows = coproprietaires.map(copro => {
+    const rows = exportData.map(copro => {
       const montantPaye = copro.paiement?.montantPaye || 0;
       const resteADevoir = copro.montantIndividuel - montantPaye;
       return [
@@ -466,8 +545,8 @@ export function useAppelsFonds() {
     });
 
     // Ajouter une ligne de total
-    const totalAppele = coproprietaires.reduce((sum, c) => sum + c.montantIndividuel, 0);
-    const totalPaye = coproprietaires.reduce((sum, c) => sum + (c.paiement?.montantPaye || 0), 0);
+    const totalAppele = exportData.reduce((sum, c) => sum + c.montantIndividuel, 0);
+    const totalPaye = exportData.reduce((sum, c) => sum + (c.paiement?.montantPaye || 0), 0);
     const totalReste = totalAppele - totalPaye;
     rows.push(['', '', '', '', '', '', '']);
     rows.push(['TOTAL', '', '', totalAppele.toFixed(2).replace('.', ','), totalPaye.toFixed(2).replace('.', ','), totalReste.toFixed(2).replace('.', ','), '']);
@@ -492,6 +571,7 @@ export function useAppelsFonds() {
   const exportToPDF = useCallback(() => {
     if (!selectedAppel) return;
 
+    const exportData = coproprietaires;
     const doc = new jsPDF();
     let yPos = 20;
     const xPos = 14;
@@ -513,8 +593,8 @@ export function useAppelsFonds() {
     yPos += 12;
 
     // Synthèse
-    const totalAppele = coproprietaires.reduce((sum, c) => sum + c.montantIndividuel, 0);
-    const totalPaye = coproprietaires.reduce((sum, c) => sum + (c.paiement?.montantPaye || 0), 0);
+    const totalAppele = exportData.reduce((sum, c) => sum + c.montantIndividuel, 0);
+    const totalPaye = exportData.reduce((sum, c) => sum + (c.paiement?.montantPaye || 0), 0);
     const totalReste = totalAppele - totalPaye;
     const tauxRecouvrement = totalAppele > 0 ? ((totalPaye / totalAppele) * 100).toFixed(1) : '0';
 
@@ -541,7 +621,7 @@ export function useAppelsFonds() {
     yPos += 8;
 
     doc.setFont('helvetica', 'normal');
-    coproprietaires.forEach(copro => {
+    exportData.forEach(copro => {
       if (yPos > 270) {
         doc.addPage();
         yPos = 20;
@@ -583,16 +663,26 @@ export function useAppelsFonds() {
     doc.save(`appel_fonds_${selectedAppel.id}_${new Date().toISOString().split('T')[0]}.pdf`);
   }, [selectedAppel, coproprietaires]);
 
+  // Loading state
+  const isLoading = isLoadingCalls || isLoadingLines;
+
   return {
-    // État
+    // État - from Supabase
     appels,
-    setAppels,
+    setAppels: refreshCalls, // No-op setter, use refreshCalls instead
     filteredAppels,
     selectedAppel,
     coproprietaires,
     filteredCoproprietaires,
     sendingInProgress,
     stats,
+
+    // Loading states
+    isLoading,
+    isLoadingCalls,
+    isLoadingLines,
+    refreshCalls,
+    refreshLines,
 
     // Alertes de délais
     alertes,
@@ -633,6 +723,7 @@ export function useAppelsFonds() {
     // Formulaire
     newAppelForm,
     setNewAppelForm,
+    repartitionKeys, // For dropdown in new appel form
 
     // Handlers
     handleGestionClick,
@@ -670,5 +761,9 @@ export function useAppelsFonds() {
     handleNouvelleRelance,
     handleVoirExportAvis,
     handleCloseExportAvisModal,
+
+    // Mutation states
+    isCreating: createCallMutation.isLoading,
+    isRecordingPayment: recordPaymentMutation.isLoading,
   };
 }

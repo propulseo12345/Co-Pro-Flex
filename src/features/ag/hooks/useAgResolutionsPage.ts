@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   useResolutionLibrary,
   type SortOption,
 } from '@/hooks/modules/useResolutionLibrary';
 import type { MajorityType, TypeAG, ResolutionTemplate } from '@/lib/constants/resolutions';
 import type { ICustomResolution } from '@/types/models/custom-resolution';
+import { loadDraft, saveDraft } from '@/lib/ag/draft-persistence';
+import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
 
 interface AvailableAG {
   id: string;
@@ -28,11 +30,11 @@ interface StoredResolution {
 
 export function useAgResolutionsPage() {
   const library = useResolutionLibrary({ pageSize: 24 });
+  const { drafts: agDrafts, isLoading: isLoadingDrafts } = useAgDrafts();
 
   const [showFilters, setShowFilters] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [availableAGs, setAvailableAGs] = useState<AvailableAG[]>([]);
   const [showAddToAGModal, setShowAddToAGModal] = useState(false);
   const [selectedResolutionForAG, setSelectedResolutionForAG] = useState<ResolutionTemplate | null>(null);
   const [addedToAGId, setAddedToAGId] = useState<string | null>(null);
@@ -47,35 +49,31 @@ export function useAgResolutionsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    const loadAvailableAGs = () => {
-      const agKeys = Object.keys(localStorage).filter(key => key.startsWith('ag-draft-'));
-      const ags: AvailableAG[] = [];
-      const today = new Date().toISOString().split('T')[0];
+  // Mapper les brouillons d'AG Supabase vers le format AvailableAG
+  const availableAGs = useMemo((): AvailableAG[] => {
+    if (isLoadingDrafts) return [];
 
-      for (const key of agKeys) {
-        const agId = key.replace('ag-draft-', '');
-        const isCompleted = localStorage.getItem(`ag-completed-${agId}`);
+    const today = new Date().toISOString().split('T')[0];
 
-        if (!isCompleted) {
-          try {
-            const draftData = JSON.parse(localStorage.getItem(key) || '{}');
-            if (draftData.date && draftData.date >= today) {
-              ags.push({
-                id: agId,
-                type: draftData.type || 'ORDINAIRE',
-                date: draftData.date,
-                lieu: draftData.lieu || 'Non défini',
-              });
-            }
-          } catch { /* ignore */ }
-        }
-      }
-      ags.sort((a, b) => a.date.localeCompare(b.date));
-      setAvailableAGs(ags);
-    };
-    loadAvailableAGs();
-  }, []);
+    return agDrafts
+      .filter(draft => {
+        // Inclure les AG avec une date future ou sans date (en cours de préparation)
+        if (!draft.meeting_date) return true;
+        const draftDate = draft.meeting_date.split('T')[0];
+        return draftDate >= today;
+      })
+      .map((draft): AvailableAG => ({
+        id: draft.id,
+        type: draft.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE',
+        date: draft.meeting_date ? draft.meeting_date.split('T')[0] : '',
+        lieu: draft.location || 'Non défini',
+      }))
+      .sort((a, b) => {
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return a.date.localeCompare(b.date);
+      });
+  }, [agDrafts, isLoadingDrafts]);
 
   const saveCustomResolutions = (resolutions: ICustomResolution[]) => {
     localStorage.setItem('custom-resolutions-library', JSON.stringify(resolutions));
@@ -122,15 +120,13 @@ export function useAgResolutionsPage() {
     setShowAddToAGModal(true);
   }, []);
 
-  const handleAddToAG = useCallback((agId: string) => {
+  const handleAddToAG = useCallback(async (agId: string) => {
     if (!selectedResolutionForAG) return;
 
     const existingKey = `ag-resolutions-${agId}`;
     let existingResolutions: StoredResolution[] = [];
-    try {
-      const saved = localStorage.getItem(existingKey);
-      if (saved) existingResolutions = JSON.parse(saved);
-    } catch { existingResolutions = []; }
+    const { data: saved } = await loadDraft<StoredResolution[]>(agId, 'resolutions', existingKey);
+    if (saved) existingResolutions = saved;
 
     const alreadyExists = existingResolutions.some(r => r.templateId === selectedResolutionForAG.id);
     if (alreadyExists) {
@@ -155,7 +151,7 @@ export function useAgResolutionsPage() {
       categorie: selectedResolutionForAG.categorie,
     };
 
-    localStorage.setItem(existingKey, JSON.stringify([...existingResolutions, newResolution]));
+    await saveDraft(agId, 'resolutions', [...existingResolutions, newResolution], existingKey);
     setAddedToAGId(agId);
     setTimeout(() => setAddedToAGId(null), 2000);
     setShowAddToAGModal(false);

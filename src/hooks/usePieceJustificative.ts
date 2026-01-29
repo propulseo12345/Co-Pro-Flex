@@ -68,13 +68,13 @@ export function usePieceJustificative({
 
   // Télécharger une pièce
   const telechargerPiece = useCallback(
-    (piece: PieceJustificative) => {
+    async (piece: PieceJustificative) => {
       if (!piecesJustificativesService.peutTelechargerPiece(piece, role)) {
         setError(new Error('Vous ne pouvez pas télécharger cette pièce'));
         return;
       }
 
-      const url = piecesJustificativesService.getUrlTelechargement(piece);
+      const url = await piecesJustificativesService.getUrlTelechargement(piece);
 
       // Créer un lien temporaire pour le téléchargement
       const link = document.createElement('a');
@@ -90,13 +90,13 @@ export function usePieceJustificative({
 
   // Ouvrir dans un nouvel onglet
   const ouvrirDansNouvelOnglet = useCallback(
-    (piece: PieceJustificative) => {
+    async (piece: PieceJustificative) => {
       if (!piecesJustificativesService.peutVoirPiece(piece, role)) {
         setError(new Error("Vous n'avez pas accès à cette pièce"));
         return;
       }
 
-      const url = piecesJustificativesService.getUrlVisualisation(piece);
+      const url = await piecesJustificativesService.getUrlVisualisation(piece);
       window.open(url, '_blank', 'noopener,noreferrer');
     },
     [role]

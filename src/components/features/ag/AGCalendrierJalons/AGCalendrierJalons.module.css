@@ -16,28 +16,34 @@
 .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-3);
-    padding-bottom: var(--spacing-3);
-    margin-bottom: var(--spacing-4);
-    border-bottom: 1px solid var(--border-color);
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
 }
 
 .legendItem {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: var(--spacing-1);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .legendDot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .legendLabel {
     white-space: nowrap;
+    line-height: 1.2;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -83,15 +89,17 @@
 
 .jalon {
     display: flex;
-    gap: var(--spacing-3);
-    padding: var(--spacing-2);
-    border-radius: var(--radius-md);
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.15s ease;
+    min-height: 52px;
+    align-items: flex-start;
 }
 
 .jalon:hover {
-    background: var(--hover-bg);
+    background: rgba(0, 0, 0, 0.04);
 }
 
 /* Indicateur timeline */
@@ -133,18 +141,20 @@
 .jalonHeader {
     display: flex;
     align-items: center;
-    gap: var(--spacing-2);
+    gap: 12px;
+    min-height: 40px;
 }
 
 .jalonIcon {
     width: 32px;
     height: 32px;
-    border-radius: var(--radius-md);
+    min-width: 32px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
+    background: #f3f4f6;
+    color: #6b7280;
     flex-shrink: 0;
 }
 
@@ -153,26 +163,33 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .jalonLabel {
-    font-size: var(--font-size-sm);
+    font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary);
+    color: #1f2937;
     line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .jalonDate {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
 }
 
 .jalonBadge {
-    font-size: var(--font-size-xs);
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--radius-full);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 9999px;
     white-space: nowrap;
     font-weight: 500;
+    flex-shrink: 0;
+    align-self: center;
 }
 
 /* Détails du jalon */
@@ -441,23 +458,41 @@
 
 @media (max-width: 640px) {
     .legend {
-        gap: var(--spacing-2);
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .legendItem {
+        font-size: 11px;
     }
 
     .jalonHeader {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .jalonIcon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+    }
+
+    .jalonLabel {
+        font-size: 13px;
+    }
+
+    .jalonDate {
+        font-size: 11px;
     }
 
     .jalonBadge {
-        order: -1;
-        width: 100%;
-        text-align: center;
-        margin-bottom: var(--spacing-1);
+        font-size: 11px;
+        padding: 3px 8px;
     }
 
     .summary {
         flex-direction: column;
-        gap: var(--spacing-2);
+        gap: 8px;
     }
 
     .summaryItem {
@@ -465,4 +500,34 @@
         justify-content: space-between;
         align-items: center;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════ */
+
+:global([data-theme="dark"]) .legend {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .legendItem {
+    color: #9ca3af;
+}
+
+:global([data-theme="dark"]) .jalonIcon {
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
+}
+
+:global([data-theme="dark"]) .jalonLabel {
+    color: #f3f4f6;
+}
+
+:global([data-theme="dark"]) .jalonDate {
+    color: #9ca3af;
+}
+
+:global([data-theme="dark"]) .jalon:hover {
+    background: rgba(255, 255, 255, 0.06);
 }

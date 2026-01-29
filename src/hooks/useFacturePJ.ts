@@ -12,6 +12,7 @@ import { facturePJService } from '@/lib/services/facture-pj.service';
 
 interface UseFacturePJOptions {
   factureId?: string;
+  coproId?: string;
   initialPJ?: PJFacture[];
 }
 
@@ -36,6 +37,7 @@ interface UseFacturePJReturn {
  */
 export function useFacturePJ({
   factureId,
+  coproId = '',
   initialPJ = [],
 }: UseFacturePJOptions = {}): UseFacturePJReturn {
   const [piecesJointes, setPiecesJointes] = useState<PJFacture[]>(initialPJ);
@@ -78,11 +80,11 @@ export function useFacturePJ({
         }
 
         // Si factureId existe, utiliser le service
-        if (factureId) {
+        if (factureId && coproId) {
           const result = await facturePJService.uploadFichier(factureId, {
             file,
             estPrincipale,
-          });
+          }, coproId);
 
           if (!result.success) {
             setError(result.error || 'Erreur lors de l\'upload');
@@ -147,12 +149,12 @@ export function useFacturePJ({
           return false;
         }
 
-        if (factureId) {
+        if (factureId && coproId) {
           const result = await facturePJService.ajouterLienExterne(factureId, {
             lienExterne: url,
             nomPersonnalise: nom,
             estPrincipale,
-          });
+          }, coproId);
 
           if (!result.success) {
             setError(result.error || 'Erreur lors de l\'ajout du lien');

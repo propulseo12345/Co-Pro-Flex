@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle } from 'lucide-react';
-import type { LegacyEmailMessage } from '@/data/mock/mail.mock';
+import type { LegacyEmailMessage } from '@/hooks/modules/useMailListPage';
 import type { TabType } from './MailTabs';
 import { MailListItem } from './MailListItem';
 import styles from './mail-components.module.css';

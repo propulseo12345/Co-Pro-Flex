@@ -534,7 +534,7 @@ class PVExportService {
         options: IPVExportOptions,
         onProgress?: ProgressCallback
     ): Promise<IPVExportResult> {
-        const template = pvTemplateService.getTemplate(templateId);
+        const template = await pvTemplateService.getTemplate(templateId);
 
         if (!template) {
             return {
@@ -587,11 +587,11 @@ class PVExportService {
     /**
      * Génère un aperçu HTML (pour preview dans un iframe)
      */
-    generatePreview(
+    async generatePreview(
         templateId: string,
         context: IPVRenderContext
-    ): { success: boolean; html: string; errors: string[] } {
-        const template = pvTemplateService.getTemplate(templateId);
+    ): Promise<{ success: boolean; html: string; errors: string[] }> {
+        const template = await pvTemplateService.getTemplate(templateId);
 
         if (!template) {
             return { success: false, html: '', errors: ['Template non trouvé'] };
@@ -609,9 +609,9 @@ class PVExportService {
     /**
      * Génère un aperçu avec données de test
      */
-    generatePreviewWithMockData(templateId: string): { success: boolean; html: string; errors: string[] } {
+    async generatePreviewWithMockData(templateId: string): Promise<{ success: boolean; html: string; errors: string[] }> {
         const mockContext = this.getMockContext();
-        return this.generatePreview(templateId, mockContext);
+        return await this.generatePreview(templateId, mockContext);
     }
 
     /**

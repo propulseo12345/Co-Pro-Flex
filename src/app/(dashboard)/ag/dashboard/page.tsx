@@ -1,12 +1,14 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { Calendar, Users, FileText, Plus, Mail, Play, ClipboardList, Copy, Eye, Download, Edit3, Trash2 } from 'lucide-react';
+import { Calendar, Users, FileText, Plus, Mail, Play, ClipboardList, Copy, Eye, Download, Edit3, Trash2, Loader2, Pencil, Check, X } from 'lucide-react';
 import { AGQuickActions } from '@/components/features/ag/Dashboard';
 import { AgDocumentQuickActions } from '@/components/features/ag';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgMeetings } from '@/hooks/modules/useAgData';
+import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
+import { createClient } from '@/lib/supabase/client';
 import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
 import styles from './dashboard.module.css';
 import clsx from 'clsx';
@@ -29,7 +31,7 @@ function getTypeLabel(type: AgMeetingType): string {
       return 'Ordinaire';
     case 'extraordinary':
       return 'Extraordinaire';
-    case 'mixed':
+    case 'special':
       return 'Mixte';
     default:
       return type;
@@ -176,8 +178,49 @@ function NextAgCard({ ag, isConvoked }: { ag: AgOverview; isConvoked: boolean })
 }
 
 // Component for displaying a draft AG item (from Supabase)
-function AgBrouillonItem({ ag }: { ag: AgOverview }) {
+function AgBrouillonItem({
+  ag,
+  onDelete,
+  onRename,
+  isDeleting,
+  isRenaming
+}: {
+  ag: AgOverview;
+  onDelete: (id: string, title: string) => void;
+  onRename: (id: string, newTitle: string) => Promise<void>;
+  isDeleting: boolean;
+  isRenaming: boolean;
+}) {
   const typeLabel = getTypeLabel(ag.meeting_type);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(ag.title || `AG ${typeLabel}`);
+
+  const handleStartEdit = () => {
+    setEditTitle(ag.title || `AG ${typeLabel}`);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditTitle(ag.title || `AG ${typeLabel}`);
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    const trimmedTitle = editTitle.trim();
+    if (trimmedTitle && trimmedTitle !== ag.title) {
+      await onRename(ag.id, trimmedTitle);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
 
   return (
     <div className={styles.brouillonItem}>
@@ -185,9 +228,53 @@ function AgBrouillonItem({ ag }: { ag: AgOverview }) {
         <Edit3 size={20} aria-hidden="true" />
       </div>
       <div className={styles.brouillonContent}>
-        <div className={styles.brouillonTitle}>
-          {ag.title || `AG ${typeLabel}`}
-        </div>
+        {isEditing ? (
+          <div className={styles.brouillonTitleEdit}>
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={handleSaveEdit}
+              className={styles.brouillonTitleInput}
+              autoFocus
+              disabled={isRenaming}
+            />
+            <button
+              onClick={handleSaveEdit}
+              className={styles.brouillonEditBtn}
+              title="Valider"
+              disabled={isRenaming}
+            >
+              {isRenaming ? (
+                <Loader2 size={14} className={styles.spinning} />
+              ) : (
+                <Check size={14} />
+              )}
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              className={styles.brouillonEditBtnCancel}
+              title="Annuler"
+              disabled={isRenaming}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ) : (
+          <div className={styles.brouillonTitleRow}>
+            <div className={styles.brouillonTitle}>
+              {ag.title || `AG ${typeLabel}`}
+            </div>
+            <button
+              onClick={handleStartEdit}
+              className={styles.brouillonRenameBtn}
+              title="Renommer"
+            >
+              <Pencil size={14} />
+            </button>
+          </div>
+        )}
         <div className={styles.brouillonMeta}>
           {ag.meeting_date ? (
             <>Prévue le {new Date(ag.meeting_date).toLocaleDateString('fr-FR')}</>
@@ -207,6 +294,18 @@ function AgBrouillonItem({ ag }: { ag: AgOverview }) {
           <ClipboardList size={16} aria-hidden="true" />
           <span>Agenda</span>
         </Link>
+        <button
+          onClick={() => onDelete(ag.id, ag.title || `AG ${typeLabel}`)}
+          className={styles.brouillonLinkDanger}
+          title="Supprimer le brouillon"
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <Loader2 size={16} className={styles.spinning} aria-hidden="true" />
+          ) : (
+            <Trash2 size={16} aria-hidden="true" />
+          )}
+        </button>
       </div>
     </div>
   );
@@ -298,9 +397,22 @@ function AgHistoryItem({ ag }: { ag: AgOverview }) {
 export default function AGDashboardPage() {
   const { currentCoproId, isManager } = useCopro();
   const { meetings, nextMeeting, pastMeetings, isLoading, error, refresh } = useAgMeetings();
+  const { deleteDraft } = useAgDrafts();
 
   // State for localStorage drafts
   const [localStorageDrafts, setLocalStorageDrafts] = useState<LocalStorageDraft[]>([]);
+
+  // State for delete confirmation
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // State pour les IDs supprimés (évite le refresh qui scroll en haut)
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+
+  // State pour le renommage
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamedTitles, setRenamedTitles] = useState<Map<string, string>>(new Map());
 
   // Load localStorage drafts on mount
   useEffect(() => {
@@ -347,16 +459,70 @@ export default function AGDashboardPage() {
     }
   };
 
+  // Open delete confirmation for Supabase draft
+  const handleOpenDeleteConfirm = (id: string, title: string) => {
+    setDeleteConfirm({ id, title });
+  };
+
+  // Cancel delete
+  const handleCancelDelete = () => {
+    setDeleteConfirm(null);
+  };
+
+  // Rename a Supabase draft
+  const handleRename = async (id: string, newTitle: string) => {
+    setRenamingId(id);
+    try {
+      const supabase = createClient();
+      const { error } = await (supabase as any)
+        .from('ag_meetings')
+        .update({ title: newTitle })
+        .eq('id', id);
+
+      if (!error) {
+        // Mise à jour optimiste locale
+        setRenamedTitles(prev => new Map(prev).set(id, newTitle));
+      }
+    } finally {
+      setRenamingId(null);
+    }
+  };
+
+  // Confirm delete Supabase draft
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return;
+
+    setIsDeleting(true);
+    setDeletingId(deleteConfirm.id);
+
+    try {
+      const success = await deleteDraft(deleteConfirm.id);
+      if (success) {
+        // Mise à jour optimiste : ajouter l'ID aux supprimés (évite le refresh qui scroll)
+        setDeletedIds(prev => new Set(prev).add(deleteConfirm.id));
+      }
+    } finally {
+      setIsDeleting(false);
+      setDeletingId(null);
+      setDeleteConfirm(null);
+    }
+  };
+
   // Determine if the next meeting is convoked
   const isConvoked = useMemo(() => {
     if (!nextMeeting) return false;
     return nextMeeting.status === 'convoked' || nextMeeting.status === 'in_progress';
   }, [nextMeeting]);
 
-  // Get all draft meetings from Supabase (brouillons)
+  // Get all draft meetings from Supabase (brouillons), excluant les supprimés, avec titres renommés
   const draftMeetings = useMemo(() => {
-    return meetings.filter((m) => m.status === 'draft');
-  }, [meetings]);
+    return meetings
+      .filter((m) => m.status === 'draft' && !deletedIds.has(m.id))
+      .map((m) => ({
+        ...m,
+        title: renamedTitles.get(m.id) || m.title,
+      }));
+  }, [meetings, deletedIds, renamedTitles]);
 
   // Total drafts count (Supabase + localStorage)
   const totalDraftsCount = draftMeetings.length + localStorageDrafts.length;
@@ -431,7 +597,14 @@ export default function AGDashboardPage() {
                 <div className={styles.brouillonList}>
                   {/* Brouillons Supabase */}
                   {draftMeetings.map((ag) => (
-                    <AgBrouillonItem key={ag.id} ag={ag} />
+                    <AgBrouillonItem
+                      key={ag.id}
+                      ag={ag}
+                      onDelete={handleOpenDeleteConfirm}
+                      onRename={handleRename}
+                      isDeleting={deletingId === ag.id}
+                      isRenaming={renamingId === ag.id}
+                    />
                   ))}
                   {/* Brouillons localStorage */}
                   {localStorageDrafts.map((draft) => (
@@ -472,6 +645,50 @@ export default function AGDashboardPage() {
           </div>
         </div>
       </DataState>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className={styles.modalOverlay} onClick={handleCancelDelete}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalIcon}>
+              <Trash2 size={32} aria-hidden="true" />
+            </div>
+            <h3 className={styles.modalTitle}>Supprimer ce brouillon ?</h3>
+            <p className={styles.modalText}>
+              Vous êtes sur le point de supprimer <strong>&quot;{deleteConfirm.title}&quot;</strong>.
+            </p>
+            <p className={styles.modalWarning}>
+              Cette action supprimera définitivement l'AG et toutes ses données associées.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                onClick={handleCancelDelete}
+                className={styles.modalCancelBtn}
+                disabled={isDeleting}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className={styles.modalDeleteBtn}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 size={16} className={styles.spinning} aria-hidden="true" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} aria-hidden="true" />
+                    Supprimer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

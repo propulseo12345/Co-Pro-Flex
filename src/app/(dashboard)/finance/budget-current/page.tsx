@@ -1,22 +1,48 @@
 'use client';
 
-import { MOCK_BUDGETS, MOCK_EXERCICE_ACTUEL } from '@/data/mock';
-import { Download, PieChart } from 'lucide-react';
+import { useBudget } from '@/hooks/modules/useBudget';
+import { Download, PieChart, Loader2 } from 'lucide-react';
 import styles from './budget-current.module.css';
 
 export default function CurrentBudgetPage() {
-    const totalBudget = MOCK_BUDGETS.reduce((sum, b) => sum + b.montantN, 0);
-    const totalRealise = MOCK_BUDGETS.reduce((sum, b) => sum + b.montantN1, 0); // Using N-1 as "Realized" mock for now, or I should add a "Realized N" field. 
-    // Let's assume N1 is realized for demo purposes or add a random factor.
-    // Actually, let's just use N1 as "Realized so far" for the demo.
+    const {
+        postesBudget,
+        totals,
+        selectedYear,
+        isLoading,
+        error,
+    } = useBudget();
 
-    const percentage = Math.round((totalRealise / totalBudget) * 100);
+    const totalBudget = totals.totalBudget;
+    const totalRealise = totals.totalConsomme;
+    const percentage = totalBudget > 0 ? Math.round((totalRealise / totalBudget) * 100) : 0;
+
+    if (isLoading) {
+        return (
+            <div className="container">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '2rem' }}>
+                    <Loader2 size={24} className="animate-spin" />
+                    <span>Chargement du budget...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container">
+                <div className="card" style={{ background: 'var(--color-error-bg)', color: 'var(--color-error)' }}>
+                    Erreur: {error}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container">
             <div className={styles.header}>
                 <div>
-                    <h1 className={styles.title}>Suivi du budget courant {MOCK_EXERCICE_ACTUEL.annee}</h1>
+                    <h1 className={styles.title}>Suivi du budget courant {selectedYear}</h1>
                     <p className={styles.subtitle}>
                         État des dépenses par rapport au budget voté.
                     </p>
@@ -46,25 +72,33 @@ export default function CurrentBudgetPage() {
             <div className="card">
                 <h2 className={styles.sectionTitle}>Détail par poste</h2>
                 <div className={styles.list}>
-                    {MOCK_BUDGETS.map((budget) => {
-                        const percent = Math.min(100, Math.round((budget.montantN1 / budget.montantN) * 100));
-                        return (
-                            <div key={budget.id} className={styles.item}>
-                                <div className={styles.itemHeader}>
-                                    <span className={styles.poste}>{budget.poste}</span>
-                                    <span className={styles.values}>
-                                        {budget.montantN1.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} / {budget.montantN.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-                                    </span>
+                    {postesBudget.length === 0 ? (
+                        <p style={{ padding: '1rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                            Aucun poste budgétaire défini
+                        </p>
+                    ) : (
+                        postesBudget.map((poste) => {
+                            const percent = poste.budgetVote > 0
+                                ? Math.min(100, Math.round((poste.consomme / poste.budgetVote) * 100))
+                                : 0;
+                            return (
+                                <div key={poste.poste} className={styles.item}>
+                                    <div className={styles.itemHeader}>
+                                        <span className={styles.poste}>{poste.label}</span>
+                                        <span className={styles.values}>
+                                            {poste.consomme.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} / {poste.budgetVote.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                                        </span>
+                                    </div>
+                                    <div className={styles.progressBarBg}>
+                                        <div
+                                            className={styles.progressBarFill}
+                                            style={{ width: `${percent}%`, backgroundColor: percent > 100 ? '#EF4444' : '#10B981' }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className={styles.progressBarBg}>
-                                    <div
-                                        className={styles.progressBarFill}
-                                        style={{ width: `${percent}%`, backgroundColor: percent > 100 ? '#EF4444' : '#10B981' }}
-                                    />
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </div>

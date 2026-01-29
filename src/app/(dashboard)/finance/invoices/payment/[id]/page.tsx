@@ -1,18 +1,40 @@
 'use client';
 
-import { MOCK_FACTURES } from '@/data/mock';
-import { ArrowLeft, CreditCard, FileText } from 'lucide-react';
+import { useSupplierInvoices } from '@/hooks/modules/useFinanceData';
+import { ArrowLeft, FileText, Loader2 } from 'lucide-react';
 import styles from './detail.module.css';
 import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useMemo } from 'react';
 
 export default function InvoiceDetailPage() {
     const params = useParams();
     const id = params?.id as string;
-    const facture = MOCK_FACTURES.find(f => f.id === id);
+    const { data: invoices, isLoading, error } = useSupplierInvoices();
 
-    if (!facture) {
-        return <div>Facture non trouvée</div>;
+    const invoice = useMemo(() => {
+        if (!invoices) return null;
+        return invoices.find(f => f.id === id);
+    }, [invoices, id]);
+
+    if (isLoading) {
+        return (
+            <div className="container">
+                <Loader2 size={24} />
+                <span>Chargement...</span>
+            </div>
+        );
+    }
+
+    if (error || !invoice) {
+        return (
+            <div className="container">
+                <p>Facture non trouvée</p>
+                <Link href="/finance/invoices/payment" className="btn btn-secondary">
+                    Retour aux factures
+                </Link>
+            </div>
+        );
     }
 
     return (
@@ -24,24 +46,24 @@ export default function InvoiceDetailPage() {
             <div className={styles.grid}>
                 <div className={styles.mainContent}>
                     <div className="card">
-                        <h1 className={styles.title}>Paiement de la facture {facture.fournisseur}</h1>
+                        <h1 className={styles.title}>Paiement de la facture {invoice.supplier_name}</h1>
 
                         <div className={styles.summary}>
                             <div className={styles.summaryItem}>
                                 <span className={styles.label}>Montant à payer</span>
-                                <span className={styles.amount}>{facture.montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</span>
+                                <span className={styles.amount}>{Number(invoice.total_amount).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</span>
                             </div>
                             <div className={styles.summaryItem}>
                                 <span className={styles.label}>Bénéficiaire</span>
-                                <span className={styles.value}>{facture.fournisseur}</span>
+                                <span className={styles.value}>{invoice.supplier_name}</span>
                             </div>
                             <div className={styles.summaryItem}>
-                                <span className={styles.label}>IBAN</span>
-                                <span className={styles.value}>{facture.iban}</span>
+                                <span className={styles.label}>Référence</span>
+                                <span className={styles.value}>{invoice.invoice_number || invoice.label || '-'}</span>
                             </div>
                             <div className={styles.summaryItem}>
-                                <span className={styles.label}>BIC</span>
-                                <span className={styles.value}>{facture.bic}</span>
+                                <span className={styles.label}>Date d&apos;échéance</span>
+                                <span className={styles.value}>{invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('fr-FR') : '-'}</span>
                             </div>
                         </div>
 

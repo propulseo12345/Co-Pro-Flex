@@ -122,8 +122,21 @@
 }
 
 .categorized {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+    color: #059669;
+    background-color: #D1FAE5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.ignored {
+    color: #6B7280;
+    background-color: #F3F4F6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
 }
 
 .amount {

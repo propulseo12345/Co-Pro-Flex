@@ -1,3 +1,8 @@
+/**
+ * Service de gestion des pièces justificatives
+ * VERSION SUPABASE - Utilise l'API documents et Supabase Storage
+ */
+
 import {
   PieceJustificative,
   DepenseAvecPJ,
@@ -6,14 +11,34 @@ import {
   extraireFormat,
   TypePieceJustificative,
 } from '@/types/models/piece-justificative';
+import * as documentsApi from '@/lib/documents/api';
 
+// Constante pour cleanup legacy localStorage (one-shot en dev)
+const LEGACY_STORAGE_KEY = 'coproflex-pieces-justificatives';
 
 /**
  * Service de gestion des pièces justificatives
- * NOTE: Version frontend - stockage localStorage en attendant Supabase
+ * Utilise Supabase pour le stockage (table documents + storage bucket ged)
  */
 export class PiecesJustificativesService {
-  private storageKey = 'coproflex-pieces-justificatives';
+  private initialized = false;
+
+  /**
+   * Initialise le service et nettoie le localStorage legacy si présent
+   */
+  private async init(): Promise<void> {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    // Cleanup legacy localStorage (one-shot)
+    if (typeof window !== 'undefined') {
+      const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyData) {
+        console.warn('[PiecesJustificativesService] Suppression données localStorage legacy');
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    }
+  }
 
   // ========================================
   // RÉCUPÉRATION
@@ -23,28 +48,50 @@ export class PiecesJustificativesService {
    * Récupère toutes les PJ d'une dépense
    */
   async getPiecesParDepense(depenseId: string): Promise<PieceJustificative[]> {
-    const toutes = this.getAllPieces();
-    return toutes.filter((pj) => pj.depenseId === depenseId);
+    await this.init();
+
+    try {
+      const documents = await documentsApi.getDocumentsForEntity('depense', depenseId);
+      return documents.map(doc => this.documentToPJ(doc, depenseId));
+    } catch (error) {
+      console.error('[PiecesJustificativesService] Erreur getPiecesParDepense:', error);
+      return [];
+    }
   }
 
   /**
    * Récupère une PJ par son ID
    */
   async getPieceById(pieceId: string): Promise<PieceJustificative | null> {
-    const toutes = this.getAllPieces();
-    return toutes.find((pj) => pj.id === pieceId) || null;
+    await this.init();
+
+    try {
+      const doc = await documentsApi.getDocumentById(pieceId);
+      if (!doc) return null;
+      return this.documentToPJ(doc, '');
+    } catch (error) {
+      console.error('[PiecesJustificativesService] Erreur getPieceById:', error);
+      return null;
+    }
   }
 
   /**
    * Récupère les dépenses avec leurs PJ
    */
   async getDepensesAvecPJ(depenses: Array<{ id: string }>): Promise<DepenseAvecPJ[]> {
-    const toutesPJ = this.getAllPieces();
+    await this.init();
 
-    return depenses.map((depense) => ({
-      ...depense,
-      piecesJustificatives: toutesPJ.filter((pj) => pj.depenseId === depense.id),
-    })) as DepenseAvecPJ[];
+    const result: DepenseAvecPJ[] = [];
+
+    for (const depense of depenses) {
+      const pjs = await this.getPiecesParDepense(depense.id);
+      result.push({
+        ...depense,
+        piecesJustificatives: pjs,
+      } as DepenseAvecPJ);
+    }
+
+    return result;
   }
 
   // ========================================
@@ -86,250 +133,141 @@ export class PiecesJustificativesService {
   /**
    * Génère l'URL de visualisation d'une PJ
    */
-  getUrlVisualisation(piece: PieceJustificative): string {
-    // En production, ce serait une URL Supabase Storage ou autre
-    return piece.urlFichier;
+  async getUrlVisualisation(piece: PieceJustificative): Promise<string> {
+    // Si c'est déjà une URL complète, la retourner
+    if (piece.urlFichier.startsWith('http://') || piece.urlFichier.startsWith('https://')) {
+      return piece.urlFichier;
+    }
+
+    try {
+      return await documentsApi.getDocumentUrl(piece.urlFichier);
+    } catch (error) {
+      console.error('[PiecesJustificativesService] Erreur getUrlVisualisation:', error);
+      return piece.urlFichier;
+    }
   }
 
   /**
    * Génère l'URL de téléchargement d'une PJ
    */
-  getUrlTelechargement(piece: PieceJustificative): string {
+  async getUrlTelechargement(piece: PieceJustificative): Promise<string> {
+    const url = await this.getUrlVisualisation(piece);
     // En production, ajouter un paramètre pour forcer le téléchargement
-    return `${piece.urlFichier}?download=true`;
+    return `${url}${url.includes('?') ? '&' : '?'}download=true`;
   }
 
   // ========================================
-  // UPLOAD (préparation pour Supabase)
+  // UPLOAD
   // ========================================
 
   /**
    * Upload une nouvelle PJ
-   * NOTE: En attendant Supabase, simule l'upload
    */
   async uploadPiece(
     depenseId: string,
     fichier: File,
     metadata: Partial<PieceJustificative>,
-    utilisateurId: string
+    utilisateurId: string,
+    coproId: string
   ): Promise<PieceJustificative> {
-    // Simuler un délai d'upload
-    await new Promise((r) => setTimeout(r, 500));
+    await this.init();
 
-    const nouvellePiece: PieceJustificative = {
-      id: `pj-${Date.now()}`,
-      depenseId,
-      nomFichier: fichier.name,
-      urlFichier: URL.createObjectURL(fichier), // En production: URL Supabase
-      format: extraireFormat(fichier.name),
-      tailleFichier: fichier.size,
-      type: metadata.type || 'AUTRE',
-      description: metadata.description,
-      dateDocument: metadata.dateDocument,
-      reference: metadata.reference,
-      uploadePar: utilisateurId,
-      uploadeLe: new Date().toISOString(),
-      estPublic: metadata.estPublic ?? true,
-      estConfidentiel: metadata.estConfidentiel ?? false,
+    // Déterminer la catégorie du document
+    const categoryMap: Record<TypePieceJustificative, documentsApi.DocumentCategory> = {
+      FACTURE: 'facture',
+      CONTRAT: 'contrat',
+      DEVIS: 'devis',
+      ATTESTATION: 'diagnostic',
+      RELEVE: 'releve_charges',
+      COURRIER: 'courrier',
+      AVOIR: 'facture',
+      NOTE_CREDIT: 'facture',
+      AUTRE: 'autre',
     };
 
-    // Sauvegarder
-    const toutes = this.getAllPieces();
-    toutes.push(nouvellePiece);
-    localStorage.setItem(this.storageKey, JSON.stringify(toutes));
+    const category = categoryMap[metadata.type || 'AUTRE'] || 'autre';
 
-    return nouvellePiece;
+    // Upload vers Supabase
+    const doc = await documentsApi.uploadDocument(fichier, coproId, category, {
+      title: fichier.name,
+      description: metadata.description,
+      tags: [
+        `pj-type:${metadata.type || 'AUTRE'}`,
+        metadata.estPublic === false ? 'private' : 'public',
+        metadata.estConfidentiel ? 'confidential' : '',
+      ].filter(Boolean),
+      confidentiality: metadata.estConfidentiel ? 'restricted' : metadata.estPublic ? 'public' : 'council',
+    });
+
+    // Créer le lien avec la dépense
+    await documentsApi.linkDocumentToEntity(doc.id, 'depense', depenseId, 'main');
+
+    return this.documentToPJ(doc, depenseId);
   }
 
   /**
    * Supprime une PJ
    */
   async supprimerPiece(pieceId: string): Promise<boolean> {
-    const toutes = this.getAllPieces();
-    const index = toutes.findIndex((pj) => pj.id === pieceId);
-
-    if (index === -1) return false;
-
-    toutes.splice(index, 1);
-    localStorage.setItem(this.storageKey, JSON.stringify(toutes));
-
-    return true;
-  }
-
-  // ========================================
-  // STOCKAGE LOCAL
-  // ========================================
-
-  private getAllPieces(): PieceJustificative[] {
-    if (typeof window === 'undefined') {
-      return this.getMockPieces();
-    }
+    await this.init();
 
     try {
-      const data = localStorage.getItem(this.storageKey);
-      if (data) {
-        return JSON.parse(data);
-      }
-      // Initialiser avec les données de démo
-      const mockPieces = this.getMockPieces();
-      localStorage.setItem(this.storageKey, JSON.stringify(mockPieces));
-      return mockPieces;
-    } catch {
-      return this.getMockPieces();
+      await documentsApi.archiveDocument(pieceId);
+      return true;
+    } catch (error) {
+      console.error('[PiecesJustificativesService] Erreur supprimerPiece:', error);
+      return false;
     }
   }
 
+  // ========================================
+  // HELPERS PRIVÉS
+  // ========================================
+
   /**
-   * Données de démonstration
-   * Les IDs correspondent aux dépenses dans MOCK_DEPENSES_BUDGETS
+   * Convertit un Document Supabase en PieceJustificative
    */
-  private getMockPieces(): PieceJustificative[] {
-    return [
-      // Facture eau T1
-      {
-        id: 'pj-1',
-        depenseId: 'd1',
-        nomFichier: 'Facture_Eau_T1_2024.pdf',
-        urlFichier: '/demo/factures/eau-t1.pdf',
-        format: 'pdf',
-        tailleFichier: 125000,
-        type: 'FACTURE' as TypePieceJustificative,
-        description: 'Facture eau 1er trimestre',
-        dateDocument: '2024-01-15',
-        reference: 'FAC-VE-2024-0142',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-01-20T10:30:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Facture eau T2
-      {
-        id: 'pj-2',
-        depenseId: 'd2',
-        nomFichier: 'Facture_Eau_T2_2024.pdf',
-        urlFichier: '/demo/factures/eau-t2.pdf',
-        format: 'pdf',
-        tailleFichier: 118000,
-        type: 'FACTURE' as TypePieceJustificative,
-        description: 'Facture eau 2ème trimestre',
-        dateDocument: '2024-04-18',
-        reference: 'FAC-VE-2024-0356',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-04-20T09:15:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Facture électricité
-      {
-        id: 'pj-3',
-        depenseId: 'd5',
-        nomFichier: 'Facture_EDF_T1_2024.pdf',
-        urlFichier: '/demo/factures/edf-t1.pdf',
-        format: 'pdf',
-        tailleFichier: 89000,
-        type: 'FACTURE' as TypePieceJustificative,
-        description: 'Facture électricité 1er trimestre',
-        dateDocument: '2024-01-20',
-        reference: 'EDF-2024-789456',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-01-25T14:00:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Attestation assurance
-      {
-        id: 'pj-4',
-        depenseId: 'd9',
-        nomFichier: 'Attestation_Assurance_2024.pdf',
-        urlFichier: '/demo/contrats/assurance-2024.pdf',
-        format: 'pdf',
-        tailleFichier: 245000,
-        type: 'ATTESTATION' as TypePieceJustificative,
-        description: 'Attestation assurance immeuble',
-        dateDocument: '2024-01-01',
-        reference: 'ATT-2024-001',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-01-05T09:00:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Contrat assurance (2ème PJ pour la même dépense)
-      {
-        id: 'pj-5',
-        depenseId: 'd9',
-        nomFichier: 'Contrat_Assurance_MRI_2024.pdf',
-        urlFichier: '/demo/contrats/contrat-assurance.pdf',
-        format: 'pdf',
-        tailleFichier: 520000,
-        type: 'CONTRAT' as TypePieceJustificative,
-        description: 'Contrat assurance multirisques immeuble',
-        dateDocument: '2024-01-01',
-        reference: 'CON-MRI-2024',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-01-05T09:15:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Facture ménage
-      {
-        id: 'pj-6',
-        depenseId: 'd10',
-        nomFichier: 'Facture_Menage_Jan_2024.pdf',
-        urlFichier: '/demo/factures/menage-jan.pdf',
-        format: 'pdf',
-        tailleFichier: 78000,
-        type: 'FACTURE' as TypePieceJustificative,
-        description: 'Facture ménage janvier',
-        dateDocument: '2024-01-31',
-        reference: 'FAC-NET-2024-012',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-02-02T11:00:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Facture ascenseur
-      {
-        id: 'pj-7',
-        depenseId: 'd14',
-        nomFichier: 'Facture_Ascenseur_T1_2024.pdf',
-        urlFichier: '/demo/factures/ascenseur-t1.pdf',
-        format: 'pdf',
-        tailleFichier: 156000,
-        type: 'FACTURE' as TypePieceJustificative,
-        description: 'Contrat maintenance ascenseur T1',
-        dateDocument: '2024-01-15',
-        reference: 'FAC-ASC-2024-0045',
-        uploadePar: 'user-1',
-        uploadeParNom: 'Marie Dupont',
-        uploadeLe: '2024-01-18T16:30:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-      // Photo de facture (image)
-      {
-        id: 'pj-8',
-        depenseId: 'd17',
-        nomFichier: 'Photo_Facture_Espaces_Verts.jpg',
-        urlFichier: '/demo/factures/espaces-verts.jpg',
-        format: 'jpg',
-        tailleFichier: 2500000,
-        type: 'FACTURE' as TypePieceJustificative,
-        description: 'Photo de la facture espaces verts',
-        dateDocument: '2024-02-10',
-        reference: 'FAC-JD-2024-089',
-        uploadePar: 'user-2',
-        uploadeParNom: 'Pierre Martin',
-        uploadeLe: '2024-02-12T14:45:00Z',
-        estPublic: true,
-        estConfidentiel: false,
-      },
-    ];
+  private documentToPJ(doc: documentsApi.Document, depenseId: string): PieceJustificative {
+    // Extraire le type de PJ depuis les tags
+    const typeTags = (doc.tags || []).filter(t => t.startsWith('pj-type:'));
+    const typeFromTag = typeTags.length > 0
+      ? typeTags[0].replace('pj-type:', '') as TypePieceJustificative
+      : 'AUTRE';
+
+    // Mapper la catégorie document vers type PJ
+    const categoryToType: Record<string, TypePieceJustificative> = {
+      facture: 'FACTURE',
+      contrat: 'CONTRAT',
+      devis: 'DEVIS',
+      diagnostic: 'ATTESTATION',
+      releve_charges: 'RELEVE',
+      courrier: 'COURRIER',
+    };
+
+    const type = typeFromTag !== 'AUTRE'
+      ? typeFromTag
+      : categoryToType[doc.category || ''] || 'AUTRE';
+
+    const isConfidential = doc.confidentiality === 'restricted' || (doc.tags || []).includes('confidential');
+    const isPublic = doc.confidentiality === 'public' || (doc.tags || []).includes('public');
+
+    return {
+      id: doc.id,
+      depenseId: depenseId,
+      nomFichier: doc.file_name,
+      urlFichier: doc.file_path,
+      format: extraireFormat(doc.file_name),
+      tailleFichier: doc.file_size || 0,
+      type,
+      description: doc.description,
+      dateDocument: doc.document_date,
+      reference: undefined,
+      uploadePar: doc.created_by || '',
+      uploadeParNom: doc.created_by_name,
+      uploadeLe: doc.created_at,
+      estPublic: isPublic,
+      estConfidentiel: isConfidential,
+    };
   }
 }
 

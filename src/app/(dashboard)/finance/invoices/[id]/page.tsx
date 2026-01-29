@@ -1,19 +1,65 @@
 'use client';
 
-import { ArrowLeft, Download, Check, X, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Download, Check, X, AlertCircle, Loader2 } from 'lucide-react';
 import styles from './invoice-detail.module.css';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { MOCK_FACTURES } from '@/data/mock';
+import { useSupplierInvoices } from '@/hooks/modules/useFinanceData';
+import { useMemo } from 'react';
+
+// Map Supabase status to display status
+function mapStatus(status: string): string {
+    switch (status) {
+        case 'paid': return 'PAYEE';
+        case 'posted':
+        case 'approved': return 'A_PAYER';
+        case 'draft': return 'EN_ATTENTE_VALIDATION';
+        default: return status.toUpperCase();
+    }
+}
 
 export default function InvoiceDetailPage() {
     const params = useParams();
-    const facture = MOCK_FACTURES.find(f => f.id === params.id);
+    const { data: invoices, isLoading, error } = useSupplierInvoices();
 
-    if (!facture) {
+    const invoice = useMemo(() => {
+        if (!invoices) return null;
+        return invoices.find(f => f.id === params.id);
+    }, [invoices, params.id]);
+
+    // Convert to display format
+    const facture = useMemo(() => {
+        if (!invoice) return null;
+        return {
+            id: invoice.id,
+            fournisseur: invoice.supplier_name,
+            date: invoice.invoice_date,
+            reference: invoice.invoice_number || invoice.label,
+            montant: Number(invoice.total_amount),
+            statut: mapStatus(invoice.status),
+            iban: null as string | null,
+            bic: null as string | null,
+        };
+    }, [invoice]);
+
+    if (isLoading) {
+        return (
+            <div className="container">
+                <div className={styles.loading || ''}>
+                    <Loader2 size={24} className={styles.spinner || ''} />
+                    <span>Chargement...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !facture) {
         return (
             <div className="container">
                 <p>Facture non trouvée</p>
+                <Link href="/finance/invoices" className="btn btn-secondary">
+                    Retour aux factures
+                </Link>
             </div>
         );
     }

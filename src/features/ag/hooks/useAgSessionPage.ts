@@ -36,6 +36,27 @@ import {
 import { useCopro } from '@/providers/CoproContext';
 import { useAgDetail, useEligibleVoters, useCastVote, useRegisterAttendance, useStartAg } from '@/hooks/modules/useAgData';
 import type { VoteDirection, MajorityType as DbMajorityType } from '@/lib/ag/types';
+import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+
+// Debounce helper
+function debounce<T extends (...args: Parameters<T>) => void>(fn: T, delay: number): T {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return ((...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  }) as T;
+}
+
+// Session data stored in ag_session_drafts(type='session')
+interface SessionDraftData {
+  started: boolean;
+  currentResolutionIndex: number;
+  completedResolutions: string[];
+  isSecondVote?: boolean;
+  passerelleResolution?: Resolution | null;
+  passerelleVoteInitial?: PasserelleVoteInitial | null;
+  presencesEnrichies?: Record<string, PresenceData>;
+}
 
 interface UseAgSessionPageParams {
   agId: string;
@@ -179,94 +200,103 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
 
   const allVariables = useMemo(() => mergeVariables(variableValues), [mergeVariables, variableValues]);
 
-  // Load data - from Supabase if available, otherwise localStorage
+  // Load data - from Supabase drafts first, then ag_* tables
   useEffect(() => {
-    // Load resolutions
-    if (useSupabase && dbResolutions.length > 0) {
-      // Convert DB resolutions to frontend format
-      const frontendRes: Resolution[] = dbResolutions.map(r => ({
-        id: r.id,
-        titre: r.title,
-        texte: r.description || '',
-        majorite: fromDbMajorityType(r.majority_type),
-        custom: true,
-        resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
-      }));
-      setResolutions(frontendRes);
-    } else {
-      // Fallback to localStorage
-      const savedResolutions = localStorage.getItem('ag-resolutions-' + agId);
-      if (savedResolutions) setResolutions(JSON.parse(savedResolutions));
-    }
-
-    // Load votes from localStorage (votes are saved locally during session)
-    const savedVotes = localStorage.getItem('ag-votes-' + agId);
-    let loadedVotes: VoteData[] = [];
-    if (savedVotes) {
-      const parsedVotes: VoteData[] = JSON.parse(savedVotes);
-      loadedVotes = parsedVotes.map(v => ({
-        ...v, source: v.vote !== null ? 'CORRESPONDANCE' as VoteSource : null
-      }));
-      setVotes(loadedVotes);
-    }
-
-    // Load session state
-    const savedSession = localStorage.getItem('ag-session-' + agId);
-    if (savedSession) {
-      const sessionData = JSON.parse(savedSession);
-      setSessionState({ started: sessionData.started, currentResolutionIndex: sessionData.currentResolutionIndex, completedResolutions: sessionData.completedResolutions });
-      if (sessionData.isSecondVote) setIsSecondVote(sessionData.isSecondVote);
-      if (sessionData.passerelleResolution) setPasserelleResolution(sessionData.passerelleResolution);
-      if (sessionData.passerelleVoteInitial) setPasserelleVoteInitial(sessionData.passerelleVoteInitial);
-      if (sessionData.presencesEnrichies) {
-        setPresencesEnrichies(sessionData.presencesEnrichies);
-        setPresences(presencesEnrichiesVersSimple(sessionData.presencesEnrichies));
-      }
-    }
-
-    const savedVariables = localStorage.getItem('ag-variables-' + agId);
-    if (savedVariables) setVariableValues(JSON.parse(savedVariables));
-
-    // Initialize presences from Supabase attendance or coproprietaires
-    if (useSupabase && dbAttendance.length > 0) {
-      const enrichies: Record<string, PresenceData> = {};
-      const simplePresences: Record<string, boolean> = {};
-
-      for (const att of dbAttendance) {
-        const mode = att.presence_type === 'present' ? 'present'
-          : att.presence_type === 'proxy' ? 'represente'
-          : att.presence_type === 'correspondence' ? 'correspondance'
-          : 'absent';
-
-        enrichies[att.coproprietaire_id] = {
-          coproprietaireId: att.coproprietaire_id,
-          mode,
-          voteCorrespondanceNeutralise: false,
-          mandataireId: att.represented_by_name ? undefined : undefined,
-        };
-        simplePresences[att.coproprietaire_id] = mode !== 'absent';
+    const loadSessionData = async () => {
+      // Load resolutions from DB if available
+      if (useSupabase && dbResolutions.length > 0) {
+        const frontendRes: Resolution[] = dbResolutions.map(r => ({
+          id: r.id,
+          titre: r.title,
+          texte: r.description || '',
+          majorite: fromDbMajorityType(r.majority_type),
+          custom: true,
+          resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
+        }));
+        setResolutions(frontendRes);
+      } else if (!isValidUUID(agId)) {
+        // Fallback to loadDraft (which uses localStorage) for non-UUID (legacy) AGs
+        const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', 'ag-resolutions-' + agId);
+        if (savedResolutions) setResolutions(savedResolutions);
       }
 
-      // Add missing coproprietaires as absent
-      for (const copro of coproprietaires) {
-        if (!enrichies[copro.id]) {
-          enrichies[copro.id] = { coproprietaireId: copro.id, mode: 'absent', voteCorrespondanceNeutralise: false };
-          simplePresences[copro.id] = false;
+      // Load votes draft from Supabase
+      const votesDraft = await loadDraft<VoteData[]>(agId, 'votes');
+      let loadedVotes: VoteData[] = [];
+      if (votesDraft.data && Array.isArray(votesDraft.data)) {
+        loadedVotes = votesDraft.data.map(v => ({
+          ...v, source: v.vote !== null ? 'CORRESPONDANCE' as VoteSource : null
+        }));
+        setVotes(loadedVotes);
+      }
+
+      // Load session draft from Supabase
+      const sessionDraft = await loadDraft<SessionDraftData>(agId, 'session');
+      if (sessionDraft.data) {
+        const sessionData = sessionDraft.data;
+        setSessionState({
+          started: sessionData.started || false,
+          currentResolutionIndex: sessionData.currentResolutionIndex || 0,
+          completedResolutions: sessionData.completedResolutions || []
+        });
+        if (sessionData.isSecondVote) setIsSecondVote(sessionData.isSecondVote);
+        if (sessionData.passerelleResolution) setPasserelleResolution(sessionData.passerelleResolution);
+        if (sessionData.passerelleVoteInitial) setPasserelleVoteInitial(sessionData.passerelleVoteInitial);
+        if (sessionData.presencesEnrichies) {
+          setPresencesEnrichies(sessionData.presencesEnrichies);
+          setPresences(presencesEnrichiesVersSimple(sessionData.presencesEnrichies));
         }
       }
 
-      setPresencesEnrichies(enrichies);
-      setPresences(simplePresences);
-    } else if (coproprietaires.length > 0) {
-      // Initialize from coproprietaires list
-      const initialPresences: Record<string, boolean> = {};
-      coproprietaires.forEach(copro => { initialPresences[copro.id] = false; });
-      setPresences(initialPresences);
+      // Load variables draft from Supabase
+      const variablesDraft = await loadDraft<Record<string, string>>(agId, 'variables');
+      if (variablesDraft.data) {
+        setVariableValues(variablesDraft.data);
+      }
 
-      const enrichies = integrerVotesCorrespondance(initialPresences, loadedVotes);
-      setPresencesEnrichies(enrichies);
-      setPresences(presencesEnrichiesVersSimple(enrichies));
-    }
+      // Initialize presences from Supabase attendance or coproprietaires
+      if (useSupabase && dbAttendance.length > 0) {
+        const enrichies: Record<string, PresenceData> = {};
+        const simplePresences: Record<string, boolean> = {};
+
+        for (const att of dbAttendance) {
+          const mode = att.presence_type === 'present' ? 'present'
+            : att.presence_type === 'proxy' ? 'represente'
+            : att.presence_type === 'correspondence' ? 'correspondance'
+            : 'absent';
+
+          enrichies[att.coproprietaire_id] = {
+            coproprietaireId: att.coproprietaire_id,
+            mode,
+            voteCorrespondanceNeutralise: false,
+            mandataireId: att.represented_by_name ? undefined : undefined,
+          };
+          simplePresences[att.coproprietaire_id] = mode !== 'absent';
+        }
+
+        // Add missing coproprietaires as absent
+        for (const copro of coproprietaires) {
+          if (!enrichies[copro.id]) {
+            enrichies[copro.id] = { coproprietaireId: copro.id, mode: 'absent', voteCorrespondanceNeutralise: false };
+            simplePresences[copro.id] = false;
+          }
+        }
+
+        setPresencesEnrichies(enrichies);
+        setPresences(simplePresences);
+      } else if (coproprietaires.length > 0) {
+        // Initialize from coproprietaires list
+        const initialPresences: Record<string, boolean> = {};
+        coproprietaires.forEach(copro => { initialPresences[copro.id] = false; });
+        setPresences(initialPresences);
+
+        const enrichies = integrerVotesCorrespondance(initialPresences, loadedVotes);
+        setPresencesEnrichies(enrichies);
+        setPresences(presencesEnrichiesVersSimple(enrichies));
+      }
+    };
+
+    loadSessionData();
   }, [agId, useSupabase, dbResolutions, dbAttendance, coproprietaires]);
 
   const votesCorrespondanceCount = useMemo(() => {
@@ -370,25 +400,33 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
     setShowVariableModal(true);
   }, [allVariables]);
 
+  // Debounced save for variables
+  const debouncedSaveVariables = useMemo(
+    () => debounce((values: Record<string, string>) => {
+      saveDraft(agId, 'variables', values);
+    }, 500),
+    [agId]
+  );
+
   const handleSaveVariable = useCallback(() => {
     if (editingVariable) {
       const newValues = { ...variableValues, [editingVariable.name]: editingVariable.value };
       setVariableValues(newValues);
-      localStorage.setItem('ag-variables-' + agId, JSON.stringify(newValues));
+      debouncedSaveVariables(newValues);
       setShowVariableModal(false);
       setEditingVariable(null);
     }
-  }, [editingVariable, variableValues, agId]);
+  }, [editingVariable, variableValues, debouncedSaveVariables]);
 
   const handlePrefillFromCopro = useCallback((variableName: string, coproId: string) => {
     const copro = coproprietaires.find(c => c.id === coproId);
     if (copro) {
       const newValues = { ...variableValues, [variableName]: copro.nom };
       setVariableValues(newValues);
-      localStorage.setItem('ag-variables-' + agId, JSON.stringify(newValues));
+      debouncedSaveVariables(newValues);
     }
     setShowPrefillDropdown(null);
-  }, [variableValues, agId, coproprietaires]);
+  }, [variableValues, coproprietaires, debouncedSaveVariables]);
 
   const currentResolution = resolutions[sessionState.currentResolutionIndex];
   const stats = currentResolution ? getResolutionStats(votes, currentResolution.id) : null;
@@ -419,15 +457,16 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
     }
   }, [currentResolution, allVariables]);
 
-  const saveSession = useCallback(() => {
-    localStorage.setItem('ag-session-' + agId, JSON.stringify({
+  const saveSession = useCallback(async () => {
+    const sessionData: SessionDraftData = {
       ...sessionState,
       isSecondVote,
       passerelleResolution,
       passerelleVoteInitial,
       presencesEnrichies
-    }));
-    localStorage.setItem('ag-votes-' + agId, JSON.stringify(votes));
+    };
+    await saveDraft(agId, 'session', sessionData);
+    await saveDraft(agId, 'votes', votes);
   }, [agId, sessionState, isSecondVote, passerelleResolution, passerelleVoteInitial, presencesEnrichies, votes]);
 
   const handleNextResolution = useCallback(() => {
@@ -498,7 +537,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
   const updateResolutionWithPasserelle = useCallback((resolutionId: string, passerelleData: PasserelleMajorite, resultat: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE') => {
     setResolutions(prev => prev.map(r => r.id === resolutionId ? { ...r, passerelle: passerelleData, resultat } : r));
     const updatedResolutions = resolutions.map(r => r.id === resolutionId ? { ...r, passerelle: passerelleData, resultat } : r);
-    localStorage.setItem('ag-resolutions-' + agId, JSON.stringify(updatedResolutions));
+    // Save resolutions state to drafts (for passerelle tracking)
+    saveDraft(agId, 'resolutions', updatedResolutions);
   }, [resolutions, agId]);
 
   const handleNavigateToResolution = useCallback((index: number) => {

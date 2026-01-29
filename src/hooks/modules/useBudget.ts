@@ -211,6 +211,22 @@ export function useBudget() {
       })) as BudgetTravaux[];
   }, [rawBudgets]);
 
+  // ALUR funds (from raw budgets of type 'alur')
+  const fondsALUR = useMemo(() => {
+    const alurBudget = rawBudgets.find(b => b.budget_type === 'alur');
+    if (!alurBudget) {
+      return { soldeActuel: 0, cotisationAnnuelle: 0, pourcentageBudget: 0, historiqueTransferts: [] };
+    }
+    const cotisation = Number(alurBudget.total_planned);
+    const pourcentage = budgetAnnuelVote > 0 ? (cotisation / budgetAnnuelVote) * 100 : 5;
+    return {
+      soldeActuel: cotisation - Number(alurBudget.validated_spent),
+      cotisationAnnuelle: cotisation,
+      pourcentageBudget: Math.round(pourcentage * 10) / 10,
+      historiqueTransferts: [],
+    };
+  }, [rawBudgets, budgetAnnuelVote]);
+
   // ============================================================================
   // Computed Values
   // ============================================================================
@@ -545,8 +561,8 @@ export function useBudget() {
     postesBudget,
     budgetsTravaux,
     setBudgetsTravaux: () => {}, // No-op, data comes from Supabase
-    fondsALUR: { soldeActuel: 0, cotisationAnnuelle: 0, pourcentageBudget: 0, historiqueTransferts: [] }, // TODO: Implement ALUR funds
-    coproprietairesALUR: [],
+    fondsALUR,
+    coproprietairesALUR: [], // TODO: Implement from lot_owners with their ALUR contributions
     resolutionsAG: [],
     dernieresDepenses,
 

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Send, AlertCircle, ClipboardCheck, Shield } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, AlertCircle, ClipboardCheck, Shield, Mail, FileText } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
 import {
   ConvocationErrorState,
@@ -161,6 +161,10 @@ export default function ConvocationPage() {
       <div className={styles.mainLayout}>
         {/* Colonne gauche: Preview */}
         <div className={styles.previewColumn}>
+          <h2 className={styles.previewColumnTitle}>
+            <FileText size={24} aria-hidden="true" />
+            Prévisualisation
+          </h2>
           <ConvocationPreview
             status={preview.status}
             pdfUrl={preview.pdfUrl}
@@ -179,6 +183,12 @@ export default function ConvocationPage() {
 
         {/* Colonne droite: Configuration envoi */}
         <div className={styles.sendingColumn}>
+          {/* Titre de section */}
+          <h2 className={styles.sendingColumnTitle}>
+            <Mail size={24} aria-hidden="true" />
+            Gestion des envois
+          </h2>
+
           {/* Tabs */}
           <div className={styles.tabs}>
             <button
@@ -191,46 +201,49 @@ export default function ConvocationPage() {
               onClick={() => setActiveTab('tracking')}
               className={`${styles.tab} ${activeTab === 'tracking' ? styles.tabActive : ''}`}
             >
-              Suivi envois
+              Suivi d&apos;envoi
             </button>
           </div>
 
-          {activeTab === 'config' ? (
-            <>
-              <DeliveryModeSelector
-                selectedMode={delivery.config.globalMode}
-                isRegistered={delivery.config.postalSettings.isRegistered}
-                stats={delivery.stats}
-                onModeChange={delivery.setGlobalMode}
-                onRegisteredChange={delivery.setPostalRegistered}
-              />
-
-              <DeliveryByOwnerTable
-                owners={delivery.ownerStatuses}
-                globalMode={delivery.config.globalMode}
-                onOwnerModeChange={delivery.setOwnerMode}
-                onSavePreferences={delivery.saveAsPreferences}
-                onResetPreferences={delivery.resetToPreferences}
-              />
-
-              {/* Actions */}
-              <div className={styles.actionsSection}>
-                <PostalLabelsGeneratorButton
-                  postalRecipients={delivery.getOwnersForPostal()}
-                  sendType={delivery.config.postalSettings.sendType}
-                  sender={SYNDIC_INFO}
-                  agTitle={agData?.type}
+          {/* Tab Content */}
+          <div className={styles.tabContent}>
+            {activeTab === 'config' ? (
+              <>
+                <DeliveryModeSelector
+                  selectedMode={delivery.config.globalMode}
+                  isRegistered={delivery.config.postalSettings.isRegistered}
+                  stats={delivery.stats}
+                  onModeChange={delivery.setGlobalMode}
+                  onRegisteredChange={delivery.setPostalRegistered}
                 />
-              </div>
-            </>
-          ) : (
-            <EmailSendTrackingPanel
-              emailRecipients={delivery.getOwnersForEmail()}
-              stats={delivery.stats}
-              onSendEmail={delivery.sendEmail}
-              onSendAllEmails={delivery.sendAllEmails}
-            />
-          )}
+
+                <DeliveryByOwnerTable
+                  owners={delivery.ownerStatuses}
+                  globalMode={delivery.config.globalMode}
+                  onOwnerModeChange={delivery.setOwnerMode}
+                  onSavePreferences={delivery.saveAsPreferences}
+                  onResetPreferences={delivery.resetToPreferences}
+                />
+
+                {/* Actions */}
+                <div className={styles.actionsSection}>
+                  <PostalLabelsGeneratorButton
+                    postalRecipients={delivery.getOwnersForPostal()}
+                    sendType={delivery.config.postalSettings.sendType}
+                    sender={SYNDIC_INFO}
+                    agTitle={agData?.type}
+                  />
+                </div>
+              </>
+            ) : (
+              <EmailSendTrackingPanel
+                emailRecipients={delivery.getOwnersForEmail()}
+                stats={delivery.stats}
+                onSendEmail={delivery.sendEmail}
+                onSendAllEmails={delivery.sendAllEmails}
+              />
+            )}
+          </div>
         </div>
       </div>
 

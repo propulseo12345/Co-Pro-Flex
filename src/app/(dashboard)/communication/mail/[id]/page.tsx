@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -9,7 +9,7 @@ import {
   AlertTriangle, X, RotateCcw, Image, Clock
 } from 'lucide-react';
 import styles from './mail-detail.module.css';
-import { useMail } from '@/hooks/modules/useMail';
+import { mailSupabaseService } from '@/lib/services/mail-supabase.service';
 import { ConfirmModal, Toast } from '@/components/features/communication/mail';
 import {
   Mail as MailType,
@@ -17,59 +17,11 @@ import {
   formatTailleFichier,
   joursRestantsCorbeille,
 } from '@/types/models/mail';
-import { findMockEmailById, getAllMockEmails } from '@/data/mock/mail.mock';
-
-function convertOldEmailToMail(oldEmail: any): MailType {
-  const parseSize = (sizeStr: string): number => {
-    if (!sizeStr) return 0;
-    const match = sizeStr.match(/(\d+(?:\.\d+)?)\s*(KB|MB|Ko|Mo)/i);
-    if (!match) return 0;
-    const value = parseFloat(match[1]);
-    const unit = match[2].toUpperCase();
-    if (unit.includes('MB') || unit.includes('MO')) return value * 1024 * 1024;
-    if (unit.includes('KB') || unit.includes('KO')) return value * 1024;
-    return value;
-  };
-
-  const getMimeType = (filename: string): string => {
-    const ext = filename.split('.').pop()?.toLowerCase();
-    if (ext === 'pdf') return 'application/pdf';
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext || '')) return 'image/jpeg';
-    return 'application/octet-stream';
-  };
-
-  return {
-    id: `mail-${oldEmail.id}`,
-    coproprieteId: 'copro-1',
-    subject: oldEmail.subject || '',
-    body: oldEmail.body || oldEmail.preview || '',
-    preview: oldEmail.preview || oldEmail.body?.substring(0, 100) || '',
-    sender: oldEmail.sender ? { id: 'unknown', nom: oldEmail.sender, type: 'coproprietaire' as const }
-      : { id: 'syndic-1', nom: 'Syndic', type: 'syndic' as const },
-    recipients: oldEmail.recipients?.map((r: string) => ({ id: 'unknown', nom: r, type: 'groupe' as const })) || [],
-    recipientType: oldEmail.recipientType || 'all',
-    piecesJointes: oldEmail.attachments?.map((a: any, idx: number) => ({
-      id: `pj-${oldEmail.id}-${idx}`,
-      nom: a.name || 'fichier',
-      taille: parseSize(a.size) || 0,
-      mimeType: getMimeType(a.name || ''),
-      url: '',
-      dateAjout: oldEmail.date || new Date().toISOString()
-    })) || [],
-    statut: oldEmail.status as MailType['statut'],
-    isRead: oldEmail.isRead !== false,
-    hasAttachment: oldEmail.hasAttachment || false,
-    dateCreation: oldEmail.date || new Date().toISOString(),
-    template: oldEmail.template
-  };
-}
 
 export default function MailDetailPage() {
   const params = useParams();
   const router = useRouter();
   const mailId = params.id as string;
-
-  const { getMailById, supprimerMail, restaurerMail, supprimerDefinitivement, telechargerPJ, telechargerToutesPJ, marquerCommeLu } = useMail();
 
   const [mail, setMail] = useState<MailType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,27 +30,38 @@ export default function MailDetailPage() {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
+  // Load mail from Supabase
   useEffect(() => {
-    let foundMail = getMailById(mailId);
-    if (!foundMail) {
-      const stored = typeof window !== 'undefined' ? localStorage.getItem('mail-copro-data') : null;
-      if (stored) {
-        try {
-          const data = JSON.parse(stored);
-          const allOldEmails = [...(data.sent || []), ...(data.inbox || []), ...(data.drafts || []), ...(data.archived || []), ...Object.values(data.emails || {})];
-          const oldEmail = allOldEmails.find((e: any) => e.id === Number(mailId) || String(e.id) === mailId);
-          if (oldEmail) foundMail = convertOldEmailToMail(oldEmail);
-        } catch { /* ignore */ }
+    const loadMail = async () => {
+      setLoading(true);
+      try {
+        const foundMail = await mailSupabaseService.getMailById(mailId);
+        setMail(foundMail);
+        if (foundMail?.statut === 'received' && !foundMail.isRead) {
+          await mailSupabaseService.markAsRead(mailId);
+        }
+      } catch (err) {
+        console.error('Error loading mail:', err);
+      } finally {
+        setLoading(false);
       }
-      if (!foundMail) {
-        const mockEmail = findMockEmailById(mailId);
-        if (mockEmail) foundMail = convertOldEmailToMail(mockEmail);
-      }
+    };
+    loadMail();
+  }, [mailId]);
+
+  // Download attachment
+  const telechargerPJ = useCallback((pj: PieceJointeMail) => {
+    if (pj.url) {
+      window.open(pj.url, '_blank');
     }
-    setMail(foundMail);
-    setLoading(false);
-    if (foundMail?.statut === 'received' && !foundMail.isRead) marquerCommeLu(foundMail.id);
-  }, [mailId, getMailById, marquerCommeLu]);
+  }, []);
+
+  // Download all attachments
+  const telechargerToutesPJ = useCallback((mailData: MailType) => {
+    mailData.piecesJointes?.forEach(pj => {
+      if (pj.url) window.open(pj.url, '_blank');
+    });
+  }, []);
 
   if (loading) return <div className="container"><div className={styles.notFound}><p>Chargement...</p></div></div>;
   if (!mail) return (
@@ -117,28 +80,37 @@ export default function MailDetailPage() {
   const isDraft = mail.statut === 'draft';
 
   const handleMoveToTrash = async () => {
-    if (await supprimerMail(mailId)) {
+    try {
+      await mailSupabaseService.moveToTrash(mailId);
       setShowDeleteModal(false);
       setToastMessage('Mail déplacé vers la corbeille');
       setShowSuccessToast(true);
       setTimeout(() => router.push('/communication/mail'), 1500);
+    } catch (err) {
+      console.error('Error moving to trash:', err);
     }
   };
 
   const handleRestore = async () => {
-    if (await restaurerMail(mailId)) {
+    try {
+      await mailSupabaseService.restore(mailId);
       setToastMessage('Mail restauré avec succès');
       setShowSuccessToast(true);
       setTimeout(() => router.push('/communication/mail'), 1500);
+    } catch (err) {
+      console.error('Error restoring:', err);
     }
   };
 
   const handlePermanentDelete = async () => {
-    if (await supprimerDefinitivement(mailId)) {
+    try {
+      await mailSupabaseService.permanentDelete(mailId);
       setShowPermanentDeleteModal(false);
       setToastMessage('Mail supprimé définitivement');
       setShowSuccessToast(true);
       setTimeout(() => router.push('/communication/mail?tab=trash'), 1500);
+    } catch (err) {
+      console.error('Error permanently deleting:', err);
     }
   };
 

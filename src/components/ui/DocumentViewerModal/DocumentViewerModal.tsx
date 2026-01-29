@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useId, useCallback, useMemo } from 'react';
+import { useState, useId, useCallback, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   X, Download, FileText, ZoomIn, ZoomOut, RotateCcw, RotateCw,
@@ -11,8 +11,9 @@ import {
   Users, ClipboardList, Banknote, AlertTriangle, Wrench, Home,
   History, GitBranch, Plus, CheckCircle, Archive, FileEdit, XCircle,
   Upload, BarChart3, Lock, Unlock, Globe, Shield, Type,
-  ArrowRight
+  ArrowRight, Loader2
 } from 'lucide-react';
+import * as documentsApi from '@/lib/documents/api';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import {
   getDocumentLinks,
@@ -65,6 +66,7 @@ export interface DocumentForViewer {
   dateAjout: string;
   taille: string;
   dossierId?: string;
+  filePath?: string; // Supabase storage path
 }
 
 interface DocumentViewerModalProps {
@@ -168,6 +170,32 @@ export default function DocumentViewerModal({
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [showNewVersionModal, setShowNewVersionModal] = useState(false);
 
+  // États pour le chargement du fichier réel depuis Supabase
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  // Charger l'URL signée depuis Supabase Storage
+  useEffect(() => {
+    if (!document.filePath) return;
+
+    const fetchSignedUrl = async () => {
+      setIsLoadingFile(true);
+      setFileError(null);
+      try {
+        const url = await documentsApi.getDocumentUrl(document.filePath!, 3600);
+        setSignedUrl(url);
+      } catch (err) {
+        console.error('Error fetching signed URL:', err);
+        setFileError(err instanceof Error ? err.message : 'Erreur de chargement du fichier');
+      } finally {
+        setIsLoadingFile(false);
+      }
+    };
+
+    fetchSignedUrl();
+  }, [document.filePath]);
+
   const titleId = useId();
   const focusTrapRef = useFocusTrap<HTMLDivElement>({
     isActive: true,
@@ -240,9 +268,28 @@ export default function DocumentViewerModal({
     setCurrentPage(p => Math.min(totalPages, p + 1));
   }, [totalPages]);
 
-  const handleDownload = useCallback(() => {
-    alert(`Téléchargement de "${document.nom}" en cours...\n\nFonctionnalité disponible après intégration Supabase.`);
-  }, [document.nom]);
+  const handleDownload = useCallback(async () => {
+    if (!document.filePath) {
+      alert(`Téléchargement non disponible - fichier non lié à Supabase Storage.`);
+      return;
+    }
+
+    try {
+      // Si on a déjà l'URL signée, on l'utilise directement
+      const url = signedUrl || await documentsApi.getDocumentUrl(document.filePath, 3600);
+
+      // Créer un lien temporaire pour le téléchargement
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.nom;
+      link.target = '_blank';
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+    } catch (err) {
+      alert(`Erreur de téléchargement: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+    }
+  }, [document.filePath, document.nom, signedUrl]);
 
   const handlePrint = useCallback(() => {
     alert(`Impression de "${document.nom}"...\n\nFonctionnalité disponible après intégration Supabase.`);
@@ -500,50 +547,98 @@ export default function DocumentViewerModal({
 
               {/* Preview Area */}
               <div className={styles.previewArea}>
-                {isPdf ? (
-                  <div
-                    className={styles.pdfContainer}
-                    style={{
-                      transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                    }}
-                  >
-                    <div className={styles.pdfPreview}>
-                      <div className={styles.pdfPage}>
-                        <FileText size={48} className={styles.pdfIcon} />
-                        <h3>Aperçu du document</h3>
-                        <p className={styles.pdfFilename}>{document.nom}</p>
-                        <p className={styles.pdfPageNum}>Page {currentPage} sur {totalPages}</p>
-                        <div className={styles.pdfMockContent}>
-                          <div className={styles.pdfLine} style={{ width: '80%' }} />
-                          <div className={styles.pdfLine} style={{ width: '95%' }} />
-                          <div className={styles.pdfLine} style={{ width: '70%' }} />
-                          <div className={styles.pdfLine} style={{ width: '85%' }} />
-                          <div className={styles.pdfLine} style={{ width: '60%' }} />
-                          <div className={styles.pdfLine} style={{ width: '90%' }} />
-                          <div className={styles.pdfLine} style={{ width: '75%' }} />
+                {isLoadingFile ? (
+                  <div className={styles.loadingPreview}>
+                    <Loader2 size={48} className={styles.loadingSpinner} />
+                    <p>Chargement du document...</p>
+                  </div>
+                ) : fileError ? (
+                  <div className={styles.errorPreview}>
+                    <AlertTriangle size={48} />
+                    <h3>Erreur de chargement</h3>
+                    <p>{fileError}</p>
+                    <button className={styles.downloadBtnLarge} onClick={handleDownload}>
+                      <Download size={18} />
+                      Télécharger le fichier
+                    </button>
+                  </div>
+                ) : isPdf ? (
+                  signedUrl ? (
+                    <div
+                      className={styles.pdfContainer}
+                      style={{
+                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+                      }}
+                    >
+                      <iframe
+                        src={signedUrl}
+                        title={document.nom}
+                        className={styles.pdfIframe}
+                        style={{ width: '100%', height: '100%', border: 'none', minHeight: '500px' }}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className={styles.pdfContainer}
+                      style={{
+                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+                      }}
+                    >
+                      <div className={styles.pdfPreview}>
+                        <div className={styles.pdfPage}>
+                          <FileText size={48} className={styles.pdfIcon} />
+                          <h3>Aperçu du document</h3>
+                          <p className={styles.pdfFilename}>{document.nom}</p>
+                          <p className={styles.pdfPageNum}>Page {currentPage} sur {totalPages}</p>
+                          <div className={styles.pdfMockContent}>
+                            <div className={styles.pdfLine} style={{ width: '80%' }} />
+                            <div className={styles.pdfLine} style={{ width: '95%' }} />
+                            <div className={styles.pdfLine} style={{ width: '70%' }} />
+                            <div className={styles.pdfLine} style={{ width: '85%' }} />
+                            <div className={styles.pdfLine} style={{ width: '60%' }} />
+                            <div className={styles.pdfLine} style={{ width: '90%' }} />
+                            <div className={styles.pdfLine} style={{ width: '75%' }} />
+                          </div>
+                          <p className={styles.pdfNote}>
+                            Aucun chemin de fichier disponible. Uploadez via la GED pour prévisualiser.
+                          </p>
                         </div>
-                        <p className={styles.pdfNote}>
-                          Prévisualisation simulée - En production, le PDF réel sera affiché via PDF.js
+                      </div>
+                    </div>
+                  )
+                ) : isImage ? (
+                  signedUrl ? (
+                    <div
+                      className={styles.imageContainer}
+                      style={{
+                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={signedUrl}
+                        alt={document.nom}
+                        className={styles.imageActual}
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className={styles.imageContainer}
+                      style={{
+                        transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+                      }}
+                    >
+                      <div className={styles.imagePreview}>
+                        <Image size={64} className={styles.imageIcon} />
+                        <h3>Aperçu de l'image</h3>
+                        <p className={styles.imageFilename}>{document.nom}</p>
+                        <p className={styles.imageNote}>
+                          Aucun chemin de fichier disponible. Uploadez via la GED pour prévisualiser.
                         </p>
                       </div>
                     </div>
-                  </div>
-                ) : isImage ? (
-                  <div
-                    className={styles.imageContainer}
-                    style={{
-                      transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                    }}
-                  >
-                    <div className={styles.imagePreview}>
-                      <Image size={64} className={styles.imageIcon} />
-                      <h3>Aperçu de l'image</h3>
-                      <p className={styles.imageFilename}>{document.nom}</p>
-                      <p className={styles.imageNote}>
-                        Prévisualisation simulée - En production, l'image réelle sera affichée
-                      </p>
-                    </div>
-                  </div>
+                  )
                 ) : (
                   <div className={styles.unsupportedPreview}>
                     {getFileIcon(document.type, document.nom, 64)}

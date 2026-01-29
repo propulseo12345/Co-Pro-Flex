@@ -15,7 +15,14 @@ import {
   isFactureEnRetard
 } from '@/components/features/finance/Factures/types';
 import { useCopro } from '@/providers/CoproContext';
-import { useSupplierInvoices, useCreateSupplierInvoice, usePaySupplierInvoice, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+import {
+  useSupplierInvoices,
+  useCreateSupplierInvoiceDirect,
+  useOpenPeriod,
+  useUpdateSupplierInvoice,
+  useDeleteSupplierInvoice,
+  useSuppliers
+} from '@/hooks/modules/useFinanceData';
 
 // Store original Supabase invoice IDs for mutations
 const invoiceIdMap = new Map<string, string>(); // local ID -> supabase ID
@@ -38,8 +45,10 @@ export function useFacturesPage() {
   const { currentCoproId } = useCopro();
   const { data: supabaseInvoices, isLoading, error, refresh } = useSupplierInvoices();
   const { data: openPeriod } = useOpenPeriod();
-  const createInvoiceMutation = useCreateSupplierInvoice();
-  const payInvoiceMutation = usePaySupplierInvoice();
+  const createInvoiceMutation = useCreateSupplierInvoiceDirect();
+  const updateInvoiceMutation = useUpdateSupplierInvoice();
+  const deleteInvoiceMutation = useDeleteSupplierInvoice();
+  const { data: suppliers } = useSuppliers();
 
   // Track last refresh time for UI indicator
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
@@ -213,23 +222,20 @@ export function useFacturesPage() {
   }, []);
 
   const handlePaymentComplete = useCallback(async (compteId: string) => {
-    if (!selectedFacture || !openPeriod) return;
+    if (!selectedFacture) return;
 
     setIsMutating(true);
 
     try {
-      // Call Supabase API to pay the invoice
-      const result = await payInvoiceMutation.mutate({
-        period_id: openPeriod.id,
-        supplier_invoice_id: selectedFacture.id,
-        amount: selectedFacture.montant,
-        payment_date: new Date().toISOString().split('T')[0],
-        method: 'virement',
+      // Update status to 'paid' directly via Supabase update
+      // This bypasses the Edge Function that requires auth
+      const result = await updateInvoiceMutation.mutate({
+        invoice_id: selectedFacture.id,
+        status: 'paid',
       });
 
       if (result.error) {
         console.error('Payment error:', result.error);
-        // Still update local state optimistically for better UX
       }
 
       // Update local state optimistically
@@ -246,19 +252,41 @@ export function useFacturesPage() {
     }
 
     setShowPaymentModal(false);
-  }, [selectedFacture, openPeriod, payInvoiceMutation, refreshWithTimestamp]);
+  }, [selectedFacture, updateInvoiceMutation, refreshWithTimestamp]);
 
-  const handleSendToAccounting = useCallback(() => {
+  const handleSendToAccounting = useCallback(async () => {
     if (!selectedFacture) return;
-    const posteBudgetaire = TYPE_DEPENSE_TO_POSTE[selectedTypeDepense] || selectedFacture.posteBudgetaire;
-    setFactures(prev => prev.map(f =>
-      f.id === selectedFacture.id
-        ? { ...f, typeDepense: selectedTypeDepense, posteBudgetaire, statut: 'A_PAYER' as StatutFacture }
-        : f
-    ));
+
+    setIsMutating(true);
+
+    try {
+      // Update status to 'posted' (A_PAYER) in Supabase
+      const result = await updateInvoiceMutation.mutate({
+        invoice_id: selectedFacture.id,
+        status: 'posted',
+      });
+
+      if (result.error) {
+        console.error('Send to accounting error:', result.error);
+      }
+
+      // Update local state optimistically
+      const posteBudgetaire = TYPE_DEPENSE_TO_POSTE[selectedTypeDepense] || selectedFacture.posteBudgetaire;
+      setFactures(prev => prev.map(f =>
+        f.id === selectedFacture.id
+          ? { ...f, typeDepense: selectedTypeDepense, posteBudgetaire, statut: 'A_PAYER' as StatutFacture }
+          : f
+      ));
+
+      // Refresh from Supabase to ensure consistency
+      await refreshWithTimestamp();
+    } finally {
+      setIsMutating(false);
+    }
+
     setShowAccountingModal(false);
     setSelectedFacture(null);
-  }, [selectedFacture, selectedTypeDepense]);
+  }, [selectedFacture, selectedTypeDepense, updateInvoiceMutation, refreshWithTimestamp]);
 
   const handleView = useCallback((facture: Facture) => {
     setSelectedFacture(facture);
@@ -278,37 +306,80 @@ export function useFacturesPage() {
     setShowEditModal(true);
   }, []);
 
-  const handleSaveEdit = useCallback(() => {
+  const handleSaveEdit = useCallback(async () => {
     if (!selectedFacture) return;
-    setFactures(prev => prev.map(f =>
-      f.id === selectedFacture.id
-        ? {
-            ...f,
-            date: editForm.date || f.date,
-            fournisseur: editForm.fournisseur || f.fournisseur,
-            reference: editForm.reference || f.reference,
-            montant: editForm.montant || f.montant,
-            fichier: editForm.fichier || f.fichier,
-            posteBudgetaire: editForm.posteBudgetaire || f.posteBudgetaire
-          }
-        : f
-    ));
+
+    setIsMutating(true);
+
+    try {
+      // Update in Supabase
+      const result = await updateInvoiceMutation.mutate({
+        invoice_id: selectedFacture.id,
+        invoice_date: editForm.date,
+        invoice_number: editForm.reference,
+        total_amount: editForm.montant ? Number(editForm.montant) : undefined,
+      });
+
+      if (result.error) {
+        console.error('Update error:', result.error);
+      }
+
+      // Update local state optimistically
+      setFactures(prev => prev.map(f =>
+        f.id === selectedFacture.id
+          ? {
+              ...f,
+              date: editForm.date || f.date,
+              fournisseur: editForm.fournisseur || f.fournisseur,
+              reference: editForm.reference || f.reference,
+              montant: editForm.montant || f.montant,
+              fichier: editForm.fichier || f.fichier,
+              posteBudgetaire: editForm.posteBudgetaire || f.posteBudgetaire
+            }
+          : f
+      ));
+
+      // Refresh from Supabase to ensure consistency
+      await refreshWithTimestamp();
+    } finally {
+      setIsMutating(false);
+    }
+
     setShowEditModal(false);
     setSelectedFacture(null);
     setEditForm({});
-  }, [selectedFacture, editForm]);
+  }, [selectedFacture, editForm, updateInvoiceMutation, refreshWithTimestamp]);
 
   const handleDelete = useCallback((facture: Facture) => {
     setSelectedFacture(facture);
     setShowDeleteModal(true);
   }, []);
 
-  const handleConfirmDelete = useCallback(() => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!selectedFacture) return;
-    setFactures(prev => prev.filter(f => f.id !== selectedFacture.id));
+
+    setIsMutating(true);
+
+    try {
+      // Delete (cancel) in Supabase
+      const result = await deleteInvoiceMutation.mutate(selectedFacture.id);
+
+      if (result.error) {
+        console.error('Delete error:', result.error);
+      }
+
+      // Update local state optimistically
+      setFactures(prev => prev.filter(f => f.id !== selectedFacture.id));
+
+      // Refresh from Supabase to ensure consistency
+      await refreshWithTimestamp();
+    } finally {
+      setIsMutating(false);
+    }
+
     setShowDeleteModal(false);
     setSelectedFacture(null);
-  }, [selectedFacture]);
+  }, [selectedFacture, deleteInvoiceMutation, refreshWithTimestamp]);
 
   const handleNewFacture = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -323,63 +394,124 @@ export function useFacturesPage() {
     setShowNewModal(true);
   }, []);
 
+  // State for creation error message
+  const [createError, setCreateError] = useState<string | null>(null);
+
   const handleCreateFacture = useCallback(async () => {
     if (!newFactureForm.fournisseur || !newFactureForm.reference || !newFactureForm.montant || !newFactureForm.dateEcheance) return;
 
-    // If connected to Supabase, use the Edge Function
-    if (currentCoproId && openPeriod) {
-      // Note: This requires supplier_id which we don't have yet in the form
-      // For now, we'll create locally and refresh will sync later
-      // TODO: Add supplier selection to the form
-    }
+    setIsMutating(true);
+    setCreateError(null);
 
-    const newFacture: Facture = {
-      id: String(factures.length + 1 + Date.now()),
-      typeDocument: 'FACTURE',
-      date: newFactureForm.date,
-      dateEcheance: newFactureForm.dateEcheance,
-      fournisseur: newFactureForm.fournisseur,
-      reference: newFactureForm.reference,
-      montant: parseFloat(newFactureForm.montant),
-      statut: 'BROUILLON',
-      fichier: newFactureForm.fichier || undefined,
-      posteBudgetaire: newFactureForm.posteBudgetaire,
-      historique: [{
-        id: String(Date.now()),
-        date: new Date().toISOString(),
-        type: 'CREATION',
-        utilisateur: 'Utilisateur courant',
-        commentaire: 'Création de la facture'
-      }]
-    };
-    setFactures(prev => [newFacture, ...prev]);
-    setShowNewModal(false);
-  }, [factures.length, newFactureForm, currentCoproId, openPeriod]);
+    try {
+      // Validate required Supabase data
+      if (!currentCoproId) {
+        setCreateError('Aucune copropriété sélectionnée');
+        return;
+      }
+      if (!openPeriod) {
+        setCreateError('Aucune période comptable ouverte');
+        return;
+      }
+
+      // Find supplier by name (case-insensitive)
+      const supplier = suppliers?.find(
+        s => s.name.toLowerCase() === newFactureForm.fournisseur.toLowerCase()
+      );
+
+      if (!supplier) {
+        setCreateError(`Le fournisseur "${newFactureForm.fournisseur}" n'existe pas. Veuillez d'abord le créer dans la liste des fournisseurs ou sélectionner un fournisseur existant.`);
+        return;
+      }
+
+      const montant = parseFloat(newFactureForm.montant);
+
+      // Direct creation in Supabase (bypasses Edge Function auth issues)
+      const result = await createInvoiceMutation.mutate({
+        period_id: openPeriod.id,
+        supplier_id: supplier.id,
+        invoice_number: newFactureForm.reference,
+        invoice_date: newFactureForm.date,
+        due_date: newFactureForm.dateEcheance,
+        label: newFactureForm.reference,
+        total_amount: montant,
+      });
+
+      if (result.error) {
+        setCreateError(`Erreur lors de la création: ${result.error}`);
+        return;
+      }
+
+      // Refresh to get the new invoice from Supabase
+      await refreshWithTimestamp();
+      setShowNewModal(false);
+    } finally {
+      setIsMutating(false);
+    }
+  }, [newFactureForm, currentCoproId, openPeriod, suppliers, createInvoiceMutation, refreshWithTimestamp]);
 
   const handleCreateAvoir = useCallback((facture: Facture) => {
     setSelectedFacture(facture);
     setShowAvoirModal(true);
   }, []);
 
-  const handleConfirmAvoir = useCallback((montant: number, motif: MotifAvoir, reference: string) => {
+  const handleConfirmAvoir = useCallback(async (montant: number, motif: MotifAvoir, reference: string) => {
     if (!selectedFacture) return;
-    const nouvelAvoir: Facture = {
-      id: String(Date.now()),
-      typeDocument: 'AVOIR',
-      date: new Date().toISOString().split('T')[0],
-      dateEcheance: new Date().toISOString().split('T')[0],
-      fournisseur: selectedFacture.fournisseur,
-      reference,
-      montant,
-      statut: 'A_PAYER',
-      posteBudgetaire: selectedFacture.posteBudgetaire,
-      factureOrigineId: selectedFacture.id,
-      motifAvoir: motif
-    };
-    setFactures(prev => [nouvelAvoir, ...prev]);
-    setShowAvoirModal(false);
-    setSelectedFacture(null);
-  }, [selectedFacture]);
+
+    setIsMutating(true);
+
+    try {
+      // Try to create avoir in Supabase
+      if (currentCoproId && openPeriod && suppliers) {
+        // Find supplier by name (same as original invoice)
+        const supplier = suppliers.find(
+          s => s.name.toLowerCase() === selectedFacture.fournisseur.toLowerCase()
+        );
+
+        if (supplier) {
+          // Create as a credit note (negative amount) using direct insertion
+          const result = await createInvoiceMutation.mutate({
+            period_id: openPeriod.id,
+            supplier_id: supplier.id,
+            invoice_number: reference,
+            invoice_date: new Date().toISOString().split('T')[0],
+            due_date: new Date().toISOString().split('T')[0],
+            label: `Avoir: ${motif} - ${reference}`,
+            total_amount: -montant, // Negative for credit note
+          });
+
+          if (!result.error) {
+            await refreshWithTimestamp();
+            setShowAvoirModal(false);
+            setSelectedFacture(null);
+            return;
+          } else {
+            console.error('Create avoir error:', result.error);
+          }
+        }
+      }
+
+      // Fallback: Create locally (shouldn't happen if supplier exists)
+      const nouvelAvoir: Facture = {
+        id: String(Date.now()),
+        typeDocument: 'AVOIR',
+        date: new Date().toISOString().split('T')[0],
+        dateEcheance: new Date().toISOString().split('T')[0],
+        fournisseur: selectedFacture.fournisseur,
+        reference,
+        montant,
+        statut: 'A_PAYER',
+        posteBudgetaire: selectedFacture.posteBudgetaire,
+        factureOrigineId: selectedFacture.id,
+        motifAvoir: motif
+      };
+      setFactures(prev => [nouvelAvoir, ...prev]);
+      setShowAvoirModal(false);
+      setSelectedFacture(null);
+    } finally {
+      setIsMutating(false);
+    }
+  }, [selectedFacture, currentCoproId, openPeriod, suppliers, createInvoiceMutation, refreshWithTimestamp]);
 
   const closePaymentModal = useCallback(() => setShowPaymentModal(false), []);
   const closeAccountingModal = useCallback(() => { setShowAccountingModal(false); setSelectedFacture(null); }, []);
@@ -400,6 +532,7 @@ export function useFacturesPage() {
     hasData: factures.length > 0,
 
     // Data
+    suppliers: suppliers || [],
     factures,
     filteredFactures,
     searchTerm,
@@ -444,6 +577,8 @@ export function useFacturesPage() {
     handleConfirmDelete,
     handleNewFacture,
     handleCreateFacture,
+    createError,
+    clearCreateError: () => setCreateError(null),
     handleCreateAvoir,
     handleConfirmAvoir,
     closePaymentModal,

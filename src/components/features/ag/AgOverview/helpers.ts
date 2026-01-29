@@ -9,7 +9,7 @@ export function getTypeLabel(type: AgMeetingType): string {
       return 'Ordinaire';
     case 'extraordinary':
       return 'Extraordinaire';
-    case 'mixed':
+    case 'special':
       return 'Mixte';
     default:
       return type;

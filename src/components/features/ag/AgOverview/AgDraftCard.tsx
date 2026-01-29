@@ -1,14 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Clock, Calendar, MapPin, ArrowRight, Trash2 } from 'lucide-react';
 import type { AgDraft } from '@/hooks/modules/useAgDrafts';
+import { DeleteDraftModal } from './DeleteDraftModal';
 import clsx from 'clsx';
 import styles from './AgOverview.module.css';
 
 interface AgDraftCardProps {
   draft: AgDraft;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<boolean>;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -72,12 +74,16 @@ function getResumeUrl(draft: AgDraft): string {
 }
 
 export function AgDraftCard({ draft, onDelete }: AgDraftCardProps) {
-  const handleDelete = (e: React.MouseEvent) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleOpenDeleteModal = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm('Supprimer ce brouillon et toutes ses données ?')) {
-      onDelete(draft.id);
-    }
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async (): Promise<boolean> => {
+    return onDelete(draft.id);
   };
 
   const progressItems = [
@@ -158,7 +164,7 @@ export function AgDraftCard({ draft, onDelete }: AgDraftCardProps) {
 
       <div className={styles.draftCardFooter}>
         <button
-          onClick={handleDelete}
+          onClick={handleOpenDeleteModal}
           className={styles.draftDeleteBtn}
           title="Supprimer le brouillon"
         >
@@ -170,6 +176,13 @@ export function AgDraftCard({ draft, onDelete }: AgDraftCardProps) {
           <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>
+
+      <DeleteDraftModal
+        isOpen={isDeleteModalOpen}
+        draftTitle={draft.title}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

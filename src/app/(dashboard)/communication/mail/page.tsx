@@ -23,17 +23,12 @@ import {
 } from '@/components/features/communication/mail';
 
 import {
+  useMailListPage,
   type LegacyEmailMessage,
   type MailFolder,
   DEFAULT_FOLDERS,
   FOLDER_COLORS,
-  MOCK_INBOX,
-  MOCK_SENT,
-  MOCK_DRAFTS,
-  MOCK_ARCHIVED,
-} from '@/data/mock/mail.mock';
-
-import { useMailListPage } from '@/hooks/modules/useMailListPage';
+} from '@/hooks/modules/useMailListPage';
 
 export default function MailCoproPage() {
   const searchParams = useSearchParams();

@@ -37,13 +37,13 @@ interface DraftMetadata {
 const TYPE_MAPPING_TO_DB: Record<AGFormData['type'], AgMeetingType> = {
   'ORDINAIRE': 'ordinary',
   'EXTRAORDINAIRE': 'extraordinary',
-  'URGENTE': 'mixed', // On map URGENTE sur mixed car pas de type urgente dans le schema
+  'URGENTE': 'special', // On map URGENTE sur special car pas de type urgente dans le schema
 };
 
 const TYPE_MAPPING_FROM_DB: Record<AgMeetingType, AGFormData['type']> = {
   'ordinary': 'ORDINAIRE',
   'extraordinary': 'EXTRAORDINAIRE',
-  'mixed': 'URGENTE',
+  'special': 'URGENTE',
 };
 
 /**
@@ -133,7 +133,10 @@ function formatAdresseComplete(adresse: AdresseAG): string {
 function extractDateFromISO(isoString: string | null): string {
   if (!isoString) return '';
   try {
-    return isoString.split('T')[0];
+    // Supabase peut retourner "2026-04-18 19:43:00+00" (avec espace) ou "2026-04-18T19:43:00" (avec T)
+    // On gère les deux formats
+    const dateOnly = isoString.split('T')[0].split(' ')[0];
+    return dateOnly;
   } catch {
     return '';
   }
@@ -366,8 +369,9 @@ function getDefaultMeetingDate(): string {
 }
 
 /**
- * Hook pour la création/reprise automatique d'un brouillon d'AG
- * À utiliser sur /ag/new pour la logique de reprise
+ * Hook pour la création d'un NOUVEAU brouillon d'AG
+ * À utiliser sur /ag/new - crée TOUJOURS une nouvelle AG
+ * Pour reprendre un brouillon existant, utiliser les liens depuis le dashboard
  */
 export function useAgDraftAutoCreate() {
   const { currentCoproId } = useCopro();
@@ -381,56 +385,42 @@ export function useAgDraftAutoCreate() {
       return;
     }
 
-    const initializeDraft = async () => {
+    const createNewDraft = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
         const supabase = createUntypedClient();
 
-        // 1. Chercher un brouillon existant
-        const { data: existingDrafts, error: searchError } = await supabase
+        // Toujours créer un NOUVEAU brouillon (meeting_date est NOT NULL)
+        const newDraft = {
+          copro_id: currentCoproId,
+          title: `AG ${new Date().toLocaleDateString('fr-FR')}`,
+          meeting_type: 'ordinary',
+          meeting_date: getDefaultMeetingDate(),
+          status: 'draft',
+        };
+
+        const { data: created, error: createError } = await supabase
           .from('ag_meetings')
-          .select('id, updated_at')
-          .eq('copro_id', currentCoproId)
-          .eq('status', 'draft')
-          .order('updated_at', { ascending: false })
-          .limit(1);
+          .insert(newDraft)
+          .select('id')
+          .single();
 
-        if (searchError) throw new Error(searchError.message);
+        if (createError) throw new Error(createError.message);
 
-        if (existingDrafts && existingDrafts.length > 0) {
-          // Reprendre le brouillon existant
-          setDraftId(existingDrafts[0].id);
-        } else {
-          // Créer un nouveau brouillon avec une date par défaut (meeting_date est NOT NULL)
-          const newDraft = {
-            copro_id: currentCoproId,
-            title: `AG ${new Date().toLocaleDateString('fr-FR')}`,
-            meeting_type: 'ordinary',
-            meeting_date: getDefaultMeetingDate(),
-            status: 'draft',
-          };
-
-          const { data: created, error: createError } = await supabase
-            .from('ag_meetings')
-            .insert(newDraft)
-            .select('id')
-            .single();
-
-          if (createError) throw new Error(createError.message);
-
-          setDraftId(created.id);
-        }
+        const newId = created.id;
+        setDraftId(newId);
+        console.log('[useAgDraftAutoCreate] Nouvelle AG créée:', newId);
       } catch (err) {
         console.error('[useAgDraftAutoCreate] Error:', err);
-        setError(err instanceof Error ? err.message : 'Erreur lors de l\'initialisation');
+        setError(err instanceof Error ? err.message : 'Erreur lors de la création');
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeDraft();
+    createNewDraft();
   }, [currentCoproId]);
 
   return {

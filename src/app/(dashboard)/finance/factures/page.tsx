@@ -11,12 +11,13 @@ import { EditModal } from '@/components/features/finance/Factures/modals/EditMod
 import { DeleteModal } from '@/components/features/finance/Factures/modals/DeleteModal';
 import { NewFactureModal } from '@/components/features/finance/Factures/modals/NewFactureModal';
 import { AvoirModal } from '@/components/features/finance/Factures/modals/AvoirModal';
-import { MOCK_POSTES_BUDGET } from '@/components/features/finance/Budget';
+import { useBudget } from '@/hooks/modules/useBudget';
 import { useFacturesPage } from '@/features/finance';
 import styles from './factures.module.css';
 
 export default function FacturesPage() {
   const page = useFacturesPage();
+  const { postesBudget } = useBudget();
 
   return (
     <div className={styles.container}>
@@ -37,7 +38,7 @@ export default function FacturesPage() {
       />
       <FacturesTable
         factures={page.filteredFactures}
-        postesBudget={MOCK_POSTES_BUDGET}
+        postesBudget={postesBudget}
         onStatutClick={page.handleStatutClick}
         onCategorize={page.handleCategorize}
         onView={page.handleView}
@@ -60,13 +61,22 @@ export default function FacturesPage() {
         <ViewModal facture={page.selectedFacture} onClose={page.closeViewModal} />
       )}
       {page.showEditModal && page.selectedFacture && (
-        <EditModal facture={page.selectedFacture} editForm={page.editForm} postesBudget={MOCK_POSTES_BUDGET} onEditFormChange={page.setEditForm} onClose={page.closeEditModal} onSave={page.handleSaveEdit} />
+        <EditModal facture={page.selectedFacture} editForm={page.editForm} postesBudget={postesBudget} onEditFormChange={page.setEditForm} onClose={page.closeEditModal} onSave={page.handleSaveEdit} />
       )}
       {page.showDeleteModal && page.selectedFacture && (
         <DeleteModal facture={page.selectedFacture} onClose={page.closeDeleteModal} onConfirm={page.handleConfirmDelete} />
       )}
       {page.showNewModal && (
-        <NewFactureModal form={page.newFactureForm} postesBudget={MOCK_POSTES_BUDGET} onFormChange={page.setNewFactureForm} onClose={page.closeNewModal} onCreate={page.handleCreateFacture} />
+        <NewFactureModal
+          form={page.newFactureForm}
+          postesBudget={postesBudget}
+          suppliers={page.suppliers}
+          createError={page.createError}
+          isCreating={page.isMutating}
+          onFormChange={page.setNewFactureForm}
+          onClose={() => { page.clearCreateError(); page.closeNewModal(); }}
+          onCreate={page.handleCreateFacture}
+        />
       )}
       {page.showAvoirModal && page.selectedFacture && (
         <AvoirModal facture={page.selectedFacture} onClose={page.closeAvoirModal} onConfirm={page.handleConfirmAvoir} />

@@ -1,5 +1,6 @@
 /**
  * Service de gestion des templates de PV
+ * VERSION SUPABASE - Utilise la table pv_templates (si disponible)
  *
  * Gère:
  * - CRUD des templates
@@ -15,32 +16,14 @@ import type {
     IPVSection,
     PVSectionType,
 } from '@/types/models/pv-template';
+import { createClient } from '@/lib/supabase/client';
 
-// ═══════════════════════════════════════════════════════════════
-// STORAGE
-// ═══════════════════════════════════════════════════════════════
+// Helper: Create untyped client to avoid deep type instantiation issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
-const TEMPLATES_STORAGE_KEY = 'pv-templates';
-
-function getTemplatesFromStorage(): Record<string, IPVTemplate> {
-    if (typeof window === 'undefined') return {};
-    const data = localStorage.getItem(TEMPLATES_STORAGE_KEY);
-    if (!data) return {};
-    try {
-        return JSON.parse(data);
-    } catch {
-        return {};
-    }
-}
-
-function saveTemplatesToStorage(templates: Record<string, IPVTemplate>): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
-}
-
-function generateTemplateId(): string {
-    return `tpl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
+// Constante pour cleanup legacy localStorage (one-shot en dev)
+const LEGACY_STORAGE_KEY = 'pv-templates';
 
 // ═══════════════════════════════════════════════════════════════
 // DEFAULT TEMPLATE
@@ -81,7 +64,6 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
         },
 
         sections: [
-            // Section informations AG
             {
                 id: 'ag-info',
                 type: 'ag_info',
@@ -102,8 +84,6 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
 {{/if}}
                 `.trim(),
             },
-
-            // Section bureau
             {
                 id: 'bureau',
                 type: 'bureau',
@@ -127,8 +107,6 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
 </ul>
                 `.trim(),
             },
-
-            // Section feuille de présence
             {
                 id: 'presence-sheet',
                 type: 'presence_sheet',
@@ -163,8 +141,6 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
 </table>
                 `.trim(),
             },
-
-            // Section quorum
             {
                 id: 'quorum',
                 type: 'quorum',
@@ -204,8 +180,6 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
 </p>
                 `.trim(),
             },
-
-            // Section résolutions (itérée)
             {
                 id: 'resolutions',
                 type: 'resolutions',
@@ -213,12 +187,8 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
                 enabled: true,
                 required: true,
                 order: 5,
-                content: `
-<h2>Résolutions</h2>
-                `.trim(),
+                content: `<h2>Résolutions</h2>`.trim(),
             },
-
-            // Détail d'une résolution (itéré sur resolutions)
             {
                 id: 'resolution-detail',
                 type: 'resolution_detail',
@@ -268,8 +238,6 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
                     itemVariable: 'resolution',
                 },
             },
-
-            // Section signatures
             {
                 id: 'signatures',
                 type: 'signatures',
@@ -322,101 +290,169 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
     };
 }
 
+function generateTemplateId(): string {
+    return `tpl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // SERVICE
 // ═══════════════════════════════════════════════════════════════
 
 class PVTemplateService {
-    private systemTemplatesInitialized = false;
+    private initialized = false;
+    private systemTemplate: IPVTemplate | null = null;
 
     /**
-     * Initialise les templates système si nécessaire
+     * Initialise le service et nettoie localStorage legacy
      */
-    private initializeSystemTemplates(): void {
-        if (this.systemTemplatesInitialized) return;
+    private async init(): Promise<void> {
+        if (this.initialized) return;
+        this.initialized = true;
 
-        const templates = getTemplatesFromStorage();
-
-        // Vérifier si le template système existe
-        const hasSystemTemplate = Object.values(templates).some(t => t.isSystemTemplate);
-
-        if (!hasSystemTemplate) {
-            const systemTemplate: IPVTemplate = {
-                id: 'system-default',
-                organizationId: 'system',
-                name: 'Template Standard',
-                description: 'Template par défaut conforme à la réglementation française',
-                status: 'active',
-                isDefault: false,
-                isSystemTemplate: true,
-                spec: getDefaultTemplateSpec(),
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                createdBy: 'system',
-                usageCount: 0,
-            };
-
-            templates['system-default'] = systemTemplate;
-            saveTemplatesToStorage(templates);
+        // Cleanup legacy localStorage (one-shot)
+        if (typeof window !== 'undefined') {
+            const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+            if (legacyData) {
+                console.warn('[PVTemplateService] Suppression données localStorage legacy');
+                localStorage.removeItem(LEGACY_STORAGE_KEY);
+            }
         }
 
-        this.systemTemplatesInitialized = true;
+        // Initialiser le template système
+        this.systemTemplate = {
+            id: 'system-default',
+            organizationId: 'system',
+            name: 'Template Standard',
+            description: 'Template par défaut conforme à la réglementation française',
+            status: 'active',
+            isDefault: false,
+            isSystemTemplate: true,
+            spec: getDefaultTemplateSpec(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: 'system',
+            usageCount: 0,
+        };
     }
 
     /**
      * Liste tous les templates pour une organisation
      */
-    listTemplates(organizationId: string): IPVTemplate[] {
-        this.initializeSystemTemplates();
-        const templates = getTemplatesFromStorage();
+    async listTemplates(organizationId: string): Promise<IPVTemplate[]> {
+        await this.init();
 
-        return Object.values(templates)
-            .filter(t => t.organizationId === organizationId || t.isSystemTemplate)
-            .sort((a, b) => {
-                // Templates système en premier, puis par date de mise à jour
-                if (a.isSystemTemplate && !b.isSystemTemplate) return -1;
-                if (!a.isSystemTemplate && b.isSystemTemplate) return 1;
-                return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-            });
+        const templates: IPVTemplate[] = [];
+
+        // Toujours inclure le template système
+        if (this.systemTemplate) {
+            templates.push(this.systemTemplate);
+        }
+
+        try {
+            const supabase = createUntypedClient();
+            const { data, error } = await supabase
+                .from('pv_templates')
+                .select('*')
+                .or(`organization_id.eq.${organizationId},is_system_template.eq.true`)
+                .order('updated_at', { ascending: false });
+
+            if (error) {
+                if (error.code === '42P01') {
+                    console.info('[PVTemplateService] Table pv_templates non disponible');
+                    return templates;
+                }
+                throw error;
+            }
+
+            // Mapper et ajouter les templates de la DB
+            if (data) {
+                for (const t of data) {
+                    if (t.id === 'system-default') continue; // Éviter les doublons
+                    templates.push(this.mapFromDb(t));
+                }
+            }
+        } catch (error) {
+            console.error('[PVTemplateService] Erreur listTemplates:', error);
+        }
+
+        return templates.sort((a, b) => {
+            if (a.isSystemTemplate && !b.isSystemTemplate) return -1;
+            if (!a.isSystemTemplate && b.isSystemTemplate) return 1;
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
     }
 
     /**
      * Récupère un template par son ID
      */
-    getTemplate(templateId: string): IPVTemplate | null {
-        this.initializeSystemTemplates();
-        const templates = getTemplatesFromStorage();
-        return templates[templateId] || null;
+    async getTemplate(templateId: string): Promise<IPVTemplate | null> {
+        await this.init();
+
+        if (templateId === 'system-default') {
+            return this.systemTemplate;
+        }
+
+        try {
+            const supabase = createUntypedClient();
+            const { data, error } = await supabase
+                .from('pv_templates')
+                .select('*')
+                .eq('id', templateId)
+                .single();
+
+            if (error) {
+                if (error.code === '42P01' || error.code === 'PGRST116') {
+                    return null;
+                }
+                throw error;
+            }
+
+            return this.mapFromDb(data);
+        } catch (error) {
+            console.error('[PVTemplateService] Erreur getTemplate:', error);
+            return null;
+        }
     }
 
     /**
      * Récupère le template par défaut pour une organisation
      */
-    getDefaultTemplate(organizationId: string): IPVTemplate | null {
-        this.initializeSystemTemplates();
-        const templates = getTemplatesFromStorage();
+    async getDefaultTemplate(organizationId: string): Promise<IPVTemplate | null> {
+        await this.init();
 
-        // Chercher le template par défaut de l'organisation
-        const orgDefault = Object.values(templates).find(
-            t => t.organizationId === organizationId && t.isDefault
-        );
-        if (orgDefault) return orgDefault;
+        try {
+            const supabase = createUntypedClient();
+            const { data, error } = await supabase
+                .from('pv_templates')
+                .select('*')
+                .eq('organization_id', organizationId)
+                .eq('is_default', true)
+                .single();
 
-        // Sinon retourner le template système
-        return Object.values(templates).find(t => t.isSystemTemplate) || null;
+            if (error) {
+                if (error.code === '42P01' || error.code === 'PGRST116') {
+                    return this.systemTemplate;
+                }
+                throw error;
+            }
+
+            return this.mapFromDb(data);
+        } catch (error) {
+            return this.systemTemplate;
+        }
     }
 
     /**
      * Crée un nouveau template
      */
-    createTemplate(
+    async createTemplate(
         organizationId: string,
         name: string,
         description: string,
         userId: string,
         baseSpec?: Partial<IPVTemplateSpec>
-    ): IPVTemplate {
-        const templates = getTemplatesFromStorage();
+    ): Promise<IPVTemplate | null> {
+        await this.init();
 
         const defaultSpec = getDefaultTemplateSpec();
         const spec: IPVTemplateSpec = baseSpec
@@ -438,286 +474,114 @@ class PVTemplateService {
             usageCount: 0,
         };
 
-        templates[template.id] = template;
-        saveTemplatesToStorage(templates);
+        try {
+            const supabase = createUntypedClient();
+            const { error } = await supabase
+                .from('pv_templates')
+                .insert(this.mapToDb(template));
 
-        return template;
-    }
+            if (error) {
+                if (error.code === '42P01') {
+                    console.warn('[PVTemplateService] Table pv_templates non disponible');
+                }
+                throw error;
+            }
 
-    /**
-     * Duplique un template existant
-     */
-    duplicateTemplate(
-        templateId: string,
-        organizationId: string,
-        userId: string,
-        newName?: string
-    ): IPVTemplate | null {
-        const sourceTemplate = this.getTemplate(templateId);
-        if (!sourceTemplate) return null;
-
-        const name = newName || `${sourceTemplate.name} (copie)`;
-
-        return this.createTemplate(
-            organizationId,
-            name,
-            sourceTemplate.description || '',
-            userId,
-            JSON.parse(JSON.stringify(sourceTemplate.spec)) // Deep clone
-        );
+            return template;
+        } catch (error) {
+            console.error('[PVTemplateService] Erreur createTemplate:', error);
+            return null;
+        }
     }
 
     /**
      * Met à jour un template
      */
-    updateTemplate(
+    async updateTemplate(
         templateId: string,
         updates: Partial<Pick<IPVTemplate, 'name' | 'description' | 'status' | 'spec'>>,
         userId: string
-    ): IPVTemplate | null {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
+    ): Promise<IPVTemplate | null> {
+        if (templateId === 'system-default') {
+            return null; // Ne pas modifier le template système
+        }
 
-        if (!template || template.isSystemTemplate) {
+        try {
+            const supabase = createUntypedClient();
+
+            const updateData: Record<string, unknown> = {
+                updated_at: new Date().toISOString(),
+                last_modified_by: userId,
+            };
+
+            if (updates.name !== undefined) updateData.name = updates.name;
+            if (updates.description !== undefined) updateData.description = updates.description;
+            if (updates.status !== undefined) updateData.status = updates.status;
+            if (updates.spec !== undefined) updateData.spec = updates.spec;
+
+            const { data, error } = await supabase
+                .from('pv_templates')
+                .update(updateData)
+                .eq('id', templateId)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            return this.mapFromDb(data);
+        } catch (error) {
+            console.error('[PVTemplateService] Erreur updateTemplate:', error);
             return null;
         }
-
-        const updated: IPVTemplate = {
-            ...template,
-            ...updates,
-            updatedAt: new Date(),
-            lastModifiedBy: userId,
-        };
-
-        templates[templateId] = updated;
-        saveTemplatesToStorage(templates);
-
-        return updated;
-    }
-
-    /**
-     * Met à jour la spécification d'un template
-     */
-    updateTemplateSpec(
-        templateId: string,
-        specUpdates: Partial<IPVTemplateSpec>,
-        userId: string
-    ): IPVTemplate | null {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
-
-        if (!template || template.isSystemTemplate) {
-            return null;
-        }
-
-        const updated: IPVTemplate = {
-            ...template,
-            spec: {
-                ...template.spec,
-                ...specUpdates,
-            },
-            updatedAt: new Date(),
-            lastModifiedBy: userId,
-        };
-
-        templates[templateId] = updated;
-        saveTemplatesToStorage(templates);
-
-        return updated;
-    }
-
-    /**
-     * Met à jour une section d'un template
-     */
-    updateSection(
-        templateId: string,
-        sectionId: string,
-        sectionUpdates: Partial<IPVSection>,
-        userId: string
-    ): IPVTemplate | null {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
-
-        if (!template || template.isSystemTemplate) {
-            return null;
-        }
-
-        const sectionIndex = template.spec.sections.findIndex(s => s.id === sectionId);
-        if (sectionIndex === -1) return null;
-
-        const updatedSections = [...template.spec.sections];
-        updatedSections[sectionIndex] = {
-            ...updatedSections[sectionIndex],
-            ...sectionUpdates,
-        };
-
-        return this.updateTemplateSpec(
-            templateId,
-            { sections: updatedSections },
-            userId
-        );
-    }
-
-    /**
-     * Active/désactive une section
-     */
-    toggleSection(
-        templateId: string,
-        sectionId: string,
-        enabled: boolean,
-        userId: string
-    ): IPVTemplate | null {
-        return this.updateSection(templateId, sectionId, { enabled }, userId);
-    }
-
-    /**
-     * Réordonne les sections
-     */
-    reorderSections(
-        templateId: string,
-        sectionIds: string[],
-        userId: string
-    ): IPVTemplate | null {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
-
-        if (!template || template.isSystemTemplate) {
-            return null;
-        }
-
-        const sectionsMap = new Map(template.spec.sections.map(s => [s.id, s]));
-        const reorderedSections = sectionIds
-            .map((id, index) => {
-                const section = sectionsMap.get(id);
-                if (section) {
-                    return { ...section, order: index + 1 };
-                }
-                return null;
-            })
-            .filter((s): s is IPVSection => s !== null);
-
-        return this.updateTemplateSpec(
-            templateId,
-            { sections: reorderedSections },
-            userId
-        );
-    }
-
-    /**
-     * Définit un template comme défaut pour l'organisation
-     */
-    setAsDefault(
-        templateId: string,
-        organizationId: string
-    ): boolean {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
-
-        if (!template || template.organizationId !== organizationId) {
-            return false;
-        }
-
-        // Retirer le flag default des autres templates de l'organisation
-        for (const t of Object.values(templates)) {
-            if (t.organizationId === organizationId && t.isDefault) {
-                t.isDefault = false;
-            }
-        }
-
-        // Définir ce template comme défaut
-        templates[templateId].isDefault = true;
-        saveTemplatesToStorage(templates);
-
-        return true;
     }
 
     /**
      * Supprime un template
      */
-    deleteTemplate(templateId: string): boolean {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
-
-        if (!template || template.isSystemTemplate) {
+    async deleteTemplate(templateId: string): Promise<boolean> {
+        if (templateId === 'system-default') {
             return false;
         }
 
-        delete templates[templateId];
-        saveTemplatesToStorage(templates);
+        try {
+            const supabase = createUntypedClient();
+            const { error } = await supabase
+                .from('pv_templates')
+                .delete()
+                .eq('id', templateId);
 
-        return true;
+            if (error) throw error;
+
+            return true;
+        } catch (error) {
+            console.error('[PVTemplateService] Erreur deleteTemplate:', error);
+            return false;
+        }
     }
 
     /**
      * Incrémente le compteur d'utilisation
      */
-    incrementUsageCount(templateId: string): void {
-        const templates = getTemplatesFromStorage();
-        const template = templates[templateId];
+    async incrementUsageCount(templateId: string): Promise<void> {
+        if (templateId === 'system-default') return;
 
-        if (template) {
-            template.usageCount = (template.usageCount || 0) + 1;
-            saveTemplatesToStorage(templates);
-        }
-    }
-
-    /**
-     * Exporte un template en JSON
-     */
-    exportTemplate(templateId: string): string | null {
-        const template = this.getTemplate(templateId);
-        if (!template) return null;
-
-        const exportData = {
-            exportVersion: '1.0',
-            exportedAt: new Date().toISOString(),
-            template: {
-                name: template.name,
-                description: template.description,
-                spec: template.spec,
-            },
-        };
-
-        return JSON.stringify(exportData, null, 2);
-    }
-
-    /**
-     * Importe un template depuis JSON
-     */
-    importTemplate(
-        jsonString: string,
-        organizationId: string,
-        userId: string
-    ): IPVTemplate | null {
         try {
-            const data = JSON.parse(jsonString);
-
-            if (!data.template || !data.template.spec) {
-                throw new Error('Format de template invalide');
-            }
-
-            return this.createTemplate(
-                organizationId,
-                data.template.name || 'Template importé',
-                data.template.description || '',
-                userId,
-                data.template.spec
-            );
+            const supabase = createUntypedClient();
+            await supabase.rpc('increment_template_usage', { template_id: templateId });
         } catch (error) {
-            console.error('[PVTemplateService] Erreur import:', error);
-            return null;
+            console.error('[PVTemplateService] Erreur incrementUsageCount:', error);
         }
     }
 
     /**
      * Valide un template
      */
-    validateTemplate(templateId: string): {
+    async validateTemplate(templateId: string): Promise<{
         valid: boolean;
         errors: string[];
         warnings: string[];
-    } {
-        const template = this.getTemplate(templateId);
+    }> {
+        const template = await this.getTemplate(templateId);
         if (!template) {
             return { valid: false, errors: ['Template non trouvé'], warnings: [] };
         }
@@ -725,7 +589,6 @@ class PVTemplateService {
         const errors: string[] = [];
         const warnings: string[] = [];
 
-        // Vérifier les sections requises
         const requiredTypes: PVSectionType[] = ['ag_info', 'quorum', 'resolutions'];
         for (const type of requiredTypes) {
             const section = template.spec.sections.find(s => s.type === type);
@@ -734,14 +597,12 @@ class PVTemplateService {
             }
         }
 
-        // Vérifier que les sections ont du contenu
         for (const section of template.spec.sections) {
             if (section.enabled && !section.content.trim()) {
                 errors.push(`Section "${section.label}" est vide`);
             }
         }
 
-        // Vérifier les formulations
         if (!template.spec.formulations.resolutionAdopted) {
             warnings.push('Formulation "résolution adoptée" manquante');
         }
@@ -750,6 +611,45 @@ class PVTemplateService {
             valid: errors.length === 0,
             errors,
             warnings,
+        };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════
+
+    private mapFromDb(data: Record<string, unknown>): IPVTemplate {
+        return {
+            id: data.id as string,
+            organizationId: data.organization_id as string,
+            name: data.name as string,
+            description: data.description as string || '',
+            status: data.status as PVTemplateStatus,
+            isDefault: data.is_default as boolean,
+            isSystemTemplate: data.is_system_template as boolean,
+            spec: data.spec as IPVTemplateSpec,
+            createdAt: new Date(data.created_at as string),
+            updatedAt: new Date(data.updated_at as string),
+            createdBy: data.created_by as string,
+            lastModifiedBy: data.last_modified_by as string | undefined,
+            usageCount: data.usage_count as number || 0,
+        };
+    }
+
+    private mapToDb(template: IPVTemplate): Record<string, unknown> {
+        return {
+            id: template.id,
+            organization_id: template.organizationId,
+            name: template.name,
+            description: template.description,
+            status: template.status,
+            is_default: template.isDefault,
+            is_system_template: template.isSystemTemplate,
+            spec: template.spec,
+            created_at: template.createdAt.toISOString(),
+            updated_at: template.updatedAt.toISOString(),
+            created_by: template.createdBy,
+            usage_count: template.usageCount,
         };
     }
 }

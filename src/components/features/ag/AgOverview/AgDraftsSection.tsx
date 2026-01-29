@@ -11,7 +11,7 @@ interface AgDraftsSectionProps {
   isLoading: boolean;
   error: string | null;
   onRefresh: () => void;
-  onDeleteDraft: (id: string) => void;
+  onDeleteDraft: (id: string) => Promise<boolean>;
 }
 
 export function AgDraftsSection({

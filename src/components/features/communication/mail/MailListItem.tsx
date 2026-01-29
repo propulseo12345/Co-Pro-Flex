@@ -12,7 +12,7 @@ import {
   Download,
 } from 'lucide-react';
 import clsx from 'clsx';
-import type { LegacyEmailMessage } from '@/data/mock/mail.mock';
+import type { LegacyEmailMessage } from '@/hooks/modules/useMailListPage';
 import type { TabType } from './MailTabs';
 import styles from './mail-components.module.css';
 
@@ -59,10 +59,12 @@ export function MailListItem({
   onToggleSelect,
   selectedTab,
 }: MailListItemProps) {
+  // Use originalId for navigation (Supabase UUID)
+  const mailId = email.originalId || email.id;
   const linkHref =
     selectedTab === 'drafts'
-      ? `/communication/mail/nouveau?draft=${email.id}`
-      : `/communication/mail/${email.id}`;
+      ? `/communication/mail/nouveau?draft=${mailId}`
+      : `/communication/mail/${mailId}`;
 
   return (
     <div

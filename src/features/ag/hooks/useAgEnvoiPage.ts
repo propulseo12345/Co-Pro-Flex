@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import type { SendingMethod, SendingChoice } from '../types';
+import { loadDraft, saveDraft } from '@/lib/ag/draft-persistence';
 
 const SENDING_COSTS: Record<SendingMethod, number> = {
   RECOMMANDE: 6.50,
@@ -32,14 +33,18 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
   const [isSent, setIsSent] = useState(false);
 
   useEffect(() => {
-    const defaultChoices = MOCK_COPROPRIETAIRES.map(copro => ({
-      coproprietaireId: copro.id,
-      methods: [] as SendingMethod[]
-    }));
-    setSendingChoices(defaultChoices);
+    const loadData = async () => {
+      const defaultChoices = MOCK_COPROPRIETAIRES.map(copro => ({
+        coproprietaireId: copro.id,
+        methods: [] as SendingMethod[]
+      }));
+      setSendingChoices(defaultChoices);
 
-    const sentStatus = localStorage.getItem('ag-sent-' + agId);
-    if (sentStatus) setIsSent(true);
+      // Load sent status from Supabase/localStorage
+      const { data: sentStatus } = await loadDraft<{ sent: boolean }>(agId, 'milestones', 'ag-sent-' + agId);
+      if (sentStatus?.sent) setIsSent(true);
+    };
+    loadData();
   }, [agId]);
 
   const toggleMethod = useCallback((coproId: string, method: SendingMethod) => {
@@ -99,14 +104,14 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
     return Array.from(allMethods);
   }, [sendingChoices]);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const hasEmptyChoices = sendingChoices.some(choice => choice.methods.length === 0);
     if (hasEmptyChoices) {
       alert('Veuillez sélectionner au moins une méthode d\'envoi pour chaque copropriétaire.');
       return;
     }
-    localStorage.setItem('ag-sending-' + agId, JSON.stringify(sendingChoices));
-    localStorage.setItem('ag-sent-' + agId, 'true');
+    await saveDraft(agId, 'session', { sendingChoices }, 'ag-sending-' + agId);
+    await saveDraft(agId, 'milestones', { sent: true }, 'ag-sent-' + agId);
     setIsSent(true);
     alert('Convocations envoyées avec succès !');
   }, [sendingChoices, agId]);

@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { Download, FileText } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import {
   RelevesStats,
   RelevesFilters,
   RelevesTable,
   ReleveDetailModal,
-  MOCK_RELEVES,
   downloadReleveHTML,
   printReleve,
   downloadMultipleRelevesAsZip
 } from '@/components/features/finance/RelevesIndividuels';
+import { useRelevesIndividuels } from '@/hooks/modules/useRelevesIndividuels';
 import { getExercicesList } from '@/lib/dates';
 import type {
   ReleveIndividuel,
@@ -23,7 +23,6 @@ import styles from './releves-individuels.module.css';
 const EXERCICES = getExercicesList(3);
 
 export default function RelevesIndividuelsPage() {
-  const [releves] = useState<ReleveIndividuel[]>(MOCK_RELEVES);
   const [filters, setFilters] = useState<RelevesFiltersType>({
     search: '',
     exercice: EXERCICES[0], // Exercice actuel (dynamique)
@@ -32,6 +31,9 @@ export default function RelevesIndividuelsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedReleve, setSelectedReleve] = useState<ReleveIndividuel | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Fetch data from Supabase
+  const { releves, isLoading, error } = useRelevesIndividuels(filters.exercice);
 
   const filteredReleves = useMemo(() => {
     return releves.filter(releve => {
@@ -119,6 +121,27 @@ export default function RelevesIndividuelsPage() {
       printReleve(selectedReleve);
     }
   }, [selectedReleve]);
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '2rem' }}>
+          <Loader2 size={24} className="animate-spin" />
+          <span>Chargement des relevés...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className="card" style={{ background: 'var(--color-error-bg)', color: 'var(--color-error)' }}>
+          Erreur: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

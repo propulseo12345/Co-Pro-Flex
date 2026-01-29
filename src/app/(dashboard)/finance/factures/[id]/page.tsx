@@ -58,7 +58,7 @@ export default function FactureDetailPage() {
                 <div className={styles.infoItem}><span className={styles.infoLabel}>Référence</span><span className={styles.infoValue} style={{ fontFamily: 'monospace' }}>{page.facture.reference}</span></div>
                 <div className={styles.infoItem}><span className={styles.infoLabel}>Montant TTC</span><span className={`${styles.infoValue} ${styles.infoValueHighlight}`}>{page.isAvoir ? '-' : ''}{page.formatCurrency(page.facture.montant)}</span></div>
                 {page.facture.datePaiement && (<div className={styles.infoItem}><span className={styles.infoLabel}>Date paiement</span><span className={`${styles.infoValue} ${styles.infoValueSuccess}`}>{page.formatDate(page.facture.datePaiement)}</span></div>)}
-                {page.cleRepartition && (<div className={styles.infoItem}><span className={styles.infoLabel}>Clé de répartition</span><span className={styles.cleBadge}><Key size={12} />{page.cleRepartition.nom}</span></div>)}
+                {page.cleRepartition && (<div className={styles.infoItem}><span className={styles.infoLabel}>Clé de répartition</span><span className={styles.cleBadge}><Key size={12} />{page.cleRepartition.name}</span></div>)}
               </div>
             </div>
           </section>
@@ -69,8 +69,8 @@ export default function FactureDetailPage() {
               <>
                 <table className={styles.ventilationTable}><thead><tr><th>Compte</th><th>Libellé</th><th className={styles.textRight}>HT</th><th className={styles.textRight}>TVA</th><th className={styles.textRight}>TTC</th><th>Clé</th></tr></thead><tbody>
                   {page.facture.ventilation.map((ligne) => {
-                    const cle = page.MOCK_CLES_REPARTITION.find(c => c.id === ligne.cleRepartitionId);
-                    return (<tr key={ligne.id}><td style={{ fontFamily: 'monospace' }}>{ligne.compteComptable}</td><td>{ligne.libelle}</td><td className={`${styles.textRight} ${styles.montant}`}>{page.formatCurrency(ligne.montantHT)}</td><td className={styles.textRight}>{ligne.tauxTVA}%</td><td className={`${styles.textRight} ${styles.montant}`}>{page.formatCurrency(ligne.montantTTC)}</td><td>{cle && (<span className={styles.cleBadge}><Key size={10} />{cle.nom}</span>)}</td></tr>);
+                    const cle = page.repartitionKeys.find(c => c.id === ligne.cleRepartitionId);
+                    return (<tr key={ligne.id}><td style={{ fontFamily: 'monospace' }}>{ligne.compteComptable}</td><td>{ligne.libelle}</td><td className={`${styles.textRight} ${styles.montant}`}>{page.formatCurrency(ligne.montantHT)}</td><td className={styles.textRight}>{ligne.tauxTVA}%</td><td className={`${styles.textRight} ${styles.montant}`}>{page.formatCurrency(ligne.montantTTC)}</td><td>{cle && (<span className={styles.cleBadge}><Key size={10} />{cle.name}</span>)}</td></tr>);
                   })}
                 </tbody></table>
                 <div className={styles.ventilationTotal}><span className={styles.ventilationTotalLabel}>Total TTC</span><span className={styles.ventilationTotalValue}>{page.formatCurrency(page.facture.montant)}</span></div>

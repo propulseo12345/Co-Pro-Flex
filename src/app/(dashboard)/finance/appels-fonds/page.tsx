@@ -56,11 +56,12 @@ export default function AppelsFondsPage() {
     filteredCoproprietaires,
     sendingInProgress,
     stats,
-    setAppels,
+    refreshCalls,
+    isLoading: _isLoading,
 
     // Alertes de délais
-    alertes,
-    statsAlertes,
+    alertes: _alertes,
+    statsAlertes: _statsAlertes,
 
     // Filtres principaux
     searchTerm,
@@ -142,20 +143,12 @@ export default function AppelsFondsPage() {
   }, []);
 
   // Handler pour le succès de l'émission
-  const handleEmissionSuccess = useCallback((result: { nouveauStatut: string }) => {
-    if (appelAEmettre && setAppels) {
-      // Mettre à jour le statut de l'appel dans la liste
-      setAppels((prev: AppelFonds[]) =>
-        prev.map((a: AppelFonds) =>
-          a.id === appelAEmettre.id
-            ? { ...a, statut: 'ENVOYE' as const }
-            : a
-        )
-      );
-    }
+  const handleEmissionSuccess = useCallback(async (_result: { nouveauStatut: string }) => {
+    // Refresh data from Supabase to get updated status
+    await refreshCalls();
     setShowEmissionModal(false);
     setAppelAEmettre(null);
-  }, [appelAEmettre, setAppels]);
+  }, [refreshCalls]);
 
   // Handler pour fermer la modal d'émission
   const handleCloseEmissionModal = useCallback(() => {

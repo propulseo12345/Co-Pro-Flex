@@ -1,24 +1,42 @@
 'use client';
 
-import { FileText, Download, Plus, Search, Filter } from 'lucide-react';
+import { Download, Plus, Search, Filter, Loader2 } from 'lucide-react';
 import styles from './invoices.module.css';
-import { MOCK_FACTURES } from '@/data/mock';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSupplierInvoices } from '@/hooks/modules/useFinanceData';
+
+// Map Supabase status to display status
+function mapStatus(status: string): string {
+    switch (status) {
+        case 'paid': return 'PAYEE';
+        case 'posted':
+        case 'approved': return 'A_PAYER';
+        case 'draft': return 'EN_ATTENTE_VALIDATION';
+        default: return status.toUpperCase();
+    }
+}
 
 export default function InvoicesPage() {
+    const { data: invoices, isLoading, error } = useSupplierInvoices();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
 
-    const filteredInvoices = MOCK_FACTURES.filter((facture) => {
-        const matchesSearch = facture.fournisseur.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            facture.reference?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'ALL' || facture.statut === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
+    const filteredInvoices = useMemo(() => {
+        if (!invoices) return [];
+        return invoices.filter((invoice) => {
+            const matchesSearch = invoice.supplier_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                invoice.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                invoice.label?.toLowerCase().includes(searchTerm.toLowerCase());
+            const mappedStatus = mapStatus(invoice.status);
+            const matchesStatus = statusFilter === 'ALL' || mappedStatus === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [invoices, searchTerm, statusFilter]);
 
-    const getStatusBadge = (statut: string) => {
-        switch (statut) {
+    const getStatusBadge = (status: string) => {
+        const mappedStatus = mapStatus(status);
+        switch (mappedStatus) {
             case 'PAYEE':
                 return <span className="badge badge-success">Payée</span>;
             case 'A_PAYER':
@@ -26,12 +44,14 @@ export default function InvoicesPage() {
             case 'EN_ATTENTE_VALIDATION':
                 return <span className="badge badge-warning">En attente</span>;
             default:
-                return null;
+                return <span className="badge">{mappedStatus}</span>;
         }
     };
 
-    const totalAmount = filteredInvoices.reduce((sum, f) => sum + f.montant, 0);
-    const unpaidAmount = filteredInvoices.filter(f => f.statut === 'A_PAYER').reduce((sum, f) => sum + f.montant, 0);
+    const totalAmount = filteredInvoices.reduce((sum, f) => sum + Number(f.total_amount), 0);
+    const unpaidAmount = filteredInvoices
+        .filter(f => mapStatus(f.status) === 'A_PAYER')
+        .reduce((sum, f) => sum + Number(f.total_amount), 0);
 
     return (
         <div className="container">
@@ -85,6 +105,16 @@ export default function InvoicesPage() {
                     </div>
                 </div>
 
+                {isLoading ? (
+                    <div className={styles.loading}>
+                        <Loader2 size={24} className={styles.spinner} />
+                        <span>Chargement des factures...</span>
+                    </div>
+                ) : error ? (
+                    <div className={styles.error}>
+                        Erreur lors du chargement: {error}
+                    </div>
+                ) : (
                 <div className={styles.tableWrapper}>
                     <table className={styles.table}>
                         <thead>
@@ -98,16 +128,16 @@ export default function InvoicesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredInvoices.map((facture) => (
-                                <tr key={facture.id}>
-                                    <td>{new Date(facture.date).toLocaleDateString('fr-FR')}</td>
-                                    <td className={styles.fournisseur}>{facture.fournisseur}</td>
-                                    <td className={styles.reference}>{facture.reference || '-'}</td>
-                                    <td className={styles.montant}>{facture.montant.toLocaleString('fr-FR')} €</td>
-                                    <td>{getStatusBadge(facture.statut)}</td>
+                            {filteredInvoices.map((invoice) => (
+                                <tr key={invoice.id}>
+                                    <td>{new Date(invoice.invoice_date).toLocaleDateString('fr-FR')}</td>
+                                    <td className={styles.fournisseur}>{invoice.supplier_name}</td>
+                                    <td className={styles.reference}>{invoice.invoice_number || invoice.label || '-'}</td>
+                                    <td className={styles.montant}>{Number(invoice.total_amount).toLocaleString('fr-FR')} €</td>
+                                    <td>{getStatusBadge(invoice.status)}</td>
                                     <td>
                                         <div className={styles.actions}>
-                                            <Link href={`/finance/invoices/${facture.id}`} className="btn btn-secondary btn-sm">
+                                            <Link href={`/finance/invoices/${invoice.id}`} className="btn btn-secondary btn-sm">
                                                 Détails
                                             </Link>
                                             <button className="btn btn-secondary btn-sm" aria-label="Télécharger"><Download size={14} aria-hidden="true" /></button>
@@ -118,6 +148,7 @@ export default function InvoicesPage() {
                         </tbody>
                     </table>
                 </div>
+                )}
             </div>
         </div>
     );

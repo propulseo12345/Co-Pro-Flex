@@ -1,7 +1,8 @@
 import { AppelFondsStatut } from '@/types/enums/statuts';
 
 // Re-export pour compatibilité (deprecated, utiliser AppelFondsStatut)
-export type StatutAppel = AppelFondsStatut | 'ENVOYE' | 'A_GENERER' | 'EN_PREPARATION';
+// Note: 'SOLDE' and 'ANNULE' added for Supabase status mapping compatibility
+export type StatutAppel = AppelFondsStatut | 'ENVOYE' | 'A_GENERER' | 'EN_PREPARATION' | 'SOLDE' | 'ANNULE';
 
 export type ModeEnvoi = 'electronique' | 'email' | 'courrier';
 export type StatutPaiement = 'NON_PAYE' | 'PARTIELLEMENT_PAYE' | 'PAYE';

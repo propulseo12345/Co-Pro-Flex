@@ -1,3 +1,8 @@
+/**
+ * Service de gestion des pièces jointes de factures
+ * VERSION SUPABASE - Utilise l'API documents et Supabase Storage
+ */
+
 import {
   PJFacture,
   UploadPJData,
@@ -6,13 +11,35 @@ import {
   validateUrl,
   generatePJId,
 } from '@/components/features/finance/Factures/types';
+import * as documentsApi from '@/lib/documents/api';
+import { createClient } from '@/lib/supabase/client';
+
+// Constante pour cleanup legacy localStorage (one-shot en dev)
+const LEGACY_STORAGE_KEY = 'coproflex-factures-pj';
 
 /**
  * Service de gestion des pièces jointes de factures
- * NOTE: Version frontend - stockage localStorage en attendant Supabase
+ * Utilise Supabase pour le stockage (table documents + storage bucket ged)
  */
 class FacturePJService {
-  private storageKey = 'coproflex-factures-pj';
+  private initialized = false;
+
+  /**
+   * Initialise le service et nettoie le localStorage legacy si présent
+   */
+  private async init(): Promise<void> {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    // Cleanup legacy localStorage (one-shot)
+    if (typeof window !== 'undefined') {
+      const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyData) {
+        console.warn('[FacturePJService] Suppression données localStorage legacy');
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    }
+  }
 
   // ========================================
   // RÉCUPÉRATION
@@ -20,26 +47,43 @@ class FacturePJService {
 
   /**
    * Récupère toutes les PJ d'une facture
+   * Utilise document_links pour trouver les documents liés à la facture
    */
   async getPJParFacture(factureId: string): Promise<PJFacture[]> {
-    const toutes = this.getAllPJ();
-    return toutes
-      .filter((pj) => pj.id.startsWith(`${factureId}-`))
-      .sort((a, b) => {
-        // PJ principale en premier
-        if (a.estPrincipale && !b.estPrincipale) return -1;
-        if (!a.estPrincipale && b.estPrincipale) return 1;
-        // Puis par date d'ajout (plus récente en premier)
-        return new Date(b.dateAjout).getTime() - new Date(a.dateAjout).getTime();
-      });
+    await this.init();
+
+    try {
+      const documents = await documentsApi.getDocumentsForEntity('facture', factureId);
+
+      return documents
+        .map(doc => this.documentToPJ(doc, factureId))
+        .sort((a, b) => {
+          // PJ principale en premier
+          if (a.estPrincipale && !b.estPrincipale) return -1;
+          if (!a.estPrincipale && b.estPrincipale) return 1;
+          // Puis par date d'ajout (plus récente en premier)
+          return new Date(b.dateAjout).getTime() - new Date(a.dateAjout).getTime();
+        });
+    } catch (error) {
+      console.error('[FacturePJService] Erreur getPJParFacture:', error);
+      return [];
+    }
   }
 
   /**
    * Récupère une PJ par son ID
    */
   async getPJById(pjId: string): Promise<PJFacture | null> {
-    const toutes = this.getAllPJ();
-    return toutes.find((pj) => pj.id === pjId) || null;
+    await this.init();
+
+    try {
+      const doc = await documentsApi.getDocumentById(pjId);
+      if (!doc) return null;
+      return this.documentToPJ(doc, '');
+    } catch (error) {
+      console.error('[FacturePJService] Erreur getPJById:', error);
+      return null;
+    }
   }
 
   // ========================================
@@ -49,7 +93,13 @@ class FacturePJService {
   /**
    * Upload un fichier comme PJ
    */
-  async uploadFichier(factureId: string, data: UploadPJData): Promise<UploadResult> {
+  async uploadFichier(
+    factureId: string,
+    data: UploadPJData,
+    coproId: string
+  ): Promise<UploadResult> {
+    await this.init();
+
     if (!data.file) {
       return { success: false, error: 'Aucun fichier fourni' };
     }
@@ -60,37 +110,50 @@ class FacturePJService {
       return { success: false, error: validation.error };
     }
 
-    // Simuler un délai d'upload
-    await new Promise((r) => setTimeout(r, 300));
+    try {
+      // Upload vers Supabase via l'API documents
+      const doc = await documentsApi.uploadDocument(data.file, coproId, 'facture', {
+        title: data.nomPersonnalise || data.file.name,
+        description: `Pièce jointe facture ${factureId}`,
+        tags: data.estPrincipale ? ['principale'] : [],
+      });
 
-    const nouvellePJ: PJFacture = {
-      id: `${factureId}-${generatePJId()}`,
-      type: 'FICHIER',
-      nom: data.nomPersonnalise || data.file.name,
-      url: URL.createObjectURL(data.file), // En production: URL Supabase/S3
-      mimeType: data.file.type,
-      taille: data.file.size,
-      dateAjout: new Date().toISOString(),
-      estPrincipale: data.estPrincipale ?? false,
-    };
+      // Créer le lien avec la facture
+      await documentsApi.linkDocumentToEntity(
+        doc.id,
+        'facture',
+        factureId,
+        data.estPrincipale ? 'main' : 'annexe'
+      );
 
-    // Gérer l'unicité de estPrincipale
-    if (nouvellePJ.estPrincipale) {
-      await this.unsetPrincipale(factureId);
+      // Si c'est la principale, retirer le tag des autres
+      if (data.estPrincipale) {
+        await this.unsetPrincipale(factureId, doc.id);
+      }
+
+      const pj = this.documentToPJ(doc, factureId);
+      pj.estPrincipale = data.estPrincipale ?? false;
+
+      return { success: true, pj };
+    } catch (error) {
+      console.error('[FacturePJService] Erreur upload:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur lors de l\'upload'
+      };
     }
-
-    // Sauvegarder
-    const toutes = this.getAllPJ();
-    toutes.push(nouvellePJ);
-    this.savePJ(toutes);
-
-    return { success: true, pj: nouvellePJ };
   }
 
   /**
    * Ajoute un lien externe comme PJ
    */
-  async ajouterLienExterne(factureId: string, data: UploadPJData): Promise<UploadResult> {
+  async ajouterLienExterne(
+    factureId: string,
+    data: UploadPJData,
+    coproId: string
+  ): Promise<UploadResult> {
+    await this.init();
+
     if (!data.lienExterne) {
       return { success: false, error: 'Aucun lien fourni' };
     }
@@ -101,26 +164,50 @@ class FacturePJService {
       return { success: false, error: validation.error };
     }
 
-    const nouvellePJ: PJFacture = {
-      id: `${factureId}-${generatePJId()}`,
-      type: 'LIEN_EXTERNE',
-      nom: data.nomPersonnalise || this.extraireNomDepuisUrl(data.lienExterne),
-      url: data.lienExterne,
-      dateAjout: new Date().toISOString(),
-      estPrincipale: data.estPrincipale ?? false,
-    };
+    try {
+      // Créer un document avec le lien externe comme file_path
+      const doc = await documentsApi.createDocument({
+        copro_id: coproId,
+        file_name: data.nomPersonnalise || this.extraireNomDepuisUrl(data.lienExterne),
+        file_path: data.lienExterne,
+        category: 'facture',
+        title: data.nomPersonnalise || this.extraireNomDepuisUrl(data.lienExterne),
+        description: `Lien externe - Facture ${factureId}`,
+        tags: data.estPrincipale ? ['principale', 'lien-externe'] : ['lien-externe'],
+        confidentiality: 'public',
+        source_module: 'finance',
+      });
 
-    // Gérer l'unicité de estPrincipale
-    if (nouvellePJ.estPrincipale) {
-      await this.unsetPrincipale(factureId);
+      // Créer le lien avec la facture
+      await documentsApi.linkDocumentToEntity(
+        doc.id,
+        'facture',
+        factureId,
+        data.estPrincipale ? 'main' : 'annexe'
+      );
+
+      // Si c'est la principale, retirer le tag des autres
+      if (data.estPrincipale) {
+        await this.unsetPrincipale(factureId, doc.id);
+      }
+
+      const pj: PJFacture = {
+        id: doc.id,
+        type: 'LIEN_EXTERNE',
+        nom: doc.file_name,
+        url: data.lienExterne,
+        dateAjout: doc.created_at,
+        estPrincipale: data.estPrincipale ?? false,
+      };
+
+      return { success: true, pj };
+    } catch (error) {
+      console.error('[FacturePJService] Erreur ajouterLienExterne:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur lors de la création du lien'
+      };
     }
-
-    // Sauvegarder
-    const toutes = this.getAllPJ();
-    toutes.push(nouvellePJ);
-    this.savePJ(toutes);
-
-    return { success: true, pj: nouvellePJ };
   }
 
   // ========================================
@@ -131,31 +218,54 @@ class FacturePJService {
    * Définit une PJ comme principale
    */
   async definirPrincipale(factureId: string, pjId: string): Promise<boolean> {
-    const toutes = this.getAllPJ();
+    await this.init();
 
-    // Enlever le flag principal de toutes les PJ de cette facture
-    toutes.forEach((pj) => {
-      if (pj.id.startsWith(`${factureId}-`)) {
-        pj.estPrincipale = pj.id === pjId;
+    try {
+      // Récupérer toutes les PJ de cette facture
+      const documents = await documentsApi.getDocumentsForEntity('facture', factureId);
+
+      // Mettre à jour les tags pour enlever 'principale' des autres et l'ajouter à celle-ci
+      for (const doc of documents) {
+        const currentTags = doc.tags || [];
+        const isPrincipal = doc.id === pjId;
+
+        let newTags: string[];
+        if (isPrincipal) {
+          newTags = currentTags.includes('principale')
+            ? currentTags
+            : [...currentTags, 'principale'];
+        } else {
+          newTags = currentTags.filter(t => t !== 'principale');
+        }
+
+        if (JSON.stringify(currentTags) !== JSON.stringify(newTags)) {
+          await documentsApi.updateDocument(doc.id, { tags: newTags });
+        }
       }
-    });
 
-    this.savePJ(toutes);
-    return true;
+      return true;
+    } catch (error) {
+      console.error('[FacturePJService] Erreur definirPrincipale:', error);
+      return false;
+    }
   }
 
   /**
    * Renomme une PJ
    */
   async renommerPJ(pjId: string, nouveauNom: string): Promise<boolean> {
-    const toutes = this.getAllPJ();
-    const pj = toutes.find((p) => p.id === pjId);
+    await this.init();
 
-    if (!pj) return false;
-
-    pj.nom = nouveauNom;
-    this.savePJ(toutes);
-    return true;
+    try {
+      await documentsApi.updateDocument(pjId, {
+        title: nouveauNom,
+        file_name: nouveauNom,
+      });
+      return true;
+    } catch (error) {
+      console.error('[FacturePJService] Erreur renommerPJ:', error);
+      return false;
+    }
   }
 
   // ========================================
@@ -163,44 +273,39 @@ class FacturePJService {
   // ========================================
 
   /**
-   * Supprime une PJ
+   * Supprime une PJ (archive le document)
    */
   async supprimerPJ(pjId: string): Promise<boolean> {
-    const toutes = this.getAllPJ();
-    const index = toutes.findIndex((pj) => pj.id === pjId);
+    await this.init();
 
-    if (index === -1) return false;
-
-    // Révoquer l'URL blob si c'est un fichier local
-    const pj = toutes[index];
-    if (pj.type === 'FICHIER' && pj.url.startsWith('blob:')) {
-      URL.revokeObjectURL(pj.url);
+    try {
+      // Archive au lieu de supprimer pour garder l'historique
+      await documentsApi.archiveDocument(pjId);
+      return true;
+    } catch (error) {
+      console.error('[FacturePJService] Erreur supprimerPJ:', error);
+      return false;
     }
-
-    toutes.splice(index, 1);
-    this.savePJ(toutes);
-
-    return true;
   }
 
   /**
-   * Supprime toutes les PJ d'une facture
+   * Supprime toutes les PJ d'une facture (archive)
    */
   async supprimerToutesPJ(factureId: string): Promise<number> {
-    const toutes = this.getAllPJ();
-    const aSupprimer = toutes.filter((pj) => pj.id.startsWith(`${factureId}-`));
+    await this.init();
 
-    // Révoquer les URLs blob
-    aSupprimer.forEach((pj) => {
-      if (pj.type === 'FICHIER' && pj.url.startsWith('blob:')) {
-        URL.revokeObjectURL(pj.url);
+    try {
+      const documents = await documentsApi.getDocumentsForEntity('facture', factureId);
+
+      for (const doc of documents) {
+        await documentsApi.archiveDocument(doc.id);
       }
-    });
 
-    const restantes = toutes.filter((pj) => !pj.id.startsWith(`${factureId}-`));
-    this.savePJ(restantes);
-
-    return aSupprimer.length;
+      return documents.length;
+    } catch (error) {
+      console.error('[FacturePJService] Erreur supprimerToutesPJ:', error);
+      return 0;
+    }
   }
 
   // ========================================
@@ -231,39 +336,63 @@ class FacturePJService {
     return pj.find((p) => p.estPrincipale) || pj[0] || null;
   }
 
-  // ========================================
-  // STOCKAGE LOCAL
-  // ========================================
-
-  private getAllPJ(): PJFacture[] {
-    if (typeof window === 'undefined') {
-      return [];
-    }
-
+  /**
+   * Obtient l'URL signée pour télécharger/visualiser un document
+   */
+  async getUrlDocument(filePath: string): Promise<string> {
     try {
-      const data = localStorage.getItem(this.storageKey);
-      if (data) {
-        return JSON.parse(data);
+      // Si c'est un lien externe, retourner directement
+      if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+        return filePath;
       }
-      return [];
-    } catch {
-      return [];
+      return await documentsApi.getDocumentUrl(filePath);
+    } catch (error) {
+      console.error('[FacturePJService] Erreur getUrlDocument:', error);
+      return filePath;
     }
   }
 
-  private savePJ(pj: PJFacture[]): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(this.storageKey, JSON.stringify(pj));
+  // ========================================
+  // HELPERS PRIVÉS
+  // ========================================
+
+  /**
+   * Convertit un Document Supabase en PJFacture
+   */
+  private documentToPJ(doc: documentsApi.Document, factureId: string): PJFacture {
+    const isExternal = doc.file_path?.startsWith('http://') || doc.file_path?.startsWith('https://');
+
+    return {
+      id: doc.id,
+      type: isExternal ? 'LIEN_EXTERNE' : 'FICHIER',
+      nom: doc.title || doc.file_name,
+      url: doc.file_path,
+      mimeType: doc.mime_type,
+      taille: doc.file_size,
+      dateAjout: doc.created_at,
+      estPrincipale: doc.tags?.includes('principale') ?? false,
+    };
   }
 
-  private async unsetPrincipale(factureId: string): Promise<void> {
-    const toutes = this.getAllPJ();
-    toutes.forEach((pj) => {
-      if (pj.id.startsWith(`${factureId}-`)) {
-        pj.estPrincipale = false;
+  /**
+   * Retire le tag 'principale' de toutes les PJ sauf celle spécifiée
+   */
+  private async unsetPrincipale(factureId: string, exceptPjId: string): Promise<void> {
+    try {
+      const documents = await documentsApi.getDocumentsForEntity('facture', factureId);
+
+      for (const doc of documents) {
+        if (doc.id === exceptPjId) continue;
+
+        const currentTags = doc.tags || [];
+        if (currentTags.includes('principale')) {
+          const newTags = currentTags.filter(t => t !== 'principale');
+          await documentsApi.updateDocument(doc.id, { tags: newTags });
+        }
       }
-    });
-    this.savePJ(toutes);
+    } catch (error) {
+      console.error('[FacturePJService] Erreur unsetPrincipale:', error);
+    }
   }
 
   private extraireNomDepuisUrl(url: string): string {

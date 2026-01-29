@@ -31,7 +31,11 @@
       "Bash(git checkout:*)",
       "Bash(git restore:*)",
       "Bash(git fsck:*)",
-      "mcp__plugin_supabase_supabase__list_extensions"
+      "mcp__plugin_supabase_supabase__list_extensions",
+      "Bash(npx eslint:*)",
+      "Bash(rg:*)",
+      "Bash(npx next build:*)",
+      "mcp__plugin_supabase_supabase__get_logs"
     ]
   }
 }

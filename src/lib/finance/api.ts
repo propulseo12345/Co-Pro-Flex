@@ -354,6 +354,46 @@ export async function createSupplierInvoice(payload: CreateSupplierInvoicePayloa
   return invokeEdgeFunction('create_supplier_invoice', payload);
 }
 
+// Direct creation without Edge Function (bypasses auth issues)
+export interface CreateSupplierInvoiceDirectPayload {
+  copro_id: string;
+  period_id: string;
+  supplier_id: string;
+  invoice_number?: string;
+  invoice_date: string;
+  due_date?: string;
+  label: string;
+  total_amount: number;
+}
+
+export async function createSupplierInvoiceDirect(payload: CreateSupplierInvoiceDirectPayload): Promise<ApiResult<{ invoice_id: string }>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('supplier_invoices')
+    .insert({
+      copro_id: payload.copro_id,
+      period_id: payload.period_id,
+      supplier_id: payload.supplier_id,
+      invoice_number: payload.invoice_number || null,
+      invoice_date: payload.invoice_date,
+      due_date: payload.due_date || null,
+      label: payload.label,
+      total_amount: payload.total_amount,
+      status: 'draft',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: { invoice_id: data.id }, error: null };
+}
+
 export interface PaySupplierInvoicePayload {
   copro_id: string;
   period_id: string;
@@ -366,6 +406,52 @@ export interface PaySupplierInvoicePayload {
 
 export async function paySupplierInvoice(payload: PaySupplierInvoicePayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; invoice_status: string }>> {
   return invokeEdgeFunction('pay_supplier_invoice', payload);
+}
+
+export interface UpdateSupplierInvoicePayload {
+  copro_id: string;
+  invoice_id: string;
+  invoice_number?: string;
+  invoice_date?: string;
+  due_date?: string;
+  label?: string;
+  total_amount?: number;
+  status?: 'draft' | 'approved' | 'posted' | 'paid' | 'cancelled';
+}
+
+export async function updateSupplierInvoice(payload: UpdateSupplierInvoicePayload): Promise<ApiResult<{ success: boolean }>> {
+  const supabase = getSupabaseClient();
+
+  const { invoice_id, copro_id, ...updates } = payload;
+
+  const { error } = await supabase
+    .from('supplier_invoices')
+    .update(updates)
+    .eq('id', invoice_id)
+    .eq('copro_id', copro_id);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: { success: true }, error: null };
+}
+
+export async function deleteSupplierInvoice(coproId: string, invoiceId: string): Promise<ApiResult<{ success: boolean }>> {
+  const supabase = getSupabaseClient();
+
+  // Soft delete by setting status to cancelled
+  const { error } = await supabase
+    .from('supplier_invoices')
+    .update({ status: 'cancelled' })
+    .eq('id', invoiceId)
+    .eq('copro_id', coproId);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: { success: true }, error: null };
 }
 
 // ============================================================================

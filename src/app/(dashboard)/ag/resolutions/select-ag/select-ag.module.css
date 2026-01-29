@@ -55,6 +55,17 @@
     margin-bottom: var(--space-lg);
 }
 
+.spinner {
+    color: var(--primary);
+    margin-bottom: var(--space-lg);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .emptyState h2 {
     font-size: var(--text-xl);
     font-weight: 600;

@@ -1,591 +1,397 @@
-'use client';
-
 /**
- * Finance-specific hooks built on useAsyncData
- * Ready to swap mock API for real API without changing hook signatures
+ * @deprecated DEPRECATED - Ces hooks ne doivent plus être utilisés directement.
+ *
+ * Migration vers Supabase:
+ * - useCoproprietaires() → @/hooks/modules/useCoproData
+ * - useLots() → @/hooks/modules/useLotsData
+ * - useBudgets() → @/hooks/modules/useBudgetData
+ * - useAppelsFonds() → @/hooks/modules/useFinanceData (useCalls)
+ * - usePaiements() → @/hooks/modules/useFinanceData (usePayments)
+ * - useEcritures() → @/hooks/modules/useFinanceData (useGeneralLedger)
+ *
+ * Ce fichier existe uniquement pour la compatibilité avec le code legacy.
+ * Tous les hooks retournent des données vides et émettent un warning.
+ *
+ * TODO: Supprimer ce fichier une fois tous les imports migrés.
  */
 
-import { financeApi } from '@/shared/services/financeApi';
-import type {
-  MockCopropriete,
-  MockCoproprietaire,
-  MockLot,
-  MockBudget,
-  MockAppelFonds,
-  MockPaiement,
-  MockFacture,
-  MockFournisseur,
-  MockExercice,
-  MockEcritureComptable,
-  MockMouvementBancaire,
-  MockCompteComptable,
-} from '@/shared/mock/finance';
-import type { ID } from '@/types/common';
-import {
-  useAsyncData,
-  useAsyncList,
-  useMutation,
-  usePaginatedData,
-  type UseAsyncDataOptions,
-} from './useAsyncData';
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
 
 // ============================================
-// COPROPRIETE
+// TYPES
 // ============================================
 
-export function useCopropriete(options?: UseAsyncDataOptions<MockCopropriete>) {
-  return useAsyncData(() => financeApi.copropriete.get(), options);
-}
-
-export function useUpdateCopropriete() {
-  return useMutation((updates: Partial<MockCopropriete>) =>
-    financeApi.copropriete.update(updates)
-  );
+export interface FinanceStats {
+  soldeCompteBancaire: number;
+  totalAppelsEmis: number;
+  totalAppelesPaye: number;
+  totalImpayes: number;
+  nombreImpayes: number;
+  tauxRecouvrement: number;
+  facturesAPayer: number;
+  nombreFacturesAPayer: number;
 }
 
 // ============================================
-// COPROPRIETAIRES
+// DEPRECATED WARNING HELPER
 // ============================================
 
-export function useCoproprietaires(
-  filter?: Partial<MockCoproprietaire>,
-  options?: UseAsyncDataOptions<MockCoproprietaire[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.coproprietaires.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
+const DEPRECATED_MSG = (hookName: string, replacement: string) =>
+  `[${hookName}] DEPRECATED - Utiliser ${replacement} à la place`;
+
+function useDeprecatedHook<T>(
+  hookName: string,
+  replacement: string,
+  defaultData: T
+): {
+  data: T;
+  isLoading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+} {
+  const [hasWarned, setHasWarned] = useState(false);
+
+  useEffect(() => {
+    if (!hasWarned) {
+      console.warn(DEPRECATED_MSG(hookName, replacement));
+      setHasWarned(true);
+    }
+  }, [hasWarned, hookName, replacement]);
+
+  return {
+    data: defaultData,
+    isLoading: false,
+    error: null,
+    refetch: async () => {
+      console.warn(DEPRECATED_MSG(hookName, replacement));
     },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
-}
-
-export function useCoproprietairesPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.coproprietaires.list(filters),
-    options
-  );
-}
-
-export function useCoproprietaire(id: ID | null, options?: UseAsyncDataOptions<MockCoproprietaire>) {
-  return useAsyncData(
-    () => (id ? financeApi.coproprietaires.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
-}
-
-export function useCreateCoproprietaire() {
-  return useMutation((data: Omit<MockCoproprietaire, 'id'>) =>
-    financeApi.coproprietaires.create(data)
-  );
-}
-
-export function useUpdateCoproprietaire() {
-  return useMutation(({ id, ...updates }: Partial<MockCoproprietaire> & { id: ID }) =>
-    financeApi.coproprietaires.update(id, updates)
-  );
-}
-
-export function useDeleteCoproprietaire() {
-  return useMutation((id: ID) => financeApi.coproprietaires.delete(id));
+  };
 }
 
 // ============================================
-// LOTS
+// DEPRECATED HOOKS - COPROPRIETAIRES
 // ============================================
 
-export function useLots(
-  filter?: Partial<MockLot>,
-  options?: UseAsyncDataOptions<MockLot[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.lots.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated - Utiliser useCoproData.useCoproprietaires() */
+export function useCopropriete() {
+  return useDeprecatedHook('useCopropriete', '@/hooks/modules/useCoproData', null);
 }
 
-export function useLotsByCoproprietaire(coproprietaireId: ID | null) {
-  return useAsyncList(
-    () =>
-      coproprietaireId
-        ? financeApi.lots.getByCoproprietaire(coproprietaireId)
-        : Promise.resolve({ success: false, error: 'No ID', data: [] }),
-    { deps: [coproprietaireId], immediate: !!coproprietaireId }
-  );
+/** @deprecated - Utiliser useCoproData.useCoproprietaires() */
+export function useCoproprietaires() {
+  return useDeprecatedHook('useCoproprietaires', '@/hooks/modules/useCoproData', []);
 }
 
-export function useCreateLot() {
-  return useMutation((data: Omit<MockLot, 'id'>) => financeApi.lots.create(data));
+/** @deprecated - Utiliser useCoproData.useCoproprietaire() */
+export function useCoproprietaire(id: string | null) {
+  return useDeprecatedHook('useCoproprietaire', '@/hooks/modules/useCoproData', null);
 }
 
-export function useUpdateLot() {
-  return useMutation(({ id, ...updates }: Partial<MockLot> & { id: ID }) =>
-    financeApi.lots.update(id, updates)
-  );
-}
-
-export function useDeleteLot() {
-  return useMutation((id: ID) => financeApi.lots.delete(id));
+/** @deprecated */
+export function useCoproprietairesPaginated() {
+  return useDeprecatedHook('useCoproprietairesPaginated', '@/hooks/modules/useCoproData', []);
 }
 
 // ============================================
-// EXERCICES
+// DEPRECATED HOOKS - LOTS
 // ============================================
 
-export function useExercices(options?: UseAsyncDataOptions<MockExercice[]>) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.exercices.list();
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    options
-  );
+/** @deprecated - Utiliser useLotsData.useLots() */
+export function useLots() {
+  return useDeprecatedHook('useLots', '@/hooks/modules/useLotsData', []);
 }
 
-export function useCurrentExercice(options?: UseAsyncDataOptions<MockExercice>) {
-  return useAsyncData(() => financeApi.exercices.getCurrent(), options);
-}
-
-export function useExercice(id: ID | null, options?: UseAsyncDataOptions<MockExercice>) {
-  return useAsyncData(
-    () => (id ? financeApi.exercices.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
+/** @deprecated */
+export function useLotsByCoproprietaire(coproprietaireId: string | null) {
+  return useDeprecatedHook('useLotsByCoproprietaire', '@/hooks/modules/useLotsData', []);
 }
 
 // ============================================
-// BUDGETS
+// DEPRECATED HOOKS - EXERCICES
 // ============================================
 
-export function useBudgets(
-  filter?: Partial<MockBudget>,
-  options?: UseAsyncDataOptions<MockBudget[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.budgets.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated - Utiliser useBudgetData.useAccountingPeriods() */
+export function useExercices() {
+  return useDeprecatedHook('useExercices', '@/hooks/modules/useBudgetData', []);
 }
 
-export function useBudgetsByYear(annee: number, options?: UseAsyncDataOptions<MockBudget[]>) {
-  return useAsyncList(() => financeApi.budgets.getByYear(annee), {
-    ...options,
-    deps: [annee, ...(options?.deps || [])],
-  });
+/** @deprecated */
+export function useCurrentExercice() {
+  return useDeprecatedHook('useCurrentExercice', '@/hooks/modules/useBudgetData', null);
 }
 
-export function useBudget(id: ID | null, options?: UseAsyncDataOptions<MockBudget>) {
-  return useAsyncData(
-    () => (id ? financeApi.budgets.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
-}
-
-export function useCreateBudget() {
-  return useMutation((data: Omit<MockBudget, 'id'>) => financeApi.budgets.create(data));
-}
-
-export function useUpdateBudget() {
-  return useMutation(({ id, ...updates }: Partial<MockBudget> & { id: ID }) =>
-    financeApi.budgets.update(id, updates)
-  );
-}
-
-export function useDeleteBudget() {
-  return useMutation((id: ID) => financeApi.budgets.delete(id));
+/** @deprecated */
+export function useExercice(id: string | null) {
+  return useDeprecatedHook('useExercice', '@/hooks/modules/useBudgetData', null);
 }
 
 // ============================================
-// APPELS DE FONDS
+// DEPRECATED HOOKS - BUDGETS
 // ============================================
 
-export function useAppelsFonds(
-  filter?: Partial<MockAppelFonds>,
-  options?: UseAsyncDataOptions<MockAppelFonds[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.appelsFonds.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated - Utiliser useBudgetData.useBudgets() */
+export function useBudgets() {
+  return useDeprecatedHook('useBudgets', '@/hooks/modules/useBudgetData', []);
 }
 
-export function useAppelsFondsPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.appelsFonds.list(filters),
-    options
-  );
+/** @deprecated */
+export function useBudgetsByYear(annee: number) {
+  return useDeprecatedHook('useBudgetsByYear', '@/hooks/modules/useBudgetData', []);
 }
 
-export function useAppelsFondsByBudget(budgetId: ID | null) {
-  return useAsyncList(
-    () =>
-      budgetId
-        ? financeApi.appelsFonds.getByBudget(budgetId)
-        : Promise.resolve({ success: false, error: 'No ID', data: [] }),
-    { deps: [budgetId], immediate: !!budgetId }
-  );
-}
-
-export function useAppelsFondsByExercice(exerciceId: ID | null) {
-  return useAsyncList(
-    () =>
-      exerciceId
-        ? financeApi.appelsFonds.getByExercice(exerciceId)
-        : Promise.resolve({ success: false, error: 'No ID', data: [] }),
-    { deps: [exerciceId], immediate: !!exerciceId }
-  );
-}
-
-export function useAppelFonds(id: ID | null, options?: UseAsyncDataOptions<MockAppelFonds>) {
-  return useAsyncData(
-    () => (id ? financeApi.appelsFonds.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
-}
-
-export function useCreateAppelFonds() {
-  return useMutation((data: Omit<MockAppelFonds, 'id' | 'lignes'>) =>
-    financeApi.appelsFonds.create(data)
-  );
-}
-
-export function useUpdateAppelFonds() {
-  return useMutation(({ id, ...updates }: Partial<MockAppelFonds> & { id: ID }) =>
-    financeApi.appelsFonds.update(id, updates)
-  );
+/** @deprecated */
+export function useBudget(id: string | null) {
+  return useDeprecatedHook('useBudget', '@/hooks/modules/useBudgetData', null);
 }
 
 // ============================================
-// PAIEMENTS
+// DEPRECATED HOOKS - APPELS DE FONDS
 // ============================================
 
-export function usePaiements(
-  filter?: Partial<MockPaiement>,
-  options?: UseAsyncDataOptions<MockPaiement[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.paiements.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated - Utiliser useFinanceData.useCalls() */
+export function useAppelsFonds() {
+  return useDeprecatedHook('useAppelsFonds', '@/hooks/modules/useFinanceData', []);
 }
 
-export function usePaiementsPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.paiements.list(filters),
-    options
-  );
+/** @deprecated */
+export function useAppelsFondsPaginated() {
+  return useDeprecatedHook('useAppelsFondsPaginated', '@/hooks/modules/useFinanceData', []);
 }
 
-export function usePaiementsByCoproprietaire(coproprietaireId: ID | null) {
-  return useAsyncList(
-    () =>
-      coproprietaireId
-        ? financeApi.paiements.getByCoproprietaire(coproprietaireId)
-        : Promise.resolve({ success: false, error: 'No ID', data: [] }),
-    { deps: [coproprietaireId], immediate: !!coproprietaireId }
-  );
+/** @deprecated */
+export function useAppelsFondsByBudget(budgetId: string | null) {
+  return useDeprecatedHook('useAppelsFondsByBudget', '@/hooks/modules/useFinanceData', []);
 }
 
-export function usePaiementsByAppel(appelFondsId: ID | null) {
-  return useAsyncList(
-    () =>
-      appelFondsId
-        ? financeApi.paiements.getByAppel(appelFondsId)
-        : Promise.resolve({ success: false, error: 'No ID', data: [] }),
-    { deps: [appelFondsId], immediate: !!appelFondsId }
-  );
+/** @deprecated */
+export function useAppelsFondsByExercice(exerciceId: string | null) {
+  return useDeprecatedHook('useAppelsFondsByExercice', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useCreatePaiement() {
-  return useMutation((data: Omit<MockPaiement, 'id'>) => financeApi.paiements.create(data));
-}
-
-export function useUpdatePaiement() {
-  return useMutation(({ id, ...updates }: Partial<MockPaiement> & { id: ID }) =>
-    financeApi.paiements.update(id, updates)
-  );
-}
-
-export function useDeletePaiement() {
-  return useMutation((id: ID) => financeApi.paiements.delete(id));
+/** @deprecated */
+export function useAppelFonds(id: string | null) {
+  return useDeprecatedHook('useAppelFonds', '@/hooks/modules/useFinanceData', null);
 }
 
 // ============================================
-// FACTURES
+// DEPRECATED HOOKS - PAIEMENTS
 // ============================================
 
-export function useFactures(
-  filter?: Partial<MockFacture>,
-  options?: UseAsyncDataOptions<MockFacture[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.factures.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated - Utiliser useFinanceData.usePayments() */
+export function usePaiements() {
+  return useDeprecatedHook('usePaiements', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useFacturesPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.factures.list(filters),
-    options
-  );
+/** @deprecated */
+export function usePaiementsPaginated() {
+  return useDeprecatedHook('usePaiementsPaginated', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useFacture(id: ID | null, options?: UseAsyncDataOptions<MockFacture>) {
-  return useAsyncData(
-    () => (id ? financeApi.factures.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
+/** @deprecated */
+export function usePaiementsByCoproprietaire(coproprietaireId: string | null) {
+  return useDeprecatedHook('usePaiementsByCoproprietaire', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useFacturesByStatut(statut: MockFacture['statut']) {
-  return useAsyncList(() => financeApi.factures.getByStatut(statut), {
-    deps: [statut],
-  });
-}
-
-export function useCreateFacture() {
-  return useMutation((data: Omit<MockFacture, 'id'>) => financeApi.factures.create(data));
-}
-
-export function useUpdateFacture() {
-  return useMutation(({ id, ...updates }: Partial<MockFacture> & { id: ID }) =>
-    financeApi.factures.update(id, updates)
-  );
-}
-
-export function useDeleteFacture() {
-  return useMutation((id: ID) => financeApi.factures.delete(id));
+/** @deprecated */
+export function usePaiementsByAppel(appelFondsId: string | null) {
+  return useDeprecatedHook('usePaiementsByAppel', '@/hooks/modules/useFinanceData', []);
 }
 
 // ============================================
-// FOURNISSEURS
+// DEPRECATED HOOKS - FACTURES
 // ============================================
 
-export function useFournisseurs(options?: UseAsyncDataOptions<MockFournisseur[]>) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.fournisseurs.list();
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    options
-  );
+/** @deprecated */
+export function useFactures() {
+  return useDeprecatedHook('useFactures', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useFournisseursPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.fournisseurs.list(filters),
-    options
-  );
+/** @deprecated */
+export function useFacturesPaginated() {
+  return useDeprecatedHook('useFacturesPaginated', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useFournisseur(id: ID | null, options?: UseAsyncDataOptions<MockFournisseur>) {
-  return useAsyncData(
-    () => (id ? financeApi.fournisseurs.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
+/** @deprecated */
+export function useFacture(id: string | null) {
+  return useDeprecatedHook('useFacture', '@/hooks/modules/useFinanceData', null);
 }
 
-export function useCreateFournisseur() {
-  return useMutation((data: Omit<MockFournisseur, 'id'>) =>
-    financeApi.fournisseurs.create(data)
-  );
-}
-
-export function useUpdateFournisseur() {
-  return useMutation(({ id, ...updates }: Partial<MockFournisseur> & { id: ID }) =>
-    financeApi.fournisseurs.update(id, updates)
-  );
-}
-
-export function useDeleteFournisseur() {
-  return useMutation((id: ID) => financeApi.fournisseurs.delete(id));
+/** @deprecated */
+export function useFacturesByStatut(statut: string) {
+  return useDeprecatedHook('useFacturesByStatut', '@/hooks/modules/useFinanceData', []);
 }
 
 // ============================================
-// MOUVEMENTS BANCAIRES
+// DEPRECATED HOOKS - FOURNISSEURS
 // ============================================
 
-export function useMouvementsBancaires(
-  filter?: Partial<MockMouvementBancaire>,
-  options?: UseAsyncDataOptions<MockMouvementBancaire[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.mouvementsBancaires.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated */
+export function useFournisseurs() {
+  return useDeprecatedHook('useFournisseurs', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useMouvementsBancairesPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.mouvementsBancaires.list(filters),
-    options
-  );
+/** @deprecated */
+export function useFournisseursPaginated() {
+  return useDeprecatedHook('useFournisseursPaginated', '@/hooks/modules/useFinanceData', []);
 }
 
+/** @deprecated */
+export function useFournisseur(id: string | null) {
+  return useDeprecatedHook('useFournisseur', '@/hooks/modules/useFinanceData', null);
+}
+
+// ============================================
+// DEPRECATED HOOKS - MOUVEMENTS BANCAIRES
+// ============================================
+
+/** @deprecated */
+export function useMouvementsBancaires() {
+  return useDeprecatedHook('useMouvementsBancaires', '@/hooks/modules/useFinanceData', []);
+}
+
+/** @deprecated */
+export function useMouvementsBancairesPaginated() {
+  return useDeprecatedHook('useMouvementsBancairesPaginated', '@/hooks/modules/useFinanceData', []);
+}
+
+/** @deprecated */
 export function useMouvementsARapprocher() {
-  return useAsyncList(() => financeApi.mouvementsBancaires.getByStatut('A_RAPPROCHER'));
-}
-
-export function useCreateMouvementBancaire() {
-  return useMutation((data: Omit<MockMouvementBancaire, 'id'>) =>
-    financeApi.mouvementsBancaires.create(data)
-  );
-}
-
-export function useRapprocherMouvement() {
-  return useMutation(({ id, ecritureId }: { id: ID; ecritureId: ID }) =>
-    financeApi.mouvementsBancaires.rapprocher(id, ecritureId)
-  );
+  return useDeprecatedHook('useMouvementsARapprocher', '@/hooks/modules/useFinanceData', []);
 }
 
 // ============================================
-// ECRITURES COMPTABLES
+// DEPRECATED HOOKS - ECRITURES
 // ============================================
 
-export function useEcritures(
-  filter?: Partial<MockEcritureComptable>,
-  options?: UseAsyncDataOptions<MockEcritureComptable[]>
-) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.ecritures.list({ filter });
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    { ...options, deps: [JSON.stringify(filter), ...(options?.deps || [])] }
-  );
+/** @deprecated - Utiliser useFinanceData.useGeneralLedger() */
+export function useEcritures() {
+  return useDeprecatedHook('useEcritures', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useEcrituresPaginated(options?: {
-  initialPage?: number;
-  initialPageSize?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
-}) {
-  return usePaginatedData(
-    (filters) => financeApi.ecritures.list(filters),
-    options
-  );
+/** @deprecated */
+export function useEcrituresPaginated() {
+  return useDeprecatedHook('useEcrituresPaginated', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useEcrituresByExercice(exerciceId: ID | null) {
-  return useAsyncList(
-    () =>
-      exerciceId
-        ? financeApi.ecritures.getByExercice(exerciceId)
-        : Promise.resolve({ success: false, error: 'No ID', data: [] }),
-    { deps: [exerciceId], immediate: !!exerciceId }
-  );
+/** @deprecated */
+export function useEcrituresByExercice(exerciceId: string | null) {
+  return useDeprecatedHook('useEcrituresByExercice', '@/hooks/modules/useFinanceData', []);
 }
 
+/** @deprecated */
 export function useEcrituresByJournal(journalCode: string) {
-  return useAsyncList(() => financeApi.ecritures.getByJournal(journalCode), {
-    deps: [journalCode],
-  });
+  return useDeprecatedHook('useEcrituresByJournal', '@/hooks/modules/useFinanceData', []);
 }
 
+/** @deprecated */
 export function useEcrituresByCompte(compteNumero: string) {
-  return useAsyncList(() => financeApi.ecritures.getByCompte(compteNumero), {
-    deps: [compteNumero],
-  });
-}
-
-export function useCreateEcriture() {
-  return useMutation((data: Omit<MockEcritureComptable, 'id'>) =>
-    financeApi.ecritures.create(data)
-  );
+  return useDeprecatedHook('useEcrituresByCompte', '@/hooks/modules/useFinanceData', []);
 }
 
 // ============================================
-// COMPTES COMPTABLES
+// DEPRECATED HOOKS - COMPTES
 // ============================================
 
-export function useComptesComptables(options?: UseAsyncDataOptions<MockCompteComptable[]>) {
-  return useAsyncData(
-    async () => {
-      const result = await financeApi.comptesComptables.list();
-      return { success: result.success, data: result.data?.data, error: result.error };
-    },
-    options
-  );
+/** @deprecated - Utiliser useFinanceData.useAccounts() */
+export function useComptesComptables() {
+  return useDeprecatedHook('useComptesComptables', '@/hooks/modules/useFinanceData', []);
 }
 
-export function useCompteComptable(id: ID | null, options?: UseAsyncDataOptions<MockCompteComptable>) {
-  return useAsyncData(
-    () => (id ? financeApi.comptesComptables.getById(id) : Promise.resolve({ success: false, error: 'No ID' })),
-    { ...options, deps: [id, ...(options?.deps || [])], immediate: !!id }
-  );
+/** @deprecated */
+export function useCompteComptable(id: string | null) {
+  return useDeprecatedHook('useCompteComptable', '@/hooks/modules/useFinanceData', null);
 }
 
-export function useCompteComptableByNumero(numero: string, options?: UseAsyncDataOptions<MockCompteComptable>) {
-  return useAsyncData(
-    () => (numero ? financeApi.comptesComptables.getByNumero(numero) : Promise.resolve({ success: false, error: 'No numero' })),
-    { ...options, deps: [numero, ...(options?.deps || [])], immediate: !!numero }
-  );
+/** @deprecated */
+export function useCompteComptableByNumero(numero: string) {
+  return useDeprecatedHook('useCompteComptableByNumero', '@/hooks/modules/useFinanceData', null);
 }
 
 // ============================================
-// STATS
+// DEPRECATED HOOKS - STATS
 // ============================================
 
-import type { FinanceStats } from '@/shared/services/financeApi';
-
-export function useFinanceStats(options?: UseAsyncDataOptions<FinanceStats>) {
-  return useAsyncData(() => financeApi.stats.getStats(), options);
+/** @deprecated - Utiliser les vues Supabase directement */
+export function useFinanceStats() {
+  const emptyStats: FinanceStats = {
+    soldeCompteBancaire: 0,
+    totalAppelsEmis: 0,
+    totalAppelesPaye: 0,
+    totalImpayes: 0,
+    nombreImpayes: 0,
+    tauxRecouvrement: 100,
+    facturesAPayer: 0,
+    nombreFacturesAPayer: 0,
+  };
+  return useDeprecatedHook('useFinanceStats', 'vues Supabase (v_*)', emptyStats);
 }
 
 // ============================================
-// ADMIN
+// DEPRECATED HOOKS - MUTATIONS (stubs)
 // ============================================
 
-export function useResetFinanceData() {
-  return useMutation(() => financeApi.admin.resetData());
-}
+const deprecatedMutation = (name: string) => ({
+  mutate: async () => {
+    console.warn(`[${name}] DEPRECATED - Utiliser les hooks Supabase`);
+    return null;
+  },
+  mutateAsync: async () => {
+    console.warn(`[${name}] DEPRECATED - Utiliser les hooks Supabase`);
+    throw new Error('DEPRECATED');
+  },
+  isLoading: false,
+  error: null,
+});
+
+/** @deprecated */
+export function useUpdateCopropriete() { return deprecatedMutation('useUpdateCopropriete'); }
+/** @deprecated */
+export function useCreateCoproprietaire() { return deprecatedMutation('useCreateCoproprietaire'); }
+/** @deprecated */
+export function useUpdateCoproprietaire() { return deprecatedMutation('useUpdateCoproprietaire'); }
+/** @deprecated */
+export function useDeleteCoproprietaire() { return deprecatedMutation('useDeleteCoproprietaire'); }
+/** @deprecated */
+export function useCreateLot() { return deprecatedMutation('useCreateLot'); }
+/** @deprecated */
+export function useUpdateLot() { return deprecatedMutation('useUpdateLot'); }
+/** @deprecated */
+export function useDeleteLot() { return deprecatedMutation('useDeleteLot'); }
+/** @deprecated */
+export function useCreateBudget() { return deprecatedMutation('useCreateBudget'); }
+/** @deprecated */
+export function useUpdateBudget() { return deprecatedMutation('useUpdateBudget'); }
+/** @deprecated */
+export function useDeleteBudget() { return deprecatedMutation('useDeleteBudget'); }
+/** @deprecated */
+export function useCreateAppelFonds() { return deprecatedMutation('useCreateAppelFonds'); }
+/** @deprecated */
+export function useUpdateAppelFonds() { return deprecatedMutation('useUpdateAppelFonds'); }
+/** @deprecated */
+export function useCreatePaiement() { return deprecatedMutation('useCreatePaiement'); }
+/** @deprecated */
+export function useUpdatePaiement() { return deprecatedMutation('useUpdatePaiement'); }
+/** @deprecated */
+export function useDeletePaiement() { return deprecatedMutation('useDeletePaiement'); }
+/** @deprecated */
+export function useCreateFacture() { return deprecatedMutation('useCreateFacture'); }
+/** @deprecated */
+export function useUpdateFacture() { return deprecatedMutation('useUpdateFacture'); }
+/** @deprecated */
+export function useDeleteFacture() { return deprecatedMutation('useDeleteFacture'); }
+/** @deprecated */
+export function useCreateFournisseur() { return deprecatedMutation('useCreateFournisseur'); }
+/** @deprecated */
+export function useUpdateFournisseur() { return deprecatedMutation('useUpdateFournisseur'); }
+/** @deprecated */
+export function useDeleteFournisseur() { return deprecatedMutation('useDeleteFournisseur'); }
+/** @deprecated */
+export function useCreateMouvementBancaire() { return deprecatedMutation('useCreateMouvementBancaire'); }
+/** @deprecated */
+export function useRapprocherMouvement() { return deprecatedMutation('useRapprocherMouvement'); }
+/** @deprecated */
+export function useCreateEcriture() { return deprecatedMutation('useCreateEcriture'); }
+/** @deprecated */
+export function useResetFinanceData() { return deprecatedMutation('useResetFinanceData'); }

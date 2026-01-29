@@ -46,8 +46,8 @@ export default function AGPage() {
     return <LoadingState message="Chargement de la copropriété..." />;
   }
 
-  const handleDeleteDraft = async (draftId: string) => {
-    await deleteDraft(draftId);
+  const handleDeleteDraft = async (draftId: string): Promise<boolean> => {
+    return deleteDraft(draftId);
   };
 
   return (

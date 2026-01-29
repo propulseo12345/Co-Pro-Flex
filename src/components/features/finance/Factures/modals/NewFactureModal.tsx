@@ -4,21 +4,28 @@ import { useState, useCallback, useEffect } from 'react';
 import { X, Plus, AlertCircle, Calendar } from 'lucide-react';
 import { NewFactureForm, PJFacture, calculerDateEcheanceDefaut, PosteBudget } from '../types';
 import type { PosteBudgetData } from '@/components/features/finance/Budget/types';
-import { MOCK_FOURNISSEURS } from '../data';
 import { detectPosteBudgetaire, getResteDisponible, formatCurrency, POSTE_BUDGET_LABELS } from '../utils';
 import { PosteBudgetSelector } from '../PosteBudgetSelector';
 import { FacturePJSection } from '../PJ';
 import styles from '../Factures.module.css';
 
+interface Supplier {
+  id: string;
+  name: string;
+}
+
 interface NewFactureModalProps {
   form: NewFactureForm;
   postesBudget: PosteBudgetData[];
+  suppliers?: Supplier[];
+  createError?: string | null;
+  isCreating?: boolean;
   onFormChange: (form: NewFactureForm) => void;
   onClose: () => void;
   onCreate: () => void;
 }
 
-export function NewFactureModal({ form, postesBudget, onFormChange, onClose, onCreate }: NewFactureModalProps) {
+export function NewFactureModal({ form, postesBudget, suppliers = [], createError, isCreating, onFormChange, onClose, onCreate }: NewFactureModalProps) {
   const [pjError, setPjError] = useState<string | null>(null);
   const [suggestedPoste, setSuggestedPoste] = useState<PosteBudget | null>(null);
 
@@ -127,22 +134,21 @@ export function NewFactureModal({ form, postesBudget, onFormChange, onClose, onC
 
           <div className={styles.formGroup}>
             <label htmlFor="new-fournisseur">Fournisseur <span className={styles.required}>*</span></label>
-            <select
+            <input
               id="new-fournisseur"
+              type="text"
+              list="fournisseurs-list"
               value={form.fournisseur}
-              onChange={(e) => {
-                const fournisseur = MOCK_FOURNISSEURS.find(f => f.id === e.target.value);
-                if (fournisseur) {
-                  onFormChange({ ...form, fournisseur: fournisseur.nom });
-                }
-              }}
+              onChange={(e) => onFormChange({ ...form, fournisseur: e.target.value })}
               className={styles.formInput}
-            >
-              <option value="">Sélectionner un fournisseur...</option>
-              {MOCK_FOURNISSEURS.map((f) => (
-                <option key={f.id} value={f.id}>{f.nom}</option>
+              placeholder="Saisir ou sélectionner un fournisseur..."
+              autoComplete="off"
+            />
+            <datalist id="fournisseurs-list">
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.name} />
               ))}
-            </select>
+            </datalist>
           </div>
 
           <div className={styles.formGroup}>
@@ -196,15 +202,25 @@ export function NewFactureModal({ form, postesBudget, onFormChange, onClose, onC
               </span>
             )}
           </div>
+
+          {/* Erreur de création Supabase */}
+          {createError && (
+            <div className={styles.formGroup}>
+              <span className={styles.errorMessage} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', padding: '0.75rem', backgroundColor: 'var(--color-error-bg, #fef2f2)', borderRadius: '0.375rem' }}>
+                <AlertCircle size={16} aria-hidden="true" style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+                <span>{createError}</span>
+              </span>
+            </div>
+          )}
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.cancelButton} onClick={onClose}>
+          <button className={styles.cancelButton} onClick={onClose} disabled={isCreating}>
             Annuler
           </button>
-          <button className={styles.payButton} onClick={handleCreate}>
+          <button className={styles.payButton} onClick={handleCreate} disabled={isCreating}>
             <Plus size={20} aria-hidden="true" />
-            Créer la facture
+            {isCreating ? 'Création en cours...' : 'Créer la facture'}
           </button>
         </div>
       </div>

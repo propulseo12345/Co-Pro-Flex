@@ -4,6 +4,13 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { isValid, parseISO, format, startOfDay } from 'date-fns';
 import type { AGFormData, AdresseAG, BudgetPoste } from '../types';
+import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+import { createClient } from '@/lib/supabase/client';
+import { AGFormat } from '@/types';
+import type { AgMeeting, AgMeetingType } from '@/lib/ag/types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
 interface GooglePlaceResult {
   address_components?: Array<{
@@ -17,6 +24,70 @@ interface GooglePlaceResult {
 interface GoogleAutocomplete {
   addListener: (event: string, callback: () => void) => void;
   getPlace: () => GooglePlaceResult;
+}
+
+// Mapping des types AG depuis la DB
+const TYPE_MAPPING_FROM_DB: Record<AgMeetingType, 'ORDINAIRE' | 'EXTRAORDINAIRE'> = {
+  'ordinary': 'ORDINAIRE',
+  'extraordinary': 'EXTRAORDINAIRE',
+  'special': 'EXTRAORDINAIRE',
+};
+
+const TYPE_MAPPING_TO_DB: Record<string, AgMeetingType> = {
+  'ORDINAIRE': 'ordinary',
+  'EXTRAORDINAIRE': 'extraordinary',
+};
+
+// Interface pour les métadonnées stockées dans opening_notes
+interface DraftMetadata {
+  format?: AGFormat;
+  heure?: string;
+  adresse?: AdresseAG;
+  visioUrl?: string;
+  visioProvider?: string;
+  budget?: boolean;
+  budgetMontant?: string;
+  budgetExercice?: string;
+  budgetPostes?: BudgetPoste[];
+}
+
+function deserializeMetadata(raw: string | null): DraftMetadata {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as DraftMetadata;
+  } catch {
+    return {};
+  }
+}
+
+function serializeMetadata(formData: AGFormData): string {
+  const metadata: DraftMetadata = {
+    heure: formData.heure,
+    adresse: formData.adresse,
+    budget: formData.budget,
+    budgetMontant: formData.budgetMontant,
+    budgetExercice: formData.budgetExercice,
+    budgetPostes: formData.budgetPostes,
+  };
+  return JSON.stringify(metadata);
+}
+
+function extractDateFromISO(isoString: string | null): string {
+  if (!isoString) return '';
+  try {
+    // Supabase peut retourner "2026-04-18 19:43:00+00" (avec espace) ou "2026-04-18T19:43:00" (avec T)
+    // On gère les deux formats
+    const dateOnly = isoString.split('T')[0].split(' ')[0];
+    return dateOnly;
+  } catch {
+    return '';
+  }
+}
+
+function combineDateAndTime(date: string, heure: string): string {
+  if (!date) return '';
+  if (!heure) return `${date}T00:00:00`;
+  return `${date}T${heure}:00`;
 }
 
 const BUDGET_PRECEDENT = {
@@ -70,13 +141,66 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
   const autocompleteInstance = useRef<GoogleAutocomplete | null>(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    const savedData = localStorage.getItem(`ag-draft-${agId}`);
-    if (savedData) {
-      try {
-        setFormData(JSON.parse(savedData) as AGFormData);
-      } catch { /* ignore */ }
-    }
+    const loadData = async () => {
+      setIsLoading(true);
+
+      // Vérifier si c'est une AG Supabase (UUID)
+      if (isValidUUID(agId)) {
+        try {
+          const supabase = createUntypedClient();
+          const { data: meeting, error } = await supabase
+            .from('ag_meetings')
+            .select('*')
+            .eq('id', agId)
+            .single();
+
+          if (!error && meeting) {
+            const m = meeting as AgMeeting;
+            const metadata = deserializeMetadata(m.opening_notes);
+
+            // Essayer aussi de charger depuis ag_session_drafts
+            let sessionMetadata: DraftMetadata = metadata;
+            try {
+              const { data: sessionData } = await loadDraft<DraftMetadata>(agId, 'session', `ag-session-${agId}`);
+              if (sessionData) {
+                sessionMetadata = { ...metadata, ...sessionData };
+              }
+            } catch {
+              // Ignore, use metadata from opening_notes
+            }
+
+            const loadedData: AGFormData = {
+              type: TYPE_MAPPING_FROM_DB[m.meeting_type] || 'ORDINAIRE',
+              date: extractDateFromISO(m.meeting_date),
+              heure: sessionMetadata.heure || '',
+              lieu: m.location || '',
+              adresse: sessionMetadata.adresse || { nomLieu: '', rue: '', codePostal: '', ville: '' },
+              adresseComplete: m.location || '',
+              budget: sessionMetadata.budget || false,
+              budgetMontant: sessionMetadata.budgetMontant || '',
+              budgetExercice: sessionMetadata.budgetExercice || (new Date().getFullYear() + 1 + ''),
+              budgetPostes: sessionMetadata.budgetPostes || [],
+            };
+
+            setFormData(loadedData);
+          }
+        } catch (err) {
+          console.error('[useAgEditPage] Error loading from Supabase:', err);
+        }
+      } else {
+        // Fallback pour les anciennes AG (localStorage)
+        const { data: savedData } = await loadDraft<AGFormData>(agId, 'session', `ag-draft-${agId}`);
+        if (savedData) {
+          setFormData(savedData);
+        }
+      }
+
+      setIsLoading(false);
+    };
+    loadData();
   }, [agId]);
 
   const handleChange = useCallback((field: keyof AGFormData, value: string | boolean | BudgetPoste[] | AdresseAG) => {
@@ -289,14 +413,46 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     try {
-      localStorage.setItem(`ag-draft-${agId}`, JSON.stringify(formData));
+      // Sauvegarder vers Supabase si c'est une AG UUID
+      if (isValidUUID(agId)) {
+        const supabase = createUntypedClient();
+
+        const meetingDate = combineDateAndTime(formData.date, formData.heure);
+
+        const updates: Record<string, unknown> = {
+          meeting_type: TYPE_MAPPING_TO_DB[formData.type] || 'ordinary',
+          location: formData.adresseComplete || formData.lieu || null,
+          opening_notes: serializeMetadata(formData),
+          updated_at: new Date().toISOString(),
+        };
+
+        // Mettre à jour meeting_date seulement si valide
+        if (meetingDate && formData.date) {
+          updates.meeting_date = meetingDate;
+        }
+
+        const { error } = await supabase
+          .from('ag_meetings')
+          .update(updates)
+          .eq('id', agId);
+
+        if (error) throw new Error(error.message);
+
+        // Sauvegarder aussi dans ag_session_drafts pour backup
+        await saveDraft(agId, 'session', formData, `ag-session-${agId}`);
+      } else {
+        // Fallback localStorage
+        await saveDraft(agId, 'session', formData, `ag-draft-${agId}`);
+      }
+
       router.push(`/ag/${agId}/agenda`);
-    } catch (error) {
+    } catch (err) {
+      console.error('[useAgEditPage] Error saving:', err);
       setErrors({ form: 'Une erreur est survenue lors de la modification de l\'AG. Veuillez réessayer.' });
     }
   }, [validate, agId, formData, router]);
@@ -323,6 +479,7 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
     isGoogleMapsLoaded,
     autocompleteRef,
     budgetTotal,
+    isLoading,
     POSTES_DEPENSES,
     BUDGET_PRECEDENT,
     handleChange,

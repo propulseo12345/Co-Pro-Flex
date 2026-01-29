@@ -2,8 +2,7 @@
 
 import { X, FolderPlus, Edit3, Trash2, FolderInput, Folder, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
-import type { MailFolder } from '@/data/mock/mail.mock';
-import { FOLDER_COLORS } from '@/data/mock/mail.mock';
+import { type MailFolder, FOLDER_COLORS } from '@/hooks/modules/useMailListPage';
 import styles from './mail-components.module.css';
 
 interface CreateFolderModalProps {

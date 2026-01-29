@@ -1,17 +1,61 @@
 'use client';
 
-import { MOCK_MOUVEMENTS_BANCAIRES } from '@/data/mock';
-import { Download, Search, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { useBankMovements } from '@/hooks/modules/useFinanceData';
+import { Download, Search, ArrowUpRight, ArrowDownLeft, Loader2 } from 'lucide-react';
 import styles from './transactions.module.css';
 import clsx from 'clsx';
 
 export default function TransactionsPage() {
-    // Add some mock categorized transactions for display
-    const allTransactions = [
-        ...MOCK_MOUVEMENTS_BANCAIRES,
-        { id: '4', date: '2025-11-15', libelle: 'PRLV URSSAF', montant: -450.00, statut: 'CATEGORISE', compteId: '431' },
-        { id: '5', date: '2025-11-10', libelle: 'VIR MME MARTIN CHARGES T4', montant: 280.00, statut: 'CATEGORISE', compteId: '411' }
-    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const { data: movements, isLoading, error } = useBankMovements();
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Filter and sort transactions
+    const filteredTransactions = useMemo(() => {
+        if (!movements) return [];
+        return movements
+            .filter(tx =>
+                tx.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                tx.bank_ref?.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .sort((a, b) => new Date(b.bank_date).getTime() - new Date(a.bank_date).getTime());
+    }, [movements, searchTerm]);
+
+    // Calculate balances
+    const { soldeActuel, soldeComptable } = useMemo(() => {
+        if (!movements) return { soldeActuel: 0, soldeComptable: 0 };
+
+        const total = movements.reduce((sum, tx) => sum + tx.amount_signed, 0);
+        const matchedTotal = movements
+            .filter(tx => tx.status === 'matched')
+            .reduce((sum, tx) => sum + tx.amount_signed, 0);
+
+        return {
+            soldeActuel: total,
+            soldeComptable: matchedTotal,
+        };
+    }, [movements]);
+
+    if (isLoading) {
+        return (
+            <div className="container">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '2rem' }}>
+                    <Loader2 size={24} className="animate-spin" />
+                    <span>Chargement des transactions...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container">
+                <div className="card" style={{ background: 'var(--color-error-bg)', color: 'var(--color-error)' }}>
+                    Erreur: {error}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container">
@@ -30,11 +74,11 @@ export default function TransactionsPage() {
             <div className={styles.balanceCard}>
                 <div className={styles.balanceItem}>
                     <span className={styles.balanceLabel}>Solde actuel</span>
-                    <span className={styles.balanceValue}>12 450,00 €</span>
+                    <span className={styles.balanceValue}>{soldeActuel.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</span>
                 </div>
                 <div className={styles.balanceItem}>
                     <span className={styles.balanceLabel}>Solde comptable</span>
-                    <span className={styles.balanceValue}>12 450,00 €</span>
+                    <span className={styles.balanceValue}>{soldeComptable.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</span>
                 </div>
             </div>
 
@@ -42,7 +86,14 @@ export default function TransactionsPage() {
                 <div className={styles.filters}>
                     <div className={styles.searchWrapper}>
                         <Search size={16} className={styles.searchIcon} aria-hidden="true" />
-                        <input type="text" placeholder="Rechercher une transaction..." className={styles.searchInput} aria-label="Rechercher une transaction..."/>
+                        <input
+                            type="text"
+                            placeholder="Rechercher une transaction..."
+                            className={styles.searchInput}
+                            aria-label="Rechercher une transaction..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
 
@@ -51,36 +102,46 @@ export default function TransactionsPage() {
                         <tr>
                             <th>Date</th>
                             <th>Libellé</th>
-                            <th>Catégorie</th>
+                            <th>Statut</th>
                             <th className="text-right">Montant</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {allTransactions.map((tx) => (
-                            <tr key={tx.id}>
-                                <td className={styles.dateCell}>{new Date(tx.date).toLocaleDateString('fr-FR')}</td>
-                                <td className={styles.libelleCell}>
-                                    <div className={styles.iconWrapper}>
-                                        {tx.montant > 0 ? (
-                                            <ArrowDownLeft size={16} className="text-green-600" aria-hidden="true" />
-                                        ) : (
-                                            <ArrowUpRight size={16} className="text-red-600" aria-hidden="true" />
-                                        )}
-                                    </div>
-                                    {tx.libelle}
-                                </td>
-                                <td>
-                                    {tx.statut === 'A_CATEGORISER' ? (
-                                        <span className={styles.uncategorized}>À catégoriser</span>
-                                    ) : (
-                                        <span className={styles.categorized}>Catégorisé</span>
-                                    )}
-                                </td>
-                                <td className={clsx(styles.amount, tx.montant > 0 ? styles.positive : styles.negative)}>
-                                    {tx.montant > 0 ? '+' : ''}{tx.montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                        {filteredTransactions.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                                    {movements?.length === 0 ? 'Aucune transaction' : 'Aucun résultat'}
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            filteredTransactions.map((tx) => (
+                                <tr key={tx.id}>
+                                    <td className={styles.dateCell}>{new Date(tx.bank_date).toLocaleDateString('fr-FR')}</td>
+                                    <td className={styles.libelleCell}>
+                                        <div className={styles.iconWrapper}>
+                                            {tx.direction === 'credit' ? (
+                                                <ArrowDownLeft size={16} className="text-green-600" aria-hidden="true" />
+                                            ) : (
+                                                <ArrowUpRight size={16} className="text-red-600" aria-hidden="true" />
+                                            )}
+                                        </div>
+                                        {tx.label}
+                                    </td>
+                                    <td>
+                                        {tx.status === 'unmatched' ? (
+                                            <span className={styles.uncategorized}>Non rapproché</span>
+                                        ) : tx.status === 'matched' ? (
+                                            <span className={styles.categorized}>Rapproché</span>
+                                        ) : (
+                                            <span className={styles.ignored}>Ignoré</span>
+                                        )}
+                                    </td>
+                                    <td className={clsx(styles.amount, tx.direction === 'credit' ? styles.positive : styles.negative)}>
+                                        {tx.direction === 'credit' ? '+' : '-'}{tx.amount_abs.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

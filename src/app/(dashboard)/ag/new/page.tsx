@@ -20,7 +20,8 @@ import { useGoogleMapsAutocomplete, useBudgetPostes } from '../../../../features
 import { useAgDraftAutoCreate, useAgDraftEdit } from '@/hooks/modules/useAgDraftEdit';
 import { useAGDelais } from '@/hooks/modules/useAGDelais';
 import { DELAIS_LEGAUX } from '@/lib/constants/ag-delais-legaux';
-import { ajouterResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
+import { genererResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
+import { saveDraft } from '@/lib/ag/draft-persistence';
 import { validateVisioUrl, sanitizeUrl } from '@/lib/utils/url-validation';
 import { detectVisioProvider, requiresVisioUrl, isVisioUrlMandatory } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -177,7 +178,7 @@ export default function NewAGPage() {
   }, [formData, validationDateAG, datesMinimales]);
 
   // Soumission du formulaire
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate() || !draftId) {
@@ -187,15 +188,20 @@ export default function NewAGPage() {
     try {
       // Ajouter les résolutions standard pour AG ordinaire
       if (formData.type === 'ORDINAIRE') {
-        const resolutions = ajouterResolutionsAGOrdinaire(draftId);
-        if (resolutions) {
-          sessionStorage.setItem(`ag-resolutions-created-${draftId}`, 'true');
+        const resolutions = genererResolutionsAGOrdinaire();
+        if (resolutions && resolutions.length > 0) {
+          // Sauvegarder les résolutions dans Supabase via saveDraft
+          await saveDraft(draftId, 'resolutions', resolutions);
+          // Marquer que les résolutions ont été créées
+          await saveDraft(draftId, 'milestones', { resolutionsCreated: true });
+          console.log(`[NewAGPage] ${resolutions.length} résolutions sauvegardées pour AG ${draftId}`);
         }
       }
 
       // Rediriger vers l'étape suivante (agenda)
       router.push(`/ag/${draftId}/agenda`);
-    } catch {
+    } catch (err) {
+      console.error('[NewAGPage] Erreur:', err);
       setErrors({ form: "Une erreur est survenue lors de la création de l'AG. Veuillez réessayer." });
     }
   }, [formData.type, validate, router, draftId]);

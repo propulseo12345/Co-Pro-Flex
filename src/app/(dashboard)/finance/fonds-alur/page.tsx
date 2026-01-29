@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Search,
   Download,
@@ -8,158 +8,88 @@ import {
   Clock,
   Euro,
   FileText,
-  ChevronDown,
-  ChevronUp
+  Loader2,
+  Percent
 } from 'lucide-react';
 import styles from './fonds-alur.module.css';
+import { useBudget } from '@/hooks/modules/useBudget';
+import { useLotsWithOwners } from '@/hooks/modules/useCoproData';
 
-interface VersementFondsALUR {
-  id: string;
-  montantVerse: number;
-  dateVersement: string;
-  annee: number;
-  origine: 'APPEL_FONDS' | 'REGULARISATION' | 'VENTE';
-}
-
-interface SoldeFondsALUR {
+interface LotALURData {
   lotId: string;
   lot: string;
   coproprietaire: string;
+  tantiemes: number;
+  sharePercent: number;
   soldeActuel: number;
-  versements: VersementFondsALUR[];
 }
 
-const MOCK_FONDS_ALUR: SoldeFondsALUR[] = [
-  {
-    lotId: '1',
-    lot: 'A1',
-    coproprietaire: 'Marie LEBLANC',
-    soldeActuel: 3250.00,
-    versements: [
-      { id: 'v1', montantVerse: 800.00, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v2', montantVerse: 800.00, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v3', montantVerse: 800.00, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v4', montantVerse: 850.00, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '2',
-    lot: 'A2',
-    coproprietaire: 'Pierre MOREAU',
-    soldeActuel: 2600.00,
-    versements: [
-      { id: 'v5', montantVerse: 650.00, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v6', montantVerse: 650.00, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v7', montantVerse: 650.00, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v8', montantVerse: 650.00, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '3',
-    lot: 'B3',
-    coproprietaire: 'Sophie LAURENT',
-    soldeActuel: 3900.00,
-    versements: [
-      { id: 'v9', montantVerse: 975.00, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v10', montantVerse: 975.00, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v11', montantVerse: 975.00, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v12', montantVerse: 975.00, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '4',
-    lot: 'B4',
-    coproprietaire: 'Jean MARTIN',
-    soldeActuel: 3250.00,
-    versements: [
-      { id: 'v13', montantVerse: 812.50, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v14', montantVerse: 812.50, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v15', montantVerse: 812.50, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v16', montantVerse: 812.50, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '5',
-    lot: 'C5',
-    coproprietaire: 'Isabelle DUBOIS',
-    soldeActuel: 2600.00,
-    versements: [
-      { id: 'v17', montantVerse: 650.00, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v18', montantVerse: 650.00, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v19', montantVerse: 650.00, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v20', montantVerse: 650.00, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '6',
-    lot: 'C6',
-    coproprietaire: 'Claude BERNARD',
-    soldeActuel: 3900.00,
-    versements: [
-      { id: 'v21', montantVerse: 975.00, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v22', montantVerse: 975.00, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v23', montantVerse: 975.00, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v24', montantVerse: 975.00, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '7',
-    lot: 'D7',
-    coproprietaire: 'Anne ROUSSEAU',
-    soldeActuel: 3250.00,
-    versements: [
-      { id: 'v25', montantVerse: 812.50, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v26', montantVerse: 812.50, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v27', montantVerse: 812.50, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v28', montantVerse: 812.50, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-  {
-    lotId: '8',
-    lot: 'D8',
-    coproprietaire: 'Marc PETIT',
-    soldeActuel: 3250.00,
-    versements: [
-      { id: 'v29', montantVerse: 812.50, dateVersement: '2024-01-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v30', montantVerse: 812.50, dateVersement: '2024-04-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v31', montantVerse: 812.50, dateVersement: '2024-07-15', annee: 2024, origine: 'APPEL_FONDS' },
-      { id: 'v32', montantVerse: 812.50, dateVersement: '2024-10-15', annee: 2024, origine: 'APPEL_FONDS' },
-    ]
-  },
-];
-
 export default function FondsALURPage() {
-  const [fonds, setFonds] = useState<SoldeFondsALUR[]>(MOCK_FONDS_ALUR);
+  const { fondsALUR, selectedYear, isLoading: budgetLoading, error: budgetError } = useBudget();
+  const { lots, isLoading: lotsLoading, error: lotsError } = useLotsWithOwners();
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedLotId, setExpandedLotId] = useState<string | null>(null);
 
-  const filteredFonds = fonds.filter(f =>
-    f.coproprietaire.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.lot.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const isLoading = budgetLoading || lotsLoading;
+  const error = budgetError || lotsError;
 
-  const totalFonds = fonds.reduce((sum, f) => sum + f.soldeActuel, 0);
+  // Calculate total tantiemes for percentage calculation
+  const totalTantiemes = useMemo(() => {
+    return lots.reduce((sum, lot) => sum + (lot.tantiemes_generaux || 0), 0);
+  }, [lots]);
 
-  const getOrigineBadge = (origine: string) => {
-    switch (origine) {
-      case 'APPEL_FONDS':
-        return <span className={styles.origineAppelFonds}>Appel de fonds</span>;
-      case 'REGULARISATION':
-        return <span className={styles.origineRegularisation}>Régularisation</span>;
-      case 'VENTE':
-        return <span className={styles.origineVente}>Vente</span>;
-      default:
-        return null;
-    }
-  };
+  // Map lots to ALUR data with calculated share
+  const lotsALURData = useMemo((): LotALURData[] => {
+    if (!lots.length || totalTantiemes === 0) return [];
 
-  const handleToggleExpand = (lotId: string) => {
-    setExpandedLotId(expandedLotId === lotId ? null : lotId);
-  };
+    return lots.map(lot => {
+      const tantiemes = lot.tantiemes_generaux || 0;
+      const sharePercent = (tantiemes / totalTantiemes) * 100;
+      // Calculate lot's share of ALUR fund based on tantiemes
+      const soldeActuel = (fondsALUR.soldeActuel * tantiemes) / totalTantiemes;
+
+      return {
+        lotId: lot.id,
+        lot: lot.ref,
+        coproprietaire: lot.owner_display_name || 'Non assigné',
+        tantiemes,
+        sharePercent,
+        soldeActuel,
+      };
+    });
+  }, [lots, totalTantiemes, fondsALUR.soldeActuel]);
+
+  const filteredFonds = useMemo(() => {
+    return lotsALURData.filter(f =>
+      f.coproprietaire.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.lot.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [lotsALURData, searchTerm]);
 
   const exportToExcel = () => {
     // Export Excel du fonds ALUR
   };
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '2rem' }}>
+          <Loader2 size={24} className="animate-spin" />
+          <span>Chargement des données ALUR...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className="card" style={{ background: 'var(--color-error-bg)', color: 'var(--color-error)' }}>
+          Erreur: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -186,7 +116,7 @@ export default function FondsALURPage() {
           <div className={styles.statContent}>
             <span className={styles.statLabel}>Total du fonds</span>
             <span className={styles.statValue}>
-              {totalFonds.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+              {fondsALUR.soldeActuel.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
             </span>
           </div>
         </div>
@@ -195,8 +125,19 @@ export default function FondsALURPage() {
             <TrendingUp size={24} aria-hidden="true" />
           </div>
           <div className={styles.statContent}>
-            <span className={styles.statLabel}>Nombre de lots</span>
-            <span className={styles.statValue}>{fonds.length}</span>
+            <span className={styles.statLabel}>Cotisation annuelle</span>
+            <span className={styles.statValue}>
+              {fondsALUR.cotisationAnnuelle.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+            </span>
+          </div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>
+            <Percent size={24} aria-hidden="true" />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statLabel}>Part du budget</span>
+            <span className={styles.statValue}>{fondsALUR.pourcentageBudget}%</span>
           </div>
         </div>
         <div className={styles.statCard}>
@@ -204,8 +145,8 @@ export default function FondsALURPage() {
             <Clock size={24} aria-hidden="true" />
           </div>
           <div className={styles.statContent}>
-            <span className={styles.statLabel}>Année en cours</span>
-            <span className={styles.statValue}>{new Date().getFullYear()}</span>
+            <span className={styles.statLabel}>Exercice</span>
+            <span className={styles.statValue}>{selectedYear}</span>
           </div>
         </div>
       </div>
@@ -222,72 +163,32 @@ export default function FondsALURPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th></th>
               <th>Lot</th>
               <th>Copropriétaire</th>
-              <th>Nombre de versements</th>
-              <th className={styles.textRight}>Solde actuel</th>
+              <th className={styles.textRight}>Tantièmes</th>
+              <th className={styles.textRight}>Quote-part</th>
+              <th className={styles.textRight}>Solde ALUR</th>
               <th className={styles.textCenter}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredFonds.map((fond) => (
-              <>
-                <tr key={fond.lotId} className={styles.mainRow}>
-                  <td>
-                    <button
-                      className={styles.expandButton}
-                      onClick={() => handleToggleExpand(fond.lotId)}
-                    >
-                      {expandedLotId === fond.lotId ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
-                    </button>
-                  </td>
-                  <td className={styles.lotCell}>{fond.lot}</td>
-                  <td className={styles.coproCell}>{fond.coproprietaire}</td>
-                  <td>{fond.versements.length}</td>
-                  <td className={styles.textRight}>
-                    <span className={styles.solde}>
-                      {fond.soldeActuel.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-                    </span>
-                  </td>
-                  <td className={styles.textCenter}>
-                    <button className={styles.actionButton} title="Voir le détail">
-                      <FileText size={16} aria-hidden="true" />
-                    </button>
-                  </td>
-                </tr>
-                {expandedLotId === fond.lotId && (
-                  <tr className={styles.expandedRow}>
-                    <td colSpan={6}>
-                      <div className={styles.versementsContainer}>
-                        <h4 className={styles.versementsTitle}>Historique des versements</h4>
-                        <div className={styles.versementsList}>
-                          {fond.versements.map((versement) => (
-                            <div key={versement.id} className={styles.versementItem}>
-                              <div className={styles.versementInfo}>
-                                <span className={styles.versementDate}>
-                                  {new Date(versement.dateVersement).toLocaleDateString('fr-FR')}
-                                </span>
-                                <span className={styles.versementAnnee}>Année {versement.annee}</span>
-                                {getOrigineBadge(versement.origine)}
-                              </div>
-                              <div className={styles.versementMontant}>
-                                {versement.montantVerse.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className={styles.versementsTotal}>
-                          <span>Total des versements</span>
-                          <span className={styles.versementsTotalValue}>
-                            {fond.versements.reduce((sum, v) => sum + v.montantVerse, 0).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </>
+              <tr key={fond.lotId} className={styles.mainRow}>
+                <td className={styles.lotCell}>{fond.lot}</td>
+                <td className={styles.coproCell}>{fond.coproprietaire}</td>
+                <td className={styles.textRight}>{fond.tantiemes.toLocaleString('fr-FR')}</td>
+                <td className={styles.textRight}>{fond.sharePercent.toFixed(2)}%</td>
+                <td className={styles.textRight}>
+                  <span className={styles.solde}>
+                    {fond.soldeActuel.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                  </span>
+                </td>
+                <td className={styles.textCenter}>
+                  <button className={styles.actionButton} title="Voir le détail">
+                    <FileText size={16} aria-hidden="true" />
+                  </button>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>
@@ -295,7 +196,7 @@ export default function FondsALURPage() {
         {filteredFonds.length === 0 && (
           <div className={styles.emptyState}>
             <FileText size={48} aria-hidden="true" />
-            <p>Aucun lot trouvé</p>
+            <p>{lots.length === 0 ? 'Aucun lot configuré' : 'Aucun lot trouvé'}</p>
           </div>
         )}
       </div>

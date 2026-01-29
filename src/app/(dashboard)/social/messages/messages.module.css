@@ -1,11 +1,33 @@
 .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 2rem;
 }
 
 .title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     font-size: 1.875rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+}
+
+.unreadBadge {
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: var(--primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .subtitle {
@@ -51,6 +73,13 @@
     color: inherit;
     transition: background-color 0.2s;
     position: relative;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
 }
 
 .conversationItem:last-child {
@@ -110,16 +139,57 @@
     font-weight: 500;
 }
 
-.unreadDot {
-    width: 10px;
-    height: 10px;
-    background-color: var(--primary);
-    border-radius: 50%;
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
 }
 
-.emptyState {
-    text-align: center;
-    padding: 2rem;
+.emptyIcon {
+    color: var(--text-tertiary, #9CA3AF);
+    opacity: 0.5;
+}
+
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 3rem 2rem;
     color: var(--text-secondary);
-    font-style: italic;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.errorState {
+    padding: 2rem;
+    text-align: center;
+    color: var(--error, #ef4444);
+    background-color: rgba(239, 68, 68, 0.1);
+    border-radius: 8px;
+    margin: 1rem;
+}
+
+.unreadDot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    background-color: var(--primary);
+    color: white;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
 }

@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { parseISO, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import type { AGFormData, AdresseAG, BudgetPoste } from '../domain/types';
 import { AGFormat, requiresVisioUrl, isVisioUrlMandatory, detectVisioProvider } from '@/types';
 import { validateVisioUrl, sanitizeUrl } from '@/lib/utils/url-validation';
 import { useAGDelais } from '@/hooks/modules/useAGDelais';
 import { DELAIS_LEGAUX } from '@/lib/constants/ag-delais-legaux';
-import { ajouterResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
+import { useCreateAg } from '@/hooks/modules/useAgData';
+import { saveDraft } from '@/lib/ag/draft-persistence';
 
 const INITIAL_FORM_DATA: AGFormData = {
   type: 'ORDINAIRE',
@@ -37,6 +39,10 @@ export function useAgCreateForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [showCalendrierJalons, setShowCalendrierJalons] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Hook pour créer l'AG dans Supabase
+  const { execute: createAgInSupabase, isLoading: isCreatingAg, error: createAgError } = useCreateAg();
 
   const {
     jalons,
@@ -177,31 +183,101 @@ export function useAgCreateForm() {
   }, [formData, validationDateAG, datesMinimales]);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
 
       if (!validate()) {
         return;
       }
 
-      const agId = 'ag-' + Date.now();
+      setIsSubmitting(true);
+      setErrors({});
 
       try {
-        localStorage.setItem('ag-draft-' + agId, JSON.stringify(formData));
+        // Construire la date complète ISO (date + heure)
+        const meetingDateTime = `${formData.date}T${formData.heure}:00`;
 
-        if (formData.type === 'ORDINAIRE') {
-          const resolutions = ajouterResolutionsAGOrdinaire(agId);
-          if (resolutions) {
-            sessionStorage.setItem(`ag-resolutions-created-${agId}`, 'true');
-          }
+        // Construire l'adresse complète pour location
+        const locationParts = [];
+        if (formData.lieu) locationParts.push(formData.lieu);
+        if (formData.adresse.nomLieu && formData.adresse.nomLieu !== formData.lieu) {
+          locationParts.push(formData.adresse.nomLieu);
+        }
+        if (formData.adresse.rue) locationParts.push(formData.adresse.rue);
+        if (formData.adresse.codePostal || formData.adresse.ville) {
+          locationParts.push(`${formData.adresse.codePostal} ${formData.adresse.ville}`.trim());
+        }
+        const location = locationParts.join(', ') || 'À définir';
+
+        // Mapper le type vers meeting_type Supabase (AgMeetingType: 'ordinary' | 'extraordinary' | 'special')
+        const meetingTypeMap: Record<string, 'ordinary' | 'extraordinary' | 'special'> = {
+          'ORDINAIRE': 'ordinary',
+          'EXTRAORDINAIRE': 'extraordinary',
+          'URGENTE': 'extraordinary', // AG urgente = extraordinaire
+          'MIXTE': 'special', // AG mixte = special
+        };
+        const meetingType = meetingTypeMap[formData.type] || 'ordinary';
+
+        // Générer le titre
+        const dateFormatted = format(parseISO(formData.date), 'd MMMM yyyy', { locale: fr });
+        const title = formData.type === 'ORDINAIRE'
+          ? `Assemblée Générale Ordinaire du ${dateFormatted}`
+          : formData.type === 'EXTRAORDINAIRE'
+            ? `Assemblée Générale Extraordinaire du ${dateFormatted}`
+            : `Assemblée Générale du ${dateFormatted}`;
+
+        // Créer l'AG dans Supabase via Edge Function
+        const result = await createAgInSupabase({
+          title,
+          meeting_date: meetingDateTime,
+          location,
+          meeting_type: meetingType,
+          include_standard_resolutions: formData.type === 'ORDINAIRE',
+        });
+
+        if (!result.success || !result.ag_id) {
+          setErrors({
+            form: result.error || "Une erreur est survenue lors de la création de l'AG dans la base de données."
+          });
+          setIsSubmitting(false);
+          return;
         }
 
+        const agId = result.ag_id;
+        console.log('[useAgCreateForm] AG créée avec succès, UUID:', agId);
+
+        // Sauvegarder les données additionnelles du formulaire dans ag_session_drafts
+        // (budget, format visio, etc. qui ne sont pas dans ag_meetings)
+        const additionalData = {
+          format: formData.format,
+          heure: formData.heure,
+          visioUrl: formData.visioUrl,
+          visioProvider: formData.visioProvider,
+          budget: formData.budget,
+          budgetMontant: formData.budgetMontant,
+          budgetExercice: formData.budgetExercice,
+          budgetPostes: formData.budgetPostes,
+          adresse: formData.adresse,
+        };
+
+        // Sauvegarder en Supabase (maintenant que agId est un UUID valide)
+        await saveDraft(agId, 'session', additionalData);
+
+        // Naviguer vers la page agenda avec l'UUID Supabase
         router.push(`/ag/${agId}/agenda`);
-      } catch {
-        setErrors({ form: "Une erreur est survenue lors de la création de l'AG. Veuillez réessayer." });
+
+      } catch (err) {
+        console.error('[useAgCreateForm] Erreur:', err);
+        setErrors({
+          form: err instanceof Error
+            ? err.message
+            : "Une erreur est survenue lors de la création de l'AG. Veuillez réessayer."
+        });
+      } finally {
+        setIsSubmitting(false);
       }
     },
-    [formData, validate, router]
+    [formData, validate, router, createAgInSupabase]
   );
 
   const handleBack = useCallback(() => {
@@ -218,6 +294,7 @@ export function useAgCreateForm() {
     validationDateAG,
     datesMinimales,
     budgetTotal,
+    isSubmitting: isSubmitting || isCreatingAg,
     setFormData,
     setShowCalendrierJalons,
     handleChange,

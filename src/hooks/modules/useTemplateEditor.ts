@@ -37,9 +37,9 @@ export function useTemplateEditor(templateId: string) {
 
   useEffect(() => { selectTemplate(templateId); }, [templateId, selectTemplate]);
 
-  const updatePreview = useCallback(() => {
+  const updatePreview = useCallback(async () => {
     if (!templateId) return;
-    const result = generatePreview(templateId);
+    const result = await generatePreview(templateId);
     setPreviewHtml(result.html);
     setPreviewErrors(result.errors);
   }, [templateId, generatePreview]);

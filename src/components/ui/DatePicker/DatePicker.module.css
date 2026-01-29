@@ -28,16 +28,20 @@
 
 .input {
   width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  padding-right: calc(var(--spacing-3) + 70px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  height: 42px;
+  padding: 10px 12px;
+  padding-right: 72px; /* Espace fixe pour les icônes */
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--color-bg-primary, #fff);
+  color: var(--color-text-primary, #1f2937);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
   min-width: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
 }
 
 .input:focus {
@@ -66,12 +70,15 @@
 
 .inputIcons {
   position: absolute;
-  right: var(--spacing-2);
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
   pointer-events: none;
+  height: 28px;
 }
 
 .inputIcons button {

@@ -1,12 +1,19 @@
 /**
  * Service de distribution des Procès-Verbaux
+ * VERSION SUPABASE - Utilise Documents API pour l'archivage GED
  *
  * Ce service gère :
- * - L'archivage automatique dans la GED (catégorie PV)
- * - L'envoi par email aux copropriétaires
+ * - L'archivage automatique dans la GED (via documents API)
+ * - L'envoi par email aux copropriétaires (stub)
  * - Le suivi des notifications
  * - Les options de configuration (envoi automatique, etc.)
  */
+
+import * as documentsApi from '@/lib/documents/api';
+
+// Constantes pour cleanup legacy localStorage (one-shot en dev)
+const LEGACY_DISTRIBUTION_JOBS_KEY = 'pv-distribution-jobs';
+const LEGACY_GED_DOCUMENTS_KEY = 'ged-pv-documents';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
@@ -42,6 +49,7 @@ export interface DistributionJob {
     id: string;
     pvDocumentId: string;
     agId: string;
+    coproId: string;
     type: 'archive' | 'notification' | 'full';
     status: 'queued' | 'running' | 'completed' | 'failed';
     progress: number;
@@ -73,42 +81,27 @@ export interface GEDCategory {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STORAGE
+// IN-MEMORY STATE
 // ═══════════════════════════════════════════════════════════════
 
-const DISTRIBUTION_JOBS_KEY = 'pv-distribution-jobs';
-const GED_DOCUMENTS_KEY = 'ged-pv-documents';
+const activeDistributionJobs = new Map<string, DistributionJob>();
 
-function getDistributionJobs(): Record<string, DistributionJob> {
-    if (typeof window === 'undefined') return {};
-    const data = localStorage.getItem(DISTRIBUTION_JOBS_KEY);
-    if (!data) return {};
-    try {
-        return JSON.parse(data);
-    } catch {
-        return {};
+let initialized = false;
+
+function initService(): void {
+    if (initialized) return;
+    initialized = true;
+
+    // Cleanup legacy localStorage (one-shot)
+    if (typeof window !== 'undefined') {
+        [LEGACY_DISTRIBUTION_JOBS_KEY, LEGACY_GED_DOCUMENTS_KEY].forEach(key => {
+            const data = localStorage.getItem(key);
+            if (data) {
+                console.warn(`[PVDistribution] Suppression localStorage legacy: ${key}`);
+                localStorage.removeItem(key);
+            }
+        });
     }
-}
-
-function saveDistributionJobs(jobs: Record<string, DistributionJob>): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(DISTRIBUTION_JOBS_KEY, JSON.stringify(jobs));
-}
-
-function getGEDDocuments(): Record<string, GEDArchiveResult> {
-    if (typeof window === 'undefined') return {};
-    const data = localStorage.getItem(GED_DOCUMENTS_KEY);
-    if (!data) return {};
-    try {
-        return JSON.parse(data);
-    } catch {
-        return {};
-    }
-}
-
-function saveGEDDocuments(docs: Record<string, GEDArchiveResult>): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(GED_DOCUMENTS_KEY, JSON.stringify(docs));
 }
 
 function generateJobId(): string {
@@ -116,7 +109,7 @@ function generateJobId(): string {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// GED CATEGORIES (Mock - à remplacer par l'API réelle)
+// GED CATEGORIES
 // ═══════════════════════════════════════════════════════════════
 
 const GED_PV_CATEGORY: GEDCategory = {
@@ -164,39 +157,79 @@ Le syndic`;
 
 class PVDistributionService {
     /**
-     * Archive le PV dans la GED
+     * Archive le PV dans la GED via l'API documents
      */
     async archiveToGED(
         pvDocumentId: string,
         agId: string,
+        coproId: string,
         agData: { date: string; type: string },
         pdfBlob?: Blob
     ): Promise<GEDArchiveResult> {
+        initService();
         console.log('[PVDistribution] Archivage GED en cours...', pvDocumentId);
 
-        // Simuler un délai d'archivage
-        await new Promise(resolve => setTimeout(resolve, 500));
+        try {
+            // Générer le chemin dans la GED
+            const year = new Date(agData.date).getFullYear();
+            const dateStr = new Date(agData.date).toISOString().split('T')[0];
 
-        // Générer le chemin dans la GED
-        const year = new Date(agData.date).getFullYear();
-        const dateStr = new Date(agData.date).toISOString().split('T')[0];
-        const gedPath = `${GED_PV_CATEGORY.path}/${year}/PV_AG_${agData.type}_${dateStr}.pdf`;
+            // Si on a un blob PDF, l'uploader
+            if (pdfBlob) {
+                const fileName = `PV_AG_${agData.type}_${dateStr}.pdf`;
+                const storagePath = `ged/${coproId}/pv_ag/${year}/${Date.now()}_${fileName}`;
 
-        const result: GEDArchiveResult = {
-            success: true,
-            documentId: `ged-${pvDocumentId}-${Date.now()}`,
-            gedCategoryId: GED_PV_CATEGORY.id,
-            gedPath,
-            archivedAt: new Date(),
-        };
+                const doc = await documentsApi.uploadDocument(
+                    new File([pdfBlob], fileName, { type: 'application/pdf' }),
+                    coproId,
+                    'pv_ag',
+                    {
+                        title: `Procès-Verbal AG ${agData.type} - ${dateStr}`,
+                        description: `PV de l'Assemblée Générale ${agData.type} du ${dateStr}`,
+                        tags: ['pv', 'ag', agData.type.toLowerCase(), 'archived'],
+                    }
+                );
 
-        // Sauvegarder dans le "GED" (localStorage pour l'instant)
-        const gedDocs = getGEDDocuments();
-        gedDocs[result.documentId] = result;
-        saveGEDDocuments(gedDocs);
+                // Lier au AG
+                await documentsApi.linkDocumentToEntity(doc.id, 'ag', agId, 'main');
 
-        console.log('[PVDistribution] Document archivé:', gedPath);
-        return result;
+                const result: GEDArchiveResult = {
+                    success: true,
+                    documentId: doc.id,
+                    gedCategoryId: GED_PV_CATEGORY.id,
+                    gedPath: storagePath,
+                    archivedAt: new Date(),
+                };
+
+                console.log('[PVDistribution] Document archivé:', doc.id);
+                return result;
+            }
+
+            // Si pas de blob, le document existe probablement déjà
+            // Vérifier via l'ID fourni
+            const existingDoc = await documentsApi.getDocumentById(pvDocumentId);
+            if (existingDoc) {
+                return {
+                    success: true,
+                    documentId: existingDoc.id,
+                    gedCategoryId: GED_PV_CATEGORY.id,
+                    gedPath: existingDoc.file_path,
+                    archivedAt: new Date(),
+                };
+            }
+
+            throw new Error('Document non trouvé et aucun fichier fourni');
+        } catch (error) {
+            console.error('[PVDistribution] Erreur archivage:', error);
+            return {
+                success: false,
+                documentId: pvDocumentId,
+                gedCategoryId: GED_PV_CATEGORY.id,
+                gedPath: '',
+                archivedAt: new Date(),
+                error: error instanceof Error ? error.message : 'Erreur inconnue',
+            };
+        }
     }
 
     /**
@@ -218,6 +251,7 @@ class PVDistributionService {
         failed: number;
         results: NotificationRecipient[];
     }> {
+        initService();
         console.log('[PVDistribution] Envoi aux copropriétaires...', recipients.length);
 
         const defaultOptions: DistributionOptions = {
@@ -282,6 +316,7 @@ class PVDistributionService {
     async startDistributionJob(
         pvDocumentId: string,
         agId: string,
+        coproId: string,
         agData: { date: string; type: string },
         recipients: Array<{
             id: string;
@@ -290,12 +325,14 @@ class PVDistributionService {
         }>,
         options: Partial<DistributionOptions> = {}
     ): Promise<DistributionJob> {
+        initService();
         const jobId = generateJobId();
 
         const job: DistributionJob = {
             id: jobId,
             pvDocumentId,
             agId,
+            coproId,
             type: 'full',
             status: 'queued',
             progress: 0,
@@ -310,9 +347,7 @@ class PVDistributionService {
             },
         };
 
-        const jobs = getDistributionJobs();
-        jobs[jobId] = job;
-        saveDistributionJobs(jobs);
+        activeDistributionJobs.set(jobId, job);
 
         // Lancer le job en arrière-plan
         this.runDistributionJob(jobId, agData, recipients).catch(error => {
@@ -334,8 +369,7 @@ class PVDistributionService {
             email?: string;
         }>
     ): Promise<void> {
-        const jobs = getDistributionJobs();
-        const job = jobs[jobId];
+        const job = activeDistributionJobs.get(jobId);
         if (!job) return;
 
         try {
@@ -344,20 +378,20 @@ class PVDistributionService {
             job.startedAt = new Date();
             job.progress = 10;
             job.message = 'Archivage dans la GED...';
-            saveDistributionJobs(jobs);
+            activeDistributionJobs.set(jobId, { ...job });
 
             // Étape 1: Archivage GED
-            const archiveResult = await this.archiveToGED(job.pvDocumentId, job.agId, agData);
+            const archiveResult = await this.archiveToGED(job.pvDocumentId, job.agId, job.coproId, agData);
             job.archiveResult = archiveResult;
             job.progress = 40;
             job.message = 'Document archivé, préparation des envois...';
-            saveDistributionJobs(jobs);
+            activeDistributionJobs.set(jobId, { ...job });
 
             // Étape 2: Envoi aux copropriétaires (si autoSend activé)
             if (job.options.autoSendAfterArchive) {
                 job.progress = 50;
                 job.message = 'Envoi des notifications...';
-                saveDistributionJobs(jobs);
+                activeDistributionJobs.set(jobId, { ...job });
 
                 const sendResult = await this.sendToCoproprietaires(
                     job.pvDocumentId,
@@ -377,14 +411,14 @@ class PVDistributionService {
 
             job.status = 'completed';
             job.completedAt = new Date();
-            saveDistributionJobs(jobs);
+            activeDistributionJobs.set(jobId, { ...job });
 
             console.log('[PVDistribution] Job terminé:', jobId);
         } catch (error) {
             job.status = 'failed';
             job.error = error instanceof Error ? error.message : 'Erreur inconnue';
             job.completedAt = new Date();
-            saveDistributionJobs(jobs);
+            activeDistributionJobs.set(jobId, { ...job });
 
             console.error('[PVDistribution] Job échoué:', jobId, error);
         }
@@ -394,47 +428,73 @@ class PVDistributionService {
      * Récupère un job par son ID
      */
     getJob(jobId: string): DistributionJob | null {
-        const jobs = getDistributionJobs();
-        return jobs[jobId] || null;
+        initService();
+        return activeDistributionJobs.get(jobId) || null;
     }
 
     /**
      * Récupère les jobs pour une AG
      */
     getJobsForAG(agId: string): DistributionJob[] {
-        const jobs = getDistributionJobs();
-        return Object.values(jobs).filter(j => j.agId === agId);
+        initService();
+        return Array.from(activeDistributionJobs.values()).filter(j => j.agId === agId);
     }
 
     /**
-     * Récupère l'historique GED pour une AG
+     * Récupère l'historique GED pour une AG via documents API
      */
-    getGEDHistoryForAG(agId: string): GEDArchiveResult[] {
-        const jobs = getDistributionJobs();
-        return Object.values(jobs)
-            .filter(j => j.agId === agId && j.archiveResult)
-            .map(j => j.archiveResult!)
-            .sort((a, b) => new Date(b.archivedAt).getTime() - new Date(a.archivedAt).getTime());
+    async getGEDHistoryForAG(agId: string, coproId: string): Promise<GEDArchiveResult[]> {
+        initService();
+
+        try {
+            // Récupérer les documents liés à cette AG
+            const documents = await documentsApi.getDocumentsForEntity('ag', agId);
+
+            return documents
+                .filter(d => d.category === 'pv_ag')
+                .map(d => ({
+                    success: true,
+                    documentId: d.id,
+                    gedCategoryId: GED_PV_CATEGORY.id,
+                    gedPath: d.file_path,
+                    archivedAt: new Date(d.created_at),
+                }))
+                .sort((a, b) => b.archivedAt.getTime() - a.archivedAt.getTime());
+        } catch (error) {
+            console.error('[PVDistribution] Erreur getGEDHistoryForAG:', error);
+            return [];
+        }
     }
 
     /**
-     * Vérifie si le PV a déjà été archivé
+     * Vérifie si le PV a déjà été archivé (via documents API)
      */
-    isAlreadyArchived(pvDocumentId: string): boolean {
-        const jobs = getDistributionJobs();
-        return Object.values(jobs).some(
-            j => j.pvDocumentId === pvDocumentId && j.archiveResult?.success
-        );
+    async isAlreadyArchived(agId: string, coproId: string): Promise<boolean> {
+        try {
+            const documents = await documentsApi.getDocumentsForEntity('ag', agId);
+            return documents.some(d => d.category === 'pv_ag');
+        } catch (error) {
+            // Vérifier en mémoire
+            for (const job of activeDistributionJobs.values()) {
+                if (job.agId === agId && job.archiveResult?.success) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**
      * Vérifie si le PV a déjà été envoyé
      */
     isAlreadySent(pvDocumentId: string): boolean {
-        const jobs = getDistributionJobs();
-        return Object.values(jobs).some(
-            j => j.pvDocumentId === pvDocumentId && j.notifications.some(n => n.status === 'sent')
-        );
+        initService();
+        for (const job of activeDistributionJobs.values()) {
+            if (job.pvDocumentId === pvDocumentId && job.notifications.some(n => n.status === 'sent')) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

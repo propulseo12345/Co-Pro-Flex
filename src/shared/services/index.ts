@@ -20,8 +20,7 @@ export {
   financeStatsApi,
   financeAdminApi,
   type ApiResult,
-  type FinanceStats,
+  // Note: FinanceStats is now exported from hooks/useFinance.ts
   type RepartitionLigne,
   type RepartitionResult,
-  type ValidationResult,
 } from './financeApi';

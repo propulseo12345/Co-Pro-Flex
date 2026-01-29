@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Image as ImageIcon, AlertCircle, Loader2 } from 'lucide-react';
 import { PieceJustificative, estImage, estPDF } from '@/types/models/piece-justificative';
 import { piecesJustificativesService } from '@/lib/services/pieces-justificatives.service';
@@ -13,10 +13,15 @@ interface PieceJustificativeViewerProps {
 export function PieceJustificativeViewer({ piece }: PieceJustificativeViewerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [url, setUrl] = useState<string>('');
 
-  const url = piecesJustificativesService.getUrlVisualisation(piece);
   const isImageFile = estImage(piece.format);
   const isPDFFile = estPDF(piece.format);
+
+  // Load URL asynchronously
+  useEffect(() => {
+    piecesJustificativesService.getUrlVisualisation(piece).then(setUrl).catch(() => setHasError(true));
+  }, [piece]);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -26,6 +31,16 @@ export function PieceJustificativeViewer({ piece }: PieceJustificativeViewerProp
     setIsLoading(false);
     setHasError(true);
   };
+
+  // URL not yet loaded
+  if (!url && !hasError) {
+    return (
+      <div className={styles.loading}>
+        <Loader2 size={32} className={styles.spinner} aria-hidden="true" />
+        <p>Chargement...</p>
+      </div>
+    );
+  }
 
   // Erreur de chargement
   if (hasError) {

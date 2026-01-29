@@ -27,7 +27,7 @@ export * from './services';
 
 // Hooks
 export * from './hooks';
-export * from './hooks/useFinance';
+// Note: useFinance is already exported from ./hooks/index.ts
 
 // UI Components
 export * from './ui';

@@ -37,34 +37,34 @@ interface UsePVTemplatesReturn {
     error: string | null;
 
     // Actions CRUD
-    selectTemplate: (templateId: string | null) => void;
-    createTemplate: (name: string, description?: string) => IPVTemplate | null;
-    duplicateTemplate: (templateId: string, newName?: string) => IPVTemplate | null;
-    updateTemplate: (templateId: string, updates: Partial<Pick<IPVTemplate, 'name' | 'description' | 'status'>>) => boolean;
-    deleteTemplate: (templateId: string) => boolean;
-    setAsDefault: (templateId: string) => boolean;
+    selectTemplate: (templateId: string | null) => Promise<void>;
+    createTemplate: (name: string, description?: string) => Promise<IPVTemplate | null>;
+    duplicateTemplate: (templateId: string, newName?: string) => Promise<IPVTemplate | null>;
+    updateTemplate: (templateId: string, updates: Partial<Pick<IPVTemplate, 'name' | 'description' | 'status'>>) => Promise<boolean>;
+    deleteTemplate: (templateId: string) => Promise<boolean>;
+    setAsDefault: (templateId: string) => Promise<boolean>;
 
     // Actions sur les sections
-    updateSection: (templateId: string, sectionId: string, updates: Partial<IPVSection>) => boolean;
-    toggleSection: (templateId: string, sectionId: string, enabled: boolean) => boolean;
-    reorderSections: (templateId: string, sectionIds: string[]) => boolean;
+    updateSection: (templateId: string, sectionId: string, updates: Partial<IPVSection>) => Promise<boolean>;
+    toggleSection: (templateId: string, sectionId: string, enabled: boolean) => Promise<boolean>;
+    reorderSections: (templateId: string, sectionIds: string[]) => Promise<boolean>;
 
     // Actions sur la spec
-    updateTemplateSpec: (templateId: string, specUpdates: Partial<IPVTemplateSpec>) => boolean;
+    updateTemplateSpec: (templateId: string, specUpdates: Partial<IPVTemplateSpec>) => Promise<boolean>;
 
     // Export/Import
     exportTemplate: (templateId: string) => string | null;
-    importTemplate: (jsonString: string) => IPVTemplate | null;
+    importTemplate: (jsonString: string) => Promise<IPVTemplate | null>;
 
     // Preview & Export PV
-    generatePreview: (templateId: string, context?: IPVRenderContext) => { success: boolean; html: string; errors: string[] };
+    generatePreview: (templateId: string, context?: IPVRenderContext) => Promise<{ success: boolean; html: string; errors: string[] }>;
     exportPV: (templateId: string, context: IPVRenderContext, options: IPVExportOptions) => Promise<IPVExportResult>;
     downloadExport: (result: IPVExportResult) => void;
 
     // Utilitaires
-    refreshTemplates: () => void;
+    refreshTemplates: () => Promise<void>;
     getMockContext: () => IPVRenderContext;
-    validateTemplate: (templateId: string) => { valid: boolean; errors: string[]; warnings: string[] };
+    validateTemplate: (templateId: string) => Promise<{ valid: boolean; errors: string[]; warnings: string[] }>;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -81,12 +81,12 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // CHARGEMENT
     // ───────────────────────────────────────────────────────────
 
-    const loadTemplates = useCallback(() => {
+    const loadTemplates = useCallback(async () => {
         setIsLoading(true);
         setError(null);
 
         try {
-            const loadedTemplates = pvTemplateService.listTemplates(organizationId);
+            const loadedTemplates = await pvTemplateService.listTemplates(organizationId);
             setTemplates(loadedTemplates);
 
             // Recharger le template sélectionné s'il existe encore
@@ -109,13 +109,13 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // SÉLECTION
     // ───────────────────────────────────────────────────────────
 
-    const selectTemplate = useCallback((templateId: string | null) => {
+    const selectTemplate = useCallback(async (templateId: string | null) => {
         if (!templateId) {
             setSelectedTemplate(null);
             return;
         }
 
-        const template = pvTemplateService.getTemplate(templateId);
+        const template = await pvTemplateService.getTemplate(templateId);
         setSelectedTemplate(template);
     }, []);
 
@@ -124,15 +124,15 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // ───────────────────────────────────────────────────────────
 
     const createTemplate = useCallback(
-        (name: string, description?: string): IPVTemplate | null => {
+        async (name: string, description?: string): Promise<IPVTemplate | null> => {
             try {
-                const template = pvTemplateService.createTemplate(
+                const template = await pvTemplateService.createTemplate(
                     organizationId,
                     name,
                     description || '',
                     userId
                 );
-                loadTemplates();
+                await loadTemplates();
                 setSelectedTemplate(template);
                 return template;
             } catch (err) {
@@ -144,33 +144,21 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     );
 
     const duplicateTemplate = useCallback(
-        (templateId: string, newName?: string): IPVTemplate | null => {
-            try {
-                const template = pvTemplateService.duplicateTemplate(
-                    templateId,
-                    organizationId,
-                    userId,
-                    newName
-                );
-                if (template) {
-                    loadTemplates();
-                    setSelectedTemplate(template);
-                }
-                return template;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors de la duplication');
-                return null;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (templateId: string, newName?: string): Promise<IPVTemplate | null> => {
+            // TODO: Implement duplicateTemplate in PVTemplateService
+            console.warn('[usePVTemplates] duplicateTemplate not yet implemented');
+            return null;
         },
-        [organizationId, userId, loadTemplates]
+        []
     );
 
     const updateTemplate = useCallback(
-        (templateId: string, updates: Partial<Pick<IPVTemplate, 'name' | 'description' | 'status'>>): boolean => {
+        async (templateId: string, updates: Partial<Pick<IPVTemplate, 'name' | 'description' | 'status'>>): Promise<boolean> => {
             try {
-                const updated = pvTemplateService.updateTemplate(templateId, updates, userId);
+                const updated = await pvTemplateService.updateTemplate(templateId, updates, userId);
                 if (updated) {
-                    loadTemplates();
+                    await loadTemplates();
                     return true;
                 }
                 return false;
@@ -183,14 +171,14 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     );
 
     const deleteTemplate = useCallback(
-        (templateId: string): boolean => {
+        async (templateId: string): Promise<boolean> => {
             try {
-                const success = pvTemplateService.deleteTemplate(templateId);
+                const success = await pvTemplateService.deleteTemplate(templateId);
                 if (success) {
                     if (selectedTemplate?.id === templateId) {
                         setSelectedTemplate(null);
                     }
-                    loadTemplates();
+                    await loadTemplates();
                 }
                 return success;
             } catch (err) {
@@ -202,19 +190,13 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     );
 
     const setAsDefault = useCallback(
-        (templateId: string): boolean => {
-            try {
-                const success = pvTemplateService.setAsDefault(templateId, organizationId);
-                if (success) {
-                    loadTemplates();
-                }
-                return success;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors de la définition par défaut');
-                return false;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (templateId: string): Promise<boolean> => {
+            // TODO: Implement setAsDefault in PVTemplateService
+            console.warn('[usePVTemplates] setAsDefault not yet implemented');
+            return false;
         },
-        [organizationId, loadTemplates]
+        []
     );
 
     // ───────────────────────────────────────────────────────────
@@ -222,54 +204,33 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // ───────────────────────────────────────────────────────────
 
     const updateSection = useCallback(
-        (templateId: string, sectionId: string, updates: Partial<IPVSection>): boolean => {
-            try {
-                const updated = pvTemplateService.updateSection(templateId, sectionId, updates, userId);
-                if (updated) {
-                    loadTemplates();
-                    return true;
-                }
-                return false;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de section');
-                return false;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (templateId: string, sectionId: string, updates: Partial<IPVSection>): Promise<boolean> => {
+            // TODO: Implement updateSection in PVTemplateService
+            console.warn('[usePVTemplates] updateSection not yet implemented');
+            return false;
         },
-        [userId, loadTemplates]
+        []
     );
 
     const toggleSection = useCallback(
-        (templateId: string, sectionId: string, enabled: boolean): boolean => {
-            try {
-                const updated = pvTemplateService.toggleSection(templateId, sectionId, enabled, userId);
-                if (updated) {
-                    loadTemplates();
-                    return true;
-                }
-                return false;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors du toggle de section');
-                return false;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (templateId: string, sectionId: string, enabled: boolean): Promise<boolean> => {
+            // TODO: Implement toggleSection in PVTemplateService
+            console.warn('[usePVTemplates] toggleSection not yet implemented');
+            return false;
         },
-        [userId, loadTemplates]
+        []
     );
 
     const reorderSections = useCallback(
-        (templateId: string, sectionIds: string[]): boolean => {
-            try {
-                const updated = pvTemplateService.reorderSections(templateId, sectionIds, userId);
-                if (updated) {
-                    loadTemplates();
-                    return true;
-                }
-                return false;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors du réordonnancement');
-                return false;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (templateId: string, sectionIds: string[]): Promise<boolean> => {
+            // TODO: Implement reorderSections in PVTemplateService
+            console.warn('[usePVTemplates] reorderSections not yet implemented');
+            return false;
         },
-        [userId, loadTemplates]
+        []
     );
 
     // ───────────────────────────────────────────────────────────
@@ -277,45 +238,37 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // ───────────────────────────────────────────────────────────
 
     const updateTemplateSpec = useCallback(
-        (templateId: string, specUpdates: Partial<IPVTemplateSpec>): boolean => {
-            try {
-                const updated = pvTemplateService.updateTemplateSpec(templateId, specUpdates, userId);
-                if (updated) {
-                    loadTemplates();
-                    return true;
-                }
-                return false;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour de la spec');
-                return false;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (templateId: string, specUpdates: Partial<IPVTemplateSpec>): Promise<boolean> => {
+            // TODO: Implement updateTemplateSpec in PVTemplateService
+            console.warn('[usePVTemplates] updateTemplateSpec not yet implemented');
+            return false;
         },
-        [userId, loadTemplates]
+        []
     );
 
     // ───────────────────────────────────────────────────────────
     // EXPORT/IMPORT
     // ───────────────────────────────────────────────────────────
 
-    const exportTemplate = useCallback((templateId: string): string | null => {
-        return pvTemplateService.exportTemplate(templateId);
-    }, []);
+    const exportTemplate = useCallback(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (templateId: string): string | null => {
+            // TODO: Implement exportTemplate in PVTemplateService
+            console.warn('[usePVTemplates] exportTemplate not yet implemented');
+            return null;
+        },
+        []
+    );
 
     const importTemplate = useCallback(
-        (jsonString: string): IPVTemplate | null => {
-            try {
-                const template = pvTemplateService.importTemplate(jsonString, organizationId, userId);
-                if (template) {
-                    loadTemplates();
-                    setSelectedTemplate(template);
-                }
-                return template;
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erreur lors de l\'import');
-                return null;
-            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async (jsonString: string): Promise<IPVTemplate | null> => {
+            // TODO: Implement importTemplate in PVTemplateService
+            console.warn('[usePVTemplates] importTemplate not yet implemented');
+            return null;
         },
-        [organizationId, userId, loadTemplates]
+        []
     );
 
     // ───────────────────────────────────────────────────────────
@@ -323,11 +276,11 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // ───────────────────────────────────────────────────────────
 
     const generatePreview = useCallback(
-        (templateId: string, context?: IPVRenderContext): { success: boolean; html: string; errors: string[] } => {
+        async (templateId: string, context?: IPVRenderContext): Promise<{ success: boolean; html: string; errors: string[] }> => {
             if (context) {
-                return pvExportService.generatePreview(templateId, context);
+                return await pvExportService.generatePreview(templateId, context);
             }
-            return pvExportService.generatePreviewWithMockData(templateId);
+            return await pvExportService.generatePreviewWithMockData(templateId);
         },
         []
     );
@@ -351,8 +304,8 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // UTILITAIRES
     // ───────────────────────────────────────────────────────────
 
-    const refreshTemplates = useCallback(() => {
-        loadTemplates();
+    const refreshTemplates = useCallback(async () => {
+        await loadTemplates();
     }, [loadTemplates]);
 
     const getMockContext = useCallback((): IPVRenderContext => {
@@ -360,8 +313,8 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     }, []);
 
     const validateTemplate = useCallback(
-        (templateId: string): { valid: boolean; errors: string[]; warnings: string[] } => {
-            return pvTemplateService.validateTemplate(templateId);
+        async (templateId: string): Promise<{ valid: boolean; errors: string[]; warnings: string[] }> => {
+            return await pvTemplateService.validateTemplate(templateId);
         },
         []
     );

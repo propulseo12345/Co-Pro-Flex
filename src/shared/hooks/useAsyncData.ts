@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { ApiResult } from '@/shared/services/financeApi';
+
+/**
+ * Standard API result type for async operations
+ * Defined locally to avoid circular dependencies
+ */
+export interface ApiResult<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
 
 // ============================================
 // TYPES

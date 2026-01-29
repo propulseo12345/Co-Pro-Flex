@@ -13,6 +13,27 @@ export default function EditAGPage() {
   const agId = params.id as string;
   const page = useAgEditPage({ agId });
 
+  if (page.isLoading) {
+    return (
+      <div className="container">
+        <div className={styles.header}>
+          <button onClick={page.goBack} className={styles.backButton}>
+            <ArrowLeft size={20} aria-hidden="true" />
+            Retour
+          </button>
+          <div className={styles.headerContent}>
+            <h1 className={styles.title}>Chargement...</h1>
+            <p className={styles.subtitle}>Récupération des données de l'AG</p>
+          </div>
+        </div>
+        <Stepper currentStep={1} agId={agId} />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+          <p>Chargement des données...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <div className={styles.header}>

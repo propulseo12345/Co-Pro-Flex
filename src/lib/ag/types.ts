@@ -6,7 +6,7 @@
 // ENUMS (matching database types)
 // ============================================================================
 
-export type AgMeetingType = 'ordinary' | 'extraordinary' | 'mixed';
+export type AgMeetingType = 'ordinary' | 'extraordinary' | 'special';
 
 export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'closed' | 'pv_generated';
 

@@ -1,12 +1,40 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { AlertCircle, Calculator } from 'lucide-react';
 import { PosteEditor, type PosteEditorData } from './PosteEditor';
 import { AddPosteDropdown } from '../AddPosteDropdown';
-import { clesRepartitionApi } from '@/shared/services';
-import type { MockCleRepartition } from '@/shared/mock/finance';
+import { useRepartitionKeys } from '@/hooks/modules/useLotsData';
+import type { RepartitionKeyWithTotals } from '@/lib/lots/api';
 import styles from './PosteEditor.module.css';
+
+// Mapper Supabase → UI format (compatible avec MockCleRepartition)
+interface CleRepartitionUI {
+  id: string;
+  nom: string;
+  code: string;
+  description?: string;
+  totalTantiemes: number;
+  type: 'GENERALE' | 'ASCENSEUR' | 'CHAUFFAGE' | 'BATIMENT' | 'PERSONNALISEE';
+}
+
+function mapToCleUI(key: RepartitionKeyWithTotals): CleRepartitionUI {
+  // Mapper basis Supabase → type UI
+  const typeMap: Record<string, CleRepartitionUI['type']> = {
+    tantiemes: 'GENERALE',
+    surface: 'PERSONNALISEE',
+    custom: 'PERSONNALISEE',
+  };
+
+  return {
+    id: key.key_id,
+    nom: key.name,
+    code: key.name.substring(0, 8).toUpperCase(),
+    description: key.description || undefined,
+    totalTantiemes: key.total_weight,
+    type: typeMap[key.basis] || 'GENERALE',
+  };
+}
 
 interface PostesListEditorProps {
   postes: PosteEditorData[];
@@ -23,18 +51,10 @@ export function PostesListEditor({
 }: PostesListEditorProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [clesRepartition, setClesRepartition] = useState<MockCleRepartition[]>([]);
 
-  // Load clés de répartition
-  useEffect(() => {
-    const loadCles = async () => {
-      const result = await clesRepartitionApi.list({ pageSize: 100 });
-      if (result.success && result.data) {
-        setClesRepartition(result.data.data);
-      }
-    };
-    loadCles();
-  }, []);
+  // Load clés de répartition via Supabase hook
+  const { keys, isLoading: isLoadingCles } = useRepartitionKeys();
+  const clesRepartition = useMemo(() => (keys || []).map(mapToCleUI), [keys]);
 
   const existingPosteIds = useMemo(() => {
     return postes.map((p) => p.posteId).filter(Boolean) as string[];

@@ -473,12 +473,113 @@
     min-width: 0;
 }
 
+.brouillonTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
 .brouillonTitle {
     font-weight: 600;
-    margin-bottom: 0.25rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.brouillonRenameBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.brouillonItem:hover .brouillonRenameBtn {
+    opacity: 1;
+}
+
+.brouillonRenameBtn:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.brouillonTitleEdit {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.25rem;
+}
+
+.brouillonTitleInput {
+    flex: 1;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text-main);
+    outline: none;
+    min-width: 0;
+}
+
+.brouillonTitleInput:focus {
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.brouillonEditBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: var(--success);
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.brouillonEditBtn:hover:not(:disabled) {
+    background: var(--success-dark, #16A34A);
+}
+
+.brouillonEditBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.brouillonEditBtnCancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.brouillonEditBtnCancel:hover:not(:disabled) {
+    background: var(--surface);
+    color: var(--text-main);
+}
+
+.brouillonEditBtnCancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .brouillonMeta {
@@ -566,4 +667,172 @@
 
 .emptyBrouillons span {
     font-size: 0.875rem;
+}
+
+/* ========================================
+   DELETE CONFIRMATION MODAL
+   ======================================== */
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1000;
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: var(--shadow-xl);
+    animation: slideUp 0.2s ease-out;
+    text-align: center;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modalIcon {
+    color: var(--error);
+    margin-bottom: 1rem;
+}
+
+.modalTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 0.75rem 0;
+}
+
+.modalText {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.modalText strong {
+    color: var(--text-main);
+}
+
+.modalWarning {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    margin: 0 0 1.5rem 0;
+    padding: 0.75rem;
+    background: var(--error-light, #FEE2E2);
+    border-radius: 6px;
+    line-height: 1.4;
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.modalCancelBtn {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modalCancelBtn:hover:not(:disabled) {
+    background: var(--surface);
+    border-color: var(--text-tertiary);
+}
+
+.modalCancelBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modalDeleteBtn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: var(--error);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modalDeleteBtn:hover:not(:disabled) {
+    background: var(--error-dark, #DC2626);
+}
+
+.modalDeleteBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Spinning animation */
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Dark mode modal */
+[data-theme="dark"] .modalOverlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .modal {
+    background: var(--surface-secondary, var(--surface));
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .modalWarning {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+[data-theme="dark"] .modalCancelBtn {
+    background: var(--surface);
+}
+
+[data-theme="dark"] .brouillonLinkDanger:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+
+.brouillonLinkDanger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

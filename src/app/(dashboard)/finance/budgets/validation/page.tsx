@@ -2,16 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Calendar, DollarSign, FileText, ArrowRight } from 'lucide-react';
+import { CheckCircle, Calendar, DollarSign, FileText, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { ModeEcheancier, Echeance } from '@/types';
-import { genererResolutionBudget, validerBudgetPourResolution, genererRecapitulatifEcheancier, BudgetData, ResolutionBudget } from '@/lib/utils/budget';
+import { genererResolutionBudget, validerBudgetPourResolution, BudgetData, ResolutionBudget } from '@/lib/utils/budget';
+import { useCopro } from '@/providers/CoproContext';
+import { useBudgetMutations } from '@/hooks/modules/useBudgetMutations';
+import { getAccountingPeriod } from '@/lib/budget/api';
 import styles from './validation.module.css';
 
 export default function BudgetValidationPage() {
     const router = useRouter();
+    const { currentCoproId } = useCopro();
     const [step, setStep] = useState<'config' | 'preview' | 'success'>('config');
     const [budget, setBudget] = useState<BudgetData>({
-        id: 'budget-' + Date.now(),
+        id: '',
         annee: new Date().getFullYear() + 1,
         montantTotal: 0,
         dateDebut: '',
@@ -20,6 +24,12 @@ export default function BudgetValidationPage() {
     const [modeEcheancier, setModeEcheancier] = useState<ModeEcheancier>('TRIMESTRIEL');
     const [cleRepartition, setCleRepartition] = useState('CHARGES_GENERALES');
     const [resolutionGeneree, setResolutionGeneree] = useState<ResolutionBudget | null>(null);
+    const [createdBudgetId, setCreatedBudgetId] = useState<string | null>(null);
+
+    // Supabase mutation hook
+    const { createBudget, updateBudgetStatus, isSaving, error: mutationError } = useBudgetMutations({
+        onError: (err) => console.error('[BudgetValidation] Mutation error:', err),
+    });
 
     const clesRepartition = [
         { value: 'CHARGES_GENERALES', label: 'Charges générales' },
@@ -47,28 +57,38 @@ export default function BudgetValidationPage() {
         setStep('preview');
     };
 
-    const handleValider = () => {
-        if (!resolutionGeneree) return;
+    const handleValider = async () => {
+        if (!resolutionGeneree || !currentCoproId) return;
 
-        // Sauvegarder le budget dans localStorage
-        const savedBudgets = localStorage.getItem('budgets');
-        const budgets = savedBudgets ? JSON.parse(savedBudgets) : [];
-        budgets.push({
-            ...budget,
-            statut: 'VALIDE',
-            dateValidation: new Date().toISOString(),
-            resolutionId: resolutionGeneree.id
-        });
-        localStorage.setItem('budgets', JSON.stringify(budgets));
+        try {
+            // 1. Get accounting period for the year
+            const period = await getAccountingPeriod(currentCoproId, budget.annee);
+            if (!period) {
+                alert(`Aucun exercice comptable trouvé pour l'année ${budget.annee}. Veuillez d'abord créer un exercice.`);
+                return;
+            }
 
-        // Sauvegarder la résolution générée
-        // Note: En production, il faudrait lier cela à une AG spécifique
-        const savedResolutions = localStorage.getItem('resolutions-budget-auto');
-        const resolutions = savedResolutions ? JSON.parse(savedResolutions) : [];
-        resolutions.push(resolutionGeneree);
-        localStorage.setItem('resolutions-budget-auto', JSON.stringify(resolutions));
+            // 2. Create budget in Supabase
+            const budgetId = await createBudget({
+                period_id: period.id,
+                budget_type: 'current',
+                name: `Budget prévisionnel ${budget.annee}`,
+                notes: `Échéancier: ${modeEcheancier}, Clé: ${cleRepartition}`,
+            });
 
-        setStep('success');
+            if (!budgetId) {
+                alert('Erreur lors de la création du budget. Veuillez réessayer.');
+                return;
+            }
+
+            setCreatedBudgetId(budgetId);
+            // Note: La résolution sera créée lors de la liaison avec une AG
+            // Pour l'instant, on informe l'utilisateur qu'il doit aller lier le budget à une AG
+            setStep('success');
+        } catch (err) {
+            console.error('[BudgetValidation] Error:', err);
+            alert('Une erreur est survenue lors de la validation du budget.');
+        }
     };
 
     return (
@@ -80,8 +100,31 @@ export default function BudgetValidationPage() {
                 </p>
             </div>
 
+            {/* Erreur si pas de copropriété */}
+            {!currentCoproId && (
+                <div className={styles.content}>
+                    <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+                        <AlertCircle size={48} style={{ color: 'var(--color-warning)', marginBottom: '1rem' }} aria-hidden="true" />
+                        <h2>Aucune copropriété sélectionnée</h2>
+                        <p>Veuillez sélectionner une copropriété pour créer un budget.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Erreur mutation */}
+            {mutationError && (
+                <div className={styles.content}>
+                    <div className="card" style={{ background: 'var(--color-error-light)', padding: '1rem', marginBottom: '1rem' }}>
+                        <p style={{ color: 'var(--color-error)', margin: 0 }}>
+                            <AlertCircle size={16} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} aria-hidden="true" />
+                            {mutationError}
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Étape 1: Configuration */}
-            {step === 'config' && (
+            {step === 'config' && currentCoproId && (
                 <div className={styles.content}>
                     <div className="card">
                         <h2 className={styles.sectionTitle}>1. Informations du budget</h2>
@@ -232,9 +275,14 @@ export default function BudgetValidationPage() {
                         <button
                             onClick={handleValider}
                             className="btn btn-primary"
+                            disabled={isSaving || !currentCoproId}
                         >
-                            <CheckCircle size={16} aria-hidden="true" />
-                            Valider le budget
+                            {isSaving ? (
+                                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                            ) : (
+                                <CheckCircle size={16} aria-hidden="true" />
+                            )}
+                            {isSaving ? 'Validation...' : 'Valider le budget'}
                         </button>
                     </div>
                 </div>
@@ -247,24 +295,33 @@ export default function BudgetValidationPage() {
                         <div className={styles.successIcon}>
                             <CheckCircle size={64} aria-hidden="true" />
                         </div>
-                        <h2 className={styles.successTitle}>Budget validé avec succès !</h2>
+                        <h2 className={styles.successTitle}>Budget créé avec succès !</h2>
                         <p className={styles.successText}>
-                            Le budget prévisionnel {budget.annee} a été validé et la résolution d'approbation a été générée automatiquement avec l'échéancier d'appels de fonds.
+                            Le budget prévisionnel {budget.annee} a été créé et enregistré.
+                            Pour finaliser l'approbation, vous devez lier ce budget à une Assemblée Générale
+                            et créer la résolution correspondante.
                         </p>
 
                         <div className={styles.successDetails}>
                             <div className={styles.successDetail}>
                                 <FileText size={24} aria-hidden="true" />
                                 <div>
-                                    <strong>Résolution créée</strong>
+                                    <strong>Résolution à créer</strong>
                                     <p>{resolutionGeneree?.titre}</p>
                                 </div>
                             </div>
                             <div className={styles.successDetail}>
                                 <Calendar size={24} aria-hidden="true" />
                                 <div>
-                                    <strong>Échéances programmées</strong>
-                                    <p>{resolutionGeneree?.echeancier?.echeances.length} appel(s) de fonds</p>
+                                    <strong>Échéancier prévu</strong>
+                                    <p>{resolutionGeneree?.echeancier?.echeances.length} appel(s) de fonds ({modeEcheancier.toLowerCase()})</p>
+                                </div>
+                            </div>
+                            <div className={styles.successDetail}>
+                                <DollarSign size={24} aria-hidden="true" />
+                                <div>
+                                    <strong>Montant total</strong>
+                                    <p>{budget.montantTotal.toLocaleString('fr-FR')} €</p>
                                 </div>
                             </div>
                         </div>
@@ -277,10 +334,10 @@ export default function BudgetValidationPage() {
                                 Retour aux budgets
                             </button>
                             <button
-                                onClick={() => router.push('/ag')}
+                                onClick={() => router.push('/ag/new')}
                                 className="btn btn-primary"
                             >
-                                Voir les assemblées générales
+                                Créer une AG pour ce budget
                             </button>
                         </div>
                     </div>

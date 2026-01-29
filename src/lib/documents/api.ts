@@ -432,11 +432,11 @@ export async function uploadDocument(
 ): Promise<Document> {
   const supabase = createUntypedClient();
 
-  // Générer le chemin
+  // Générer le chemin (sans préfixe 'ged/' car le bucket s'appelle déjà 'ged')
   const year = new Date().getFullYear();
   const timestamp = Date.now();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path = `ged/${coproId}/${category}/${year}/${timestamp}_${safeName}`;
+  const path = `${coproId}/${category}/${year}/${timestamp}_${safeName}`;
 
   // Upload le fichier
   const { error: uploadError } = await supabase.storage
@@ -468,9 +468,14 @@ export async function uploadDocument(
 
 export async function getDocumentUrl(filePath: string, expiresIn = 3600): Promise<string> {
   const supabase = createUntypedClient();
+
+  // Normaliser le chemin: supprimer le préfixe 'ged/' si présent (ancien format)
+  // car le bucket s'appelle déjà 'ged'
+  const normalizedPath = filePath.startsWith('ged/') ? filePath.slice(4) : filePath;
+
   const { data, error } = await supabase.storage
     .from('ged')
-    .createSignedUrl(filePath, expiresIn);
+    .createSignedUrl(normalizedPath, expiresIn);
 
   if (error) throw error;
   return data.signedUrl;
@@ -478,9 +483,13 @@ export async function getDocumentUrl(filePath: string, expiresIn = 3600): Promis
 
 export async function downloadDocument(filePath: string): Promise<Blob> {
   const supabase = createUntypedClient();
+
+  // Normaliser le chemin: supprimer le préfixe 'ged/' si présent (ancien format)
+  const normalizedPath = filePath.startsWith('ged/') ? filePath.slice(4) : filePath;
+
   const { data, error } = await supabase.storage
     .from('ged')
-    .download(filePath);
+    .download(normalizedPath);
 
   if (error) throw error;
   return data;

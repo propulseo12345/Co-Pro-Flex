@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { X, Calculator, Key, Users, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
-import { clesRepartitionApi } from '@/shared/services';
-import type { MockCleRepartition } from '@/shared/mock/finance';
+import { useRepartitionKeys, useLots } from '@/hooks/modules/useLotsData';
+import * as lotsApi from '@/lib/lots/api';
+import { useCopro } from '@/providers/CoproContext';
 import type { PosteEditorData } from '../PosteEditor/PosteEditor';
 import styles from './SimulationRepartitionModal.module.css';
 
@@ -41,52 +42,98 @@ interface SimulationRepartitionModalProps {
 }
 
 export function SimulationRepartitionModal({ postes, onClose }: SimulationRepartitionModalProps) {
-  const [clesRepartition, setClesRepartition] = useState<MockCleRepartition[]>([]);
+  const { currentCoproId } = useCopro();
+  const { keys: clesRepartition, isLoading: isLoadingCles } = useRepartitionKeys();
+  const { lots, isLoading: isLoadingLots } = useLots();
   const [repartitions, setRepartitions] = useState<PosteRepartition[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [viewMode, setViewMode] = useState<'by-poste' | 'by-copro'>('by-copro');
   const [expandedPostes, setExpandedPostes] = useState<Set<string>>(new Set());
 
   const budgetTotal = useMemo(() => postes.reduce((sum, p) => sum + p.montant, 0), [postes]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        // Load clés de répartition
-        const clesResult = await clesRepartitionApi.list({ pageSize: 100 });
-        if (clesResult.success && clesResult.data) {
-          setClesRepartition(clesResult.data.data);
-        }
+  // Create a map of lot info for quick lookup
+  const lotsMap = useMemo(() => {
+    const map = new Map<string, { ref: string; type: string; ownerId: string; ownerName: string }>();
+    (lots || []).forEach(lot => {
+      map.set(lot.id, {
+        ref: lot.ref,
+        type: lot.type || 'autre',
+        ownerId: lot.coproprietaire_id || 'unknown',
+        ownerName: lot.owner_display_name || 'Propriétaire inconnu',
+      });
+    });
+    return map;
+  }, [lots]);
 
-        // Calculate répartition for each poste with a clé assigned
+  // Calculate répartition from key lines
+  const calculerRepartition = useCallback(async (cleId: string, montant: number, cleNom: string): Promise<RepartitionLigne[]> => {
+    if (!currentCoproId) return [];
+
+    const { data: lines, error } = await lotsApi.listRepartitionKeyLines(currentCoproId, cleId);
+    if (error || !lines || lines.length === 0) return [];
+
+    // Calculate total weight
+    const totalWeight = lines.reduce((sum, l) => sum + l.weight, 0);
+    if (totalWeight === 0) return [];
+
+    return lines.map(line => {
+      const lotInfo = lotsMap.get(line.lot_id);
+      const pourcentage = (line.weight / totalWeight) * 100;
+      const montantLigne = (line.weight / totalWeight) * montant;
+
+      return {
+        lotId: line.lot_id,
+        lotNumero: lotInfo?.ref || line.lot_ref,
+        lotType: lotInfo?.type || (line.lot_type || 'autre'),
+        coproprietaireId: lotInfo?.ownerId || 'unknown',
+        coproprietaireNom: lotInfo?.ownerName || 'Propriétaire inconnu',
+        tantiemes: line.weight,
+        pourcentage,
+        montant: Math.round(montantLigne * 100) / 100,
+      };
+    });
+  }, [currentCoproId, lotsMap]);
+
+  // Load répartitions when data is ready
+  useEffect(() => {
+    const loadRepartitions = async () => {
+      if (isLoadingCles || isLoadingLots || !clesRepartition || !lots) return;
+
+      setIsCalculating(true);
+      try {
         const postesWithCle = postes.filter(p => p.cleRepartitionId);
-        const repartitionPromises = postesWithCle.map(async (poste) => {
-          const result = await clesRepartitionApi.calculerRepartition(poste.cleRepartitionId!, poste.montant);
-          if (result.success && result.data) {
-            return {
+        const results: PosteRepartition[] = [];
+
+        for (const poste of postesWithCle) {
+          const cle = clesRepartition.find(c => c.key_id === poste.cleRepartitionId);
+          if (!cle) continue;
+
+          const lignes = await calculerRepartition(poste.cleRepartitionId!, poste.montant, cle.name);
+          if (lignes.length > 0) {
+            results.push({
               posteId: poste.id,
               posteLibelle: poste.libelle,
               cleId: poste.cleRepartitionId!,
-              cleNom: result.data.cleNom,
+              cleNom: cle.name,
               montant: poste.montant,
-              lignes: result.data.lignes,
-            };
+              lignes,
+            });
           }
-          return null;
-        });
+        }
 
-        const results = await Promise.all(repartitionPromises);
-        setRepartitions(results.filter((r): r is PosteRepartition => r !== null));
-      } catch {
-        console.error('Erreur lors du calcul de la répartition');
+        setRepartitions(results);
+      } catch (err) {
+        console.error('Erreur lors du calcul de la répartition:', err);
       } finally {
-        setIsLoading(false);
+        setIsCalculating(false);
       }
     };
 
-    loadData();
-  }, [postes]);
+    loadRepartitions();
+  }, [postes, clesRepartition, lots, isLoadingCles, isLoadingLots, calculerRepartition]);
+
+  const isLoading = isLoadingCles || isLoadingLots || isCalculating;
 
   // Aggregate by copropriétaire
   const coproprietairesTotals = useMemo(() => {

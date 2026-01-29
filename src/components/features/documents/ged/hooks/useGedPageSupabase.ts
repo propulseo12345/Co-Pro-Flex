@@ -419,6 +419,38 @@ export function useGedPageSupabase() {
     [currentFolder, currentFolderId, currentCoproId]
   );
 
+  const handleFilesSelected = useCallback(
+    async (fileList: FileList) => {
+      const files = Array.from(fileList);
+
+      if (files.length === 0 || !currentCoproId) return;
+
+      try {
+        for (const file of files) {
+          // Determine category based on folder
+          const category: DocumentCategory = currentFolder?.icon === 'Users' ? 'pv_ag' :
+            currentFolder?.icon === 'Receipt' ? 'facture' :
+            currentFolder?.icon === 'FileSignature' ? 'contrat' : 'autre';
+
+          await documentsApi.uploadDocument(file, currentCoproId, category, {
+            folderId: currentFolderId || undefined,
+            title: file.name,
+          });
+        }
+
+        // Refresh documents
+        const docsData = await documentsApi.getDocuments(currentCoproId);
+        setDocuments(docsData);
+
+        alert(`${files.length} fichier(s) importé(s) avec succès dans Supabase !`);
+      } catch (err) {
+        console.error('Upload error:', err);
+        alert(`Erreur d'import: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      }
+    },
+    [currentFolder, currentFolderId, currentCoproId]
+  );
+
   // ============================================================================
   // LINK MODAL
   // ============================================================================
@@ -554,6 +586,7 @@ export function useGedPageSupabase() {
     handleDragOver,
     handleDragLeave,
     handleDrop,
+    handleFilesSelected,
     handleOpenLinkModal,
     handleCloseLinkModal,
     handleCreateLink,

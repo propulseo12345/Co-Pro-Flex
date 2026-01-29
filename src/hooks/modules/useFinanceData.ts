@@ -394,6 +394,31 @@ export function useCreateSupplierInvoice() {
   return { ...state, mutate };
 }
 
+// Direct creation hook (bypasses Edge Function auth issues)
+export function useCreateSupplierInvoiceDirect() {
+  const { currentCoproId } = useCopro();
+  const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
+
+  const mutate = useCallback(async (payload: Omit<financeApi.CreateSupplierInvoiceDirectPayload, 'copro_id'>) => {
+    if (!currentCoproId) {
+      return { data: null, error: 'Aucune copropriété sélectionnée' };
+    }
+
+    setState({ isLoading: true, error: null });
+
+    const result = await financeApi.createSupplierInvoiceDirect({
+      ...payload,
+      copro_id: currentCoproId,
+    });
+
+    setState({ isLoading: false, error: result.error });
+
+    return result;
+  }, [currentCoproId]);
+
+  return { ...state, mutate };
+}
+
 export function usePaySupplierInvoice() {
   const { currentCoproId } = useCopro();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
@@ -409,6 +434,51 @@ export function usePaySupplierInvoice() {
       ...payload,
       copro_id: currentCoproId,
     });
+
+    setState({ isLoading: false, error: result.error });
+
+    return result;
+  }, [currentCoproId]);
+
+  return { ...state, mutate };
+}
+
+export function useUpdateSupplierInvoice() {
+  const { currentCoproId } = useCopro();
+  const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
+
+  const mutate = useCallback(async (payload: Omit<financeApi.UpdateSupplierInvoicePayload, 'copro_id'>) => {
+    if (!currentCoproId) {
+      return { data: null, error: 'Aucune copropriété sélectionnée' };
+    }
+
+    setState({ isLoading: true, error: null });
+
+    const result = await financeApi.updateSupplierInvoice({
+      ...payload,
+      copro_id: currentCoproId,
+    });
+
+    setState({ isLoading: false, error: result.error });
+
+    return result;
+  }, [currentCoproId]);
+
+  return { ...state, mutate };
+}
+
+export function useDeleteSupplierInvoice() {
+  const { currentCoproId } = useCopro();
+  const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
+
+  const mutate = useCallback(async (invoiceId: string) => {
+    if (!currentCoproId) {
+      return { data: null, error: 'Aucune copropriété sélectionnée' };
+    }
+
+    setState({ isLoading: true, error: null });
+
+    const result = await financeApi.deleteSupplierInvoice(currentCoproId, invoiceId);
 
     setState({ isLoading: false, error: result.error });
 

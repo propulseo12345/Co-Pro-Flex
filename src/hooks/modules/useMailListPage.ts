@@ -1,80 +1,92 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useCopro } from '@/providers/CoproContext';
+import { mailSupabaseService } from '@/lib/services/mail-supabase.service';
 import type { TabType } from '@/components/features/communication/mail/MailTabs';
-import {
-  type LegacyEmailMessage,
-  type MailFolder,
-  DEFAULT_FOLDERS,
-  FOLDER_COLORS,
-  MOCK_INBOX,
-  MOCK_SENT,
-  MOCK_DRAFTS,
-  MOCK_ARCHIVED,
-} from '@/data/mock/mail.mock';
+import type { Mail } from '@/types/models/mail';
 
-const MAIL_STORAGE_KEY = 'mail-copro-data';
-
-interface MailStorageData {
-  sent: LegacyEmailMessage[];
-  inbox: LegacyEmailMessage[];
-  drafts: LegacyEmailMessage[];
-  archived: LegacyEmailMessage[];
-  emails: Record<string, LegacyEmailMessage>;
-  inboxReadState?: Record<number, boolean>;
-  deletedIds?: number[];
-  folders?: MailFolder[];
-  emailFolders?: Record<number, string>;
+// Folder types (kept client-side for now) - exported for use in pages
+export interface MailFolder {
+  id: string;
+  name: string;
+  color: string;
+  order: number;
 }
 
-const DEFAULT_MAIL_DATA: MailStorageData = { sent: [], inbox: [], drafts: [], archived: [], emails: {} };
+export const DEFAULT_FOLDERS: MailFolder[] = [];
 
-const getStoredData = (): MailStorageData => {
-  if (typeof window === 'undefined') return DEFAULT_MAIL_DATA;
-  const stored = localStorage.getItem(MAIL_STORAGE_KEY);
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored) as MailStorageData;
-      if (parsed && typeof parsed === 'object') {
-        return {
-          sent: Array.isArray(parsed.sent) ? parsed.sent : [],
-          inbox: Array.isArray(parsed.inbox) ? parsed.inbox : [],
-          drafts: Array.isArray(parsed.drafts) ? parsed.drafts : [],
-          archived: Array.isArray(parsed.archived) ? parsed.archived : [],
-          emails: parsed.emails && typeof parsed.emails === 'object' ? parsed.emails : {},
-          inboxReadState: parsed.inboxReadState || {},
-          deletedIds: Array.isArray(parsed.deletedIds) ? parsed.deletedIds : [],
-          folders: Array.isArray(parsed.folders) ? parsed.folders : undefined,
-          emailFolders: parsed.emailFolders && typeof parsed.emailFolders === 'object' ? parsed.emailFolders : undefined
-        };
-      }
-    } catch {
-      return DEFAULT_MAIL_DATA;
-    }
-  }
-  return DEFAULT_MAIL_DATA;
-};
+export const FOLDER_COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6',
+];
 
-const saveStoredData = (data: MailStorageData) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(MAIL_STORAGE_KEY, JSON.stringify(data));
+// Map Supabase Mail to UI expected format - exported for use in pages/components
+export interface LegacyEmailMessage {
+  id: number;
+  originalId: string; // Keep original Supabase UUID for navigation
+  subject: string;
+  preview: string;
+  sender?: string;
+  recipients: string[];
+  recipientType: 'all' | 'group' | 'individual';
+  date: string;
+  isRead?: boolean;
+  hasAttachment: boolean;
+  status: 'draft' | 'sending' | 'sent' | 'opened' | 'delivered' | 'failed' | 'received';
+  template?: string;
+  stats?: { sent: number; opened: number; received: number };
+  deletedAt?: string;
+  originalTab?: TabType;
+  body?: string;
+  folderId?: string;
+  attachments?: { name: string; size: string; type: string }[];
+}
+
+function mapMailToLegacy(mail: Mail): LegacyEmailMessage {
+  // Map recipient type
+  let recipientType: 'all' | 'group' | 'individual' = 'individual';
+  if (mail.recipientType === 'all') {
+    recipientType = 'all';
+  } else if (mail.recipientType === 'group') {
+    recipientType = 'group';
   }
-};
+
+  return {
+    id: parseInt(mail.id.replace(/[^0-9]/g, '').slice(0, 8) || '0', 10) || Math.floor(Math.random() * 100000),
+    originalId: mail.id, // Keep original Supabase UUID
+    subject: mail.subject,
+    preview: mail.preview || mail.body.substring(0, 100),
+    sender: mail.statut === 'received' ? (mail.sender?.nom || undefined) : undefined,
+    recipients: mail.recipients.map(r => r.nom),
+    recipientType,
+    date: mail.dateEnvoi || mail.dateCreation,
+    isRead: mail.isRead,
+    hasAttachment: mail.hasAttachment,
+    status: mail.statut === 'draft' ? 'draft' :
+            mail.statut === 'sent' ? 'sent' :
+            mail.statut === 'opened' ? 'opened' :
+            mail.statut === 'received' ? 'received' : 'sent',
+    template: mail.template,
+    stats: mail.stats,
+    body: mail.body,
+  };
+}
 
 export function useMailListPage() {
+  const { currentCoproId } = useCopro();
   const [selectedTab, setSelectedTab] = useState<TabType>('inbox');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEmails, setSelectedEmails] = useState<number[]>([]);
-  const [sentEmails, setSentEmails] = useState<LegacyEmailMessage[]>(MOCK_SENT);
-  const [inboxEmails, setInboxEmails] = useState<LegacyEmailMessage[]>(MOCK_INBOX);
-  const [draftEmails, setDraftEmails] = useState<LegacyEmailMessage[]>(MOCK_DRAFTS);
-  const [archivedEmails, setArchivedEmails] = useState<LegacyEmailMessage[]>(MOCK_ARCHIVED);
+  const [sentEmails, setSentEmails] = useState<LegacyEmailMessage[]>([]);
+  const [inboxEmails, setInboxEmails] = useState<LegacyEmailMessage[]>([]);
+  const [draftEmails, setDraftEmails] = useState<LegacyEmailMessage[]>([]);
+  const [archivedEmails, setArchivedEmails] = useState<LegacyEmailMessage[]>([]);
   const [trashEmails, setTrashEmails] = useState<LegacyEmailMessage[]>([]);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [deletedIds, setDeletedIds] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Folder state
+  // Folder state (client-side only)
   const [folders, setFolders] = useState<MailFolder[]>(DEFAULT_FOLDERS);
   const [emailFolders, setEmailFolders] = useState<Record<number, string>>({});
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
@@ -91,49 +103,41 @@ export function useMailListPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPermanentDeleteModal, setShowPermanentDeleteModal] = useState(false);
 
-  // Load from localStorage
+  // Fetch mails from Supabase
+  const fetchMails = useCallback(async () => {
+    if (!currentCoproId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Fetch all tabs in parallel
+      const [inbox, sent, drafts, archived, trash] = await Promise.all([
+        mailSupabaseService.getMails(currentCoproId, { onglet: 'inbox', recherche: '' }),
+        mailSupabaseService.getMails(currentCoproId, { onglet: 'sent', recherche: '' }),
+        mailSupabaseService.getMails(currentCoproId, { onglet: 'drafts', recherche: '' }),
+        mailSupabaseService.getMails(currentCoproId, { onglet: 'archived', recherche: '' }),
+        mailSupabaseService.getMails(currentCoproId, { onglet: 'trash', recherche: '' }),
+      ]);
+
+      setInboxEmails(inbox.map(mapMailToLegacy));
+      setSentEmails(sent.map(mapMailToLegacy));
+      setDraftEmails(drafts.map(mapMailToLegacy));
+      setArchivedEmails(archived.map(mapMailToLegacy));
+      setTrashEmails(trash.map(mapMailToLegacy));
+    } catch (err) {
+      console.error('Error fetching mails:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCoproId]);
+
+  // Initial fetch
   useEffect(() => {
-    const data = getStoredData();
-    const storedDeletedIds = data.deletedIds || [];
-    setDeletedIds(storedDeletedIds);
-
-    const filterDeleted = (emails: LegacyEmailMessage[]) =>
-      emails.filter(e => !storedDeletedIds.includes(e.id));
-
-    if (data.sent?.length > 0) {
-      const sentIds = new Set(data.sent.map(e => e.id));
-      const uniqueMockSent = MOCK_SENT.filter(e => !sentIds.has(e.id));
-      setSentEmails(filterDeleted([...data.sent, ...uniqueMockSent]));
-    } else {
-      setSentEmails(filterDeleted(MOCK_SENT));
-    }
-
-    const readState = data.inboxReadState;
-    const filteredInbox = filterDeleted(MOCK_INBOX).map(email => ({
-      ...email,
-      isRead: readState?.[email.id] ?? email.isRead
-    }));
-    setInboxEmails(filteredInbox);
-
-    if (data.drafts?.length > 0) {
-      const storedDraftIds = new Set(data.drafts.map(d => d.id));
-      const mockDraftsFiltered = MOCK_DRAFTS.filter(d => !storedDraftIds.has(d.id));
-      setDraftEmails(filterDeleted([...data.drafts, ...mockDraftsFiltered]));
-    } else {
-      setDraftEmails(filterDeleted(MOCK_DRAFTS));
-    }
-
-    if (data.archived?.length > 0) {
-      const archivedIds = new Set(data.archived.map(e => e.id));
-      const uniqueMockArchived = MOCK_ARCHIVED.filter(e => !archivedIds.has(e.id));
-      setArchivedEmails(filterDeleted([...data.archived, ...uniqueMockArchived]));
-    } else {
-      setArchivedEmails(filterDeleted(MOCK_ARCHIVED));
-    }
-
-    if (data.folders?.length) setFolders(data.folders);
-    if (data.emailFolders) setEmailFolders(data.emailFolders);
-  }, []);
+    fetchMails();
+  }, [fetchMails]);
 
   const getEmailsForTab = useCallback((): LegacyEmailMessage[] => {
     let emails: LegacyEmailMessage[];
@@ -162,7 +166,7 @@ export function useMailListPage() {
     );
   }, []);
 
-  // Folder actions
+  // Folder actions (client-side)
   const handleCreateFolder = useCallback(() => {
     if (!newFolderName.trim()) return;
     const newFolder: MailFolder = {
@@ -171,11 +175,7 @@ export function useMailListPage() {
       color: newFolderColor,
       order: folders.length,
     };
-    const updatedFolders = [...folders, newFolder];
-    setFolders(updatedFolders);
-    const data = getStoredData();
-    data.folders = updatedFolders;
-    saveStoredData(data);
+    setFolders([...folders, newFolder]);
     setNewFolderName('');
     setNewFolderColor(FOLDER_COLORS[0]);
     setShowFolderModal(false);
@@ -183,13 +183,9 @@ export function useMailListPage() {
 
   const handleRenameFolder = useCallback(() => {
     if (!editingFolder || !newFolderName.trim()) return;
-    const updatedFolders = folders.map(f =>
+    setFolders(folders.map(f =>
       f.id === editingFolder.id ? { ...f, name: newFolderName.trim(), color: newFolderColor } : f
-    );
-    setFolders(updatedFolders);
-    const data = getStoredData();
-    data.folders = updatedFolders;
-    saveStoredData(data);
+    ));
     setEditingFolder(null);
     setNewFolderName('');
     setNewFolderColor(FOLDER_COLORS[0]);
@@ -198,35 +194,27 @@ export function useMailListPage() {
 
   const handleDeleteFolder = useCallback(() => {
     if (!editingFolder) return;
-    const updatedFolders = folders.filter(f => f.id !== editingFolder.id);
-    setFolders(updatedFolders);
-    const updatedEmailFolders = { ...emailFolders };
-    Object.keys(updatedEmailFolders).forEach(emailId => {
-      if (updatedEmailFolders[Number(emailId)] === editingFolder.id) {
-        delete updatedEmailFolders[Number(emailId)];
+    setFolders(folders.filter(f => f.id !== editingFolder.id));
+    const updated = { ...emailFolders };
+    Object.keys(updated).forEach(emailId => {
+      if (updated[Number(emailId)] === editingFolder.id) {
+        delete updated[Number(emailId)];
       }
     });
-    setEmailFolders(updatedEmailFolders);
+    setEmailFolders(updated);
     if (selectedFolder === editingFolder.id) setSelectedFolder(null);
-    const data = getStoredData();
-    data.folders = updatedFolders;
-    data.emailFolders = updatedEmailFolders;
-    saveStoredData(data);
     setEditingFolder(null);
     setShowDeleteFolderModal(false);
   }, [editingFolder, folders, emailFolders, selectedFolder]);
 
   const handleMoveToFolder = useCallback((folderId: string | null) => {
     if (selectedEmails.length === 0) return;
-    const updatedEmailFolders = { ...emailFolders };
+    const updated = { ...emailFolders };
     selectedEmails.forEach(emailId => {
-      if (folderId) updatedEmailFolders[emailId] = folderId;
-      else delete updatedEmailFolders[emailId];
+      if (folderId) updated[emailId] = folderId;
+      else delete updated[emailId];
     });
-    setEmailFolders(updatedEmailFolders);
-    const data = getStoredData();
-    data.emailFolders = updatedEmailFolders;
-    saveStoredData(data);
+    setEmailFolders(updated);
     setSelectedEmails([]);
     setShowMoveToFolderModal(false);
   }, [selectedEmails, emailFolders]);
@@ -250,24 +238,21 @@ export function useMailListPage() {
     setShowDeleteFolderModal(true);
   }, []);
 
-  // Mail actions
-  const handleMarkAsRead = useCallback(() => {
+  // Mail actions (via Supabase)
+  const handleMarkAsRead = useCallback(async () => {
     if (selectedTab !== 'inbox' || selectedEmails.length === 0) return;
-    const updatedInbox = inboxEmails.map(email =>
+
+    // For now, just update local state (Supabase integration would need mail IDs mapping)
+    setInboxEmails(prev => prev.map(email =>
       selectedEmails.includes(email.id) ? { ...email, isRead: true } : email
-    );
-    setInboxEmails(updatedInbox);
-    const data = getStoredData();
-    const newReadState = data.inboxReadState || {};
-    selectedEmails.forEach(id => { newReadState[id] = true; });
-    data.inboxReadState = newReadState;
-    saveStoredData(data);
+    ));
     setSelectedEmails([]);
-  }, [selectedTab, selectedEmails, inboxEmails]);
+  }, [selectedTab, selectedEmails]);
 
   const handleArchive = useCallback(() => {
     if (selectedEmails.length === 0) return;
     const emailsToArchive = getEmailsForTab().filter(email => selectedEmails.includes(email.id));
+
     if (selectedTab === 'archived') {
       emailsToArchive.forEach(email => {
         if (email.sender) setInboxEmails(prev => [email, ...prev.filter(e => e.id !== email.id)]);
@@ -281,9 +266,6 @@ export function useMailListPage() {
         case 'sent': setSentEmails(prev => prev.filter(email => !selectedEmails.includes(email.id))); break;
         case 'drafts': setDraftEmails(prev => prev.filter(email => !selectedEmails.includes(email.id))); break;
       }
-      const data = getStoredData();
-      data.archived = [...emailsToArchive, ...(data.archived || [])];
-      saveStoredData(data);
     }
     setSelectedEmails([]);
   }, [selectedEmails, selectedTab, getEmailsForTab]);
@@ -328,9 +310,6 @@ export function useMailListPage() {
   const handlePermanentDelete = useCallback(() => {
     if (selectedEmails.length === 0) return;
     setTrashEmails(prev => prev.filter(email => !selectedEmails.includes(email.id)));
-    const data = getStoredData();
-    data.deletedIds = [...(data.deletedIds || []), ...selectedEmails];
-    saveStoredData(data);
     setToastMessage(selectedEmails.length > 1 ? `${selectedEmails.length} mails supprimés définitivement` : 'Mail supprimé définitivement');
     setSelectedEmails([]);
     setShowPermanentDeleteModal(false);
@@ -340,10 +319,6 @@ export function useMailListPage() {
 
   const handleEmptyTrash = useCallback(() => {
     const count = trashEmails.length;
-    const trashIds = trashEmails.map(e => e.id);
-    const data = getStoredData();
-    data.deletedIds = [...(data.deletedIds || []), ...trashIds];
-    saveStoredData(data);
     setTrashEmails([]);
     setToastMessage(`Corbeille vidée (${count} mails)`);
     setShowSuccessToast(true);
@@ -375,6 +350,7 @@ export function useMailListPage() {
     sentEmails, inboxEmails, draftEmails, archivedEmails, trashEmails,
     showSuccessToast, setShowSuccessToast,
     toastMessage,
+    isLoading,
     folders, selectedFolder, setSelectedFolder,
     showFolderModal, setShowFolderModal,
     showRenameFolderModal, setShowRenameFolderModal,
@@ -404,5 +380,6 @@ export function useMailListPage() {
     getEmailsForTab,
     getEmailCountForFolder,
     toggleEmailSelection,
+    refetch: fetchMails,
   };
 }

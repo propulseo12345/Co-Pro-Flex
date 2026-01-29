@@ -1,9 +1,7 @@
 'use client';
 
-import { GripVertical, Trash2, AlertTriangle, Key } from 'lucide-react';
-import { useCallback, useRef, useState, useEffect } from 'react';
-import { clesRepartitionApi } from '@/shared/services';
-import type { MockCleRepartition } from '@/shared/mock/finance';
+import { GripVertical, Trash2, AlertTriangle } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
 import styles from './PosteEditor.module.css';
 
 export interface PosteEditorData {
@@ -12,6 +10,16 @@ export interface PosteEditorData {
   montant: number;
   posteId?: string;
   cleRepartitionId?: string;
+}
+
+// Type compatible avec le mapper de PostesListEditor
+interface CleRepartitionUI {
+  id: string;
+  nom: string;
+  code?: string;
+  description?: string;
+  totalTantiemes?: number;
+  type?: string;
 }
 
 interface PosteEditorProps {
@@ -25,7 +33,7 @@ interface PosteEditorProps {
   isDragging?: boolean;
   isDragOver?: boolean;
   budgetTotal?: number;
-  clesRepartition?: MockCleRepartition[];
+  clesRepartition?: CleRepartitionUI[];
 }
 
 export function PosteEditor({

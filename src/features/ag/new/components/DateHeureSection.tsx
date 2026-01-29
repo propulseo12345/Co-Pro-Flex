@@ -3,7 +3,6 @@
 import { Clock, AlertTriangle, AlertCircle } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { isValid, parseISO, format } from 'date-fns';
-import { DELAIS_LEGAUX } from '@/lib/constants/ag-delais-legaux';
 import type { ValidationDateAG } from '@/hooks/modules/useAGDelais';
 import styles from '../../../../app/(dashboard)/ag/new/new-ag.module.css';
 
@@ -42,7 +41,6 @@ export function DateHeureSection({
           required
           minDate={datesMinimales.minimum}
           error={errors.date}
-          hint={`Minimum ${DELAIS_LEGAUX.convocation_min} jours avant l'AG pour les convocations`}
           placeholder="DD/MM/YYYY"
         />
         {validationDateAG && (validationDateAG.niveau === 'warning') && (
