@@ -27,7 +27,7 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 1.25rem;
-    background: #FEF3C7;
+    background: rgba(251, 191, 36, 0.15);
     border-bottom: 1px solid var(--border);
 }
 
@@ -36,11 +36,11 @@
 }
 
 .header.urgence {
-    background: #FEE2E2;
+    background: rgba(220, 38, 38, 0.15);
 }
 
 .header.critique {
-    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+    background: rgba(220, 38, 38, 0.2);
 }
 
 .header.tresCritique {
@@ -198,12 +198,12 @@
 }
 
 .actionRenouveler .actionIcon {
-    background: #D1FAE5;
+    background: rgba(5, 150, 105, 0.2);
     color: #059669;
 }
 
 .actionResilier .actionIcon {
-    background: #FEE2E2;
+    background: rgba(220, 38, 38, 0.2);
     color: #DC2626;
 }
 
@@ -223,7 +223,7 @@
 /* Suggestion Box */
 .suggestionBox {
     padding: 1rem;
-    background: #FEF3C7;
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid #F59E0B;
     border-radius: var(--radius-md);
 }
@@ -235,7 +235,7 @@
     margin: 0 0 0.75rem;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .suggestionBox ul {
@@ -247,7 +247,7 @@
 .suggestionBox li {
     margin-bottom: 0.375rem;
     font-size: 0.8125rem;
-    color: #78350F;
+    color: #FBBF24;
 }
 
 /* Form Container */
@@ -416,7 +416,7 @@
     align-items: flex-start;
     gap: 0.75rem;
     padding: 1rem;
-    background: #FEF3C7;
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid #F59E0B;
     border-radius: var(--radius-md);
     margin-bottom: 1.25rem;
@@ -431,7 +431,7 @@
 .warningBox p {
     margin: 0;
     font-size: 0.875rem;
-    color: #78350F;
+    color: #FCD34D;
 }
 
 /* Form Actions */
@@ -444,47 +444,6 @@
 }
 
 /* Dark theme */
-:global([data-theme="dark"]) .header {
-    background: rgba(251, 191, 36, 0.15);
-}
-
-:global([data-theme="dark"]) .header.urgence {
-    background: rgba(220, 38, 38, 0.15);
-}
-
-:global([data-theme="dark"]) .header.critique {
-    background: rgba(220, 38, 38, 0.2);
-}
-
-:global([data-theme="dark"]) .suggestionBox {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(245, 158, 11, 0.5);
-}
-
-:global([data-theme="dark"]) .suggestionBox h4 {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .suggestionBox li {
-    color: #FBBF24;
-}
-
-:global([data-theme="dark"]) .warningBox {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(245, 158, 11, 0.5);
-}
-
-:global([data-theme="dark"]) .warningBox p {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .actionRenouveler .actionIcon {
-    background: rgba(5, 150, 105, 0.2);
-}
-
-:global([data-theme="dark"]) .actionResilier .actionIcon {
-    background: rgba(220, 38, 38, 0.2);
-}
 
 /* Responsive */
 @media (max-width: 640px) {

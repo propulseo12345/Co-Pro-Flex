@@ -1,5 +1,5 @@
 .card {
-    background: var(--color-bg-card, #fff);
+    background: var(--surface, #1E293B);
     border: 1px solid var(--color-border, #e5e7eb);
     border-radius: var(--radius-lg, 8px);
     padding: 1.5rem;
@@ -12,7 +12,7 @@
     gap: 0.5rem;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-text, #111827);
+    color: var(--text-main, #F1F5F9);
     margin: 0 0 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-border, #e5e7eb);
@@ -32,7 +32,7 @@
 .infoLabel {
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--text-secondary, #94A3B8);
     text-transform: uppercase;
     letter-spacing: 0.025em;
 }
@@ -45,7 +45,7 @@
 
 .infoValueText {
     font-size: 0.9375rem;
-    color: var(--color-text, #111827);
+    color: var(--text-main, #F1F5F9);
     line-height: 1.6;
     white-space: pre-wrap;
 }
@@ -64,21 +64,21 @@
 
 .emailField strong {
     font-size: 0.75rem;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--text-secondary, #94A3B8);
     text-transform: uppercase;
 }
 
 .emailField p {
     margin: 0;
-    color: var(--color-text, #111827);
+    color: var(--text-main, #F1F5F9);
 }
 
 .emailBody {
     font-family: inherit;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--color-text, #111827);
-    background: var(--color-bg-subtle, #f9fafb);
+    color: var(--text-main, #F1F5F9);
+    background: var(--bg-secondary, #1A1F2E);
     padding: 1rem;
     border-radius: var(--radius-sm, 4px);
     white-space: pre-wrap;
@@ -96,43 +96,5 @@
 .archiveInfo p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--color-text, #111827);
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .card {
-    background: var(--surface, #1E293B);
-    border-color: var(--border, #334155);
-}
-
-:global([data-theme="dark"]) .cardTitle {
-    color: var(--text-main, #F1F5F9);
-    border-bottom-color: var(--border, #334155);
-}
-
-:global([data-theme="dark"]) .infoLabel {
-    color: var(--text-secondary, #94A3B8);
-}
-
-:global([data-theme="dark"]) .infoValue,
-:global([data-theme="dark"]) .infoValueText {
-    color: var(--text-main, #F1F5F9);
-}
-
-:global([data-theme="dark"]) .emailField strong {
-    color: var(--text-secondary, #94A3B8);
-}
-
-:global([data-theme="dark"]) .emailField p {
-    color: var(--text-main, #F1F5F9);
-}
-
-:global([data-theme="dark"]) .emailBody {
-    background: var(--bg-secondary, #1A1F2E);
-    color: var(--text-main, #F1F5F9);
-    border: 1px solid var(--border, #334155);
-}
-
-:global([data-theme="dark"]) .archiveInfo p {
     color: var(--text-main, #F1F5F9);
 }

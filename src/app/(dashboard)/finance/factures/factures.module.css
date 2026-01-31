@@ -1150,21 +1150,3 @@
 .required {
     color: var(--danger);
 }
-
-@media (prefers-color-scheme: dark) {
-    .deleteWarning svg {
-        color: #F87171;
-    }
-
-    .deleteButton {
-        background: #EF4444;
-    }
-
-    .deleteButton:hover {
-        background: #DC2626;
-    }
-
-    .deleteWarningText {
-        color: #F87171;
-    }
-}

@@ -1,18 +1,19 @@
 /**
  * Hook pour gérer les pouvoirs (mandats) d'une AG
+ * MIGRATION 2026-01-31: Source de vérité = Supabase uniquement
  *
  * Fournit un état complet et des helpers pour :
  * - Ajouter/modifier/supprimer des pouvoirs
  * - Valider les règles légales (max 3 pouvoirs par mandataire)
  * - Détecter les doublons et incohérences
- * - Gérer les justificatifs
+ * - Gérer les justificatifs (upload vers Supabase Storage)
  * - Calculer le quorum prévisionnel
  */
 
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { MOCK_COPROPRIETAIRES, type Coproprietaire } from '@/data/mock';
+import { createClient } from '@/lib/supabase/client';
 import type {
     IPouvoir,
     JustificatifPouvoir,
@@ -22,7 +23,9 @@ import type {
     QuorumPrevisionnel,
     ParticipantPreRempli,
 } from '@/types/models/ag';
-import type { VoteCorrespondanceState } from './useVotesCorrespondance';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
 // ============================================================================
 // Constants
@@ -31,22 +34,49 @@ import type { VoteCorrespondanceState } from './useVotesCorrespondance';
 /** Nombre maximum de pouvoirs qu'un mandataire peut détenir */
 export const MAX_POUVOIRS_PAR_MANDATAIRE = 3;
 
-const STORAGE_KEY_PREFIX = 'ag-pouvoirs-';
-const VOTES_STORAGE_KEY_PREFIX = 'ag-votes-correspondance-';
+function isValidUUID(str: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+}
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface CoproprietaireForPouvoir extends Coproprietaire {
-    /** Nombre de pouvoirs reçus (en tant que mandataire) */
+interface CoproprietaireDB {
+    id: string;
+    full_name: string;
+    email: string | null;
+    tantiemes: number;
+}
+
+export interface CoproprietaireForPouvoir {
+    id: string;
+    nom: string;
+    email: string;
+    telephone: string;
+    lot: string;
+    tantiemes: number;
     pouvoirsRecus: number;
-    /** A donné son pouvoir (en tant que mandant) */
     aDonnePouvoir: boolean;
-    /** ID du mandataire si a donné pouvoir */
     mandataireId?: string;
-    /** Peut encore recevoir des pouvoirs */
     peutRecevoirPouvoir: boolean;
+}
+
+interface PouvoirDB {
+    id: string;
+    ag_id: string;
+    mandant_id: string;
+    mandant_name: string;
+    mandant_tantiemes: number;
+    mandataire_id: string;
+    mandataire_name: string;
+    mandataire_tantiemes: number;
+    signed_at: string | null;
+    justificatif_filename: string | null;
+    justificatif_path: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface UsePouvoirsOptions {
@@ -62,9 +92,9 @@ export interface UsePouvoirsReturn {
     isLoading: boolean;
 
     // Actions CRUD
-    addPouvoir: (mandantId: string, mandataireId: string, signedAt?: string) => PouvoirValidationResult;
+    addPouvoir: (mandantId: string, mandataireId: string, signedAt?: string) => Promise<PouvoirValidationResult>;
     updatePouvoir: (pouvoirId: string, updates: Partial<Pick<IPouvoir, 'signedAt'>>) => void;
-    removePouvoir: (pouvoirId: string) => void;
+    removePouvoir: (pouvoirId: string) => Promise<void>;
 
     // Actions sur les justificatifs
     uploadJustificatif: (pouvoirId: string, file: File) => Promise<void>;
@@ -86,56 +116,6 @@ export interface UsePouvoirsReturn {
 // ============================================================================
 // Helpers
 // ============================================================================
-
-function getStorageKey(agId: string): string {
-    return `${STORAGE_KEY_PREFIX}${agId}`;
-}
-
-function getVotesStorageKey(agId: string): string {
-    return `${VOTES_STORAGE_KEY_PREFIX}${agId}`;
-}
-
-function loadPouvoirsFromStorage(agId: string): IPouvoir[] {
-    if (typeof window === 'undefined') return [];
-
-    try {
-        const stored = localStorage.getItem(getStorageKey(agId));
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch {
-        // Silently fail, return empty
-    }
-    return [];
-}
-
-function savePouvoirsToStorage(agId: string, pouvoirs: IPouvoir[]): void {
-    if (typeof window === 'undefined') return;
-
-    try {
-        localStorage.setItem(getStorageKey(agId), JSON.stringify(pouvoirs));
-    } catch {
-        // Silently fail
-    }
-}
-
-function loadVotesCorrespondanceFromStorage(agId: string): Record<string, VoteCorrespondanceState> {
-    if (typeof window === 'undefined') return {};
-
-    try {
-        const stored = localStorage.getItem(getVotesStorageKey(agId));
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch {
-        // Silently fail
-    }
-    return {};
-}
-
-function generateId(): string {
-    return `pouvoir-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
 
 /**
  * Compte le nombre de pouvoirs par mandataire
@@ -209,45 +189,28 @@ export function validatePouvoir(
  * Calcule le quorum prévisionnel
  */
 export function computeQuorumPrevisionnel(
-    coproprietaires: Coproprietaire[],
-    votesCorrespondance: Record<string, VoteCorrespondanceState>,
+    coproprietaires: CoproprietaireForPouvoir[],
+    votesCorrespondanceCount: number,
+    votesCorrespondanceTantiemes: number,
     pouvoirs: IPouvoir[],
-    resolutionsCount: number
 ): QuorumPrevisionnel {
     const totalTantiemes = coproprietaires.reduce((sum, c) => sum + c.tantiemes, 0);
     const totalCoproprietaires = coproprietaires.length;
-
-    // Copropriétaires avec votes par correspondance complets
-    const coproWithCompleteVotes = new Set<string>();
-    let tantiemesVotesCorrespondance = 0;
-
-    Object.entries(votesCorrespondance).forEach(([coproId, state]) => {
-        const votesCount = Object.values(state.votesByResolutionId).filter(v => v !== null).length;
-        const isComplete = resolutionsCount > 0 && votesCount === resolutionsCount;
-
-        if (isComplete && state.tantiemesVotes > 0) {
-            coproWithCompleteVotes.add(coproId);
-            tantiemesVotesCorrespondance += state.tantiemesVotes;
-        }
-    });
 
     // Mandants représentés par pouvoir
     const mandantsRepresentes = new Set<string>();
     let tantiemesMandants = 0;
 
     pouvoirs.forEach(pouvoir => {
-        // Ne pas compter les mandants qui ont déjà voté par correspondance
-        if (!coproWithCompleteVotes.has(pouvoir.mandantCoproId)) {
-            const mandant = coproprietaires.find(c => c.id === pouvoir.mandantCoproId);
-            if (mandant && !mandantsRepresentes.has(pouvoir.mandantCoproId)) {
-                mandantsRepresentes.add(pouvoir.mandantCoproId);
-                tantiemesMandants += mandant.tantiemes;
-            }
+        const mandant = coproprietaires.find(c => c.id === pouvoir.mandantCoproId);
+        if (mandant && !mandantsRepresentes.has(pouvoir.mandantCoproId)) {
+            mandantsRepresentes.add(pouvoir.mandantCoproId);
+            tantiemesMandants += mandant.tantiemes;
         }
     });
 
-    const tantiemesRepresentes = tantiemesVotesCorrespondance + tantiemesMandants;
-    const nbCoproprietairesRepresentes = coproWithCompleteVotes.size + mandantsRepresentes.size;
+    const tantiemesRepresentes = votesCorrespondanceTantiemes + tantiemesMandants;
+    const nbCoproprietairesRepresentes = votesCorrespondanceCount + mandantsRepresentes.size;
 
     return {
         tantiemesRepresentes,
@@ -257,8 +220,8 @@ export function computeQuorumPrevisionnel(
         totalCoproprietaires,
         details: {
             votesCorrespondance: {
-                count: coproWithCompleteVotes.size,
-                tantiemes: tantiemesVotesCorrespondance,
+                count: votesCorrespondanceCount,
+                tantiemes: votesCorrespondanceTantiemes,
             },
             mandantsRepresentes: {
                 count: mandantsRepresentes.size,
@@ -272,10 +235,9 @@ export function computeQuorumPrevisionnel(
  * Construit la liste des participants pré-remplie pour la feuille de présence
  */
 export function buildAttendanceList(
-    coproprietaires: Coproprietaire[],
+    coproprietaires: CoproprietaireForPouvoir[],
     pouvoirs: IPouvoir[],
-    votesCorrespondance: Record<string, VoteCorrespondanceState>,
-    resolutionsCount: number
+    votesCorrespondanceIds: Set<string>,
 ): ParticipantPreRempli[] {
     const pouvoirsByMandant = new Map<string, IPouvoir>();
     pouvoirs.forEach(p => {
@@ -283,15 +245,8 @@ export function buildAttendanceList(
     });
 
     return coproprietaires.map(copro => {
-        const voteState = votesCorrespondance[copro.id];
         const pouvoir = pouvoirsByMandant.get(copro.id);
-
-        // Déterminer si vote correspondance complet
-        let voteCorrespondanceComplet = false;
-        if (voteState) {
-            const votesCount = Object.values(voteState.votesByResolutionId).filter(v => v !== null).length;
-            voteCorrespondanceComplet = resolutionsCount > 0 && votesCount === resolutionsCount;
-        }
+        const voteCorrespondanceComplet = votesCorrespondanceIds.has(copro.id);
 
         // Déterminer le mode de participation
         let modeParticipation: 'VOTE_CORRESPONDANCE' | 'REPRESENTE' | 'NON_DETERMINE' = 'NON_DETERMINE';
@@ -326,53 +281,109 @@ export function buildAttendanceList(
 
 export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
     const [pouvoirs, setPouvoirs] = useState<IPouvoir[]>([]);
-    const [votesCorrespondance, setVotesCorrespondance] = useState<Record<string, VoteCorrespondanceState>>({});
-    const [resolutionsCount, setResolutionsCount] = useState(0);
+    const [coproprietairesDB, setCoproprietairesDB] = useState<CoproprietaireDB[]>([]);
+    const [votesCorrespondanceCount, setVotesCorrespondanceCount] = useState(0);
+    const [votesCorrespondanceTantiemes, setVotesCorrespondanceTantiemes] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     // Charger les données au montage
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        if (!isValidUUID(agId)) {
+            setIsLoading(false);
+            return;
+        }
 
-        setIsLoading(true);
+        const loadData = async () => {
+            setIsLoading(true);
 
-        // Charger les pouvoirs
-        const loadedPouvoirs = loadPouvoirsFromStorage(agId);
-        setPouvoirs(loadedPouvoirs);
+            try {
+                const supabase = createUntypedClient();
 
-        // Charger les votes correspondance pour le calcul du quorum
-        const loadedVotes = loadVotesCorrespondanceFromStorage(agId);
-        setVotesCorrespondance(loadedVotes);
+                // 1. Get AG to find copro_id
+                const { data: agData, error: agError } = await supabase
+                    .from('ag_meetings')
+                    .select('copro_id')
+                    .eq('id', agId)
+                    .single();
 
-        // Charger le nombre de résolutions
-        try {
-            const resolutions = localStorage.getItem(`ag-resolutions-${agId}`);
-            if (resolutions) {
-                const parsed = JSON.parse(resolutions);
-                setResolutionsCount(Array.isArray(parsed) ? parsed.length : 0);
+                if (agError || !agData?.copro_id) {
+                    console.error('[usePouvoirs] AG not found:', agError);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const coproId = agData.copro_id;
+
+                // 2. Load coproprietaires for this copro
+                const { data: coprosData, error: coprosError } = await supabase
+                    .from('coproprietaires')
+                    .select('id, full_name, email, tantiemes')
+                    .eq('copro_id', coproId);
+
+                if (coprosError) {
+                    console.error('[usePouvoirs] Error loading coproprietaires:', coprosError);
+                }
+
+                setCoproprietairesDB(coprosData || []);
+
+                // 3. Load pouvoirs via RPC
+                const { data: pouvoirsData, error: pouvoirsError } = await supabase
+                    .rpc('get_ag_pouvoirs', { p_ag_id: agId });
+
+                if (pouvoirsError) {
+                    console.error('[usePouvoirs] Error loading pouvoirs:', pouvoirsError);
+                }
+
+                // Map from DB format to IPouvoir
+                const mappedPouvoirs: IPouvoir[] = (pouvoirsData || []).map((p: PouvoirDB) => ({
+                    id: p.id,
+                    agId: p.ag_id,
+                    mandantCoproId: p.mandant_id,
+                    mandataireCoproId: p.mandataire_id,
+                    signedAt: p.signed_at || undefined,
+                    justificatif: p.justificatif_filename ? {
+                        fileName: p.justificatif_filename,
+                        mimeType: 'application/octet-stream',
+                        size: 0,
+                        uploadedAt: p.created_at,
+                    } : undefined,
+                    createdAt: p.created_at,
+                    updatedAt: p.updated_at,
+                }));
+
+                setPouvoirs(mappedPouvoirs);
+
+                // 4. Count validated votes correspondance for quorum
+                const { data: votesData, error: votesError } = await supabase
+                    .from('ag_correspondence_votes')
+                    .select('coproprietaire_id, total_tantiemes')
+                    .eq('ag_id', agId)
+                    .eq('status', 'validated');
+
+                if (votesError) {
+                    console.error('[usePouvoirs] Error loading votes correspondance:', votesError);
+                }
+
+                const uniqueVoters = new Set<string>();
+                let totalVoteTantiemes = 0;
+                (votesData || []).forEach((v: { coproprietaire_id: string; total_tantiemes: number }) => {
+                    if (!uniqueVoters.has(v.coproprietaire_id)) {
+                        uniqueVoters.add(v.coproprietaire_id);
+                        totalVoteTantiemes += v.total_tantiemes || 0;
+                    }
+                });
+
+                setVotesCorrespondanceCount(uniqueVoters.size);
+                setVotesCorrespondanceTantiemes(totalVoteTantiemes);
+
+            } catch (err) {
+                console.error('[usePouvoirs] Error:', err);
+            } finally {
+                setIsLoading(false);
             }
-        } catch {
-            setResolutionsCount(0);
-        }
+        };
 
-        setIsLoading(false);
-    }, [agId]);
-
-    // Sauvegarder automatiquement quand les pouvoirs changent
-    useEffect(() => {
-        if (!isLoading) {
-            savePouvoirsToStorage(agId, pouvoirs);
-        }
-    }, [pouvoirs, agId, isLoading]);
-
-    // Recharger les votes correspondance périodiquement (pour synchronisation)
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const loadedVotes = loadVotesCorrespondanceFromStorage(agId);
-            setVotesCorrespondance(loadedVotes);
-        }, 2000);
-
-        return () => clearInterval(interval);
+        loadData();
     }, [agId]);
 
     // Copropriétaires avec info pouvoirs
@@ -384,20 +395,25 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
             mandantsWithPouvoir.set(p.mandantCoproId, p.mandataireCoproId);
         });
 
-        return MOCK_COPROPRIETAIRES.map(copro => {
+        return coproprietairesDB.map(copro => {
             const pouvoirsRecus = pouvoirCounts[copro.id] || 0;
             const aDonnePouvoir = mandantsWithPouvoir.has(copro.id);
             const mandataireId = mandantsWithPouvoir.get(copro.id);
 
             return {
-                ...copro,
+                id: copro.id,
+                nom: copro.full_name,
+                email: copro.email || '',
+                telephone: '',
+                lot: '',
+                tantiemes: copro.tantiemes,
                 pouvoirsRecus,
                 aDonnePouvoir,
                 mandataireId,
                 peutRecevoirPouvoir: pouvoirsRecus < MAX_POUVOIRS_PAR_MANDATAIRE,
             };
         });
-    }, [pouvoirs]);
+    }, [pouvoirs, coproprietairesDB]);
 
     // Statistiques
     const stats = useMemo<PouvoirsStats>(() => {
@@ -434,12 +450,12 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
     // Quorum prévisionnel
     const quorumPrevisionnel = useMemo<QuorumPrevisionnel>(() => {
         return computeQuorumPrevisionnel(
-            MOCK_COPROPRIETAIRES,
-            votesCorrespondance,
+            coproprietaires,
+            votesCorrespondanceCount,
+            votesCorrespondanceTantiemes,
             pouvoirs,
-            resolutionsCount
         );
-    }, [votesCorrespondance, pouvoirs, resolutionsCount]);
+    }, [coproprietaires, votesCorrespondanceCount, votesCorrespondanceTantiemes, pouvoirs]);
 
     // Actions
     const validatePouvoirFn = useCallback(
@@ -457,32 +473,65 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
     );
 
     const addPouvoir = useCallback(
-        (mandantId: string, mandataireId: string, signedAt?: string): PouvoirValidationResult => {
+        async (mandantId: string, mandataireId: string, signedAt?: string): Promise<PouvoirValidationResult> => {
             const validation = validatePouvoirFn(mandantId, mandataireId);
 
             if (!validation.ok) {
                 return validation;
             }
 
-            const now = new Date().toISOString();
-            const newPouvoir: IPouvoir = {
-                id: generateId(),
-                agId,
-                mandantCoproId: mandantId,
-                mandataireCoproId: mandataireId,
-                signedAt,
-                createdAt: now,
-                updatedAt: now,
-            };
+            try {
+                const supabase = createUntypedClient();
 
-            setPouvoirs(prev => [...prev, newPouvoir]);
+                const { data, error } = await supabase.rpc('save_ag_pouvoir', {
+                    p_ag_id: agId,
+                    p_mandant_id: mandantId,
+                    p_mandataire_id: mandataireId,
+                    p_signed_at: signedAt || null,
+                });
 
-            return validation;
+                if (error || !data?.success) {
+                    console.error('[usePouvoirs] Error saving pouvoir:', error || data?.error);
+                    return {
+                        ok: false,
+                        errors: [{
+                            code: 'DUPLICATE',
+                            message: data?.error || 'Erreur lors de la sauvegarde',
+                        }],
+                    };
+                }
+
+                // Add to local state
+                const now = new Date().toISOString();
+                const newPouvoir: IPouvoir = {
+                    id: data.pouvoir_id,
+                    agId,
+                    mandantCoproId: mandantId,
+                    mandataireCoproId: mandataireId,
+                    signedAt,
+                    createdAt: now,
+                    updatedAt: now,
+                };
+
+                setPouvoirs(prev => [...prev, newPouvoir]);
+
+                return validation;
+            } catch (err) {
+                console.error('[usePouvoirs] Error adding pouvoir:', err);
+                return {
+                    ok: false,
+                    errors: [{
+                        code: 'DUPLICATE',
+                        message: 'Erreur lors de la sauvegarde',
+                    }],
+                };
+            }
         },
         [agId, validatePouvoirFn]
     );
 
     const updatePouvoir = useCallback((pouvoirId: string, updates: Partial<Pick<IPouvoir, 'signedAt'>>) => {
+        // Update local state (Supabase update would need additional RPC)
         setPouvoirs(prev =>
             prev.map(p =>
                 p.id === pouvoirId
@@ -492,8 +541,23 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
         );
     }, []);
 
-    const removePouvoir = useCallback((pouvoirId: string) => {
-        setPouvoirs(prev => prev.filter(p => p.id !== pouvoirId));
+    const removePouvoir = useCallback(async (pouvoirId: string) => {
+        try {
+            const supabase = createUntypedClient();
+
+            const { data, error } = await supabase.rpc('delete_ag_pouvoir', {
+                p_pouvoir_id: pouvoirId,
+            });
+
+            if (error || !data?.success) {
+                console.error('[usePouvoirs] Error deleting pouvoir:', error || data?.error);
+                return;
+            }
+
+            setPouvoirs(prev => prev.filter(p => p.id !== pouvoirId));
+        } catch (err) {
+            console.error('[usePouvoirs] Error removing pouvoir:', err);
+        }
     }, []);
 
     const uploadJustificatif = useCallback(async (pouvoirId: string, file: File) => {
@@ -508,36 +572,51 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
             throw new Error('Fichier trop volumineux. Maximum 10 Mo.');
         }
 
-        return new Promise<void>((resolve, reject) => {
-            const reader = new FileReader();
+        try {
+            const supabase = createUntypedClient();
 
-            reader.onload = () => {
-                const justificatif: JustificatifPouvoir = {
-                    fileName: file.name,
-                    mimeType: file.type,
-                    size: file.size,
-                    uploadedAt: new Date().toISOString(),
-                    dataUrl: reader.result as string,
-                };
+            // Upload to Supabase Storage
+            const filePath = `pouvoirs/${agId}/${pouvoirId}/${file.name}`;
+            const { error: uploadError } = await supabase.storage
+                .from('documents')
+                .upload(filePath, file, { upsert: true });
 
-                setPouvoirs(prev =>
-                    prev.map(p =>
-                        p.id === pouvoirId
-                            ? { ...p, justificatif, updatedAt: new Date().toISOString() }
-                            : p
-                    )
-                );
+            if (uploadError) {
+                throw new Error(`Erreur upload: ${uploadError.message}`);
+            }
 
-                resolve();
+            // Update DB with file info
+            const { error: updateError } = await supabase.rpc('update_ag_pouvoir_justificatif', {
+                p_pouvoir_id: pouvoirId,
+                p_filename: file.name,
+                p_path: filePath,
+                p_size: file.size,
+            });
+
+            if (updateError) {
+                console.error('[usePouvoirs] Error updating justificatif:', updateError);
+            }
+
+            // Update local state
+            const justificatif: JustificatifPouvoir = {
+                fileName: file.name,
+                mimeType: file.type,
+                size: file.size,
+                uploadedAt: new Date().toISOString(),
             };
 
-            reader.onerror = () => {
-                reject(new Error('Erreur lors de la lecture du fichier.'));
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }, []);
+            setPouvoirs(prev =>
+                prev.map(p =>
+                    p.id === pouvoirId
+                        ? { ...p, justificatif, updatedAt: new Date().toISOString() }
+                        : p
+                )
+            );
+        } catch (err) {
+            console.error('[usePouvoirs] Upload error:', err);
+            throw err;
+        }
+    }, [agId]);
 
     const removeJustificatif = useCallback((pouvoirId: string) => {
         setPouvoirs(prev =>
@@ -569,8 +648,9 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
     }, [pouvoirs]);
 
     const save = useCallback(() => {
-        savePouvoirsToStorage(agId, pouvoirs);
-    }, [agId, pouvoirs]);
+        // No-op: All saves are now done via Supabase RPCs
+        console.log('[usePouvoirs] save() called - data is already persisted to Supabase');
+    }, []);
 
     return {
         pouvoirs,

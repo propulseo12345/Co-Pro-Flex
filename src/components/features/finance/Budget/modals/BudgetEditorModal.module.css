@@ -105,7 +105,7 @@
   align-items: center;
   padding: var(--space-lg) var(--space-xl);
   border-top: 1px solid var(--border);
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 .totalSection {
@@ -131,21 +131,6 @@
   display: flex;
   gap: var(--space-md);
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .modalContent {
-  background: var(--background);
-}
-
-:global([data-theme="dark"]) .modalHeader {
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .modalFooter {
-  background: var(--bg-tertiary);
-  border-color: var(--border);
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .modalOverlay {

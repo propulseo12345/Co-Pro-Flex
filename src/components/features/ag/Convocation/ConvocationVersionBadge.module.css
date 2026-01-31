@@ -55,7 +55,7 @@
   top: calc(100% + var(--space-xs));
   right: 0;
   width: 280px;
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
@@ -103,7 +103,7 @@
 }
 
 .versionItemCurrent {
-  background: var(--primary-light);
+  background: rgba(96, 165, 250, 0.15);
 }
 
 .versionItemCurrent:hover {
@@ -166,13 +166,4 @@
   font-size: 10px;
   color: var(--text-tertiary);
   text-align: center;
-}
-
-/* Dark mode */
-[data-theme="dark"] .dropdown {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .versionItemCurrent {
-  background: rgba(96, 165, 250, 0.15);
 }

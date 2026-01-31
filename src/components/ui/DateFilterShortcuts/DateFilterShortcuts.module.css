@@ -15,7 +15,7 @@
   gap: 6px;
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--color-gray-600);
+  color: var(--color-gray-400);
   white-space: nowrap;
 }
 
@@ -29,8 +29,8 @@
 .shortcutButton {
   padding: 6px 12px;
   border: 1px solid var(--color-gray-200);
-  background: var(--color-white);
-  color: var(--color-gray-700);
+  background: var(--color-gray-800);
+  color: var(--color-gray-300);
   font-size: var(--font-size-sm);
   font-weight: 500;
   border-radius: var(--radius-md);
@@ -40,20 +40,20 @@
 }
 
 .shortcutButton:hover {
-  border-color: var(--color-gray-300);
-  background: var(--color-gray-50);
-  color: var(--color-gray-900);
+  border-color: var(--color-gray-100);
+  background: var(--color-gray-700);
+  color: var(--color-gray-100);
 }
 
 .shortcutButton.active {
-  background: var(--color-primary-50);
-  border-color: var(--color-primary-200);
-  color: var(--color-primary-700);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-400);
 }
 
 .shortcutButton.active:hover {
-  background: var(--color-primary-100);
-  border-color: var(--color-primary-300);
+  background: rgba(59, 130, 246, 0.3);
+  border-color: var(--color-primary-600);
 }
 
 .compact .shortcutButton {
@@ -73,7 +73,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--color-white);
+  background: var(--color-gray-800);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
   padding: 2px;
@@ -87,15 +87,15 @@
   height: 28px;
   border: none;
   background: transparent;
-  color: var(--color-gray-600);
+  color: var(--color-gray-400);
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: all 0.15s ease;
 }
 
 .navButton:hover {
-  background: var(--color-gray-100);
-  color: var(--color-gray-900);
+  background: var(--color-gray-700);
+  color: var(--color-gray-100);
 }
 
 .periodLabel {
@@ -103,61 +103,9 @@
   text-align: center;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-gray-800);
+  color: var(--color-gray-200);
   padding: 0 8px;
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .label {
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .shortcutButton {
-  border-color: var(--color-gray-700);
-  background: var(--color-gray-800);
-  color: var(--color-gray-300);
-}
-
-:global([data-theme="dark"]) .shortcutButton:hover {
-  border-color: var(--color-gray-600);
-  background: var(--color-gray-700);
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .shortcutButton.active {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: var(--color-primary-700);
-  color: var(--color-primary-400);
-}
-
-:global([data-theme="dark"]) .shortcutButton.active:hover {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: var(--color-primary-600);
-}
-
-:global([data-theme="dark"]) .selectedRange {
-  color: var(--color-gray-500);
-  border-color: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .navigator {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .navButton {
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .navButton:hover {
-  background: var(--color-gray-700);
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .periodLabel {
-  color: var(--color-gray-200);
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .container {

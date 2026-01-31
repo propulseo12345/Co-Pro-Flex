@@ -1,7 +1,7 @@
 /**
  * Service de persistance de la session AG
- * Gère le stockage Supabase avec fallback localStorage
- * Version migrée depuis localStorage pur vers Supabase (ACTION 9)
+ * MIGRATION 2026-01-31: Source de vérité = Supabase UNIQUEMENT
+ * localStorage utilisé uniquement pour métadonnées UI (non business data)
  */
 
 import { createClient } from '@/lib/supabase/client';
@@ -16,22 +16,16 @@ type DraftType = 'attendance' | 'votes' | 'roles' | 'resolutions' | 'session';
 
 /**
  * Type helper pour les appels RPC non encore générés dans les types Supabase
- * Note: Régénérer les types après application des migrations
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClientAny = SupabaseClient<any, any, any>;
 
 /**
- * Clés de stockage localStorage (fallback uniquement)
+ * Clés de stockage localStorage (UNIQUEMENT pour métadonnées UI, pas business data)
  */
 const STORAGE_KEYS = {
-  PRESENCES: (agId: string) => `ag-session-presences-${agId}`,
-  ROLES: (agId: string) => `ag-session-roles-${agId}`,
-  VOTES: (agId: string) => `ag-session-votes-${agId}`,
-  RESOLUTIONS_STATE: (agId: string) => `ag-session-resolutions-${agId}`,
   LAST_SAVE: (agId: string) => `ag-session-last-save-${agId}`,
   SESSION_METADATA: (agId: string) => `ag-session-metadata-${agId}`,
-  SESSION_STARTED: (agId: string) => `ag-session-started-${agId}`,
 };
 
 /**
@@ -59,7 +53,7 @@ export interface RestoreResult {
   data: Partial<AGSessionData> | null;
   warnings: string[];
   lastSaveDate: Date | null;
-  source: 'supabase' | 'localStorage';
+  source: 'supabase';
 }
 
 /**
@@ -72,21 +66,23 @@ function isValidUUID(id: string): boolean {
 
 /**
  * Service de persistance de la session AG
- * Utilise Supabase comme stockage principal, localStorage en fallback
+ * Utilise UNIQUEMENT Supabase comme stockage
  */
 export class AGSessionPersistenceService {
   private agId: string;
   private autoSaveInterval: ReturnType<typeof setInterval> | null = null;
   private isDirty: boolean = false;
   private version: number = 1;
-  private useSupabase: boolean;
-  // Cast to any for new RPC functions not yet in generated types
+  private isValid: boolean;
   private supabase: SupabaseClientAny = createClient();
 
   constructor(agId: string) {
     this.agId = agId;
-    // Utiliser Supabase seulement si l'ID est un UUID valide
-    this.useSupabase = isValidUUID(agId);
+    this.isValid = isValidUUID(agId);
+
+    if (!this.isValid) {
+      console.warn('[AGSessionPersistence] Invalid AG ID (not UUID):', agId);
+    }
   }
 
   // ========================================
@@ -97,7 +93,7 @@ export class AGSessionPersistenceService {
    * Sauvegarde un draft via RPC Supabase
    */
   private async saveDraftToSupabase(draftType: DraftType, data: unknown): Promise<boolean> {
-    if (!this.useSupabase) return false;
+    if (!this.isValid) return false;
 
     try {
       const { error } = await this.supabase.rpc('save_ag_session_draft', {
@@ -107,13 +103,13 @@ export class AGSessionPersistenceService {
       });
 
       if (error) {
-        console.warn('[AGSessionPersistence] Supabase save error:', error.message);
+        console.error('[AGSessionPersistence] Supabase save error:', error.message);
         return false;
       }
 
       return true;
     } catch (err) {
-      console.warn('[AGSessionPersistence] Supabase save exception:', err);
+      console.error('[AGSessionPersistence] Supabase save exception:', err);
       return false;
     }
   }
@@ -122,7 +118,7 @@ export class AGSessionPersistenceService {
    * Récupère un draft via RPC Supabase
    */
   private async getDraftFromSupabase(draftType: DraftType): Promise<{ data: unknown; version: number; lastModified: Date } | null> {
-    if (!this.useSupabase) return null;
+    if (!this.isValid) return null;
 
     try {
       const { data, error } = await this.supabase.rpc('get_ag_session_draft', {
@@ -134,42 +130,13 @@ export class AGSessionPersistenceService {
         return null;
       }
 
-      // data is JSONB with: id, draft_data, version, last_modified_at
       return {
         data: data.draft_data,
         version: data.version,
         lastModified: new Date(data.last_modified_at),
       };
     } catch (err) {
-      console.warn('[AGSessionPersistence] Supabase get exception:', err);
-      return null;
-    }
-  }
-
-  // ========================================
-  // HELPERS LOCALSTORAGE (FALLBACK)
-  // ========================================
-
-  /**
-   * Sauvegarde en localStorage (fallback)
-   */
-  private saveToLocalStorage(key: string, data: unknown): void {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch (error) {
-      console.error('[AGSessionPersistence] localStorage save error:', error);
-    }
-  }
-
-  /**
-   * Récupère depuis localStorage (fallback)
-   */
-  private getFromLocalStorage<T>(key: string): T | null {
-    try {
-      const str = localStorage.getItem(key);
-      return str ? JSON.parse(str) : null;
-    } catch (error) {
-      console.error('[AGSessionPersistence] localStorage get error:', error);
+      console.error('[AGSessionPersistence] Supabase get exception:', err);
       return null;
     }
   }
@@ -182,13 +149,7 @@ export class AGSessionPersistenceService {
    * Sauvegarde les présences enrichies
    */
   async savePresences(presences: Record<string, PresenceData>): Promise<void> {
-    const saved = await this.saveDraftToSupabase('attendance', presences);
-
-    if (!saved) {
-      // Fallback localStorage
-      this.saveToLocalStorage(STORAGE_KEYS.PRESENCES(this.agId), presences);
-    }
-
+    await this.saveDraftToSupabase('attendance', presences);
     this.markAsSaved();
     this.isDirty = false;
   }
@@ -197,12 +158,7 @@ export class AGSessionPersistenceService {
    * Sauvegarde les rôles (président, secrétaire, scrutateurs)
    */
   async saveRoles(roles: RolesAG): Promise<void> {
-    const saved = await this.saveDraftToSupabase('roles', roles);
-
-    if (!saved) {
-      this.saveToLocalStorage(STORAGE_KEYS.ROLES(this.agId), roles);
-    }
-
+    await this.saveDraftToSupabase('roles', roles);
     this.markAsSaved();
   }
 
@@ -210,12 +166,7 @@ export class AGSessionPersistenceService {
    * Sauvegarde les votes par résolution
    */
   async saveVotes(votes: Record<string, unknown>): Promise<void> {
-    const saved = await this.saveDraftToSupabase('votes', votes);
-
-    if (!saved) {
-      this.saveToLocalStorage(STORAGE_KEYS.VOTES(this.agId), votes);
-    }
-
+    await this.saveDraftToSupabase('votes', votes);
     this.markAsSaved();
   }
 
@@ -224,11 +175,7 @@ export class AGSessionPersistenceService {
    */
   async saveResolutionState(index: number, completedResolutions: string[] = []): Promise<void> {
     const data = { activeIndex: index, completedResolutions };
-    const saved = await this.saveDraftToSupabase('resolutions', data);
-
-    if (!saved) {
-      this.saveToLocalStorage(STORAGE_KEYS.RESOLUTIONS_STATE(this.agId), data);
-    }
+    await this.saveDraftToSupabase('resolutions', data);
   }
 
   /**
@@ -236,11 +183,7 @@ export class AGSessionPersistenceService {
    */
   async saveSessionStarted(started: boolean): Promise<void> {
     const data = { started, startedAt: started ? new Date().toISOString() : null };
-    const saved = await this.saveDraftToSupabase('session', data);
-
-    if (!saved) {
-      this.saveToLocalStorage(STORAGE_KEYS.SESSION_STARTED(this.agId), started);
-    }
+    await this.saveDraftToSupabase('session', data);
   }
 
   /**
@@ -270,23 +213,25 @@ export class AGSessionPersistenceService {
   }
 
   /**
-   * Enregistre les métadonnées de la dernière sauvegarde
+   * Enregistre les métadonnées de la dernière sauvegarde (UI only)
    */
   private markAsSaved(): void {
+    if (typeof window === 'undefined') return;
     const key = STORAGE_KEYS.LAST_SAVE(this.agId);
     localStorage.setItem(key, new Date().toISOString());
   }
 
   /**
-   * Sauvegarde les métadonnées de session
+   * Sauvegarde les métadonnées de session (UI only)
    */
   private saveMetadata(): void {
+    if (typeof window === 'undefined') return;
     const key = STORAGE_KEYS.SESSION_METADATA(this.agId);
     const metadata = {
       agId: this.agId,
       lastModified: new Date().toISOString(),
       version: this.version,
-      storageMode: this.useSupabase ? 'supabase' : 'localStorage',
+      storageMode: 'supabase',
     };
     localStorage.setItem(key, JSON.stringify(metadata));
   }
@@ -296,121 +241,62 @@ export class AGSessionPersistenceService {
   // ========================================
 
   /**
-   * Restaure toutes les données de session
+   * Restaure toutes les données de session depuis Supabase
    */
   async restore(): Promise<RestoreResult> {
     const warnings: string[] = [];
     const data: Partial<AGSessionData> = {};
     let lastSaveDate: Date | null = null;
-    let source: 'supabase' | 'localStorage' = 'localStorage';
+
+    if (!this.isValid) {
+      return {
+        success: false,
+        data: null,
+        warnings: ['Invalid AG ID'],
+        lastSaveDate: null,
+        source: 'supabase',
+      };
+    }
 
     try {
-      // Essayer d'abord Supabase si disponible
-      if (this.useSupabase) {
-        const [presencesDraft, rolesDraft, votesDraft, resolutionsDraft, sessionDraft] = await Promise.all([
-          this.getDraftFromSupabase('attendance'),
-          this.getDraftFromSupabase('roles'),
-          this.getDraftFromSupabase('votes'),
-          this.getDraftFromSupabase('resolutions'),
-          this.getDraftFromSupabase('session'),
-        ]);
+      const [presencesDraft, rolesDraft, votesDraft, resolutionsDraft, sessionDraft] = await Promise.all([
+        this.getDraftFromSupabase('attendance'),
+        this.getDraftFromSupabase('roles'),
+        this.getDraftFromSupabase('votes'),
+        this.getDraftFromSupabase('resolutions'),
+        this.getDraftFromSupabase('session'),
+      ]);
 
-        // Si au moins un draft existe sur Supabase, utiliser Supabase
-        const hasSupabaseData = presencesDraft || rolesDraft || votesDraft || resolutionsDraft || sessionDraft;
-
-        if (hasSupabaseData) {
-          source = 'supabase';
-
-          // Helper to update lastSaveDate
-          const updateLastSave = (newDate: Date) => {
-            if (!lastSaveDate || newDate.getTime() > lastSaveDate.getTime()) {
-              lastSaveDate = newDate;
-            }
-          };
-
-          if (presencesDraft) {
-            data.presencesEnrichies = presencesDraft.data as Record<string, PresenceData>;
-            updateLastSave(presencesDraft.lastModified);
-          }
-
-          if (rolesDraft) {
-            data.roles = rolesDraft.data as RolesAG;
-            updateLastSave(rolesDraft.lastModified);
-          }
-
-          if (votesDraft) {
-            data.votesParResolution = votesDraft.data as Record<string, unknown>;
-            updateLastSave(votesDraft.lastModified);
-          }
-
-          if (resolutionsDraft) {
-            const resData = resolutionsDraft.data as { activeIndex: number; completedResolutions: string[] };
-            data.resolutionActiveIndex = resData.activeIndex;
-            data.completedResolutions = resData.completedResolutions || [];
-          }
-
-          if (sessionDraft) {
-            const sessData = sessionDraft.data as { started: boolean };
-            data.sessionStarted = sessData.started;
-          }
-
-          return {
-            success: true,
-            data: Object.keys(data).length > 0 ? data : null,
-            warnings,
-            lastSaveDate,
-            source,
-          };
+      const updateLastSave = (newDate: Date) => {
+        if (!lastSaveDate || newDate.getTime() > lastSaveDate.getTime()) {
+          lastSaveDate = newDate;
         }
+      };
+
+      if (presencesDraft) {
+        data.presencesEnrichies = presencesDraft.data as Record<string, PresenceData>;
+        updateLastSave(presencesDraft.lastModified);
       }
 
-      // Fallback: Restaurer depuis localStorage
-      source = 'localStorage';
-
-      // Vérifier la date de dernière sauvegarde
-      const lastSaveKey = STORAGE_KEYS.LAST_SAVE(this.agId);
-      const lastSaveStr = localStorage.getItem(lastSaveKey);
-      if (lastSaveStr) {
-        lastSaveDate = new Date(lastSaveStr);
-
-        // Vérifier si les données ne sont pas trop anciennes (24h)
-        const ageHours = (Date.now() - lastSaveDate.getTime()) / (1000 * 60 * 60);
-        if (ageHours > 24) {
-          warnings.push(`Données datant de ${Math.round(ageHours)} heures`);
-        }
+      if (rolesDraft) {
+        data.roles = rolesDraft.data as RolesAG;
+        updateLastSave(rolesDraft.lastModified);
       }
 
-      // Restaurer les présences
-      const presences = this.getFromLocalStorage<Record<string, PresenceData>>(STORAGE_KEYS.PRESENCES(this.agId));
-      if (presences && typeof presences === 'object') {
-        data.presencesEnrichies = presences;
+      if (votesDraft) {
+        data.votesParResolution = votesDraft.data as Record<string, unknown>;
+        updateLastSave(votesDraft.lastModified);
       }
 
-      // Restaurer les rôles
-      const roles = this.getFromLocalStorage<RolesAG>(STORAGE_KEYS.ROLES(this.agId));
-      if (roles) {
-        data.roles = roles;
+      if (resolutionsDraft) {
+        const resData = resolutionsDraft.data as { activeIndex: number; completedResolutions: string[] };
+        data.resolutionActiveIndex = resData.activeIndex;
+        data.completedResolutions = resData.completedResolutions || [];
       }
 
-      // Restaurer les votes
-      const votes = this.getFromLocalStorage<Record<string, unknown>>(STORAGE_KEYS.VOTES(this.agId));
-      if (votes) {
-        data.votesParResolution = votes;
-      }
-
-      // Restaurer l'état de résolution
-      const resolutionState = this.getFromLocalStorage<{ activeIndex: number; completedResolutions: string[] }>(
-        STORAGE_KEYS.RESOLUTIONS_STATE(this.agId)
-      );
-      if (resolutionState) {
-        data.resolutionActiveIndex = resolutionState.activeIndex;
-        data.completedResolutions = resolutionState.completedResolutions || [];
-      }
-
-      // Restaurer l'état de démarrage
-      const sessionStarted = this.getFromLocalStorage<boolean>(STORAGE_KEYS.SESSION_STARTED(this.agId));
-      if (sessionStarted !== null) {
-        data.sessionStarted = sessionStarted;
+      if (sessionDraft) {
+        const sessData = sessionDraft.data as { started: boolean };
+        data.sessionStarted = sessData.started;
       }
 
       return {
@@ -418,7 +304,7 @@ export class AGSessionPersistenceService {
         data: Object.keys(data).length > 0 ? data : null,
         warnings,
         lastSaveDate,
-        source,
+        source: 'supabase',
       };
 
     } catch (error) {
@@ -428,7 +314,7 @@ export class AGSessionPersistenceService {
         data: null,
         warnings: ['Erreur lors de la restauration des données'],
         lastSaveDate: null,
-        source: 'localStorage',
+        source: 'supabase',
       };
     }
   }
@@ -437,36 +323,32 @@ export class AGSessionPersistenceService {
    * Vérifie si des données existent pour cette AG
    */
   async hasData(): Promise<boolean> {
-    // Check Supabase first
-    if (this.useSupabase) {
-      const draft = await this.getDraftFromSupabase('attendance');
-      if (draft) return true;
+    if (!this.isValid) return false;
 
-      const sessionDraft = await this.getDraftFromSupabase('session');
-      if (sessionDraft) return true;
-    }
+    const draft = await this.getDraftFromSupabase('attendance');
+    if (draft) return true;
 
-    // Fallback localStorage
-    const presencesKey = STORAGE_KEYS.PRESENCES(this.agId);
-    const sessionStartedKey = STORAGE_KEYS.SESSION_STARTED(this.agId);
-    return localStorage.getItem(presencesKey) !== null ||
-           localStorage.getItem(sessionStartedKey) !== null;
+    const sessionDraft = await this.getDraftFromSupabase('session');
+    if (sessionDraft) return true;
+
+    return false;
   }
 
   /**
-   * Retourne la date de dernière sauvegarde
+   * Retourne la date de dernière sauvegarde (from localStorage metadata)
    */
   getLastSaveDate(): Date | null {
+    if (typeof window === 'undefined') return null;
     const key = STORAGE_KEYS.LAST_SAVE(this.agId);
     const str = localStorage.getItem(key);
     return str ? new Date(str) : null;
   }
 
   /**
-   * Indique si le service utilise Supabase ou localStorage
+   * Indique si le service utilise Supabase (toujours vrai maintenant)
    */
   isUsingSupabase(): boolean {
-    return this.useSupabase;
+    return this.isValid;
   }
 
   // ========================================
@@ -480,18 +362,18 @@ export class AGSessionPersistenceService {
     getData: () => Partial<AGSessionData>,
     intervalMs: number = 5000
   ): void {
-    this.stopAutoSave(); // Arrêter si déjà en cours
+    this.stopAutoSave();
 
     this.autoSaveInterval = setInterval(async () => {
       if (this.isDirty) {
         const data = getData();
         await this.saveAll(data);
         this.isDirty = false;
-        console.log(`[AGSessionPersistence] Auto-save effectué (${this.useSupabase ? 'Supabase' : 'localStorage'})`);
+        console.log('[AGSessionPersistence] Auto-save effectué (Supabase)');
       }
     }, intervalMs);
 
-    console.log(`[AGSessionPersistence] Auto-save démarré (${intervalMs}ms, mode: ${this.useSupabase ? 'Supabase' : 'localStorage'})`);
+    console.log(`[AGSessionPersistence] Auto-save démarré (${intervalMs}ms, mode: Supabase)`);
   }
 
   /**
@@ -527,98 +409,27 @@ export class AGSessionPersistenceService {
    * Supprime toutes les données de cette AG
    */
   async clear(): Promise<void> {
-    // Clear Supabase via RPC (if manager)
-    if (this.useSupabase) {
+    if (this.isValid) {
       try {
         await this.supabase.rpc('clear_ag_session_drafts', {
           p_ag_id: this.agId,
         });
       } catch (err) {
-        console.warn('[AGSessionPersistence] Supabase clear error:', err);
+        console.error('[AGSessionPersistence] Supabase clear error:', err);
       }
     }
 
-    // Always clear localStorage too
-    Object.values(STORAGE_KEYS).forEach((keyFn) => {
-      if (typeof keyFn === 'function') {
-        localStorage.removeItem(keyFn(this.agId));
-      }
-    });
+    // Clear UI metadata from localStorage
+    if (typeof window !== 'undefined') {
+      Object.values(STORAGE_KEYS).forEach((keyFn) => {
+        if (typeof keyFn === 'function') {
+          localStorage.removeItem(keyFn(this.agId));
+        }
+      });
+    }
 
     this.isDirty = false;
     console.log('[AGSessionPersistence] Données supprimées');
-  }
-
-  /**
-   * Migre les données localStorage vers Supabase (one-time)
-   */
-  async migrateToSupabase(): Promise<{ success: boolean; migrated: string[] }> {
-    if (!this.useSupabase) {
-      return { success: false, migrated: [] };
-    }
-
-    const migrated: string[] = [];
-
-    try {
-      // Migrate presences
-      const presences = this.getFromLocalStorage<Record<string, PresenceData>>(STORAGE_KEYS.PRESENCES(this.agId));
-      if (presences) {
-        const saved = await this.saveDraftToSupabase('attendance', presences);
-        if (saved) {
-          migrated.push('attendance');
-          localStorage.removeItem(STORAGE_KEYS.PRESENCES(this.agId));
-        }
-      }
-
-      // Migrate roles
-      const roles = this.getFromLocalStorage<RolesAG>(STORAGE_KEYS.ROLES(this.agId));
-      if (roles) {
-        const saved = await this.saveDraftToSupabase('roles', roles);
-        if (saved) {
-          migrated.push('roles');
-          localStorage.removeItem(STORAGE_KEYS.ROLES(this.agId));
-        }
-      }
-
-      // Migrate votes
-      const votes = this.getFromLocalStorage<Record<string, unknown>>(STORAGE_KEYS.VOTES(this.agId));
-      if (votes) {
-        const saved = await this.saveDraftToSupabase('votes', votes);
-        if (saved) {
-          migrated.push('votes');
-          localStorage.removeItem(STORAGE_KEYS.VOTES(this.agId));
-        }
-      }
-
-      // Migrate resolution state
-      const resState = this.getFromLocalStorage<{ activeIndex: number; completedResolutions: string[] }>(
-        STORAGE_KEYS.RESOLUTIONS_STATE(this.agId)
-      );
-      if (resState) {
-        const saved = await this.saveDraftToSupabase('resolutions', resState);
-        if (saved) {
-          migrated.push('resolutions');
-          localStorage.removeItem(STORAGE_KEYS.RESOLUTIONS_STATE(this.agId));
-        }
-      }
-
-      // Migrate session started
-      const sessionStarted = this.getFromLocalStorage<boolean>(STORAGE_KEYS.SESSION_STARTED(this.agId));
-      if (sessionStarted !== null) {
-        const saved = await this.saveDraftToSupabase('session', { started: sessionStarted });
-        if (saved) {
-          migrated.push('session');
-          localStorage.removeItem(STORAGE_KEYS.SESSION_STARTED(this.agId));
-        }
-      }
-
-      console.log(`[AGSessionPersistence] Migration réussie: ${migrated.join(', ')}`);
-      return { success: true, migrated };
-
-    } catch (err) {
-      console.error('[AGSessionPersistence] Migration error:', err);
-      return { success: false, migrated };
-    }
   }
 
   /**

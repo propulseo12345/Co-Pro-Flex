@@ -1,5 +1,5 @@
 .section {
-    background: var(--color-bg-card, #fff);
+    background: var(--surface, #1E293B);
     border: 1px solid var(--color-border, #e5e7eb);
     border-radius: var(--radius-lg, 8px);
     padding: 1.5rem;
@@ -9,7 +9,7 @@
 .sectionTitle {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-text, #111827);
+    color: var(--text-main, #F1F5F9);
     margin: 0 0 1rem;
 }
 
@@ -31,12 +31,12 @@
 }
 
 .radioCard:hover {
-    border-color: var(--color-primary, #3b82f6);
+    border-color: var(--primary, #34D399);
 }
 
 .radioCardSelected {
-    border-color: var(--color-primary, #3b82f6);
-    background: rgba(59, 130, 246, 0.05);
+    border-color: var(--primary, #34D399);
+    background: rgba(52, 211, 153, 0.1);
 }
 
 .radioInput {
@@ -51,46 +51,13 @@
 .radioCardTitle {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--color-text, #111827);
+    color: var(--text-main, #F1F5F9);
     margin: 0 0 0.25rem;
 }
 
 .radioCardDescription {
     font-size: 0.8125rem;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--text-secondary, #94A3B8);
     margin: 0;
     line-height: 1.4;
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .section {
-    background: var(--surface, #1E293B);
-    border-color: var(--border, #334155);
-}
-
-:global([data-theme="dark"]) .sectionTitle {
-    color: var(--text-main, #F1F5F9);
-}
-
-:global([data-theme="dark"]) .radioCard {
-    border-color: var(--border, #334155);
-    background: var(--bg-secondary, #1A1F2E);
-}
-
-:global([data-theme="dark"]) .radioCard:hover {
-    border-color: var(--primary, #34D399);
-    background: var(--surface-hover, #2D3748);
-}
-
-:global([data-theme="dark"]) .radioCardSelected {
-    border-color: var(--primary, #34D399);
-    background: rgba(52, 211, 153, 0.1);
-}
-
-:global([data-theme="dark"]) .radioCardTitle {
-    color: var(--text-main, #F1F5F9);
-}
-
-:global([data-theme="dark"]) .radioCardDescription {
-    color: var(--text-secondary, #94A3B8);
 }

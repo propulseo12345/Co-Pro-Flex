@@ -58,10 +58,10 @@
 
 .error {
   padding: 0.75rem;
-  background: var(--color-error-50);
+  background: rgba(239, 68, 68, 0.15);
   border: 1px solid var(--color-error-200);
   border-radius: var(--radius-md, 6px);
-  color: var(--color-error-700);
+  color: #fca5a5;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -124,7 +124,7 @@
 .field textarea:focus {
   outline: none;
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px var(--color-primary-100);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .field input:disabled,
@@ -162,17 +162,4 @@
   margin-top: 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--color-border);
-}
-
-/* Dark mode */
-[data-theme="dark"] .error {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-}
-
-[data-theme="dark"] .field input:focus,
-[data-theme="dark"] .field select:focus,
-[data-theme="dark"] .field textarea:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }

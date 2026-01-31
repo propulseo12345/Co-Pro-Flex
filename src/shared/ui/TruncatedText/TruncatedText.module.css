@@ -9,7 +9,7 @@
 .tooltip {
     position: fixed;
     z-index: 9999;
-    background-color: var(--text-primary, #1e293b);
+    background-color: var(--background-tertiary, #374151);
     color: white;
     padding: 0.5rem 0.75rem;
     border-radius: var(--radius-md, 6px);
@@ -19,8 +19,4 @@
     pointer-events: none;
     white-space: normal;
     word-wrap: break-word;
-}
-
-:global([data-theme="dark"]) .tooltip {
-    background-color: var(--background-tertiary, #374151);
 }

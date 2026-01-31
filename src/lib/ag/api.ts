@@ -411,13 +411,28 @@ export async function updateResolution(
     resolution_type?: string;
     majority_type?: string;
     status?: string;
+    variables?: Record<string, unknown>;
+    is_customized?: boolean;
   }
 ): Promise<void> {
   const supabase = createUntypedClient();
 
+  // Build update payload, filtering undefined values
+  const payload: Record<string, unknown> = {};
+  if (updates.title !== undefined) payload.title = updates.title;
+  if (updates.description !== undefined) payload.description = updates.description;
+  if (updates.resolution_type !== undefined) payload.resolution_type = updates.resolution_type;
+  if (updates.majority_type !== undefined) payload.majority_type = updates.majority_type;
+  if (updates.status !== undefined) payload.status = updates.status;
+  if (updates.variables !== undefined) payload.variables = updates.variables;
+  if (updates.is_customized !== undefined) payload.is_customized = updates.is_customized;
+
+  // Always set updated_at
+  payload.updated_at = new Date().toISOString();
+
   const { error } = await supabase
     .from('ag_resolutions')
-    .update(updates)
+    .update(payload)
     .eq('id', resolutionId);
 
   if (error) throw new Error(error.message);

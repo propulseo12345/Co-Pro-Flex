@@ -20,14 +20,14 @@
   background: var(--color-white);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
-  color: var(--color-gray-700);
+  color: var(--color-gray-300);
   cursor: pointer;
   font-size: var(--font-size-sm);
   transition: all 0.15s ease;
 }
 
 .backBtn:hover {
-  background: var(--color-gray-50);
+  background: var(--color-gray-700);
   border-color: var(--color-gray-300);
 }
 
@@ -76,7 +76,7 @@
 }
 
 .card {
-  background: var(--color-white);
+  background: var(--color-gray-800);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5);
@@ -101,8 +101,8 @@
 }
 
 .totalBadge {
-  background: var(--color-primary-50);
-  color: var(--color-primary-700);
+  background: var(--color-primary-900);
+  color: var(--color-primary-300);
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
@@ -182,17 +182,17 @@
 .table th {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-gray-600);
-  background: var(--color-gray-50);
+  color: var(--color-gray-400);
+  background: var(--color-gray-900);
   white-space: nowrap;
 }
 
 .table tbody tr:hover {
-  background: var(--color-gray-50);
+  background: var(--color-gray-700);
 }
 
 .table tfoot {
-  background: var(--color-gray-50);
+  background: var(--color-gray-900);
 }
 
 .table tfoot td {
@@ -210,9 +210,9 @@
 
 .lotType {
   font-size: 11px;
-  color: var(--color-gray-500);
+  color: var(--color-gray-400);
   text-transform: uppercase;
-  background: var(--color-gray-100);
+  background: var(--color-gray-700);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
 }
@@ -329,7 +329,7 @@
 .simulationInput label {
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--color-gray-700);
+  color: var(--color-gray-400);
 }
 
 .inputGroup {
@@ -354,11 +354,11 @@
   display: flex;
   align-items: center;
   padding: 0 var(--spacing-3);
-  background: var(--color-gray-100);
+  background: var(--color-gray-700);
   border: 1px solid var(--color-gray-200);
   border-left: none;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  color: var(--color-gray-600);
+  color: var(--color-gray-400);
   font-size: var(--font-size-sm);
 }
 
@@ -381,7 +381,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-2);
-  background: var(--color-gray-50);
+  background: var(--color-gray-900);
   border-radius: var(--radius-sm);
 }
 
@@ -398,7 +398,7 @@
 
 .simulationMontant {
   font-weight: 600;
-  color: var(--color-gray-900);
+  color: var(--color-gray-100);
   font-size: var(--font-size-sm);
 }
 
@@ -452,80 +452,6 @@
 .error {
   color: var(--color-error);
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .backBtn,
-:global([data-theme="dark"]) .card {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .backBtn {
-  color: var(--color-gray-300);
-}
-
-:global([data-theme="dark"]) .backBtn:hover {
-  background: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .title,
-:global([data-theme="dark"]) .cardTitle,
-:global([data-theme="dark"]) .lotNumero,
-:global([data-theme="dark"]) .validationValue,
-:global([data-theme="dark"]) .simulationMontant {
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .subtitle,
-:global([data-theme="dark"]) .formGroup label,
-:global([data-theme="dark"]) .simulationInput label {
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .formGroup input,
-:global([data-theme="dark"]) .formGroup select,
-:global([data-theme="dark"]) .formGroup textarea,
-:global([data-theme="dark"]) .inputGroup input,
-:global([data-theme="dark"]) .tantiemesInput {
-  background: var(--color-gray-900) !important;
-  border-color: var(--color-gray-600) !important;
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .table th {
-  background: var(--color-gray-900);
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .table tbody tr:hover {
-  background: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .table tfoot {
-  background: var(--color-gray-900);
-}
-
-:global([data-theme="dark"]) .lotType {
-  background: var(--color-gray-700);
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .totalBadge {
-  background: var(--color-primary-900);
-  color: var(--color-primary-300);
-}
-
-:global([data-theme="dark"]) .validationStats,
-:global([data-theme="dark"]) .simulationRow {
-  background: var(--color-gray-900);
-}
-
-:global([data-theme="dark"]) .inputSuffix {
-  background: var(--color-gray-700);
-  border-color: var(--color-gray-600);
-  color: var(--color-gray-400);
-}
-
 /* Responsive */
 @media (max-width: 1024px) {
   .content {

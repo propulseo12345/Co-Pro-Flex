@@ -4,27 +4,27 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.875rem 1.25rem;
-  background-color: #fef3c7;
+  background-color: rgba(251, 191, 36, 0.15);
   border: 1px solid #f59e0b;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
 .bandeauInfo {
-  background-color: #dbeafe;
-  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
 }
 
 .bandeauInfo .icone {
-  color: #1d4ed8;
+  color: #93c5fd;
 }
 
 .bandeauInfo .message {
-  color: #1e40af;
+  color: #dbeafe;
 }
 
 .bandeauInfo .date {
-  color: #2563eb;
+  color: #93c5fd;
 }
 
 .contenu {
@@ -34,7 +34,7 @@
 }
 
 .icone {
-  color: #b45309;
+  color: #fcd34d;
   flex-shrink: 0;
   margin-top: 0.125rem;
 }
@@ -49,14 +49,14 @@
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: #92400e;
+  color: #fef3c7;
   line-height: 1.4;
 }
 
 .date {
   margin: 0;
   font-size: 0.8125rem;
-  color: #b45309;
+  color: #fcd34d;
 }
 
 .boutonAnnulation {
@@ -64,19 +64,19 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.5rem 0.875rem;
-  background-color: white;
+  background-color: #fcd34d;
   border: 1px solid #f59e0b;
   border-radius: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #b45309;
+  color: #fcd34d;
   cursor: pointer;
   white-space: nowrap;
   transition: all 150ms ease;
 }
 
 .boutonAnnulation:hover {
-  background-color: #fffbeb;
+  background-color: rgba(251, 191, 36, 0.2);
   border-color: #d97706;
 }
 
@@ -97,49 +97,4 @@
     justify-content: center;
     margin-top: 0.5rem;
   }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .bandeau {
-  background-color: rgba(251, 191, 36, 0.15);
-  border-color: rgba(251, 191, 36, 0.5);
-}
-
-:global([data-theme="dark"]) .icone {
-  color: #fcd34d;
-}
-
-:global([data-theme="dark"]) .message {
-  color: #fef3c7;
-}
-
-:global([data-theme="dark"]) .date {
-  color: #fcd34d;
-}
-
-:global([data-theme="dark"]) .boutonAnnulation {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-color: rgba(251, 191, 36, 0.5);
-  color: #fcd34d;
-}
-
-:global([data-theme="dark"]) .boutonAnnulation:hover {
-  background-color: rgba(251, 191, 36, 0.2);
-}
-
-:global([data-theme="dark"]) .bandeauInfo {
-  background-color: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.5);
-}
-
-:global([data-theme="dark"]) .bandeauInfo .icone {
-  color: #93c5fd;
-}
-
-:global([data-theme="dark"]) .bandeauInfo .message {
-  color: #dbeafe;
-}
-
-:global([data-theme="dark"]) .bandeauInfo .date {
-  color: #93c5fd;
 }

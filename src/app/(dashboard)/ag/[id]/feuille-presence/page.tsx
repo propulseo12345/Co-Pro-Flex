@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+/**
+ * Feuille de présence AG
+ * MIGRATION 2026-01-31: Persistence Supabase via ag-session-persistence service
+ * TODO: Remplacer les mocks par données Supabase (coproprietaires, lots)
+ */
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, UserCheck, Users, FileDown, Save, Eye, EyeOff, Vote } from 'lucide-react';
+import { ArrowLeft, UserCheck, Users, FileDown, Eye, EyeOff, Vote } from 'lucide-react';
 import SignatureCanvas from '@/ui/SignatureCanvas';
 import { FeuillePresence, SignaturePresence, Coproprietaire, Lot, StatutPresence } from '@/types';
+import { createAGSessionPersistence, type AGSessionPersistenceService } from '@/lib/services/ag-session-persistence.service';
 import styles from './feuille-presence.module.css';
 
-// Mock data - en production, charger depuis l'API
+// TODO: Remplacer par chargement Supabase
 const MOCK_COPROPRIETAIRES: Coproprietaire[] = [
     { id: 'cp1', nom: 'Dupont', prenom: 'Jean', email: 'jean.dupont@email.com', telephone: '0601020304' },
     { id: 'cp2', nom: 'Martin', prenom: 'Marie', email: 'marie.martin@email.com', telephone: '0602030405' },
@@ -15,6 +22,7 @@ const MOCK_COPROPRIETAIRES: Coproprietaire[] = [
     { id: 'cp4', nom: 'Dubois', prenom: 'Sophie', email: 'sophie.dubois@email.com', telephone: '0604050607' },
 ];
 
+// TODO: Remplacer par chargement Supabase
 const MOCK_LOTS: Lot[] = [
     { id: 'lot1', numero: 'A101', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp1', tantiemesGeneraux: 100 },
     { id: 'lot2', numero: 'A102', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp2', tantiemesGeneraux: 120 },
@@ -31,35 +39,142 @@ export default function FeuillePresencePage() {
     const [showSignatureModal, setShowSignatureModal] = useState(false);
     const [currentSignature, setCurrentSignature] = useState<SignaturePresence | null>(null);
     const [showSignatures, setShowSignatures] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    // Charger ou créer la feuille de présence
+    // Persistence service ref
+    const persistenceServiceRef = useRef<AGSessionPersistenceService | null>(null);
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Initialize persistence service
     useEffect(() => {
-        const saved = localStorage.getItem(`feuille-presence-${agId}`);
-        if (saved) {
-            setFeuillePresence(JSON.parse(saved));
-        } else {
-            // Créer une nouvelle feuille de présence
-            const nouvelleFeuille: FeuillePresence = {
-                id: 'fp-' + Date.now(),
-                agId,
-                dateCreation: new Date().toISOString(),
-                statut: 'BROUILLON',
-                signatures: MOCK_COPROPRIETAIRES.map(cp => ({
-                    id: 'sig-' + cp.id,
-                    coproprietaireId: cp.id,
-                    statut: 'ABSENT' as StatutPresence,
-                }))
-            };
-            setFeuillePresence(nouvelleFeuille);
-        }
+        persistenceServiceRef.current = createAGSessionPersistence(agId);
+
+        return () => {
+            if (persistenceServiceRef.current) {
+                persistenceServiceRef.current.destroy();
+            }
+        };
     }, [agId]);
 
-    // Sauvegarder automatiquement
+    // Convert FeuillePresence to PresenceData format for persistence service
+    const convertToPresenceData = useCallback((feuille: FeuillePresence) => {
+        const presencesEnrichies: Record<string, unknown> = {};
+        feuille.signatures.forEach(sig => {
+            presencesEnrichies[sig.coproprietaireId] = {
+                coproprietaireId: sig.coproprietaireId,
+                statut: sig.statut,
+                representant: sig.representant,
+                signatureData: sig.signatureData,
+                dateSignature: sig.dateSignature,
+            };
+        });
+        return presencesEnrichies;
+    }, []);
+
+    // Convert PresenceData back to FeuillePresence format
+    const convertFromPresenceData = useCallback((presencesEnrichies: Record<string, unknown>, existingFeuille?: FeuillePresence): FeuillePresence => {
+        const signatures: SignaturePresence[] = MOCK_COPROPRIETAIRES.map(cp => {
+            const data = presencesEnrichies[cp.id] as {
+                statut?: string;
+                representant?: string;
+                signatureData?: string;
+                dateSignature?: string;
+            } | undefined;
+
+            return {
+                id: 'sig-' + cp.id,
+                coproprietaireId: cp.id,
+                statut: (data?.statut || 'ABSENT') as StatutPresence,
+                representant: data?.representant,
+                signatureData: data?.signatureData,
+                dateSignature: data?.dateSignature,
+            };
+        });
+
+        return {
+            id: existingFeuille?.id || 'fp-' + Date.now(),
+            agId,
+            dateCreation: existingFeuille?.dateCreation || new Date().toISOString(),
+            statut: existingFeuille?.statut || 'BROUILLON',
+            signatures,
+            dateOuverture: existingFeuille?.dateOuverture,
+            dateCloture: existingFeuille?.dateCloture,
+        };
+    }, [agId]);
+
+    // Charger la feuille de présence depuis Supabase (via persistence service)
     useEffect(() => {
-        if (feuillePresence) {
-            localStorage.setItem(`feuille-presence-${agId}`, JSON.stringify(feuillePresence));
+        const loadData = async () => {
+            if (!persistenceServiceRef.current) return;
+
+            try {
+                const result = await persistenceServiceRef.current.restore();
+
+                if (result.success && result.data?.presencesEnrichies) {
+                    const feuille = convertFromPresenceData(result.data.presencesEnrichies as Record<string, unknown>);
+                    setFeuillePresence(feuille);
+                } else {
+                    // Créer une nouvelle feuille de présence
+                    const nouvelleFeuille: FeuillePresence = {
+                        id: 'fp-' + Date.now(),
+                        agId,
+                        dateCreation: new Date().toISOString(),
+                        statut: 'BROUILLON',
+                        signatures: MOCK_COPROPRIETAIRES.map(cp => ({
+                            id: 'sig-' + cp.id,
+                            coproprietaireId: cp.id,
+                            statut: 'ABSENT' as StatutPresence,
+                        }))
+                    };
+                    setFeuillePresence(nouvelleFeuille);
+                }
+            } catch (err) {
+                console.error('[FeuillePresencePage] Error loading data:', err);
+                // Fallback: créer une nouvelle feuille
+                const nouvelleFeuille: FeuillePresence = {
+                    id: 'fp-' + Date.now(),
+                    agId,
+                    dateCreation: new Date().toISOString(),
+                    statut: 'BROUILLON',
+                    signatures: MOCK_COPROPRIETAIRES.map(cp => ({
+                        id: 'sig-' + cp.id,
+                        coproprietaireId: cp.id,
+                        statut: 'ABSENT' as StatutPresence,
+                    }))
+                };
+                setFeuillePresence(nouvelleFeuille);
+            }
+        };
+
+        loadData();
+    }, [agId, convertFromPresenceData]);
+
+    // Sauvegarder automatiquement (debounced) via persistence service
+    useEffect(() => {
+        if (!feuillePresence || !persistenceServiceRef.current) return;
+
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
         }
-    }, [feuillePresence, agId]);
+
+        saveTimeoutRef.current = setTimeout(async () => {
+            setIsSaving(true);
+            try {
+                const presencesEnrichies = convertToPresenceData(feuillePresence);
+                await persistenceServiceRef.current?.savePresences(presencesEnrichies as Record<string, never>);
+            } catch (err) {
+                console.error('[FeuillePresencePage] Error saving:', err);
+            } finally {
+                setIsSaving(false);
+            }
+        }, 1000);
+
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, [feuillePresence, convertToPresenceData]);
 
     const getCoproprietaireInfo = (cpId: string) => {
         return MOCK_COPROPRIETAIRES.find(cp => cp.id === cpId);
@@ -166,6 +281,7 @@ export default function FeuillePresencePage() {
                     <h1 className={styles.title}>Feuille de présence</h1>
                     <p className={styles.subtitle}>
                         Assemblée Générale - {feuillePresence.statut === 'BROUILLON' ? 'Brouillon' : feuillePresence.statut === 'OUVERTE' ? 'Ouverte' : 'Clôturée'}
+                        {isSaving && <span> (enregistrement...)</span>}
                     </p>
                 </div>
             </div>

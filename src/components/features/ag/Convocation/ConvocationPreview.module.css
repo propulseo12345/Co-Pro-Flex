@@ -140,7 +140,7 @@
   flex: 1;
   overflow: hidden;
   position: relative;
-  background: var(--bg-tertiary);
+  background: var(--surface-secondary);
 }
 
 /* States */
@@ -225,7 +225,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  background: var(--surface-secondary);
   overflow: auto;
 }
 
@@ -356,17 +356,4 @@
     flex: 1;
     justify-content: center;
   }
-}
-
-/* Dark mode */
-[data-theme="dark"] .previewContent {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .pdfIframe {
-  filter: invert(0.9) hue-rotate(180deg);
-}
-
-[data-theme="dark"] .emailPreview {
-  background: var(--surface-secondary);
 }

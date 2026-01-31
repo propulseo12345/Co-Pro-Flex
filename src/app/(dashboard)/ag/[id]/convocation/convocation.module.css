@@ -54,7 +54,7 @@
     display: flex;
     gap: var(--space-md);
     padding: var(--space-md) var(--space-lg);
-    background: var(--warning-light);
+    background: rgba(245, 158, 11, 0.15);
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-lg);
@@ -210,7 +210,7 @@
 }
 
 .coproCard {
-    background: var(--bg-secondary);
+    background: var(--surface-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-md);
@@ -223,7 +223,7 @@
 
 .coproCardSelected {
     border-color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.15);
 }
 
 .coproCardWarning {
@@ -281,7 +281,7 @@
     gap: var(--space-xs);
     margin-bottom: var(--space-md);
     padding: var(--space-sm);
-    background: var(--surface);
+    background: var(--bg-secondary);
     border-radius: var(--radius-sm);
 }
 
@@ -308,7 +308,7 @@
 
 /* Edit Form */
 .editForm {
-    background: var(--surface);
+    background: var(--surface-secondary);
     border: 1px solid var(--primary);
     border-radius: var(--radius-md);
     padding: var(--space-md);
@@ -412,7 +412,7 @@
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm);
-    background: var(--surface);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -523,7 +523,7 @@
 }
 
 .previewText {
-    background: var(--bg-secondary);
+    background: var(--surface-secondary);
     padding: var(--space-md);
     border-radius: var(--radius-md);
     font-family: inherit;
@@ -813,33 +813,4 @@
     .tab {
         padding: var(--space-md);
     }
-}
-
-/* Dark mode */
-[data-theme="dark"] .coproCard {
-    background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .coproCardSelected {
-    background: rgba(96, 165, 250, 0.15);
-}
-
-[data-theme="dark"] .coproCoords {
-    background: var(--bg-secondary);
-}
-
-[data-theme="dark"] .editForm {
-    background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .methodOption {
-    background: var(--bg-secondary);
-}
-
-[data-theme="dark"] .previewText {
-    background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .alertBanner {
-    background: rgba(245, 158, 11, 0.15);
 }

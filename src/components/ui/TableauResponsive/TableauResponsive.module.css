@@ -87,12 +87,12 @@
 
 .ombreDroite {
   right: 0;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.15), transparent);
 }
 
 .ombreGauche {
   left: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.15), transparent);
 }
 
 /* Mobile */
@@ -101,13 +101,4 @@
     width: 28px;
     height: 28px;
   }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .ombreDroite {
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.15), transparent);
-}
-
-:global([data-theme="dark"]) .ombreGauche {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.15), transparent);
 }

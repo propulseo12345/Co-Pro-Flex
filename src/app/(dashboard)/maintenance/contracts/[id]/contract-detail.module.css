@@ -36,7 +36,7 @@
 }
 
 .alertWarning {
-    background: #FEF3C7;
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid #F59E0B;
 }
 
@@ -46,11 +46,11 @@
 
 .alertWarning strong,
 .alertWarning p {
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .alertUrgent {
-    background: #FEE2E2;
+    background: rgba(248, 113, 113, 0.15);
     border: 1px solid #EF4444;
 }
 
@@ -60,7 +60,7 @@
 
 .alertUrgent strong,
 .alertUrgent p {
-    color: #DC2626;
+    color: #F87171;
 }
 
 /* Header */
@@ -107,23 +107,23 @@
 }
 
 .actif {
-    background: #D1FAE5;
-    color: #047857;
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
 }
 
 .a_renouveler {
-    background: #FEF3C7;
-    color: #92400E;
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
 }
 
 .resilie {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: rgba(148, 163, 184, 0.2);
+    color: #94A3B8;
 }
 
 .brouillon {
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
 }
 
 .badgeReglementaire {
@@ -134,8 +134,8 @@
     border-radius: var(--radius-full);
     font-size: 0.75rem;
     font-weight: 500;
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
 }
 
 /* Actions */
@@ -208,11 +208,11 @@
 }
 
 .textWarning {
-    color: #92400E !important;
+    color: #FCD34D !important;
 }
 
 .textDanger {
-    color: #DC2626 !important;
+    color: #F87171 !important;
 }
 
 .joursRestants {
@@ -260,7 +260,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
 }
@@ -315,7 +315,7 @@
 
 /* Add Attachment Form */
 .addAttachmentForm {
-    background: var(--surface-secondary, #F9FAFB);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 1rem;
@@ -344,7 +344,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.625rem 1rem;
-    background: var(--surface);
+    background: var(--bg-secondary);
     border: 1px dashed var(--border);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -366,107 +366,18 @@
     width: 2rem;
     height: 2rem;
     border: none;
-    background: #FEE2E2;
-    color: #DC2626;
+    background: rgba(248, 113, 113, 0.2);
+    color: #F87171;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-base);
 }
 
 .fileClear:hover {
-    background: #FECACA;
+    background: rgba(248, 113, 113, 0.3);
 }
 
 /* Dark theme */
-:global([data-theme="dark"]) .alertWarning {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.5);
-}
-
-:global([data-theme="dark"]) .alertWarning svg,
-:global([data-theme="dark"]) .alertWarning strong,
-:global([data-theme="dark"]) .alertWarning p {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .alertUrgent {
-    background: rgba(248, 113, 113, 0.15);
-    border-color: rgba(248, 113, 113, 0.5);
-}
-
-:global([data-theme="dark"]) .alertUrgent svg,
-:global([data-theme="dark"]) .alertUrgent strong,
-:global([data-theme="dark"]) .alertUrgent p {
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .actif {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .a_renouveler {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .resilie {
-    background: rgba(148, 163, 184, 0.2);
-    color: #94A3B8;
-}
-
-:global([data-theme="dark"]) .brouillon {
-    background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .badgeReglementaire {
-    background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .textWarning {
-    color: #FCD34D !important;
-}
-
-:global([data-theme="dark"]) .textDanger {
-    color: #F87171 !important;
-}
-
-:global([data-theme="dark"]) .section {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .document {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .addAttachmentForm {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .fileUploadLabel {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .fileUploadLabel:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .fileClear {
-    background: rgba(248, 113, 113, 0.2);
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .fileClear:hover {
-    background: rgba(248, 113, 113, 0.3);
-}
 
 /* Modal de modification */
 .modalOverlay {

@@ -53,8 +53,8 @@
 }
 
 .sortableHeader.active .headerButton {
-  color: var(--primary-dark);
-  background: var(--primary-light);
+  color: var(--primary);
+  background: rgba(52, 211, 153, 0.15);
 }
 
 .headerLabel {
@@ -124,7 +124,7 @@
 }
 
 .row.clickable:hover {
-  background: var(--primary-light);
+  background: rgba(52, 211, 153, 0.1);
 }
 
 /* Cells */
@@ -154,40 +154,4 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: help;
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .header,
-:global([data-theme="dark"]) .sortableHeader {
-  background: var(--bg-secondary);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .stickyHeader th {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .headerButton:hover {
-  background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .sortableHeader.active .headerButton {
-  background: rgba(52, 211, 153, 0.15);
-  color: var(--primary);
-}
-
-:global([data-theme="dark"]) .sortableHeader.active .sortIcon {
-  color: var(--primary);
-}
-
-:global([data-theme="dark"]) .row:hover {
-  background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .row.clickable:hover {
-  background: rgba(52, 211, 153, 0.1);
-}
-
-:global([data-theme="dark"]) .cell {
-  border-color: var(--border);
 }

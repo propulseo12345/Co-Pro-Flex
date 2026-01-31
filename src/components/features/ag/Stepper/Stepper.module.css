@@ -208,7 +208,7 @@
 }
 
 .stepClickable:hover .stepCircle {
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
     border-color: var(--primary-hover);
 }
 
@@ -289,8 +289,8 @@
 .optionalBadgeSmall {
     font-size: 8px;
     font-weight: 600;
-    color: var(--warning);
-    background: var(--warning-light);
+    color: #FCD34D;
+    background: rgba(251, 191, 36, 0.2);
     padding: 1px 4px;
     border-radius: var(--radius-sm);
 }
@@ -309,8 +309,8 @@
 .lockedBadgeSmall {
     font-size: 8px;
     font-weight: 600;
-    color: var(--danger);
-    background: var(--danger-light);
+    color: #F87171;
+    background: rgba(248, 113, 113, 0.2);
     padding: 1px 4px;
     border-radius: var(--radius-sm);
 }
@@ -322,7 +322,7 @@
     background: var(--primary);
     border-color: var(--primary);
     color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 12px rgba(52, 211, 153, 0.4);
 }
 
 .stepCompleted .stepNumber {
@@ -340,7 +340,7 @@
     border-color: var(--primary);
     border-width: 3px;
     color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 0 4px var(--primary-light), 0 4px 16px rgba(52, 211, 153, 0.3);
     transform: scale(1.1);
 }
 
@@ -606,7 +606,7 @@
 
 .groupIn_progress {
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
 }
 
 .groupLocked {
@@ -749,7 +749,7 @@
     background: var(--primary);
     border-color: var(--primary);
     color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
 }
 
 .mobileStepDotCompleted {
@@ -885,56 +885,3 @@
 }
 
 /* === DARK MODE ADJUSTMENTS === */
-[data-theme="dark"] .progressTrack {
-    background: var(--border);
-}
-
-[data-theme="dark"] .stepCompleted .stepCircle {
-    box-shadow: 0 2px 12px rgba(52, 211, 153, 0.4);
-}
-
-[data-theme="dark"] .stepActive .stepCircle,
-[data-theme="dark"] .stepIn_progress .stepCircle {
-    box-shadow: 0 0 0 4px var(--primary-light), 0 4px 16px rgba(52, 211, 153, 0.3);
-}
-
-[data-theme="dark"] .mobileProgress {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-[data-theme="dark"] .moduleSection {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-[data-theme="dark"] .stepClickable:hover .stepCircle {
-    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
-}
-
-[data-theme="dark"] .mobileStepDotActive,
-[data-theme="dark"] .mobileStepDotIn_progress {
-    box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
-}
-
-[data-theme="dark"] .expertGroup {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-[data-theme="dark"] .groupIn_progress {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
-}
-
-[data-theme="dark"] .optionalBadge,
-[data-theme="dark"] .optionalBadgeSmall {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-[data-theme="dark"] .lockedBadge,
-[data-theme="dark"] .lockedBadgeSmall {
-    background: rgba(248, 113, 113, 0.2);
-    color: #F87171;
-}

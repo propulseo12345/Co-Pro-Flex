@@ -94,7 +94,7 @@
 
 .optionCard:hover:not(.optionDisabled) {
   border-color: var(--primary);
-  background: var(--primary-light);
+  background: var(--primary-dark);
 }
 
 .optionCard:focus-visible {
@@ -206,7 +206,7 @@
   gap: var(--space-md);
   padding: var(--space-lg) var(--space-xl);
   border-top: 1px solid var(--border);
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 /* Étape de configuration après choix du type */
@@ -341,25 +341,6 @@
   color: var(--text-secondary);
   margin: 0;
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .modalContent {
-  background: var(--background);
-}
-
-:global([data-theme="dark"]) .optionCard {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .optionCard:hover:not(.optionDisabled) {
-  background: var(--primary-dark);
-}
-
-:global([data-theme="dark"]) .configSection,
-:global([data-theme="dark"]) .modalFooter {
-  background: var(--bg-tertiary);
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .modalOverlay {

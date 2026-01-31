@@ -4,7 +4,7 @@
    ============================================================================ */
 
 .container {
-  background: var(--color-bg-elevated, #fff);
+  background: var(--color-bg-elevated-dark, #1f2937);
   border-radius: var(--radius-lg, 8px);
   border: 1px solid var(--color-border, #e5e7eb);
   overflow: hidden;
@@ -17,7 +17,7 @@
   justify-content: space-between;
   padding: var(--spacing-4, 1rem);
   border-bottom: 1px solid var(--color-border, #e5e7eb);
-  background: var(--color-bg-subtle, #f9fafb);
+  background: var(--color-bg-subtle-dark, #111827);
 }
 
 .title {
@@ -27,7 +27,7 @@
   margin: 0;
   font-size: var(--font-size-base, 1rem);
   font-weight: 600;
-  color: var(--color-text, #111827);
+  color: var(--color-text-dark, #f9fafb);
 }
 
 .refreshButton {
@@ -254,7 +254,7 @@
 }
 
 .recipientRow:hover {
-  background: var(--color-bg-hover, #f9fafb);
+  background: var(--color-bg-hover-dark, #374151);
 }
 
 .recipientRowSelected {
@@ -278,7 +278,7 @@
 
 .recipientName {
   font-weight: 500;
-  color: var(--color-text, #111827);
+  color: var(--color-text-dark, #f9fafb);
 }
 
 .recipientMeta {
@@ -380,31 +380,4 @@
 .quickActionBtn:hover {
   border-color: var(--color-primary-300, #93c5fd);
   background: var(--color-primary-50, #eff6ff);
-}
-
-/* Dark Mode */
-[data-theme="dark"] .container {
-  background: var(--color-bg-elevated-dark, #1f2937);
-  border-color: var(--color-border-dark, #374151);
-}
-
-[data-theme="dark"] .header {
-  background: var(--color-bg-subtle-dark, #111827);
-  border-color: var(--color-border-dark, #374151);
-}
-
-[data-theme="dark"] .title {
-  color: var(--color-text-dark, #f9fafb);
-}
-
-[data-theme="dark"] .recipientRow {
-  border-color: var(--color-border-dark, #374151);
-}
-
-[data-theme="dark"] .recipientRow:hover {
-  background: var(--color-bg-hover-dark, #374151);
-}
-
-[data-theme="dark"] .recipientName {
-  color: var(--color-text-dark, #f9fafb);
 }

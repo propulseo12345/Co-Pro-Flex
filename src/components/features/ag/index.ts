@@ -3,6 +3,13 @@ export { VariableEditor } from './VariableEditor';
 export { BibliothequeResolutions } from './BibliothequeResolutions';
 export { ResolutionDraggableItem, type Resolution } from './ResolutionDraggableItem';
 export { ResolutionsReorderList } from './ResolutionsReorderList';
+export { InlineResolutionEditor, type ResolutionEditData } from './InlineResolutionEditor';
+export {
+  FinancingScheduleEditor,
+  type FinancingSchedule,
+  type ScheduleEntry,
+  type FrequencyType,
+} from './FinancingScheduleEditor';
 export { OrdreDuJourPreview } from './OrdreDuJourPreview';
 export { VariablesDetectedPanel } from './VariablesDetectedPanel';
 export { StepUnavailable } from './StepUnavailable';

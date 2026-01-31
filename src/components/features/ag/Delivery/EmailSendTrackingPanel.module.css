@@ -107,7 +107,7 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
@@ -201,7 +201,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: var(--surface);
+  background: var(--bg-main);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
@@ -285,14 +285,4 @@
     border-top: 1px solid var(--border);
     margin-top: var(--space-sm);
   }
-}
-
-/* Dark Mode */
-[data-theme="dark"] .recipientCard {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .sendBtn,
-[data-theme="dark"] .retryBtn {
-  background: var(--bg-main);
 }

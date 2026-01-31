@@ -4,7 +4,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -15,7 +15,7 @@
 .modal {
     background: var(--surface);
     border-radius: var(--radius-lg);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
@@ -53,7 +53,7 @@
 }
 
 .closeButton:hover {
-    background: var(--background);
+    background: var(--surface-hover);
     color: var(--text-main);
 }
 
@@ -71,7 +71,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
 }
 
@@ -94,7 +94,7 @@
 
 .workflowInfo {
     padding: 1rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
 }
@@ -142,7 +142,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--surface);
+    background: var(--bg-secondary);
     border: 2px solid var(--border);
     flex-shrink: 0;
     z-index: 1;
@@ -150,13 +150,13 @@
 }
 
 .timelineStep.stepCompleted .timelineMarker {
-    background: var(--success);
-    border-color: var(--success);
+    background: var(--bg-secondary);
+    border-color: var(--border);
 }
 
 .timelineStep.stepActive .timelineMarker {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--bg-secondary);
+    border-color: var(--border);
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
@@ -287,7 +287,7 @@
 }
 
 .timelineStep.stepPending .timelineMarker {
-    background: var(--surface);
+    background: var(--bg-secondary);
     border-color: var(--border);
 }
 
@@ -301,11 +301,11 @@
     gap: 0.5rem;
     margin-top: 0.5rem;
     padding: 0.75rem;
-    background: #FEF3C7;
+    background: rgba(252, 211, 77, 0.1);
     border: 1px solid #FCD34D;
     border-radius: var(--radius-md);
     font-size: 0.8125rem;
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .archiveNote svg {
@@ -318,11 +318,11 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem;
-    background: #FEE2E2;
+    background: rgba(248, 113, 113, 0.15);
     border: 1px solid #FCA5A5;
     border-radius: var(--radius-md);
     font-size: 0.875rem;
-    color: #991B1B;
+    color: #FCA5A5;
 }
 
 .footer {
@@ -345,58 +345,6 @@
         transform: rotate(360deg);
     }
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .overlay {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .modal {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-}
-
-:global([data-theme="dark"]) .closeButton:hover {
-    background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .currentStatus {
-    background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .workflowInfo {
-    background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .step {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .timelineMarker {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .timelineStep::before {
-    background: var(--border);
-}
-
-:global([data-theme="dark"]) .timelineStep.stepCompleted::before {
-    background: var(--success);
-}
-
-:global([data-theme="dark"]) .archiveNote {
-    background: rgba(252, 211, 77, 0.1);
-    border-color: rgba(252, 211, 77, 0.3);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .error {
-    background: rgba(248, 113, 113, 0.15);
-    border-color: rgba(248, 113, 113, 0.3);
-    color: #FCA5A5;
-}
-
 /* Responsive */
 @media (max-width: 640px) {
     .modal {

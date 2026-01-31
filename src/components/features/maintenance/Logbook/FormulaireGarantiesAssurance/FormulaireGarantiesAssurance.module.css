@@ -221,52 +221,6 @@
   color: var(--color-error-600, #dc2626);
   border-color: var(--color-error-300, #fca5a5);
 }
-
-/* Dark mode */
-:global([data-theme='dark']) .resume {
-  background-color: rgba(37, 99, 235, 0.1);
-  border-color: rgba(37, 99, 235, 0.3);
-}
-
-:global([data-theme='dark']) .resumeCount {
-  color: var(--color-primary-400, #60a5fa);
-}
-
-:global([data-theme='dark']) .resumeLabel {
-  color: var(--color-primary-300, #93c5fd);
-}
-
-:global([data-theme='dark']) .categorieHeader {
-  background-color: var(--color-bg-secondary);
-}
-
-:global([data-theme='dark']) .categorieHeader:hover {
-  background-color: var(--color-bg-tertiary);
-}
-
-:global([data-theme='dark']) .garantieChip {
-  background-color: var(--color-bg-tertiary);
-  border-color: var(--color-border);
-}
-
-:global([data-theme='dark']) .garantieChipActive {
-  background-color: rgba(37, 99, 235, 0.2);
-  border-color: rgba(37, 99, 235, 0.4);
-  color: var(--color-primary-300);
-}
-
-:global([data-theme='dark']) .garantiePersonnalisee {
-  background-color: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.3);
-  color: var(--color-success-400);
-}
-
-:global([data-theme='dark']) .inputAjout {
-  background-color: var(--color-bg-secondary);
-  border-color: var(--color-border);
-  color: var(--color-text-primary);
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .garantiesListe {

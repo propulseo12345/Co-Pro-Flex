@@ -61,7 +61,7 @@
   top: calc(100% + var(--space-xs));
   left: 0;
   min-width: 280px;
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
@@ -83,7 +83,7 @@
 }
 
 .dropdownItem:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-main);
 }
 
 .dropdownItem svg {
@@ -133,13 +133,4 @@
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: var(--text-sm);
-}
-
-/* Dark Mode */
-[data-theme="dark"] .dropdown {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .dropdownItem:hover {
-  background: var(--bg-main);
 }

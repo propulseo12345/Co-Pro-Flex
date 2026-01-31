@@ -26,9 +26,9 @@
 }
 
 .arrowBtn:hover:not(:disabled) {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary);
+  background: rgba(96, 165, 250, 0.2);
+  border-color: #93C5FD;
+  color: #93C5FD;
 }
 
 .arrowBtn:disabled {
@@ -112,16 +112,16 @@
 }
 
 .navItem.en_cours .statusDot {
-  background: var(--warning);
+  background: #FCD34D;
   animation: pulse 1.5s infinite;
 }
 
 .navItem.vote .statusDot {
-  background: var(--success);
+  background: #6EE7B7;
 }
 
 .navItem.reporte .statusDot {
-  background: var(--danger);
+  background: #F87171;
 }
 
 /* Animation pulse pour résolution en cours */
@@ -224,30 +224,3 @@
 }
 
 /* Dark mode overrides */
-:global([data-theme="dark"]) .navItem.active {
-  background: var(--primary);
-  border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .navItem:hover:not(:disabled):not(.active) {
-  background: rgba(96, 165, 250, 0.2);
-  color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .navItem.vote .statusDot {
-  background: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .navItem.en_cours .statusDot {
-  background: #FCD34D;
-}
-
-:global([data-theme="dark"]) .navItem.reporte .statusDot {
-  background: #F87171;
-}
-
-:global([data-theme="dark"]) .arrowBtn:hover:not(:disabled) {
-  background: rgba(96, 165, 250, 0.2);
-  color: #93C5FD;
-  border-color: #93C5FD;
-}

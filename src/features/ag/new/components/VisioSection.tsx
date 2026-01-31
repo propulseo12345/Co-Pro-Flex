@@ -1,6 +1,6 @@
 'use client';
 
-import { Video, Link2 } from 'lucide-react';
+import { Video, Link2, Sparkles } from 'lucide-react';
 import { VISIO_PROVIDER_LABELS } from '@/types';
 import styles from '../../../../app/(dashboard)/ag/new/new-ag.module.css';
 
@@ -45,6 +45,16 @@ export function VisioSection({ visioUrl, visioProvider, error, onVisioUrlChange 
           Permet aux copropriétaires de participer à distance. Le lien doit provenir d'un service de visioconférence
           (Zoom, Teams, Google Meet, Webex...).
         </p>
+
+        {/* Info auto-génération */}
+        {!visioUrl && (
+          <div className={styles.visioAutoGenInfo}>
+            <Sparkles size={14} />
+            <span>
+              Si aucun lien n'est fourni, un lien <strong>Jitsi Meet</strong> sera généré automatiquement lors de la validation.
+            </span>
+          </div>
+        )}
       </div>
 
       {visioUrl && visioProvider && (

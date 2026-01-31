@@ -24,7 +24,7 @@
     display: flex;
     justify-content: space-between;
     padding: 0.875rem 1rem;
-    background-color: var(--background-tertiary, #f1f5f9);
+    background-color: var(--background-tertiary, #374151);
     font-weight: 600;
     color: var(--text-secondary);
     border-bottom: 2px solid var(--border);
@@ -47,15 +47,15 @@
 }
 
 .row:hover {
-    background-color: var(--background-hover, #f8fafc);
+    background-color: var(--background-secondary, #1f2937);
 }
 
 .zebraRow {
-    background-color: var(--background-secondary, #f9fafb);
+    background-color: var(--background-secondary, #1e293b);
 }
 
 .zebraRow:hover {
-    background-color: var(--background-hover, #f1f5f9);
+    background-color: var(--background-tertiary, #334155);
 }
 
 .accountInfo {
@@ -76,7 +76,7 @@
     font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
     font-weight: 600;
     color: var(--primary);
-    background-color: var(--primary-light, #dbeafe);
+    background-color: rgba(59, 130, 246, 0.3);
     padding: 0.125rem 0.5rem;
     border-radius: 4px;
     font-size: 0.8125rem;
@@ -97,11 +97,11 @@
 .level-1 {
     padding-left: 1rem;
     font-weight: 700;
-    background-color: var(--background-tertiary, #e2e8f0);
+    background-color: var(--background-tertiary, #374151);
 }
 
 .level-1:hover {
-    background-color: var(--background-tertiary-hover, #cbd5e1);
+    background-color: var(--background-secondary, #4b5563);
 }
 
 .level-2 {
@@ -129,7 +129,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background-color: var(--primary-light, #dbeafe);
+    background-color: rgba(37, 99, 235, 0.2);
     border: 1px solid var(--primary, #2563eb);
     border-radius: var(--radius-md, 6px);
     margin-bottom: 1rem;
@@ -193,7 +193,7 @@
 }
 
 .clickableRow:hover {
-    background-color: var(--primary-light, #dbeafe) !important;
+    background-color: rgba(59, 130, 246, 0.2) !important;
 }
 
 .viewEcritures {
@@ -228,7 +228,7 @@
 }
 
 .modal {
-    background-color: var(--background, #fff);
+    background-color: var(--background, #111827);
     border-radius: var(--radius-lg, 12px);
     width: 100%;
     max-width: 1400px;
@@ -288,7 +288,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 1.5rem;
-    background-color: var(--background-secondary, #f9fafb);
+    background-color: var(--background-tertiary, #1f2937);
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
 }
@@ -339,7 +339,7 @@
 }
 
 .quickFilterBtn:hover {
-    background-color: var(--primary-light, #dbeafe);
+    background-color: rgba(59, 130, 246, 0.2);
     border-color: var(--primary, #3b82f6);
     color: var(--primary, #3b82f6);
 }
@@ -349,7 +349,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1.5rem;
-    background-color: var(--background);
+    background-color: var(--background-secondary, #1f2937);
     border-bottom: 1px solid var(--border);
 }
 
@@ -428,7 +428,7 @@
 .ecrituresTable thead {
     position: sticky;
     top: 0;
-    background-color: var(--background-tertiary, #e2e8f0);
+    background-color: var(--background-tertiary, #374151);
     z-index: 10;
 }
 
@@ -436,7 +436,7 @@
     padding: 0.875rem 1rem;
     text-align: left;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-secondary, #9ca3af);
     border-bottom: 2px solid var(--border);
     white-space: nowrap;
     font-size: 0.8125rem;
@@ -461,17 +461,17 @@
 }
 
 .dataRow { transition: background-color 0.15s ease; }
-.dataRow:hover { background-color: var(--background-hover, #f8fafc); }
-.dataRow.zebraRow { background-color: var(--background-secondary, #f8fafc); }
-.dataRow.zebraRow:hover { background-color: var(--background-hover, #f1f5f9); }
+.dataRow:hover { background-color: var(--background-tertiary, #334155); }
+.dataRow.zebraRow { background-color: var(--background-secondary, #1e293b); }
+.dataRow.zebraRow:hover { background-color: var(--background-tertiary, #334155); }
 
 .groupHeader {
     cursor: pointer;
-    background-color: var(--background-tertiary, #e2e8f0) !important;
+    background-color: var(--background-tertiary, #374151);
     transition: background-color 0.15s ease;
 }
 
-.groupHeader:hover { background-color: var(--background-secondary, #cbd5e1) !important; }
+.groupHeader:hover { background-color: var(--background-secondary, #4b5563); }
 .groupHeader td { background-color: inherit; }
 
 .groupHeaderCell {
@@ -574,18 +574,18 @@
     text-decoration: none;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
-    background-color: var(--primary-light, #dbeafe);
+    background-color: rgba(59, 130, 246, 0.2);
     transition: all 0.2s;
 }
 
 .justificatifLink:hover { background-color: var(--primary, #2563eb); color: white; }
 .noJustificatif { color: var(--text-tertiary); }
 
-.ecrituresTable tfoot { position: sticky; bottom: 0; background-color: var(--background, #fff); }
+.ecrituresTable tfoot { position: sticky; bottom: 0; background-color: var(--background, #111827); }
 
 .totalsRow td {
     padding: 1rem;
-    background-color: var(--background-tertiary, #e2e8f0);
+    background-color: var(--background-tertiary, #374151);
     border-top: 2px solid var(--border);
 }
 
@@ -594,27 +594,3 @@
 
 .equilibreRow td { padding: 0.75rem 1rem; text-align: center; }
 .equilibreOk { color: var(--success, #16a34a); font-weight: 600; background-color: rgba(34, 197, 94, 0.1); }
-
-/* Dark mode */
-:global([data-theme="dark"]) .infoSource { background-color: rgba(37, 99, 235, 0.2); border-color: var(--primary, #3b82f6); }
-:global([data-theme="dark"]) .row:hover { background-color: var(--background-secondary, #1f2937); }
-:global([data-theme="dark"]) .level-1 { background-color: var(--background-tertiary, #374151); }
-:global([data-theme="dark"]) .level-1:hover { background-color: var(--background-secondary, #4b5563); }
-:global([data-theme="dark"]) .accountNumber { background-color: rgba(59, 130, 246, 0.3); }
-:global([data-theme="dark"]) .zebraRow { background-color: var(--background-secondary, #1e293b); }
-:global([data-theme="dark"]) .zebraRow:hover { background-color: var(--background-tertiary, #334155); }
-:global([data-theme="dark"]) .clickableRow:hover { background-color: rgba(59, 130, 246, 0.2) !important; }
-:global([data-theme="dark"]) .modal { background-color: var(--background, #111827); }
-:global([data-theme="dark"]) .modalFilters { background-color: var(--background-tertiary, #1f2937); }
-:global([data-theme="dark"]) .groupControls { background-color: var(--background-secondary, #1f2937); }
-:global([data-theme="dark"]) .ecrituresTable thead { background-color: var(--background-tertiary, #374151); }
-:global([data-theme="dark"]) .ecrituresTable th { color: var(--text-secondary, #9ca3af); }
-:global([data-theme="dark"]) .groupHeader { background-color: var(--background-tertiary, #374151); }
-:global([data-theme="dark"]) .groupHeader:hover { background-color: var(--background-secondary, #4b5563); }
-:global([data-theme="dark"]) .dataRow.zebraRow { background-color: var(--background-secondary, #1e293b); }
-:global([data-theme="dark"]) .dataRow:hover { background-color: var(--background-tertiary, #334155); }
-:global([data-theme="dark"]) .totalsRow td { background-color: var(--background-tertiary, #374151); }
-:global([data-theme="dark"]) .ecrituresTable tfoot { background-color: var(--background, #111827); }
-:global([data-theme="dark"]) .justificatifLink { background-color: rgba(59, 130, 246, 0.2); }
-:global([data-theme="dark"]) .quickFilterBtn:hover { background-color: rgba(59, 130, 246, 0.2); }
-:global([data-theme="dark"]) .tableHeader { background-color: var(--background-tertiary, #374151); }

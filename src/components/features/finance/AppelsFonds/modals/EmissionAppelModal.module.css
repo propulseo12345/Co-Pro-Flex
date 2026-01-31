@@ -14,7 +14,7 @@
 }
 
 .modal {
-  background: var(--bg-main);
+  background: var(--bg-dark);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 560px;
@@ -81,7 +81,7 @@
 
 /* Récapitulatif */
 .recap {
-  background: var(--bg-secondary);
+  background: var(--bg-darker);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   margin-bottom: var(--space-lg);
@@ -193,7 +193,7 @@
   align-items: flex-start;
   gap: var(--space-sm);
   padding: var(--space-md);
-  background: var(--warning-light);
+  background: rgba(245, 158, 11, 0.1);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   color: var(--warning-dark);
@@ -434,17 +434,4 @@
 
 .closeResultBtn:hover {
   background: var(--primary-dark);
-}
-
-/* Dark mode */
-[data-theme="dark"] .modal {
-  background: var(--bg-dark);
-}
-
-[data-theme="dark"] .recap {
-  background: var(--bg-darker);
-}
-
-[data-theme="dark"] .warning {
-  background: rgba(245, 158, 11, 0.1);
 }

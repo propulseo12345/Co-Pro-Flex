@@ -165,8 +165,8 @@
     font-size: 0.6875rem;
     font-weight: 500;
     white-space: nowrap;
-    background: #EEF2FF;
-    color: #4F46E5;
+    background: rgba(99, 102, 241, 0.2);
+    color: #A5B4FC;
 }
 
 .itemDetails {
@@ -202,10 +202,4 @@
     font-size: 0.6875rem;
     color: var(--text-tertiary);
     font-family: 'Monaco', 'Courier New', monospace;
-}
-
-/* Dark mode */
-[data-theme="dark"] .typeBadge {
-    background: rgba(99, 102, 241, 0.2);
-    color: #A5B4FC;
 }

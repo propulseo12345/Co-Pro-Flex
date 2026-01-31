@@ -20,7 +20,7 @@ import styles from './Pouvoirs.module.css';
 interface PowersListProps {
     pouvoirs: IPouvoir[];
     coproprietaires: CoproprietaireForPouvoir[];
-    onRemove: (pouvoirId: string) => void;
+    onRemove: (pouvoirId: string) => void | Promise<void>;
     onUploadJustificatif: (pouvoirId: string, file: File) => Promise<void>;
     onRemoveJustificatif: (pouvoirId: string) => void;
 }
@@ -54,7 +54,19 @@ export function PowersList({
     const [showPreview, setShowPreview] = useState<string | null>(null);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [removingId, setRemovingId] = useState<string | null>(null);
     const fileInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
+
+    const handleRemove = async (pouvoirId: string) => {
+        setRemovingId(pouvoirId);
+        try {
+            await onRemove(pouvoirId);
+        } catch (err) {
+            console.error('Error removing pouvoir:', err);
+        } finally {
+            setRemovingId(null);
+        }
+    };
 
     // Enrichir les pouvoirs avec les infos des copropriétaires
     const enrichedPouvoirs = useMemo<PouvoirWithDetails[]>(() => {
@@ -260,9 +272,10 @@ export function PowersList({
 
                                         <button
                                             type="button"
-                                            onClick={() => onRemove(pouvoir.id)}
+                                            onClick={() => handleRemove(pouvoir.id)}
                                             className={`${styles.actionButton} ${styles.actionButtonDanger}`}
                                             title="Supprimer ce pouvoir"
+                                            disabled={removingId === pouvoir.id}
                                         >
                                             <Trash2 size={18} aria-hidden="true" />
                                         </button>

@@ -27,6 +27,9 @@ interface AgDraftProgress {
   meeting_date: string | null;
   location: string | null;
   status: string;
+  current_step: number;
+  step_data: Record<string, unknown> | null;
+  wizard_mode: string | null;
   created_at: string;
   updated_at: string;
   resolutions_count: number;
@@ -55,11 +58,13 @@ export interface AgDraft {
   attendanceCount: number;
   hasVotes: boolean;
   votesCount: number;
-  // Étape suggérée
+  // Étape suggérée (basée sur données)
   suggestedStep: number;
-  // Nouveau: ratio de complétion (0..1)
+  // Étape courante (source DB - utilisée pour la navigation)
+  currentStep: number;
+  // Ratio de complétion (0..1)
   completionRatio: number;
-  // Nouveau: dernière activité
+  // Dernière activité
   lastActivityAt: string;
 }
 
@@ -138,6 +143,8 @@ function mapProgressToDraft(row: AgDraftProgress): AgDraft {
       meeting_date: row.meeting_date,
       location: row.location,
     }),
+    // Source de vérité DB pour la navigation
+    currentStep: row.current_step || 1,
     completionRatio: row.completion_ratio,
     lastActivityAt: row.last_activity_at,
   };
@@ -212,6 +219,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
           meeting_type: 'ordinary' | 'extraordinary' | 'special';
           meeting_date: string | null;
           location: string | null;
+          current_step?: number;
           created_at: string;
           updated_at: string;
         }) => ({
@@ -230,6 +238,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
           hasVotes: false,
           votesCount: 0,
           suggestedStep: 1,
+          currentStep: m.current_step || 1,
           completionRatio: 0,
           lastActivityAt: m.updated_at,
         }));

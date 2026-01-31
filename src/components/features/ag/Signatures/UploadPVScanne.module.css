@@ -184,16 +184,9 @@
 .error {
   margin-top: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  background: var(--color-error-50);
+  background: var(--color-error-900);
   border: 1px solid var(--color-error-200);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  color: var(--color-error-700);
-}
-
-/* Dark mode */
-[data-theme="dark"] .error {
-  background: var(--color-error-900);
-  border-color: var(--color-error-700);
   color: var(--color-error-200);
 }

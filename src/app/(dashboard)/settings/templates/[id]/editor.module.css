@@ -609,7 +609,7 @@
     height: 100%;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: white;
+    background: #1a1a1a;
 }
 
 /* Variables Palette */
@@ -702,12 +702,6 @@
     font-size: 0.7rem;
     color: var(--text-secondary);
 }
-
-/* Dark Mode */
-:global([data-theme="dark"]) .previewIframe {
-    background: #1a1a1a;
-}
-
 /* Responsive */
 @media (max-width: 1024px) {
     .mainContent {

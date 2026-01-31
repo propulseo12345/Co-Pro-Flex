@@ -23,10 +23,10 @@
     align-items: center;
     gap: var(--space-md);
     padding: var(--space-md) var(--space-lg);
-    background: var(--success-light);
+    background: rgba(52, 211, 153, 0.15);
     border: 1px solid var(--success);
     border-radius: var(--radius-md);
-    color: var(--success);
+    color: #6EE7B7;
     font-size: var(--text-sm);
     animation: slideIn 0.3s ease-out;
 }
@@ -50,22 +50,16 @@
     }
 }
 
-:global([data-theme="dark"]) .successMessage {
-    background: rgba(52, 211, 153, 0.15);
-    border-color: rgba(52, 211, 153, 0.4);
-    color: #6EE7B7;
-}
-
 /* Message d'avertissement */
 .warningMessage {
     display: flex;
     align-items: center;
     gap: var(--space-md);
     padding: var(--space-md) var(--space-lg);
-    background: var(--warning-light);
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
-    color: var(--warning);
+    color: #FCD34D;
     font-size: var(--text-sm);
     animation: slideIn 0.3s ease-out;
 }
@@ -78,10 +72,45 @@
     font-weight: 600;
 }
 
-:global([data-theme="dark"]) .warningMessage {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.4);
-    color: #FCD34D;
+.warningMessage a,
+.warningLink {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.warningMessage a:hover,
+.warningLink:hover {
+    opacity: 0.8;
+}
+
+/* Info message style - for accounting period configuration */
+.infoMessage {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid var(--info);
+    border-radius: var(--radius-md);
+    color: #93C5FD;
+    font-size: var(--text-sm);
+    animation: slideIn 0.3s ease-out;
+}
+
+.infoMessage svg {
+    flex-shrink: 0;
+}
+
+.infoMessage a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.infoMessage a:hover {
+    opacity: 0.8;
 }
 .resolutionsList { display: flex; flex-direction: column; gap: var(--space-md); }
 .resolutionCard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); }
@@ -93,12 +122,12 @@
 .resolutionText { margin-bottom: var(--space-md); line-height: 1.6; }
 .resolutionMeta { display: flex; gap: var(--space-sm); }
 .majorityBadge { background: var(--primary-light); color: var(--primary); padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-xs); }
-.warningBadge { background: var(--warning-light); color: var(--warning); padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-xs); }
+.warningBadge { background: rgba(251, 191, 36, 0.2); color: #FCD34D; padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-xs); }
 .footer { display: flex; justify-content: space-between; padding-top: var(--space-xl); border-top: 1px solid var(--border); }
 .modalOverlay { 
     position: fixed; 
     inset: 0; 
-    background: rgba(0,0,0,0.5); 
+    background: rgba(0, 0, 0, 0.7); 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -400,8 +429,8 @@
 }
 
 .majorityBadgeSmall {
-    background: var(--primary-light);
-    color: var(--primary);
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
     padding: 2px 8px;
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
@@ -413,13 +442,13 @@
 }
 
 .statusComplete {
-    color: var(--success);
+    color: #6EE7B7;
     font-size: var(--text-xs);
     font-weight: 600;
 }
 
 .statusIncomplete {
-    color: var(--warning);
+    color: #FCD34D;
     font-size: var(--text-xs);
     font-weight: 600;
 }
@@ -493,8 +522,8 @@
 }
 
 .variableEmpty {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
     border: 1px dashed var(--warning);
 }
 
@@ -504,8 +533,8 @@
 }
 
 .variableFilled {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
     border: 1px solid var(--success-light);
 }
 
@@ -542,47 +571,3 @@
 }
 
 /* Dark mode overrides */
-:global([data-theme="dark"]) .modalOverlay {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .variableEmpty {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-    border-color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .variableEmpty:hover {
-    background: var(--warning);
-    color: white;
-}
-
-:global([data-theme="dark"]) .variableFilled {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-    border-color: rgba(52, 211, 153, 0.3);
-}
-
-:global([data-theme="dark"]) .variableFilled:hover {
-    background: var(--success);
-    color: white;
-}
-
-:global([data-theme="dark"]) .majorityBadge,
-:global([data-theme="dark"]) .majorityBadgeSmall {
-    background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .warningBadge {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .statusComplete {
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .statusIncomplete {
-    color: #FCD34D;
-}

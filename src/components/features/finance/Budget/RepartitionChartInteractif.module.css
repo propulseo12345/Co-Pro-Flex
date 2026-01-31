@@ -11,7 +11,7 @@
   padding: var(--space-md) var(--space-lg);
   background: var(--surface);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   border: 1px solid var(--border);
 }
 
@@ -106,10 +106,4 @@
 
 .container :global(.recharts-pie) {
   animation: fadeIn 0.3s ease-out;
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .tooltip {
-  background: var(--surface);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }

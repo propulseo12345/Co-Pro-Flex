@@ -5,7 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -26,7 +26,7 @@
 
 .modal {
   position: relative;
-  background: var(--surface);
+  background: var(--surface-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
   max-width: 420px;
@@ -109,7 +109,7 @@
   text-align: center;
   margin: 0 0 var(--space-lg) 0;
   padding: var(--space-md);
-  background: var(--danger-light);
+  background: rgba(239, 68, 68, 0.15);
   border-radius: var(--radius-md);
   line-height: 1.5;
 }
@@ -120,7 +120,7 @@
   justify-content: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  background: var(--danger-light);
+  background: rgba(239, 68, 68, 0.2);
   color: var(--danger);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -140,7 +140,7 @@
 .cancelBtn {
   flex: 1;
   padding: var(--space-sm) var(--space-lg);
-  background: var(--bg-secondary);
+  background: var(--surface);
   color: var(--text-main);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -151,7 +151,7 @@
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: var(--surface);
+  background: var(--bg-secondary);
   border-color: var(--text-tertiary);
 }
 
@@ -202,31 +202,6 @@
 /* ═══════════════════════════════════════════════════════════════
    Dark Mode
    ═══════════════════════════════════════════════════════════════ */
-
-:global([data-theme="dark"]) .overlay {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .modal {
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
-}
-
-:global([data-theme="dark"]) .warning {
-  background: rgba(239, 68, 68, 0.15);
-}
-
-:global([data-theme="dark"]) .error {
-  background: rgba(239, 68, 68, 0.2);
-}
-
-:global([data-theme="dark"]) .cancelBtn {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .cancelBtn:hover:not(:disabled) {
-  background: var(--bg-secondary);
-}
 
 /* ═══════════════════════════════════════════════════════════════
    Responsive

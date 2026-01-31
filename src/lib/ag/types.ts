@@ -180,6 +180,9 @@ export interface AgResolutionResult {
   bridge_vote_id: string | null;
   voted_at: string | null;
   vote_details: Record<string, unknown>;
+  // Variables for template interpolation
+  variables?: Record<string, unknown> | null;
+  is_customized?: boolean;
   created_at: string;
 }
 
@@ -246,6 +249,7 @@ export interface AddResolutionInput {
   resolution_type?: ResolutionType;
   majority_type?: MajorityType;
   resolution_number?: number;
+  variables?: Record<string, unknown>;
 }
 
 export interface RegisterAttendanceInput {

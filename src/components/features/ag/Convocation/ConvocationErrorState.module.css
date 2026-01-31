@@ -9,7 +9,7 @@
 .errorCard {
   max-width: 500px;
   width: 100%;
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--danger);
   border-radius: var(--radius-lg);
   padding: var(--space-2xl);
@@ -44,7 +44,7 @@
 }
 
 .errorCode code {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   font-family: monospace;
@@ -115,11 +115,3 @@
   color: white;
 }
 
-/* Dark mode */
-[data-theme="dark"] .errorCard {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .errorCode code {
-  background: var(--bg-tertiary);
-}

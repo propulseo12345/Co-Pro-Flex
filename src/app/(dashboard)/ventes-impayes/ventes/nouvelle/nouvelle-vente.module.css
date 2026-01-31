@@ -25,7 +25,7 @@
   gap: 0.75rem;
   padding: 1.5rem;
   border-bottom: 1px solid var(--border-color);
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 .cardHeaderClickable {
@@ -34,7 +34,7 @@
 }
 
 .cardHeaderClickable:hover {
-  background: #f1f5f9;
+  background: var(--hover-bg);
 }
 
 .cardHeaderLeft {
@@ -88,7 +88,7 @@
 }
 
 .required {
-  color: #ef4444;
+  color: #f87171;
 }
 
 .input,
@@ -105,7 +105,7 @@
 .textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
 }
 
 .textarea {
@@ -117,7 +117,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.938rem;
@@ -145,8 +145,8 @@
   display: inline-flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
   border-radius: 6px;
   font-size: 0.938rem;
   font-weight: 500;
@@ -154,7 +154,7 @@
 
 .error {
   font-size: 0.813rem;
-  color: #ef4444;
+  color: #f87171;
 }
 
 .hint {
@@ -225,12 +225,12 @@
 
 .documentItem:hover {
   border-color: var(--primary-color);
-  background: #fafafa;
+  background: var(--bg-secondary);
 }
 
 .documentSelected {
   border-color: var(--primary-color);
-  background: rgba(79, 70, 229, 0.05);
+  background: rgba(129, 140, 248, 0.1);
 }
 
 .documentObligatoire {
@@ -274,8 +274,8 @@
   font-size: 0.688rem;
   font-weight: 500;
   padding: 0.125rem 0.5rem;
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
   border-radius: 4px;
 }
 
@@ -304,12 +304,12 @@
 
 .osItem:hover {
   border-color: var(--primary-color);
-  background: #fafafa;
+  background: var(--bg-secondary);
 }
 
 .osSelected {
   border-color: var(--primary-color);
-  background: rgba(79, 70, 229, 0.05);
+  background: rgba(129, 140, 248, 0.1);
 }
 
 .osCheck {
@@ -351,13 +351,13 @@
 }
 
 .osCLOTURE {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(52, 211, 153, 0.2);
+  color: #34d399;
 }
 
 .osEN_COURS {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
 }
 
 /* Actions */
@@ -378,10 +378,10 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: #f0f9ff;
+  background: rgba(96, 165, 250, 0.15);
   border: 1px solid #0284c7;
   border-radius: 6px;
-  color: #0c4a6e;
+  color: #60a5fa;
   font-size: 0.875rem;
   flex: 1;
   min-width: 300px;
@@ -397,7 +397,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -512,7 +512,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.813rem;
@@ -525,7 +525,7 @@
   gap: 0.75rem;
   padding: 1.5rem;
   border-top: 1px solid var(--border-color);
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 /* Success State */
@@ -541,9 +541,9 @@
   width: 80px;
   height: 80px;
   margin: 0 auto 1.5rem;
-  background: #dcfce7;
+  background: rgba(52, 211, 153, 0.2);
   border-radius: 50%;
-  color: #16a34a;
+  color: #34d399;
 }
 
 .successContent h2 {
@@ -564,7 +564,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
@@ -587,7 +587,7 @@
 }
 
 .docCheck {
-  color: #16a34a;
+  color: #34d399;
 }
 
 .redirectMsg {
@@ -614,185 +614,6 @@
 /* ========================================
    DARK MODE
    ======================================== */
-
-:global([data-theme="dark"]) .cardHeader {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .cardHeaderClickable:hover {
-  background: var(--hover-bg);
-}
-
-:global([data-theme="dark"]) .input,
-:global([data-theme="dark"]) .textarea {
-  background: var(--surface);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-:global([data-theme="dark"]) .input::placeholder,
-:global([data-theme="dark"]) .textarea::placeholder {
-  color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .input:focus,
-:global([data-theme="dark"]) .textarea:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
-}
-
-:global([data-theme="dark"]) .readOnly {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .statusBadge {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .divider {
-  background: var(--border-color);
-}
-
-:global([data-theme="dark"]) .toggleBtn {
-  background: var(--surface);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .toggleBtn:hover {
-  background: var(--hover-bg);
-}
-
-:global([data-theme="dark"]) .toggleActive {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .documentItem {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .documentItem:hover {
-  border-color: var(--primary-color);
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .documentSelected {
-  border-color: var(--primary-color);
-  background: rgba(129, 140, 248, 0.1);
-}
-
-:global([data-theme="dark"]) .emptyCheck {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .obligatoireTag {
-  background: rgba(248, 113, 113, 0.2);
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .osItem {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .osItem:hover {
-  border-color: var(--primary-color);
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .osSelected {
-  border-color: var(--primary-color);
-  background: rgba(129, 140, 248, 0.1);
-}
-
-:global([data-theme="dark"]) .osCLOTURE {
-  background: rgba(52, 211, 153, 0.2);
-  color: #34d399;
-}
-
-:global([data-theme="dark"]) .osEN_COURS {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .actions {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .actionsInfo {
-  background: rgba(96, 165, 250, 0.15);
-  border-color: rgba(96, 165, 250, 0.4);
-  color: #60a5fa;
-}
-
-:global([data-theme="dark"]) .modalOverlay {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .modal {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .modalHeader {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .closeBtn {
-  color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .closeBtn:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
-}
-
-:global([data-theme="dark"]) .recapSection h3 {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .docItem {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .modalFooter {
-  border-color: var(--border-color);
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .successIcon {
-  background: rgba(52, 211, 153, 0.2);
-  color: #34d399;
-}
-
-:global([data-theme="dark"]) .documentsGeneres {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .docGenere {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .docCheck {
-  color: #34d399;
-}
-
-:global([data-theme="dark"]) .error {
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .required {
-  color: #f87171;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

@@ -3,7 +3,7 @@
     flex-direction: column;
     gap: 0.75rem;
     padding: 1rem;
-    background-color: var(--color-bg-primary, white);
+    background-color: var(--color-bg-primary-dark, #1f2937);
     border: 1px solid var(--color-border, #e5e7eb);
     border-radius: 0.75rem;
     margin-bottom: 1rem;
@@ -39,8 +39,8 @@
     border: 1px solid var(--color-border, #d1d5db);
     border-radius: 0.5rem;
     font-size: 0.9375rem;
-    color: var(--color-text-primary, #111827);
-    background-color: var(--color-bg-primary, white);
+    color: var(--color-text-primary-dark, #f3f4f6);
+    background-color: var(--color-text-primary-dark, #f3f4f6);
     transition: border-color 150ms, box-shadow 150ms;
 }
 
@@ -81,18 +81,18 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background-color: var(--color-bg-primary, white);
+    background-color: var(--color-text-primary-dark, #f3f4f6);
     border: 1px solid var(--color-border, #d1d5db);
     border-radius: 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--color-text-primary, #374151);
+    color: var(--color-text-primary-dark, #f3f4f6);
     cursor: pointer;
     transition: all 150ms;
 }
 
 .btnFiltres:hover {
-    background-color: var(--color-bg-secondary, #f9fafb);
+    background-color: var(--color-bg-tertiary-dark, #374151);
 }
 
 .btnFiltresActif {
@@ -149,12 +149,12 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.375rem 0.875rem;
-    background-color: var(--color-bg-secondary, #f3f4f6);
+    background-color: var(--color-text-secondary-dark, #9ca3af);
     border: 1px solid transparent;
     border-radius: 9999px;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--color-text-secondary-dark, #9ca3af);
     cursor: pointer;
     transition: all 150ms;
 }
@@ -222,8 +222,8 @@
     border: 1px solid var(--color-border, #d1d5db);
     border-radius: 0.375rem;
     font-size: 0.875rem;
-    color: var(--color-text-primary, #111827);
-    background-color: var(--color-bg-primary, white);
+    color: var(--color-text-primary-dark, #f3f4f6);
+    background-color: var(--color-text-primary-dark, #f3f4f6);
 }
 
 .inputDate:focus {
@@ -232,42 +232,6 @@
 }
 
 /* Dark mode support */
-:global([data-theme="dark"]) .container {
-    background-color: var(--color-bg-primary-dark, #1f2937);
-    border-color: var(--color-border-dark, #374151);
-}
-
-:global([data-theme="dark"]) .inputRecherche {
-    background-color: var(--color-bg-secondary-dark, #111827);
-    border-color: var(--color-border-dark, #374151);
-    color: var(--color-text-primary-dark, #f3f4f6);
-}
-
-:global([data-theme="dark"]) .btnFiltres {
-    background-color: var(--color-bg-secondary-dark, #111827);
-    border-color: var(--color-border-dark, #374151);
-    color: var(--color-text-primary-dark, #f3f4f6);
-}
-
-:global([data-theme="dark"]) .btnFiltres:hover {
-    background-color: var(--color-bg-tertiary-dark, #374151);
-}
-
-:global([data-theme="dark"]) .chipStatut {
-    background-color: var(--color-bg-secondary-dark, #374151);
-    color: var(--color-text-secondary-dark, #9ca3af);
-}
-
-:global([data-theme="dark"]) .panneauAvance {
-    border-top-color: var(--color-border-dark, #374151);
-}
-
-:global([data-theme="dark"]) .select,
-:global([data-theme="dark"]) .inputDate {
-    background-color: var(--color-bg-secondary-dark, #111827);
-    border-color: var(--color-border-dark, #374151);
-    color: var(--color-text-primary-dark, #f3f4f6);
-}
 
 /* Responsive */
 @media (max-width: 768px) {

@@ -98,7 +98,7 @@
 }
 
 .previewItem:hover {
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.1);
 }
 
 .previewNum {
@@ -191,24 +191,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    color: var(--success);
+    color: #6EE7B7;
     font-size: var(--text-sm);
 }
 
 .completenessWarning {
-    color: var(--warning);
-    font-size: var(--text-sm);
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .previewItem:hover {
-    background: rgba(96, 165, 250, 0.1);
-}
-
-:global([data-theme="dark"]) .completenessSuccess {
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .completenessWarning {
     color: #FCD34D;
+    font-size: var(--text-sm);
 }

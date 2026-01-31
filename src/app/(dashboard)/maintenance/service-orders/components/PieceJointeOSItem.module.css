@@ -162,33 +162,3 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
-
-/* Dark mode */
-:global([data-theme='dark']) .item {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border);
-}
-
-:global([data-theme='dark']) .item:hover {
-    background-color: var(--color-bg-hover);
-}
-
-:global([data-theme='dark']) .typePdf {
-    background-color: rgba(220, 38, 38, 0.15);
-}
-
-:global([data-theme='dark']) .typeImage {
-    background-color: rgba(37, 99, 235, 0.15);
-}
-
-:global([data-theme='dark']) .typeAutre {
-    background-color: rgba(107, 114, 128, 0.15);
-}
-
-:global([data-theme='dark']) .itemCompact {
-    background-color: var(--color-bg-secondary);
-}
-
-:global([data-theme='dark']) .btnAction:hover:not(:disabled) {
-    background-color: var(--color-bg-hover);
-}

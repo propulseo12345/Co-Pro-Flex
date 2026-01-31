@@ -9,7 +9,7 @@
 .loadingCard {
   max-width: 400px;
   width: 100%;
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-2xl);
@@ -47,9 +47,4 @@
   font-size: var(--text-sm);
   color: var(--text-tertiary);
   margin: 0;
-}
-
-/* Dark mode */
-[data-theme="dark"] .loadingCard {
-  background: var(--surface-secondary);
 }

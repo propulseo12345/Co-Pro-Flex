@@ -104,12 +104,12 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--space-md) var(--space-lg);
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.1);
 }
 
 .themeName {
     font-weight: 600;
-    color: var(--primary);
+    color: #93C5FD;
     font-size: var(--text-base);
 }
 
@@ -153,13 +153,4 @@
     .hint {
         display: none;
     }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .themeHeader {
-    background: rgba(96, 165, 250, 0.1);
-}
-
-:global([data-theme="dark"]) .themeName {
-    color: #93C5FD;
 }

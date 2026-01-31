@@ -140,7 +140,7 @@
 }
 
 .coproButtonComplete {
-    border-color: var(--success);
+    border-color: #6EE7B7;
 }
 
 .coproButtonInfo {
@@ -186,8 +186,8 @@
 }
 
 .coproButtonComplete .coproButtonCount {
-    background-color: var(--success-light);
-    color: var(--success);
+    background-color: #6EE7B7;
+    color: #6EE7B7;
 }
 
 .coproButtonCheck {
@@ -197,7 +197,7 @@
 /* En-tête copropriétaire */
 .coproHeader {
     padding: var(--space-lg);
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--surface) 100%);
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, var(--surface) 100%);
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-lg);
     border: 1px solid var(--primary);
@@ -307,21 +307,21 @@
 }
 
 .globalVoteButtonPour:hover {
-    border-color: var(--success);
-    background-color: var(--success-light);
-    color: var(--success);
+    border-color: #6EE7B7;
+    background-color: #6EE7B7;
+    color: #6EE7B7;
 }
 
 .globalVoteButtonContre:hover {
-    border-color: var(--danger);
-    background-color: var(--danger-light);
-    color: var(--danger);
+    border-color: #F87171;
+    background-color: #F87171;
+    color: #F87171;
 }
 
 .globalVoteButtonAbstention:hover {
-    border-color: var(--warning);
-    background-color: var(--warning-light);
-    color: var(--warning);
+    border-color: #FCD34D;
+    background-color: #FCD34D;
+    color: #FCD34D;
 }
 
 /* Liste des résolutions */
@@ -349,8 +349,8 @@
 }
 
 .resolutionVoteCardVoted {
-    background: var(--success-light);
-    border-color: var(--success);
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
 }
 
 .resolutionVoteInfo {
@@ -376,8 +376,8 @@
 }
 
 .resolutionVoteCardVoted .resolutionNumber {
-    background-color: var(--success);
-    color: white;
+    background-color: #1a1a2e;
+    color: #1a1a2e;
 }
 
 .resolutionContent {
@@ -423,38 +423,38 @@
 }
 
 .voteButtonPour:hover {
-    border-color: var(--success);
-    background-color: var(--success-light);
-    color: var(--success);
+    border-color: #6EE7B7;
+    background-color: #6EE7B7;
+    color: #6EE7B7;
 }
 
 .voteButtonPour.voteButtonActive {
-    border-color: var(--success);
-    background-color: var(--success);
+    border-color: white;
+    background-color: white;
     color: white;
 }
 
 .voteButtonContre:hover {
-    border-color: var(--danger);
-    background-color: var(--danger-light);
-    color: var(--danger);
+    border-color: #F87171;
+    background-color: #F87171;
+    color: #F87171;
 }
 
 .voteButtonContre.voteButtonActive {
-    border-color: var(--danger);
-    background-color: var(--danger);
+    border-color: white;
+    background-color: white;
     color: white;
 }
 
 .voteButtonAbstention:hover {
-    border-color: var(--warning);
-    background-color: var(--warning-light);
-    color: var(--warning);
+    border-color: #FCD34D;
+    background-color: #FCD34D;
+    color: #FCD34D;
 }
 
 .voteButtonAbstention.voteButtonActive {
-    border-color: var(--warning);
-    background-color: var(--warning);
+    border-color: white;
+    background-color: white;
     color: white;
 }
 
@@ -561,78 +561,6 @@
 }
 
 /* Dark mode overrides */
-:global([data-theme="dark"]) .coproButtonActive {
-    background: rgba(96, 165, 250, 0.2);
-}
-
-:global([data-theme="dark"]) .coproButtonComplete {
-    border-color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .coproButtonComplete .coproButtonCount {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .coproHeader {
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, var(--surface) 100%);
-    border-color: rgba(96, 165, 250, 0.5);
-}
-
-:global([data-theme="dark"]) .resolutionVoteCardVoted {
-    background: rgba(52, 211, 153, 0.15);
-    border-color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .resolutionVoteCardVoted .resolutionNumber {
-    background: #6EE7B7;
-    color: #1a1a2e;
-}
-
-:global([data-theme="dark"]) .voteButtonPour:hover {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .voteButtonPour.voteButtonActive {
-    background: var(--success);
-    color: white;
-}
-
-:global([data-theme="dark"]) .voteButtonContre:hover {
-    background: rgba(248, 113, 113, 0.2);
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .voteButtonContre.voteButtonActive {
-    background: var(--danger);
-    color: white;
-}
-
-:global([data-theme="dark"]) .voteButtonAbstention:hover {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .voteButtonAbstention.voteButtonActive {
-    background: var(--warning);
-    color: white;
-}
-
-:global([data-theme="dark"]) .globalVoteButtonPour:hover {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .globalVoteButtonContre:hover {
-    background: rgba(248, 113, 113, 0.2);
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .globalVoteButtonAbstention:hover {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
 
 /* Loading state */
 .loadingContainer {
@@ -670,7 +598,7 @@
     gap: var(--space-sm);
     margin-bottom: var(--space-xl);
     padding: var(--space-xs);
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-lg);
 }
 
@@ -712,7 +640,7 @@
 }
 
 .tabActive .tabBadge {
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.2);
     color: var(--primary);
 }
 
@@ -731,17 +659,6 @@
 }
 
 /* Dark mode tabs */
-:global([data-theme="dark"]) .tabs {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-:global([data-theme="dark"]) .tabActive {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .tabActive .tabBadge {
-    background: rgba(96, 165, 250, 0.2);
-}
 
 /* Responsive tabs */
 @media (max-width: 640px) {

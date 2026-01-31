@@ -57,7 +57,6 @@ interface UseAGSessionPersistenceReturn {
   startNewSession: () => void;
   markDirty: () => void;
   clearData: () => void;
-  migrateToSupabase: () => Promise<{ success: boolean; migrated: string[] }>;
 
   // Pour l'auto-save
   setDataGetter: (getter: () => Partial<AGSessionData>) => void;
@@ -293,7 +292,7 @@ export function useAGSessionPersistence({
 
   const restore = useCallback(async (): Promise<RestoreResult> => {
     if (!serviceRef.current) {
-      return { success: false, data: null, warnings: ['Service non initialisé'], lastSaveDate: null, source: 'localStorage' };
+      return { success: false, data: null, warnings: ['Service non initialisé'], lastSaveDate: null, source: 'supabase' };
     }
     return serviceRef.current.restore();
   }, []);
@@ -333,17 +332,9 @@ export function useAGSessionPersistence({
   const startNewSession = useCallback(() => {
     clearData();
     setError(null);
-    setRestoreResult({ success: true, data: null, warnings: [], lastSaveDate: null, source: 'localStorage' });
+    setRestoreResult({ success: true, data: null, warnings: [], lastSaveDate: null, source: 'supabase' });
     setStatus(isOnline ? 'ready' : 'degraded');
   }, [clearData, isOnline]);
-
-  // Migration localStorage vers Supabase
-  const migrateToSupabase = useCallback(async (): Promise<{ success: boolean; migrated: string[] }> => {
-    if (!serviceRef.current) {
-      return { success: false, migrated: [] };
-    }
-    return serviceRef.current.migrateToSupabase();
-  }, []);
 
   return {
     status,
@@ -365,7 +356,6 @@ export function useAGSessionPersistence({
     startNewSession,
     markDirty,
     clearData,
-    migrateToSupabase,
     setDataGetter,
     hasExistingData,
   };

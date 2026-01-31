@@ -173,7 +173,7 @@
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--bg-secondary);
+  background: var(--surface);
   margin-bottom: 0.5rem;
   cursor: pointer;
   text-align: left;
@@ -369,7 +369,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 0.75rem;
-  background: var(--bg-secondary);
+  background: var(--surface);
 }
 
 .resolutionItem.resolutionVoted {
@@ -429,7 +429,7 @@
   padding: 0.5rem 0.75rem;
   border: 2px solid var(--border);
   border-radius: 6px;
-  background: var(--surface);
+  background: var(--bg-tertiary);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -588,17 +588,4 @@
 .emptyState p {
   margin: 0;
   max-width: 400px;
-}
-
-/* Dark mode */
-[data-theme="dark"] .ownerCard {
-  background: var(--surface);
-}
-
-[data-theme="dark"] .resolutionItem {
-  background: var(--surface);
-}
-
-[data-theme="dark"] .voteButton {
-  background: var(--bg-tertiary);
 }

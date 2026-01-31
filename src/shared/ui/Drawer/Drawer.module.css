@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-modal-backdrop);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   opacity: 0;
   visibility: hidden;
@@ -98,7 +98,7 @@
 }
 
 .closeButton:hover {
-  background: var(--bg-secondary);
+  background: var(--surface-hover);
   color: var(--text-main);
 }
 
@@ -146,17 +146,4 @@
   .right {
     border: none;
   }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .overlay {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .closeButton:hover {
-  background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .actions {
-  background: var(--surface);
 }

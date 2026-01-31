@@ -71,17 +71,17 @@
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: all var(--transition-fast);
-    background: var(--background);
+    background: var(--bg-secondary);
 }
 
 .radioCard:hover {
     border-color: var(--primary);
-    background: var(--surface);
+    background: var(--surface-hover);
 }
 
 .radioCardSelected {
     border-color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.1);
 }
 
 .radioInput {
@@ -115,7 +115,7 @@
 .providerInfo {
     margin-top: 1.25rem;
     padding: 1rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     display: flex;
@@ -203,10 +203,10 @@
 .categoryInfo {
     margin-top: 0.75rem;
     padding: 0.625rem 1rem;
-    background: var(--primary-light);
+    background: rgba(59, 130, 246, 0.1);
     border-radius: var(--radius-md);
     font-size: 0.8125rem;
-    color: var(--primary);
+    color: #93C5FD;
 }
 
 /* Alerte de cohérence prestataire */
@@ -216,106 +216,16 @@
     gap: 0.625rem;
     margin-top: 1rem;
     padding: 0.875rem 1rem;
-    background: #FEF3C7;
+    background: rgba(252, 211, 77, 0.1);
     border: 1px solid #FCD34D;
     border-radius: var(--radius-md);
     font-size: 0.8125rem;
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .alerteCoherence svg {
     flex-shrink: 0;
     margin-top: 0.125rem;
-}
-
-:global([data-theme="dark"]) .alerteCoherence {
-    background: rgba(252, 211, 77, 0.1);
-    border-color: rgba(252, 211, 77, 0.3);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .categoryInfo {
-    background: rgba(59, 130, 246, 0.1);
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .section {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .sectionTitle {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .sectionDescription {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .radioCard {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .radioCard:hover {
-    background: var(--surface-hover);
-    border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .radioCardSelected {
-    background: rgba(52, 211, 153, 0.1);
-    border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .radioCardTitle {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .radioCardDescription {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .providerInfo {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .infoRow {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .infoRow strong {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .label {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .dropdown {
-    background: var(--surface);
-    border-color: var(--border);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-}
-
-:global([data-theme="dark"]) .dropdownItem {
-    border-bottom-color: var(--border);
-}
-
-:global([data-theme="dark"]) .dropdownItem:hover {
-    background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .dropdownItem strong {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .dropdownMeta {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .clearButton:hover {
-    color: #F87171;
 }
 
 /* Search Container with Dropdown */
@@ -339,7 +249,7 @@
 }
 
 .clearButton:hover {
-    color: var(--danger);
+    color: #F87171;
 }
 
 .dropdown {
@@ -350,7 +260,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
     z-index: 100;
     max-height: 250px;
     overflow-y: auto;
@@ -369,7 +279,7 @@
 }
 
 .dropdownItem:hover {
-    background: var(--primary-light);
+    background: var(--surface-hover);
 }
 
 .dropdownItem strong {
@@ -380,7 +290,7 @@
 
 .dropdownMeta {
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
 }
 
 .dropdownMeta span {

@@ -46,7 +46,7 @@
 .exportButton:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Stats */
@@ -69,7 +69,7 @@
 }
 
 .statCard:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     border-color: var(--primary-light);
 }
 
@@ -328,7 +328,8 @@
 .origineVente {
     font-size: var(--text-xs);
     padding: var(--space-xs) var(--space-sm);
-    background: #F3E5F5;
+    background: rgba(192, 132, 252, 0.2);
+    color: #C084FC;
     color: #7B1FA2;
     border-radius: var(--radius-sm);
     font-weight: 600;
@@ -678,7 +679,7 @@
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -695,7 +696,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .modalHeader {
@@ -1022,31 +1023,6 @@
     border-radius: var(--radius-md);
     color: var(--error);
     font-size: var(--text-sm);
-}
-
-/* Dark mode overrides */
-:global([data-theme="dark"]) {
-    .statCard:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .exportButton:hover,
-    .transferButton:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .origineVente {
-        background: rgba(192, 132, 252, 0.2);
-        color: #C084FC;
-    }
-
-    .modal {
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    .modalOverlay {
-        background: rgba(0, 0, 0, 0.7);
-    }
 }
 
 /* Responsive */

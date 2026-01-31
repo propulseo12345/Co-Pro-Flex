@@ -119,17 +119,12 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background-color: var(--primary-light, #dbeafe);
+    background-color: rgba(37, 99, 235, 0.2);
     border: 1px solid var(--primary, #2563eb);
     border-radius: var(--radius-md, 6px);
     margin-bottom: 1rem;
     font-size: 0.875rem;
     color: var(--primary, #2563eb);
-}
-
-:global([data-theme="dark"]) .infoSource {
-    background-color: rgba(37, 99, 235, 0.2);
-    border-color: var(--primary, #3b82f6);
 }
 
 .table {
@@ -244,7 +239,7 @@
 
 .level-1 td {
     font-weight: 700;
-    background-color: #F9FAFB;
+    background-color: var(--background-tertiary, #374151);
 }
 
 .level-2 td {
@@ -262,12 +257,12 @@
 
 .totalRow td {
     font-weight: 700;
-    background-color: #F3F4F6;
+    background-color: var(--background-secondary, #1f2937);
     border-top: 2px solid var(--border);
 }
 
 .equilibreRow td {
-    background-color: #F9FAFB;
+    background-color: var(--background-tertiary, #374151);
     text-align: center;
     padding: 1rem;
 }
@@ -289,14 +284,3 @@
 }
 
 /* Dark mode support */
-:global([data-theme="dark"]) .level-1 td {
-    background-color: var(--background-tertiary, #374151);
-}
-
-:global([data-theme="dark"]) .totalRow td {
-    background-color: var(--background-secondary, #1f2937);
-}
-
-:global([data-theme="dark"]) .equilibreRow td {
-    background-color: var(--background-tertiary, #374151);
-}

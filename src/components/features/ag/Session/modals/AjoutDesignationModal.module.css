@@ -21,7 +21,7 @@
 }
 
 .modal {
-  background: var(--surface);
+  background: var(--bg-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
   max-width: 440px;
@@ -49,8 +49,8 @@
   width: 64px;
   height: 64px;
   margin: 0 auto var(--space-md);
-  background: var(--primary-light);
-  color: var(--primary);
+  background: rgba(96, 165, 250, 0.2);
+  color: #93C5FD;
   border-radius: 50%;
 }
 
@@ -78,10 +78,10 @@
 .maxWarning {
   padding: var(--space-sm);
   margin-bottom: var(--space-md);
-  background: var(--warning-light);
+  background: rgba(251, 191, 36, 0.15);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: var(--warning-dark);
+  color: #FCD34D;
 }
 
 .actions {
@@ -96,7 +96,7 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-md) var(--space-lg);
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   color: var(--text-main);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -105,7 +105,7 @@
 }
 
 .cancelBtn:hover {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .confirmBtn {
@@ -143,42 +143,11 @@
   gap: var(--space-xs);
   margin: var(--space-md) 0 0;
   padding: var(--space-sm);
-  background: var(--info-light);
+  background: rgba(96, 165, 250, 0.15);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: var(--info);
-}
-
-/* ===== Dark Mode ===== */
-
-:global([data-theme="dark"]) .modal {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .icon {
-  background: rgba(96, 165, 250, 0.2);
   color: #93C5FD;
 }
-
-:global([data-theme="dark"]) .cancelBtn {
-  background: var(--bg-tertiary);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-:global([data-theme="dark"]) .maxWarning {
-  background: rgba(251, 191, 36, 0.15);
-  color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .minimumWarning {
-  background: rgba(96, 165, 250, 0.15);
-  color: #93C5FD;
-}
-
 /* ===== Responsive ===== */
 
 @media (max-width: 480px) {

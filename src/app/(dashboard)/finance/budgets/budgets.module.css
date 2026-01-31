@@ -1643,45 +1643,6 @@
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-/* Dark mode overrides */
-:global([data-theme="dark"]) {
-    .summaryCard:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .posteCard:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .modalOverlay {
-        background: rgba(0, 0, 0, 0.7);
-    }
-
-    .modalContent {
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    .transferButton:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .alertCard {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
-    }
-
-    .travauxOverviewCard:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .stackedBarSegment:hover {
-        opacity: 0.9;
-    }
-
-    .alurCoproTableRow:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-}
-
 /* Styles pour le modal historique travaux */
 .modalContentXLarge {
     background: var(--surface);
@@ -2119,41 +2080,6 @@
     background: var(--primary);
     border-color: var(--primary);
     color: white;
-}
-
-/* Dark mode for historique */
-@media (prefers-color-scheme: dark) {
-    .modalContentXLarge {
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    }
-
-    .timelineMontant {
-        background: rgba(59, 130, 246, 0.2);
-    }
-
-    .etapeBadgeTermine {
-        background: rgba(34, 197, 94, 0.2);
-    }
-
-    .etapeBadgeEnCours {
-        background: rgba(59, 130, 246, 0.2);
-    }
-
-    .etapeBadgeEnRetard {
-        background: rgba(239, 68, 68, 0.2);
-    }
-
-    .etapeBadgeAFaire {
-        background: rgba(148, 163, 184, 0.2);
-    }
-
-    .prestataireIcon {
-        background: rgba(59, 130, 246, 0.2);
-    }
-
-    .documentType {
-        background: rgba(59, 130, 246, 0.2);
-    }
 }
 
 /* Loading and Error States */

@@ -10,7 +10,7 @@
 }
 
 .modal {
-  background: var(--color-bg-primary, #fff);
+  background: var(--color-bg-primary);
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
@@ -159,7 +159,7 @@
   padding: 1rem;
   border: 2px solid var(--color-border, #e5e7eb);
   border-radius: 10px;
-  background: var(--color-bg-primary, #fff);
+  background: var(--color-bg-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
@@ -167,7 +167,7 @@
 
 .levelCard:hover {
   border-color: var(--color-primary-300, #93c5fd);
-  background: var(--color-bg-secondary, #f9fafb);
+  background: var(--color-bg-tertiary);
 }
 
 .levelCardActive {
@@ -253,7 +253,7 @@
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 8px;
-  background: var(--color-bg-primary, #fff);
+  background: var(--color-bg-secondary);
 }
 
 .searchBox:focus-within {
@@ -294,7 +294,7 @@
   padding: 0.75rem 1rem;
   border: none;
   border-bottom: 1px solid var(--color-border, #e5e7eb);
-  background: var(--color-bg-primary, #fff);
+  background: var(--color-bg-secondary);
   cursor: pointer;
   text-align: left;
   transition: background 0.15s ease;
@@ -305,7 +305,7 @@
 }
 
 .userResult:hover {
-  background: var(--color-bg-secondary, #f9fafb);
+  background: var(--color-bg-tertiary);
 }
 
 .userResult svg {
@@ -603,26 +603,3 @@
 }
 
 /* Dark mode support */
-[data-theme="dark"] .modal {
-  background: var(--color-bg-primary);
-}
-
-[data-theme="dark"] .searchBox {
-  background: var(--color-bg-secondary);
-}
-
-[data-theme="dark"] .levelCard {
-  background: var(--color-bg-secondary);
-}
-
-[data-theme="dark"] .levelCard:hover {
-  background: var(--color-bg-tertiary);
-}
-
-[data-theme="dark"] .userResult {
-  background: var(--color-bg-secondary);
-}
-
-[data-theme="dark"] .userResult:hover {
-  background: var(--color-bg-tertiary);
-}

@@ -533,10 +533,10 @@
   top: 100%;
   right: 0;
   margin-top: 0.5rem;
-  background: var(--card-bg);
+  background: #1E293B;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
   min-width: 180px;
   z-index: 1000;
   overflow: hidden;
@@ -544,18 +544,6 @@
   /* Force opaque background for better visibility */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-}
-
-/* Ensure opaque background in both light and dark themes */
-[data-theme="light"] .dropdownMenu,
-:root:not([data-theme="dark"]) .dropdownMenu {
-  background: #FFFFFF;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="dark"] .dropdownMenu {
-  background: #1E293B;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .menuItem {
@@ -606,11 +594,6 @@
 }
 
 .deleteItem:hover {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-[data-theme="dark"] .deleteItem:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
 }

@@ -74,6 +74,8 @@ interface ResolutionInfo {
   voters_abstention: number;
   is_approved?: boolean;
   threshold_tantiemes?: number;
+  variables?: Record<string, unknown>;
+  rendered_description?: string; // Computed after variable interpolation
 }
 
 interface AttendanceInfo {
@@ -173,6 +175,108 @@ function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: numbe
 }
 
 // ============================================================================
+// VARIABLE INTERPOLATION (same logic as src/lib/ag/rendering/render-resolution-template.ts)
+// ============================================================================
+
+function isMontantVariable(varName: string): boolean {
+  const lowerName = varName.toLowerCase();
+  return (
+    lowerName.includes("montant") ||
+    lowerName.includes("budget") ||
+    lowerName.includes("somme") ||
+    lowerName.includes("cout") ||
+    lowerName.includes("prix") ||
+    lowerName.includes("total") ||
+    lowerName.includes("provision")
+  );
+}
+
+function isDateVariable(varName: string): boolean {
+  const lowerName = varName.toLowerCase();
+  return (
+    lowerName.includes("date") ||
+    lowerName.includes("debut") ||
+    lowerName.includes("fin") ||
+    lowerName.includes("cloture") ||
+    lowerName.includes("echeance")
+  );
+}
+
+function isISODateString(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}(T|$)/.test(value);
+}
+
+function formatDateFRForPdf(value: unknown): string {
+  if (!value) return "";
+  try {
+    const strVal = String(value);
+    // Already in DD/MM/YYYY format
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(strVal)) {
+      return strVal;
+    }
+    const date = new Date(strVal);
+    if (isNaN(date.getTime())) return strVal;
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return String(value);
+  }
+}
+
+function formatMontantFRForPdf(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "";
+  try {
+    let num: number;
+    if (typeof value === "number") {
+      num = value;
+    } else {
+      const cleaned = String(value).replace(/[€\s]/g, "").replace(",", ".");
+      num = parseFloat(cleaned);
+    }
+    if (isNaN(num)) return String(value);
+    return num.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  } catch {
+    return String(value);
+  }
+}
+
+function formatValueForPdf(varName: string, value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "boolean") return value ? "Oui" : "Non";
+  const strValue = String(value);
+  if (strValue === "") return "";
+
+  if (isDateVariable(varName) || (typeof value === "string" && isISODateString(value))) {
+    return formatDateFRForPdf(value);
+  }
+  if (isMontantVariable(varName)) {
+    const formatted = formatMontantFRForPdf(value);
+    if (formatted !== strValue) return formatted;
+  }
+  return strValue;
+}
+
+/**
+ * Renders a resolution template by replacing {variable} placeholders with values
+ * CRITICAL: This must match the logic in src/lib/ag/rendering/render-resolution-template.ts
+ */
+function renderResolutionBody(body: string, variables?: Record<string, unknown> | null): string {
+  if (!body) return "";
+  if (!variables) return body;
+
+  return body.replace(/\{([^}]+)\}/g, (match, varName: string) => {
+    const trimmedName = varName.trim();
+    if (!(trimmedName in variables)) {
+      // Variable not found - leave empty (not placeholder)
+      return "";
+    }
+    return formatValueForPdf(trimmedName, variables[trimmedName]);
+  });
+}
+
+// ============================================================================
 // PDF GENERATORS
 // ============================================================================
 
@@ -258,8 +362,10 @@ async function generateConvocation(
 
   for (const resolution of resolutions) {
     drawText(`${resolution.resolution_number}. ${resolution.title}`, { bold: true, size: 10 });
-    if (resolution.description) {
-      drawText(resolution.description, { size: 9, indent: 20 });
+    // Use rendered_description (with variables interpolated) instead of raw description
+    const descToShow = resolution.rendered_description || resolution.description;
+    if (descToShow) {
+      drawText(descToShow, { size: 9, indent: 20 });
     }
     drawText(`Majorité requise : ${getMajorityLabel(resolution.majority_type)}`, { size: 8, indent: 20 });
     y -= 5;
@@ -564,8 +670,10 @@ async function generatePV(
     }
 
     drawText(`Résolution n°${resolution.resolution_number} : ${resolution.title}`, { bold: true, size: 10 });
-    if (resolution.description) {
-      drawText(resolution.description, { size: 9, indent: 10 });
+    // Use rendered_description (with variables interpolated) instead of raw description
+    const descToShow = resolution.rendered_description || resolution.description;
+    if (descToShow) {
+      drawText(descToShow, { size: 9, indent: 10 });
     }
     drawText(`Majorité requise : ${getMajorityLabel(resolution.majority_type)}`, { size: 8, indent: 10 });
 
@@ -669,19 +777,36 @@ async function fetchAgData(supabase: SupabaseClient, coproId: string, agId: stri
 
   if (agError) throw new Error(`AG not found: ${agError.message}`);
 
-  // Fetch resolutions
+  // Fetch resolutions (including variables for interpolation)
   const { data: resolutions, error: resError } = await supabase
     .from("ag_resolutions")
     .select(`
       id, resolution_number, title, description, majority_type, status,
       tantiemes_for, tantiemes_against, tantiemes_abstention,
       voters_for, voters_against, voters_abstention,
-      is_approved, threshold_tantiemes
+      is_approved, threshold_tantiemes, variables
     `)
     .eq("ag_id", agId)
     .order("resolution_number");
 
   if (resError) throw new Error(`Resolutions error: ${resError.message}`);
+
+  // Apply variable interpolation to resolution descriptions
+  const processedResolutions = (resolutions || []).map((r: Record<string, unknown>) => {
+    const vars = r.variables as Record<string, unknown> | null;
+    const description = r.description as string | undefined;
+    const renderedDescription = description ? renderResolutionBody(description, vars) : "";
+
+    // Log warning if there are still unresolved placeholders
+    if (renderedDescription && /\{[^}]+\}/.test(renderedDescription)) {
+      console.warn(`[ag_generate_document] Unresolved placeholders in resolution ${r.resolution_number}: ${renderedDescription.match(/\{[^}]+\}/g)?.join(", ")}`);
+    }
+
+    return {
+      ...r,
+      rendered_description: renderedDescription,
+    };
+  });
 
   // Fetch attendance via view
   const { data: attendance, error: attError } = await supabase
@@ -710,7 +835,7 @@ async function fetchAgData(supabase: SupabaseClient, coproId: string, agId: stri
   return {
     copro: copro as CoproInfo,
     ag: ag as AgMeetingInfo,
-    resolutions: (resolutions || []) as ResolutionInfo[],
+    resolutions: processedResolutions as ResolutionInfo[],
     attendance: (attendance || []).map((a: Record<string, unknown>) => ({
       id: a.id as string,
       coproprietaire_id: a.coproprietaire_id as string,

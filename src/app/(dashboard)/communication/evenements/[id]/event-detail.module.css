@@ -224,23 +224,23 @@
 }
 
 .rsvpConfirm {
-  color: #059669;
+  color: #6EE7B7;
 }
 
 .rsvpConfirm:hover,
 .rsvpConfirm.active {
-  background: #d1fae5;
-  border-color: #059669;
+  background: rgba(52, 211, 153, 0.2);
+  border-color: #6EE7B7;
 }
 
 .rsvpDecline {
-  color: #dc2626;
+  color: #F87171;
 }
 
 .rsvpDecline:hover,
 .rsvpDecline.active {
-  background: #fee2e2;
-  border-color: #dc2626;
+  background: rgba(248, 113, 113, 0.2);
+  border-color: #F87171;
 }
 
 .rsvpConfirmation {
@@ -249,9 +249,9 @@
   gap: 0.5rem;
   margin-top: 1rem;
   padding: 0.75rem;
-  background: #d1fae5;
+  background: rgba(52, 211, 153, 0.2);
   border-radius: 8px;
-  color: #059669;
+  color: #6EE7B7;
   font-size: 0.875rem;
 }
 
@@ -478,15 +478,15 @@
 }
 
 .statusConfirmed {
-  color: #059669;
+  color: #6EE7B7;
 }
 
 .statusDeclined {
-  color: #dc2626;
+  color: #F87171;
 }
 
 .statusPending {
-  color: #f59e0b;
+  color: #FCD34D;
 }
 
 .showMore {
@@ -583,42 +583,3 @@
 }
 
 /* Dark mode overrides */
-:global([data-theme="dark"]) .rsvpConfirm {
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .rsvpConfirm:hover,
-:global([data-theme="dark"]) .rsvpConfirm.active {
-  background: rgba(52, 211, 153, 0.2);
-  border-color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .rsvpDecline {
-  color: #F87171;
-}
-
-:global([data-theme="dark"]) .rsvpDecline:hover,
-:global([data-theme="dark"]) .rsvpDecline.active {
-  background: rgba(248, 113, 113, 0.2);
-  border-color: #F87171;
-}
-
-:global([data-theme="dark"]) .rsvpConfirmation {
-  background: rgba(52, 211, 153, 0.2);
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .iconConfirmed,
-:global([data-theme="dark"]) .statusConfirmed {
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .iconDeclined,
-:global([data-theme="dark"]) .statusDeclined {
-  color: #F87171;
-}
-
-:global([data-theme="dark"]) .iconPending,
-:global([data-theme="dark"]) .statusPending {
-  color: #FCD34D;
-}

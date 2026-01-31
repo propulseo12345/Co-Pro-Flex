@@ -27,7 +27,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .modalFullscreen {
@@ -200,7 +200,7 @@
 
 .tab:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tabActive {
@@ -391,7 +391,7 @@
 
 .pdfPreview,
 .imagePreview {
-  background: white;
+  background: var(--surface);
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -910,7 +910,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .subModalHeader {
@@ -979,29 +979,6 @@
   border-color: var(--primary);
   background: rgba(37, 99, 235, 0.05);
 }
-
-/* ============================================
-   Dark Mode
-   ============================================ */
-
-[data-theme="dark"] .modal {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-[data-theme="dark"] .pdfPreview,
-[data-theme="dark"] .imagePreview {
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-[data-theme="dark"] .tab:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-[data-theme="dark"] .subModal {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
 /* ============================================
    Responsive
    ============================================ */

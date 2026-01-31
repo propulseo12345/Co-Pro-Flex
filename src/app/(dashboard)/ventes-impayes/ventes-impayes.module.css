@@ -94,7 +94,7 @@
 }
 
 .statCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
 
@@ -225,7 +225,7 @@
 
 .moduleCard:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   transform: translateY(-4px);
 }
 
@@ -379,8 +379,8 @@
 .quickLink:hover {
   background: var(--primary-color);
   color: white;
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  border-color: white;
+  box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3);
   transform: translateY(-2px);
 }
 
@@ -396,7 +396,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
-  background: var(--hover-bg);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   text-decoration: none;
@@ -406,7 +406,7 @@
 
 .venteItem:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
 }
 
 .venteMain {
@@ -453,8 +453,8 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -500,7 +500,7 @@
 
 .breakdownItem:hover {
   transform: scale(1.02);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .breakdownLabel {
@@ -525,19 +525,19 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem;
-  background: var(--hover-bg);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .impayeItem:hover {
-  border-color: #ef4444;
+  border-color: #f87171;
 }
 
 .impayeSelected {
   border-color: var(--primary-color);
-  background: rgba(79, 70, 229, 0.05);
+  background: rgba(129, 140, 248, 0.1);
 }
 
 .impayeCheckbox {
@@ -567,12 +567,12 @@
 }
 
 .impayeCheckbox:hover .checkmark {
-  border-color: var(--primary-color);
+  border-color: var(--border-color);
 }
 
 .impayeCheckbox input:checked ~ .checkmark {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background: var(--surface);
+  border-color: var(--border-color);
 }
 
 .impayeCheckbox input:checked ~ .checkmark::after {
@@ -623,7 +623,7 @@
 .impayeMontant {
   font-size: 0.938rem;
   font-weight: 700;
-  color: #ef4444;
+  color: #f87171;
 }
 
 .impayeRetard {
@@ -659,7 +659,7 @@
 .iconButton:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
-  background: rgba(79, 70, 229, 0.05);
+  background: rgba(129, 140, 248, 0.1);
 }
 
 /* Group Actions */
@@ -669,7 +669,7 @@
   align-items: center;
   margin-top: 1rem;
   padding: 0.75rem 1rem;
-  background: rgba(79, 70, 229, 0.05);
+  background: rgba(129, 140, 248, 0.1);
   border: 1px solid var(--primary-color);
   border-radius: 8px;
 }
@@ -781,7 +781,7 @@
 
 .relanceOption {
   padding: 1rem;
-  background: var(--hover-bg);
+  background: var(--bg-secondary);
   border-radius: 8px;
 }
 
@@ -843,144 +843,6 @@
 /* ========================================
    DARK MODE
    ======================================== */
-
-:global([data-theme="dark"]) .secondaryButton {
-  background: var(--surface);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .secondaryButton:hover {
-  background: var(--hover-bg);
-}
-
-:global([data-theme="dark"]) .statCard {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .statCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-:global([data-theme="dark"]) .sectionCard {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .moduleCard {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .moduleCard:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-:global([data-theme="dark"]) .activityList {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .activityItem {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .activityItem:hover {
-  background: var(--hover-bg);
-}
-
-:global([data-theme="dark"]) .quickLink {
-  background: var(--surface);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-:global([data-theme="dark"]) .quickLink:hover {
-  background: var(--primary-color);
-  color: white;
-  box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3);
-}
-
-:global([data-theme="dark"]) .venteItem {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .venteItem:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
-}
-
-:global([data-theme="dark"]) .venteFooter {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .alertBadge {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .impayeItem {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .impayeItem:hover {
-  border-color: #f87171;
-}
-
-:global([data-theme="dark"]) .impayeSelected {
-  background: rgba(129, 140, 248, 0.1);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .checkmark {
-  background: var(--surface);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .impayeMontant {
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .iconButton {
-  background: var(--surface);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .iconButton:hover {
-  background: rgba(129, 140, 248, 0.1);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .groupActions {
-  background: rgba(129, 140, 248, 0.1);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .modal {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .modalHeader {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .relanceOption {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .modalFooter {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .breakdownItem:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
 
 /* Responsive */
 @media (max-width: 1024px) {

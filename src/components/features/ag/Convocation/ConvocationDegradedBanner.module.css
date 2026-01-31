@@ -3,7 +3,7 @@
   align-items: flex-start;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
-  background: var(--warning-light);
+  background: rgba(245, 158, 11, 0.15);
   border: 1px solid var(--warning);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-lg);
@@ -56,7 +56,7 @@
 }
 
 .retryBtn {
-  background: white;
+  background: var(--surface-secondary);
   border: 1px solid var(--warning);
   color: var(--warning-dark);
 }
@@ -76,20 +76,6 @@
   background: white;
   border-style: solid;
 }
-
-/* Dark mode */
-[data-theme="dark"] .degradedBanner {
-  background: rgba(245, 158, 11, 0.15);
-}
-
-[data-theme="dark"] .retryBtn {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .retryBtn:hover {
-  background: var(--warning);
-}
-
 @media (max-width: 768px) {
   .degradedBanner {
     flex-direction: column;

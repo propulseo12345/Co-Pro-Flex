@@ -16,7 +16,7 @@ import {
   ValidationBanner,
   Footer,
 } from '../../../../features/ag/new/components';
-import { useGoogleMapsAutocomplete, useBudgetPostes } from '../../../../features/ag/new/hooks';
+import { useGoogleMapsAutocomplete, useBudgetPostes, useBudgetImport } from '../../../../features/ag/new/hooks';
 import { useAgDraftAutoCreate, useAgDraftEdit } from '@/hooks/modules/useAgDraftEdit';
 import { useAGDelais } from '@/hooks/modules/useAGDelais';
 import { DELAIS_LEGAUX } from '@/lib/constants/ag-delais-legaux';
@@ -24,6 +24,8 @@ import { genererResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
 import { saveDraft } from '@/lib/ag/draft-persistence';
 import { validateVisioUrl, sanitizeUrl } from '@/lib/utils/url-validation';
 import { detectVisioProvider, requiresVisioUrl, isVisioUrlMandatory } from '@/types';
+import { ensureRemoteMeeting } from '@/lib/services/remote-meeting.service';
+import { useCopro } from '@/providers/CoproContext';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
@@ -31,6 +33,7 @@ import styles from './new-ag.module.css';
 
 export default function NewAGPage() {
   const router = useRouter();
+  const { currentCoproId } = useCopro();
 
   // Auto-création/reprise de brouillon via Supabase
   const { draftId, isLoading: isDraftLoading, error: draftError } = useAgDraftAutoCreate();
@@ -89,10 +92,15 @@ export default function NewAGPage() {
     },
   });
 
-  // Budget postes manager
+  // Budget import depuis Supabase
+  const { importBudget, isLoading: isBudgetImporting, error: budgetImportError } = useBudgetImport();
+
+  // Budget postes manager avec import Supabase
   const budgetPostesManager = useBudgetPostes({
     budgetPostes: formData.budgetPostes,
     onPostesChange: (postes) => updateField('budgetPostes', postes),
+    importBudgetFn: importBudget,
+    exercice: parseInt(formData.budgetExercice) || new Date().getFullYear(),
   });
 
   // Handler pour le changement de champ générique
@@ -181,11 +189,28 @@ export default function NewAGPage() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate() || !draftId) {
+    if (!validate() || !draftId || !currentCoproId) {
       return;
     }
 
     try {
+      // Génération automatique du lien de réunion à distance si format MIXTE
+      // et si l'utilisateur n'a pas fourni son propre lien
+      if (formData.format === AGFormat.MIXTE && !formData.visioUrl.trim()) {
+        const meetingDatetime = formData.date && formData.heure
+          ? `${formData.date}T${formData.heure}:00`
+          : new Date().toISOString();
+
+        const meeting = await ensureRemoteMeeting({
+          coproId: currentCoproId,
+          agId: draftId,
+          title: formData.type === 'ORDINAIRE' ? 'AG Ordinaire' : 'AG Extraordinaire',
+          startsAt: meetingDatetime,
+        });
+
+        console.log(`[NewAGPage] Lien de réunion généré: ${meeting.url} (${meeting.provider})`);
+      }
+
       // Ajouter les résolutions standard pour AG ordinaire
       if (formData.type === 'ORDINAIRE') {
         const resolutions = genererResolutionsAGOrdinaire();
@@ -204,7 +229,7 @@ export default function NewAGPage() {
       console.error('[NewAGPage] Erreur:', err);
       setErrors({ form: "Une erreur est survenue lors de la création de l'AG. Veuillez réessayer." });
     }
-  }, [formData.type, validate, router, draftId]);
+  }, [formData.type, formData.format, formData.visioUrl, formData.date, formData.heure, validate, router, draftId, currentCoproId]);
 
   // Retour en arrière
   const handleBack = useCallback(() => {
@@ -323,6 +348,8 @@ export default function NewAGPage() {
             newPoste={budgetPostesManager.newPoste}
             showCustomPoste={budgetPostesManager.showCustomPoste}
             editing={budgetPostesManager.editing}
+            isImporting={budgetPostesManager.isImporting || isBudgetImporting}
+            importError={budgetPostesManager.importError || budgetImportError}
             onBudgetChange={(value) => handleChange('budget', value)}
             onExerciceChange={(value) => handleChange('budgetExercice', value)}
             onNewPosteChange={budgetPostesManager.setNewPoste}

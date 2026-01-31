@@ -19,13 +19,13 @@
 .title {
   font-size: var(--font-size-2xl);
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: var(--color-gray-100);
   margin: 0 0 var(--spacing-1) 0;
 }
 
 .subtitle {
   font-size: var(--font-size-base);
-  color: var(--color-gray-600);
+  color: var(--color-gray-400);
   margin: 0;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .cleCard {
-  background: var(--color-white);
+  background: var(--color-gray-800);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5);
@@ -136,9 +136,9 @@
 
 .cleCode {
   font-size: var(--font-size-sm);
-  color: var(--color-gray-500);
+  color: var(--color-gray-300);
   font-family: monospace;
-  background: var(--color-gray-100);
+  background: var(--color-gray-700);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
 }
@@ -170,7 +170,7 @@
 
 .cleDescription {
   font-size: var(--font-size-sm);
-  color: var(--color-gray-600);
+  color: var(--color-gray-400);
   margin: 0;
   line-height: 1.5;
 }
@@ -180,7 +180,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-3);
   padding: var(--spacing-3);
-  background: var(--color-gray-50);
+  background: var(--color-gray-900);
   border-radius: var(--radius-md);
 }
 
@@ -194,7 +194,7 @@
 .cleStatValue {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--color-gray-900);
+  color: var(--color-gray-100);
 }
 
 .cleStatLabel {
@@ -250,16 +250,16 @@
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
   border: 1px solid var(--color-gray-200);
-  background: var(--color-white);
+  background: var(--color-gray-800);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  color: var(--color-gray-700);
+  color: var(--color-gray-300);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .actionBtn:hover {
-  background: var(--color-gray-50);
+  background: var(--color-gray-700);
   border-color: var(--color-gray-300);
 }
 
@@ -480,16 +480,16 @@
 }
 
 .repartitionTable th {
-  background: var(--color-gray-50);
+  background: var(--color-gray-800);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-gray-300);
   position: sticky;
   top: 0;
 }
 
 .repartitionTable tbody tr:hover {
-  background: var(--color-gray-50);
+  background: var(--color-gray-800);
 }
 
 .repartitionTable tfoot {
@@ -513,79 +513,6 @@
   color: var(--color-gray-500);
   text-transform: uppercase;
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .title {
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .subtitle {
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .statCard,
-:global([data-theme="dark"]) .cleCard {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .statValue,
-:global([data-theme="dark"]) .cleName,
-:global([data-theme="dark"]) .cleStatValue {
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .cleCode {
-  background: var(--color-gray-700);
-  color: var(--color-gray-300);
-}
-
-:global([data-theme="dark"]) .cleDescription {
-  color: var(--color-gray-400);
-}
-
-:global([data-theme="dark"]) .cleStats {
-  background: var(--color-gray-900);
-}
-
-:global([data-theme="dark"]) .actionBtn {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-600);
-  color: var(--color-gray-300);
-}
-
-:global([data-theme="dark"]) .actionBtn:hover {
-  background: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .modal,
-:global([data-theme="dark"]) .simulationModal {
-  background: var(--color-gray-900);
-}
-
-:global([data-theme="dark"]) .inputGroup input {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-600);
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .repartitionTable {
-  border-color: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .repartitionTable th {
-  background: var(--color-gray-800);
-  color: var(--color-gray-300);
-}
-
-:global([data-theme="dark"]) .repartitionTable td {
-  border-color: var(--color-gray-800);
-}
-
-:global([data-theme="dark"]) .repartitionTable tbody tr:hover {
-  background: var(--color-gray-800);
-}
-
 @media (max-width: 768px) {
   .container {
     padding: var(--spacing-4);

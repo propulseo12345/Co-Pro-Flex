@@ -13,8 +13,8 @@ interface PowersPanelProps {
     coproprietaires: CoproprietaireForPouvoir[];
     stats: PouvoirsStats;
     quorumPrevisionnel: QuorumPrevisionnel;
-    onAddPouvoir: (mandantId: string, mandataireId: string, signedAt?: string) => PouvoirValidationResult;
-    onRemovePouvoir: (pouvoirId: string) => void;
+    onAddPouvoir: (mandantId: string, mandataireId: string, signedAt?: string) => PouvoirValidationResult | Promise<PouvoirValidationResult>;
+    onRemovePouvoir: (pouvoirId: string) => void | Promise<void>;
     onUploadJustificatif: (pouvoirId: string, file: File) => Promise<void>;
     onRemoveJustificatif: (pouvoirId: string) => void;
     validatePouvoir: (mandantId: string, mandataireId: string) => PouvoirValidationResult;

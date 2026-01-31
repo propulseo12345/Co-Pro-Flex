@@ -683,6 +683,8 @@ export function useUpdateResolution() {
         resolution_type?: string;
         majority_type?: string;
         status?: string;
+        variables?: Record<string, unknown>;
+        is_customized?: boolean;
       }
     ): Promise<{ success: boolean; error?: string }> => {
       setIsLoading(true);

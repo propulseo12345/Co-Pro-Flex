@@ -60,12 +60,12 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background-color: #F3F4F6;
+  background-color: var(--bg-secondary);
   color: var(--text-secondary);
 }
 
 .listIconDraft {
-  background-color: var(--warning-light, #FEF3C7);
+  background-color: rgba(245, 158, 11, 0.15);
   color: var(--warning, #F59E0B);
 }
 
@@ -134,7 +134,7 @@
   transition: all var(--ag-transition);
 }
 
-.listLinkDanger:hover { color: var(--error); background-color: var(--error-light, #FEE2E2); }
+.listLinkDanger:hover { color: var(--error); background-color: rgba(239, 68, 68, 0.2); }
 .listLinkDanger:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ---------- INLINE EDIT PATTERN ---------- */
@@ -235,7 +235,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -246,7 +246,7 @@
 }
 
 .modal {
-  background: var(--surface);
+  background: var(--surface-secondary, var(--surface));
   border-radius: var(--ag-radius-xl);
   padding: var(--ag-gap-xl);
   max-width: 400px;
@@ -279,7 +279,7 @@
   color: var(--text-tertiary);
   margin: 0 0 var(--ag-gap-xl) 0;
   padding: var(--ag-gap-md);
-  background: var(--error-light, #FEE2E2);
+  background: rgba(239, 68, 68, 0.15);
   border-radius: var(--ag-radius-md);
   line-height: 1.4;
 }
@@ -297,7 +297,7 @@
 }
 
 .modalBtnCancel {
-  background: var(--bg-secondary);
+  background: var(--surface);
   color: var(--text-main);
   border: 1px solid var(--border);
 }
@@ -370,12 +370,3 @@
 @media (min-width: 768px) { .listLinkText { display: inline; } }
 
 /* ---------- DARK MODE ---------- */
-[data-theme="dark"] .listIcon { background-color: var(--bg-secondary); }
-[data-theme="dark"] .listIconDraft { background-color: rgba(245, 158, 11, 0.15); }
-[data-theme="dark"] .listItemDraft { background-color: var(--surface); }
-[data-theme="dark"] .listLinkDraft { background-color: var(--bg-secondary); }
-[data-theme="dark"] .listLinkDanger:hover { background-color: rgba(239, 68, 68, 0.2); }
-[data-theme="dark"] .modalOverlay { background: rgba(0, 0, 0, 0.7); }
-[data-theme="dark"] .modal { background: var(--surface-secondary, var(--surface)); border: 1px solid var(--border); }
-[data-theme="dark"] .modalWarning { background: rgba(239, 68, 68, 0.15); }
-[data-theme="dark"] .modalBtnCancel { background: var(--surface); }

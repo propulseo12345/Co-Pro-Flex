@@ -45,7 +45,7 @@
 }
 
 .statItemError {
-    background: var(--danger-light);
+    background: rgba(248, 113, 113, 0.15);
 }
 
 .statItemError .statIcon {
@@ -57,7 +57,7 @@
 }
 
 .statItemWarning {
-    background: var(--warning-light);
+    background: rgba(251, 191, 36, 0.15);
 }
 
 .statItemWarning .statIcon {
@@ -144,13 +144,13 @@
 
 .quorumProgressFill {
     height: 100%;
-    background: linear-gradient(90deg, var(--warning) 0%, var(--primary) 100%);
+    background: linear-gradient(90deg, #FCD34D 0%, #60A5FA 100%);
     border-radius: var(--radius-full);
     transition: width 0.3s ease;
 }
 
 .quorumProgressSuccess {
-    background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+    background: linear-gradient(90deg, #60A5FA 0%, #6EE7B7 100%);
 }
 
 .quorumValues {
@@ -299,7 +299,7 @@
     justify-content: space-between;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.2);
     border: 1px solid var(--primary);
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
@@ -343,7 +343,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     z-index: 100;
     margin-top: 4px;
 }
@@ -378,7 +378,7 @@
 }
 
 .dropdownItemWarning {
-    background: var(--warning-light);
+    background: rgba(251, 191, 36, 0.15);
 }
 
 .dropdownItemName {
@@ -481,7 +481,7 @@
     justify-content: space-between;
     width: 100%;
     padding: var(--space-md) var(--space-lg);
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.05);
     border: none;
     cursor: pointer;
     transition: background 0.2s;
@@ -843,44 +843,3 @@
 /* ---------------------------------------------------------------------------
    Dark Mode
    --------------------------------------------------------------------------- */
-
-:global([data-theme="dark"]) .statsCard,
-:global([data-theme="dark"]) .quorumCard,
-:global([data-theme="dark"]) .addForm,
-:global([data-theme="dark"]) .mandataireGroup {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .statItem,
-:global([data-theme="dark"]) .mandataireHeader {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-:global([data-theme="dark"]) .statItemError {
-    background: rgba(248, 113, 113, 0.15);
-}
-
-:global([data-theme="dark"]) .statItemWarning {
-    background: rgba(251, 191, 36, 0.15);
-}
-
-:global([data-theme="dark"]) .quorumProgressFill {
-    background: linear-gradient(90deg, #FCD34D 0%, #60A5FA 100%);
-}
-
-:global([data-theme="dark"]) .quorumProgressSuccess {
-    background: linear-gradient(90deg, #60A5FA 0%, #6EE7B7 100%);
-}
-
-:global([data-theme="dark"]) .selectedValue {
-    background: rgba(96, 165, 250, 0.2);
-}
-
-:global([data-theme="dark"]) .dropdown {
-    background: var(--surface);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-:global([data-theme="dark"]) .dropdownItemWarning {
-    background: rgba(251, 191, 36, 0.15);
-}

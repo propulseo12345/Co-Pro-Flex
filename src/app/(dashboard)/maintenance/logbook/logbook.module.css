@@ -1140,25 +1140,25 @@
 /* Badge travaux importants amélioré */
 .importantBadge {
     padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, var(--warning) 0%, #dc6900 100%);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     color: white;
     border-radius: 1rem;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.025em;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
 }
 
 /* Badge intervention courante */
 .couranteBadge {
     padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, var(--info) 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
     color: white;
     border-radius: 1rem;
     font-size: 0.75rem;
     font-weight: 500;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
 }
 
 /* Filters */
@@ -1305,7 +1305,7 @@
 
 .importantBadge {
     padding: 0.25rem 0.75rem;
-    background: var(--error-light);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     color: var(--error);
     border-radius: 1rem;
     font-size: 0.75rem;
@@ -2264,8 +2264,8 @@
 }
 
 .badge.a_l_etude {
-    background: var(--purple-light, #f3e8ff);
-    color: var(--purple, #9333ea);
+    background: rgba(147, 51, 234, 0.15);
+    color: #a78bfa;
 }
 
 .badge.termine {
@@ -2280,7 +2280,7 @@
     display: flex;
     gap: 1.25rem;
     padding: 1.25rem;
-    background: linear-gradient(135deg, var(--primary-light) 0%, rgba(16, 185, 129, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.02) 100%);
     border: 1px solid var(--primary);
     border-radius: 0.75rem;
     margin-bottom: 1.5rem;
@@ -2306,7 +2306,7 @@
     margin: 0 0 0.5rem;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--primary);
+    color: #34d399;
 }
 
 .pptBannerContent p {
@@ -2332,7 +2332,7 @@
 .pptStatValue {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--primary);
+    color: #34d399;
     display: block;
 }
 
@@ -2380,8 +2380,8 @@
 }
 
 .kpiVote .kpiIconWrap {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
 }
 
 .kpiVote:hover {
@@ -2389,8 +2389,8 @@
 }
 
 .kpiPrevu .kpiIconWrap {
-    background: var(--info-light);
-    color: var(--info);
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
 }
 
 .kpiPrevu:hover {
@@ -2398,8 +2398,8 @@
 }
 
 .kpiEtude .kpiIconWrap {
-    background: var(--purple-light, #f3e8ff);
-    color: var(--purple, #9333ea);
+    background: rgba(147, 51, 234, 0.15);
+    color: #a78bfa;
 }
 
 .kpiEtude:hover {
@@ -2407,7 +2407,7 @@
 }
 
 .kpiTermine .kpiIconWrap {
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-secondary);
 }
 
@@ -2465,7 +2465,7 @@
 
 .categoryCount {
     padding: 0.25rem 0.625rem;
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-secondary);
     border-radius: 1rem;
     font-size: 0.75rem;
@@ -2483,7 +2483,7 @@
    ================================================ */
 .travauxCardVote {
     border-left: 4px solid var(--success);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(34, 197, 94, 0.05) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(34, 197, 94, 0.08) 100%);
 }
 
 .travauxCardVote:hover {
@@ -2492,7 +2492,7 @@
 
 .travauxCardEnCours {
     border-left: 4px solid var(--warning);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.05) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.08) 100%);
 }
 
 .travauxCardEnCours:hover {
@@ -2501,7 +2501,7 @@
 
 .travauxCardPrevu {
     border-left: 4px solid var(--info);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(59, 130, 246, 0.05) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(59, 130, 246, 0.08) 100%);
 }
 
 .travauxCardPrevu:hover {
@@ -2510,7 +2510,7 @@
 
 .travauxCardEtude {
     border-left: 4px solid var(--purple, #9333ea);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(147, 51, 234, 0.05) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(147, 51, 234, 0.08) 100%);
 }
 
 .travauxCardEtude:hover {
@@ -2548,8 +2548,8 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.125rem 0.5rem;
-    background: var(--primary-light);
-    color: var(--primary);
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
     border-radius: 0.25rem;
     font-size: 0.625rem;
     font-weight: 600;
@@ -2602,18 +2602,18 @@
 }
 
 .prioriteHAUTE {
-    background: var(--error-light);
-    color: var(--error);
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
 }
 
 .prioriteMOYENNE {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
 }
 
 .prioriteBASSE {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
 }
 
 /* ================================================
@@ -2621,12 +2621,12 @@
    ================================================ */
 .montantVote {
     font-weight: 700;
-    color: var(--success);
+    color: #4ade80;
 }
 
 .montantReel {
     font-weight: 700;
-    color: var(--primary);
+    color: #34d399;
 }
 
 /* ================================================
@@ -2645,120 +2645,6 @@
 /* ================================================
    Dark Mode - PPT & Travaux
    ================================================ */
-:global([data-theme="dark"]) .pptBanner {
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.02) 100%);
-    border-color: rgba(52, 211, 153, 0.4);
-}
-
-:global([data-theme="dark"]) .pptBannerIcon {
-    background: var(--primary);
-}
-
-:global([data-theme="dark"]) .pptBannerContent h3 {
-    color: #34d399;
-}
-
-:global([data-theme="dark"]) .pptBannerStats {
-    border-left-color: rgba(52, 211, 153, 0.4);
-}
-
-:global([data-theme="dark"]) .pptStatValue {
-    color: #34d399;
-}
-
-:global([data-theme="dark"]) .travauxKpi {
-    background: var(--card-bg);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .kpiVote .kpiIconWrap {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-}
-
-:global([data-theme="dark"]) .kpiPrevu .kpiIconWrap {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-}
-
-:global([data-theme="dark"]) .kpiEtude .kpiIconWrap {
-    background: rgba(147, 51, 234, 0.15);
-    color: #a78bfa;
-}
-
-:global([data-theme="dark"]) .kpiTermine .kpiIconWrap {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-:global([data-theme="dark"]) .travauxCardVote {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(34, 197, 94, 0.08) 100%);
-    border-left-color: #4ade80;
-}
-
-:global([data-theme="dark"]) .travauxCardEnCours {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.08) 100%);
-    border-left-color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .travauxCardPrevu {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(59, 130, 246, 0.08) 100%);
-    border-left-color: #60a5fa;
-}
-
-:global([data-theme="dark"]) .travauxCardEtude {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(147, 51, 234, 0.08) 100%);
-    border-left-color: #a78bfa;
-}
-
-:global([data-theme="dark"]) .travauxCardTermine {
-    border-left-color: #4ade80;
-}
-
-:global([data-theme="dark"]) .pptTag {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34d399;
-}
-
-:global([data-theme="dark"]) .categoryHeader {
-    border-bottom-color: var(--border);
-}
-
-:global([data-theme="dark"]) .categoryCount {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-:global([data-theme="dark"]) .badge.a_l_etude {
-    background: rgba(147, 51, 234, 0.15);
-    color: #a78bfa;
-}
-
-:global([data-theme="dark"]) .prioriteHAUTE {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-}
-
-:global([data-theme="dark"]) .prioriteMOYENNE {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .prioriteBASSE {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-}
-
-:global([data-theme="dark"]) .montantVote {
-    color: #4ade80;
-}
-
-:global([data-theme="dark"]) .montantReel {
-    color: #34d399;
-}
-
-:global([data-theme="dark"]) .emptyCategory {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
 
 /* Responsive PPT Banner */
 @media (max-width: 768px) {
@@ -2941,23 +2827,23 @@
 }
 
 .categoryAccordionIcon.dta {
-    background: var(--error-light);
-    color: var(--error);
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
 }
 
 .categoryAccordionIcon.diagnostics {
-    background: var(--info-light);
-    color: var(--info);
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
 }
 
 .categoryAccordionIcon.controles {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
 }
 
 .categoryAccordionIcon.garanties {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
 }
 
 .categoryAccordionIcon.autres {
@@ -2992,8 +2878,8 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.625rem;
-    background: var(--error-light);
-    color: var(--error);
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
     border-radius: 1rem;
     font-size: 0.75rem;
     font-weight: 500;
@@ -3004,8 +2890,8 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.625rem;
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
     border-radius: 1rem;
     font-size: 0.75rem;
     font-weight: 500;
@@ -3055,12 +2941,12 @@
 
 .documentCardEnhanced.expired {
     border-left: 3px solid var(--error);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--error-light) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(239, 68, 68, 0.08) 100%);
 }
 
 .documentCardEnhanced.expiring {
     border-left: 3px solid var(--warning);
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--warning-light) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.08) 100%);
 }
 
 .documentCardIcon {
@@ -3123,18 +3009,18 @@
 }
 
 .validityBadge.valid {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
 }
 
 .validityBadge.expiring {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
 }
 
 .validityBadge.expired {
-    background: var(--error-light);
-    color: var(--error);
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
 }
 
 .documentCardObs {
@@ -3165,9 +3051,9 @@
 }
 
 .documentActionBtn:hover {
-    background: var(--primary-light);
-    color: var(--primary);
-    border-color: var(--primary);
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+    border-color: #34d399;
 }
 
 /* Empty state pour catégorie */
@@ -3184,10 +3070,10 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.1);
     border: 1px dashed var(--primary);
     border-radius: 0.5rem;
-    color: var(--primary);
+    color: #34d399;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -3197,120 +3083,12 @@
 }
 
 .addDocumentBtn:hover {
-    background: var(--primary);
-    color: white;
+    background: #34d399;
+    color: var(--card-bg);
     border-style: solid;
 }
 
 /* Dark Mode - Documents Techniques */
-:global([data-theme="dark"]) .documentSearchBox {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .documentFilterSelect {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .categoryAccordion {
-    background: var(--card-bg);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .categoryAccordionHeader {
-    background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .categoryAccordionIcon.dta {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-}
-
-:global([data-theme="dark"]) .categoryAccordionIcon.diagnostics {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-}
-
-:global([data-theme="dark"]) .categoryAccordionIcon.controles {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .categoryAccordionIcon.garanties {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-}
-
-:global([data-theme="dark"]) .documentCardEnhanced {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .documentCardEnhanced.expired {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(239, 68, 68, 0.08) 100%);
-}
-
-:global([data-theme="dark"]) .documentCardEnhanced.expiring {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.08) 100%);
-}
-
-:global([data-theme="dark"]) .validityBadge.valid {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-}
-
-:global([data-theme="dark"]) .validityBadge.expiring {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .validityBadge.expired {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-}
-
-:global([data-theme="dark"]) .categoryAlertBadge {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-}
-
-:global([data-theme="dark"]) .categoryExpiringBadge {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .documentActionBtn {
-    background: var(--card-bg);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .documentActionBtn:hover {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34d399;
-    border-color: #34d399;
-}
-
-:global([data-theme="dark"]) .addDocumentBtn {
-    background: rgba(52, 211, 153, 0.1);
-    border-color: #34d399;
-    color: #34d399;
-}
-
-:global([data-theme="dark"]) .addDocumentBtn:hover {
-    background: #34d399;
-    color: var(--card-bg);
-}
-
-:global([data-theme="dark"]) .importantBadge {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
-}
-
-:global([data-theme="dark"]) .couranteBadge {
-    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
-}
 
 /* Responsive Documents */
 @media (max-width: 768px) {

@@ -1,7 +1,7 @@
 /* ===== RolesSeancePanel Component Styles ===== */
 
 .container {
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
@@ -32,8 +32,8 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
-  background: var(--success-light);
-  color: var(--success);
+  background: rgba(52, 211, 153, 0.2);
+  color: #6EE7B7;
   font-size: var(--text-sm);
   font-weight: 600;
   border-radius: var(--radius-full);
@@ -44,8 +44,8 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
-  background: var(--warning-light);
-  color: var(--warning);
+  background: rgba(251, 191, 36, 0.2);
+  color: #FCD34D;
   font-size: var(--text-sm);
   font-weight: 600;
   border-radius: var(--radius-full);
@@ -57,7 +57,7 @@
   align-items: flex-start;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: var(--info-light);
+  background: rgba(59, 130, 246, 0.15);
   border: 1px solid var(--info);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-xl);
@@ -103,7 +103,7 @@
   flex-direction: column;
   gap: var(--space-md);
   padding: var(--space-lg);
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
@@ -165,7 +165,7 @@
 
 .scrutateurSlot {
   padding: var(--space-sm);
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
 }
@@ -205,11 +205,11 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  background: var(--warning-light);
+  background: rgba(251, 191, 36, 0.15);
   border: 1px solid var(--warning);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: var(--warning-dark, #92400e);
+  color: #FCD34D;
 }
 
 .warningBox svg {
@@ -219,7 +219,7 @@
 /* Recap section */
 .recap {
   padding: var(--space-lg);
-  background: linear-gradient(135deg, var(--success-light) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(96, 165, 250, 0.15) 100%);
   border: 2px solid var(--success);
   border-radius: var(--radius-md);
 }
@@ -230,7 +230,7 @@
   gap: var(--space-sm);
   font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--success);
+  color: #6EE7B7;
   margin: 0 0 var(--space-md) 0;
 }
 
@@ -252,7 +252,7 @@
 }
 
 .recapList li svg {
-  color: var(--success);
+  color: #6EE7B7;
   flex-shrink: 0;
 }
 
@@ -264,55 +264,6 @@
   font-size: var(--text-xs);
   color: var(--text-secondary);
 }
-
-/* ===== Dark Mode ===== */
-
-:global([data-theme="dark"]) .container {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .infoBox {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--info);
-}
-
-:global([data-theme="dark"]) .roleCard {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .scrutateurSlot {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .statusOk {
-  background: rgba(52, 211, 153, 0.2);
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .statusWarning {
-  background: rgba(251, 191, 36, 0.2);
-  color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .warningBox {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: #FCD34D;
-  color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .recap {
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(96, 165, 250, 0.15) 100%);
-  border-color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .recapTitle {
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .recapList li svg {
-  color: #6EE7B7;
-}
-
 /* ===== Responsive ===== */
 
 @media (max-width: 768px) {

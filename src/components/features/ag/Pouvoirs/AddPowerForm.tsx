@@ -8,7 +8,7 @@ import styles from './Pouvoirs.module.css';
 
 interface AddPowerFormProps {
     coproprietaires: CoproprietaireForPouvoir[];
-    onAdd: (mandantId: string, mandataireId: string, signedAt?: string) => PouvoirValidationResult;
+    onAdd: (mandantId: string, mandataireId: string, signedAt?: string) => PouvoirValidationResult | Promise<PouvoirValidationResult>;
     validate: (mandantId: string, mandataireId: string) => PouvoirValidationResult;
 }
 
@@ -21,6 +21,7 @@ export function AddPowerForm({ coproprietaires, onAdd, validate }: AddPowerFormP
     const [showMandantDropdown, setShowMandantDropdown] = useState(false);
     const [showMandataireDropdown, setShowMandataireDropdown] = useState(false);
     const [errors, setErrors] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Copropriétaires disponibles comme mandants (n'ont pas encore donné de pouvoir)
     const availableMandants = useMemo(() => {
@@ -78,7 +79,7 @@ export function AddPowerForm({ coproprietaires, onAdd, validate }: AddPowerFormP
         setErrors([]);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!mandantId || !mandataireId) {
@@ -86,18 +87,23 @@ export function AddPowerForm({ coproprietaires, onAdd, validate }: AddPowerFormP
             return;
         }
 
-        const result = onAdd(mandantId, mandataireId, signedAt || undefined);
+        setIsSubmitting(true);
+        try {
+            const result = await onAdd(mandantId, mandataireId, signedAt || undefined);
 
-        if (!result.ok) {
-            setErrors(result.errors.map(err => err.message));
-        } else {
-            // Reset form
-            setMandantId('');
-            setMandataireId('');
-            setSignedAt('');
-            setMandantSearch('');
-            setMandataireSearch('');
-            setErrors([]);
+            if (!result.ok) {
+                setErrors(result.errors.map(err => err.message));
+            } else {
+                // Reset form
+                setMandantId('');
+                setMandataireId('');
+                setSignedAt('');
+                setMandantSearch('');
+                setMandataireSearch('');
+                setErrors([]);
+            }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -282,10 +288,10 @@ export function AddPowerForm({ coproprietaires, onAdd, validate }: AddPowerFormP
             <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={!mandantId || !mandataireId || (liveValidation !== null && !liveValidation.ok)}
+                disabled={isSubmitting || !mandantId || !mandataireId || (liveValidation !== null && !liveValidation.ok)}
             >
                 <Plus size={18} aria-hidden="true" />
-                Enregistrer le pouvoir
+                {isSubmitting ? 'Enregistrement...' : 'Enregistrer le pouvoir'}
             </button>
         </form>
     );

@@ -167,18 +167,18 @@
 }
 
 .categorieSYNDIC {
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
 }
 
 .categorieCOPROPRIETE {
-    background: #D1FAE5;
-    color: #047857;
+    background: rgba(16, 185, 129, 0.2);
+    color: #6EE7B7;
 }
 
 .categorieCOPROFLEX {
-    background: #FAE8FF;
-    color: #7E22CE;
+    background: rgba(168, 85, 247, 0.2);
+    color: #C084FC;
 }
 
 .itemDetails {
@@ -199,20 +199,4 @@
     font-size: 0.75rem;
     color: #F59E0B;
     font-weight: 500;
-}
-
-/* Dark mode */
-[data-theme="dark"] .categorieSYNDIC {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93C5FD;
-}
-
-[data-theme="dark"] .categorieCOPROPRIETE {
-    background: rgba(16, 185, 129, 0.2);
-    color: #6EE7B7;
-}
-
-[data-theme="dark"] .categorieCOPROFLEX {
-    background: rgba(168, 85, 247, 0.2);
-    color: #C084FC;
 }

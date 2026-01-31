@@ -23,7 +23,7 @@
 
 .backButton:hover {
   background: var(--hover-bg);
-  color: var(--text-primary);
+  color: var(--primary-color);
 }
 
 .title {
@@ -41,7 +41,7 @@
 
 /* Form Container */
 .formContainer {
-  background: var(--card-bg);
+  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 2rem;
@@ -67,10 +67,10 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: #fef2f2;
+  background: rgba(248, 113, 113, 0.15);
   border: 1px solid #fecaca;
   border-radius: 8px;
-  color: #dc2626;
+  color: #f87171;
   margin-bottom: 1.5rem;
 }
 
@@ -153,7 +153,7 @@
 .textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15);
 }
 
 /* Tags */
@@ -247,8 +247,8 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: #dbeafe;
-  color: #1e40af;
+  background: rgba(129, 140, 248, 0.2);
+  color: var(--primary-color);
   border-radius: 20px;
   font-size: 0.813rem;
   font-weight: 500;
@@ -288,7 +288,7 @@
 }
 
 .optionCheckbox:hover {
-  border-color: var(--primary-light);
+  border-color: var(--primary-color);
 }
 
 .optionCheckbox input {
@@ -344,7 +344,7 @@
 .uploadButton:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
-  background: var(--primary-light);
+  background: rgba(129, 140, 248, 0.1);
 }
 
 .fileHint {
@@ -406,8 +406,8 @@
 }
 
 .removeAttachment:hover {
-  background: #fee2e2;
-  color: #dc2626;
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
 /* Preview */
@@ -442,7 +442,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -538,7 +538,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
   border: none;
   border-radius: 8px;
   font-size: 0.938rem;
@@ -550,7 +550,7 @@
 
 .publishButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(129, 140, 248, 0.4);
 }
 
 .publishButton:disabled {
@@ -592,14 +592,14 @@
 }
 
 .visibilityBtn:hover {
-  border-color: var(--primary-light);
+  border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .visibilityBtn.active {
   border-color: var(--primary-color);
-  background: var(--primary-light);
+  background: rgba(129, 140, 248, 0.15);
 }
 
 .visibilityBtn svg {
@@ -664,12 +664,12 @@
 }
 
 .groupCheckbox:hover {
-  border-color: var(--primary-light);
+  border-color: var(--primary-color);
 }
 
 .groupCheckbox:has(input:checked) {
   border-color: var(--primary-color);
-  background: var(--primary-light);
+  background: rgba(129, 140, 248, 0.15);
 }
 
 .groupCheckbox input {
@@ -700,9 +700,9 @@
 }
 
 .draftButton:hover:not(:disabled) {
-  border-color: var(--primary-light);
+  border-color: var(--primary-color);
   color: var(--text-primary);
-  background: var(--hover-bg);
+  background: rgba(129, 140, 248, 0.1);
 }
 
 .draftButton:disabled {
@@ -748,195 +748,3 @@
 /* ========================================
    DARK MODE OPTIMIZATIONS
    ======================================== */
-
-:global([data-theme="dark"]) .backButton {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .backButton:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .formContainer {
-  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .error {
-  background: rgba(248, 113, 113, 0.15);
-  border-color: rgba(248, 113, 113, 0.3);
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .categoryBtn {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .categoryBtn:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-:global([data-theme="dark"]) .input,
-:global([data-theme="dark"]) .textarea {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-:global([data-theme="dark"]) .input:focus,
-:global([data-theme="dark"]) .textarea:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15);
-}
-
-:global([data-theme="dark"]) .tagsContainer {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .tagBtn {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .tagBtn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .tagBtn.selected {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .customTagInput input {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-:global([data-theme="dark"]) .customTagInput input:focus {
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .selectedTag {
-  background: rgba(129, 140, 248, 0.2);
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .optionCheckbox {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .optionCheckbox:hover {
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .visibilityBtn {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .visibilityBtn:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-:global([data-theme="dark"]) .visibilityBtn.active {
-  border-color: var(--primary-color);
-  background: rgba(129, 140, 248, 0.15);
-}
-
-:global([data-theme="dark"]) .groupSelection {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .groupCheckbox {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .groupCheckbox:hover {
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .groupCheckbox:has(input:checked) {
-  border-color: var(--primary-color);
-  background: rgba(129, 140, 248, 0.15);
-}
-
-:global([data-theme="dark"]) .attachmentsArea {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .uploadButton {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .uploadButton:hover {
-  border-color: var(--primary-color);
-  background: rgba(129, 140, 248, 0.1);
-}
-
-:global([data-theme="dark"]) .attachmentItem {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .removeAttachment:hover {
-  background: rgba(248, 113, 113, 0.15);
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .preview {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .previewCard {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .previewAvatar {
-  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-}
-
-:global([data-theme="dark"]) .previewTag {
-  background: var(--card-bg);
-}
-
-:global([data-theme="dark"]) .actions {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .cancelButton {
-  background: var(--card-bg);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .cancelButton:hover {
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .draftButton {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .draftButton:hover:not(:disabled) {
-  border-color: var(--primary-color);
-  background: rgba(129, 140, 248, 0.1);
-}
-
-:global([data-theme="dark"]) .publishButton {
-  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-  box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
-}
-
-:global([data-theme="dark"]) .publishButton:hover:not(:disabled) {
-  box-shadow: 0 8px 24px rgba(129, 140, 248, 0.4);
-}

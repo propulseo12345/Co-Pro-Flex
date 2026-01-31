@@ -212,12 +212,53 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
           majorite: fromDbMajorityType(r.majority_type),
           custom: true,
           resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
+          // Include variables from Supabase for template interpolation
+          variables: r.variables as Record<string, string> | undefined,
         }));
         setResolutions(frontendRes);
+
+        // Initialize variableValues: prioritize draft, then resolution.variables
+        const variablesDraft = await loadDraft<Record<string, string>>(agId, 'variables');
+        if (variablesDraft.data) {
+          // Use variables from draft (user edits during session)
+          setVariableValues(variablesDraft.data);
+        } else {
+          // Merge all resolution variables into a single object (from step 2 edits)
+          const mergedVariables: Record<string, string> = {};
+          for (const res of dbResolutions) {
+            if (res.variables && typeof res.variables === 'object') {
+              const vars = res.variables as Record<string, unknown>;
+              for (const [key, value] of Object.entries(vars)) {
+                if (value !== null && value !== undefined) {
+                  mergedVariables[key] = String(value);
+                }
+              }
+            }
+          }
+          if (Object.keys(mergedVariables).length > 0) {
+            setVariableValues(mergedVariables);
+          }
+        }
       } else if (!isValidUUID(agId)) {
         // Fallback to loadDraft (which uses localStorage) for non-UUID (legacy) AGs
         const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', 'ag-resolutions-' + agId);
-        if (savedResolutions) setResolutions(savedResolutions);
+        if (savedResolutions) {
+          setResolutions(savedResolutions);
+          // Also merge resolution variables for legacy mode
+          const mergedVariables: Record<string, string> = {};
+          for (const res of savedResolutions) {
+            if (res.variables && typeof res.variables === 'object') {
+              for (const [key, value] of Object.entries(res.variables)) {
+                if (value !== null && value !== undefined) {
+                  mergedVariables[key] = String(value);
+                }
+              }
+            }
+          }
+          if (Object.keys(mergedVariables).length > 0) {
+            setVariableValues(prev => ({ ...mergedVariables, ...prev }));
+          }
+        }
       }
 
       // Load votes draft from Supabase
@@ -248,11 +289,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
         }
       }
 
-      // Load variables draft from Supabase
-      const variablesDraft = await loadDraft<Record<string, string>>(agId, 'variables');
-      if (variablesDraft.data) {
-        setVariableValues(variablesDraft.data);
-      }
+      // Note: Variables are now loaded earlier along with resolutions (from draft or merged from resolution.variables)
 
       // Initialize presences from Supabase attendance or coproprietaires
       if (useSupabase && dbAttendance.length > 0) {

@@ -89,11 +89,11 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-lg);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(248, 113, 113, 0.05) 100%);
   border: 1px solid var(--danger);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-lg);
-  color: var(--danger);
+  color: #f87171;
   font-size: var(--text-sm);
   animation: fadeIn 0.3s ease-out;
 }
@@ -553,8 +553,8 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  background: var(--danger-light);
-  color: var(--danger);
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
   border-radius: var(--radius-full);
   font-size: 10px;
   font-weight: 700;
@@ -565,8 +565,8 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  background: var(--warning-light);
-  color: var(--warning);
+  background: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
   border-radius: var(--radius-full);
   font-size: 10px;
   font-weight: 600;
@@ -575,37 +575,14 @@
 
 /* Urgent Row Highlight */
 .rowUrgent {
-  background: rgba(239, 68, 68, 0.03);
-}
-
-.rowUrgent:hover {
-  background: rgba(239, 68, 68, 0.06) !important;
-}
-
-/* Dark mode overrides */
-:global([data-theme="dark"]) .deadlineAlert {
-  background: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(248, 113, 113, 0.05) 100%);
-  border-color: rgba(248, 113, 113, 0.5);
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .rowUrgent {
   background: rgba(248, 113, 113, 0.05);
 }
 
-:global([data-theme="dark"]) .rowUrgent:hover {
+.rowUrgent:hover {
   background: rgba(248, 113, 113, 0.1) !important;
 }
 
-:global([data-theme="dark"]) .thisWeekBadge {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fcd34d;
-}
-
-:global([data-theme="dark"]) .soonBadge {
-  background: rgba(248, 113, 113, 0.2);
-  color: #f87171;
-}
+/* Dark mode overrides */
 
 /* Responsive */
 @media (max-width: 768px) {

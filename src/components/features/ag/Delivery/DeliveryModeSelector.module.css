@@ -37,7 +37,7 @@
   align-items: flex-start;
   gap: var(--space-md);
   padding: var(--space-lg);
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
   border: 2px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -53,7 +53,7 @@
 
 .optionCardSelected {
   border-color: var(--primary);
-  background: var(--primary-light);
+  background: rgba(96, 165, 250, 0.15);
 }
 
 .optionIcon {
@@ -106,7 +106,7 @@
 
 /* Postal Options */
 .postalOptions {
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
@@ -128,7 +128,7 @@
   gap: var(--space-md);
   cursor: pointer;
   padding: var(--space-md);
-  background: var(--surface);
+  background: var(--bg-main);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-md);
 }
@@ -175,7 +175,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-md);
-  background: var(--surface);
+  background: var(--bg-main);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
 }
@@ -214,7 +214,7 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
   border-radius: var(--radius-md);
   min-width: 100px;
   flex: 1;
@@ -260,29 +260,4 @@
     min-width: 80px;
     padding: var(--space-sm);
   }
-}
-
-/* Dark Mode */
-[data-theme="dark"] .optionCard {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .optionCardSelected {
-  background: rgba(96, 165, 250, 0.15);
-}
-
-[data-theme="dark"] .postalOptions {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .toggleRow {
-  background: var(--bg-main);
-}
-
-[data-theme="dark"] .costEstimate {
-  background: var(--bg-main);
-}
-
-[data-theme="dark"] .statItem {
-  background: var(--surface-secondary);
 }

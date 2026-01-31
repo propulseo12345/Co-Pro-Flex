@@ -31,7 +31,7 @@
     align-items: center;
     gap: var(--space-md);
     padding: var(--space-md) var(--space-lg);
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-md);
     min-width: 180px;
     position: relative;
@@ -43,7 +43,7 @@
     justify-content: center;
     width: 44px;
     height: 44px;
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.2);
     border-radius: var(--radius-md);
     color: var(--primary);
 }
@@ -229,12 +229,12 @@
 }
 
 .coproItemSelected {
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.2);
     border-color: var(--primary);
 }
 
 .coproItemComplete {
-    border-color: var(--success);
+    border-color: #6EE7B7;
 }
 
 .coproItemComplete:hover {
@@ -315,7 +315,7 @@
 
 .editorHeader {
     padding: var(--space-lg);
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--surface) 100%);
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, var(--surface) 100%);
     border-radius: var(--radius-lg);
     border: 1px solid var(--primary);
 }
@@ -580,8 +580,8 @@
 }
 
 .resolutionCardVoted {
-    background: var(--success-light);
-    border-color: var(--success);
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
 }
 
 .resolutionInfo {
@@ -607,8 +607,8 @@
 }
 
 .resolutionCardVoted .resolutionNumber {
-    background: var(--success);
-    color: white;
+    background: #6EE7B7;
+    color: #1a1a2e;
 }
 
 .resolutionContent {
@@ -661,7 +661,7 @@
 }
 
 .voteBtnPour.voteBtnActive {
-    border-color: var(--success);
+    border-color: white;
     background: var(--success);
     color: white;
 }
@@ -673,7 +673,7 @@
 }
 
 .voteBtnContre.voteBtnActive {
-    border-color: var(--danger);
+    border-color: white;
     background: var(--danger);
     color: white;
 }
@@ -685,7 +685,7 @@
 }
 
 .voteBtnAbstention.voteBtnActive {
-    border-color: var(--warning);
+    border-color: white;
     background: var(--warning);
     color: white;
 }
@@ -799,7 +799,7 @@
 
 .uploadDropzone:hover {
     border-color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(96, 165, 250, 0.1);
 }
 
 .uploadDropzoneUploading {
@@ -1113,52 +1113,3 @@
 /* ---------------------------------------------------------------------------
    Dark Mode
    --------------------------------------------------------------------------- */
-
-:global([data-theme="dark"]) .progressCard {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-:global([data-theme="dark"]) .progressCardIcon {
-    background: rgba(96, 165, 250, 0.2);
-}
-
-:global([data-theme="dark"]) .editorHeader {
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, var(--surface) 100%);
-}
-
-:global([data-theme="dark"]) .resolutionCardVoted {
-    background: rgba(52, 211, 153, 0.15);
-    border-color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .resolutionCardVoted .resolutionNumber {
-    background: #6EE7B7;
-    color: #1a1a2e;
-}
-
-:global([data-theme="dark"]) .voteBtnPour.voteBtnActive {
-    background: var(--success);
-    color: white;
-}
-
-:global([data-theme="dark"]) .voteBtnContre.voteBtnActive {
-    background: var(--danger);
-    color: white;
-}
-
-:global([data-theme="dark"]) .voteBtnAbstention.voteBtnActive {
-    background: var(--warning);
-    color: white;
-}
-
-:global([data-theme="dark"]) .uploadDropzone:hover {
-    background: rgba(96, 165, 250, 0.1);
-}
-
-:global([data-theme="dark"]) .coproItemSelected {
-    background: rgba(96, 165, 250, 0.2);
-}
-
-:global([data-theme="dark"]) .coproItemComplete {
-    border-color: #6EE7B7;
-}

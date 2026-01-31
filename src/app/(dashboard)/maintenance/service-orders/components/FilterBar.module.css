@@ -19,15 +19,15 @@
   align-items: center;
   gap: var(--space-sm, 0.5rem);
   padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
-  background: var(--surface, #ffffff);
+  background: var(--surface);
   border: 1px solid var(--border, #e5e7eb);
   border-radius: var(--radius-md, 0.5rem);
   transition: all var(--transition-fast, 150ms);
 }
 
 .searchBox:focus-within {
-  border-color: var(--primary, #10b981);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
 }
 
 .searchBox svg {
@@ -41,11 +41,11 @@
   outline: none;
   font-size: var(--text-sm, 0.875rem);
   background: transparent;
-  color: var(--text-main, #111827);
+  color: var(--text-main);
 }
 
 .searchInput::placeholder {
-  color: var(--text-secondary, #9ca3af);
+  color: var(--text-tertiary);
 }
 
 .clearButton {
@@ -62,7 +62,7 @@
 }
 
 .clearButton:hover {
-  background: var(--background-hover, #f3f4f6);
+  background: var(--surface-hover);
   color: var(--text-main, #111827);
 }
 
@@ -71,19 +71,19 @@
   align-items: center;
   gap: var(--space-xs, 0.375rem);
   padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
-  background: var(--surface, #ffffff);
+  background: var(--surface);
   border: 1px solid var(--border, #e5e7eb);
   border-radius: var(--radius-md, 0.5rem);
   font-size: var(--text-sm, 0.875rem);
   font-weight: 500;
-  color: var(--text-main, #111827);
+  color: var(--text-main);
   cursor: pointer;
   transition: all var(--transition-fast, 150ms);
   white-space: nowrap;
 }
 
 .filterToggle:hover {
-  background: var(--background-hover, #f9fafb);
+  background: var(--surface-hover);
   border-color: var(--primary, #10b981);
 }
 
@@ -111,16 +111,16 @@
   border-radius: var(--radius-md, 0.5rem);
   font-size: var(--text-sm, 0.875rem);
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast, 150ms);
   white-space: nowrap;
 }
 
 .clearAllButton:hover {
-  background: var(--background-hover, #f9fafb);
-  color: var(--danger, #ef4444);
-  border-color: var(--danger, #ef4444);
+  background: rgba(248, 113, 113, 0.1);
+  color: #F87171;
+  border-color: rgba(248, 113, 113, 0.4);
 }
 
 .filtersPanel {
@@ -128,7 +128,7 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md, 1rem);
   padding: var(--space-md, 1rem);
-  background: var(--surface, #ffffff);
+  background: var(--surface);
   border: 1px solid var(--border, #e5e7eb);
   border-radius: var(--radius-md, 0.5rem);
 }
@@ -152,20 +152,20 @@
   border: 1px solid var(--border, #e5e7eb);
   border-radius: var(--radius-sm, 0.375rem);
   font-size: var(--text-sm, 0.875rem);
-  color: var(--text-main, #111827);
-  background: var(--surface, #ffffff);
+  color: var(--text-main);
+  background: var(--bg-secondary);
   cursor: pointer;
   transition: all var(--transition-fast, 150ms);
 }
 
 .filterSelect:hover {
-  border-color: var(--primary, #10b981);
+  border-color: var(--primary);
 }
 
 .filterSelect:focus {
   outline: none;
   border-color: var(--primary, #10b981);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
 }
 
 /* Responsive */
@@ -188,67 +188,4 @@
   .filtersPanel {
     grid-template-columns: 1fr;
   }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .searchBox {
-  background: var(--surface);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .searchBox:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
-}
-
-:global([data-theme="dark"]) .searchInput {
-  color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .searchInput::placeholder {
-  color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .clearButton:hover {
-  background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .filterToggle {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .filterToggle:hover {
-  background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .clearAllButton {
-  border-color: var(--border);
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .clearAllButton:hover {
-  background: rgba(248, 113, 113, 0.1);
-  color: #F87171;
-  border-color: rgba(248, 113, 113, 0.4);
-}
-
-:global([data-theme="dark"]) .filtersPanel {
-  background: var(--surface);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .filterSelect {
-  background: var(--bg-secondary);
-  border-color: var(--border);
-  color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .filterSelect:hover {
-  border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .filterSelect:focus {
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
 }

@@ -20,7 +20,7 @@
 
 .sortableHeader {
   padding: 0;
-  background: var(--color-gray-50);
+  background: var(--color-gray-800);
   border-bottom: 1px solid var(--color-gray-200);
 }
 
@@ -34,20 +34,20 @@
   background: transparent;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-gray-300);
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
 }
 
 .headerButton:hover {
-  background: var(--color-gray-100);
-  color: var(--color-gray-900);
+  background: var(--color-gray-700);
+  color: var(--color-gray-100);
 }
 
 .sortableHeader.active .headerButton {
-  color: var(--color-primary-700);
-  background: var(--color-primary-50);
+  color: var(--color-primary-400);
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .headerLabel {
@@ -58,12 +58,12 @@
 .sortIcon {
   display: flex;
   align-items: center;
-  color: var(--color-gray-400);
+  color: var(--color-gray-600);
   transition: color 0.15s ease;
 }
 
 .sortableHeader.active .sortIcon {
-  color: var(--color-primary-600);
+  color: var(--color-primary-400);
 }
 
 .alignLeft {
@@ -96,7 +96,7 @@
 }
 
 .row:hover {
-  background: var(--color-gray-50);
+  background: var(--color-gray-800);
 }
 
 .row.clickable {
@@ -104,14 +104,14 @@
 }
 
 .row.clickable:hover {
-  background: var(--color-primary-50);
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .cell {
   padding: 12px 16px;
   border-bottom: 1px solid var(--color-gray-100);
   font-size: var(--font-size-sm);
-  color: var(--color-gray-900);
+  color: var(--color-gray-100);
 }
 
 .emptyCell {
@@ -123,63 +123,9 @@
 
 /* Sort indicators */
 .indicatorActive {
-  color: var(--color-primary-600);
+  color: var(--color-primary-400);
 }
 
 .indicatorInactive {
-  color: var(--color-gray-400);
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .header,
-:global([data-theme="dark"]) .sortableHeader {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-700);
-}
-
-:global([data-theme="dark"]) .headerButton {
-  color: var(--color-gray-300);
-}
-
-:global([data-theme="dark"]) .headerButton:hover {
-  background: var(--color-gray-700);
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .sortableHeader.active .headerButton {
-  color: var(--color-primary-400);
-  background: rgba(59, 130, 246, 0.2);
-}
-
-:global([data-theme="dark"]) .sortIcon {
-  color: var(--color-gray-600);
-}
-
-:global([data-theme="dark"]) .sortableHeader.active .sortIcon {
-  color: var(--color-primary-400);
-}
-
-:global([data-theme="dark"]) .row:hover {
-  background: var(--color-gray-800);
-}
-
-:global([data-theme="dark"]) .row.clickable:hover {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-:global([data-theme="dark"]) .cell {
-  border-color: var(--color-gray-800);
-  color: var(--color-gray-100);
-}
-
-:global([data-theme="dark"]) .emptyCell {
-  color: var(--color-gray-500);
-}
-
-:global([data-theme="dark"]) .indicatorActive {
-  color: var(--color-primary-400);
-}
-
-:global([data-theme="dark"]) .indicatorInactive {
   color: var(--color-gray-600);
 }

@@ -61,11 +61,11 @@
 }
 
 .actionEdit {
-    background: #3B82F6;
+    background: #60A5FA;
 }
 
 .actionArchive {
-    background: #8B5CF6;
+    background: #A78BFA;
 }
 
 .actionDefault {
@@ -153,7 +153,7 @@
 }
 
 .oldValue {
-    color: #EF4444;
+    color: #F87171;
     text-decoration: line-through;
     opacity: 0.7;
 }
@@ -190,14 +190,3 @@
 }
 
 /* Dark mode overrides */
-:global([data-theme="dark"]) .actionEdit {
-    background: #60A5FA;
-}
-
-:global([data-theme="dark"]) .actionArchive {
-    background: #A78BFA;
-}
-
-:global([data-theme="dark"]) .oldValue {
-    color: #F87171;
-}

@@ -191,7 +191,7 @@
 }
 
 .systemCard {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-secondary) 100%);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,255,255,0.05) 100%);
 }
 
 /* Card Badges */
@@ -394,7 +394,7 @@
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -467,20 +467,6 @@
     gap: var(--space-sm);
     margin-top: var(--space-lg);
 }
-
-/* Dark Mode */
-:global([data-theme="dark"]) .templateCard {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .systemCard {
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,255,255,0.05) 100%);
-}
-
-:global([data-theme="dark"]) .modalOverlay {
-    background: rgba(0, 0, 0, 0.7);
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .container {

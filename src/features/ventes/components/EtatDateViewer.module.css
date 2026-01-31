@@ -58,7 +58,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: var(--color-success-600);
+  background: var(--color-success-500);
   color: white;
   border: none;
   border-radius: var(--radius-md, 6px);
@@ -69,7 +69,7 @@
 }
 
 .downloadBtn:hover:not(:disabled) {
-  background: var(--color-success-700);
+  background: var(--color-success-600);
 }
 
 .downloadBtn:disabled {
@@ -82,7 +82,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: var(--color-primary-50);
+  background: rgba(59, 130, 246, 0.15);
   color: var(--color-primary-600);
   border: none;
   border-radius: var(--radius-md, 6px);
@@ -93,7 +93,7 @@
 }
 
 .viewDocBtn:hover {
-  background: var(--color-primary-100);
+  background: rgba(59, 130, 246, 0.25);
 }
 
 .spinner {
@@ -115,8 +115,8 @@
   gap: 0.375rem;
   padding: 0.5rem 0.75rem;
   margin-top: 0.5rem;
-  background: var(--color-error-50);
-  color: var(--color-error-700);
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
   border-radius: var(--radius-md, 6px);
   font-size: 0.75rem;
 }
@@ -275,13 +275,13 @@
 }
 
 .txCall {
-  background: var(--color-warning-50);
-  color: var(--color-warning-700);
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
 }
 
 .txPayment {
-  background: var(--color-success-50);
-  color: var(--color-success-700);
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
 }
 
 .debit {
@@ -330,33 +330,3 @@
 }
 
 /* Dark mode adjustments */
-[data-theme="dark"] .downloadBtn {
-  background: var(--color-success-500);
-}
-
-[data-theme="dark"] .downloadBtn:hover:not(:disabled) {
-  background: var(--color-success-600);
-}
-
-[data-theme="dark"] .viewDocBtn {
-  background: rgba(59, 130, 246, 0.15);
-}
-
-[data-theme="dark"] .viewDocBtn:hover {
-  background: rgba(59, 130, 246, 0.25);
-}
-
-[data-theme="dark"] .txCall {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fcd34d;
-}
-
-[data-theme="dark"] .txPayment {
-  background: rgba(34, 197, 94, 0.15);
-  color: #86efac;
-}
-
-[data-theme="dark"] .downloadError {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-}

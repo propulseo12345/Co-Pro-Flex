@@ -118,39 +118,39 @@
 }
 
 .statutTerminee {
-    background: #D1FAE5;
-    color: #047857;
+    background: rgba(16, 185, 129, 0.2);
+    color: #6EE7B7;
 }
 
 .statutEnCours {
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
 }
 
 .statutPlanifiee {
-    background: #FEF3C7;
-    color: #92400E;
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
 }
 
 .statutAnnulee {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: rgba(107, 114, 128, 0.2);
+    color: #9CA3AF;
 }
 
 .iconTerminee {
-    color: #047857;
+    color: #6EE7B7;
 }
 
 .iconEnCours {
-    color: #1E40AF;
+    color: #93C5FD;
 }
 
 .iconPlanifiee {
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .iconAnnulee {
-    color: #6B7280;
+    color: #9CA3AF;
 }
 
 .emptyState {
@@ -175,38 +175,3 @@
 }
 
 /* Dark mode adjustments */
-[data-theme="dark"] .statutTerminee {
-    background: rgba(16, 185, 129, 0.2);
-    color: #6EE7B7;
-}
-
-[data-theme="dark"] .statutEnCours {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93C5FD;
-}
-
-[data-theme="dark"] .statutPlanifiee {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-[data-theme="dark"] .statutAnnulee {
-    background: rgba(107, 114, 128, 0.2);
-    color: #9CA3AF;
-}
-
-[data-theme="dark"] .iconTerminee {
-    color: #6EE7B7;
-}
-
-[data-theme="dark"] .iconEnCours {
-    color: #93C5FD;
-}
-
-[data-theme="dark"] .iconPlanifiee {
-    color: #FCD34D;
-}
-
-[data-theme="dark"] .iconAnnulee {
-    color: #9CA3AF;
-}

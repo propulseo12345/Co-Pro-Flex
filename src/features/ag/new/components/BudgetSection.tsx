@@ -1,8 +1,8 @@
 'use client';
 
-import { DollarSign, RotateCcw, Plus, Pencil, Trash2, Check, X, AlertCircle } from 'lucide-react';
+import { DollarSign, RotateCcw, Plus, Pencil, Trash2, Check, X, AlertCircle, Loader2 } from 'lucide-react';
 import type { BudgetPoste, EditingPosteState } from '../domain/types';
-import { BUDGET_PRECEDENT, POSTES_DEPENSES } from '../domain/constants';
+import { POSTES_DEPENSES } from '../domain/constants';
 import styles from '../../../../app/(dashboard)/ag/new/new-ag.module.css';
 
 interface BudgetSectionProps {
@@ -14,6 +14,8 @@ interface BudgetSectionProps {
   newPoste: { poste: string; montant: string };
   showCustomPoste: boolean;
   editing: EditingPosteState;
+  isImporting?: boolean;
+  importError?: string | null;
   onBudgetChange: (value: boolean) => void;
   onExerciceChange: (value: string) => void;
   onNewPosteChange: (value: { poste: string; montant: string }) => void;
@@ -37,6 +39,8 @@ export function BudgetSection({
   newPoste,
   showCustomPoste,
   editing,
+  isImporting = false,
+  importError = null,
   onBudgetChange,
   onExerciceChange,
   onNewPosteChange,
@@ -89,12 +93,24 @@ export function BudgetSection({
                   type="button"
                   onClick={onImportBudget}
                   className={styles.importBudgetBtn}
-                  title="Récupérer le budget de l'exercice précédent"
+                  title="Récupérer le budget depuis Finance > Budgets"
+                  disabled={isImporting}
                 >
-                  <RotateCcw size={16} aria-hidden="true" />
-                  Importer budget {BUDGET_PRECEDENT.exercice}
+                  {isImporting ? (
+                    <Loader2 size={16} className={styles.spinnerIcon} aria-hidden="true" />
+                  ) : (
+                    <RotateCcw size={16} aria-hidden="true" />
+                  )}
+                  {isImporting ? 'Import en cours...' : `Importer budget ${budgetExercice}`}
                 </button>
               </div>
+
+              {importError && (
+                <div className={styles.importError}>
+                  <AlertCircle size={16} />
+                  <span>{importError}</span>
+                </div>
+              )}
 
               <div className={styles.addPosteForm}>
                 <div className={styles.addPosteInputs}>

@@ -39,7 +39,7 @@
 
 .dragHandle:hover {
   color: var(--text-secondary);
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 .dragHandle:active {
@@ -93,7 +93,7 @@
 }
 
 .montantInput:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 .montantInput:focus {
@@ -134,26 +134,6 @@
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-
-/* Dark mode */
-:global([data-theme="dark"]) .posteRow {
-  background: var(--surface);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .posteRow:hover {
-  border-color: var(--border-hover);
-}
-
-:global([data-theme="dark"]) .libelleInput:hover,
-:global([data-theme="dark"]) .montantInput:hover {
-  background: var(--bg-tertiary);
-}
-
-:global([data-theme="dark"]) .dragHandle:hover {
-  background: var(--bg-tertiary);
-}
-
 /* PostesListEditor styles */
 .listEditorContainer {
   display: flex;
@@ -226,7 +206,7 @@
 }
 
 .cleSelect:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 .cleSelect:focus {
@@ -238,7 +218,7 @@
 /* Poste alert (>10% of budget) */
 .posteAlert {
   border-color: var(--warning) !important;
-  background: rgba(245, 158, 11, 0.05);
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .alertBadge {
@@ -255,18 +235,6 @@
 }
 
 /* Dark mode for new elements */
-:global([data-theme="dark"]) .cleSelect {
-  background: transparent;
-  color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .cleSelect:hover {
-  background: var(--bg-tertiary);
-}
-
-:global([data-theme="dark"]) .posteAlert {
-  background: rgba(245, 158, 11, 0.1);
-}
 
 /* Alert banner for >10% postes */
 .alertBanner {

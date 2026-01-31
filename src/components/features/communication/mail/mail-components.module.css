@@ -19,7 +19,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  color: var(--text-secondary);
+  color: #94a3b8;
   font-size: 0.938rem;
   font-weight: 500;
   cursor: pointer;
@@ -27,12 +27,12 @@
 }
 
 .tab:hover {
-  color: var(--primary-color);
+  color: #a5b4fc;
 }
 
 .tabActive {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
+  color: #a5b4fc;
+  border-bottom-color: #818cf8;
 }
 
 .tabBadge {
@@ -42,7 +42,7 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  background: #dc2626;
+  background: #ef4444;
   color: white;
   border-radius: 10px;
   font-size: 0.75rem;
@@ -58,7 +58,7 @@
   height: 20px;
   padding: 0 6px;
   background: #f59e0b;
-  color: white;
+  color: #1A1F2E;
   border-radius: 10px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -118,7 +118,7 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: #818cf8;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
   transform: translateY(-1px);
 }
@@ -128,7 +128,7 @@
   border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.875rem;
-  background: var(--card-bg);
+  background: #1A1F2E;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -142,7 +142,7 @@
 /* Bulk Actions */
 .bulkActions {
   padding: 0.75rem 1rem;
-  background: var(--bg-secondary);
+  background: rgba(129, 140, 248, 0.08);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -170,16 +170,16 @@
 }
 
 .emailItem:hover {
-  background: var(--hover-bg);
+  background: rgba(255, 255, 255, 0.04);
   transform: translateX(4px);
 }
 
 .emailItem.selected {
-  background: var(--primary-light);
+  background: rgba(129, 140, 248, 0.15);
 }
 
 .emailItem.unread {
-  background: #f0f9ff;
+  background: rgba(129, 140, 248, 0.08);
   border-left: 3px solid var(--primary-color);
 }
 
@@ -191,7 +191,7 @@
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: var(--primary-color);
+  background: #818cf8;
   border-radius: 50%;
   margin-right: 0.5rem;
   flex-shrink: 0;
@@ -265,8 +265,8 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background: #dbeafe;
-  color: #1e40af;
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -299,18 +299,18 @@
 }
 
 .statusBadge.sent {
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: rgba(129, 140, 248, 0.15);
+  color: #c7d2fe;
 }
 
 .statusBadge.opened {
-  background: #d1fae5;
-  color: #059669;
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
 }
 
 .statusBadge.received {
-  background: #dbeafe;
-  color: #0284c7;
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
 }
 
 .editBtn {
@@ -329,8 +329,8 @@
 }
 
 .editBtn:hover {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background: #818cf8;
+  border-color: white;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
@@ -342,17 +342,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--card-bg);
+  background: #1A1F2E;
   border: 2px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: #94a3b8;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .downloadBtn:hover {
-  background: var(--hover-bg);
-  color: var(--primary-color);
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
 }
@@ -375,13 +375,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   border-bottom: 1px solid #fecaca;
 }
 
 .trashInfo {
   font-size: 0.813rem;
-  color: #dc2626;
+  color: #fca5a5;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -389,7 +389,7 @@
 
 /* Folder Sidebar */
 .folderSidebar {
-  background: var(--card-bg);
+  background: #1E293B;
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1rem;
@@ -460,7 +460,7 @@
 }
 
 .folderItem:hover {
-  background: var(--hover-bg);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
 }
 
@@ -472,8 +472,8 @@
 }
 
 .folderItemActive {
-  background: var(--primary-light);
-  color: var(--primary-color);
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
   font-weight: 500;
 }
 
@@ -521,10 +521,10 @@
   position: absolute;
   right: 0;
   top: 100%;
-  background: var(--card-bg);
+  background: #1E293B;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   z-index: 100;
   overflow: hidden;
   min-width: 140px;
@@ -577,8 +577,8 @@
   border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.938rem;
-  color: var(--text-primary);
-  background: var(--card-bg);
+  color: #f1f5f9;
+  background: #1A1F2E;
   transition: all 0.2s;
 }
 
@@ -627,7 +627,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem 1rem;
-  background: var(--bg-secondary);
+  background: #1A1F2E;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.938rem;
@@ -638,8 +638,8 @@
 }
 
 .folderPickerItem:hover {
-  background: var(--hover-bg);
-  border-color: var(--primary-color);
+  background: rgba(129, 140, 248, 0.1);
+  border-color: #818cf8;
 }
 
 .folderPickerItem span {
@@ -715,7 +715,7 @@
   width: 80px;
   height: 80px;
   margin: 0 auto 1.5rem;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -753,7 +753,7 @@
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  background: #059669;
+  background: #10b981;
   color: white;
   padding: 1rem 1.5rem;
   border-radius: 8px;
@@ -807,180 +807,3 @@
 /* ========================================
    DARK MODE
    ======================================== */
-
-:global([data-theme="dark"]) .emailItem.unread {
-  background: rgba(129, 140, 248, 0.08);
-  border-left-color: #818cf8;
-}
-
-:global([data-theme="dark"]) .emailItem.unread:hover {
-  background: rgba(129, 140, 248, 0.12);
-}
-
-:global([data-theme="dark"]) .emailItem.selected {
-  background: rgba(129, 140, 248, 0.15);
-}
-
-:global([data-theme="dark"]) .emailItem:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-:global([data-theme="dark"]) .tabBadge {
-  background: #ef4444;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
-}
-
-:global([data-theme="dark"]) .tabBadgeDraft {
-  background: #f59e0b;
-  color: #1A1F2E;
-}
-
-:global([data-theme="dark"]) .trashActions {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-}
-
-:global([data-theme="dark"]) .trashInfo {
-  color: #fca5a5;
-}
-
-:global([data-theme="dark"]) .templateBadge {
-  background: rgba(129, 140, 248, 0.15);
-  color: #a5b4fc;
-  border: 1px solid rgba(129, 140, 248, 0.2);
-}
-
-:global([data-theme="dark"]) .statusBadge.sent {
-  background: rgba(129, 140, 248, 0.15);
-  color: #c7d2fe;
-}
-
-:global([data-theme="dark"]) .statusBadge.opened {
-  background: rgba(52, 211, 153, 0.15);
-  color: #6ee7b7;
-}
-
-:global([data-theme="dark"]) .statusBadge.received {
-  background: rgba(96, 165, 250, 0.15);
-  color: #93c5fd;
-}
-
-:global([data-theme="dark"]) .searchInput {
-  background: #1A1F2E;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
-}
-
-:global([data-theme="dark"]) .searchInput:focus {
-  background: #1E293B;
-  border-color: #818cf8;
-}
-
-:global([data-theme="dark"]) .select {
-  background: #1A1F2E;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
-}
-
-:global([data-theme="dark"]) .bulkActions {
-  background: rgba(129, 140, 248, 0.08);
-  border-color: rgba(129, 140, 248, 0.2);
-}
-
-:global([data-theme="dark"]) .editBtn,
-:global([data-theme="dark"]) .downloadBtn {
-  background: #1A1F2E;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-}
-
-:global([data-theme="dark"]) .editBtn:hover {
-  background: #818cf8;
-  border-color: #818cf8;
-  color: white;
-}
-
-:global([data-theme="dark"]) .downloadBtn:hover {
-  background: rgba(129, 140, 248, 0.15);
-  border-color: #818cf8;
-  color: #a5b4fc;
-}
-
-:global([data-theme="dark"]) .tab {
-  color: #94a3b8;
-}
-
-:global([data-theme="dark"]) .tab:hover {
-  color: #a5b4fc;
-  background: rgba(129, 140, 248, 0.08);
-}
-
-:global([data-theme="dark"]) .tabActive {
-  color: #a5b4fc;
-  border-bottom-color: #818cf8;
-}
-
-:global([data-theme="dark"]) .checkbox {
-  accent-color: #818cf8;
-}
-
-:global([data-theme="dark"]) .unreadDot {
-  background: #818cf8;
-  box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
-}
-
-:global([data-theme="dark"]) .folderSidebar {
-  background: #1E293B;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-:global([data-theme="dark"]) .folderItem:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-:global([data-theme="dark"]) .folderItemActive {
-  background: rgba(129, 140, 248, 0.15);
-  color: #a5b4fc;
-}
-
-:global([data-theme="dark"]) .folderMenu {
-  background: #1E293B;
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-:global([data-theme="dark"]) .folderInput {
-  background: #1A1F2E;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
-}
-
-:global([data-theme="dark"]) .folderPickerItem {
-  background: #1A1F2E;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-:global([data-theme="dark"]) .folderPickerItem:hover {
-  background: rgba(129, 140, 248, 0.1);
-  border-color: #818cf8;
-}
-
-:global([data-theme="dark"]) .modalIcon {
-  background: rgba(239, 68, 68, 0.2);
-}
-
-:global([data-theme="dark"]) .toast {
-  background: #10b981;
-}
-
-:global([data-theme="dark"]) .emailItem {
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-:global([data-theme="dark"]) .toolbar {
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-:global([data-theme="dark"]) .tabs {
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}

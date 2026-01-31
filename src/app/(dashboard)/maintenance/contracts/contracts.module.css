@@ -63,17 +63,17 @@
 }
 
 .kpiIconSuccess {
-    background: #D1FAE5;
-    color: #047857;
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
 }
 
 .kpiIconWarning {
-    background: #FEF3C7;
-    color: #92400E;
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
 }
 
 .kpiIconPrimary {
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.15);
     color: var(--primary);
 }
 
@@ -110,18 +110,18 @@
 }
 
 .kpiSyndicActif {
-    border-color: #10B981;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+    border-color: #34D399;
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.02) 100%);
 }
 
 .kpiSyndicWarning {
-    border-color: #F59E0B;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
+    border-color: #FBBF24;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 191, 36, 0.02) 100%);
 }
 
 .kpiSyndicResilie {
     border-color: #6B7280;
-    background: linear-gradient(135deg, rgba(107, 114, 128, 0.05) 0%, rgba(107, 114, 128, 0.02) 100%);
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(107, 114, 128, 0.02) 100%);
 }
 
 .kpiSyndicMain {
@@ -139,7 +139,7 @@
     width: 3.5rem;
     height: 3.5rem;
     border-radius: var(--radius-md);
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.15);
     color: var(--primary);
     flex-shrink: 0;
 }
@@ -176,18 +176,18 @@
 }
 
 .kpiSyndicActif .kpiSyndicStatus {
-    background: #D1FAE5;
-    color: #047857;
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
 }
 
 .kpiSyndicWarning .kpiSyndicStatus {
-    background: #FEF3C7;
-    color: #92400E;
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
 }
 
 .kpiSyndicResilie .kpiSyndicStatus {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: rgba(107, 114, 128, 0.2);
+    color: #9CA3AF;
 }
 
 .kpiSyndicName {
@@ -220,7 +220,7 @@
 }
 
 .kpiSyndicWarning .kpiSyndicDays {
-    color: #92400E !important;
+    color: #FCD34D !important;
 }
 
 .kpiSyndicActions {
@@ -234,7 +234,7 @@
     display: flex;
     gap: 0.25rem;
     margin: 1rem 0 0.75rem 0;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.2);
     padding: 0.25rem;
     border-radius: var(--radius-md);
 }
@@ -253,7 +253,7 @@
 
 .syndicTab:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .syndicTabActive {
@@ -315,7 +315,7 @@
     display: flex;
     gap: 1rem;
     padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: var(--radius-md);
 }
 
@@ -345,23 +345,6 @@
 }
 
 /* Dark theme for syndic tabs */
-:global([data-theme="dark"]) .syndicTabs {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-:global([data-theme="dark"]) .syndicTab:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-:global([data-theme="dark"]) .syndicTabActive {
-    background: var(--surface);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .syndicDocument,
-:global([data-theme="dark"]) .historiqueItem {
-    background: rgba(0, 0, 0, 0.2);
-}
 
 /* Section Alertes */
 .alertsSection {
@@ -377,7 +360,7 @@
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1rem;
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .alertsHeader h2 {
@@ -397,14 +380,14 @@
     align-items: center;
     gap: 1rem;
     padding: 0.875rem 1rem;
-    background: #FEF3C7;
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid #F59E0B;
     border-radius: var(--radius-md);
 }
 
 .alertItemUrgent {
-    background: #FEE2E2;
-    border-color: #EF4444;
+    background: rgba(248, 113, 113, 0.15);
+    border-color: rgba(248, 113, 113, 0.5);
 }
 
 .alertItemIcon {
@@ -419,11 +402,11 @@
 }
 
 .alertItem .alertItemIcon {
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .alertItemUrgent .alertItemIcon {
-    color: #DC2626;
+    color: #F87171;
 }
 
 .alertItemContent {
@@ -444,37 +427,9 @@
     color: var(--text-secondary);
 }
 
-:global([data-theme="dark"]) .alertsSection {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .alertsHeader {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .alertItem {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.5);
-}
-
-:global([data-theme="dark"]) .alertItemUrgent {
-    background: rgba(248, 113, 113, 0.15);
-    border-color: rgba(248, 113, 113, 0.5);
-}
-
-:global([data-theme="dark"]) .alertItem .alertItemIcon {
-    background: rgba(255, 255, 255, 0.1);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .alertItemUrgent .alertItemIcon {
-    color: #F87171;
-}
-
 /* Section Contrat du Syndic */
 .syndicSection {
-    background: linear-gradient(135deg, var(--primary-light) 0%, #E0E7FF 100%);
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(96, 165, 250, 0.1) 100%);
     border: 1px solid var(--primary);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -625,7 +580,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     font-size: 0.875rem;
-    background: var(--surface);
+    background: var(--bg-secondary);
     cursor: pointer;
     min-width: 150px;
 }
@@ -655,7 +610,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 2px solid var(--border);
-    background: var(--surface-secondary, #F9FAFB);
+    background: var(--bg-secondary);
 }
 
 .table td {
@@ -670,7 +625,7 @@
 }
 
 .tableRow:hover {
-    background-color: var(--surface-secondary, #F9FAFB);
+    background-color: var(--surface-hover);
 }
 
 .rowReglementaire {
@@ -700,34 +655,22 @@
 }
 
 .echeanceProche {
-    color: #92400E;
+    color: #FCD34D;
     font-weight: 500;
 }
 
 .echeanceUrgent {
-    color: #DC2626;
+    color: #F87171;
     font-weight: 600;
 }
 
 .echeanceUrgent svg {
-    color: #DC2626;
+    color: #F87171;
 }
 
 .joursRestants {
     font-size: 0.75rem;
     opacity: 0.8;
-}
-
-:global([data-theme="dark"]) .echeanceProche {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .echeanceUrgent {
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .echeanceUrgent svg {
-    color: #F87171;
 }
 
 /* Badges */
@@ -741,23 +684,23 @@
 }
 
 .badgeActif {
-    background: #D1FAE5;
-    color: #047857;
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
 }
 
 .badgeRenouveler {
-    background: #FEF3C7;
-    color: #92400E;
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
 }
 
 .badgeResilie {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: rgba(148, 163, 184, 0.2);
+    color: #94A3B8;
 }
 
 .badgeBrouillon {
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
 }
 
 .badgeReglementaire {
@@ -768,8 +711,8 @@
     border-radius: var(--radius-full);
     font-size: 0.6875rem;
     font-weight: 500;
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
 }
 
 /* Actions Dropdown */
@@ -792,7 +735,7 @@
 }
 
 .actionsBtn:hover {
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--surface-hover);
     color: var(--text-main);
 }
 
@@ -811,7 +754,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 20;
     overflow: hidden;
 }
@@ -832,15 +775,15 @@
 }
 
 .dropdownMenu button:hover {
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--surface-hover);
 }
 
 .dangerAction {
-    color: #DC2626 !important;
+    color: #F87171 !important;
 }
 
 .dangerAction:hover {
-    background: #FEF2F2 !important;
+    background: rgba(248, 113, 113, 0.15) !important;
 }
 
 /* Export Dropdown */
@@ -884,7 +827,7 @@
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -931,7 +874,7 @@
 }
 
 .modalClose:hover {
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--surface-hover);
     color: var(--text-main);
 }
 
@@ -1027,7 +970,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.625rem 1rem;
-    background: var(--surface-secondary, #F9FAFB);
+    background: var(--bg-secondary);
     border: 1px dashed var(--border);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -1039,7 +982,7 @@
 
 .fileUploadLabel:hover {
     border-color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.1);
     color: var(--primary);
 }
 
@@ -1054,35 +997,14 @@
     width: 2rem;
     height: 2rem;
     border: none;
-    background: #FEE2E2;
-    color: #DC2626;
+    background: rgba(248, 113, 113, 0.2);
+    color: #F87171;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-base);
 }
 
 .fileClear:hover {
-    background: #FECACA;
-}
-
-:global([data-theme="dark"]) .fileUploadLabel {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .fileUploadLabel:hover {
-    border-color: var(--primary);
-    background: rgba(52, 211, 153, 0.1);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .fileClear {
-    background: rgba(248, 113, 113, 0.2);
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .fileClear:hover {
     background: rgba(248, 113, 113, 0.3);
 }
 
@@ -1096,21 +1018,21 @@
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    background: #FEF3C7;
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid #F59E0B;
     border-radius: var(--radius-md);
     margin-bottom: 1.5rem;
 }
 
 .warningBox svg {
-    color: #92400E;
+    color: #FCD34D;
     flex-shrink: 0;
 }
 
 .warningBox p {
     margin: 0 0 0.25rem 0;
     font-size: 0.875rem;
-    color: #92400E;
+    color: #FCD34D;
 }
 
 .warningBox p:last-child {
@@ -1119,12 +1041,12 @@
 
 /* Input error */
 .inputError {
-    border-color: #EF4444 !important;
+    border-color: #F87171 !important;
 }
 
 .errorText {
     font-size: 0.75rem;
-    color: #EF4444;
+    color: #F87171;
     margin-top: 0.25rem;
 }
 
@@ -1139,7 +1061,7 @@
     padding: 1rem 1.25rem;
     background: var(--surface);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 1000;
     animation: slideIn 0.3s ease-out;
 }
@@ -1175,7 +1097,7 @@
 }
 
 .toast button:hover {
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--surface-hover);
     color: var(--text-main);
 }
 
@@ -1184,7 +1106,7 @@
 }
 
 .toastSuccess svg:first-child {
-    color: #10B981;
+    color: #34D399;
 }
 
 .toastError {
@@ -1192,7 +1114,7 @@
 }
 
 .toastError svg:first-child {
-    color: #EF4444;
+    color: #F87171;
 }
 
 .toastInfo {
@@ -1200,349 +1122,30 @@
 }
 
 .toastInfo svg:first-child {
-    color: #3B82F6;
+    color: #60A5FA;
 }
 
 /* ========================================
    DARK THEME
    ======================================== */
 
-:global([data-theme="dark"]) .syndicSection {
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(96, 165, 250, 0.1) 100%);
-    border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .syndicTitle {
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .syndicInfo h3 {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .syndicDetail {
-    background: var(--surface);
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .syndicDetail svg {
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .contractsSection {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .searchInput {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .searchInput::placeholder {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .filterSelect {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .table th {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .table td {
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .tableRow:hover {
-    background-color: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .rowReglementaire {
-    border-left-color: #60A5FA;
-}
-
 /* Badges dark theme */
-:global([data-theme="dark"]) .badgeActif {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .badgeRenouveler {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .badgeResilie {
-    background: rgba(148, 163, 184, 0.2);
-    color: #94A3B8;
-}
-
-:global([data-theme="dark"]) .badgeBrouillon {
-    background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .badgeReglementaire {
-    background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
-}
 
 /* Actions dark theme */
-:global([data-theme="dark"]) .actionsBtn {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .actionsBtn:hover {
-    background: var(--surface-hover);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .dropdownMenu {
-    background: var(--surface);
-    border-color: var(--border);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-:global([data-theme="dark"]) .dropdownMenu button {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .dropdownMenu button:hover {
-    background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .dangerAction {
-    color: #F87171 !important;
-}
-
-:global([data-theme="dark"]) .dangerAction:hover {
-    background: rgba(248, 113, 113, 0.15) !important;
-}
 
 /* Empty state dark theme */
-:global([data-theme="dark"]) .emptyState {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .emptyState p {
-    color: var(--text-secondary);
-}
 
 /* Modal dark theme */
-:global([data-theme="dark"]) .modalOverlay {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .modal {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .modalHeader {
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .modalHeader h2 {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .modalClose {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .modalClose:hover {
-    background: var(--surface-hover);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .formGroup label {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .formGroup input,
-:global([data-theme="dark"]) .formGroup select,
-:global([data-theme="dark"]) .formGroup textarea {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .formGroup input::placeholder,
-:global([data-theme="dark"]) .formGroup textarea::placeholder {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .formGroup input:focus,
-:global([data-theme="dark"]) .formGroup select:focus,
-:global([data-theme="dark"]) .formGroup textarea:focus {
-    border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .modalActions {
-    border-color: var(--border);
-}
 
 /* Warning box dark theme */
-:global([data-theme="dark"]) .warningBox {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.5);
-}
-
-:global([data-theme="dark"]) .warningBox svg {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .warningBox p {
-    color: #FCD34D;
-}
 
 /* Toast dark theme */
-:global([data-theme="dark"]) .toast {
-    background: var(--surface);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-:global([data-theme="dark"]) .toast span {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .toast button {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .toast button:hover {
-    background: var(--surface-hover);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .toastSuccess {
-    border-left-color: #34D399;
-}
-
-:global([data-theme="dark"]) .toastSuccess svg:first-child {
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .toastError {
-    border-left-color: #F87171;
-}
-
-:global([data-theme="dark"]) .toastError svg:first-child {
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .toastInfo {
-    border-left-color: #60A5FA;
-}
-
-:global([data-theme="dark"]) .toastInfo svg:first-child {
-    color: #60A5FA;
-}
 
 /* Input error dark theme */
-:global([data-theme="dark"]) .inputError {
-    border-color: #F87171 !important;
-}
-
-:global([data-theme="dark"]) .errorText {
-    color: #F87171;
-}
 
 /* KPI dark theme */
-:global([data-theme="dark"]) .kpiCard {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .kpiIconSuccess {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .kpiIconWarning {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .kpiIconPrimary {
-    background: rgba(52, 211, 153, 0.15);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .kpiValue {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .kpiLabel {
-    color: var(--text-secondary);
-}
 
 /* KPI Syndic dark theme */
-:global([data-theme="dark"]) .kpiSyndicCard {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .kpiSyndicActif {
-    border-color: #34D399;
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.02) 100%);
-}
-
-:global([data-theme="dark"]) .kpiSyndicWarning {
-    border-color: #FBBF24;
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 191, 36, 0.02) 100%);
-}
-
-:global([data-theme="dark"]) .kpiSyndicResilie {
-    border-color: #6B7280;
-    background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(107, 114, 128, 0.02) 100%);
-}
-
-:global([data-theme="dark"]) .kpiSyndicIcon {
-    background: rgba(52, 211, 153, 0.15);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .kpiSyndicHeader h3 {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .kpiSyndicActif .kpiSyndicStatus {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .kpiSyndicWarning .kpiSyndicStatus {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .kpiSyndicResilie .kpiSyndicStatus {
-    background: rgba(107, 114, 128, 0.2);
-    color: #9CA3AF;
-}
-
-:global([data-theme="dark"]) .kpiSyndicName {
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .kpiSyndicMeta span {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .kpiSyndicMeta svg {
-    color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .kpiSyndicWarning .kpiSyndicDays {
-    color: #FCD34D !important;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

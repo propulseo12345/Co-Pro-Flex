@@ -98,7 +98,7 @@
 }
 
 .dropdownItem:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 .dropdownItem:focus-visible {
@@ -142,7 +142,7 @@
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   color: var(--text-main);
-  background: var(--surface);
+  background: var(--bg-secondary);
 }
 
 .customInput:focus {
@@ -187,19 +187,4 @@
 .cancelButton:hover {
   color: var(--text-secondary);
   background: var(--bg-secondary);
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .dropdown {
-  background: var(--surface);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .dropdownItem:hover {
-  background: var(--bg-tertiary);
-}
-
-:global([data-theme="dark"]) .customInput {
-  background: var(--bg-secondary);
-  border-color: var(--border);
 }

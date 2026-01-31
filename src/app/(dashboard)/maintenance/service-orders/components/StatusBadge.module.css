@@ -24,285 +24,149 @@
 
 /* Statut Brouillon */
 .statutBrouillon {
-  background-color: #F3F4F6;
-  color: #6B7280;
+  background-color: #9CA3AF;
+  color: #9CA3AF;
 }
 
 .statutBrouillon:hover {
-  background-color: #E5E7EB;
+  background-color: rgba(107, 114, 128, 0.3);
 }
 
 /* Statut À envoyer */
 .statutAEnvoyer {
-  background-color: #FEF3C7;
-  color: #92400E;
+  background-color: #FCD34D;
+  color: #FCD34D;
 }
 
 .statutAEnvoyer:hover {
-  background-color: #FDE68A;
+  background-color: rgba(245, 158, 11, 0.3);
 }
 
 /* Statut Envoyé */
 .statutEnvoye {
-  background-color: #DBEAFE;
-  color: #1E40AF;
+  background-color: #93C5FD;
+  color: #93C5FD;
 }
 
 .statutEnvoye:hover {
-  background-color: #BFDBFE;
+  background-color: rgba(59, 130, 246, 0.3);
 }
 
 /* Statut Accepté */
 .statutAccepte {
-  background-color: #D1FAE5;
-  color: #065F46;
+  background-color: #6EE7B7;
+  color: #6EE7B7;
 }
 
 .statutAccepte:hover {
-  background-color: #A7F3D0;
+  background-color: rgba(16, 185, 129, 0.3);
 }
 
 /* Statut Refusé */
 .statutRefuse {
-  background-color: #FEE2E2;
-  color: #991B1B;
+  background-color: #FCA5A5;
+  color: #FCA5A5;
 }
 
 .statutRefuse:hover {
-  background-color: #FECACA;
+  background-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Statut Planifié */
 .statutPlanifie {
-  background-color: #EDE9FE;
-  color: #6D28D9;
+  background-color: #C4B5FD;
+  color: #C4B5FD;
 }
 
 .statutPlanifie:hover {
-  background-color: #DDD6FE;
+  background-color: rgba(139, 92, 246, 0.3);
 }
 
 /* Statut En cours */
 .statutEnCours {
-  background-color: #FFEDD5;
-  color: #C2410C;
+  background-color: #FDBA74;
+  color: #FDBA74;
 }
 
 .statutEnCours:hover {
-  background-color: #FED7AA;
+  background-color: rgba(249, 115, 22, 0.3);
 }
 
 /* Statut Réalisé */
 .statutRealise {
-  background-color: #DCFCE7;
-  color: #166534;
+  background-color: #86EFAC;
+  color: #86EFAC;
 }
 
 .statutRealise:hover {
-  background-color: #BBF7D0;
+  background-color: rgba(34, 197, 94, 0.3);
 }
 
 /* Statut Facturé */
 .statutFacture {
-  background-color: #E0E7FF;
-  color: #4338CA;
+  background-color: #A5B4FC;
+  color: #A5B4FC;
 }
 
 .statutFacture:hover {
-  background-color: #C7D2FE;
+  background-color: rgba(99, 102, 241, 0.3);
 }
 
 /* Statut Payé */
 .statutPaye {
-  background-color: #CCFBF1;
-  color: #0F766E;
+  background-color: #5EEAD4;
+  color: #5EEAD4;
 }
 
 .statutPaye:hover {
-  background-color: #99F6E4;
+  background-color: rgba(20, 184, 166, 0.3);
 }
 
 /* Statut Clôturé */
 .statutCloture {
-  background-color: #D1FAE5;
-  color: #065F46;
+  background-color: #6EE7B7;
+  color: #6EE7B7;
 }
 
 .statutCloture:hover {
-  background-color: #A7F3D0;
+  background-color: rgba(5, 150, 105, 0.3);
 }
 
 /* Statut Annulé */
 .statutAnnule {
-  background-color: #FEE2E2;
-  color: #991B1B;
+  background-color: #FCA5A5;
+  color: #FCA5A5;
 }
 
 .statutAnnule:hover {
-  background-color: #FECACA;
+  background-color: rgba(220, 38, 38, 0.3);
 }
 
 /* Legacy aliases */
 .statutEnAttentePrestataire {
-  background-color: #DBEAFE;
-  color: #1E40AF;
+  background-color: #93C5FD;
+  color: #93C5FD;
 }
 
 .statutEnAttentePrestataire:hover {
-  background-color: #BFDBFE;
+  background-color: rgba(59, 130, 246, 0.3);
 }
 
 .statutInterventionProgrammee {
-  background-color: #EDE9FE;
-  color: #6D28D9;
+  background-color: #C4B5FD;
+  color: #C4B5FD;
 }
 
 .statutInterventionProgrammee:hover {
-  background-color: #DDD6FE;
+  background-color: rgba(139, 92, 246, 0.3);
 }
 
 .statutInterventionRealisee {
-  background-color: #DCFCE7;
-  color: #166534;
+  background-color: #86EFAC;
+  color: #86EFAC;
 }
 
 .statutInterventionRealisee:hover {
-  background-color: #BBF7D0;
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .statutBrouillon {
-  background-color: rgba(107, 114, 128, 0.2);
-  color: #9CA3AF;
-}
-
-:global([data-theme="dark"]) .statutBrouillon:hover {
-  background-color: rgba(107, 114, 128, 0.3);
-}
-
-:global([data-theme="dark"]) .statutAEnvoyer {
-  background-color: rgba(245, 158, 11, 0.2);
-  color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .statutAEnvoyer:hover {
-  background-color: rgba(245, 158, 11, 0.3);
-}
-
-:global([data-theme="dark"]) .statutEnvoye {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .statutEnvoye:hover {
-  background-color: rgba(59, 130, 246, 0.3);
-}
-
-:global([data-theme="dark"]) .statutAccepte {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .statutAccepte:hover {
-  background-color: rgba(16, 185, 129, 0.3);
-}
-
-:global([data-theme="dark"]) .statutRefuse {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: #FCA5A5;
-}
-
-:global([data-theme="dark"]) .statutRefuse:hover {
-  background-color: rgba(239, 68, 68, 0.3);
-}
-
-:global([data-theme="dark"]) .statutPlanifie {
-  background-color: rgba(139, 92, 246, 0.2);
-  color: #C4B5FD;
-}
-
-:global([data-theme="dark"]) .statutPlanifie:hover {
-  background-color: rgba(139, 92, 246, 0.3);
-}
-
-:global([data-theme="dark"]) .statutEnCours {
-  background-color: rgba(249, 115, 22, 0.2);
-  color: #FDBA74;
-}
-
-:global([data-theme="dark"]) .statutEnCours:hover {
-  background-color: rgba(249, 115, 22, 0.3);
-}
-
-:global([data-theme="dark"]) .statutRealise {
-  background-color: rgba(34, 197, 94, 0.2);
-  color: #86EFAC;
-}
-
-:global([data-theme="dark"]) .statutRealise:hover {
   background-color: rgba(34, 197, 94, 0.3);
 }
-
-:global([data-theme="dark"]) .statutFacture {
-  background-color: rgba(99, 102, 241, 0.2);
-  color: #A5B4FC;
-}
-
-:global([data-theme="dark"]) .statutFacture:hover {
-  background-color: rgba(99, 102, 241, 0.3);
-}
-
-:global([data-theme="dark"]) .statutPaye {
-  background-color: rgba(20, 184, 166, 0.2);
-  color: #5EEAD4;
-}
-
-:global([data-theme="dark"]) .statutPaye:hover {
-  background-color: rgba(20, 184, 166, 0.3);
-}
-
-:global([data-theme="dark"]) .statutCloture {
-  background-color: rgba(5, 150, 105, 0.2);
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .statutCloture:hover {
-  background-color: rgba(5, 150, 105, 0.3);
-}
-
-:global([data-theme="dark"]) .statutAnnule {
-  background-color: rgba(220, 38, 38, 0.2);
-  color: #FCA5A5;
-}
-
-:global([data-theme="dark"]) .statutAnnule:hover {
-  background-color: rgba(220, 38, 38, 0.3);
-}
-
 /* Dark mode - Legacy aliases */
-:global([data-theme="dark"]) .statutEnAttentePrestataire {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .statutEnAttentePrestataire:hover {
-  background-color: rgba(59, 130, 246, 0.3);
-}
-
-:global([data-theme="dark"]) .statutInterventionProgrammee {
-  background-color: rgba(139, 92, 246, 0.2);
-  color: #C4B5FD;
-}
-
-:global([data-theme="dark"]) .statutInterventionProgrammee:hover {
-  background-color: rgba(139, 92, 246, 0.3);
-}
-
-:global([data-theme="dark"]) .statutInterventionRealisee {
-  background-color: rgba(34, 197, 94, 0.2);
-  color: #86EFAC;
-}
-
-:global([data-theme="dark"]) .statutInterventionRealisee:hover {
-  background-color: rgba(34, 197, 94, 0.3);
-}

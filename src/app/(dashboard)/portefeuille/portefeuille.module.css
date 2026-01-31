@@ -71,7 +71,7 @@
 
 .kpiCard:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .kpiCard::before {
@@ -227,7 +227,7 @@
 }
 
 .filterButtonActive .filterBadge {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
   color: var(--primary);
 }
 
@@ -595,13 +595,4 @@
   .tableContainer {
     margin: 0 calc(var(--space-md) * -1);
   }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .kpiCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-:global([data-theme="dark"]) .filterButtonActive .filterBadge {
-  background: rgba(255, 255, 255, 0.9);
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useSearchParams } from 'next/navigation';
-import { Maximize2, Minimize2, Sun, Moon, Wifi, WifiOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Maximize2, Minimize2, Wifi, WifiOff, AlertCircle, Loader2 } from 'lucide-react';
 import { useAgProjectorPage } from '@/features/ag/hooks/useAgProjectorPage';
 import {
   ProjectorLoading,
@@ -22,14 +22,12 @@ export default function ProjectorPage() {
   const token = searchParams.get('token') || '';
 
   const {
-    theme,
     isFullscreen,
     data,
     syncStatus,
     displayState,
     lastSyncTime,
     toggleFullscreen,
-    toggleTheme,
     error,
   } = useAgProjectorPage({ agId, token });
 
@@ -96,7 +94,7 @@ export default function ProjectorPage() {
   };
 
   return (
-    <div className={styles.projectorContainer} data-theme={theme}>
+    <div className={styles.projectorContainer}>
       <div className={styles.projectorHeader}>
         <div className={styles.headerLeft}>
           <h2 className={styles.agTitle}>{data?.agTitle || 'Assemblée Générale'}</h2>
@@ -110,13 +108,6 @@ export default function ProjectorPage() {
       {renderContent()}
 
       <div className={styles.controlsBar}>
-        <button
-          onClick={toggleTheme}
-          className={styles.controlButton}
-          title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-        >
-          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
         <button
           onClick={toggleFullscreen}
           className={styles.controlButton}

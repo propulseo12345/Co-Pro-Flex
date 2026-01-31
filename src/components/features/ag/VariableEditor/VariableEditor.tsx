@@ -11,6 +11,7 @@ import {
     generateEcheancesDates
 } from '@/lib/constants/resolutions';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { FinancingScheduleEditor, type FinancingSchedule } from '../FinancingScheduleEditor';
 import { isValid, parseISO, format } from 'date-fns';
 import styles from './VariableEditor.module.css';
 
@@ -36,6 +37,10 @@ interface VariableEditorProps {
     onModaliteChange?: (modalite: string, echeances: string) => void;
     // Nom du gestionnaire/syndic (pour l'option secrétaire de séance)
     gestionnaireNom?: string;
+    // Financing schedule support
+    financingSchedule?: FinancingSchedule | null;
+    onFinancingScheduleChange?: (schedule: FinancingSchedule) => void;
+    totalBudget?: number;
 }
 
 export default function VariableEditor({
@@ -49,7 +54,10 @@ export default function VariableEditor({
     presences = {},
     exercice = (new Date().getFullYear() + 1).toString(),
     onModaliteChange,
-    gestionnaireNom = ''
+    gestionnaireNom = '',
+    financingSchedule = null,
+    onFinancingScheduleChange,
+    totalBudget = 0,
 }: VariableEditorProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
@@ -425,7 +433,6 @@ export default function VariableEditor({
 
             // ===== Modalités de paiement =====
             case 'modalites_paiement':
-            case 'modalites_paiement_budget':
                 return (
                     <select
                         value={variableValue}
@@ -438,6 +445,36 @@ export default function VariableEditor({
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
+                );
+
+            // ===== Modalités de paiement budget avec échéancier =====
+            case 'modalites_paiement_budget':
+                return (
+                    <div className={styles.financingEditorWrapper}>
+                        <select
+                            value={variableValue}
+                            onChange={(e) => handleModaliteChange(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className={styles.selectInput}
+                        >
+                            <option value="">Sélectionner une modalité...</option>
+                            {MODALITES_PAIEMENT_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
+
+                        {/* Show FinancingScheduleEditor when a frequency is selected */}
+                        {variableValue && onFinancingScheduleChange && (
+                            <div className={styles.scheduleEditorContainer}>
+                                <FinancingScheduleEditor
+                                    value={financingSchedule}
+                                    onChange={onFinancingScheduleChange}
+                                    totalBudget={totalBudget}
+                                    exerciceYear={parseInt(exercice) || new Date().getFullYear() + 1}
+                                />
+                            </div>
+                        )}
+                    </div>
                 );
 
             // ===== Textarea (texte long) =====

@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { Plus, ArrowLeft, ArrowRight, CheckCircle, ListChecks, AlertTriangle } from 'lucide-react';
+import { Plus, ArrowLeft, ArrowRight, CheckCircle, ListChecks, AlertTriangle, Info } from 'lucide-react';
+import Link from 'next/link';
 import { MAJORITES, type MajorityType, type TypeAG } from '@/lib/constants/resolutions';
 import Stepper from '@/components/features/ag/Stepper';
 import {
@@ -10,6 +11,7 @@ import {
   BibliothequeResolutions,
   ResolutionsReorderList,
   OrdreDuJourPreview,
+  InlineResolutionEditor,
   type Resolution
 } from '@/components/features/ag';
 import { MOCK_CONTRAT_SYNDIC } from '@/data/mock';
@@ -123,6 +125,18 @@ export default function AgendaPage() {
             </button>
           </div>
 
+          {/* Avertissement si exercice comptable non configuré */}
+          {!page.accountingPeriod && (
+            <div className={styles.infoMessage}>
+              <Info size={20} />
+              <span>
+                <strong>Exercice comptable non configuré</strong> pour l'année {page.agFormData?.budgetExercice || new Date().getFullYear() + 1}.
+                Les dates de l'exercice ne seront pas pré-remplies automatiquement.{' '}
+                <Link href="/finance/budgets">Configurer l'exercice dans Finance</Link>
+              </span>
+            </div>
+          )}
+
           {page.showSuccessMessage && page.successMessageCount > 0 && (
             <div className={styles.successMessage}>
               <CheckCircle size={20} />
@@ -149,6 +163,7 @@ export default function AgendaPage() {
             resolutions={page.resolutions}
             onReorder={page.handleReorder}
             onDelete={page.handleDelete}
+            onEdit={page.handleEditResolution}
             renderVariables={renderVariables}
           />
 
@@ -179,6 +194,27 @@ export default function AgendaPage() {
       )}
 
       {page.showCustomModal && <CustomModal onSave={page.handleAddCustom} onClose={() => page.setShowCustomModal(false)} />}
+
+      {/* Modal d'édition inline */}
+      {page.editingResolution && (
+        <div className={styles.modalOverlay} onClick={page.handleCancelEditResolution}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <h2>Modifier la résolution</h2>
+            <InlineResolutionEditor
+              resolution={{
+                id: page.editingResolution.id,
+                titre: page.editingResolution.titre,
+                texte: page.editingResolution.texte,
+                majorite: page.editingResolution.majorite,
+              }}
+              onSave={page.handleUpdateResolution}
+              onCancel={page.handleCancelEditResolution}
+              isLoading={page.isUpdatingResolution}
+              error={page.updateResolutionError}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

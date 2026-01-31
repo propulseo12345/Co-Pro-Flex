@@ -202,7 +202,7 @@
 
 .folderCard:hover {
   border-color: var(--folder-color, var(--primary));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
 
 .folderIconWrapper {
@@ -212,7 +212,7 @@
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--folder-color, #6B7280) 10%, transparent);
+  background: color-mix(in srgb, var(--folder-color, #6B7280) 15%, transparent);
   color: var(--folder-color, #6B7280);
   flex-shrink: 0;
 }
@@ -282,12 +282,12 @@
 
 .dropZone:hover {
   border-color: var(--primary);
-  background: rgba(37, 99, 235, 0.02);
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .dropZoneActive {
   border-color: var(--primary);
-  background: rgba(37, 99, 235, 0.05);
+  background: rgba(37, 99, 235, 0.1);
   border-style: solid;
 }
 
@@ -335,7 +335,7 @@
 
 .statCardActive {
   border-color: var(--cat-color, var(--primary));
-  background: color-mix(in srgb, var(--cat-color, var(--primary)) 8%, var(--surface));
+  background: color-mix(in srgb, var(--cat-color, var(--primary)) 15%, var(--surface));
 }
 
 .statCount {
@@ -478,7 +478,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   z-index: 100;
   max-height: 400px;
   overflow-y: auto;
@@ -1212,26 +1212,8 @@
 }
 
 /* Dark mode adjustments */
-[data-theme="dark"] .dropZone:hover {
-  background: rgba(37, 99, 235, 0.05);
-}
-
-[data-theme="dark"] .dropZoneActive {
-  background: rgba(37, 99, 235, 0.1);
-}
-
-[data-theme="dark"] .statCardActive {
-  background: color-mix(in srgb, var(--cat-color, var(--primary)) 15%, var(--surface));
-}
 
 /* Dark mode folder adjustments */
-[data-theme="dark"] .folderIconWrapper {
-  background: color-mix(in srgb, var(--folder-color, #6B7280) 15%, transparent);
-}
-
-[data-theme="dark"] .folderCard:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -1331,17 +1313,6 @@
 }
 
 /* Dark mode search adjustments */
-[data-theme="dark"] .searchDropdown {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .advancedFilters {
-  background: var(--surface);
-}
-
-[data-theme="dark"] .filterChip:hover {
-  background: var(--bg-secondary);
-}
 
 /* ============================================== */
 /* Document Linking Styles                        */
@@ -1568,7 +1539,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
 .linkModalHeader {
@@ -1660,7 +1631,7 @@
 /* Auto-detection section */
 .linkDetection {
   padding: 1rem;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
   border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: 10px;
   margin-bottom: 1.5rem;
@@ -1859,13 +1830,6 @@
 }
 
 /* Dark mode link modal */
-[data-theme="dark"] .linkModal {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .linkDetection {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-}
 
 /* Responsive link modal */
 @media (max-width: 640px) {
@@ -1934,7 +1898,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: var(--bg-secondary);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
 }
 
@@ -2070,14 +2034,6 @@
 }
 
 /* Dark mode adjustments */
-[data-theme="dark"] .versioningAlertsCard {
-  background: var(--surface);
-  border-color: rgba(239, 68, 68, 0.4);
-}
-
-[data-theme="dark"] .versioningAlertItem {
-  background: rgba(0, 0, 0, 0.2);
-}
 
 /* ============================================================================
    CONNECTION STATUS BADGE
@@ -2102,14 +2058,6 @@
 .connectionBadge[data-connected="false"] {
   background: rgba(245, 158, 11, 0.1);
   color: #F59E0B;
-}
-
-[data-theme="dark"] .connectionBadge[data-connected="true"] {
-  background: rgba(16, 185, 129, 0.15);
-}
-
-[data-theme="dark"] .connectionBadge[data-connected="false"] {
-  background: rgba(245, 158, 11, 0.15);
 }
 
 /* Responsive */

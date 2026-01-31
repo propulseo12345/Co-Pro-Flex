@@ -282,7 +282,7 @@
   width: 100%;
   min-height: 500px;
   border: none;
-  background: #f5f5f5;
+  background: #1a1a1a;
 }
 
 .previewFooter {
@@ -400,23 +400,9 @@
   position: absolute;
   bottom: -2px;
   right: -2px;
-  background: white;
+  background: var(--surface);
   border-radius: 50%;
 }
-
-/* Dark mode */
-[data-theme="dark"] .container {
-  background: var(--surface);
-}
-
-[data-theme="dark"] .previewFrame {
-  background: #1a1a1a;
-}
-
-[data-theme="dark"] .quickBtn .checkIcon {
-  background: var(--surface);
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .actions {

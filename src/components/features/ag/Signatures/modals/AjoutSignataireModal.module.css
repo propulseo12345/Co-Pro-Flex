@@ -69,10 +69,10 @@
   align-items: flex-start;
   gap: var(--spacing-2);
   padding: var(--spacing-3);
-  background: var(--color-error-50);
+  background: var(--color-error-900);
   border: 1px solid var(--color-error-200);
   border-radius: var(--radius-md);
-  color: var(--color-error-700);
+  color: var(--color-error-200);
 }
 
 .errors svg {
@@ -124,7 +124,7 @@
 .field select:focus {
   outline: none;
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px var(--color-primary-100);
+  box-shadow: 0 0 0 3px var(--color-primary-900);
 }
 
 .field input:disabled,
@@ -218,16 +218,4 @@
 .submitBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Dark mode */
-[data-theme="dark"] .errors {
-  background: var(--color-error-900);
-  border-color: var(--color-error-700);
-  color: var(--color-error-200);
-}
-
-[data-theme="dark"] .field input:focus,
-[data-theme="dark"] .field select:focus {
-  box-shadow: 0 0 0 3px var(--color-primary-900);
 }

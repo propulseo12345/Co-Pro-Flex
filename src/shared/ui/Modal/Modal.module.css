@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-md);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   animation: fadeIn var(--transition-fast) ease-out;
 }
@@ -103,7 +103,7 @@
 }
 
 .closeButton:hover {
-  background: var(--bg-secondary);
+  background: var(--surface-hover);
   color: var(--text-main);
 }
 
@@ -230,13 +230,4 @@
     max-width: none;
     width: 100%;
   }
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .overlay {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .closeButton:hover {
-  background: var(--surface-hover);
 }

@@ -1,151 +1,284 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+/**
+ * Page de saisie des votes par correspondance pour un copropriétaire spécifique
+ * MIGRATION 2026-01-31: Source de vérité = Supabase uniquement
+ */
+
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Check, Save, FileText } from 'lucide-react';
-import { VoteCorrespondance, VoteResolution, ChoixVote, Coproprietaire, Lot } from '@/types';
+import { ArrowLeft, Check, Save } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import styles from './votes-correspondance.module.css';
 
-// Mock data
-const MOCK_COPROPRIETAIRES: Coproprietaire[] = [
-    { id: 'cp1', nom: 'Dupont', prenom: 'Jean', email: 'jean.dupont@email.com', telephone: '0601020304' },
-    { id: 'cp2', nom: 'Martin', prenom: 'Marie', email: 'marie.martin@email.com', telephone: '0602030405' },
-    { id: 'cp3', nom: 'Bernard', prenom: 'Pierre', email: 'pierre.bernard@email.com', telephone: '0603040506' },
-    { id: 'cp4', nom: 'Dubois', prenom: 'Sophie', email: 'sophie.dubois@email.com', telephone: '0604050607' },
-];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
-const MOCK_LOTS: Lot[] = [
-    { id: 'lot1', numero: 'A101', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp1', tantiemesGeneraux: 100 },
-    { id: 'lot2', numero: 'A102', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp2', tantiemesGeneraux: 120 },
-    { id: 'lot3', numero: 'B201', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp3', tantiemesGeneraux: 150 },
-    { id: 'lot4', numero: 'B202', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp4', tantiemesGeneraux: 130 },
-];
+function isValidUUID(str: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+}
+
+type VoteChoice = 'POUR' | 'CONTRE' | 'ABSTENTION' | 'NON_VOTE';
 
 interface Resolution {
     id: string;
     titre: string;
     texte: string;
+    numero: number;
 }
 
-export default function VotesCorrespondancePage() {
+interface CoproprietaireData {
+    id: string;
+    full_name: string;
+    email: string | null;
+    tantiemes: number;
+}
+
+interface VoteState {
+    resolutionId: string;
+    choix: VoteChoice;
+    dateVote: string;
+}
+
+export default function VotesCorrespondanceCoproPage() {
     const router = useRouter();
     const params = useParams();
     const agId = params.id as string;
-    const coproId = params.coproId as string;
+    const coproprietaireId = params.coproId as string;
 
     const [resolutions, setResolutions] = useState<Resolution[]>([]);
-    const [voteCorrespondance, setVoteCorrespondance] = useState<VoteCorrespondance | null>(null);
+    const [copro, setCopro] = useState<CoproprietaireData | null>(null);
+    const [votes, setVotes] = useState<VoteState[]>([]);
+    const [isValidated, setIsValidated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [savedMessage, setSavedMessage] = useState(false);
 
-    const copro = MOCK_COPROPRIETAIRES.find(c => c.id === coproId);
-    const lots = MOCK_LOTS.filter(l => l.coproprietaireId === coproId);
-    const totalTantiemes = lots.reduce((sum, lot) => sum + lot.tantiemesGeneraux, 0);
-
-    // Charger les résolutions de l'AG
+    // Load data from Supabase
     useEffect(() => {
-        const savedResolutions = localStorage.getItem(`ag-resolutions-${agId}`);
-        if (savedResolutions) {
-            setResolutions(JSON.parse(savedResolutions));
+        if (!isValidUUID(agId) || !isValidUUID(coproprietaireId)) {
+            setIsLoading(false);
+            return;
         }
-    }, [agId]);
 
-    // Charger ou créer le vote par correspondance
-    useEffect(() => {
-        const saved = localStorage.getItem(`vote-correspondance-${agId}-${coproId}`);
-        if (saved) {
-            setVoteCorrespondance(JSON.parse(saved));
-        } else {
-            // Créer un nouveau vote par correspondance
-            const nouveauVote: VoteCorrespondance = {
-                id: 'vote-' + Date.now(),
-                agId,
-                coproprietaireId: coproId,
-                votes: resolutions.map(res => ({
-                    resolutionId: res.id,
-                    choix: 'NON_VOTE' as ChoixVote,
-                    dateVote: ''
-                })),
-                dateEnregistrement: new Date().toISOString(),
-                statut: 'BROUILLON'
-            };
-            setVoteCorrespondance(nouveauVote);
-        }
-    }, [agId, coproId, resolutions]);
+        const loadData = async () => {
+            setIsLoading(true);
 
-    // Mettre à jour les votes quand les résolutions changent
-    useEffect(() => {
-        if (voteCorrespondance && resolutions.length > 0) {
-            const existingVoteIds = voteCorrespondance.votes.map(v => v.resolutionId);
-            const newResolutions = resolutions.filter(r => !existingVoteIds.includes(r.id));
+            try {
+                const supabase = createUntypedClient();
 
-            if (newResolutions.length > 0) {
-                setVoteCorrespondance({
-                    ...voteCorrespondance,
-                    votes: [
-                        ...voteCorrespondance.votes,
-                        ...newResolutions.map(res => ({
-                            resolutionId: res.id,
-                            choix: 'NON_VOTE' as ChoixVote,
-                            dateVote: ''
-                        }))
-                    ]
+                // 1. Load coproprietaire
+                const { data: coproData, error: coproError } = await supabase
+                    .from('coproprietaires')
+                    .select('id, full_name, email, tantiemes')
+                    .eq('id', coproprietaireId)
+                    .single();
+
+                if (coproError || !coproData) {
+                    console.error('[VotesCorrespondanceCoproPage] Coproprietaire not found:', coproError);
+                    setIsLoading(false);
+                    return;
+                }
+
+                setCopro(coproData);
+
+                // 2. Load resolutions for this AG
+                const { data: resolutionsData, error: resError } = await supabase
+                    .from('ag_resolutions')
+                    .select('id, title, description, resolution_number')
+                    .eq('ag_id', agId)
+                    .order('resolution_number', { ascending: true });
+
+                if (resError) {
+                    console.error('[VotesCorrespondanceCoproPage] Error loading resolutions:', resError);
+                }
+
+                const mappedResolutions: Resolution[] = (resolutionsData || []).map((r: {
+                    id: string;
+                    title: string;
+                    description: string | null;
+                    resolution_number: number;
+                }) => ({
+                    id: r.id,
+                    titre: r.title,
+                    texte: r.description || '',
+                    numero: r.resolution_number,
+                }));
+                setResolutions(mappedResolutions);
+
+                // 3. Load existing votes for this coproprietaire
+                const { data: existingVotes, error: votesError } = await supabase
+                    .from('ag_votes')
+                    .select('resolution_id, vote, updated_at')
+                    .eq('coproprietaire_id', coproprietaireId)
+                    .eq('vote_source', 'correspondence');
+
+                if (votesError) {
+                    console.error('[VotesCorrespondanceCoproPage] Error loading votes:', votesError);
+                }
+
+                // Map votes from DB
+                const voteMap: Record<string, { choix: VoteChoice; dateVote: string }> = {};
+                (existingVotes || []).forEach((v: { resolution_id: string; vote: string; updated_at: string }) => {
+                    const choix = mapVoteFromDB(v.vote);
+                    voteMap[v.resolution_id] = {
+                        choix,
+                        dateVote: v.updated_at,
+                    };
                 });
+
+                // Build initial votes state
+                const initialVotes: VoteState[] = mappedResolutions.map(res => ({
+                    resolutionId: res.id,
+                    choix: voteMap[res.id]?.choix || 'NON_VOTE',
+                    dateVote: voteMap[res.id]?.dateVote || '',
+                }));
+
+                setVotes(initialVotes);
+
+                // Check if already validated (all votes cast)
+                const allVoted = initialVotes.every(v => v.choix !== 'NON_VOTE');
+                setIsValidated(allVoted && initialVotes.length > 0);
+
+            } catch (err) {
+                console.error('[VotesCorrespondanceCoproPage] Error:', err);
+            } finally {
+                setIsLoading(false);
             }
-        }
-    }, [resolutions, voteCorrespondance]);
+        };
 
-    const handleVoteChange = (resolutionId: string, choix: ChoixVote) => {
-        if (!voteCorrespondance) return;
+        loadData();
+    }, [agId, coproprietaireId]);
 
-        setVoteCorrespondance({
-            ...voteCorrespondance,
-            votes: voteCorrespondance.votes.map(vote =>
+    const mapVoteFromDB = (vote: string): VoteChoice => {
+        const mapping: Record<string, VoteChoice> = {
+            'for': 'POUR',
+            'against': 'CONTRE',
+            'abstention': 'ABSTENTION',
+        };
+        return mapping[vote] || 'NON_VOTE';
+    };
+
+    const mapVoteToDB = (choix: VoteChoice): string | null => {
+        const mapping: Record<string, string> = {
+            'POUR': 'for',
+            'CONTRE': 'against',
+            'ABSTENTION': 'abstention',
+        };
+        return mapping[choix] || null;
+    };
+
+    const handleVoteChange = useCallback((resolutionId: string, choix: VoteChoice) => {
+        if (isValidated) return;
+
+        setVotes(prev =>
+            prev.map(vote =>
                 vote.resolutionId === resolutionId
                     ? { ...vote, choix, dateVote: new Date().toISOString() }
                     : vote
-            ),
-            dateModification: new Date().toISOString()
-        });
-    };
+            )
+        );
+    }, [isValidated]);
 
-    const handleSave = () => {
-        if (!voteCorrespondance) return;
+    const handleSave = useCallback(async () => {
+        if (!isValidUUID(agId) || !copro) return;
 
-        localStorage.setItem(`vote-correspondance-${agId}-${coproId}`, JSON.stringify(voteCorrespondance));
-        setSavedMessage(true);
-        setTimeout(() => setSavedMessage(false), 3000);
-    };
+        setIsSaving(true);
 
-    const handleValider = () => {
-        if (!voteCorrespondance) return;
+        try {
+            const supabase = createUntypedClient();
 
-        // Vérifier que tous les votes sont renseignés
-        const votesNonRenseignes = voteCorrespondance.votes.filter(v => v.choix === 'NON_VOTE').length;
+            // Build votes array for RPC
+            const votesToSave = votes
+                .filter(v => v.choix !== 'NON_VOTE')
+                .map(v => ({
+                    resolution_id: v.resolutionId,
+                    vote: mapVoteToDB(v.choix),
+                    tantiemes: copro.tantiemes,
+                }));
+
+            const { data, error } = await supabase.rpc('save_votes_correspondance', {
+                p_ag_id: agId,
+                p_coproprietaire_id: coproprietaireId,
+                p_votes: votesToSave,
+                p_status: 'draft',
+            });
+
+            if (error) {
+                console.error('[VotesCorrespondanceCoproPage] Error saving:', error);
+                alert('Erreur lors de la sauvegarde');
+            } else if (data?.success) {
+                setSavedMessage(true);
+                setTimeout(() => setSavedMessage(false), 3000);
+            }
+        } catch (err) {
+            console.error('[VotesCorrespondanceCoproPage] Save error:', err);
+            alert('Erreur lors de la sauvegarde');
+        } finally {
+            setIsSaving(false);
+        }
+    }, [agId, coproprietaireId, copro, votes]);
+
+    const handleValider = useCallback(async () => {
+        if (!isValidUUID(agId) || !copro) return;
+
+        // Check incomplete votes
+        const votesNonRenseignes = votes.filter(v => v.choix === 'NON_VOTE').length;
         if (votesNonRenseignes > 0) {
             if (!confirm(`${votesNonRenseignes} vote(s) n'est/ne sont pas renseigné(s). Voulez-vous quand même valider ?`)) {
                 return;
             }
         }
 
-        const voteValide = {
-            ...voteCorrespondance,
-            statut: 'VALIDE' as const,
-            dateModification: new Date().toISOString()
-        };
+        setIsSaving(true);
 
-        localStorage.setItem(`vote-correspondance-${agId}-${coproId}`, JSON.stringify(voteValide));
-        setVoteCorrespondance(voteValide);
-        alert('Vote par correspondance validé avec succès !');
-        router.back();
-    };
+        try {
+            const supabase = createUntypedClient();
 
-    const getVoteForResolution = (resolutionId: string): VoteResolution | undefined => {
-        return voteCorrespondance?.votes.find(v => v.resolutionId === resolutionId);
-    };
+            // Build votes array for RPC
+            const votesToSave = votes
+                .filter(v => v.choix !== 'NON_VOTE')
+                .map(v => ({
+                    resolution_id: v.resolutionId,
+                    vote: mapVoteToDB(v.choix),
+                    tantiemes: copro.tantiemes,
+                }));
 
-    const votesComplets = voteCorrespondance?.votes.filter(v => v.choix !== 'NON_VOTE').length || 0;
+            const { data, error } = await supabase.rpc('save_votes_correspondance', {
+                p_ag_id: agId,
+                p_coproprietaire_id: coproprietaireId,
+                p_votes: votesToSave,
+                p_status: 'validated',
+            });
+
+            if (error) {
+                console.error('[VotesCorrespondanceCoproPage] Error validating:', error);
+                alert('Erreur lors de la validation');
+            } else if (data?.success) {
+                setIsValidated(true);
+                alert('Vote par correspondance validé avec succès !');
+                router.back();
+            }
+        } catch (err) {
+            console.error('[VotesCorrespondanceCoproPage] Validate error:', err);
+            alert('Erreur lors de la validation');
+        } finally {
+            setIsSaving(false);
+        }
+    }, [agId, coproprietaireId, copro, votes, router]);
+
+    const votesComplets = votes.filter(v => v.choix !== 'NON_VOTE').length;
     const totalVotes = resolutions.length;
     const progression = totalVotes > 0 ? Math.round((votesComplets / totalVotes) * 100) : 0;
+
+    if (isLoading) {
+        return (
+            <div className="container">
+                <p>Chargement...</p>
+            </div>
+        );
+    }
 
     if (!copro) {
         return (
@@ -165,7 +298,7 @@ export default function VotesCorrespondancePage() {
                 <div>
                     <h1 className={styles.title}>Vote par correspondance</h1>
                     <p className={styles.subtitle}>
-                        {copro.prenom} {copro.nom} - {totalTantiemes} tantièmes
+                        {copro.full_name} - {copro.tantiemes} tantièmes
                     </p>
                 </div>
             </div>
@@ -183,7 +316,7 @@ export default function VotesCorrespondancePage() {
             </div>
 
             {/* Statut */}
-            {voteCorrespondance?.statut === 'VALIDE' && (
+            {isValidated && (
                 <div className={styles.valideBanner}>
                     <Check size={20} aria-hidden="true" />
                     <span>Ce vote par correspondance a été validé</span>
@@ -200,7 +333,7 @@ export default function VotesCorrespondancePage() {
             {/* Liste des résolutions */}
             <div className={styles.resolutionsList}>
                 {resolutions.map((resolution, index) => {
-                    const vote = getVoteForResolution(resolution.id);
+                    const vote = votes.find(v => v.resolutionId === resolution.id);
                     const isVoted = vote && vote.choix !== 'NON_VOTE';
 
                     return (
@@ -219,7 +352,7 @@ export default function VotesCorrespondancePage() {
                                 <button
                                     className={`${styles.voteButton} ${styles.votePour} ${vote?.choix === 'POUR' ? styles.voteButtonActive : ''}`}
                                     onClick={() => handleVoteChange(resolution.id, 'POUR')}
-                                    disabled={voteCorrespondance?.statut === 'VALIDE'}
+                                    disabled={isValidated || isSaving}
                                 >
                                     <Check size={16} aria-hidden="true" />
                                     Pour
@@ -227,7 +360,7 @@ export default function VotesCorrespondancePage() {
                                 <button
                                     className={`${styles.voteButton} ${styles.voteContre} ${vote?.choix === 'CONTRE' ? styles.voteButtonActive : ''}`}
                                     onClick={() => handleVoteChange(resolution.id, 'CONTRE')}
-                                    disabled={voteCorrespondance?.statut === 'VALIDE'}
+                                    disabled={isValidated || isSaving}
                                 >
                                     ✕
                                     Contre
@@ -235,7 +368,7 @@ export default function VotesCorrespondancePage() {
                                 <button
                                     className={`${styles.voteButton} ${styles.voteAbstention} ${vote?.choix === 'ABSTENTION' ? styles.voteButtonActive : ''}`}
                                     onClick={() => handleVoteChange(resolution.id, 'ABSTENTION')}
-                                    disabled={voteCorrespondance?.statut === 'VALIDE'}
+                                    disabled={isValidated || isSaving}
                                 >
                                     −
                                     Abstention
@@ -253,15 +386,15 @@ export default function VotesCorrespondancePage() {
             </div>
 
             {/* Actions */}
-            {voteCorrespondance?.statut !== 'VALIDE' && (
+            {!isValidated && (
                 <div className={styles.actions}>
-                    <button onClick={handleSave} className="btn btn-secondary">
+                    <button onClick={handleSave} className="btn btn-secondary" disabled={isSaving}>
                         <Save size={16} aria-hidden="true" />
-                        Sauvegarder le brouillon
+                        {isSaving ? 'Sauvegarde...' : 'Sauvegarder le brouillon'}
                     </button>
-                    <button onClick={handleValider} className="btn btn-primary">
+                    <button onClick={handleValider} className="btn btn-primary" disabled={isSaving}>
                         <Check size={16} aria-hidden="true" />
-                        Valider le vote
+                        {isSaving ? 'Validation...' : 'Valider le vote'}
                     </button>
                 </div>
             )}

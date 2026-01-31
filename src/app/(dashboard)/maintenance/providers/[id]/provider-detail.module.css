@@ -20,7 +20,7 @@
 
 .backLink:hover {
     color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.1);
 }
 
 /* En-tête */
@@ -75,7 +75,7 @@
 
 .categorieBadge {
     padding: 0.25rem 0.75rem;
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--bg-secondary);
     color: var(--text-secondary);
     border-radius: var(--radius-full);
     font-size: 0.6875rem;
@@ -92,8 +92,8 @@
 
 .badge {
     padding: 0.25rem 0.75rem;
-    background: var(--primary-light);
-    color: var(--primary-dark, var(--primary));
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--primary);
     border-radius: var(--radius-full);
     font-size: 0.75rem;
     font-weight: 500;
@@ -227,16 +227,16 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.5rem 0.875rem;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.2);
     border-radius: var(--radius-md);
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #059669;
+    color: #34D399;
 }
 
 .certifBadge svg {
-    color: #10B981;
+    color: #34D399;
 }
 
 /* Statistiques */
@@ -249,7 +249,7 @@
 .stat {
     text-align: center;
     padding: 1rem 0.75rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
     min-width: 0;
     overflow: hidden;
@@ -285,7 +285,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -295,7 +295,7 @@
 
 .contratCard:hover {
     border-color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.1);
 }
 
 .contratCard > svg {
@@ -329,18 +329,18 @@
 }
 
 .contratActif {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
+    background: rgba(52, 211, 153, 0.15);
+    color: #34D399;
 }
 
 .contratRenouveler {
-    background: rgba(245, 158, 11, 0.1);
-    color: #D97706;
+    background: rgba(251, 191, 36, 0.15);
+    color: #FBBF24;
 }
 
 .contratResilie {
-    background: rgba(239, 68, 68, 0.1);
-    color: #DC2626;
+    background: rgba(248, 113, 113, 0.15);
+    color: #F87171;
 }
 
 /* Interventions */
@@ -352,7 +352,7 @@
 
 .interventionCard {
     padding: 1.25rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
@@ -396,33 +396,33 @@
 }
 
 .statusCompleted {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
+    background: rgba(52, 211, 153, 0.15);
+    color: #34D399;
 }
 
 .statusInProgress {
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563EB;
+    background: rgba(96, 165, 250, 0.15);
+    color: #60A5FA;
 }
 
 .statusPlanned {
-    background: rgba(107, 114, 128, 0.1);
-    color: #4B5563;
+    background: rgba(156, 163, 175, 0.15);
+    color: #9CA3AF;
 }
 
 .typeEntretien {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
+    background: rgba(52, 211, 153, 0.15);
+    color: #34D399;
 }
 
 .typeReparation {
-    background: rgba(245, 158, 11, 0.1);
-    color: #D97706;
+    background: rgba(251, 191, 36, 0.15);
+    color: #FBBF24;
 }
 
 .typeAmelioration {
-    background: rgba(139, 92, 246, 0.1);
-    color: #7C3AED;
+    background: rgba(167, 139, 250, 0.15);
+    color: #A78BFA;
 }
 
 .interventionTitle {
@@ -460,7 +460,7 @@
 
 .interventionDomaine {
     padding: 0.125rem 0.5rem;
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--surface);
     border-radius: var(--radius-full);
     font-size: 0.6875rem;
     color: var(--text-secondary);
@@ -487,7 +487,7 @@
 }
 
 .interventionLink:hover {
-    background: var(--primary-light);
+    background: rgba(52, 211, 153, 0.1);
     border-color: var(--primary);
     color: var(--primary);
 }
@@ -510,7 +510,7 @@
 
 .avisCard {
     padding: 1.25rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
 }
@@ -552,7 +552,7 @@
     line-height: 1.6;
     font-size: 0.9375rem;
     padding: 1rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
     border-left: 3px solid var(--primary);
 }
@@ -610,7 +610,7 @@
     padding: 1rem 1.25rem;
     background: var(--surface);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 1000;
     animation: slideIn 0.3s ease-out;
 }
@@ -639,11 +639,11 @@
 }
 
 .toastSuccess { border-left: 4px solid #10B981; }
-.toastSuccess svg:first-child { color: #10B981; }
+.toastSuccess svg:first-child { color: #34D399; }
 .toastError { border-left: 4px solid #EF4444; }
-.toastError svg:first-child { color: #EF4444; }
+.toastError svg:first-child { color: #F87171; }
 .toastInfo { border-left: 4px solid #3B82F6; }
-.toastInfo svg:first-child { color: #3B82F6; }
+.toastInfo svg:first-child { color: #60A5FA; }
 
 /* Modal */
 .modalOverlay {
@@ -697,7 +697,7 @@
 }
 
 .modalClose:hover {
-    background: var(--surface-secondary, #F3F4F6);
+    background: var(--surface-hover);
     color: var(--text-main);
 }
 
@@ -751,7 +751,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     font-size: 0.875rem;
-    background: var(--surface);
+    background: var(--bg-secondary);
     color: var(--text-main);
     transition: border-color var(--transition-fast);
 }
@@ -780,7 +780,7 @@
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.5rem;
     padding: 0.75rem;
-    background: var(--background);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     max-height: 200px;
@@ -811,211 +811,6 @@
 /* ========================================
    DARK THEME
    ======================================== */
-
-:global([data-theme="dark"]) .backLink {
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .backLink:hover {
-    color: var(--primary);
-    background: rgba(52, 211, 153, 0.1);
-}
-
-:global([data-theme="dark"]) .avatar {
-    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-}
-
-:global([data-theme="dark"]) .categorieBadge {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .badge {
-    background: rgba(52, 211, 153, 0.15);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .section,
-:global([data-theme="dark"]) .sectionFull {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .certifBadge {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: rgba(16, 185, 129, 0.3);
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .certifBadge svg {
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .stat {
-    background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .contratCard {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .contratCard:hover {
-    border-color: var(--primary);
-    background: rgba(52, 211, 153, 0.1);
-}
-
-:global([data-theme="dark"]) .interventionCard {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .interventionCard:hover {
-    border-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .interventionDomaine {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .interventionLink {
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .interventionLink:hover {
-    background: rgba(52, 211, 153, 0.1);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-:global([data-theme="dark"]) .avisCard {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .notes {
-    background: var(--bg-secondary);
-    border-left-color: var(--primary);
-}
-
-:global([data-theme="dark"]) .toast {
-    background: var(--surface);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-:global([data-theme="dark"]) .toastSuccess { border-left-color: #34D399; }
-:global([data-theme="dark"]) .toastSuccess svg:first-child { color: #34D399; }
-:global([data-theme="dark"]) .toastError { border-left-color: #F87171; }
-:global([data-theme="dark"]) .toastError svg:first-child { color: #F87171; }
-:global([data-theme="dark"]) .toastInfo { border-left-color: #60A5FA; }
-:global([data-theme="dark"]) .toastInfo svg:first-child { color: #60A5FA; }
-
-:global([data-theme="dark"]) .modal {
-    background: var(--surface);
-}
-
-:global([data-theme="dark"]) .modalHeader {
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .modalClose:hover {
-    background: var(--surface-hover);
-}
-
-:global([data-theme="dark"]) .modalFooter {
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .formGroup input,
-:global([data-theme="dark"]) .formGroup select,
-:global([data-theme="dark"]) .formGroup textarea,
-:global([data-theme="dark"]) .formGroupFull input,
-:global([data-theme="dark"]) .formGroupFull textarea {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-:global([data-theme="dark"]) .domainesGrid {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .statusCompleted {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .statusInProgress {
-    background: rgba(96, 165, 250, 0.15);
-    color: #60A5FA;
-}
-
-:global([data-theme="dark"]) .statusPlanned {
-    background: rgba(156, 163, 175, 0.15);
-    color: #9CA3AF;
-}
-
-:global([data-theme="dark"]) .typeEntretien {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .typeReparation {
-    background: rgba(251, 191, 36, 0.15);
-    color: #FBBF24;
-}
-
-:global([data-theme="dark"]) .typeAmelioration {
-    background: rgba(167, 139, 250, 0.15);
-    color: #A78BFA;
-}
-
-:global([data-theme="dark"]) .contratActif {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .contratRenouveler {
-    background: rgba(251, 191, 36, 0.15);
-    color: #FBBF24;
-}
-
-:global([data-theme="dark"]) .contratResilie {
-    background: rgba(248, 113, 113, 0.15);
-    color: #F87171;
-}
-
-:global([data-theme="dark"]) .statusCompleted {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .statusInProgress {
-    background: rgba(96, 165, 250, 0.15);
-    color: #60A5FA;
-}
-
-:global([data-theme="dark"]) .statusPlanned {
-    background: rgba(156, 163, 175, 0.15);
-    color: #9CA3AF;
-}
-
-:global([data-theme="dark"]) .typeEntretien {
-    background: rgba(52, 211, 153, 0.15);
-    color: #34D399;
-}
-
-:global([data-theme="dark"]) .typeReparation {
-    background: rgba(251, 191, 36, 0.15);
-    color: #FBBF24;
-}
-
-:global([data-theme="dark"]) .typeAmelioration {
-    background: rgba(167, 139, 250, 0.15);
-    color: #A78BFA;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

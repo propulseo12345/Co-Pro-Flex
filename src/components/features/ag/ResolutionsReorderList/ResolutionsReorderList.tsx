@@ -24,6 +24,7 @@ interface ResolutionsReorderListProps {
     resolutions: Resolution[];
     onReorder: (newResolutions: Resolution[]) => void;
     onDelete: (id: string) => void;
+    onEdit?: (resolution: Resolution) => void;
     renderVariables?: (resolution: Resolution) => React.ReactNode;
 }
 
@@ -33,6 +34,7 @@ export function ResolutionsReorderList({
     resolutions,
     onReorder,
     onDelete,
+    onEdit,
     renderVariables
 }: ResolutionsReorderListProps) {
     const [expandedResolutions, setExpandedResolutions] = useState<Set<string>>(new Set());
@@ -198,6 +200,7 @@ export function ResolutionsReorderList({
                                                     onMoveUp={handleMoveUp}
                                                     onMoveDown={handleMoveDown}
                                                     onDelete={handleDelete}
+                                                    onEdit={onEdit}
                                                     renderVariables={renderVariables}
                                                 />
                                             );
@@ -225,6 +228,7 @@ export function ResolutionsReorderList({
                                     onMoveUp={handleMoveUp}
                                     onMoveDown={handleMoveDown}
                                     onDelete={handleDelete}
+                                    onEdit={onEdit}
                                     renderVariables={renderVariables}
                                 />
                             ))}

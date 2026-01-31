@@ -19,7 +19,7 @@
     gap: 12px;
     padding: 12px;
     margin-bottom: 16px;
-    background: #f9fafb;
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     border: 1px solid #e5e7eb;
 }
@@ -29,7 +29,7 @@
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #6b7280;
+    color: #9ca3af;
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -99,7 +99,7 @@
 }
 
 .jalon:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 /* Indicateur timeline */
@@ -153,8 +153,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f3f4f6;
-    color: #6b7280;
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
     flex-shrink: 0;
 }
 
@@ -169,7 +169,7 @@
 .jalonLabel {
     font-size: 14px;
     font-weight: 500;
-    color: #1f2937;
+    color: #f3f4f6;
     line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -178,7 +178,7 @@
 
 .jalonDate {
     font-size: 12px;
-    color: #6b7280;
+    color: #9ca3af;
     white-space: nowrap;
 }
 
@@ -244,8 +244,8 @@
 }
 
 .jalonA_venir .jalonIcon {
-    background: var(--primary-light);
-    color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
 }
 
 .badgeA_venir {
@@ -261,8 +261,8 @@
 }
 
 .jalonImminent .jalonIcon {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
 }
 
 .badgeImminent {
@@ -279,8 +279,8 @@
 }
 
 .jalonUrgent .jalonIcon {
-    background: var(--danger-light);
-    color: var(--danger);
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
 }
 
 .badgeUrgent {
@@ -297,13 +297,13 @@
 }
 
 .jalonDepasse .jalonIcon {
-    background: var(--danger-light);
-    color: var(--danger);
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
 }
 
 .jalonDepasse .jalonLabel {
     text-decoration: line-through;
-    color: var(--danger);
+    color: #f3f4f6;
 }
 
 .badgeDepasse {
@@ -319,12 +319,12 @@
 }
 
 .jalonComplete .jalonIcon {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
 }
 
 .jalonComplete .jalonLabel {
-    color: var(--success);
+    color: #f3f4f6;
 }
 
 .badgeComplete {
@@ -505,29 +505,3 @@
 /* ═══════════════════════════════════════════════════════════════
    DARK MODE
    ═══════════════════════════════════════════════════════════════ */
-
-:global([data-theme="dark"]) .legend {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-:global([data-theme="dark"]) .legendItem {
-    color: #9ca3af;
-}
-
-:global([data-theme="dark"]) .jalonIcon {
-    background: rgba(255, 255, 255, 0.08);
-    color: #9ca3af;
-}
-
-:global([data-theme="dark"]) .jalonLabel {
-    color: #f3f4f6;
-}
-
-:global([data-theme="dark"]) .jalonDate {
-    color: #9ca3af;
-}
-
-:global([data-theme="dark"]) .jalon:hover {
-    background: rgba(255, 255, 255, 0.06);
-}

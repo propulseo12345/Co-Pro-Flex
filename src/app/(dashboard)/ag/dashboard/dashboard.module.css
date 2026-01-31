@@ -130,5 +130,3 @@
 }
 
 /* --- DARK MODE --- */
-[data-theme="dark"] .preparationCardCompact { background: var(--surface) !important; border-color: var(--border); }
-[data-theme="dark"] .preparationCardCompact .actionButton { background-color: var(--bg-secondary); border-color: var(--border); }

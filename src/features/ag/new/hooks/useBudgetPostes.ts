@@ -2,14 +2,22 @@
 
 import { useState, useCallback } from 'react';
 import type { BudgetPoste, EditingPosteState } from '../domain/types';
-import { BUDGET_PRECEDENT } from '../domain/constants';
 
 interface UseBudgetPostesProps {
   budgetPostes: BudgetPoste[];
   onPostesChange: (postes: BudgetPoste[]) => void;
+  /** Fonction async pour importer le budget (depuis Supabase) */
+  importBudgetFn?: (exercice: number) => Promise<BudgetPoste[]>;
+  /** Année d'exercice pour l'import */
+  exercice?: number;
 }
 
-export function useBudgetPostes({ budgetPostes, onPostesChange }: UseBudgetPostesProps) {
+export function useBudgetPostes({
+  budgetPostes,
+  onPostesChange,
+  importBudgetFn,
+  exercice,
+}: UseBudgetPostesProps) {
   const [newPoste, setNewPoste] = useState({ poste: '', montant: '' });
   const [showCustomPoste, setShowCustomPoste] = useState(false);
   const [editing, setEditing] = useState<EditingPosteState>({
@@ -17,6 +25,8 @@ export function useBudgetPostes({ budgetPostes, onPostesChange }: UseBudgetPoste
     data: { poste: '', montant: '' },
     error: null,
   });
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const handlePosteSelect = useCallback((value: string) => {
     if (value === 'Autre') {
@@ -103,13 +113,26 @@ export function useBudgetPostes({ budgetPostes, onPostesChange }: UseBudgetPoste
     [handleSavePoste, handleCancelEdit]
   );
 
-  const handleImportBudgetPrecedent = useCallback(() => {
-    const postesAvecNouveauxIds = BUDGET_PRECEDENT.postes.map((p) => ({
-      ...p,
-      id: `${p.id}-${Date.now()}`,
-    }));
-    onPostesChange(postesAvecNouveauxIds);
-  }, [onPostesChange]);
+  const handleImportBudgetPrecedent = useCallback(async () => {
+    // Si on a une fonction d'import Supabase, l'utiliser
+    if (importBudgetFn && exercice) {
+      setIsImporting(true);
+      setImportError(null);
+
+      try {
+        const postes = await importBudgetFn(exercice);
+        if (postes.length > 0) {
+          onPostesChange(postes);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erreur lors de l\'import';
+        setImportError(message);
+        console.error('[useBudgetPostes] Import error:', err);
+      } finally {
+        setIsImporting(false);
+      }
+    }
+  }, [onPostesChange, importBudgetFn, exercice]);
 
   const updateEditingData = useCallback((field: 'poste' | 'montant', value: string) => {
     setEditing((prev) => ({
@@ -123,6 +146,8 @@ export function useBudgetPostes({ budgetPostes, onPostesChange }: UseBudgetPoste
     setNewPoste,
     showCustomPoste,
     editing,
+    isImporting,
+    importError,
     handlePosteSelect,
     handleAddPoste,
     handleRemovePoste,

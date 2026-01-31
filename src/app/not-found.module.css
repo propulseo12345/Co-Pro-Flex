@@ -4,7 +4,7 @@
   justify-content: center;
   min-height: 100vh;
   padding: var(--spacing-6, 1.5rem);
-  background: var(--color-bg-primary, #ffffff);
+  background: var(--color-bg-primary, #0f172a);
 }
 
 .content {
@@ -15,7 +15,7 @@
 .code {
   font-size: 8rem;
   font-weight: var(--font-weight-bold, 700);
-  color: var(--color-primary-600, #2563eb);
+  color: var(--color-primary-400, #60a5fa);
   line-height: 1;
   margin: 0;
 }
@@ -71,13 +71,4 @@
 
 .secondaryButton:hover {
   background: var(--color-bg-hover, #e2e8f0);
-}
-
-/* Dark mode */
-[data-theme="dark"] .container {
-  background: var(--color-bg-primary, #0f172a);
-}
-
-[data-theme="dark"] .code {
-  color: var(--color-primary-400, #60a5fa);
 }

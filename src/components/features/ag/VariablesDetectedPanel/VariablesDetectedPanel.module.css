@@ -59,7 +59,7 @@
 }
 
 .statAuto {
-    color: var(--primary);
+    color: #93C5FD;
 }
 
 .statManual {
@@ -67,11 +67,11 @@
 }
 
 .statMissing {
-    color: var(--warning);
+    color: #FCD34D;
 }
 
 .statError {
-    color: var(--danger);
+    color: #FCA5A5;
 }
 
 .collapseIcon {
@@ -173,8 +173,8 @@
 }
 
 .badgeAuto {
-    background: var(--primary-light);
-    color: var(--primary);
+    background: rgba(96, 165, 250, 0.2);
+    color: #93C5FD;
 }
 
 .badgeManual {
@@ -183,13 +183,13 @@
 }
 
 .badgeMissing {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
 }
 
 .badgeError {
-    background: var(--danger-light);
-    color: var(--danger);
+    background: rgba(239, 68, 68, 0.2);
+    color: #FCA5A5;
 }
 
 /* Variable value */
@@ -356,10 +356,10 @@
     gap: var(--space-xs);
     margin-top: var(--space-sm);
     padding: var(--space-xs) var(--space-sm);
-    background: var(--danger-light);
+    background: rgba(239, 68, 68, 0.2);
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
-    color: var(--danger);
+    color: #FCA5A5;
 }
 
 /* Warning message */
@@ -369,48 +369,9 @@
     gap: var(--space-sm);
     margin-top: var(--space-lg);
     padding: var(--space-md);
-    background: var(--warning-light);
+    background: rgba(251, 191, 36, 0.15);
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
-    color: var(--warning);
-}
-
-/* Dark mode */
-:global([data-theme="dark"]) .badgeAuto {
-    background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .badgeMissing {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .badgeError {
-    background: rgba(239, 68, 68, 0.2);
-    color: #FCA5A5;
-}
-
-:global([data-theme="dark"]) .statAuto {
-    color: #93C5FD;
-}
-
-:global([data-theme="dark"]) .statMissing {
-    color: #FCD34D;
-}
-
-:global([data-theme="dark"]) .statError {
-    color: #FCA5A5;
-}
-
-:global([data-theme="dark"]) .validationError {
-    background: rgba(239, 68, 68, 0.2);
-    color: #FCA5A5;
-}
-
-:global([data-theme="dark"]) .warningMessage {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.4);
     color: #FCD34D;
 }

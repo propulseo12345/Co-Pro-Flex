@@ -2,14 +2,14 @@
     display: flex;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    background-color: var(--color-bg-primary, white);
+    background-color: var(--color-bg-primary-dark, #1f2937);
     border: 1px solid var(--color-border, #e5e7eb);
     border-radius: 0.75rem;
     transition: box-shadow 150ms;
 }
 
 .carte:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Indicateur statut (barre verticale) */
@@ -40,7 +40,7 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-text-primary, #111827);
+    color: var(--color-text-primary-dark, #f3f4f6);
     line-height: 1.4;
 }
 
@@ -76,7 +76,7 @@
     align-items: center;
     gap: 0.375rem;
     font-size: 0.8125rem;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--color-text-secondary-dark, #9ca3af);
 }
 
 .dateRealisation {
@@ -94,10 +94,10 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    background-color: var(--color-bg-secondary, #f3f4f6);
+    background-color: var(--color-text-secondary-dark, #9ca3af);
     border-radius: 0.25rem;
     font-size: 0.75rem;
-    color: var(--color-text-secondary, #4b5563);
+    color: var(--color-text-secondary-dark, #9ca3af);
 }
 
 .tagLink {
@@ -105,7 +105,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    background-color: var(--color-bg-secondary, #f3f4f6);
+    background-color: var(--color-bg-secondary-dark, #374151);
     border-radius: 0.25rem;
     font-size: 0.75rem;
     color: var(--color-primary, #3b82f6);
@@ -114,14 +114,14 @@
 }
 
 .tagLink:hover {
-    background-color: var(--color-primary-light, #dbeafe);
+    background-color: rgba(59, 130, 246, 0.2);
 }
 
 /* Description */
 .description {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--color-text-secondary-dark, #9ca3af);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -152,7 +152,7 @@
     gap: 0.25rem;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--color-text-primary, #111827);
+    color: var(--color-text-primary-dark, #f3f4f6);
 }
 
 .documents {
@@ -160,16 +160,16 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.8125rem;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--color-text-secondary-dark, #9ca3af);
 }
 
 .badgeTravaux {
     padding: 0.25rem 0.5rem;
-    background-color: var(--color-warning-light, #fef3c7);
+    background-color: var(--color-warning-light, #fcd34d);
     border-radius: 0.25rem;
     font-size: 0.6875rem;
     font-weight: 600;
-    color: var(--color-warning-dark, #92400e);
+    color: var(--color-warning-light, #fcd34d);
     text-transform: uppercase;
     letter-spacing: 0.025em;
 }
@@ -191,15 +191,15 @@
     border-radius: 0.375rem;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--color-text-secondary-dark, #9ca3af);
     cursor: pointer;
     transition: all 150ms;
 }
 
 .btnEdit:hover {
-    background-color: var(--color-bg-secondary, #f3f4f6);
-    color: var(--color-text-primary, #374151);
-    border-color: var(--color-text-tertiary, #9ca3af);
+    background-color: var(--color-text-primary-dark, #f3f4f6);
+    color: var(--color-text-primary-dark, #f3f4f6);
+    border-color: var(--color-text-primary-dark, #f3f4f6);
 }
 
 .btnEdit:focus {
@@ -208,62 +208,6 @@
 }
 
 /* Dark mode support */
-:global([data-theme="dark"]) .carte {
-    background-color: var(--color-bg-primary-dark, #1f2937);
-    border-color: var(--color-border-dark, #374151);
-}
-
-:global([data-theme="dark"]) .carte:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-:global([data-theme="dark"]) .titre {
-    color: var(--color-text-primary-dark, #f3f4f6);
-}
-
-:global([data-theme="dark"]) .date {
-    color: var(--color-text-secondary-dark, #9ca3af);
-}
-
-:global([data-theme="dark"]) .tag {
-    background-color: var(--color-bg-secondary-dark, #374151);
-    color: var(--color-text-secondary-dark, #9ca3af);
-}
-
-:global([data-theme="dark"]) .tagLink {
-    background-color: var(--color-bg-secondary-dark, #374151);
-}
-
-:global([data-theme="dark"]) .tagLink:hover {
-    background-color: rgba(59, 130, 246, 0.2);
-}
-
-:global([data-theme="dark"]) .description {
-    color: var(--color-text-secondary-dark, #9ca3af);
-}
-
-:global([data-theme="dark"]) .cout {
-    color: var(--color-text-primary-dark, #f3f4f6);
-}
-
-:global([data-theme="dark"]) .documents {
-    color: var(--color-text-secondary-dark, #9ca3af);
-}
-
-:global([data-theme="dark"]) .badgeTravaux {
-    background-color: rgba(245, 158, 11, 0.2);
-    color: var(--color-warning-light, #fcd34d);
-}
-
-:global([data-theme="dark"]) .btnEdit {
-    border-color: var(--color-border-dark, #374151);
-    color: var(--color-text-secondary-dark, #9ca3af);
-}
-
-:global([data-theme="dark"]) .btnEdit:hover {
-    background-color: var(--color-bg-secondary-dark, #374151);
-    color: var(--color-text-primary-dark, #f3f4f6);
-}
 
 /* Responsive */
 @media (max-width: 640px) {

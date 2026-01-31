@@ -40,8 +40,8 @@
 
 .lotType {
   padding: 0.375rem 0.875rem;
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: rgba(129, 140, 248, 0.2);
+  color: #a5b4fc;
   border-radius: 20px;
   font-size: 0.813rem;
   font-weight: 600;
@@ -200,26 +200,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-tertiary);
   flex-shrink: 0;
   transition: all 0.3s;
 }
 
 .stepCompleted {
-  background: #d1fae5;
-  color: #10b981;
+  background: rgba(52, 211, 153, 0.2);
+  color: #34d399;
 }
 
 .stepCurrent {
-  background: #dbeafe;
-  color: #0284c7;
-  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+  background: rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
 }
 
 .stepNext {
-  background: #f8fafc;
-  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-tertiary);
 }
 
 .stepContent {
@@ -257,11 +257,11 @@
   top: 56px;
   width: 2px;
   height: calc(100% - 8px);
-  background: #e2e8f0;
+  background: rgba(148, 163, 184, 0.2);
 }
 
 .connectorCompleted {
-  background: #10b981;
+  background: #34d399;
 }
 
 /* Documents */
@@ -291,7 +291,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1.25rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   transition: all 0.2s;
@@ -299,7 +299,7 @@
 
 .documentCard:hover {
   background: var(--surface);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .documentIcon {
@@ -339,7 +339,7 @@
 }
 
 .required {
-  color: #ef4444;
+  color: #f87171;
   font-size: 1rem;
 }
 
@@ -403,7 +403,7 @@
 .timelineLine {
   width: 2px;
   flex: 1;
-  background: #e2e8f0;
+  background: rgba(148, 163, 184, 0.2);
   margin-top: 0.5rem;
   min-height: 40px;
 }
@@ -432,7 +432,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -489,7 +489,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin: 1rem 0;
@@ -500,10 +500,10 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: #fef3c7;
+  background: rgba(251, 191, 36, 0.15);
   border: 1px solid #fbbf24;
   border-radius: 6px;
-  color: #92400e;
+  color: #fbbf24;
   font-size: 0.875rem;
   margin-top: 1rem;
 }
@@ -527,7 +527,7 @@
   padding: 1rem 1.25rem;
   background: var(--surface);
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   z-index: 1100;
   animation: slideIn 0.3s ease;
 }
@@ -704,11 +704,11 @@
 }
 
 .osSelectItem:hover {
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 .osSelectItemActive {
-  background: #eef2ff;
+  background: rgba(129, 140, 248, 0.15);
   border-color: var(--primary-color);
 }
 
@@ -748,7 +748,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 1rem;
-  background: var(--bg-primary, white);
+  background: var(--bg-secondary);
 }
 
 .searchBox input {
@@ -784,11 +784,11 @@
 }
 
 .osLinkItem:hover {
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 .osLinkItemActive {
-  background: #eef2ff;
+  background: rgba(129, 140, 248, 0.15);
   border-color: var(--primary-color);
 }
 
@@ -881,7 +881,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.625rem 0.75rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   text-decoration: none;
@@ -929,10 +929,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 0.875rem;
-  background: #fef3c7;
+  background: rgba(251, 191, 36, 0.15);
   border: 1px solid #fbbf24;
   border-radius: 6px;
-  color: #92400e;
+  color: #fbbf24;
   font-size: 0.813rem;
 }
 
@@ -954,201 +954,7 @@
    DARK MODE
    ======================================== */
 
-:global([data-theme="dark"]) .backLink {
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .backLink:hover {
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .lotType {
-  background: rgba(129, 140, 248, 0.2);
-  color: #a5b4fc;
-}
-
-:global([data-theme="dark"]) .sidebarHeader {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .divider {
-  background: var(--border-color);
-}
-
-:global([data-theme="dark"]) .tabs {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .tab {
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .tab:hover {
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .tabActive {
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .stepIndicator {
-  background: rgba(148, 163, 184, 0.2);
-  color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .stepCompleted {
-  background: rgba(52, 211, 153, 0.2);
-  color: #34d399;
-}
-
-:global([data-theme="dark"]) .stepCurrent {
-  background: rgba(96, 165, 250, 0.2);
-  color: #60a5fa;
-  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
-}
-
-:global([data-theme="dark"]) .stepNext {
-  background: rgba(148, 163, 184, 0.1);
-  color: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .stepConnector {
-  background: rgba(148, 163, 184, 0.2);
-}
-
-:global([data-theme="dark"]) .connectorCompleted {
-  background: #34d399;
-}
-
-:global([data-theme="dark"]) .documentsHeader {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .documentCard {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .documentCard:hover {
-  background: var(--surface);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-:global([data-theme="dark"]) .documentIcon {
-  background: var(--surface);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .required {
-  color: #f87171;
-}
-
-:global([data-theme="dark"]) .timelineDot {
-  background: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .timelineLine {
-  background: rgba(148, 163, 184, 0.2);
-}
-
-:global([data-theme="dark"]) .modal {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-:global([data-theme="dark"]) .modalContent {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .modalHeader {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .closeBtn {
-  color: var(--text-secondary);
-}
-
-:global([data-theme="dark"]) .closeBtn:hover {
-  background: var(--hover-bg);
-}
-
-:global([data-theme="dark"]) .docPreview {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .warning {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: rgba(251, 191, 36, 0.4);
-  color: #fbbf24;
-}
-
-:global([data-theme="dark"]) .modalActions {
-  border-color: var(--border-color);
-}
-
 /* Dark mode for new components */
-:global([data-theme="dark"]) .toast {
-  background: var(--surface);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-:global([data-theme="dark"]) .modalLarge,
-:global([data-theme="dark"]) .modalMedium {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .editSection {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .osSelectItem {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .osSelectItem:hover {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .osSelectItemActive {
-  background: rgba(129, 140, 248, 0.15);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .osLinkItem {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .osLinkItem:hover {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .osLinkItemActive {
-  background: rgba(129, 140, 248, 0.15);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .osLinkedItem {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .osLinkedItem:hover {
-  background: var(--surface);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .searchBox {
-  border-color: var(--border-color);
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .stepWarning {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: rgba(251, 191, 36, 0.4);
-  color: #fbbf24;
-}
 
 /* ========================================
    NEW STYLES FOR MUTATIONS/ETAT DATE
@@ -1163,11 +969,6 @@
 }
 
 .actionsCard {
-  background: #f0f9ff;
-  border-color: #bae6fd;
-}
-
-:global([data-theme="dark"]) .actionsCard {
   background: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.3);
 }
@@ -1225,7 +1026,7 @@
 }
 
 .actionSecondary:hover:not(:disabled) {
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-color: var(--primary-color);
 }
 
@@ -1247,7 +1048,7 @@
 }
 
 .actionDanger:hover:not(:disabled) {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
 }
 
@@ -1291,7 +1092,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--border-color);
+  background: var(--primary-color);
   border: 2px solid var(--surface);
   z-index: 1;
 }
@@ -1378,12 +1179,8 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 1rem;
-  background: #f8fafc;
-  border-radius: 6px;
-}
-
-:global([data-theme="dark"]) .partyCard {
   background: var(--bg-secondary);
+  border-radius: 6px;
 }
 
 .partyLabel {
@@ -1471,21 +1268,6 @@
 }
 
 /* Dark mode for action buttons */
-:global([data-theme="dark"]) .actionSecondary {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .actionSecondary:hover:not(:disabled) {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .actionDanger {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .actionDanger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.1);
-}
 
 /* Responsive */
 @media (max-width: 1024px) {

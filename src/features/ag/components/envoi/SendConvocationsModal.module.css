@@ -15,7 +15,7 @@
 }
 
 .modal {
-  background: var(--color-bg-elevated, #fff);
+  background: var(--color-bg-elevated-dark, #1f2937);
   border-radius: var(--radius-lg, 8px);
   width: 100%;
   max-width: 560px;
@@ -42,7 +42,7 @@
   margin: 0;
   font-size: var(--font-size-lg, 1.125rem);
   font-weight: 600;
-  color: var(--color-text, #111827);
+  color: var(--color-text-dark, #f9fafb);
 }
 
 .closeBtn {
@@ -74,7 +74,7 @@
 .stepTitle {
   font-size: var(--font-size-base, 1rem);
   font-weight: 600;
-  color: var(--color-text, #111827);
+  color: var(--color-text-dark, #f9fafb);
   margin-bottom: var(--spacing-4, 1rem);
 }
 
@@ -494,21 +494,4 @@
 .btnPrimary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* Dark Mode */
-[data-theme="dark"] .modal {
-  background: var(--color-bg-elevated-dark, #1f2937);
-}
-
-[data-theme="dark"] .header {
-  border-color: var(--color-border-dark, #374151);
-}
-
-[data-theme="dark"] .title {
-  color: var(--color-text-dark, #f9fafb);
-}
-
-[data-theme="dark"] .stepTitle {
-  color: var(--color-text-dark, #f9fafb);
 }

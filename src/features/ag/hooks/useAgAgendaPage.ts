@@ -9,9 +9,12 @@ import { extractVariableNames, formatDateFR, formatMontant } from '@/lib/utils/r
 import { MOCK_CONTRAT_SYNDIC, MOCK_PARAMETRES } from '@/data/mock';
 import type { Resolution } from '@/components/features/ag';
 import { useCopro } from '@/providers/CoproContext';
-import { useAgDetail, useAddResolution, useDeleteResolution, useReorderResolutions, useEligibleVoters } from '@/hooks/modules/useAgData';
+import { useAgDetail, useAddResolution, useDeleteResolution, useReorderResolutions, useEligibleVoters, useUpdateResolution } from '@/hooks/modules/useAgData';
 import type { AgResolutionResult, MajorityType as DbMajorityType } from '@/lib/ag/types';
+import type { ResolutionEditData } from '@/components/features/ag';
 import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+import { createClient } from '@/lib/supabase/client';
+import { getActiveAccountingPeriod, type AccountingPeriodInfo } from '@/lib/finance/accounting-period';
 
 interface AGFormData {
   type: 'ORDINAIRE' | 'EXTRAORDINAIRE';
@@ -83,6 +86,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const addResolutionMutation = useAddResolution();
   const deleteResolutionMutation = useDeleteResolution();
   const reorderResolutionsMutation = useReorderResolutions();
+  const updateResolutionMutation = useUpdateResolution();
 
   const [resolutions, setResolutions] = useState<Resolution[]>([]);
   const [showBankModal, setShowBankModal] = useState(false);
@@ -97,6 +101,10 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const [isLoading, setIsLoading] = useState(true);
   const [prefillWarning, setPrefillWarning] = useState<{ total: number; added: number; skipped: number } | null>(null);
   const [useSupabase, setUseSupabase] = useState(false);
+  const [editingResolution, setEditingResolution] = useState<Resolution | null>(null);
+  const [isUpdatingResolution, setIsUpdatingResolution] = useState(false);
+  const [updateResolutionError, setUpdateResolutionError] = useState<string | null>(null);
+  const [accountingPeriod, setAccountingPeriod] = useState<AccountingPeriodInfo | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
   // Check if AG exists in Supabase (UUID = Supabase AG)
@@ -107,12 +115,28 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   useEffect(() => {
     if (isSupabaseAg) {
       setUseSupabase(true);
-      // Écrire un marqueur localStorage pour le workflow
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`ag-supabase-${agId}`, 'true');
-      }
+      // Note: Plus de marqueur localStorage - Supabase est source de vérité
     }
   }, [isSupabaseAg, agId]);
+
+  // Fetch active accounting period for exercise date pre-filling
+  useEffect(() => {
+    if (!currentCoproId) return;
+
+    const fetchAccountingPeriod = async () => {
+      const exerciceYear = parseInt(agFormData?.budgetExercice || '') || new Date().getFullYear() + 1;
+      const result = await getActiveAccountingPeriod(currentCoproId, exerciceYear);
+
+      if (result.data) {
+        setAccountingPeriod(result.data);
+        console.log('[useAgAgendaPage] Accounting period loaded:', result.data);
+      } else if (result.error) {
+        console.warn('[useAgAgendaPage] Failed to load accounting period:', result.error);
+      }
+    };
+
+    fetchAccountingPeriod();
+  }, [currentCoproId, agFormData?.budgetExercice]);
 
   // Load AG form data - prioritize Supabase meeting data over localStorage
   useEffect(() => {
@@ -177,16 +201,31 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     const suggestions: Record<string, string> = {};
     const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
 
+    // Use accounting period dates if available, otherwise fallback to calendar year
+    const periodStartDate = accountingPeriod?.start_date
+      ? new Date(accountingPeriod.start_date).toLocaleDateString('fr-FR')
+      : `01/01/${exercice}`;
+    const periodEndDate = accountingPeriod?.end_date
+      ? new Date(accountingPeriod.end_date).toLocaleDateString('fr-FR')
+      : `31/12/${exercice}`;
+    const periodYear = accountingPeriod?.year?.toString() || exercice;
+    const periodLabel = accountingPeriod?.label || `Exercice ${exercice}`;
+
     for (const name of variableNames) {
       const lowerName = name.toLowerCase();
       if (lowerName === 'date' || lowerName === 'date_du_jour') {
         suggestions[name] = formatDateFR(new Date());
       } else if (lowerName === 'date_debut' || lowerName === 'exercice_debut') {
-        suggestions[name] = `01/01/${exercice}`;
+        // Use real accounting period start date from Supabase
+        suggestions[name] = periodStartDate;
       } else if (lowerName === 'date_fin' || lowerName === 'exercice_fin' || lowerName === 'date_cloture') {
-        suggestions[name] = `31/12/${exercice}`;
+        // Use real accounting period end date from Supabase
+        suggestions[name] = periodEndDate;
       } else if (lowerName === 'annee' || lowerName === 'exercice' || lowerName === 'annee_exercice') {
-        suggestions[name] = exercice;
+        suggestions[name] = periodYear;
+      } else if (lowerName === 'exercice_label' || lowerName === 'libelle_exercice') {
+        // New: formatted label from accounting period
+        suggestions[name] = periodLabel;
       } else if (lowerName === 'nom_syndic' || lowerName === 'syndic') {
         suggestions[name] = MOCK_CONTRAT_SYNDIC.cabinetNom || MOCK_CONTRAT_SYNDIC.nomSyndic || '';
       } else if (lowerName === 'adresse_syndic') {
@@ -204,7 +243,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       }
     }
     return suggestions;
-  }, [agFormData?.budgetExercice]);
+  }, [agFormData?.budgetExercice, accountingPeriod]);
 
   const prefillResolutionVariables = useCallback((resolution: Resolution): Resolution => {
     if (!resolution.variables) return resolution;
@@ -299,18 +338,13 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     }
   }, [roles, agFormData, prefillResolutionVariables, resolutions]);
 
-  // Save resolutions via saveDraft as backup (for non-Supabase AGs or offline fallback)
-  // Note: For Supabase AGs, resolutions are primarily saved via addResolutionMutation
+  // Save resolutions via saveDraft as backup (for non-Supabase AGs only)
+  // Note: For Supabase AGs, resolutions are saved via addResolutionMutation - pas de localStorage
   useEffect(() => {
-    if (resolutions.length > 0) {
-      if (!useSupabase) {
-        saveDraft(agId, 'resolutions', resolutions, `ag-resolutions-${agId}`);
-      }
-      // Écrire le compte de résolutions pour le workflow (même pour Supabase)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`ag-supabase-resolutions-count-${agId}`, String(resolutions.length));
-      }
+    if (resolutions.length > 0 && !useSupabase) {
+      saveDraft(agId, 'resolutions', resolutions, `ag-resolutions-${agId}`);
     }
+    // Note: Le compte de résolutions est obtenu depuis v_ag_drafts_progress - plus de localStorage
   }, [resolutions, agId, useSupabase]);
 
   const handleAddFromBank = useCallback(async (template: ResolutionTemplate) => {
@@ -321,7 +355,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       variables[varName] = globalSuggestions[varName] || '';
     }
 
-    // If using Supabase, add to database
+    // If using Supabase, add to database with variables
     if (useSupabase && currentCoproId && isManager) {
       const result = await addResolutionMutation.execute({
         ag_id: agId,
@@ -329,6 +363,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         description: template.texte,
         majority_type: toDbMajorityType(template.majorite),
         resolution_number: resolutions.length + 1,
+        variables: variables, // Pass pre-filled variables to Supabase
       });
 
       if (result.success) {
@@ -461,8 +496,22 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     }
   }, [useSupabase, isManager, deleteResolutionMutation]);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     if (resolutions.length === 0) { alert('Veuillez ajouter au moins une résolution'); return; }
+
+    // Mettre à jour current_step vers étape 3 (convocation) si AG Supabase
+    if (isValidUUID(agId)) {
+      try {
+        const supabase = createClient();
+        await (supabase as ReturnType<typeof createClient>).from('ag_meetings').update({
+          current_step: 3,
+          updated_at: new Date().toISOString(),
+        }).eq('id', agId);
+      } catch (err) {
+        console.warn('[useAgAgendaPage] Failed to update current_step:', err);
+      }
+    }
+
     router.push(`/ag/${agId}/convocation`);
   }, [resolutions.length, router, agId]);
 
@@ -471,27 +520,116 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     setTempVariableValue(currentValue || '');
   }, []);
 
-  const handleSaveVariable = useCallback(() => {
+  const handleSaveVariable = useCallback(async () => {
     if (!editingVariable) return;
+
+    // Calculate new variables
+    const targetResolution = resolutions.find(r => r.id === editingVariable.resId);
+    if (!targetResolution) return;
+
+    const newVars = { ...(targetResolution.variables || {}), [editingVariable.varName]: tempVariableValue };
+    if (editingVariable.varName === 'modalites_paiement_budget' && tempVariableValue) {
+      const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
+      newVars['dates_echeances_budget'] = generateEcheancesDates(tempVariableValue, exercice);
+    }
+
+    // Update local state immediately
     setResolutions(prev => prev.map(r => {
-      if (r.id === editingVariable.resId && r.variables) {
-        const newVars = { ...r.variables, [editingVariable.varName]: tempVariableValue };
-        if (editingVariable.varName === 'modalites_paiement_budget' && tempVariableValue) {
-          const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
-          newVars['dates_echeances_budget'] = generateEcheancesDates(tempVariableValue, exercice);
-        }
+      if (r.id === editingVariable.resId) {
         return { ...r, variables: newVars };
       }
       return r;
     }));
+
+    // Persist to Supabase if using Supabase mode
+    if (useSupabase && currentCoproId && isManager) {
+      try {
+        const result = await updateResolutionMutation.execute(editingVariable.resId, {
+          variables: newVars,
+        });
+        if (!result.success) {
+          console.error('[useAgAgendaPage] Failed to persist variable:', result.error);
+        } else {
+          console.log('[useAgAgendaPage] Variable saved to Supabase:', editingVariable.varName);
+        }
+      } catch (err) {
+        console.error('[useAgAgendaPage] Error persisting variable:', err);
+      }
+    }
+
     setEditingVariable(null);
     setTempVariableValue('');
-  }, [editingVariable, tempVariableValue, agFormData?.budgetExercice]);
+  }, [editingVariable, tempVariableValue, agFormData?.budgetExercice, resolutions, useSupabase, currentCoproId, isManager, updateResolutionMutation]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingVariable(null);
     setTempVariableValue('');
   }, []);
+
+  // Inline resolution editing handlers
+  const handleEditResolution = useCallback((resolution: Resolution) => {
+    setEditingResolution(resolution);
+    setUpdateResolutionError(null);
+  }, []);
+
+  const handleCancelEditResolution = useCallback(() => {
+    setEditingResolution(null);
+    setUpdateResolutionError(null);
+  }, []);
+
+  const handleUpdateResolution = useCallback(async (data: ResolutionEditData) => {
+    if (!editingResolution) return;
+
+    setIsUpdatingResolution(true);
+    setUpdateResolutionError(null);
+
+    try {
+      // Update in Supabase if applicable
+      if (useSupabase && currentCoproId && isManager) {
+        // Get existing variables from the resolution being edited
+        const existingVariables = editingResolution.variables || {};
+
+        const result = await updateResolutionMutation.execute(data.id, {
+          title: data.titre,
+          description: data.texte,
+          majority_type: toDbMajorityType(data.majorite),
+          is_customized: true,
+          variables: existingVariables,
+        });
+
+        if (!result.success) {
+          console.error('[useAgAgendaPage] Update resolution error:', result.error);
+          setUpdateResolutionError(result.error || 'Erreur lors de la mise à jour');
+          return;
+        }
+
+        // Refresh from database
+        await refreshResolutions();
+      }
+
+      // Update local state
+      setResolutions(prev => prev.map(r => {
+        if (r.id === data.id) {
+          return {
+            ...r,
+            titre: data.titre,
+            texte: data.texte,
+            majorite: data.majorite,
+            custom: true, // Mark as customized
+          };
+        }
+        return r;
+      }));
+
+      setEditingResolution(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+      console.error('[useAgAgendaPage] Update resolution error:', err);
+      setUpdateResolutionError(message);
+    } finally {
+      setIsUpdatingResolution(false);
+    }
+  }, [editingResolution, useSupabase, currentCoproId, isManager, refreshResolutions, updateResolutionMutation]);
 
   const goBack = useCallback(() => router.back(), [router]);
 
@@ -539,5 +677,14 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     useSupabase,
     isManager,
     meeting,
+    // Inline resolution editing
+    editingResolution,
+    isUpdatingResolution,
+    updateResolutionError,
+    handleEditResolution,
+    handleUpdateResolution,
+    handleCancelEditResolution,
+    // Accounting period for exercise dates
+    accountingPeriod,
   };
 }

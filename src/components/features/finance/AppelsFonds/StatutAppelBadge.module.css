@@ -42,32 +42,32 @@
 
 /* Statuts */
 .brouillon {
-  background: var(--bg-secondary);
+  background: rgba(107, 114, 128, 0.2);
   color: var(--text-secondary);
 }
 
 .en_attente {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.2);
   color: #D97706;
 }
 
 .emis {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.2);
   color: #2563EB;
 }
 
 .partiellement_paye {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.2);
   color: #7C3AED;
 }
 
 .solde {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.2);
   color: #059669;
 }
 
 .annule {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.2);
   color: #DC2626;
 }
 
@@ -96,29 +96,4 @@
   background: var(--bg-secondary);
   color: var(--text-tertiary);
   font-style: italic;
-}
-
-/* Dark mode */
-[data-theme="dark"] .brouillon {
-  background: rgba(107, 114, 128, 0.2);
-}
-
-[data-theme="dark"] .en_attente {
-  background: rgba(245, 158, 11, 0.2);
-}
-
-[data-theme="dark"] .emis {
-  background: rgba(59, 130, 246, 0.2);
-}
-
-[data-theme="dark"] .partiellement_paye {
-  background: rgba(139, 92, 246, 0.2);
-}
-
-[data-theme="dark"] .solde {
-  background: rgba(16, 185, 129, 0.2);
-}
-
-[data-theme="dark"] .annule {
-  background: rgba(239, 68, 68, 0.2);
 }

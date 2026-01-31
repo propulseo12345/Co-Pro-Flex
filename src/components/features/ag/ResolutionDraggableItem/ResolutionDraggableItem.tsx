@@ -2,7 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, ChevronUp, ChevronDown, Trash2, ChevronDown as ExpandIcon, ChevronUp as CollapseIcon } from 'lucide-react';
+import { GripVertical, ChevronUp, ChevronDown, Trash2, Pencil, ChevronDown as ExpandIcon, ChevronUp as CollapseIcon } from 'lucide-react';
 import { type MajorityType, MAJORITES } from '@/lib/constants/resolutions';
 import styles from './ResolutionDraggableItem.module.css';
 
@@ -26,6 +26,7 @@ interface ResolutionDraggableItemProps {
     onMoveUp: (index: number) => void;
     onMoveDown: (index: number) => void;
     onDelete: (id: string) => void;
+    onEdit?: (resolution: Resolution) => void;
     renderVariables?: (resolution: Resolution) => React.ReactNode;
 }
 
@@ -38,6 +39,7 @@ export function ResolutionDraggableItem({
     onMoveUp,
     onMoveDown,
     onDelete,
+    onEdit,
     renderVariables
 }: ResolutionDraggableItemProps) {
     const {
@@ -71,6 +73,13 @@ export function ResolutionDraggableItem({
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         onDelete(resolution.id);
+    };
+
+    const handleEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (onEdit) {
+            onEdit(resolution);
+        }
     };
 
     const handleToggle = () => {
@@ -158,6 +167,16 @@ export function ResolutionDraggableItem({
                         {renderVariables ? renderVariables(resolution) : resolution.texte}
                     </div>
                     <div className={styles.expandedActions}>
+                        {onEdit && (
+                            <button
+                                type="button"
+                                onClick={handleEdit}
+                                className={styles.editBtn}
+                                title="Modifier"
+                            >
+                                <Pencil size={14} /> Modifier
+                            </button>
+                        )}
                         <button
                             type="button"
                             onClick={handleDelete}

@@ -85,7 +85,7 @@
 .table th {
   text-align: left;
   padding: var(--space-md);
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
   color: var(--text-secondary);
   font-weight: 600;
   font-size: var(--text-xs);
@@ -101,11 +101,11 @@
 }
 
 .table tbody tr:hover {
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
 }
 
 .rowBlocked {
-  background: var(--warning-light) !important;
+  background: rgba(245, 158, 11, 0.15) !important;
 }
 
 /* Owner Info */
@@ -188,7 +188,7 @@
 /* Mode Select */
 .modeSelect {
   padding: var(--space-sm) var(--space-md);
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -299,21 +299,4 @@
   .modeSelect {
     min-width: 120px;
   }
-}
-
-/* Dark Mode */
-[data-theme="dark"] .table th {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .table tbody tr:hover {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .rowBlocked {
-  background: rgba(245, 158, 11, 0.15) !important;
-}
-
-[data-theme="dark"] .modeSelect {
-  background: var(--surface-secondary);
 }

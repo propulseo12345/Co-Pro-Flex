@@ -8,7 +8,7 @@ import { AgDocumentQuickActions } from '@/components/features/ag';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgMeetings } from '@/hooks/modules/useAgData';
-import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
+import { useAgDrafts, type AgDraft } from '@/hooks/modules/useAgDrafts';
 import { createClient } from '@/lib/supabase/client';
 import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
 import styles from './dashboard.module.css';
@@ -45,6 +45,21 @@ function getStatusBadge(status: AgStatus): { label: string; className: string } 
     case 'pv_generated': return { label: 'PV généré', className: styles.closed };
     default: return { label: status, className: '' };
   }
+}
+
+// Helper to map step number to path (source of truth for wizard navigation)
+const STEP_PATHS: Record<number, string> = {
+  1: 'edit',
+  2: 'agenda',
+  3: 'convocation',
+  4: 'envoi',
+  5: 'preparation',
+  6: 'session',
+  7: 'pv',
+};
+
+function getStepPath(step: number): string {
+  return STEP_PATHS[step] || 'edit';
 }
 
 // Component for displaying the next AG card
@@ -151,7 +166,7 @@ function NextAgCard({ ag, isConvoked }: { ag: AgOverview; isConvoked: boolean })
 export default function AGDashboardPage() {
   const { currentCoproId, isManager } = useCopro();
   const { meetings, nextMeeting, pastMeetings, isLoading, error, refresh } = useAgMeetings();
-  const { deleteDraft } = useAgDrafts();
+  const { drafts: supabaseDrafts, deleteDraft, isLoading: draftsLoading } = useAgDrafts();
 
   // State for localStorage drafts
   const [localStorageDrafts, setLocalStorageDrafts] = useState<LocalStorageDraft[]>([]);
@@ -265,12 +280,13 @@ export default function AGDashboardPage() {
     return nextMeeting.status === 'convoked' || nextMeeting.status === 'in_progress';
   }, [nextMeeting]);
 
-  // Get all draft meetings from Supabase, excluant les supprimés, avec titres renommés
+  // Get all draft meetings from Supabase (via useAgDrafts qui a currentStep)
+  // Exclure les supprimés, appliquer les titres renommés
   const draftMeetings = useMemo(() => {
-    return meetings
-      .filter((m) => m.status === 'draft' && !deletedIds.has(m.id))
-      .map((m) => ({ ...m, title: renamedTitles.get(m.id) || m.title }));
-  }, [meetings, deletedIds, renamedTitles]);
+    return supabaseDrafts
+      .filter((d) => !deletedIds.has(d.id))
+      .map((d) => ({ ...d, title: renamedTitles.get(d.id) || d.title }));
+  }, [supabaseDrafts, deletedIds, renamedTitles]);
 
   const totalDraftsCount = draftMeetings.length + localStorageDrafts.length;
 
@@ -278,17 +294,22 @@ export default function AGDashboardPage() {
     return <LoadingState message="Chargement de la copropriété..." />;
   }
 
-  // Build actions for Supabase draft items
-  const buildDraftActions = (ag: AgOverview): AgListItemAction[] => [
-    { icon: <Edit3 size={16} />, label: 'Continuer', href: `/ag/${ag.id}/edit`, title: 'Continuer la préparation' },
-    { icon: <ClipboardList size={16} />, label: 'Agenda', href: `/ag/${ag.id}/agenda`, title: 'Ordre du jour' },
+  // Build actions for Supabase draft items - utilise currentStep de la DB pour la navigation
+  const buildDraftActions = (draft: AgDraft): AgListItemAction[] => [
+    {
+      icon: <Edit3 size={16} />,
+      label: 'Continuer',
+      href: `/ag/${draft.id}/${getStepPath(draft.currentStep)}`,
+      title: `Reprendre à l'étape ${draft.currentStep}`,
+    },
+    { icon: <ClipboardList size={16} />, label: 'Agenda', href: `/ag/${draft.id}/agenda`, title: 'Ordre du jour' },
     {
       icon: <Trash2 size={16} />,
-      onClick: () => handleOpenDeleteConfirm(ag.id, ag.title || `AG ${getTypeLabel(ag.meeting_type)}`),
+      onClick: () => handleOpenDeleteConfirm(draft.id, draft.title || `AG ${getTypeLabel(draft.meeting_type)}`),
       title: 'Supprimer le brouillon',
       variant: 'danger',
-      disabled: deletingId === ag.id,
-      isLoading: deletingId === ag.id,
+      disabled: deletingId === draft.id,
+      isLoading: deletingId === draft.id,
     },
   ];
 
@@ -364,25 +385,27 @@ export default function AGDashboardPage() {
               </div>
               {totalDraftsCount > 0 ? (
                 <div className={clsx(styles.list, styles.listDraft)}>
-                  {draftMeetings.map((ag) => {
-                    const typeLabel = getTypeLabel(ag.meeting_type);
+                  {draftMeetings.map((draft) => {
+                    const typeLabel = getTypeLabel(draft.meeting_type);
+                    const stepLabel = `Étape ${draft.currentStep}/7`;
                     const meta = [
-                      ag.meeting_date ? `Prévue le ${new Date(ag.meeting_date).toLocaleDateString('fr-FR')}` : 'Date non définie',
-                      ag.location,
-                      `${ag.resolutions_count || 0} résolution(s)`,
+                      draft.meeting_date ? `Prévue le ${new Date(draft.meeting_date).toLocaleDateString('fr-FR')}` : 'Date non définie',
+                      draft.location,
+                      `${draft.resolutionsCount || 0} résolution(s)`,
+                      stepLabel,
                     ].filter(Boolean).join(' • ');
 
                     return (
                       <AgListItem
-                        key={ag.id}
+                        key={draft.id}
                         icon={<Edit3 size={20} aria-hidden="true" />}
-                        title={ag.title || `AG ${typeLabel}`}
+                        title={draft.title || `AG ${typeLabel}`}
                         meta={meta}
-                        actions={buildDraftActions(ag)}
+                        actions={buildDraftActions(draft)}
                         variant="draft"
                         editable
-                        onRename={(newTitle) => handleRename(ag.id, newTitle)}
-                        isRenaming={renamingId === ag.id}
+                        onRename={(newTitle) => handleRename(draft.id, newTitle)}
+                        isRenaming={renamingId === draft.id}
                       />
                     );
                   })}

@@ -122,22 +122,3 @@
         transform: rotate(360deg);
     }
 }
-
-/* Dark mode */
-:global([data-theme='dark']) .dropZone {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border);
-}
-
-:global([data-theme='dark']) .dropZone:hover {
-    background-color: var(--color-bg-hover);
-}
-
-:global([data-theme='dark']) .dropZoneActive {
-    background-color: rgba(59, 130, 246, 0.1);
-}
-
-:global([data-theme='dark']) .loading,
-:global([data-theme='dark']) .vide {
-    background-color: var(--color-bg-secondary);
-}

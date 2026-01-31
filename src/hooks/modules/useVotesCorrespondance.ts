@@ -1,22 +1,19 @@
 /**
  * Hook pour gérer les votes par correspondance d'une AG
  *
- * Fournit un état complet et des helpers pour :
- * - Saisir les votes par copropriétaire et résolution
- * - Gérer les tantièmes votés
- * - Upload et gestion des justificatifs
- * - Calcul de progression temps réel
- * - Export CSV récapitulatif
+ * MIGRATION 2026-01-31: Source de vérité = Supabase uniquement
+ * - Votes stockés dans ag_votes (vote_source = 'correspondence')
+ * - Résolutions chargées depuis ag_resolutions
+ * - Copropriétaires chargés depuis coproprietaires
+ * - RPCs: save_votes_correspondance, get_votes_correspondance
  */
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { MOCK_COPROPRIETAIRES, type Coproprietaire } from '@/data/mock';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import type {
-    VoteCorrespondance,
     JustificatifVote,
-    VoteResolution,
     VoteChoiceUI,
     VoteCompletionStatus,
 } from '@/types/models/ag';
@@ -31,6 +28,14 @@ interface Resolution {
     texte?: string;
     majorite?: string;
     numero?: number;
+}
+
+interface CoproprietaireDB {
+    id: string;
+    full_name: string;
+    email: string | null;
+    tantiemes: number;
+    lot_ids: string[];
 }
 
 export interface VoteCorrespondanceState {
@@ -53,7 +58,12 @@ export interface VotesCorrespondanceProgress {
     pourcentageCompletion: number;
 }
 
-export interface CoproprietaireWithVoteStatus extends Coproprietaire {
+export interface CoproprietaireWithVoteStatus {
+    id: string;
+    nom: string;
+    email: string | null;
+    tantiemes: number;
+    lot: string;
     votesCount: number;
     totalResolutions: number;
     completionStatus: VoteCompletionStatus;
@@ -95,7 +105,7 @@ export interface UseVotesCorrespondanceReturn {
     markAsDraft: (coproId: string) => void;
 
     // Sauvegarde et export
-    save: () => void;
+    save: () => Promise<void>;
     exportCsv: () => void;
 
     // Validation
@@ -107,60 +117,37 @@ export interface UseVotesCorrespondanceReturn {
 // Helpers
 // ============================================================================
 
-const STORAGE_KEY_PREFIX = 'ag-votes-correspondance-';
-const RESOLUTIONS_KEY_PREFIX = 'ag-resolutions-';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
-function getStorageKey(agId: string): string {
-    return `${STORAGE_KEY_PREFIX}${agId}`;
+function isValidUUID(str: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
 }
 
-function getResolutionsKey(agId: string): string {
-    return `${RESOLUTIONS_KEY_PREFIX}${agId}`;
+function mapVoteFromDB(vote: string): VoteChoiceUI {
+    const mapping: Record<string, VoteChoiceUI> = {
+        'for': 'POUR',
+        'against': 'CONTRE',
+        'abstention': 'ABSTENTION',
+    };
+    return mapping[vote] || null;
 }
 
-function loadVotesFromStorage(agId: string): Record<string, VoteCorrespondanceState> {
-    if (typeof window === 'undefined') return {};
-
-    try {
-        const stored = localStorage.getItem(getStorageKey(agId));
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch (error) {
-        // Silently fail, return empty
-    }
-    return {};
+function mapVoteToDB(choice: VoteChoiceUI): string | null {
+    const mapping: Record<string, string> = {
+        'POUR': 'for',
+        'CONTRE': 'against',
+        'ABSTENTION': 'abstention',
+    };
+    return choice ? mapping[choice] || null : null;
 }
 
-function saveVotesToStorage(agId: string, votes: Record<string, VoteCorrespondanceState>): void {
-    if (typeof window === 'undefined') return;
-
-    try {
-        localStorage.setItem(getStorageKey(agId), JSON.stringify(votes));
-    } catch (error) {
-        // Silently fail
-    }
-}
-
-function loadResolutionsFromStorage(agId: string): Resolution[] {
-    if (typeof window === 'undefined') return [];
-
-    try {
-        const stored = localStorage.getItem(getResolutionsKey(agId));
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch (error) {
-        // Silently fail
-    }
-    return [];
-}
-
-function createEmptyVoteState(copro: Coproprietaire): VoteCorrespondanceState {
+function createEmptyVoteState(coproId: string, tantiemes: number): VoteCorrespondanceState {
     return {
-        coproprietaireId: copro.id,
-        tantiemesVotes: copro.tantiemes,
-        tantiemesMax: copro.tantiemes,
+        coproprietaireId: coproId,
+        tantiemesVotes: tantiemes,
+        tantiemesMax: tantiemes,
         votesByResolutionId: {},
         justificatif: null,
         statut: 'BROUILLON',
@@ -191,74 +178,234 @@ export function useVotesCorrespondance({
 }: UseVotesCorrespondanceOptions): UseVotesCorrespondanceReturn {
     const [votesState, setVotesState] = useState<Record<string, VoteCorrespondanceState>>({});
     const [resolutions, setResolutions] = useState<Resolution[]>([]);
+    const [coproprietairesDB, setCoproprietairesDB] = useState<CoproprietaireDB[]>([]);
     const [selectedCoproId, setSelectedCoproId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [coproId, setCoproId] = useState<string | null>(null);
 
-    // Charger les données au montage
+    // Debounce save
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const pendingSavesRef = useRef<Set<string>>(new Set());
+
+    // Load data from Supabase
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        if (!isValidUUID(agId)) {
+            setIsLoading(false);
+            return;
+        }
 
-        setIsLoading(true);
+        const loadData = async () => {
+            setIsLoading(true);
 
-        // Charger les résolutions
-        const loadedResolutions = loadResolutionsFromStorage(agId);
-        setResolutions(loadedResolutions);
+            try {
+                const supabase = createUntypedClient();
 
-        // Charger les votes existants
-        const loadedVotes = loadVotesFromStorage(agId);
+                // 1. Get AG info to get copro_id
+                const { data: agData, error: agError } = await supabase
+                    .from('ag_meetings')
+                    .select('copro_id')
+                    .eq('id', agId)
+                    .single();
 
-        // Initialiser les états manquants pour chaque copropriétaire
-        const initialState: Record<string, VoteCorrespondanceState> = {};
-        MOCK_COPROPRIETAIRES.forEach(copro => {
-            if (loadedVotes[copro.id]) {
-                // Mettre à jour tantiemesMax si nécessaire
-                initialState[copro.id] = {
-                    ...loadedVotes[copro.id],
-                    tantiemesMax: copro.tantiemes,
-                };
-            } else {
-                initialState[copro.id] = createEmptyVoteState(copro);
+                if (agError || !agData) {
+                    console.error('[useVotesCorrespondance] AG not found:', agError);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const coproprieteId = agData.copro_id;
+                setCoproId(coproprieteId);
+
+                // 2. Load resolutions for this AG
+                const { data: resolutionsData, error: resError } = await supabase
+                    .from('ag_resolutions')
+                    .select('id, title, description, majority_type, resolution_number')
+                    .eq('ag_id', agId)
+                    .order('resolution_number', { ascending: true });
+
+                if (resError) {
+                    console.error('[useVotesCorrespondance] Error loading resolutions:', resError);
+                }
+
+                const mappedResolutions: Resolution[] = (resolutionsData || []).map((r: {
+                    id: string;
+                    title: string;
+                    description: string | null;
+                    majority_type: string;
+                    resolution_number: number;
+                }) => ({
+                    id: r.id,
+                    titre: r.title,
+                    texte: r.description || undefined,
+                    majorite: r.majority_type,
+                    numero: r.resolution_number,
+                }));
+                setResolutions(mappedResolutions);
+
+                // 3. Load coproprietaires for this copro
+                const { data: coprosData, error: coprosError } = await supabase
+                    .from('coproprietaires')
+                    .select('id, full_name, email, tantiemes, lot_ids')
+                    .eq('copro_id', coproprieteId);
+
+                if (coprosError) {
+                    console.error('[useVotesCorrespondance] Error loading coproprietaires:', coprosError);
+                }
+
+                const copros: CoproprietaireDB[] = coprosData || [];
+                setCoproprietairesDB(copros);
+
+                // 4. Load existing correspondence votes via RPC
+                const { data: votesResult, error: votesError } = await supabase
+                    .rpc('get_votes_correspondance', { p_ag_id: agId });
+
+                if (votesError) {
+                    console.error('[useVotesCorrespondance] Error loading votes:', votesError);
+                }
+
+                // 5. Build votes state from loaded data
+                const initialState: Record<string, VoteCorrespondanceState> = {};
+
+                copros.forEach((copro: CoproprietaireDB) => {
+                    initialState[copro.id] = createEmptyVoteState(copro.id, copro.tantiemes || 0);
+                });
+
+                // Merge with loaded votes
+                if (votesResult?.success && votesResult.votes_by_coproprietaire) {
+                    Object.entries(votesResult.votes_by_coproprietaire).forEach(([coproIdKey, data]: [string, unknown]) => {
+                        const coproData = data as {
+                            coproprietaire_id: string;
+                            tantiemes_max: number;
+                            votes: Array<{ resolution_id: string; vote: string; tantiemes: number }>;
+                        };
+
+                        if (initialState[coproIdKey]) {
+                            const votesByResolution: Record<string, VoteChoiceUI> = {};
+                            let maxTantiemes = 0;
+
+                            coproData.votes.forEach((v) => {
+                                votesByResolution[v.resolution_id] = mapVoteFromDB(v.vote);
+                                if (v.tantiemes > maxTantiemes) maxTantiemes = v.tantiemes;
+                            });
+
+                            initialState[coproIdKey] = {
+                                ...initialState[coproIdKey],
+                                votesByResolutionId: votesByResolution,
+                                tantiemesVotes: maxTantiemes || initialState[coproIdKey].tantiemesMax,
+                                statut: Object.keys(votesByResolution).length === mappedResolutions.length ? 'VALIDE' : 'BROUILLON',
+                            };
+                        }
+                    });
+                }
+
+                setVotesState(initialState);
+
+            } catch (err) {
+                console.error('[useVotesCorrespondance] Error:', err);
+            } finally {
+                setIsLoading(false);
             }
-        });
+        };
 
-        setVotesState(initialState);
-        setIsLoading(false);
+        loadData();
     }, [agId]);
 
-    // Sauvegarder automatiquement quand l'état change
-    useEffect(() => {
-        if (!isLoading && Object.keys(votesState).length > 0) {
-            saveVotesToStorage(agId, votesState);
-        }
-    }, [votesState, agId, isLoading]);
+    // Save votes to Supabase (debounced)
+    const saveVotesForCopro = useCallback(async (coproprietaireId: string) => {
+        if (!isValidUUID(agId) || !coproprietaireId) return;
 
-    // Copropriétaires avec statut de vote
+        const state = votesState[coproprietaireId];
+        if (!state) return;
+
+        try {
+            const supabase = createUntypedClient();
+
+            // Build votes array for RPC
+            const votes = Object.entries(state.votesByResolutionId)
+                .filter(([, choice]) => choice !== null)
+                .map(([resolutionId, choice]) => ({
+                    resolution_id: resolutionId,
+                    vote: mapVoteToDB(choice),
+                    tantiemes: state.tantiemesVotes,
+                }));
+
+            const { data, error } = await supabase.rpc('save_votes_correspondance', {
+                p_ag_id: agId,
+                p_coproprietaire_id: coproprietaireId,
+                p_votes: votes,
+                p_status: state.statut === 'VALIDE' ? 'validated' : 'draft',
+            });
+
+            if (error) {
+                console.error('[useVotesCorrespondance] Error saving votes:', error);
+            } else if (data?.success) {
+                console.log('[useVotesCorrespondance] Votes saved:', data.upserted_count);
+            }
+        } catch (err) {
+            console.error('[useVotesCorrespondance] Save error:', err);
+        }
+    }, [agId, votesState]);
+
+    // Debounced save effect
+    useEffect(() => {
+        if (pendingSavesRef.current.size === 0) return;
+
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        saveTimeoutRef.current = setTimeout(() => {
+            const coprosToSave = Array.from(pendingSavesRef.current);
+            pendingSavesRef.current.clear();
+
+            coprosToSave.forEach(coproprietaireId => {
+                saveVotesForCopro(coproprietaireId);
+            });
+        }, 1000); // 1 second debounce
+
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, [votesState, saveVotesForCopro]);
+
+    // Mark copro for save
+    const markForSave = useCallback((coproprietaireId: string) => {
+        pendingSavesRef.current.add(coproprietaireId);
+    }, []);
+
+    // Coproprietaires with vote status
     const coproprietaires = useMemo<CoproprietaireWithVoteStatus[]>(() => {
-        return MOCK_COPROPRIETAIRES.map(copro => {
+        return coproprietairesDB.map(copro => {
             const state = votesState[copro.id];
             const votesCount = state ? countVotes(state) : 0;
             const complete = state ? isComplete(state, resolutions.length) : false;
 
             return {
-                ...copro,
+                id: copro.id,
+                nom: copro.full_name,
+                email: copro.email,
+                tantiemes: copro.tantiemes || 0,
+                lot: copro.lot_ids?.join(', ') || '',
                 votesCount,
                 totalResolutions: resolutions.length,
                 completionStatus: complete ? 'COMPLET' : 'INCOMPLET',
                 hasJustificatif: state?.justificatif !== null,
-                tantiemesVotes: state?.tantiemesVotes ?? copro.tantiemes,
+                tantiemesVotes: state?.tantiemesVotes ?? (copro.tantiemes || 0),
             };
         });
-    }, [votesState, resolutions.length]);
+    }, [votesState, resolutions.length, coproprietairesDB]);
 
-    // État du copropriétaire sélectionné
+    // Selected copro state
     const selectedCoproState = useMemo(() => {
         if (!selectedCoproId) return null;
         return votesState[selectedCoproId] ?? null;
     }, [selectedCoproId, votesState]);
 
-    // Progression globale
+    // Progress
     const progress = useMemo<VotesCorrespondanceProgress>(() => {
-        const totalCopros = MOCK_COPROPRIETAIRES.length;
+        const totalCopros = coproprietairesDB.length;
         const totalRes = resolutions.length;
         const totalPossible = totalCopros * totalRes;
 
@@ -290,16 +437,16 @@ export function useVotesCorrespondance({
                 ? Math.round((totalVotes / totalPossible) * 100)
                 : 0,
         };
-    }, [votesState, resolutions.length]);
+    }, [votesState, resolutions.length, coproprietairesDB.length]);
 
     // Actions
-    const selectCopro = useCallback((coproId: string | null) => {
-        setSelectedCoproId(coproId);
+    const selectCopro = useCallback((coproIdParam: string | null) => {
+        setSelectedCoproId(coproIdParam);
     }, []);
 
-    const setVote = useCallback((coproId: string, resolutionId: string, choice: VoteChoiceUI) => {
+    const setVote = useCallback((coproprietaireId: string, resolutionId: string, choice: VoteChoiceUI) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             const currentChoice = state.votesByResolutionId[resolutionId];
@@ -307,7 +454,7 @@ export function useVotesCorrespondance({
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     votesByResolutionId: {
                         ...state.votesByResolutionId,
@@ -318,14 +465,14 @@ export function useVotesCorrespondance({
                 },
             };
         });
-    }, []);
+        markForSave(coproprietaireId);
+    }, [markForSave]);
 
-    const setAllVotes = useCallback((coproId: string, choice: VoteChoiceUI) => {
+    const setAllVotes = useCallback((coproprietaireId: string, choice: VoteChoiceUI) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
-            // Vérifier si tous les votes sont déjà sur ce choix
             const allSame = resolutions.every(
                 res => state.votesByResolutionId[res.id] === choice
             );
@@ -337,7 +484,7 @@ export function useVotesCorrespondance({
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     votesByResolutionId: newVotes,
                     dateModification: new Date().toISOString(),
@@ -345,16 +492,17 @@ export function useVotesCorrespondance({
                 },
             };
         });
-    }, [resolutions]);
+        markForSave(coproprietaireId);
+    }, [resolutions, markForSave]);
 
-    const clearVotes = useCallback((coproId: string) => {
+    const clearVotes = useCallback((coproprietaireId: string) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     votesByResolutionId: {},
                     dateModification: new Date().toISOString(),
@@ -362,53 +510,56 @@ export function useVotesCorrespondance({
                 },
             };
         });
-    }, []);
+        markForSave(coproprietaireId);
+    }, [markForSave]);
 
-    const setTantiemes = useCallback((coproId: string, value: number) => {
+    const setTantiemes = useCallback((coproprietaireId: string, value: number) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     tantiemesVotes: Math.max(0, Math.min(value, state.tantiemesMax)),
                     dateModification: new Date().toISOString(),
                 },
             };
         });
-    }, []);
+        markForSave(coproprietaireId);
+    }, [markForSave]);
 
-    const resetTantiemes = useCallback((coproId: string) => {
+    const resetTantiemes = useCallback((coproprietaireId: string) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     tantiemesVotes: state.tantiemesMax,
                     dateModification: new Date().toISOString(),
                 },
             };
         });
-    }, []);
+        markForSave(coproprietaireId);
+    }, [markForSave]);
 
-    const uploadJustificatif = useCallback(async (coproId: string, file: File) => {
-        // Validation du fichier
+    const uploadJustificatif = useCallback(async (coproprietaireId: string, file: File) => {
         const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
             throw new Error('Type de fichier non autorisé. Utilisez PDF, JPG ou PNG.');
         }
 
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
             throw new Error('Fichier trop volumineux. Maximum 10 Mo.');
         }
 
-        // Lire le fichier en base64 pour stockage local
+        // TODO: Upload to Supabase Storage and store reference
+        // For now, store as base64 in state (to be migrated to storage)
         return new Promise<void>((resolve, reject) => {
             const reader = new FileReader();
 
@@ -422,12 +573,12 @@ export function useVotesCorrespondance({
                 };
 
                 setVotesState(prev => {
-                    const state = prev[coproId];
+                    const state = prev[coproprietaireId];
                     if (!state) return prev;
 
                     return {
                         ...prev,
-                        [coproId]: {
+                        [coproprietaireId]: {
                             ...state,
                             justificatif,
                             dateModification: new Date().toISOString(),
@@ -446,14 +597,14 @@ export function useVotesCorrespondance({
         });
     }, []);
 
-    const removeJustificatif = useCallback((coproId: string) => {
+    const removeJustificatif = useCallback((coproprietaireId: string) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     justificatif: null,
                     dateModification: new Date().toISOString(),
@@ -462,8 +613,8 @@ export function useVotesCorrespondance({
         });
     }, []);
 
-    const getValidationErrors = useCallback((coproId: string): string[] => {
-        const state = votesState[coproId];
+    const getValidationErrors = useCallback((coproprietaireId: string): string[] => {
+        const state = votesState[coproprietaireId];
         if (!state) return ['Copropriétaire non trouvé'];
 
         const errors: string[] = [];
@@ -485,53 +636,58 @@ export function useVotesCorrespondance({
         return errors;
     }, [votesState, resolutions.length]);
 
-    const canMarkAsComplete = useCallback((coproId: string): boolean => {
-        const errors = getValidationErrors(coproId);
+    const canMarkAsComplete = useCallback((coproprietaireId: string): boolean => {
+        const errors = getValidationErrors(coproprietaireId);
         return errors.length === 0;
     }, [getValidationErrors]);
 
-    const markAsComplete = useCallback((coproId: string) => {
-        if (!canMarkAsComplete(coproId)) return;
+    const markAsComplete = useCallback((coproprietaireId: string) => {
+        if (!canMarkAsComplete(coproprietaireId)) return;
 
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     statut: 'VALIDE',
                     dateModification: new Date().toISOString(),
                 },
             };
         });
-    }, [canMarkAsComplete]);
+        markForSave(coproprietaireId);
+    }, [canMarkAsComplete, markForSave]);
 
-    const markAsDraft = useCallback((coproId: string) => {
+    const markAsDraft = useCallback((coproprietaireId: string) => {
         setVotesState(prev => {
-            const state = prev[coproId];
+            const state = prev[coproprietaireId];
             if (!state) return prev;
 
             return {
                 ...prev,
-                [coproId]: {
+                [coproprietaireId]: {
                     ...state,
                     statut: 'BROUILLON',
                     dateModification: new Date().toISOString(),
                 },
             };
         });
-    }, []);
+        markForSave(coproprietaireId);
+    }, [markForSave]);
 
-    const save = useCallback(() => {
-        saveVotesToStorage(agId, votesState);
-    }, [agId, votesState]);
+    const save = useCallback(async () => {
+        // Force save all pending changes
+        const coprosToSave = Object.keys(votesState);
+        for (const coproprietaireId of coprosToSave) {
+            await saveVotesForCopro(coproprietaireId);
+        }
+    }, [votesState, saveVotesForCopro]);
 
     const exportCsv = useCallback(() => {
         if (resolutions.length === 0) return;
 
-        // En-têtes
         const headers = [
             'Copropriétaire',
             'Lot',
@@ -542,8 +698,7 @@ export function useVotesCorrespondance({
             'Justificatif',
         ];
 
-        // Lignes de données
-        const rows = MOCK_COPROPRIETAIRES.map(copro => {
+        const rows = coproprietairesDB.map(copro => {
             const state = votesState[copro.id];
             const votes = resolutions.map(res => {
                 const choice = state?.votesByResolutionId[res.id];
@@ -551,23 +706,21 @@ export function useVotesCorrespondance({
             });
 
             return [
-                copro.nom,
-                copro.lot,
-                copro.tantiemes.toString(),
-                (state?.tantiemesVotes ?? copro.tantiemes).toString(),
+                copro.full_name,
+                copro.lot_ids?.join(', ') || '',
+                (copro.tantiemes || 0).toString(),
+                (state?.tantiemesVotes ?? (copro.tantiemes || 0)).toString(),
                 ...votes,
                 state ? (isComplete(state, resolutions.length) ? 'COMPLET' : 'INCOMPLET') : 'INCOMPLET',
                 state?.justificatif ? 'Oui' : 'Non',
             ];
         });
 
-        // Construire le CSV
         const csvContent = [
             headers.join(';'),
             ...rows.map(row => row.map(cell => `"${cell}"`).join(';')),
         ].join('\n');
 
-        // Télécharger
         const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -577,7 +730,7 @@ export function useVotesCorrespondance({
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    }, [agId, votesState, resolutions]);
+    }, [agId, votesState, resolutions, coproprietairesDB]);
 
     return {
         coproprietaires,

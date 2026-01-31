@@ -183,7 +183,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-2xl);
-  background: var(--success-light);
+  background: rgba(34, 197, 94, 0.1);
   border-radius: var(--radius-lg);
   text-align: center;
 }
@@ -279,7 +279,7 @@
   justify-content: center;
   gap: var(--space-sm);
   padding: var(--space-md);
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -339,29 +339,6 @@
   .shortcutsGrid {
     grid-template-columns: 1fr;
   }
-}
-
-/* ================================================
-   Dark Mode
-   ================================================ */
-:global([data-theme="dark"]) .metricCard {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .activityList {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .shortcutBtn {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .shortcutBtn:hover {
-  background: var(--primary);
-}
-
-:global([data-theme="dark"]) .noPriorities {
-  background: rgba(34, 197, 94, 0.1);
 }
 
 /* ================================================

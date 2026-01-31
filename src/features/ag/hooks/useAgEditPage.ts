@@ -429,6 +429,8 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
           location: formData.adresseComplete || formData.lieu || null,
           opening_notes: serializeMetadata(formData),
           updated_at: new Date().toISOString(),
+          // Met à jour current_step vers étape 2 (agenda) après validation étape 1
+          current_step: 2,
         };
 
         // Mettre à jour meeting_date seulement si valide

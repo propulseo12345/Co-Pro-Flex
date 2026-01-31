@@ -67,7 +67,7 @@
 .templatesSection {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-secondary);
+  background: var(--surface);
 }
 
 .templatesSectionHeader {
@@ -104,7 +104,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: var(--bg);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
@@ -114,7 +114,7 @@
 
 .templateCard:hover {
   border-color: var(--primary);
-  background: var(--primary-light);
+  background: rgba(96, 165, 250, 0.15);
 }
 
 .templateTitle {
@@ -198,7 +198,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 0.8125rem;
-  background: var(--bg);
+  background: var(--bg-secondary);
   color: var(--text);
 }
 
@@ -311,7 +311,7 @@
 
 .variableForm {
   padding: 1rem;
-  background: var(--surface);
+  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -362,7 +362,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: var(--bg);
+  background: var(--surface);
   border-radius: 6px;
   font-size: 0.8125rem;
 }
@@ -375,7 +375,7 @@
   height: 24px;
   border-radius: 4px;
   border: none;
-  background: var(--bg-secondary);
+  background: var(--surface);
   color: var(--text-secondary);
   cursor: pointer;
 }
@@ -479,7 +479,7 @@
   padding: 0.5rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--bg);
+  background: var(--bg-secondary);
 }
 
 .tagsList {
@@ -493,7 +493,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background: var(--bg-secondary);
+  background: var(--surface);
   border-radius: 4px;
   font-size: 0.75rem;
   color: var(--text);
@@ -570,58 +570,6 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-/* Dark Mode */
-:global([data-theme="dark"]) .templatesSection {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .templateCard {
-  background: var(--bg-secondary);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .templateCard:hover {
-  background: rgba(96, 165, 250, 0.15);
-}
-
-:global([data-theme="dark"]) .input,
-:global([data-theme="dark"]) .select,
-:global([data-theme="dark"]) .textarea,
-:global([data-theme="dark"]) .inputSmall,
-:global([data-theme="dark"]) .selectSmall {
-  background: var(--bg-secondary);
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .variableForm {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .variableItem {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .varInsertBtn {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .tag {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .tagsInput {
-  background: var(--bg-secondary);
-}
-
-:global([data-theme="dark"]) .scopeOption {
-  border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .scopeOption:hover {
-  background: rgba(96, 165, 250, 0.1);
-}
-
 /* Responsive */
 @media (max-width: 640px) {
   .formRow {

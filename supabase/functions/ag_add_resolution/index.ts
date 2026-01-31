@@ -17,6 +17,7 @@ interface AddResolutionRequest {
   majority_type: "art24" | "art25" | "art25_1" | "art26" | "art26_1" | "unanimity";
   resolution_type?: "accounts" | "budget" | "works" | "management" | "rules" | "election" | "other";
   amount?: number;
+  variables?: Record<string, unknown>; // JSONB variables for template interpolation
 }
 
 // Types pour la réponse
@@ -236,7 +237,7 @@ Deno.serve(async (req: Request) => {
       resolutionNumber = (maxRes?.resolution_number || 0) + 1;
     }
 
-    // Créer la résolution
+    // Créer la résolution (include variables for template interpolation)
     const { data: resolution, error: resError } = await supabase
       .from("ag_resolutions")
       .insert({
@@ -249,6 +250,7 @@ Deno.serve(async (req: Request) => {
         resolution_type: params.resolution_type || "other",
         amount: params.amount || null,
         status: "pending",
+        variables: params.variables || null, // JSONB variables for template
       })
       .select("id, resolution_number, title, majority_type, status")
       .single();

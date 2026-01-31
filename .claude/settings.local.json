@@ -37,7 +37,12 @@
       "Bash(npx next build:*)",
       "mcp__plugin_supabase_supabase__get_logs",
       "Bash(head:*)",
-      "Bash(npm run css:ag:check:*)"
+      "Bash(npm run css:ag:check:*)",
+      "Bash(tee:*)",
+      "Bash(node:*)",
+      "Bash(if not exist \"C:\\\\Users\\\\etien\\\\Desktop\\\\Co-Pro-Flex-main\\\\scripts\" mkdir \"C:\\\\Users\\\\etien\\\\Desktop\\\\Co-Pro-Flex-main\\\\scripts\")",
+      "Bash(npm install:*)",
+      "Bash(npx playwright install chromium)"
     ]
   }
 }

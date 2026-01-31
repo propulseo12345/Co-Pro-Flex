@@ -1,5 +1,5 @@
 .editorContainer {
-    background: var(--surface);
+    background: var(--surface-secondary);
     border: 1px solid var(--primary);
     border-radius: var(--radius-md);
     padding: var(--space-md);
@@ -59,7 +59,7 @@
 }
 
 .cancelButton {
-    background: var(--bg-secondary);
+    background: var(--surface);
     color: var(--text-secondary);
     border: 1px solid var(--border);
 }
@@ -321,7 +321,7 @@
 }
 
 .dropdownItem:hover {
-    background: var(--bg-secondary);
+    background: var(--surface-secondary);
 }
 
 .dropdownEmpty {
@@ -368,10 +368,10 @@
     align-items: flex-start;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background: var(--warning-light);
+    background: rgba(245, 158, 11, 0.15);
     border: 1px solid var(--warning);
     border-radius: var(--radius-sm);
-    color: var(--warning-dark, #92400e);
+    color: var(--warning);
     font-size: var(--text-sm);
 }
 
@@ -384,54 +384,11 @@
 .selectInput {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right var(--space-sm) center;
     padding-right: calc(var(--space-md) + 20px);
 }
-
-/* ===== Dark mode ===== */
-:global([data-theme="dark"]) .editorContainer {
-    background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .textInput,
-:global([data-theme="dark"]) .dateInput,
-:global([data-theme="dark"]) .montantInput,
-:global([data-theme="dark"]) .pourcentageInput,
-:global([data-theme="dark"]) .dureeInput,
-:global([data-theme="dark"]) .numeroInput,
-:global([data-theme="dark"]) .textareaInput,
-:global([data-theme="dark"]) .searchInput,
-:global([data-theme="dark"]) .selectInput {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .dropdown {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .dropdownItem:hover {
-    background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .cancelButton {
-    background: var(--surface);
-    border-color: var(--border);
-}
-
-:global([data-theme="dark"]) .warningMessage {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: var(--warning);
-    color: var(--warning);
-}
-
-:global([data-theme="dark"]) .selectInput {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-}
-
 /* ===== Rôles AG - Sélection avec options ===== */
 .roleSelectionContainer {
     display: flex;
@@ -441,7 +398,7 @@
 
 .gestionnaireOption {
     padding: var(--space-md);
-    background: var(--info-light);
+    background: rgba(59, 130, 246, 0.15);
     border: 1px solid var(--info);
     border-radius: var(--radius-sm);
 }
@@ -464,7 +421,7 @@
 }
 
 .gestionnaireCheckbox svg {
-    color: var(--info);
+    color: #93C5FD;
     flex-shrink: 0;
 }
 
@@ -479,12 +436,12 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background: var(--success-light);
+    background: rgba(52, 211, 153, 0.15);
     border: 1px solid var(--success);
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--success);
+    color: #6EE7B7;
 }
 
 .gestionnaireSelected svg {
@@ -497,18 +454,16 @@
     margin-right: var(--space-xs);
 }
 
+/* ===== Financing Schedule Editor ===== */
+
+.financingEditorWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.scheduleEditorContainer {
+    margin-top: var(--space-sm);
+}
+
 /* ===== Dark mode - Rôles AG ===== */
-:global([data-theme="dark"]) .gestionnaireOption {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: var(--info);
-}
-
-:global([data-theme="dark"]) .gestionnaireSelected {
-    background: rgba(52, 211, 153, 0.15);
-    border-color: #6EE7B7;
-    color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .gestionnaireCheckbox svg {
-    color: #93C5FD;
-}

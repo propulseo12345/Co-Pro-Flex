@@ -45,7 +45,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .draftsSection {
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
@@ -101,7 +101,7 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-md);
-  background: var(--danger-light);
+  background: rgba(239, 68, 68, 0.15);
   border-radius: var(--radius-md);
   color: var(--danger);
   font-size: var(--text-sm);
@@ -175,7 +175,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .draftCard {
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -335,7 +335,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-sm) var(--space-md);
-  background: var(--bg-secondary);
+  background: var(--surface);
   border-top: 1px solid var(--border);
 }
 
@@ -383,14 +383,14 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .nextAgCard {
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
 }
 
 .deroulementCard {
-  background: linear-gradient(135deg, var(--success-light) 0%, var(--surface) 100%);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, var(--surface-secondary) 100%);
   border-color: var(--success);
 }
 
@@ -534,7 +534,7 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: var(--bg-secondary);
+  background: var(--surface-secondary);
   transition: background var(--transition-base);
 }
 
@@ -596,7 +596,7 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
-  background: var(--surface);
+  background: var(--surface-secondary);
   color: var(--text-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -638,7 +638,7 @@
   align-items: center;
   text-align: center;
   padding: var(--space-3xl) var(--space-xl);
-  background: var(--surface);
+  background: var(--surface-secondary);
   border: 1px dashed var(--border);
   border-radius: var(--radius-lg);
 }
@@ -649,7 +649,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-secondary);
+  background: var(--surface);
   border-radius: var(--radius-xl);
   color: var(--text-tertiary);
   margin-bottom: var(--space-lg);
@@ -672,60 +672,3 @@
 /* ═══════════════════════════════════════════════════════════════
    Dark Mode
    ═══════════════════════════════════════════════════════════════ */
-
-:global([data-theme="dark"]) .draftsSection {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .draftCard {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .draftCard:hover {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .draftCardHeader,
-:global([data-theme="dark"]) .draftCardFooter {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .nextAgCard {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .deroulementCard {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, var(--surface-secondary) 100%);
-}
-
-:global([data-theme="dark"]) .historyItem {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .historyItem:hover {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .historyIcon {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .historyLink {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .emptyState {
-  background: var(--surface-secondary);
-}
-
-:global([data-theme="dark"]) .emptyStateIcon {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .draftsEmpty {
-  background: var(--surface);
-}
-
-:global([data-theme="dark"]) .draftsError {
-  background: rgba(239, 68, 68, 0.15);
-}

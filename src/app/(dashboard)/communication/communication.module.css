@@ -60,7 +60,7 @@
   display: flex;
   gap: 1.25rem;
   padding: 1.75rem 1.5rem;
-  background: var(--card-bg);
+  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
   border: 1px solid var(--border-color);
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -83,9 +83,9 @@
 }
 
 .statCard:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glow-primary);
   transform: translateY(-4px);
-  border-color: var(--primary-light);
+  border-color: var(--primary-color);
 }
 
 .statCard:hover::before {
@@ -110,27 +110,27 @@
 /* Stat Icon Color Variants */
 .statIconBlue {
   background: var(--icon-bg-blue);
-  color: #0284c7;
+  color: #60a5fa;
 }
 
 .statIconIndigo {
   background: var(--icon-bg-indigo);
-  color: #4f46e5;
+  color: #818cf8;
 }
 
 .statIconAmber {
   background: var(--icon-bg-amber);
-  color: #f59e0b;
+  color: #fbbf24;
 }
 
 .statIconGreen {
   background: var(--icon-bg-green);
-  color: #10b981;
+  color: #34d399;
 }
 
 .statIconPurple {
   background: var(--icon-bg-purple);
-  color: #8b5cf6;
+  color: #a78bfa;
 }
 
 .statContent {
@@ -175,7 +175,7 @@
 
 .moduleCard {
   padding: 2rem;
-  background: var(--card-bg);
+  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
   border: 2px solid var(--border-color);
   border-radius: 16px;
   text-decoration: none;
@@ -190,19 +190,19 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent, var(--primary-light));
+  background: linear-gradient(135deg, transparent, rgba(129, 140, 248, 0.08));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .moduleCard:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 12px 32px rgba(79, 70, 229, 0.15);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(129, 140, 248, 0.15);
   transform: translateY(-6px);
 }
 
 .moduleCard:hover::before {
-  opacity: 0.03;
+  opacity: 1;
 }
 
 .moduleCard:focus-visible {
@@ -231,38 +231,38 @@
 }
 
 .moduleCard:hover .moduleIcon {
-  transform: scale(1.05) rotate(-2deg);
+  transform: scale(1.08) rotate(-3deg);
 }
 
 /* Module Icon Color Variants */
 .moduleIconPurple {
   background: var(--icon-bg-purple);
-  color: #8b5cf6;
+  color: #a78bfa;
 }
 
 .moduleIconIndigo {
   background: var(--icon-bg-indigo);
-  color: #4f46e5;
+  color: #818cf8;
 }
 
 .moduleIconBlue {
   background: var(--icon-bg-blue);
-  color: #0284c7;
+  color: #38bdf8;
 }
 
 .moduleIconAmber {
   background: var(--icon-bg-amber);
-  color: #f59e0b;
+  color: #fbbf24;
 }
 
 .moduleIconGreen {
   background: var(--icon-bg-green);
-  color: #10b981;
+  color: #34d399;
 }
 
 .moduleIconCyan {
   background: var(--icon-bg-cyan);
-  color: #06b6d4;
+  color: #22d3ee;
 }
 
 .arrowIcon {
@@ -303,7 +303,7 @@
 }
 
 .moduleCard:hover .moduleFooter {
-  border-color: var(--primary-light);
+  border-color: rgba(129, 140, 248, 0.3);
 }
 
 .moduleStat {
@@ -358,7 +358,7 @@
 }
 
 .activityList {
-  background: var(--card-bg);
+  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
   border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
@@ -381,7 +381,7 @@
   top: 0;
   bottom: 0;
   width: 3px;
-  background: var(--primary-color);
+  background: linear-gradient(180deg, var(--primary-color), #6366f1);
   transform: scaleY(0);
   transition: transform 0.2s ease;
 }
@@ -391,7 +391,7 @@
 }
 
 .activityItem:hover {
-  background: var(--hover-bg);
+  background: linear-gradient(90deg, rgba(129, 140, 248, 0.08), transparent);
   padding-left: 1.75rem;
 }
 
@@ -418,27 +418,27 @@
 /* Activity Icon Color Variants */
 .activityIconIndigo {
   background: var(--icon-bg-indigo);
-  color: #4f46e5;
+  color: #818cf8;
 }
 
 .activityIconPurple {
   background: var(--icon-bg-purple);
-  color: #8b5cf6;
+  color: #a78bfa;
 }
 
 .activityIconBlue {
   background: var(--icon-bg-blue);
-  color: #0284c7;
+  color: #38bdf8;
 }
 
 .activityIconAmber {
   background: var(--icon-bg-amber);
-  color: #f59e0b;
+  color: #fbbf24;
 }
 
 .activityIconGreen {
   background: var(--icon-bg-green);
-  color: #10b981;
+  color: #34d399;
 }
 
 .activityContent {
@@ -481,7 +481,7 @@
   align-items: center;
   gap: 0.875rem;
   padding: 1.125rem 1.5rem;
-  background: var(--card-bg);
+  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
   border: 2px solid var(--border-color);
   border-radius: 10px;
   font-size: 0.9375rem;
@@ -497,7 +497,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), #6366f1);
   transform: translateX(-100%);
   transition: transform 0.3s ease;
 }
@@ -505,7 +505,7 @@
 .quickLink:hover {
   color: white;
   border-color: var(--primary-color);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(129, 140, 248, 0.2);
   transform: translateY(-3px);
 }
 
@@ -565,201 +565,26 @@
    DARK MODE OPTIMIZATIONS
    ======================================== */
 
-:global([data-theme="dark"]) .statCard {
-  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .statCard:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glow-primary);
-  border-color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .statCard::before {
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-}
-
 /* Dark mode icon colors - brighter for visibility */
-:global([data-theme="dark"]) .statIconBlue {
-  color: #60a5fa;
-  box-shadow: 0 0 12px rgba(96, 165, 250, 0.2);
-}
-
-:global([data-theme="dark"]) .statIconIndigo {
-  color: #818cf8;
-  box-shadow: 0 0 12px rgba(129, 140, 248, 0.2);
-}
-
-:global([data-theme="dark"]) .statIconAmber {
-  color: #fbbf24;
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
-}
-
-:global([data-theme="dark"]) .statIconGreen {
-  color: #34d399;
-  box-shadow: 0 0 12px rgba(52, 211, 153, 0.2);
-}
-
-:global([data-theme="dark"]) .statIconPurple {
-  color: #a78bfa;
-  box-shadow: 0 0 12px rgba(167, 139, 250, 0.2);
-}
-
-:global([data-theme="dark"]) .statValue {
-  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 /* Module Cards - Dark Mode */
-:global([data-theme="dark"]) .moduleCard {
-  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .moduleCard::before {
-  background: linear-gradient(135deg, transparent, rgba(129, 140, 248, 0.08));
-}
-
-:global([data-theme="dark"]) .moduleCard:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(129, 140, 248, 0.15);
-}
-
-:global([data-theme="dark"]) .moduleCard:hover::before {
-  opacity: 1;
-}
 
 /* Module Icon Dark Mode Colors */
-:global([data-theme="dark"]) .moduleIconPurple {
-  color: #a78bfa;
-  box-shadow: 0 4px 16px rgba(167, 139, 250, 0.25);
-}
-
-:global([data-theme="dark"]) .moduleIconIndigo {
-  color: #818cf8;
-  box-shadow: 0 4px 16px rgba(129, 140, 248, 0.25);
-}
-
-:global([data-theme="dark"]) .moduleIconBlue {
-  color: #38bdf8;
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
-}
-
-:global([data-theme="dark"]) .moduleIconAmber {
-  color: #fbbf24;
-  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.25);
-}
-
-:global([data-theme="dark"]) .moduleIconGreen {
-  color: #34d399;
-  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.25);
-}
-
-:global([data-theme="dark"]) .moduleIconCyan {
-  color: #22d3ee;
-  box-shadow: 0 4px 16px rgba(34, 211, 238, 0.25);
-}
-
-:global([data-theme="dark"]) .moduleCard:hover .moduleIcon {
-  transform: scale(1.08) rotate(-3deg);
-}
-
-:global([data-theme="dark"]) .moduleFooter {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .moduleCard:hover .moduleFooter {
-  border-color: rgba(129, 140, 248, 0.3);
-}
-
-:global([data-theme="dark"]) .statNumber {
-  color: var(--primary-color);
-  text-shadow: 0 0 20px rgba(129, 140, 248, 0.4);
-}
 
 /* Quick Links - Dark Mode */
-:global([data-theme="dark"]) .quickLink {
-  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .quickLink::before {
-  background: linear-gradient(135deg, var(--primary-color), #6366f1);
-}
-
-:global([data-theme="dark"]) .quickLink:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(129, 140, 248, 0.2);
-}
 
 /* Activity Section - Dark Mode */
-:global([data-theme="dark"]) .activityList {
-  background: linear-gradient(145deg, var(--card-bg), var(--bg-secondary));
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .activityItem {
-  border-color: var(--border-color);
-}
-
-:global([data-theme="dark"]) .activityItem:hover {
-  background: linear-gradient(90deg, rgba(129, 140, 248, 0.08), transparent);
-}
-
-:global([data-theme="dark"]) .activityItem::before {
-  background: linear-gradient(180deg, var(--primary-color), #6366f1);
-}
 
 /* Activity Icon Dark Mode Colors */
-:global([data-theme="dark"]) .activityIconIndigo {
-  color: #818cf8;
-  box-shadow: 0 2px 12px rgba(129, 140, 248, 0.3);
-}
-
-:global([data-theme="dark"]) .activityIconPurple {
-  color: #a78bfa;
-  box-shadow: 0 2px 12px rgba(167, 139, 250, 0.3);
-}
-
-:global([data-theme="dark"]) .activityIconBlue {
-  color: #38bdf8;
-  box-shadow: 0 2px 12px rgba(56, 189, 248, 0.3);
-}
-
-:global([data-theme="dark"]) .activityIconAmber {
-  color: #fbbf24;
-  box-shadow: 0 2px 12px rgba(251, 191, 36, 0.3);
-}
-
-:global([data-theme="dark"]) .activityIconGreen {
-  color: #34d399;
-  box-shadow: 0 2px 12px rgba(52, 211, 153, 0.3);
-}
-
-:global([data-theme="dark"]) .viewAll {
-  color: var(--primary-color);
-}
-
-:global([data-theme="dark"]) .viewAll:hover {
-  text-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
-}
 
 /* Section Title - Dark Mode */
-:global([data-theme="dark"]) .sectionTitle {
-  background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 /* Quick Link Primary - Highlighted Action */
 .quickLinkPrimary {
   background: linear-gradient(135deg, var(--primary-color), #6366f1);
   color: white;
   border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
 }
 
 .quickLinkPrimary::before {
@@ -767,14 +592,5 @@
 }
 
 .quickLinkPrimary:hover {
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
-}
-
-:global([data-theme="dark"]) .quickLinkPrimary {
-  background: linear-gradient(135deg, var(--primary-color), #6366f1);
-  box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
-}
-
-:global([data-theme="dark"]) .quickLinkPrimary:hover {
   box-shadow: 0 8px 28px rgba(129, 140, 248, 0.4);
 }
