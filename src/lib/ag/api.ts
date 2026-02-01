@@ -813,3 +813,34 @@ export async function markPvGenerated(
 
   return { success: true };
 }
+
+/**
+ * Met à jour l'étape courante du wizard AG
+ * Appelé automatiquement quand l'utilisateur navigue entre les étapes
+ */
+export async function updateAgCurrentStep(
+  agId: string,
+  step: number
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createUntypedClient();
+
+  try {
+    const { error } = await supabase.rpc('save_ag_wizard_state', {
+      p_ag_id: agId,
+      p_current_step: step,
+      p_step_data: null,
+      p_wizard_mode: null,
+    });
+
+    if (error) {
+      console.warn('[updateAgCurrentStep] Error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.warn('[updateAgCurrentStep] Exception:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}

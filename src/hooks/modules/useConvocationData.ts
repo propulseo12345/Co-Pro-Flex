@@ -6,7 +6,7 @@
  * Charge depuis Supabase:
  * - Données AG (étape 1) depuis ag_meetings + v_ag_overview
  * - Résolutions (étape 2) depuis v_ag_resolutions_results
- * - Copropriétaires depuis v_coproprietaires_overview
+ * - Copropriétaires via rpc_get_ag_coproprietaires (DISTINCT, scoping sécurisé)
  * - Copropriété depuis copros
  *
  * Aucun fallback localStorage pour les données métier.
@@ -432,15 +432,11 @@ export function useConvocationData({
       }
 
       // ========================================
-      // 3. Charger les copropriétaires depuis v_coproprietaires_overview
+      // 3. Charger les copropriétaires via RPC sécurisée (avec DISTINCT pour éviter doublons)
       // ========================================
       try {
         const { data: dbOwners, error: ownersError } = await supabase
-          .from('v_coproprietaires_overview')
-          .select('*')
-          .eq('copro_id', coproId)
-          .eq('owner_type', 'COPROPRIETAIRE')
-          .order('display_name', { ascending: true });
+          .rpc('rpc_get_ag_coproprietaires', { p_ag_id: agId });
 
         if (ownersError) {
           throw ownersError;

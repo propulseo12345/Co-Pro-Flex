@@ -103,15 +103,20 @@ export default function DesignationRolesPage() {
                         console.error('[DesignationRolesPage] Error loading coproprietaires:', coprosError);
                     }
 
-                    // Map view result to expected format
-                    const mappedCopros = (coprosData || []).map((c: { id: string; display_name: string; email: string | null; total_tantiemes: number }) => ({
-                        id: c.id,
-                        full_name: c.display_name,
-                        email: c.email,
-                        tantiemes: c.total_tantiemes,
-                    }));
+                    // Map view result to expected format, deduplicate by ID
+                    const uniqueMap = new Map<string, { id: string; full_name: string; email: string | null; tantiemes: number }>();
+                    (coprosData || []).forEach((c: { id: string; display_name: string; email: string | null; total_tantiemes: number }) => {
+                        if (!uniqueMap.has(c.id)) {
+                            uniqueMap.set(c.id, {
+                                id: c.id,
+                                full_name: c.display_name,
+                                email: c.email,
+                                tantiemes: c.total_tantiemes,
+                            });
+                        }
+                    });
 
-                    setCoproprietairesPresents(mappedCopros);
+                    setCoproprietairesPresents(Array.from(uniqueMap.values()));
                 }
 
                 // 4. Load gestionnaires (from memberships with role='manager' or 'admin')

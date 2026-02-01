@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Plus, ArrowLeft, ArrowRight, CheckCircle, ListChecks, AlertTriangle, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -16,12 +16,20 @@ import {
 } from '@/components/features/ag';
 import { MOCK_CONTRAT_SYNDIC } from '@/data/mock';
 import { useAgAgendaPage } from '@/features/ag/hooks/useAgAgendaPage';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import styles from './agenda.module.css';
 
 export default function AgendaPage() {
   const params = useParams();
   const agId = params.id as string;
   const page = useAgAgendaPage({ agId });
+
+  // Mise à jour de l'étape courante en DB (étape 2 = Ordre du jour)
+  useEffect(() => {
+    if (!page.isLoading && page.meeting && agId) {
+      updateAgCurrentStep(agId, 2);
+    }
+  }, [page.isLoading, page.meeting, agId]);
 
   const renderVariables = useCallback((resolution: Resolution) => {
     const { texte, variables, id, templateId } = resolution;

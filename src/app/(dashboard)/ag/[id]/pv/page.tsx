@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Stepper from '@/components/features/ag/Stepper';
 import { StepUnavailable, AgDocumentActions } from '@/components/features/ag';
 import { useAGStepGuard } from '@/hooks/modules/useAGStepGuard';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import { useCopro } from '@/providers/CoproContext';
 import {
   Header,
@@ -94,6 +96,13 @@ export default function PVPage() {
     isDrawing,
     setIsDrawing,
   });
+
+  // Mise à jour de l'étape courante en DB (étape 7 = Procès-verbal)
+  useEffect(() => {
+    if (guardState === 'allowed' && !isDataLoading && agData && agId) {
+      updateAgCurrentStep(agId, 7);
+    }
+  }, [guardState, isDataLoading, agData, agId]);
 
   // Guard states
   if (guardState === 'loading') {

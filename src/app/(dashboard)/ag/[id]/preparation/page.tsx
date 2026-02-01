@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Loader2, Vote, Users } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
@@ -16,6 +16,7 @@ import {
 import { useAGStepGuard } from '@/hooks/modules/useAGStepGuard';
 import { useVotesCorrespondance } from '@/hooks/modules/useVotesCorrespondance';
 import { usePouvoirs } from '@/hooks/modules/usePouvoirs';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import styles from './preparation.module.css';
 
@@ -81,6 +82,13 @@ export default function PreparationPage() {
     } = usePouvoirs({ agId });
 
     const isLoading = isLoadingVotes || isLoadingPouvoirs;
+
+    // Mise à jour de l'étape courante en DB (étape 5 = Votes par correspondance)
+    useEffect(() => {
+        if (guardState === 'allowed' && !isLoading && agId) {
+            updateAgCurrentStep(agId, 5);
+        }
+    }, [guardState, isLoading, agId]);
 
     // Sélection copropriétaire pour votes
     const selectedCopro = useMemo(() => {

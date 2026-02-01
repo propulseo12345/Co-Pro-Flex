@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Send, AlertCircle, ClipboardCheck, Shield, Mail, FileText } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
@@ -22,6 +22,7 @@ import { useConvocationData } from '@/hooks/modules/useConvocationData';
 import { useConvocationPreview } from '@/hooks/modules/useConvocationPreview';
 import { useDeliveryConfig, type CoproprietaireDelivery } from '@/hooks/modules/useDeliveryConfig';
 import { validateResolutionVariables } from '@/lib/utils/variable-resolution';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import styles from './convocation.module.css';
 
 export default function ConvocationPage() {
@@ -95,6 +96,13 @@ export default function ConvocationPage() {
 
   // Onglet actif (configuration / tracking)
   const [activeTab, setActiveTab] = useState<'config' | 'tracking'>('config');
+
+  // Mise à jour de l'étape courante en DB (étape 3 = Préparation convocations)
+  useEffect(() => {
+    if (status === 'ready' && agId) {
+      updateAgCurrentStep(agId, 3);
+    }
+  }, [status, agId]);
 
   // Validation des variables
   const variableValidation = useMemo(() => {

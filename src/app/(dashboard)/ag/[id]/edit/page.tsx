@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Clock, FileText, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import Stepper from '@/components/features/ag/Stepper';
 import { useAgEditPage } from '@/features/ag/hooks/useAgEditPage';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import { BudgetSection, AddressSection } from '@/features/ag/components/edit';
 import styles from '../../new/new-ag.module.css';
 
@@ -12,6 +14,13 @@ export default function EditAGPage() {
   const params = useParams();
   const agId = params.id as string;
   const page = useAgEditPage({ agId });
+
+  // Mise à jour de l'étape courante en DB (étape 1 = Planification)
+  useEffect(() => {
+    if (!page.isLoading && agId) {
+      updateAgCurrentStep(agId, 1);
+    }
+  }, [page.isLoading, agId]);
 
   if (page.isLoading) {
     return (

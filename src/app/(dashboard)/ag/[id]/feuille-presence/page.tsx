@@ -1,454 +1,367 @@
 'use client';
 
 /**
- * Feuille de présence AG
- * MIGRATION 2026-01-31: Persistence Supabase via ag-session-persistence service
- * TODO: Remplacer les mocks par données Supabase (coproprietaires, lots)
+ * Feuille de présence AG - 100% DB-First
+ *
+ * Sources Supabase :
+ * - rpc_get_ag_coproprietaires : copropriétaires avec tantièmes
+ * - v_ag_attendance_summary : présences enregistrées
+ * - compute_ag_quorum : stats quorum temps réel
+ *
+ * Zéro mock, zéro localStorage, zéro state comme vérité métier.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, UserCheck, Users, FileDown, Eye, EyeOff, Vote } from 'lucide-react';
+import {
+  ArrowLeft,
+  UserCheck,
+  Users,
+  FileDown,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Loader2,
+  RefreshCw,
+  CheckSquare,
+  Square,
+} from 'lucide-react';
 import SignatureCanvas from '@/ui/SignatureCanvas';
-import { FeuillePresence, SignaturePresence, Coproprietaire, Lot, StatutPresence } from '@/types';
-import { createAGSessionPersistence, type AGSessionPersistenceService } from '@/lib/services/ag-session-persistence.service';
+import { useFeuillePresence } from '@/hooks/modules/useFeuillePresence';
+import type { AttendanceType } from '@/lib/ag/types';
 import styles from './feuille-presence.module.css';
 
-// TODO: Remplacer par chargement Supabase
-const MOCK_COPROPRIETAIRES: Coproprietaire[] = [
-    { id: 'cp1', nom: 'Dupont', prenom: 'Jean', email: 'jean.dupont@email.com', telephone: '0601020304' },
-    { id: 'cp2', nom: 'Martin', prenom: 'Marie', email: 'marie.martin@email.com', telephone: '0602030405' },
-    { id: 'cp3', nom: 'Bernard', prenom: 'Pierre', email: 'pierre.bernard@email.com', telephone: '0603040506' },
-    { id: 'cp4', nom: 'Dubois', prenom: 'Sophie', email: 'sophie.dubois@email.com', telephone: '0604050607' },
-];
-
-// TODO: Remplacer par chargement Supabase
-const MOCK_LOTS: Lot[] = [
-    { id: 'lot1', numero: 'A101', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp1', tantiemesGeneraux: 100 },
-    { id: 'lot2', numero: 'A102', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp2', tantiemesGeneraux: 120 },
-    { id: 'lot3', numero: 'B201', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp3', tantiemesGeneraux: 150 },
-    { id: 'lot4', numero: 'B202', type: 'APPARTEMENT', estPrincipal: true, coproprietaireId: 'cp4', tantiemesGeneraux: 130 },
-];
-
 export default function FeuillePresencePage() {
-    const router = useRouter();
-    const params = useParams();
-    const agId = params.id as string;
+  const router = useRouter();
+  const params = useParams();
+  const agId = params.id as string;
 
-    const [feuillePresence, setFeuillePresence] = useState<FeuillePresence | null>(null);
-    const [showSignatureModal, setShowSignatureModal] = useState(false);
-    const [currentSignature, setCurrentSignature] = useState<SignaturePresence | null>(null);
-    const [showSignatures, setShowSignatures] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
+  // DB-first hook
+  const {
+    coproprietaires,
+    attendanceByCoprId,
+    quorumStats,
+    quorumThresholds,
+    agInfo,
+    isLoading,
+    isSaving,
+    error,
+    togglePresence,
+    setRepresentedBy,
+    bulkSetPresence,
+    saveSignature,
+    refresh,
+  } = useFeuillePresence({ agId });
 
-    // Persistence service ref
-    const persistenceServiceRef = useRef<AGSessionPersistenceService | null>(null);
-    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Local UI state
+  const [showSignatures, setShowSignatures] = useState(false);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [currentSignatureCoproId, setCurrentSignatureCoproId] = useState<string | null>(null);
 
-    // Initialize persistence service
-    useEffect(() => {
-        persistenceServiceRef.current = createAGSessionPersistence(agId);
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-        return () => {
-            if (persistenceServiceRef.current) {
-                persistenceServiceRef.current.destroy();
-            }
-        };
-    }, [agId]);
+  const handlePresenceChange = async (coproId: string, newValue: string) => {
+    const presenceType = newValue as AttendanceType | 'absent';
+    await togglePresence(coproId, presenceType);
+  };
 
-    // Convert FeuillePresence to PresenceData format for persistence service
-    const convertToPresenceData = useCallback((feuille: FeuillePresence) => {
-        const presencesEnrichies: Record<string, unknown> = {};
-        feuille.signatures.forEach(sig => {
-            presencesEnrichies[sig.coproprietaireId] = {
-                coproprietaireId: sig.coproprietaireId,
-                statut: sig.statut,
-                representant: sig.representant,
-                signatureData: sig.signatureData,
-                dateSignature: sig.dateSignature,
-            };
-        });
-        return presencesEnrichies;
-    }, []);
-
-    // Convert PresenceData back to FeuillePresence format
-    const convertFromPresenceData = useCallback((presencesEnrichies: Record<string, unknown>, existingFeuille?: FeuillePresence): FeuillePresence => {
-        const signatures: SignaturePresence[] = MOCK_COPROPRIETAIRES.map(cp => {
-            const data = presencesEnrichies[cp.id] as {
-                statut?: string;
-                representant?: string;
-                signatureData?: string;
-                dateSignature?: string;
-            } | undefined;
-
-            return {
-                id: 'sig-' + cp.id,
-                coproprietaireId: cp.id,
-                statut: (data?.statut || 'ABSENT') as StatutPresence,
-                representant: data?.representant,
-                signatureData: data?.signatureData,
-                dateSignature: data?.dateSignature,
-            };
-        });
-
-        return {
-            id: existingFeuille?.id || 'fp-' + Date.now(),
-            agId,
-            dateCreation: existingFeuille?.dateCreation || new Date().toISOString(),
-            statut: existingFeuille?.statut || 'BROUILLON',
-            signatures,
-            dateOuverture: existingFeuille?.dateOuverture,
-            dateCloture: existingFeuille?.dateCloture,
-        };
-    }, [agId]);
-
-    // Charger la feuille de présence depuis Supabase (via persistence service)
-    useEffect(() => {
-        const loadData = async () => {
-            if (!persistenceServiceRef.current) return;
-
-            try {
-                const result = await persistenceServiceRef.current.restore();
-
-                if (result.success && result.data?.presencesEnrichies) {
-                    const feuille = convertFromPresenceData(result.data.presencesEnrichies as Record<string, unknown>);
-                    setFeuillePresence(feuille);
-                } else {
-                    // Créer une nouvelle feuille de présence
-                    const nouvelleFeuille: FeuillePresence = {
-                        id: 'fp-' + Date.now(),
-                        agId,
-                        dateCreation: new Date().toISOString(),
-                        statut: 'BROUILLON',
-                        signatures: MOCK_COPROPRIETAIRES.map(cp => ({
-                            id: 'sig-' + cp.id,
-                            coproprietaireId: cp.id,
-                            statut: 'ABSENT' as StatutPresence,
-                        }))
-                    };
-                    setFeuillePresence(nouvelleFeuille);
-                }
-            } catch (err) {
-                console.error('[FeuillePresencePage] Error loading data:', err);
-                // Fallback: créer une nouvelle feuille
-                const nouvelleFeuille: FeuillePresence = {
-                    id: 'fp-' + Date.now(),
-                    agId,
-                    dateCreation: new Date().toISOString(),
-                    statut: 'BROUILLON',
-                    signatures: MOCK_COPROPRIETAIRES.map(cp => ({
-                        id: 'sig-' + cp.id,
-                        coproprietaireId: cp.id,
-                        statut: 'ABSENT' as StatutPresence,
-                    }))
-                };
-                setFeuillePresence(nouvelleFeuille);
-            }
-        };
-
-        loadData();
-    }, [agId, convertFromPresenceData]);
-
-    // Sauvegarder automatiquement (debounced) via persistence service
-    useEffect(() => {
-        if (!feuillePresence || !persistenceServiceRef.current) return;
-
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
-
-        saveTimeoutRef.current = setTimeout(async () => {
-            setIsSaving(true);
-            try {
-                const presencesEnrichies = convertToPresenceData(feuillePresence);
-                await persistenceServiceRef.current?.savePresences(presencesEnrichies as Record<string, never>);
-            } catch (err) {
-                console.error('[FeuillePresencePage] Error saving:', err);
-            } finally {
-                setIsSaving(false);
-            }
-        }, 1000);
-
-        return () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
-        };
-    }, [feuillePresence, convertToPresenceData]);
-
-    const getCoproprietaireInfo = (cpId: string) => {
-        return MOCK_COPROPRIETAIRES.find(cp => cp.id === cpId);
-    };
-
-    const getLotsForCoproprietaire = (cpId: string) => {
-        return MOCK_LOTS.filter(lot => lot.coproprietaireId === cpId);
-    };
-
-    const getTotalTantiemes = (cpId: string) => {
-        return getLotsForCoproprietaire(cpId).reduce((sum, lot) => sum + lot.tantiemesGeneraux, 0);
-    };
-
-    const handleStatutChange = (signatureId: string, newStatut: StatutPresence) => {
-        if (!feuillePresence) return;
-
-        setFeuillePresence({
-            ...feuillePresence,
-            signatures: feuillePresence.signatures.map(sig =>
-                sig.id === signatureId ? { ...sig, statut: newStatut, representant: newStatut === 'REPRESENTE' ? sig.representant : undefined } : sig
-            )
-        });
-    };
-
-    const handleRepresentantChange = (signatureId: string, representant: string) => {
-        if (!feuillePresence) return;
-
-        setFeuillePresence({
-            ...feuillePresence,
-            signatures: feuillePresence.signatures.map(sig =>
-                sig.id === signatureId ? { ...sig, representant } : sig
-            )
-        });
-    };
-
-    const handleOpenSignature = (signature: SignaturePresence) => {
-        setCurrentSignature(signature);
-        setShowSignatureModal(true);
-    };
-
-    const handleSaveSignature = (signatureData: string) => {
-        if (!feuillePresence || !currentSignature) return;
-
-        setFeuillePresence({
-            ...feuillePresence,
-            signatures: feuillePresence.signatures.map(sig =>
-                sig.id === currentSignature.id ? {
-                    ...sig,
-                    signatureData,
-                    dateSignature: new Date().toISOString()
-                } : sig
-            )
-        });
-
-        setShowSignatureModal(false);
-        setCurrentSignature(null);
-    };
-
-    const handleOuvrirFeuille = () => {
-        if (!feuillePresence) return;
-        setFeuillePresence({
-            ...feuillePresence,
-            statut: 'OUVERTE',
-            dateOuverture: new Date().toISOString()
-        });
-    };
-
-    const handleCloturerFeuille = () => {
-        if (!feuillePresence) return;
-        if (!confirm('Êtes-vous sûr de vouloir clôturer la feuille de présence ? Cette action est irréversible.')) return;
-
-        setFeuillePresence({
-            ...feuillePresence,
-            statut: 'CLOTUREE',
-            dateCloture: new Date().toISOString()
-        });
-    };
-
-    const handleExportPDF = () => {
-        alert('Export PDF en cours de développement. Cette fonctionnalité utilisera jsPDF pour générer le PDF.');
-        // TODO: Implémenter l'export PDF avec jsPDF
-    };
-
-    if (!feuillePresence) {
-        return <div className="container">Chargement...</div>;
+  const handleRepresentantChange = async (coproId: string, representantName: string) => {
+    if (representantName.trim()) {
+      await setRepresentedBy(coproId, representantName.trim());
     }
+  };
 
-    const totalTantiemes = MOCK_LOTS.reduce((sum, lot) => sum + lot.tantiemesGeneraux, 0);
-    const presentsCount = feuillePresence.signatures.filter(s => s.statut === 'PRESENT').length;
-    const representesCount = feuillePresence.signatures.filter(s => s.statut === 'REPRESENTE').length;
-    const tantMemesPresents = feuillePresence.signatures
-        .filter(s => s.statut === 'PRESENT' || s.statut === 'REPRESENTE')
-        .reduce((sum, sig) => sum + getTotalTantiemes(sig.coproprietaireId), 0);
-    const tauxParticipation = ((tantMemesPresents / totalTantiemes) * 100).toFixed(2);
+  const handleBulkPresent = async () => {
+    await bulkSetPresence('present');
+  };
 
+  const handleBulkAbsent = async () => {
+    await bulkSetPresence('absent');
+  };
+
+  const handleOpenSignature = (coproId: string) => {
+    setCurrentSignatureCoproId(coproId);
+    setShowSignatureModal(true);
+  };
+
+  const handleSaveSignature = async (signatureData: string) => {
+    if (currentSignatureCoproId) {
+      await saveSignature(currentSignatureCoproId, signatureData);
+    }
+    setShowSignatureModal(false);
+    setCurrentSignatureCoproId(null);
+  };
+
+  const handleExportPDF = () => {
+    alert('Export PDF en cours de développement.');
+  };
+
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
+  if (isLoading) {
     return (
-        <div className="container">
-            <div className={styles.header}>
-                <button onClick={() => router.back()} className={styles.backButton}>
-                    <ArrowLeft size={20} aria-hidden="true" />
-                    Retour
-                </button>
-                <div>
-                    <h1 className={styles.title}>Feuille de présence</h1>
-                    <p className={styles.subtitle}>
-                        Assemblée Générale - {feuillePresence.statut === 'BROUILLON' ? 'Brouillon' : feuillePresence.statut === 'OUVERTE' ? 'Ouverte' : 'Clôturée'}
-                        {isSaving && <span> (enregistrement...)</span>}
-                    </p>
-                </div>
-            </div>
-
-            {/* Statistiques */}
-            <div className={styles.stats}>
-                <div className={styles.statCard}>
-                    <UserCheck size={24} aria-hidden="true" />
-                    <div>
-                        <div className={styles.statValue}>{presentsCount + representesCount}</div>
-                        <div className={styles.statLabel}>Présents/Représentés</div>
-                    </div>
-                </div>
-                <div className={styles.statCard}>
-                    <Users size={24} aria-hidden="true" />
-                    <div>
-                        <div className={styles.statValue}>{tantMemesPresents} / {totalTantiemes}</div>
-                        <div className={styles.statLabel}>Tantièmes</div>
-                    </div>
-                </div>
-                <div className={styles.statCard}>
-                    <div className={styles.statValue}>{tauxParticipation}%</div>
-                    <div className={styles.statLabel}>Taux de participation</div>
-                </div>
-            </div>
-
-            {/* Actions */}
-            <div className={styles.actions}>
-                {feuillePresence.statut === 'BROUILLON' && (
-                    <button onClick={handleOuvrirFeuille} className="btn btn-primary">
-                        Ouvrir la feuille de présence
-                    </button>
-                )}
-                {feuillePresence.statut === 'OUVERTE' && (
-                    <button onClick={handleCloturerFeuille} className="btn btn-warning">
-                        Clôturer la feuille
-                    </button>
-                )}
-                <button onClick={handleExportPDF} className="btn btn-secondary">
-                    <FileDown size={16} />
-                    Exporter en PDF
-                </button>
-                <button
-                    onClick={() => setShowSignatures(!showSignatures)}
-                    className="btn btn-secondary"
-                >
-                    {showSignatures ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
-                    {showSignatures ? 'Masquer' : 'Afficher'} les signatures
-                </button>
-            </div>
-
-            {/* Liste des copropriétaires */}
-            <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Copropriétaire</th>
-                            <th>Lot(s)</th>
-                            <th>Tantièmes</th>
-                            <th>Statut</th>
-                            <th>Représentant</th>
-                            <th>Signature</th>
-                            <th>Votes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {feuillePresence.signatures.map((signature) => {
-                            const copro = getCoproprietaireInfo(signature.coproprietaireId);
-                            const lots = getLotsForCoproprietaire(signature.coproprietaireId);
-                            const tantiemes = getTotalTantiemes(signature.coproprietaireId);
-
-                            if (!copro) return null;
-
-                            return (
-                                <tr key={signature.id} className={signature.statut !== 'ABSENT' ? styles.rowPresent : ''}>
-                                    <td>
-                                        <div className={styles.coproName}>
-                                            {copro.prenom} {copro.nom}
-                                        </div>
-                                        <div className={styles.coproEmail}>{copro.email}</div>
-                                    </td>
-                                    <td>
-                                        {lots.map(lot => lot.numero).join(', ')}
-                                    </td>
-                                    <td className={styles.tantiemes}>{tantiemes}</td>
-                                    <td>
-                                        <select
-                                            value={signature.statut}
-                                            onChange={(e) => handleStatutChange(signature.id, e.target.value as StatutPresence)}
-                                            className={styles.statutSelect}
-                                            disabled={feuillePresence.statut === 'CLOTUREE'}
-                                        >
-                                            <option value="ABSENT">Absent</option>
-                                            <option value="PRESENT">Présent</option>
-                                            <option value="REPRESENTE">Représenté</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        {signature.statut === 'REPRESENTE' && (
-                                            <input type="text" placeholder="Nom du représentant" value={signature.representant || ''} onChange={(e) => handleRepresentantChange(signature.id, e.target.value)}
-                                                className={styles.representantInput}
-                                                disabled={feuillePresence.statut === 'CLOTUREE'}
-                                            />
-                                        )}
-                                    </td>
-                                    <td>
-                                        {signature.statut !== 'ABSENT' && (
-                                            <div className={styles.signatureCell}>
-                                                {signature.signatureData && showSignatures ? (
-                                                    <img
-                                                        src={signature.signatureData}
-                                                        alt="Signature"
-                                                        className={styles.signaturePreview}
-                                                    />
-                                                ) : null}
-                                                <button
-                                                    onClick={() => handleOpenSignature(signature)}
-                                                    className="btn btn-sm btn-secondary"
-                                                    disabled={feuillePresence.statut === 'CLOTUREE'}
-                                                >
-                                                    {signature.signatureData ? 'Modifier' : 'Signer'}
-                                                </button>
-                                                {signature.dateSignature && (
-                                                    <div className={styles.signatureDate}>
-                                                        {new Date(signature.dateSignature).toLocaleString('fr-FR')}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <button
-                                            onClick={() => router.push(`/ag/${agId}/votes-correspondance/${signature.coproprietaireId}`)}
-                                            className="btn btn-sm btn-primary"
-                                        >
-                                            <Vote size={16} aria-hidden="true" />
-                                            Saisie des votes
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Modal de signature */}
-            {showSignatureModal && currentSignature && (
-                <div className={styles.modalOverlay} aria-hidden="true" onClick={() => setShowSignatureModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-                        <h2 className={styles.modalTitle}>
-                            Signature de {getCoproprietaireInfo(currentSignature.coproprietaireId)?.prenom} {getCoproprietaireInfo(currentSignature.coproprietaireId)?.nom}
-                        </h2>
-                        <SignatureCanvas
-                            onSave={handleSaveSignature}
-                            onCancel={() => {
-                                setShowSignatureModal(false);
-                                setCurrentSignature(null);
-                            }}
-                            initialSignature={currentSignature.signatureData}
-                        />
-                    </div>
-                </div>
-            )}
+      <div className="container">
+        <div className={styles.loadingState}>
+          <Loader2 size={48} className={styles.spinner} />
+          <h2>Chargement de la feuille de présence...</h2>
+          <p>Récupération des données depuis Supabase</p>
         </div>
+      </div>
     );
+  }
+
+  // ============================================================================
+  // ERROR STATE
+  // ============================================================================
+
+  if (error) {
+    return (
+      <div className="container">
+        <div className={styles.errorState}>
+          <XCircle size={48} className={styles.errorIcon} />
+          <h2>Erreur de chargement</h2>
+          <p className={styles.errorDetails}>{error}</p>
+          <button onClick={refresh} className="btn btn-primary">
+            <RefreshCw size={16} />
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  const currentCopro = currentSignatureCoproId
+    ? coproprietaires.find(c => c.id === currentSignatureCoproId)
+    : null;
+
+  return (
+    <div className="container">
+      {/* Header */}
+      <div className={styles.header}>
+        <button onClick={() => router.back()} className={styles.backButton}>
+          <ArrowLeft size={20} aria-hidden="true" />
+          Retour
+        </button>
+        <div>
+          <h1 className={styles.title}>Feuille de présence</h1>
+          <p className={styles.subtitle}>
+            {agInfo?.title || 'Assemblée Générale'}
+            {isSaving && <span className={styles.savingIndicator}><Loader2 size={14} className={styles.spinnerSmall} /> Enregistrement...</span>}
+          </p>
+        </div>
+      </div>
+
+      {/* Statistiques Quorum */}
+      {quorumStats && (
+        <div className={styles.stats}>
+          <div className={styles.statCard}>
+            <UserCheck size={24} aria-hidden="true" />
+            <div>
+              <div className={styles.statValue}>{quorumStats.attendeesCount}</div>
+              <div className={styles.statLabel}>
+                Présents ({quorumStats.presentCount}) / Représentés ({quorumStats.proxyCount})
+              </div>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <Users size={24} aria-hidden="true" />
+            <div>
+              <div className={styles.statValue}>
+                {quorumStats.presentTantiemes} / {quorumStats.totalTantiemes}
+              </div>
+              <div className={styles.statLabel}>Tantièmes</div>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>{quorumStats.quorumRatio.toFixed(2)}%</div>
+            <div className={styles.statLabel}>Taux de participation</div>
+          </div>
+        </div>
+      )}
+
+      {/* Seuils Art. 24/25/26 */}
+      {quorumThresholds && (
+        <div className={styles.thresholdsGrid}>
+          <div className={`${styles.thresholdCard} ${quorumThresholds.art24.reached ? styles.thresholdReached : styles.thresholdNotReached}`}>
+            {quorumThresholds.art24.reached ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+            <div>
+              <div className={styles.thresholdLabel}>{quorumThresholds.art24.label}</div>
+              <div className={styles.thresholdValue}>
+                Seuil: {quorumThresholds.art24.threshold} tantièmes
+              </div>
+            </div>
+          </div>
+          <div className={`${styles.thresholdCard} ${quorumThresholds.art25.reached ? styles.thresholdReached : styles.thresholdNotReached}`}>
+            {quorumThresholds.art25.reached ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+            <div>
+              <div className={styles.thresholdLabel}>{quorumThresholds.art25.label}</div>
+              <div className={styles.thresholdValue}>
+                Seuil: {quorumThresholds.art25.threshold} tantièmes
+              </div>
+            </div>
+          </div>
+          <div className={`${styles.thresholdCard} ${quorumThresholds.art26.reached ? styles.thresholdReached : styles.thresholdNotReached}`}>
+            {quorumThresholds.art26.reached ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+            <div>
+              <div className={styles.thresholdLabel}>{quorumThresholds.art26.label}</div>
+              <div className={styles.thresholdValue}>
+                Seuil: {quorumThresholds.art26.threshold} tantièmes
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className={styles.actions}>
+        <button onClick={handleBulkPresent} className="btn btn-primary" disabled={isSaving}>
+          <CheckSquare size={16} />
+          Tout cocher présent
+        </button>
+        <button onClick={handleBulkAbsent} className="btn btn-secondary" disabled={isSaving}>
+          <Square size={16} />
+          Tout décocher
+        </button>
+        <button onClick={handleExportPDF} className="btn btn-secondary">
+          <FileDown size={16} />
+          Exporter PDF
+        </button>
+        <button onClick={() => setShowSignatures(!showSignatures)} className="btn btn-secondary">
+          {showSignatures ? <EyeOff size={16} /> : <Eye size={16} />}
+          {showSignatures ? 'Masquer' : 'Afficher'} signatures
+        </button>
+        <button onClick={refresh} className="btn btn-secondary" disabled={isLoading}>
+          <RefreshCw size={16} />
+          Actualiser
+        </button>
+      </div>
+
+      {/* Empty state */}
+      {coproprietaires.length === 0 && (
+        <div className={styles.emptyState}>
+          <Users size={48} />
+          <p>Aucun copropriétaire trouvé pour cette AG</p>
+          <p className={styles.emptyHint}>Vérifiez que des copropriétaires sont associés à la copropriété.</p>
+        </div>
+      )}
+
+      {/* Liste des copropriétaires */}
+      {coproprietaires.length > 0 && (
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Copropriétaire</th>
+                <th>Tantièmes</th>
+                <th>Statut</th>
+                <th>Représentant</th>
+                <th>Signature</th>
+              </tr>
+            </thead>
+            <tbody>
+              {coproprietaires.map((copro) => {
+                const attendance = attendanceByCoprId.get(copro.id);
+                const presenceType = attendance?.presenceType || 'absent';
+                const isPresent = presenceType !== 'absent';
+
+                return (
+                  <tr key={copro.id} className={isPresent ? styles.rowPresent : ''}>
+                    <td>
+                      <div className={styles.coproName}>{copro.displayName}</div>
+                      {copro.email && <div className={styles.coproEmail}>{copro.email}</div>}
+                    </td>
+                    <td className={styles.tantiemes}>{copro.tantiemes}</td>
+                    <td>
+                      <select
+                        value={presenceType}
+                        onChange={(e) => handlePresenceChange(copro.id, e.target.value)}
+                        className={styles.statutSelect}
+                        disabled={isSaving}
+                      >
+                        <option value="absent">Absent</option>
+                        <option value="present">Présent</option>
+                        <option value="proxy">Représenté</option>
+                        <option value="correspondence">Vote correspondance</option>
+                      </select>
+                    </td>
+                    <td>
+                      {presenceType === 'proxy' && (
+                        <input
+                          type="text"
+                          placeholder="Nom du représentant"
+                          defaultValue={attendance?.representedByName || ''}
+                          onBlur={(e) => handleRepresentantChange(copro.id, e.target.value)}
+                          className={styles.representantInput}
+                          disabled={isSaving}
+                        />
+                      )}
+                    </td>
+                    <td>
+                      {isPresent && presenceType !== 'correspondence' && (
+                        <div className={styles.signatureCell}>
+                          {attendance?.signed && showSignatures && attendance.signatureData && (
+                            <img
+                              src={attendance.signatureData}
+                              alt="Signature"
+                              className={styles.signaturePreview}
+                            />
+                          )}
+                          <button
+                            onClick={() => handleOpenSignature(copro.id)}
+                            className="btn btn-sm btn-secondary"
+                            disabled={isSaving}
+                          >
+                            {attendance?.signed ? 'Modifier' : 'Signer'}
+                          </button>
+                          {attendance?.signedAt && (
+                            <div className={styles.signatureDate}>
+                              {new Date(attendance.signedAt).toLocaleString('fr-FR')}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal de signature */}
+      {showSignatureModal && currentCopro && (
+        <div className={styles.modalOverlay} onClick={() => setShowSignatureModal(false)}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <h2 className={styles.modalTitle}>
+              Signature de {currentCopro.displayName}
+            </h2>
+            <SignatureCanvas
+              onSave={handleSaveSignature}
+              onCancel={() => {
+                setShowSignatureModal(false);
+                setCurrentSignatureCoproId(null);
+              }}
+              initialSignature={attendanceByCoprId.get(currentCopro.id)?.signatureData}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

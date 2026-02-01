@@ -187,7 +187,7 @@ export default function EnvoiPage() {
           <ArrowLeft size={16} aria-hidden="true" />
           Retour à la convocation
         </button>
-        <button onClick={page.handleContinue} className="btn btn-primary" disabled={!page.isSent}>
+        <button onClick={page.handleContinue} className="btn btn-primary">
           Continuer vers la préparation
           <ArrowRight size={16} aria-hidden="true" />
         </button>

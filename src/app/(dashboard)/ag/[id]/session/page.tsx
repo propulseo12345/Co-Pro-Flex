@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Stepper from '@/components/features/ag/Stepper';
 import { StepUnavailable } from '@/components/features/ag';
@@ -15,6 +16,7 @@ import {
 } from '@/components/features/ag/Session';
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { useAgSessionPage } from '@/features/ag/hooks/useAgSessionPage';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import {
   SessionHeader,
   SessionLoading,
@@ -40,6 +42,13 @@ export default function SessionPage() {
   });
 
   const session = useAgSessionPage({ agId });
+
+  // Mise à jour de l'étape courante en DB (étape 6 = Tenue de l'AG)
+  useEffect(() => {
+    if (guardState === 'allowed' && !session.isRestoring && agId) {
+      updateAgCurrentStep(agId, 6);
+    }
+  }, [guardState, session.isRestoring, agId]);
 
   // Guard states
   if (guardState === 'loading') {

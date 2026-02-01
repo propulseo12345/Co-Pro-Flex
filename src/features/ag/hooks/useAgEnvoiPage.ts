@@ -530,6 +530,37 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
   }, [sendingChoices, agId, saveChoicesToDB]);
 
   // ========================================
+  // MISE À JOUR DE L'ÉTAPE COURANTE EN DB
+  // ========================================
+
+  // Met à jour current_step = 4 quand la page est prête
+  useEffect(() => {
+    if (status !== 'ready' || !isValidUUID(agId)) return;
+
+    const updateStep = async () => {
+      try {
+        const supabase = createUntypedClient();
+        await supabase.rpc('save_ag_wizard_state', {
+          p_ag_id: agId,
+          p_current_step: 4, // Étape 4 = Envoi convocations
+          p_step_data: null,
+          p_wizard_mode: null,
+        });
+        logger.debug('current_step mis à jour: 4', { agId, step: 'envoi' });
+      } catch (err) {
+        logger.warn('Erreur mise à jour current_step', {
+          agId,
+          step: 'envoi',
+          action: 'updateStep',
+          error: err instanceof Error ? err.message : 'Unknown',
+        });
+      }
+    };
+
+    updateStep();
+  }, [status, agId]);
+
+  // ========================================
   // NAVIGATION
   // ========================================
 

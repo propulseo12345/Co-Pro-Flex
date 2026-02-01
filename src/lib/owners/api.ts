@@ -85,6 +85,7 @@ export interface LotWithOwner {
 
 /**
  * Liste les copropriétaires d'une copropriété
+ * Note: La vue peut retourner des doublons, on déduplique par ID
  */
 export async function listCoproprietaires(
   coproId: string,
@@ -111,11 +112,20 @@ export async function listCoproprietaires(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: data as CoproprietaireOverview[], error: null };
+  // Dédupliquer par ID (la vue peut retourner des doublons)
+  const uniqueMap = new Map<string, CoproprietaireOverview>();
+  (data || []).forEach((c: CoproprietaireOverview) => {
+    if (!uniqueMap.has(c.id)) {
+      uniqueMap.set(c.id, c);
+    }
+  });
+
+  return { data: Array.from(uniqueMap.values()), error: null };
 }
 
 /**
  * Récupère un copropriétaire par ID
+ * Note: La vue peut retourner des doublons, on limite à 1 résultat
  */
 export async function getCoproprietaire(
   coproId: string,
@@ -128,6 +138,7 @@ export async function getCoproprietaire(
     .select('*')
     .eq('copro_id', coproId)
     .eq('id', id)
+    .limit(1)
     .single();
 
   if (error) {
