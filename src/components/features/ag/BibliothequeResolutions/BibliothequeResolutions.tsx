@@ -19,14 +19,18 @@ interface BibliothequeResolutionsProps {
     typeAG: TypeAG;
     onSelectResolution: (resolution: ResolutionTemplate) => void;
     onClose: () => void;
+    /** @deprecated Utiliser existingTitles à la place pour comparaison DB-driven */
     resolutionsDejaAjoutees?: string[];
+    /** Titres (lowercase) des résolutions déjà ajoutées - utilisé pour comparaison DB-driven */
+    existingTitles?: string[];
 }
 
 export function BibliothequeResolutions({
     typeAG,
     onSelectResolution,
     onClose,
-    resolutionsDejaAjoutees = []
+    resolutionsDejaAjoutees = [],
+    existingTitles = []
 }: BibliothequeResolutionsProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -102,8 +106,9 @@ export function BibliothequeResolutions({
         return resolutionsObligatoires.some(r => r.id === resId);
     };
 
-    const isResolutionDejaAjoutee = (resId: string) => {
-        return resolutionsDejaAjoutees.includes(resId);
+    const isResolutionDejaAjoutee = (resId: string, resTitle: string) => {
+        // Comparaison par ID (legacy) ou par titre (DB-driven)
+        return resolutionsDejaAjoutees.includes(resId) || existingTitles.includes(resTitle.toLowerCase());
     };
 
     const handleAddResolution = (resolution: ResolutionTemplate) => {
@@ -112,7 +117,7 @@ export function BibliothequeResolutions({
 
     const renderResolutionCard = (resolution: ResolutionTemplate) => {
         const isObligatoire = isResolutionObligatoire(resolution.id);
-        const isDejaAjoutee = isResolutionDejaAjoutee(resolution.id);
+        const isDejaAjoutee = isResolutionDejaAjoutee(resolution.id, resolution.titre);
 
         return (
             <div

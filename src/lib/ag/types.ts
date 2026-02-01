@@ -250,6 +250,7 @@ export interface AddResolutionInput {
   majority_type?: MajorityType;
   resolution_number?: number;
   variables?: Record<string, unknown>;
+  is_customized?: boolean;
 }
 
 export interface RegisterAttendanceInput {

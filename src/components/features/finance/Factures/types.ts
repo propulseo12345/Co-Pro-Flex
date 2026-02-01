@@ -288,6 +288,8 @@ export interface PJFacture {
   taille?: number;
   dateAjout: string;
   estPrincipale: boolean;
+  /** Fichier original en attente d'upload (mode création uniquement) */
+  pendingFile?: File;
 }
 
 /**

@@ -272,22 +272,62 @@ export async function listEligibleVoters(coproId: string): Promise<Array<{
 // ============================================================================
 
 /**
- * Helper pour appeler une edge function
+ * Helper pour appeler une edge function via le SDK Supabase
+ * Utilise la méthode native functions.invoke qui gère mieux l'authentification
  */
 async function invokeEdgeFunction<T>(
   functionName: string,
   payload: object
 ): Promise<T> {
   const supabase = createUntypedClient();
-  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session?.access_token) {
-    throw new Error('Non authentifié');
-  }
+  console.log(`[invokeEdgeFunction] Appel de ${functionName} via SDK...`);
+  console.log(`[invokeEdgeFunction] Payload:`, JSON.stringify(payload).substring(0, 200));
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${functionName}`,
-    {
+  try {
+    // Utiliser la méthode native du SDK Supabase
+    const { data, error } = await supabase.functions.invoke(functionName, {
+      body: payload,
+    });
+
+    if (error) {
+      console.error(`[invokeEdgeFunction] Erreur SDK:`, error);
+
+      // Si c'est une erreur d'auth, suggérer de se reconnecter
+      if (error.message?.includes('401') || error.message?.includes('JWT') || error.message?.includes('auth')) {
+        throw new Error('Session expirée - veuillez vous déconnecter et vous reconnecter');
+      }
+
+      throw new Error(error.message || 'Erreur lors de l\'appel à la fonction');
+    }
+
+    console.log(`[invokeEdgeFunction] Résultat:`, data);
+    return data as T;
+
+  } catch (err) {
+    console.error(`[invokeEdgeFunction] Exception:`, err);
+
+    // Si le SDK échoue, essayer avec fetch direct après refresh de session
+    console.log(`[invokeEdgeFunction] Fallback vers fetch direct...`);
+
+    // Rafraîchir la session
+    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+    if (refreshError) {
+      console.error('[invokeEdgeFunction] Impossible de rafraîchir la session:', refreshError.message);
+      throw new Error('Session expirée - veuillez vous déconnecter et vous reconnecter');
+    }
+
+    const session = refreshData?.session;
+    if (!session?.access_token) {
+      throw new Error('Non authentifié - veuillez vous reconnecter');
+    }
+
+    console.log(`[invokeEdgeFunction] Session rafraîchie, user: ${session.user?.email}`);
+
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${functionName}`;
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -295,11 +335,20 @@ async function invokeEdgeFunction<T>(
         'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       },
       body: JSON.stringify(payload),
-    }
-  );
+    });
 
-  const result = await response.json();
-  return result as T;
+    console.log(`[invokeEdgeFunction] Fallback response status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[invokeEdgeFunction] Fallback HTTP Error: ${response.status}`, errorText);
+      throw new Error(`Erreur: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`[invokeEdgeFunction] Fallback résultat:`, result);
+    return result as T;
+  }
 }
 
 /**
@@ -311,9 +360,89 @@ export async function createAg(input: CreateAgInput): Promise<CreateAgResponse> 
 
 /**
  * Ajouter une résolution à une AG
+ * Essaie d'abord via edge function, puis fallback sur insert direct si échec auth
  */
 export async function addResolution(input: AddResolutionInput): Promise<AddResolutionResponse> {
-  return invokeEdgeFunction<AddResolutionResponse>('ag_add_resolution', input);
+  try {
+    // Essayer d'abord via edge function
+    return await invokeEdgeFunction<AddResolutionResponse>('ag_add_resolution', input);
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : '';
+
+    // Si c'est une erreur d'auth ou si l'edge function n'existe pas, utiliser insert direct
+    if (errorMsg.includes('401') || errorMsg.includes('JWT') || errorMsg.includes('auth') ||
+        errorMsg.includes('Session') || errorMsg.includes('FunctionsFetchError') ||
+        errorMsg.includes('non_2xx_response')) {
+      console.log('[addResolution] Edge function échouée, tentative d\'insert direct...');
+      return addResolutionDirect(input);
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * Insertion directe d'une résolution (fallback si edge function indisponible)
+ */
+async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolutionResponse> {
+  const supabase = createUntypedClient();
+
+  console.log('[addResolutionDirect] Insert direct pour:', input.title);
+
+  try {
+    // Construire l'objet à insérer
+    const insertData = {
+      ag_id: input.ag_id,
+      copro_id: input.copro_id,
+      title: input.title,
+      description: input.description || null,
+      resolution_type: input.resolution_type || 'other',
+      majority_type: input.majority_type || 'art24',
+      resolution_number: input.resolution_number || 1,
+      status: 'draft',
+      variables: input.variables || null,
+      is_customized: input.is_customized || false,
+      tantiemes_for: 0,
+      tantiemes_against: 0,
+      tantiemes_abstention: 0,
+      voters_for: 0,
+      voters_against: 0,
+      voters_abstention: 0,
+      is_approved: null,
+      is_bridgeable: false,
+      vote_details: {},
+    };
+
+    console.log('[addResolutionDirect] Données à insérer:', insertData);
+
+    const { data, error } = await supabase
+      .from('ag_resolutions')
+      .insert(insertData)
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('[addResolutionDirect] Erreur insert:', error);
+      return {
+        success: false,
+        error: error.message || 'Erreur lors de l\'insertion',
+      };
+    }
+
+    console.log('[addResolutionDirect] Résolution créée avec ID:', data?.id);
+
+    return {
+      success: true,
+      resolution_id: data?.id,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('[addResolutionDirect] Exception:', err);
+    return {
+      success: false,
+      error: errorMsg,
+    };
+  }
 }
 
 /**

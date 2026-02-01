@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   PJFacture,
   UploadPJData,
@@ -14,6 +14,7 @@ interface UseFacturePJOptions {
   factureId?: string;
   coproId?: string;
   initialPJ?: PJFacture[];
+  onChange?: (pj: PJFacture[]) => void;
 }
 
 interface UseFacturePJReturn {
@@ -39,11 +40,19 @@ export function useFacturePJ({
   factureId,
   coproId = '',
   initialPJ = [],
+  onChange,
 }: UseFacturePJOptions = {}): UseFacturePJReturn {
   const [piecesJointes, setPiecesJointes] = useState<PJFacture[]>(initialPJ);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Ref pour éviter les closures stale sur onChange
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   // Charger les PJ existantes si factureId est fourni
   useEffect(() => {
@@ -59,9 +68,20 @@ export function useFacturePJ({
         })
         .finally(() => {
           setIsLoading(false);
+          setInitialized(true);
         });
+    } else {
+      setInitialized(true);
     }
   }, [factureId]);
+
+  // Notifier le parent quand piecesJointes change (après initialisation)
+  // Utilise la ref pour toujours avoir la dernière version du callback
+  useEffect(() => {
+    if (initialized && onChangeRef.current) {
+      onChangeRef.current(piecesJointes);
+    }
+  }, [piecesJointes, initialized]);
 
   /**
    * Upload un fichier
@@ -101,7 +121,7 @@ export function useFacturePJ({
             });
           }
         } else {
-          // Mode création: stocker localement sans service
+          // Mode création: stocker localement avec le fichier original pour upload ultérieur
           const nouvellePJ: PJFacture = {
             id: generatePJId(),
             type: 'FICHIER',
@@ -111,6 +131,7 @@ export function useFacturePJ({
             taille: file.size,
             dateAjout: new Date().toISOString(),
             estPrincipale,
+            pendingFile: file, // Conserver le fichier original pour upload après création facture
           };
 
           setPiecesJointes((prev) => {

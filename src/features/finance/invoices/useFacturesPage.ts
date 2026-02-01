@@ -12,8 +12,10 @@ import {
   calculerDateEcheanceDefaut,
   MotifAvoir,
   calculerKPIFactures,
-  isFactureEnRetard
+  isFactureEnRetard,
+  PJFacture
 } from '@/components/features/finance/Factures/types';
+import { facturePJService } from '@/lib/services/facture-pj.service';
 import { useCopro } from '@/providers/CoproContext';
 import {
   useSupplierInvoices,
@@ -440,6 +442,33 @@ export function useFacturesPage() {
       if (result.error) {
         setCreateError(`Erreur lors de la création: ${result.error}`);
         return;
+      }
+
+      // Upload les pièces jointes après création de la facture
+      const newInvoiceId = result.data?.invoice_id;
+      if (newInvoiceId && newFactureForm.piecesJointes && newFactureForm.piecesJointes.length > 0) {
+        for (const pj of newFactureForm.piecesJointes) {
+          try {
+            if (pj.type === 'FICHIER' && pj.pendingFile) {
+              // Upload du fichier vers Supabase
+              await facturePJService.uploadFichier(newInvoiceId, {
+                file: pj.pendingFile,
+                nomPersonnalise: pj.nom,
+                estPrincipale: pj.estPrincipale,
+              }, currentCoproId);
+            } else if (pj.type === 'LIEN_EXTERNE') {
+              // Ajouter le lien externe
+              await facturePJService.ajouterLienExterne(newInvoiceId, {
+                lienExterne: pj.url,
+                nomPersonnalise: pj.nom,
+                estPrincipale: pj.estPrincipale,
+              }, currentCoproId);
+            }
+          } catch (pjError) {
+            console.error('[handleCreateFacture] Erreur upload PJ:', pjError);
+            // Continue même si une PJ échoue, la facture est créée
+          }
+        }
       }
 
       // Refresh to get the new invoice from Supabase

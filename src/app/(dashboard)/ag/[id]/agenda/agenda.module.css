@@ -124,14 +124,14 @@
 .majorityBadge { background: var(--primary-light); color: var(--primary); padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-xs); }
 .warningBadge { background: rgba(251, 191, 36, 0.2); color: #FCD34D; padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-xs); }
 .footer { display: flex; justify-content: space-between; padding-top: var(--space-xl); border-top: 1px solid var(--border); }
-.modalOverlay { 
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0, 0, 0, 0.7); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    z-index: 1000; 
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal-backdrop);
 }
 
 .modalContent {
@@ -143,6 +143,7 @@
     overflow-y: auto;
     width: 95%;
     position: relative;
+    z-index: var(--z-modal);
 }
 
 .modalContent h2 {

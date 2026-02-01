@@ -336,12 +336,48 @@ export function useConvocationData({
           degradedMode.agDataFailed = true;
         }
 
-        // 2. Charger les résolutions depuis ag_session_drafts
+        // 2. Charger les résolutions depuis la vue v_ag_resolutions_results (Supabase)
         try {
-          const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', `ag-resolutions-${agId}`);
-          if (savedResolutions && Array.isArray(savedResolutions)) {
-            resolutions = savedResolutions;
+          const supabaseRes = createUntypedClient();
+          const { data: dbResolutions, error: resError } = await supabaseRes
+            .from('v_ag_resolutions_results')
+            .select('*')
+            .eq('ag_id', agId)
+            .order('resolution_number', { ascending: true });
+
+          if (resError) {
+            throw resError;
           }
+
+          if (dbResolutions && Array.isArray(dbResolutions)) {
+            // Convertir les résolutions Supabase au format frontend
+            resolutions = dbResolutions.map((dbRes: {
+              id: string;
+              title: string;
+              description: string | null;
+              majority_type: string;
+              variables?: Record<string, unknown> | null;
+            }) => ({
+              id: dbRes.id,
+              titre: dbRes.title,
+              texte: dbRes.description || '',
+              majorite: dbRes.majority_type,
+              variables: dbRes.variables
+                ? Object.fromEntries(
+                    Object.entries(dbRes.variables).map(([k, v]) => [k, String(v ?? '')])
+                  )
+                : undefined,
+            }));
+          }
+
+          if (resolutions.length === 0) {
+            // Fallback: essayer loadDraft si aucune résolution en Supabase
+            const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', `ag-resolutions-${agId}`);
+            if (savedResolutions && Array.isArray(savedResolutions)) {
+              resolutions = savedResolutions;
+            }
+          }
+
           if (resolutions.length === 0) {
             logger.debug('Aucune résolution trouvée', {
               agId,

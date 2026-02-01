@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { X, Plus, AlertCircle, Calendar } from 'lucide-react';
 import { NewFactureForm, PJFacture, calculerDateEcheanceDefaut, PosteBudget } from '../types';
 import type { PosteBudgetData } from '@/components/features/finance/Budget/types';
@@ -41,12 +41,17 @@ export function NewFactureModal({ form, postesBudget, suppliers = [], createErro
     }
   }, [form.fournisseur]);
 
+  // Ref pour éviter les closures stale
+  const formRef = useRef(form);
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+
   const handlePJChange = useCallback((piecesJointes: PJFacture[]) => {
-    onFormChange({ ...form, piecesJointes });
-    if (pjError && piecesJointes.length > 0) {
-      setPjError(null);
-    }
-  }, [form, onFormChange, pjError]);
+    // Utilise la ref pour avoir la valeur courante du form
+    onFormChange({ ...formRef.current, piecesJointes });
+    setPjError(null);
+  }, [onFormChange]);
 
   // Quand la date de facture change, recalculer l'échéance par défaut
   const handleDateChange = useCallback((newDate: string) => {
@@ -55,11 +60,6 @@ export function NewFactureModal({ form, postesBudget, suppliers = [], createErro
   }, [form, onFormChange]);
 
   const handleCreate = () => {
-    // Vérifier qu'il y a au moins une PJ
-    if (!form.piecesJointes || form.piecesJointes.length === 0) {
-      setPjError('Une facture doit être accompagnée d\'un justificatif (PDF, image…) pour être enregistrée');
-      return;
-    }
     // Vérifier que la date d'échéance est renseignée
     if (!form.dateEcheance) {
       setPjError('La date d\'échéance est obligatoire');
@@ -193,8 +193,15 @@ export function NewFactureModal({ form, postesBudget, suppliers = [], createErro
             <FacturePJSection
               initialPJ={form.piecesJointes || []}
               onChange={handlePJChange}
-              required={true}
+              required={false}
             />
+            {/* Avertissement non-bloquant si pas de PJ */}
+            {(!form.piecesJointes || form.piecesJointes.length === 0) && (
+              <div className={styles.warningMessage} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-warning-bg, #fef3c7)', borderRadius: '0.375rem', color: 'var(--color-warning-text, #92400e)', fontSize: '0.875rem' }}>
+                <AlertCircle size={14} aria-hidden="true" style={{ flexShrink: 0 }} />
+                <span>Recommandé : joindre un justificatif (PDF, image…) pour cette facture</span>
+              </div>
+            )}
             {pjError && (
               <span className={styles.errorMessage}>
                 <AlertCircle size={14} aria-hidden="true" />

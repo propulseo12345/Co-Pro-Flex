@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Paperclip, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { PJFacture } from '../types';
 import { useFacturePJ } from '@/hooks/useFacturePJ';
+import { facturePJService } from '@/lib/services/facture-pj.service';
 import { UploadZone } from './UploadZone';
 import { PJList } from './PJList';
 import { LienExterneModal } from './LienExterneModal';
@@ -25,7 +26,7 @@ export function FacturePJSection({
   initialPJ = [],
   onChange,
   readOnly = false,
-  required = true,
+  required = false,
 }: FacturePJSectionProps) {
   const [showLienModal, setShowLienModal] = useState(false);
 
@@ -41,33 +42,24 @@ export function FacturePJSection({
   } = useFacturePJ({
     factureId,
     initialPJ,
+    onChange, // Le hook notifie directement le parent quand l'état change
   });
-
-  // Notifier le parent des changements
-  const notifyChange = useCallback(
-    (newPJ: PJFacture[]) => {
-      if (onChange) {
-        onChange(newPJ);
-      }
-    },
-    [onChange]
-  );
 
   // Gérer l'upload de fichiers
   const handleFilesSelected = useCallback(
     async (files: File[]) => {
       clearError();
+      let currentCount = piecesJointes.length;
 
       for (const file of files) {
         // Le premier fichier sera marqué comme principal s'il n'y en a pas encore
-        const estPrincipale = piecesJointes.length === 0 && files.indexOf(file) === 0;
+        const estPrincipale = currentCount === 0;
         await uploadFichier(file, estPrincipale);
+        currentCount++;
       }
-
-      // Notifier après tous les uploads
-      notifyChange([...piecesJointes]);
+      // La notification est automatique via useEffect dans le hook
     },
-    [clearError, piecesJointes, uploadFichier, notifyChange]
+    [clearError, piecesJointes.length, uploadFichier]
   );
 
   // Gérer l'ajout d'un lien externe
@@ -75,32 +67,74 @@ export function FacturePJSection({
     async (url: string, nom?: string) => {
       const estPrincipale = piecesJointes.length === 0;
       await ajouterLienExterne(url, nom, estPrincipale);
-      notifyChange([...piecesJointes]);
+      // La notification est automatique via useEffect dans le hook
     },
-    [ajouterLienExterne, piecesJointes, notifyChange]
+    [ajouterLienExterne, piecesJointes.length]
   );
 
   // Gérer la suppression
   const handleSupprimer = useCallback(
     async (pjId: string) => {
       await supprimerPJ(pjId);
-      notifyChange(piecesJointes.filter((p) => p.id !== pjId));
+      // La notification est automatique via useEffect dans le hook
     },
-    [supprimerPJ, piecesJointes, notifyChange]
+    [supprimerPJ]
   );
 
   // Gérer le changement de principale
   const handleDefinirPrincipale = useCallback(
     async (pjId: string) => {
       await definirPrincipale(pjId);
-      notifyChange(
-        piecesJointes.map((p) => ({
-          ...p,
-          estPrincipale: p.id === pjId,
-        }))
-      );
+      // La notification est automatique via useEffect dans le hook
     },
-    [definirPrincipale, piecesJointes, notifyChange]
+    [definirPrincipale]
+  );
+
+  // Gérer la visualisation - obtient une URL signée pour les fichiers Supabase
+  const handleVoir = useCallback(
+    async (pj: PJFacture) => {
+      try {
+        // Si c'est un lien externe ou un blob local, ouvrir directement
+        if (pj.type === 'LIEN_EXTERNE' || pj.url.startsWith('blob:') || pj.url.startsWith('http')) {
+          window.open(pj.url, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        // Sinon, obtenir une URL signée depuis Supabase
+        const signedUrl = await facturePJService.getUrlDocument(pj.url);
+        window.open(signedUrl, '_blank', 'noopener,noreferrer');
+      } catch (err) {
+        console.error('[FacturePJSection] Erreur visualisation:', err);
+        // Fallback: essayer d'ouvrir l'URL directement
+        window.open(pj.url, '_blank', 'noopener,noreferrer');
+      }
+    },
+    []
+  );
+
+  // Gérer le téléchargement - obtient une URL signée pour les fichiers Supabase
+  const handleTelecharger = useCallback(
+    async (pj: PJFacture) => {
+      try {
+        let downloadUrl = pj.url;
+
+        // Si ce n'est pas un blob local ou un lien http, obtenir URL signée
+        if (!pj.url.startsWith('blob:') && !pj.url.startsWith('http')) {
+          downloadUrl = await facturePJService.getUrlDocument(pj.url);
+        }
+
+        // Télécharger via un lien
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = pj.nom;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error('[FacturePJSection] Erreur téléchargement:', err);
+      }
+    },
+    []
   );
 
   const hasNoPJ = piecesJointes.length === 0;
@@ -140,6 +174,8 @@ export function FacturePJSection({
         <div className={styles.listContainer}>
           <PJList
             piecesJointes={piecesJointes}
+            onVoir={handleVoir}
+            onTelecharger={handleTelecharger}
             onSupprimer={!readOnly ? handleSupprimer : undefined}
             onDefinirPrincipale={!readOnly ? handleDefinirPrincipale : undefined}
             readOnly={readOnly}

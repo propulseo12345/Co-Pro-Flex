@@ -114,16 +114,53 @@ export default function AgendaPage() {
       <div className={styles.layoutWithPreview}>
         <div className={styles.mainContent}>
           <div className={styles.actions}>
-            <button className="btn btn-primary" onClick={page.handlePrefillObligatoires}>
-              <ListChecks size={16} /> Pré-remplir les résolutions obligatoires
+            <button
+              className="btn btn-primary"
+              onClick={page.handlePrefillObligatoires}
+              disabled={page.saveState?.isSaving}
+            >
+              <ListChecks size={16} />
+              {page.saveState?.isSaving ? 'Création en cours...' : 'Pré-remplir les résolutions obligatoires'}
             </button>
-            <button className="btn btn-secondary" onClick={() => page.setShowBankModal(true)}>
+            <button className="btn btn-secondary" onClick={() => page.setShowBankModal(true)} disabled={page.saveState?.isSaving}>
               <Plus size={16} /> Ajouter une résolution
             </button>
-            <button className="btn btn-secondary" onClick={() => page.setShowCustomModal(true)}>
+            <button className="btn btn-secondary" onClick={() => page.setShowCustomModal(true)} disabled={page.saveState?.isSaving}>
               <Plus size={16} /> Résolution personnalisée
             </button>
           </div>
+
+          {/* Afficher les erreurs de sauvegarde ou DB */}
+          {(page.saveState?.error || page.dbError) && (
+            <div className={styles.warningMessage}>
+              <AlertTriangle size={20} />
+              <span><strong>Erreur:</strong> {page.saveState?.error || page.dbError}</span>
+            </div>
+          )}
+
+          {/* Debug info si aucune résolution */}
+          {!page.isLoading && page.resolutions.length === 0 && !page.meeting && (
+            <div className={styles.warningMessage}>
+              <AlertTriangle size={20} />
+              <span><strong>AG non trouvée</strong> - Vérifiez que l'AG existe dans Supabase (ID: {agId})</span>
+            </div>
+          )}
+
+          {/* Debug panel - TODO: supprimer après debug */}
+          <details className={styles.infoMessage} style={{ cursor: 'pointer' }} open>
+            <summary><Info size={16} style={{ display: 'inline', marginRight: '8px' }} /><strong>Debug Info</strong> (cliquer pour fermer)</summary>
+            <div style={{ marginTop: '8px', fontSize: '12px', fontFamily: 'monospace', lineHeight: '1.6' }}>
+              <p>AG ID: <code>{agId}</code></p>
+              <p>Meeting trouvé: {page.meeting ? '✓ Oui' : '✗ Non'}</p>
+              <p>Meeting type: {page.meeting?.meeting_type || 'N/A'}</p>
+              <p>isManager: {page.isManager ? '✓ Oui' : '✗ Non'}</p>
+              <p>Résolutions en DB: {page.resolutions.length}</p>
+              <p>Loading: {page.isLoading ? 'Oui' : 'Non'}</p>
+              <p>DB Error: <span style={{ color: page.dbError ? 'red' : 'inherit' }}>{page.dbError || 'Aucune'}</span></p>
+              <p>Save Error: <span style={{ color: page.saveState?.error ? 'red' : 'inherit' }}>{page.saveState?.error || 'Aucune'}</span></p>
+              <p>isSaving: {page.saveState?.isSaving ? 'Oui' : 'Non'}</p>
+            </div>
+          </details>
 
           {/* Avertissement si exercice comptable non configuré */}
           {!page.accountingPeriod && (
@@ -189,7 +226,7 @@ export default function AgendaPage() {
           typeAG={(page.agFormData?.type || 'ORDINAIRE') as TypeAG}
           onSelectResolution={page.handleAddFromBank}
           onClose={() => page.setShowBankModal(false)}
-          resolutionsDejaAjoutees={page.resolutions.map(r => r.templateId).filter(Boolean) as string[]}
+          existingTitles={page.existingResolutionTitles}
         />
       )}
 

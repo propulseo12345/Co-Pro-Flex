@@ -61,9 +61,7 @@ export default function NewFacturePage() {
     if (!formData.montant || parseFloat(formData.montant) <= 0) {
       newErrors.montant = 'Le montant doit être supérieur à 0';
     }
-    if (!formData.fichier) {
-      newErrors.fichier = 'Une facture doit être accompagnée d\'un justificatif (PDF, image…) pour être enregistrée';
-    }
+    // Pas de validation bloquante pour le justificatif - c'est optionnel
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -209,7 +207,7 @@ export default function NewFacturePage() {
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label htmlFor="fichier">
                 <Upload size={16} aria-hidden="true" />
-                Pièce justificative <span className={styles.required}>*</span>
+                Pièce justificative
               </label>
               <div className={styles.fileUpload}>
                 <input
@@ -217,17 +215,18 @@ export default function NewFacturePage() {
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   onChange={handleFileChange}
-                  className={`${styles.fileInput} ${errors.fichier ? styles.inputError : ''}`}
+                  className={styles.fileInput}
                 />
                 <label htmlFor="fichier" className={styles.fileLabel}>
                   <Upload size={20} aria-hidden="true" />
                   {formData.fichier ? formData.fichier.name : 'Choisir un fichier (PDF, image…)'}
                 </label>
               </div>
-              {errors.fichier && (
-                <span className={styles.errorMessage}>
+              {/* Avertissement non-bloquant si pas de fichier */}
+              {!formData.fichier && (
+                <span className={styles.warningMessage}>
                   <AlertCircle size={14} aria-hidden="true" />
-                  {errors.fichier}
+                  Recommandé : joindre un justificatif (PDF, image…) pour cette facture
                 </span>
               )}
             </div>

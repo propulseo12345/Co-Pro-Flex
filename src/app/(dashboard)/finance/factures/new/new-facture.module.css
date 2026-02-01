@@ -139,6 +139,18 @@
     color: var(--danger);
 }
 
+.warningMessage {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--warning, #f59e0b);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--warning-bg, #fef3c7);
+    border-radius: var(--radius-sm);
+    margin-top: var(--space-xs);
+}
+
 .required {
     color: var(--danger);
 }

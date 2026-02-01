@@ -1,44 +1,53 @@
 'use client';
 
+/**
+ * Hook: useAgAgendaPage
+ *
+ * 100% DB-DRIVEN - Supabase est la SEULE source de vérité.
+ * - Aucun localStorage
+ * - Aucun état local pour données métier
+ * - Persistance immédiate après chaque modification
+ * - Re-fetch systématique après mutation
+ */
+
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MajorityType, TypeAG, ResolutionTemplate } from '@/lib/constants/resolutions';
 import { getResolutionById, generateEcheancesDates, getResolutionsObligatoires } from '@/lib/constants/resolutions';
-import { genererResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
 import { extractVariableNames, formatDateFR, formatMontant } from '@/lib/utils/resolution-variables';
-import { MOCK_CONTRAT_SYNDIC, MOCK_PARAMETRES } from '@/data/mock';
-import type { Resolution } from '@/components/features/ag';
+import type { Resolution, ResolutionEditData } from '@/components/features/ag';
 import { useCopro } from '@/providers/CoproContext';
-import { useAgDetail, useAddResolution, useDeleteResolution, useReorderResolutions, useEligibleVoters, useUpdateResolution } from '@/hooks/modules/useAgData';
-import type { AgResolutionResult, MajorityType as DbMajorityType } from '@/lib/ag/types';
-import type { ResolutionEditData } from '@/components/features/ag';
-import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+import {
+  useAgDetail,
+  useAddResolution,
+  useDeleteResolution,
+  useReorderResolutions,
+  useEligibleVoters,
+  useUpdateResolution,
+  useUpdateAg,
+} from '@/hooks/modules/useAgData';
+import type { AgResolutionResult, MajorityType as DbMajorityType, AgMeeting } from '@/lib/ag/types';
 import { createClient } from '@/lib/supabase/client';
 import { getActiveAccountingPeriod, type AccountingPeriodInfo } from '@/lib/finance/accounting-period';
 
-interface AGFormData {
-  type: 'ORDINAIRE' | 'EXTRAORDINAIRE';
-  date: string;
-  heure: string;
-  lieu: string;
-  adresse: string;
-  budget: boolean;
-  budgetMontant: string;
-  budgetExercice: string;
-  budgetPostes: { id: string; poste: string; montant: number }[];
-}
-
-interface RolesAG {
-  presidentSeance?: { nom: string; coproprietaireId?: string };
-  secretaireSeance?: { nom: string; coproprietaireId?: string };
-  scrutateur?: { nom: string; coproprietaireId?: string };
-}
+// ============================================================================
+// TYPES
+// ============================================================================
 
 interface UseAgAgendaPageParams {
   agId: string;
 }
 
-// Map frontend majority type to backend
+interface SaveState {
+  isSaving: boolean;
+  lastSaved: Date | null;
+  error: string | null;
+}
+
+// ============================================================================
+// MAJORITY TYPE MAPPERS
+// ============================================================================
+
 function toDbMajorityType(type: MajorityType): DbMajorityType {
   const map: Partial<Record<MajorityType, DbMajorityType>> = {
     'ART_24': 'art24',
@@ -47,12 +56,10 @@ function toDbMajorityType(type: MajorityType): DbMajorityType {
     'ART_26': 'art26',
     'ART_26_1': 'art26_1',
     'UNANIMITE': 'unanimity',
-    // INFORMATION is not a voting majority, defaults to art24
   };
   return map[type] || 'art24';
 }
 
-// Map backend majority type to frontend
 function fromDbMajorityType(type: DbMajorityType): MajorityType {
   const map: Record<DbMajorityType, MajorityType> = {
     'art24': 'ART_24',
@@ -65,143 +72,160 @@ function fromDbMajorityType(type: DbMajorityType): MajorityType {
   return map[type] || 'ART_24';
 }
 
-// Convert DB resolution to frontend Resolution format
+// ============================================================================
+// DB TO FRONTEND CONVERTERS
+// ============================================================================
+
 function dbToFrontendResolution(dbRes: AgResolutionResult): Resolution {
+  const variables: Record<string, string> | undefined = dbRes.variables
+    ? Object.fromEntries(
+        Object.entries(dbRes.variables as Record<string, unknown>).map(([k, v]) => [k, String(v ?? '')])
+      )
+    : undefined;
+
   return {
     id: dbRes.id,
     titre: dbRes.title,
     texte: dbRes.description || '',
     majorite: fromDbMajorityType(dbRes.majority_type),
-    custom: true, // DB resolutions are treated as custom (no template)
+    variables,
+    custom: dbRes.is_customized ?? false,
   };
 }
+
+function meetingToFormData(meeting: AgMeeting) {
+  // Extraire l'année de l'exercice depuis la date de l'AG
+  const agYear = meeting.meeting_date ? new Date(meeting.meeting_date).getFullYear() : new Date().getFullYear();
+  const budgetExercice = (agYear).toString(); // L'exercice courant
+
+  return {
+    type: meeting.meeting_type === 'ordinary' ? 'ORDINAIRE' as const : 'EXTRAORDINAIRE' as const,
+    date: meeting.meeting_date?.split('T')[0] || '',
+    heure: meeting.meeting_date?.split('T')[1]?.substring(0, 5) || '',
+    lieu: meeting.location || '',
+    adresse: meeting.location || '',
+    budgetExercice,
+    presidentSeance: meeting.president_name ? { nom: meeting.president_name } : undefined,
+    secretaireSeance: meeting.secretary_name ? { nom: meeting.secretary_name } : undefined,
+    scrutateur: meeting.scrutineer1_name ? { nom: meeting.scrutineer1_name } : undefined,
+  };
+}
+
+// ============================================================================
+// HOOK PRINCIPAL
+// ============================================================================
 
 export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const router = useRouter();
   const { currentCoproId, isManager } = useCopro();
 
-  // Supabase data hooks
-  const { meeting, resolutions: dbResolutions, isLoading: dbLoading, refreshResolutions } = useAgDetail(agId);
+  // -------------------------------------------------------------------------
+  // SUPABASE DATA HOOKS (source de vérité unique)
+  // -------------------------------------------------------------------------
+  const {
+    meeting,
+    resolutions: dbResolutions,
+    isLoading: dbLoading,
+    error: dbError,
+    refresh: refreshAll,
+    refreshResolutions,
+  } = useAgDetail(agId);
+
   const { voters } = useEligibleVoters();
   const addResolutionMutation = useAddResolution();
   const deleteResolutionMutation = useDeleteResolution();
   const reorderResolutionsMutation = useReorderResolutions();
   const updateResolutionMutation = useUpdateResolution();
+  const updateAgMutation = useUpdateAg();
 
-  const [resolutions, setResolutions] = useState<Resolution[]>([]);
+  // -------------------------------------------------------------------------
+  // UI STATES (non-métier)
+  // -------------------------------------------------------------------------
   const [showBankModal, setShowBankModal] = useState(false);
   const [showCustomModal, setShowCustomModal] = useState(false);
-  const [agFormData, setAgFormData] = useState<AGFormData | null>(null);
-  const [roles, setRoles] = useState<RolesAG>({});
   const [editingVariable, setEditingVariable] = useState<{ resId: string; varName: string; templateId?: string } | null>(null);
   const [tempVariableValue, setTempVariableValue] = useState('');
-  const [presences, setPresences] = useState<Record<string, 'PRESENT' | 'REPRESENTE' | 'ABSENT' | 'VOTE_CORRESPONDANCE'>>({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageCount, setSuccessMessageCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [prefillWarning, setPrefillWarning] = useState<{ total: number; added: number; skipped: number } | null>(null);
-  const [useSupabase, setUseSupabase] = useState(false);
   const [editingResolution, setEditingResolution] = useState<Resolution | null>(null);
-  const [isUpdatingResolution, setIsUpdatingResolution] = useState(false);
-  const [updateResolutionError, setUpdateResolutionError] = useState<string | null>(null);
   const [accountingPeriod, setAccountingPeriod] = useState<AccountingPeriodInfo | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
-  // Check if AG exists in Supabase (UUID = Supabase AG)
-  const isSupabaseAg = useMemo(() => {
-    return isValidUUID(agId) && meeting && meeting.id === agId;
-  }, [agId, meeting]);
+  // -------------------------------------------------------------------------
+  // SAVE STATE (indicateurs de persistance)
+  // -------------------------------------------------------------------------
+  const [saveState, setSaveState] = useState<SaveState>({
+    isSaving: false,
+    lastSaved: null,
+    error: null,
+  });
 
+  // -------------------------------------------------------------------------
+  // DERIVED DATA (calculé depuis DB, pas d'état local)
+  // -------------------------------------------------------------------------
+  const resolutions = useMemo(() => {
+    console.log('[useAgAgendaPage] dbResolutions count:', dbResolutions.length);
+    return dbResolutions.map(dbToFrontendResolution);
+  }, [dbResolutions]);
+
+  // Debug: Log des valeurs importantes
   useEffect(() => {
-    if (isSupabaseAg) {
-      setUseSupabase(true);
-      // Note: Plus de marqueur localStorage - Supabase est source de vérité
-    }
-  }, [isSupabaseAg, agId]);
+    console.log('[useAgAgendaPage] État actuel:', {
+      agId,
+      currentCoproId,
+      isManager,
+      meetingExists: !!meeting,
+      meetingType: meeting?.meeting_type,
+      dbResolutionsCount: dbResolutions.length,
+      dbLoading,
+      dbError,
+    });
+  }, [agId, currentCoproId, isManager, meeting, dbResolutions.length, dbLoading, dbError]);
 
-  // Fetch active accounting period for exercise date pre-filling
+  // Titres des résolutions existantes (pour éviter les doublons dans la bibliothèque)
+  const existingResolutionTitles = useMemo(() => {
+    return dbResolutions.map(r => r.title.toLowerCase());
+  }, [dbResolutions]);
+
+  const agFormData = useMemo(() => {
+    if (!meeting) return null;
+    return meetingToFormData(meeting);
+  }, [meeting]);
+
+  const roles = useMemo(() => {
+    if (!meeting) return {};
+    return {
+      presidentSeance: meeting.president_name ? { nom: meeting.president_name } : undefined,
+      secretaireSeance: meeting.secretary_name ? { nom: meeting.secretary_name } : undefined,
+      scrutateur: meeting.scrutineer1_name ? { nom: meeting.scrutineer1_name } : undefined,
+    };
+  }, [meeting]);
+
+  // -------------------------------------------------------------------------
+  // ACCOUNTING PERIOD (pour pré-remplissage dates exercice)
+  // -------------------------------------------------------------------------
   useEffect(() => {
     if (!currentCoproId) return;
 
     const fetchAccountingPeriod = async () => {
-      const exerciceYear = parseInt(agFormData?.budgetExercice || '') || new Date().getFullYear() + 1;
+      const exerciceYear = new Date().getFullYear() + 1;
       const result = await getActiveAccountingPeriod(currentCoproId, exerciceYear);
-
       if (result.data) {
         setAccountingPeriod(result.data);
-        console.log('[useAgAgendaPage] Accounting period loaded:', result.data);
-      } else if (result.error) {
-        console.warn('[useAgAgendaPage] Failed to load accounting period:', result.error);
       }
     };
 
     fetchAccountingPeriod();
-  }, [currentCoproId, agFormData?.budgetExercice]);
+  }, [currentCoproId]);
 
-  // Load AG form data - prioritize Supabase meeting data over localStorage
-  useEffect(() => {
-    // If we have a Supabase meeting, use it as source of truth
-    if (meeting && meeting.id === agId) {
-      setAgFormData({
-        type: meeting.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE',
-        date: meeting.meeting_date?.split('T')[0] || '',
-        heure: meeting.meeting_date?.split('T')[1]?.substring(0, 5) || '',
-        lieu: meeting.location || '',
-        adresse: meeting.location || '',
-        budget: false,
-        budgetMontant: '',
-        budgetExercice: (new Date().getFullYear() + 1).toString(),
-        budgetPostes: [],
-      });
-    } else {
-      // Fallback to loadDraft (localStorage) for non-Supabase AGs
-      const loadFallback = async () => {
-        const { data: savedAgData } = await loadDraft<AGFormData>(agId, 'session', `ag-draft-${agId}`);
-        if (savedAgData) {
-          setAgFormData(savedAgData);
-        }
-      };
-      loadFallback();
-    }
-
-    // Load roles from Supabase draft or localStorage
-    const loadRolesAndPresences = async () => {
-      if (isValidUUID(agId)) {
-        // Try Supabase first
-        const rolesResult = await loadDraft<RolesAG>(agId, 'roles', `roles-ag-${agId}`);
-        if (rolesResult.data) {
-          setRoles(rolesResult.data);
-        }
-
-        const presencesResult = await loadDraft<Record<string, 'PRESENT' | 'REPRESENTE' | 'ABSENT' | 'VOTE_CORRESPONDANCE'>>(
-          agId, 'attendance', `ag-presences-${agId}`
-        );
-        if (presencesResult.data) {
-          setPresences(presencesResult.data);
-        }
-      } else {
-        // Non-UUID AG, use loadDraft (localStorage fallback)
-        const { data: savedRoles } = await loadDraft<RolesAG>(agId, 'roles', `roles-ag-${agId}`);
-        if (savedRoles) {
-          setRoles(savedRoles);
-        }
-        const { data: savedPresences } = await loadDraft<Record<string, 'PRESENT' | 'REPRESENTE' | 'ABSENT' | 'VOTE_CORRESPONDANCE'>>(
-          agId, 'attendance', `ag-presences-${agId}`
-        );
-        if (savedPresences) {
-          setPresences(savedPresences);
-        }
-      }
-    };
-
-    loadRolesAndPresences();
-  }, [agId, meeting]);
-
+  // -------------------------------------------------------------------------
+  // SUGGESTIONS DE VARIABLES (basé sur données DB)
+  // -------------------------------------------------------------------------
   const getGlobalSuggestions = useCallback((variableNames: string[]): Record<string, string> => {
     const suggestions: Record<string, string> = {};
-    const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
+    const exercice = (new Date().getFullYear() + 1).toString();
 
-    // Use accounting period dates if available, otherwise fallback to calendar year
     const periodStartDate = accountingPeriod?.start_date
       ? new Date(accountingPeriod.start_date).toLocaleDateString('fr-FR')
       : `01/01/${exercice}`;
@@ -209,482 +233,507 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       ? new Date(accountingPeriod.end_date).toLocaleDateString('fr-FR')
       : `31/12/${exercice}`;
     const periodYear = accountingPeriod?.year?.toString() || exercice;
-    const periodLabel = accountingPeriod?.label || `Exercice ${exercice}`;
 
     for (const name of variableNames) {
       const lowerName = name.toLowerCase();
       if (lowerName === 'date' || lowerName === 'date_du_jour') {
         suggestions[name] = formatDateFR(new Date());
       } else if (lowerName === 'date_debut' || lowerName === 'exercice_debut') {
-        // Use real accounting period start date from Supabase
         suggestions[name] = periodStartDate;
       } else if (lowerName === 'date_fin' || lowerName === 'exercice_fin' || lowerName === 'date_cloture') {
-        // Use real accounting period end date from Supabase
         suggestions[name] = periodEndDate;
       } else if (lowerName === 'annee' || lowerName === 'exercice' || lowerName === 'annee_exercice') {
         suggestions[name] = periodYear;
-      } else if (lowerName === 'exercice_label' || lowerName === 'libelle_exercice') {
-        // New: formatted label from accounting period
-        suggestions[name] = periodLabel;
-      } else if (lowerName === 'nom_syndic' || lowerName === 'syndic') {
-        suggestions[name] = MOCK_CONTRAT_SYNDIC.cabinetNom || MOCK_CONTRAT_SYNDIC.nomSyndic || '';
-      } else if (lowerName === 'adresse_syndic') {
-        suggestions[name] = MOCK_CONTRAT_SYNDIC.adresse || '';
-      } else if (lowerName === 'telephone_syndic' || lowerName === 'tel_syndic') {
-        suggestions[name] = MOCK_CONTRAT_SYNDIC.telephone || '';
-      } else if (lowerName === 'email_syndic') {
-        suggestions[name] = MOCK_CONTRAT_SYNDIC.email || '';
-      } else if (lowerName === 'nom_copropriete' || lowerName === 'copropriete') {
-        suggestions[name] = MOCK_PARAMETRES.informationsCopro?.nom || 'Résidence Les Jardins';
-      } else if (lowerName === 'adresse_copropriete' || lowerName === 'adresse') {
-        suggestions[name] = MOCK_PARAMETRES.informationsCopro?.adresse || '';
-      } else if (lowerName === 'solde' || lowerName === 'solde_compte') {
-        suggestions[name] = formatMontant(45230.00);
       }
     }
     return suggestions;
-  }, [agFormData?.budgetExercice, accountingPeriod]);
+  }, [accountingPeriod]);
 
-  const prefillResolutionVariables = useCallback((resolution: Resolution): Resolution => {
-    if (!resolution.variables) return resolution;
-    const updatedVariables = { ...resolution.variables };
-
-    if (roles.presidentSeance && resolution.templateId === 'ag-01') updatedVariables['nom'] = roles.presidentSeance.nom;
-    if (roles.secretaireSeance && resolution.templateId === 'ag-02') updatedVariables['nom'] = roles.secretaireSeance.nom;
-    if (roles.scrutateur && resolution.templateId === 'ag-03') updatedVariables['nom'] = roles.scrutateur.nom;
-
-    if (agFormData?.budget && agFormData.budgetMontant) {
-      if (resolution.templateId === 'fin-06') {
-        const exercice = agFormData.budgetExercice || (new Date().getFullYear() + 1).toString();
-        updatedVariables['date_debut'] = `01/01/${exercice}`;
-        updatedVariables['date_fin'] = `31/12/${exercice}`;
-        updatedVariables['montant'] = parseFloat(agFormData.budgetMontant).toLocaleString('fr-FR');
-      }
-      if (resolution.templateId === 'ag-06') {
-        const budgetAmount = parseFloat(agFormData.budgetMontant) || 0;
-        updatedVariables['montant'] = Math.round(budgetAmount * 0.05).toLocaleString('fr-FR');
-        updatedVariables['pourcentage'] = '5';
-      }
-    }
-
-    const variableNames = extractVariableNames(resolution.texte);
-    const globalSuggestions = getGlobalSuggestions(variableNames);
-    for (const [varName, value] of Object.entries(globalSuggestions)) {
-      if (!updatedVariables[varName]) updatedVariables[varName] = value;
-    }
-
-    return { ...resolution, variables: updatedVariables };
-  }, [roles, agFormData, getGlobalSuggestions]);
-
-  // Load resolutions - from Supabase if available, otherwise localStorage
-  useEffect(() => {
-    if (!agId) { setIsLoading(false); return; }
-
-    // If we have Supabase data, use it
-    if (useSupabase && !dbLoading && dbResolutions.length > 0) {
-      const frontendResolutions = dbResolutions.map(dbToFrontendResolution);
-      setResolutions(frontendResolutions);
-      setIsLoading(false);
-      return;
-    }
-
-    // Otherwise, use loadDraft (localStorage fallback)
-    if (!useSupabase || (dbLoading === false && dbResolutions.length === 0)) {
-      const loadResolutions = async () => {
-        try {
-          const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', `ag-resolutions-${agId}`);
-          if (savedResolutions && Array.isArray(savedResolutions) && savedResolutions.length > 0) {
-            setResolutions(savedResolutions);
-            const { data: wasJustCreated } = await loadDraft<{ resolutionsCreated: boolean }>(agId, 'milestones', `ag-resolutions-created-${agId}`);
-            if (wasJustCreated?.resolutionsCreated) {
-              setSuccessMessageCount(savedResolutions.length);
-              setShowSuccessMessage(true);
-              // Clear the milestone
-              await saveDraft(agId, 'milestones', { resolutionsCreated: false }, `ag-resolutions-created-${agId}`);
-              setTimeout(() => setShowSuccessMessage(false), 5000);
-            }
-            setIsLoading(false);
-            return;
-          }
-          let agType = agFormData?.type;
-          if (!agType) {
-            const { data: savedAgData } = await loadDraft<AGFormData>(agId, 'session', `ag-draft-${agId}`);
-            if (savedAgData) {
-              agType = savedAgData.type;
-            }
-          }
-          if (agType === 'ORDINAIRE') {
-            const generated = genererResolutionsAGOrdinaire();
-            if (generated && generated.length > 0) {
-              // Sauvegarder dans Supabase (pas localStorage)
-              await saveDraft(agId, 'resolutions', generated, `ag-resolutions-${agId}`);
-              setResolutions(generated);
-              setSuccessMessageCount(generated.length);
-              setShowSuccessMessage(true);
-              await saveDraft(agId, 'milestones', { resolutionsCreated: true }, `ag-resolutions-created-${agId}`);
-              setTimeout(() => setShowSuccessMessage(false), 5000);
-            }
-          }
-        } catch { /* ignore */ } finally { setIsLoading(false); }
-      };
-      loadResolutions();
-    }
-  }, [agId, agFormData?.type, useSupabase, dbLoading, dbResolutions]);
-
-  useEffect(() => {
-    if (resolutions.length > 0 && (Object.keys(roles).length > 0 || agFormData?.budget)) {
-      const updated = resolutions.map(prefillResolutionVariables);
-      if (JSON.stringify(updated) !== JSON.stringify(resolutions)) setResolutions(updated);
-    }
-  }, [roles, agFormData, prefillResolutionVariables, resolutions]);
-
-  // Save resolutions via saveDraft as backup (for non-Supabase AGs only)
-  // Note: For Supabase AGs, resolutions are saved via addResolutionMutation - pas de localStorage
-  useEffect(() => {
-    if (resolutions.length > 0 && !useSupabase) {
-      saveDraft(agId, 'resolutions', resolutions, `ag-resolutions-${agId}`);
-    }
-    // Note: Le compte de résolutions est obtenu depuis v_ag_drafts_progress - plus de localStorage
-  }, [resolutions, agId, useSupabase]);
-
+  // -------------------------------------------------------------------------
+  // MUTATIONS: AJOUTER DEPUIS BIBLIOTHÈQUE
+  // -------------------------------------------------------------------------
   const handleAddFromBank = useCallback(async (template: ResolutionTemplate) => {
-    const variableNames = extractVariableNames(template.texte);
-    const globalSuggestions = getGlobalSuggestions(variableNames);
-    const variables: Record<string, string> = {};
-    for (const varName of variableNames) {
-      variables[varName] = globalSuggestions[varName] || '';
-    }
-
-    // If using Supabase, add to database with variables
-    if (useSupabase && currentCoproId && isManager) {
-      const result = await addResolutionMutation.execute({
-        ag_id: agId,
-        title: template.titre,
-        description: template.texte,
-        majority_type: toDbMajorityType(template.majorite),
-        resolution_number: resolutions.length + 1,
-        variables: variables, // Pass pre-filled variables to Supabase
-      });
-
-      if (result.success) {
-        await refreshResolutions();
-      } else {
-        // Fallback to local
-        const newResolution: Resolution = {
-          id: 'res-' + Date.now(),
-          templateId: template.id,
-          titre: template.titre,
-          texte: template.texte,
-          majorite: template.majorite,
-          variables,
-          custom: false,
-          categorie: template.categorie
-        };
-        setResolutions(prev => [...prev, newResolution]);
-      }
-    } else {
-      // Local mode
-      const newResolution: Resolution = {
-        id: 'res-' + Date.now(),
-        templateId: template.id,
-        titre: template.titre,
-        texte: template.texte,
-        majorite: template.majorite,
-        variables,
-        custom: false,
-        categorie: template.categorie
-      };
-      setResolutions(prev => [...prev, newResolution]);
-    }
-
-    setShowBankModal(false);
-  }, [getGlobalSuggestions, useSupabase, currentCoproId, isManager, addResolutionMutation, agId, resolutions.length, refreshResolutions]);
-
-  const handleAddCustom = useCallback(async (titre: string, texte: string, majorite: MajorityType) => {
-    // If using Supabase, add to database
-    if (useSupabase && currentCoproId && isManager) {
-      const result = await addResolutionMutation.execute({
-        ag_id: agId,
-        title: titre,
-        description: texte,
-        majority_type: toDbMajorityType(majorite),
-        resolution_number: resolutions.length + 1,
-      });
-
-      if (result.success) {
-        await refreshResolutions();
-      } else {
-        // Fallback to local
-        const newResolution: Resolution = { id: 'res-' + Date.now(), titre, texte, majorite, custom: true };
-        setResolutions(prev => [...prev, newResolution]);
-      }
-    } else {
-      // Local mode
-      const newResolution: Resolution = { id: 'res-' + Date.now(), titre, texte, majorite, custom: true };
-      setResolutions(prev => [...prev, newResolution]);
-    }
-
-    setShowCustomModal(false);
-  }, [useSupabase, currentCoproId, isManager, addResolutionMutation, agId, resolutions.length, refreshResolutions]);
-
-  const handlePrefillObligatoires = useCallback(() => {
-    const typeAG: TypeAG = (agFormData?.type || 'ORDINAIRE') as TypeAG;
-    const templatesObligatoires = getResolutionsObligatoires(typeAG);
-    const existingTemplateIds = new Set(resolutions.map(r => r.templateId).filter(Boolean));
-    const templatesToAdd = templatesObligatoires.filter(t => !existingTemplateIds.has(t.id));
-
-    if (templatesToAdd.length === 0) {
-      setPrefillWarning({ total: templatesObligatoires.length, added: 0, skipped: templatesObligatoires.length });
-      setTimeout(() => setPrefillWarning(null), 5000);
+    if (!currentCoproId || !isManager) {
+      setSaveState(prev => ({ ...prev, error: 'Non autorisé' }));
       return;
     }
 
-    const baseTimestamp = Date.now();
-    const newResolutions: Resolution[] = templatesToAdd.map((template, index) => {
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
+      // Pré-remplir les variables
       const variableNames = extractVariableNames(template.texte);
       const globalSuggestions = getGlobalSuggestions(variableNames);
       const variables: Record<string, string> = {};
       for (const varName of variableNames) {
         variables[varName] = globalSuggestions[varName] || '';
       }
-      return {
-        id: `res-${baseTimestamp}-${index}-${template.id}`,
-        templateId: template.id,
-        titre: template.titre,
-        texte: template.texte,
-        majorite: template.majorite,
-        variables,
-        custom: false,
-        categorie: template.categorie
-      };
-    });
 
-    const sortedNewResolutions = newResolutions.sort((a, b) => {
-      const templateA = templatesObligatoires.find(t => t.id === a.templateId);
-      const templateB = templatesObligatoires.find(t => t.id === b.templateId);
-      return (templateA?.ordre_suggere || 999) - (templateB?.ordre_suggere || 999);
-    });
+      // Persister immédiatement en DB
+      const result = await addResolutionMutation.execute({
+        ag_id: agId,
+        title: template.titre,
+        description: template.texte,
+        majority_type: toDbMajorityType(template.majorite),
+        resolution_number: dbResolutions.length + 1,
+        variables: variables,
+      });
 
-    setResolutions(prev => [...sortedNewResolutions, ...prev]);
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur lors de l\'ajout');
+      }
 
-    const skippedCount = templatesObligatoires.length - templatesToAdd.length;
-    if (skippedCount > 0) {
-      setPrefillWarning({ total: templatesObligatoires.length, added: templatesToAdd.length, skipped: skippedCount });
-    } else {
-      setSuccessMessageCount(templatesToAdd.length);
-      setShowSuccessMessage(true);
+      // Re-fetch depuis DB pour synchroniser l'UI
+      await refreshResolutions();
+
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+      setShowBankModal(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
-    setTimeout(() => { setPrefillWarning(null); setShowSuccessMessage(false); }, 5000);
-  }, [agFormData?.type, resolutions, getGlobalSuggestions]);
+  }, [currentCoproId, isManager, agId, dbResolutions.length, addResolutionMutation, refreshResolutions, getGlobalSuggestions]);
 
+  // -------------------------------------------------------------------------
+  // MUTATIONS: AJOUTER RÉSOLUTION PERSONNALISÉE
+  // -------------------------------------------------------------------------
+  const handleAddCustom = useCallback(async (titre: string, texte: string, majorite: MajorityType) => {
+    if (!currentCoproId || !isManager) {
+      setSaveState(prev => ({ ...prev, error: 'Non autorisé' }));
+      return;
+    }
+
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
+      const result = await addResolutionMutation.execute({
+        ag_id: agId,
+        title: titre,
+        description: texte,
+        majority_type: toDbMajorityType(majorite),
+        resolution_number: dbResolutions.length + 1,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur lors de l\'ajout');
+      }
+
+      await refreshResolutions();
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+      setShowCustomModal(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
+    }
+  }, [currentCoproId, isManager, agId, dbResolutions.length, addResolutionMutation, refreshResolutions]);
+
+  // -------------------------------------------------------------------------
+  // MUTATIONS: PRÉ-REMPLIR RÉSOLUTIONS OBLIGATOIRES
+  // -------------------------------------------------------------------------
+  const handlePrefillObligatoires = useCallback(async () => {
+    console.log('[handlePrefillObligatoires] ========== DÉMARRAGE ==========');
+    console.log('[handlePrefillObligatoires] État:', {
+      currentCoproId,
+      isManager,
+      meetingExists: !!meeting,
+      meetingId: meeting?.id,
+      meetingType: meeting?.meeting_type,
+      agId,
+      dbResolutionsCount: dbResolutions.length,
+    });
+
+    // Vérification détaillée des conditions
+    if (!currentCoproId) {
+      const errorMsg = 'Erreur: Aucune copropriété sélectionnée (currentCoproId est null)';
+      console.error('[handlePrefillObligatoires]', errorMsg);
+      setSaveState({ isSaving: false, lastSaved: null, error: errorMsg });
+      return;
+    }
+
+    if (!isManager) {
+      const errorMsg = 'Erreur: Vous n\'êtes pas gestionnaire de cette copropriété';
+      console.error('[handlePrefillObligatoires]', errorMsg);
+      setSaveState({ isSaving: false, lastSaved: null, error: errorMsg });
+      return;
+    }
+
+    if (!meeting) {
+      const errorMsg = `Erreur: L'AG avec l'ID "${agId}" n'a pas été trouvée dans Supabase. Vérifiez que l'AG existe.`;
+      console.error('[handlePrefillObligatoires]', errorMsg);
+      setSaveState({ isSaving: false, lastSaved: null, error: errorMsg });
+      return;
+    }
+
+    const typeAG: TypeAG = meeting.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE';
+    console.log('[handlePrefillObligatoires] Type AG détecté:', typeAG);
+
+    const templatesObligatoires = getResolutionsObligatoires(typeAG);
+    console.log('[handlePrefillObligatoires] Templates obligatoires trouvés:', templatesObligatoires.length);
+    console.log('[handlePrefillObligatoires] Templates:', templatesObligatoires.map(t => t.titre));
+
+    if (templatesObligatoires.length === 0) {
+      const errorMsg = `Aucun template obligatoire trouvé pour le type d'AG "${typeAG}"`;
+      console.warn('[handlePrefillObligatoires]', errorMsg);
+      setSaveState({ isSaving: false, lastSaved: null, error: errorMsg });
+      return;
+    }
+
+    // Identifier les templates déjà présents via le titre (car pas de templateId en DB)
+    const existingTitles = new Set(dbResolutions.map(r => r.title.toLowerCase()));
+    console.log('[handlePrefillObligatoires] Résolutions existantes:', Array.from(existingTitles));
+
+    const templatesToAdd = templatesObligatoires.filter(t => !existingTitles.has(t.titre.toLowerCase()));
+    console.log('[handlePrefillObligatoires] Templates à ajouter:', templatesToAdd.length);
+
+    if (templatesToAdd.length === 0) {
+      console.log('[handlePrefillObligatoires] Toutes les résolutions obligatoires sont déjà présentes');
+      setPrefillWarning({ total: templatesObligatoires.length, added: 0, skipped: templatesObligatoires.length });
+      setTimeout(() => setPrefillWarning(null), 5000);
+      return;
+    }
+
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
+      // Trier par ordre suggéré
+      const sortedTemplates = [...templatesToAdd].sort((a, b) => (a.ordre_suggere || 999) - (b.ordre_suggere || 999));
+      let addedCount = 0;
+      const errors: string[] = [];
+
+      for (let i = 0; i < sortedTemplates.length; i++) {
+        const template = sortedTemplates[i];
+        console.log('[handlePrefillObligatoires] Ajout résolution', i + 1, '/', sortedTemplates.length, ':', template.titre);
+
+        // Pré-remplir les variables
+        const variableNames = extractVariableNames(template.texte);
+        const globalSuggestions = getGlobalSuggestions(variableNames);
+        const variables: Record<string, string> = {};
+        for (const varName of variableNames) {
+          variables[varName] = globalSuggestions[varName] || '';
+        }
+
+        // Persister en DB via edge function
+        console.log('[handlePrefillObligatoires] Appel addResolutionMutation.execute pour:', template.titre);
+        const result = await addResolutionMutation.execute({
+          ag_id: agId,
+          title: template.titre,
+          description: template.texte,
+          majority_type: toDbMajorityType(template.majorite),
+          resolution_number: dbResolutions.length + i + 1,
+          variables: variables,
+        });
+
+        console.log('[handlePrefillObligatoires] Résultat:', JSON.stringify(result));
+
+        if (result.success) {
+          addedCount++;
+          console.log('[handlePrefillObligatoires] ✓ Résolution ajoutée avec succès:', template.titre);
+        } else {
+          const errorDetail = result.error || 'Erreur inconnue';
+          errors.push(`${template.titre}: ${errorDetail}`);
+          console.error('[handlePrefillObligatoires] ✗ Erreur ajout:', template.titre, errorDetail);
+        }
+      }
+
+      console.log('[handlePrefillObligatoires] ========== RÉSUMÉ ==========');
+      console.log('[handlePrefillObligatoires] Total ajoutées:', addedCount, '/', sortedTemplates.length);
+
+      if (errors.length > 0) {
+        console.error('[handlePrefillObligatoires] Erreurs:', errors);
+      }
+
+      // Re-fetch pour synchroniser
+      console.log('[handlePrefillObligatoires] Refresh des résolutions...');
+      await refreshResolutions();
+      console.log('[handlePrefillObligatoires] Refresh terminé, nouvelles résolutions:', dbResolutions.length);
+
+      const skippedCount = templatesObligatoires.length - templatesToAdd.length;
+
+      if (addedCount === 0 && errors.length > 0) {
+        // Toutes les ajouts ont échoué
+        setSaveState({ isSaving: false, lastSaved: null, error: `Échec de l'ajout: ${errors[0]}` });
+      } else if (addedCount > 0) {
+        // Au moins une résolution ajoutée
+        if (skippedCount > 0 || errors.length > 0) {
+          setPrefillWarning({ total: templatesObligatoires.length, added: addedCount, skipped: skippedCount + errors.length });
+        } else {
+          setSuccessMessageCount(addedCount);
+          setShowSuccessMessage(true);
+        }
+        setTimeout(() => { setPrefillWarning(null); setShowSuccessMessage(false); }, 5000);
+        setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+      }
+
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      console.error('[handlePrefillObligatoires] Exception:', err);
+      setSaveState({ isSaving: false, lastSaved: null, error: `Exception: ${message}` });
+    }
+  }, [currentCoproId, isManager, meeting, dbResolutions, agId, addResolutionMutation, refreshResolutions, getGlobalSuggestions]);
+
+  // -------------------------------------------------------------------------
+  // MUTATIONS: RÉORDONNER
+  // -------------------------------------------------------------------------
   const handleReorder = useCallback(async (newResolutions: Resolution[]) => {
-    setResolutions(newResolutions);
+    if (!isManager) return;
 
-    // If using Supabase, reorder in database
-    if (useSupabase && isManager) {
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
       const resolutionIds = newResolutions.map(r => r.id);
       await reorderResolutionsMutation.execute(agId, resolutionIds);
-    }
-  }, [useSupabase, isManager, reorderResolutionsMutation, agId]);
 
+      // Re-fetch pour garantir la synchronisation
+      await refreshResolutions();
+
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur lors du réordonnancement';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
+      // Re-fetch pour revenir à l'état DB
+      await refreshResolutions();
+    }
+  }, [isManager, agId, reorderResolutionsMutation, refreshResolutions]);
+
+  // -------------------------------------------------------------------------
+  // MUTATIONS: SUPPRIMER
+  // -------------------------------------------------------------------------
   const handleDelete = useCallback(async (id: string) => {
-    setResolutions(prev => prev.filter(r => r.id !== id));
+    if (!isManager) return;
 
-    // If using Supabase, delete from database
-    if (useSupabase && isManager) {
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
       await deleteResolutionMutation.execute(id);
+      await refreshResolutions();
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
-  }, [useSupabase, isManager, deleteResolutionMutation]);
+  }, [isManager, deleteResolutionMutation, refreshResolutions]);
 
-  const handleContinue = useCallback(async () => {
-    if (resolutions.length === 0) { alert('Veuillez ajouter au moins une résolution'); return; }
-
-    // Mettre à jour current_step vers étape 3 (convocation) si AG Supabase
-    if (isValidUUID(agId)) {
-      try {
-        const supabase = createClient();
-        await (supabase as ReturnType<typeof createClient>).from('ag_meetings').update({
-          current_step: 3,
-          updated_at: new Date().toISOString(),
-        }).eq('id', agId);
-      } catch (err) {
-        console.warn('[useAgAgendaPage] Failed to update current_step:', err);
-      }
-    }
-
-    router.push(`/ag/${agId}/convocation`);
-  }, [resolutions.length, router, agId]);
-
+  // -------------------------------------------------------------------------
+  // MUTATIONS: SAUVEGARDER VARIABLE
+  // -------------------------------------------------------------------------
   const handleStartEditVariable = useCallback((resId: string, varName: string, currentValue: string, templateId?: string) => {
     setEditingVariable({ resId, varName, templateId });
     setTempVariableValue(currentValue || '');
   }, []);
 
   const handleSaveVariable = useCallback(async () => {
-    if (!editingVariable) return;
+    if (!editingVariable || !isManager) return;
 
-    // Calculate new variables
-    const targetResolution = resolutions.find(r => r.id === editingVariable.resId);
-    if (!targetResolution) return;
+    const targetDbResolution = dbResolutions.find(r => r.id === editingVariable.resId);
+    if (!targetDbResolution) return;
 
-    const newVars = { ...(targetResolution.variables || {}), [editingVariable.varName]: tempVariableValue };
-    if (editingVariable.varName === 'modalites_paiement_budget' && tempVariableValue) {
-      const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
-      newVars['dates_echeances_budget'] = generateEcheancesDates(tempVariableValue, exercice);
-    }
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
 
-    // Update local state immediately
-    setResolutions(prev => prev.map(r => {
-      if (r.id === editingVariable.resId) {
-        return { ...r, variables: newVars };
+    try {
+      // Calculer les nouvelles variables
+      const existingVariables = (targetDbResolution.variables as Record<string, unknown>) || {};
+      const newVars = { ...existingVariables, [editingVariable.varName]: tempVariableValue };
+
+      // Gérer les modalités de paiement budget
+      if (editingVariable.varName === 'modalites_paiement_budget' && tempVariableValue) {
+        const exercice = (new Date().getFullYear() + 1).toString();
+        newVars['dates_echeances_budget'] = generateEcheancesDates(tempVariableValue, exercice);
       }
-      return r;
-    }));
 
-    // Persist to Supabase if using Supabase mode
-    if (useSupabase && currentCoproId && isManager) {
-      try {
-        const result = await updateResolutionMutation.execute(editingVariable.resId, {
-          variables: newVars,
-        });
-        if (!result.success) {
-          console.error('[useAgAgendaPage] Failed to persist variable:', result.error);
-        } else {
-          console.log('[useAgAgendaPage] Variable saved to Supabase:', editingVariable.varName);
-        }
-      } catch (err) {
-        console.error('[useAgAgendaPage] Error persisting variable:', err);
-      }
+      // Persister immédiatement en DB
+      await updateResolutionMutation.execute(editingVariable.resId, {
+        variables: newVars,
+      });
+
+      // Re-fetch pour synchroniser
+      await refreshResolutions();
+
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+      setEditingVariable(null);
+      setTempVariableValue('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
-
-    setEditingVariable(null);
-    setTempVariableValue('');
-  }, [editingVariable, tempVariableValue, agFormData?.budgetExercice, resolutions, useSupabase, currentCoproId, isManager, updateResolutionMutation]);
+  }, [editingVariable, tempVariableValue, isManager, dbResolutions, updateResolutionMutation, refreshResolutions]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingVariable(null);
     setTempVariableValue('');
   }, []);
 
-  // Inline resolution editing handlers
+  // -------------------------------------------------------------------------
+  // MUTATIONS: ÉDITER RÉSOLUTION
+  // -------------------------------------------------------------------------
   const handleEditResolution = useCallback((resolution: Resolution) => {
     setEditingResolution(resolution);
-    setUpdateResolutionError(null);
+    setSaveState(prev => ({ ...prev, error: null }));
   }, []);
 
   const handleCancelEditResolution = useCallback(() => {
     setEditingResolution(null);
-    setUpdateResolutionError(null);
+    setSaveState(prev => ({ ...prev, error: null }));
   }, []);
 
   const handleUpdateResolution = useCallback(async (data: ResolutionEditData) => {
-    if (!editingResolution) return;
+    if (!editingResolution || !isManager) return;
 
-    setIsUpdatingResolution(true);
-    setUpdateResolutionError(null);
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
 
     try {
-      // Update in Supabase if applicable
-      if (useSupabase && currentCoproId && isManager) {
-        // Get existing variables from the resolution being edited
-        const existingVariables = editingResolution.variables || {};
+      // Récupérer les variables existantes
+      const existingDbRes = dbResolutions.find(r => r.id === data.id);
+      const existingVariables = existingDbRes?.variables || {};
 
-        const result = await updateResolutionMutation.execute(data.id, {
-          title: data.titre,
-          description: data.texte,
-          majority_type: toDbMajorityType(data.majorite),
-          is_customized: true,
-          variables: existingVariables,
-        });
+      // Persister en DB
+      await updateResolutionMutation.execute(data.id, {
+        title: data.titre,
+        description: data.texte,
+        majority_type: toDbMajorityType(data.majorite),
+        is_customized: true,
+        variables: existingVariables as Record<string, unknown>,
+      });
 
-        if (!result.success) {
-          console.error('[useAgAgendaPage] Update resolution error:', result.error);
-          setUpdateResolutionError(result.error || 'Erreur lors de la mise à jour');
-          return;
-        }
+      // Re-fetch pour synchroniser
+      await refreshResolutions();
 
-        // Refresh from database
-        await refreshResolutions();
-      }
-
-      // Update local state
-      setResolutions(prev => prev.map(r => {
-        if (r.id === data.id) {
-          return {
-            ...r,
-            titre: data.titre,
-            texte: data.texte,
-            majorite: data.majorite,
-            custom: true, // Mark as customized
-          };
-        }
-        return r;
-      }));
-
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
       setEditingResolution(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
-      console.error('[useAgAgendaPage] Update resolution error:', err);
-      setUpdateResolutionError(message);
-    } finally {
-      setIsUpdatingResolution(false);
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
-  }, [editingResolution, useSupabase, currentCoproId, isManager, refreshResolutions, updateResolutionMutation]);
+  }, [editingResolution, isManager, dbResolutions, updateResolutionMutation, refreshResolutions]);
+
+  // -------------------------------------------------------------------------
+  // MUTATIONS: SAUVEGARDER RÔLES AG
+  // -------------------------------------------------------------------------
+  const handleSaveRoles = useCallback(async (newRoles: {
+    presidentSeance?: { nom: string };
+    secretaireSeance?: { nom: string };
+    scrutateur?: { nom: string };
+  }) => {
+    if (!isManager) return;
+
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
+      await updateAgMutation.execute(agId, {
+        president_name: newRoles.presidentSeance?.nom,
+        secretary_name: newRoles.secretaireSeance?.nom,
+        scrutineer1_name: newRoles.scrutateur?.nom,
+      });
+
+      await refreshAll();
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde des rôles';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
+    }
+  }, [isManager, agId, updateAgMutation, refreshAll]);
+
+  // -------------------------------------------------------------------------
+  // NAVIGATION
+  // -------------------------------------------------------------------------
+  const handleContinue = useCallback(async () => {
+    if (resolutions.length === 0) {
+      alert('Veuillez ajouter au moins une résolution');
+      return;
+    }
+
+    // Mettre à jour current_step vers étape 3 (convocation)
+    try {
+      const supabase = createClient();
+      await supabase.from('ag_meetings').update({
+        current_step: 3,
+        updated_at: new Date().toISOString(),
+      }).eq('id', agId);
+    } catch (err) {
+      console.warn('[useAgAgendaPage] Failed to update current_step:', err);
+    }
+
+    router.push(`/ag/${agId}/convocation`);
+  }, [resolutions.length, router, agId]);
 
   const goBack = useCallback(() => router.back(), [router]);
 
-  // Use voters from Supabase if available, otherwise mock
+  // -------------------------------------------------------------------------
+  // COPROPRIÉTAIRES POUR ÉDITEUR
+  // -------------------------------------------------------------------------
   const coproprietairesForEditor = useMemo(() => {
-    if (voters.length > 0) {
-      return voters.map(v => {
-        const parts = v.name.split(' ');
-        return { id: v.coproprietaire_id, nom: parts.slice(1).join(' ') || parts[0] || '', prenom: parts[0] || '' };
-      });
-    }
-    // Fallback to mock - but voters should come from Supabase
-    return [];
+    if (voters.length === 0) return [];
+    return voters.map(v => {
+      const parts = v.name.split(' ');
+      return {
+        id: v.coproprietaire_id,
+        nom: parts.slice(1).join(' ') || parts[0] || '',
+        prenom: parts[0] || '',
+      };
+    });
   }, [voters]);
 
+  // -------------------------------------------------------------------------
+  // RETURN
+  // -------------------------------------------------------------------------
   return {
+    // Data (DB-driven)
     resolutions,
+    existingResolutionTitles,
+    agFormData,
+    roles,
+    meeting,
+    accountingPeriod,
+
+    // Loading / Error states
+    isLoading: dbLoading,
+    dbError,
+    saveState,
+
+    // UI states
     showBankModal,
     setShowBankModal,
     showCustomModal,
     setShowCustomModal,
-    agFormData,
     editingVariable,
     tempVariableValue,
     setTempVariableValue,
-    presences,
     showSuccessMessage,
     successMessageCount,
-    isLoading: isLoading || dbLoading,
     prefillWarning,
+    editingResolution,
+    isUpdatingResolution: saveState.isSaving,
+    updateResolutionError: saveState.error,
     editorContainerRef,
     coproprietairesForEditor,
+
+    // Mutation handlers
     handleAddFromBank,
     handleAddCustom,
     handlePrefillObligatoires,
     handleReorder,
     handleDelete,
-    handleContinue,
     handleStartEditVariable,
     handleSaveVariable,
     handleCancelEdit,
-    goBack,
-    getResolutionById,
-    // New properties for Supabase integration
-    useSupabase,
-    isManager,
-    meeting,
-    // Inline resolution editing
-    editingResolution,
-    isUpdatingResolution,
-    updateResolutionError,
     handleEditResolution,
     handleUpdateResolution,
     handleCancelEditResolution,
-    // Accounting period for exercise dates
-    accountingPeriod,
+    handleSaveRoles,
+
+    // Navigation
+    handleContinue,
+    goBack,
+
+    // Utilities
+    getResolutionById,
+    isManager,
+
+    // Refresh from DB
+    refreshResolutions,
+    refreshAll,
+
+    // Legacy compatibility (deprecated - will be removed)
+    useSupabase: true,
+    presences: {} as Record<string, 'PRESENT' | 'REPRESENTE' | 'ABSENT' | 'VOTE_CORRESPONDANCE'>,
   };
 }

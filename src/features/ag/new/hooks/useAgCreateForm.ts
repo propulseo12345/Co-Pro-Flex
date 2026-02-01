@@ -10,7 +10,8 @@ import { validateVisioUrl, sanitizeUrl } from '@/lib/utils/url-validation';
 import { useAGDelais } from '@/hooks/modules/useAGDelais';
 import { DELAIS_LEGAUX } from '@/lib/constants/ag-delais-legaux';
 import { useCreateAg } from '@/hooks/modules/useAgData';
-import { saveDraft } from '@/lib/ag/draft-persistence';
+import { createStandardResolutions } from '@/lib/ag/create-standard-resolutions';
+import { useCopro } from '@/providers/CoproContext';
 
 const INITIAL_FORM_DATA: AGFormData = {
   type: 'ORDINAIRE',
@@ -35,6 +36,7 @@ const INITIAL_FORM_DATA: AGFormData = {
 
 export function useAgCreateForm() {
   const router = useRouter();
+  const { currentCoproId } = useCopro();
   const [formData, setFormData] = useState<AGFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showValidationErrors, setShowValidationErrors] = useState(false);
@@ -226,13 +228,19 @@ export function useAgCreateForm() {
             ? `Assemblée Générale Extraordinaire du ${dateFormatted}`
             : `Assemblée Générale du ${dateFormatted}`;
 
-        // Créer l'AG dans Supabase via Edge Function
+        if (!currentCoproId) {
+          setErrors({ form: 'Aucune copropriété sélectionnée' });
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Créer l'AG dans Supabase via Edge Function (sans résolutions automatiques)
         const result = await createAgInSupabase({
           title,
           meeting_date: meetingDateTime,
           location,
           meeting_type: meetingType,
-          include_standard_resolutions: formData.type === 'ORDINAIRE',
+          include_standard_resolutions: false, // On crée les résolutions manuellement après
         });
 
         if (!result.success || !result.ag_id) {
@@ -246,22 +254,22 @@ export function useAgCreateForm() {
         const agId = result.ag_id;
         console.log('[useAgCreateForm] AG créée avec succès, UUID:', agId);
 
-        // Sauvegarder les données additionnelles du formulaire dans ag_session_drafts
-        // (budget, format visio, etc. qui ne sont pas dans ag_meetings)
-        const additionalData = {
-          format: formData.format,
-          heure: formData.heure,
-          visioUrl: formData.visioUrl,
-          visioProvider: formData.visioProvider,
-          budget: formData.budget,
-          budgetMontant: formData.budgetMontant,
-          budgetExercice: formData.budgetExercice,
-          budgetPostes: formData.budgetPostes,
-          adresse: formData.adresse,
-        };
+        // Créer les résolutions obligatoires avec templates complets et variables
+        const typeAG = formData.type === 'ORDINAIRE' ? 'ORDINAIRE' : 'EXTRAORDINAIRE';
+        const exerciceYear = parseInt(formData.budgetExercice) || new Date().getFullYear() + 1;
 
-        // Sauvegarder en Supabase (maintenant que agId est un UUID valide)
-        await saveDraft(agId, 'session', additionalData);
+        const resolutionsResult = await createStandardResolutions({
+          agId,
+          coproId: currentCoproId,
+          typeAG,
+          exerciceYear,
+        });
+
+        console.log('[useAgCreateForm] Résolutions créées:', resolutionsResult.resolutionsCreated);
+
+        if (!resolutionsResult.success && resolutionsResult.resolutionsCreated === 0) {
+          console.warn('[useAgCreateForm] Aucune résolution créée:', resolutionsResult.results);
+        }
 
         // Naviguer vers la page agenda avec l'UUID Supabase
         router.push(`/ag/${agId}/agenda`);
@@ -277,7 +285,7 @@ export function useAgCreateForm() {
         setIsSubmitting(false);
       }
     },
-    [formData, validate, router, createAgInSupabase]
+    [formData, validate, router, createAgInSupabase, currentCoproId]
   );
 
   const handleBack = useCallback(() => {
