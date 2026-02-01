@@ -68,11 +68,12 @@ export default function VotesCorrespondanceCoproPage() {
             try {
                 const supabase = createUntypedClient();
 
-                // 1. Load coproprietaire
+                // 1. Load coproprietaire from view (has display_name and total_tantiemes)
                 const { data: coproData, error: coproError } = await supabase
-                    .from('coproprietaires')
-                    .select('id, full_name, email, tantiemes')
+                    .from('v_coproprietaires_overview')
+                    .select('id, display_name, email, total_tantiemes')
                     .eq('id', coproprietaireId)
+                    .limit(1)
                     .single();
 
                 if (coproError || !coproData) {
@@ -81,7 +82,13 @@ export default function VotesCorrespondanceCoproPage() {
                     return;
                 }
 
-                setCopro(coproData);
+                // Map view result to expected format
+                setCopro({
+                    id: coproData.id,
+                    full_name: coproData.display_name,
+                    email: coproData.email,
+                    tantiemes: coproData.total_tantiemes,
+                });
 
                 // 2. Load resolutions for this AG
                 const { data: resolutionsData, error: resError } = await supabase

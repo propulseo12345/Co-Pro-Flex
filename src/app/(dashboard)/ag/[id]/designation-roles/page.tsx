@@ -92,18 +92,26 @@ export default function DesignationRolesPage() {
                 // Get present coproprietaire IDs
                 const presentIds = (attendanceData || []).map((a: { coproprietaire_id: string }) => a.coproprietaire_id);
 
-                // 3. Load coproprietaires
+                // 3. Load coproprietaires from view (has display_name and total_tantiemes)
                 if (presentIds.length > 0) {
                     const { data: coprosData, error: coprosError } = await supabase
-                        .from('coproprietaires')
-                        .select('id, full_name, email, tantiemes')
+                        .from('v_coproprietaires_overview')
+                        .select('id, display_name, email, total_tantiemes')
                         .in('id', presentIds);
 
                     if (coprosError) {
                         console.error('[DesignationRolesPage] Error loading coproprietaires:', coprosError);
                     }
 
-                    setCoproprietairesPresents(coprosData || []);
+                    // Map view result to expected format
+                    const mappedCopros = (coprosData || []).map((c: { id: string; display_name: string; email: string | null; total_tantiemes: number }) => ({
+                        id: c.id,
+                        full_name: c.display_name,
+                        email: c.email,
+                        tantiemes: c.total_tantiemes,
+                    }));
+
+                    setCoproprietairesPresents(mappedCopros);
                 }
 
                 // 4. Load gestionnaires (from memberships with role='manager' or 'admin')

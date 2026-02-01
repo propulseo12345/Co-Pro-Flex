@@ -509,4 +509,126 @@
     }
 }
 
+/* Loading State */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: var(--space-lg);
+    text-align: center;
+}
+
+.loadingState h2 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.loadingState p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    color: var(--primary);
+}
+
+.spinnerSmall {
+    animation: spin 1s linear infinite;
+    color: var(--text-secondary);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.errorState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: var(--space-md);
+    text-align: center;
+    padding: var(--space-xl);
+}
+
+.errorIcon {
+    color: var(--error);
+}
+
+.errorState h2 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.errorDetails {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 500px;
+}
+
+.errorCode {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-family: monospace;
+    margin: 0;
+}
+
+.errorActions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+/* Empty State */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2xl);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    gap: var(--space-md);
+    color: var(--text-secondary);
+}
+
+.emptyState p {
+    margin: 0;
+}
+
+.emptyHint {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+/* Saving Indicator */
+.savingIndicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    margin-left: var(--space-md);
+}
+
+/* Copro Email */
+.coproEmail {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
 /* Dark mode overrides */

@@ -1,887 +1,619 @@
-/* Stepper Container */
-.stepperContainer {
-    margin-bottom: var(--space-2xl);
+/* ============================================
+   STEPPER - Frise de progression AG
+   ============================================ */
+
+.container {
+  margin-bottom: var(--space-xl);
 }
 
-/* === HEADER WITH MODE SWITCHER === */
-.stepperHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-md);
-    padding: 0 var(--space-sm);
+/* Header avec progression globale */
+.header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-md);
 }
 
-.progressInfo {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
+.globalProgress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
 }
 
-.progressText {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--primary);
+.progressLabel {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.timeEstimate {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-}
-
-.modeSwitcher {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 3px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-}
-
-.modeButton {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-xs) var(--space-sm);
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.modeButton:hover {
-    color: var(--text-main);
-    background: var(--surface);
-}
-
-.modeButtonActive {
-    background: var(--surface);
-    color: var(--primary);
-    box-shadow: var(--shadow-sm);
-}
-
-/* === GUIDED MODE (7 STEPS) === */
-.stepperWrapper {
-    display: flex;
-    align-items: stretch;
-    gap: var(--space-md);
-    padding: var(--space-lg) 0;
-}
-
-/* Module Sections */
-.moduleSection {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-md);
-    position: relative;
-}
-
-.moduleSection:first-child {
-    flex: 1.15;
-}
-
-.moduleSection:last-child {
-    flex: 0.85;
-}
-
-.moduleHeader {
-    text-align: center;
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--border);
-}
-
-.moduleTitle {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.moduleContent {
-    position: relative;
-    padding-top: var(--space-sm);
-}
-
-/* Module Divider */
-.moduleDivider {
-    display: flex;
-    align-items: center;
-    padding: 0 var(--space-xs);
-}
-
-.dividerLine {
-    width: 2px;
-    height: 60px;
-    background: linear-gradient(180deg, transparent, var(--border), transparent);
-    border-radius: var(--radius-full);
-}
-
-/* Progress Track */
-.progressTrack {
-    position: absolute;
-    top: calc(var(--space-sm) + 22px);
-    left: calc(100% / 8);
-    right: calc(100% / 8);
-    height: 4px;
-    background: var(--border);
-    border-radius: var(--radius-full);
-    transform: translateY(-50%);
-    z-index: 0;
+.progressBar {
+  width: 120px;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
 .progressFill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--primary-hover));
-    border-radius: var(--radius-full);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--success));
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
 }
 
-.progressFill.progressInactive {
-    background: var(--border);
+.progressValue {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 40px;
 }
 
-.progressFill::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
-    background: var(--primary);
-    border-radius: 50%;
-    box-shadow: 0 0 0 4px var(--primary-light);
-    animation: pulse 2s infinite;
+/* ============================================
+   MODULES LAYOUT
+   ============================================ */
+
+.modules {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: stretch;
 }
 
-.progressFill.progressInactive::after {
-    display: none;
+.module {
+  flex: 1;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  transition: all 0.3s ease;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 0 0 4px var(--primary-light);
-    }
-    50% {
-        box-shadow: 0 0 0 8px transparent;
-    }
+/* Module actif (celui où on se trouve) */
+.moduleActive {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light), 0 4px 20px rgba(16, 185, 129, 0.15);
 }
 
-/* Steps Row */
-.stepsRow {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-    z-index: 1;
+.moduleActive .moduleIcon {
+  background: var(--primary);
+  color: white;
 }
 
-/* Individual Step */
-.stepItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-    flex: 1;
-    position: relative;
-    transition: transform 0.2s ease;
+.moduleActive .moduleTitle {
+  color: var(--primary);
 }
 
-/* Clickable step */
+/* Module complété */
+.moduleCompleted {
+  border-color: var(--success);
+  background: rgba(34, 197, 94, 0.03);
+}
+
+.moduleCompleted .moduleIcon {
+  background: var(--success);
+  color: white;
+}
+
+.moduleCompleted .moduleTitle {
+  color: var(--success);
+}
+
+/* Module en attente */
+.modulePending {
+  opacity: 0.6;
+  border-color: var(--border);
+}
+
+.modulePending .moduleIcon {
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   MODULE HEADER
+   ============================================ */
+
+.moduleHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.moduleIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.moduleInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.moduleTitle {
+  display: block;
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-main);
+  transition: color 0.3s ease;
+}
+
+.moduleSubtitle {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.moduleProgress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.moduleProgressBar {
+  width: 80px;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.moduleProgressBarInactive {
+  opacity: 0.4;
+}
+
+.moduleProgressFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.moduleProgressText {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   SÉPARATEUR ENTRE MODULES
+   ============================================ */
+
+.moduleSeparator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-xs);
+}
+
+.separatorLine {
+  width: 2px;
+  height: 20px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+.separatorIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  margin: var(--space-xs) 0;
+}
+
+/* ============================================
+   STEPS LAYOUT
+   ============================================ */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stepWrapper {
+  position: relative;
+}
+
+.connector {
+  position: absolute;
+  left: 18px;
+  top: -8px;
+  width: 2px;
+  height: 8px;
+  background: var(--border);
+  transition: background 0.3s ease;
+}
+
+.connectorActive {
+  background: var(--primary);
+}
+
+/* ============================================
+   INDIVIDUAL STEP
+   ============================================ */
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
 .stepClickable {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .stepClickable:hover {
-    transform: translateY(-2px);
+  background: var(--bg-secondary);
 }
 
 .stepClickable:hover .stepCircle {
-    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
-    border-color: var(--primary-hover);
-}
-
-.stepClickable:focus {
-    outline: none;
-}
-
-.stepClickable:focus-visible .stepCircle {
-    box-shadow: 0 0 0 3px var(--primary-light), 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: scale(1.1);
 }
 
 /* Step Circle */
 .stepCircle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface);
-    border: 3px solid var(--border);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--text-tertiary);
-    position: relative;
-    z-index: 2;
-}
-
-.stepIcon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  color: var(--text-tertiary);
 }
 
 /* Step Content */
 .stepContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .stepNumber {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-tertiary);
-    transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
 }
 
-.stepLabel {
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: color 0.3s ease;
-    white-space: nowrap;
+.stepTitle {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.stepLabelShort {
-    display: none;
-    font-size: var(--text-xs);
-    font-weight: 500;
-    color: var(--text-secondary);
+.optionalTag {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--warning);
+  background: var(--warning-light);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-/* Optional Badge */
-.optionalBadge {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--warning);
-    background: var(--warning-light);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    margin-top: 2px;
-}
+/* ============================================
+   STEP STATES
+   ============================================ */
 
-.optionalBadgeSmall {
-    font-size: 8px;
-    font-weight: 600;
-    color: #FCD34D;
-    background: rgba(251, 191, 36, 0.2);
-    padding: 1px 4px;
-    border-radius: var(--radius-sm);
-}
-
-/* Locked Badge */
-.lockedBadge {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--danger);
-    background: var(--danger-light);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    margin-top: 2px;
-}
-
-.lockedBadgeSmall {
-    font-size: 8px;
-    font-weight: 600;
-    color: #F87171;
-    background: rgba(248, 113, 113, 0.2);
-    padding: 1px 4px;
-    border-radius: var(--radius-sm);
-}
-
-/* === STEP STATES === */
-
-/* Completed Step */
+/* Completed */
 .stepCompleted .stepCircle {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-    box-shadow: 0 2px 12px rgba(52, 211, 153, 0.4);
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
 }
 
 .stepCompleted .stepNumber {
-    color: var(--primary);
+  color: var(--success);
 }
 
-.stepCompleted .stepLabel,
-.stepCompleted .stepLabelShort {
-    color: var(--text-main);
+.stepCompleted .stepTitle {
+  color: var(--text-main);
 }
 
-/* In Progress Step (Active) */
-.stepIn_progress .stepCircle {
-    background: var(--surface);
-    border-color: var(--primary);
-    border-width: 3px;
-    color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-light), 0 4px 16px rgba(52, 211, 153, 0.3);
-    transform: scale(1.1);
+/* Current */
+.stepCurrent .stepCircle {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 0 0 4px var(--primary-light);
+  animation: pulse 2s infinite;
 }
 
-.stepIn_progress .stepNumber {
-    color: var(--primary);
-    font-weight: 700;
+.stepCurrent .stepNumber {
+  color: var(--primary);
 }
 
-.stepIn_progress .stepLabel,
-.stepIn_progress .stepLabelShort {
-    color: var(--primary);
-    font-weight: 600;
+.stepCurrent .stepTitle {
+  color: var(--primary);
+  font-weight: 600;
 }
 
-/* Available Step */
-.stepAvailable .stepCircle {
-    background: var(--surface);
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-.stepAvailable .stepNumber,
-.stepAvailable .stepLabel,
-.stepAvailable .stepLabelShort {
-    color: var(--text-secondary);
-}
-
-/* Locked Step */
-.stepLocked .stepCircle {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-tertiary);
-    opacity: 0.6;
-}
-
-.stepLocked .stepNumber,
-.stepLocked .stepLabel,
-.stepLocked .stepLabelShort {
-    color: var(--text-tertiary);
-    opacity: 0.6;
-}
-
-/* Skipped Step */
-.stepSkipped .stepCircle {
-    background: var(--bg-secondary);
-    border-color: var(--text-tertiary);
-    color: var(--text-tertiary);
-}
-
-.stepSkipped .stepNumber {
-    color: var(--text-tertiary);
-}
-
-.stepSkipped .stepLabel,
-.stepSkipped .stepLabelShort {
-    color: var(--text-tertiary);
-    text-decoration: line-through;
-}
-
-/* Legacy states for compatibility */
-.stepActive .stepCircle {
-    background: var(--surface);
-    border-color: var(--primary);
-    border-width: 3px;
-    color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(16, 185, 129, 0.2);
-    transform: scale(1.1);
-}
-
-.stepActive .stepNumber {
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.stepActive .stepLabel,
-.stepActive .stepLabelShort {
-    color: var(--primary);
-    font-weight: 600;
-}
-
+/* Pending */
 .stepPending .stepCircle {
-    background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-tertiary);
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-tertiary);
 }
 
 .stepPending .stepNumber,
-.stepPending .stepLabel,
-.stepPending .stepLabelShort {
-    color: var(--text-tertiary);
+.stepPending .stepTitle {
+  color: var(--text-tertiary);
 }
 
-/* === EXPERT MODE (4 GROUPS) === */
-.expertWrapper {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
-    padding: var(--space-lg) 0;
+/* Locked */
+.stepLocked {
+  opacity: 0.5;
 }
 
-.expertGroup {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: all 0.2s ease;
+.stepLocked .stepCircle {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-tertiary);
 }
 
-.expertGroupHeader {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    padding: var(--space-md);
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
 }
 
-.groupClickable {
-    cursor: pointer;
+/* ============================================
+   MOBILE VIEW
+   ============================================ */
+
+.mobileView {
+  display: none;
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  box-shadow: 0 0 0 4px var(--primary-light);
 }
 
-.groupClickable:hover {
-    background: var(--bg-secondary);
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
 }
 
-.expertGroupIcon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-    flex-shrink: 0;
+.mobileModule {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.expertGroupInfo {
-    flex: 1;
-    min-width: 0;
+.mobileStep {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
-.expertGroupTitle {
-    display: block;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.expertGroupDesc {
-    display: block;
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.expertGroupProgress {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--space-xs);
-}
-
-.expertGroupCount {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.expertGroupProgressBar {
-    width: 60px;
-    height: 4px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-}
-
-.expertGroupProgressFill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: var(--radius-full);
-    transition: width 0.3s ease;
-}
-
-.expertGroupExpand {
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-}
-
-.expertGroupExpand:hover {
-    background: var(--border);
-    color: var(--text-main);
-}
-
-/* Expert Group Steps (expanded) */
-.expertGroupSteps {
-    border-top: 1px solid var(--border);
-    padding: var(--space-sm);
-    background: var(--bg-secondary);
-}
-
-.expertStep {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-md);
-    transition: all 0.2s ease;
-}
-
-.expertStep.stepClickable:hover {
-    background: var(--surface);
-}
-
-.expertStepIcon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface);
-    border: 2px solid var(--border);
-    color: var(--text-tertiary);
-    flex-shrink: 0;
-}
-
-.expertStepTitle {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    flex: 1;
-}
-
-/* Expert Group States */
-.groupCompleted .expertGroupIcon {
-    background: var(--primary-light);
-    color: var(--primary);
-}
-
-.groupCompleted .expertGroupTitle {
-    color: var(--primary);
-}
-
-.groupCompleted .expertGroupProgressFill {
-    background: var(--primary);
-}
-
-.groupIn_progress .expertGroupIcon {
-    background: var(--primary-light);
-    color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-.groupIn_progress {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
-}
-
-.groupLocked {
-    opacity: 0.6;
-}
-
-.groupLocked .expertGroupHeader {
-    cursor: not-allowed;
-}
-
-/* Expert Step States */
-.expertStep.stepCompleted .expertStepIcon {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-}
-
-.expertStep.stepCompleted .expertStepTitle {
-    color: var(--text-main);
-}
-
-.expertStep.stepIn_progress .expertStepIcon {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-.expertStep.stepIn_progress .expertStepTitle {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-.expertStep.stepLocked {
-    opacity: 0.5;
-}
-
-.expertStep.stepSkipped .expertStepTitle {
-    text-decoration: line-through;
-    color: var(--text-tertiary);
-}
-
-/* === MOBILE COMPACT VIEW === */
-.mobileProgress {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-md) var(--space-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.mobileModuleBadge {
-    text-align: center;
-    margin-bottom: var(--space-sm);
-    padding: 4px 12px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.mobileProgressInfo {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-sm);
-}
-
-.mobileStepCurrent {
-    font-size: var(--text-sm);
-    font-weight: 700;
-    color: var(--primary);
-    background: var(--primary-light);
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
-}
-
-.mobileStepLabel {
-    font-size: var(--text-base);
-    font-weight: 600;
-    color: var(--text-main);
+.mobileTitle {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: var(--space-md);
+  text-align: center;
 }
 
 .mobileProgressBar {
-    height: 8px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    margin-bottom: var(--space-md);
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
 }
 
 .mobileProgressFill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--primary-hover));
-    border-radius: var(--radius-full);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--success));
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
 }
 
-/* Mobile Steps Navigation */
-.mobileStepsNav {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-xs);
+.mobileDots {
+  display: flex;
+  gap: var(--space-xs);
 }
 
-.mobileStepDot {
-    flex: 1;
-    height: 32px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--bg-secondary);
-    color: var(--text-tertiary);
+.mobileDot {
+  flex: 1;
+  height: 36px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobileDot:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.mobileDot:not(:disabled):hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.mobileDotCompleted {
+  background: var(--success-light);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.mobileDotCurrent {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.mobileDotPending {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1100px) {
+  .stepTitle {
     font-size: var(--text-xs);
-    font-weight: 600;
-    cursor: default;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  }
+
+  .moduleTitle {
+    font-size: var(--text-sm);
+  }
+
+  .module {
+    padding: var(--space-sm);
+  }
+
+  .step {
+    padding: var(--space-xs) var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .stepCircle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .connector {
+    left: 15px;
+  }
 }
 
-.mobileStepDot:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+@media (max-width: 900px) {
+  .modules {
+    flex-direction: column;
+  }
 
-.mobileStepDot:not(:disabled) {
-    cursor: pointer;
-}
+  .moduleSeparator {
+    flex-direction: row;
+    padding: var(--space-xs) 0;
+  }
 
-.mobileStepDot:not(:disabled):hover {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary);
-}
+  .separatorLine {
+    width: 40px;
+    height: 2px;
+  }
 
-.mobileStepDotIn_progress {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-    box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
-}
+  .steps {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
 
-.mobileStepDotCompleted {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary);
-}
+  .stepWrapper {
+    flex: 1;
+    min-width: 140px;
+  }
 
-.mobileStepDotCompleted:not(:disabled):hover {
-    background: var(--primary);
-    color: white;
-}
+  .connector {
+    display: none;
+  }
 
-.mobileStepDotAvailable {
-    background: var(--surface);
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-.mobileStepDotLocked {
+  .step {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-sm);
     background: var(--bg-secondary);
-    border-color: var(--border);
-    color: var(--text-tertiary);
-    opacity: 0.5;
+    border-radius: var(--radius-md);
+  }
+
+  .stepContent {
+    width: 100%;
+  }
+
+  .stepTitle {
+    white-space: normal;
+    text-align: center;
+  }
 }
 
-.mobileStepDotSkipped {
-    background: var(--bg-secondary);
-    border-color: var(--text-tertiary);
-    color: var(--text-tertiary);
+@media (max-width: 700px) {
+  .modules {
+    display: none;
+  }
+
+  .header {
+    display: none;
+  }
+
+  .mobileView {
+    display: block;
+  }
 }
 
-/* Legacy mobile states */
-.mobileStepDotActive {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+@media (max-width: 400px) {
+  .mobileView {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .mobileTitle {
+    font-size: var(--text-base);
+  }
+
+  .mobileDot {
+    height: 32px;
+    font-size: var(--text-xs);
+  }
 }
-
-/* === RESPONSIVE === */
-@media (max-width: 1200px) {
-    .stepLabel {
-        display: none;
-    }
-
-    .stepLabelShort {
-        display: block;
-    }
-
-    .stepCircle {
-        width: 40px;
-        height: 40px;
-    }
-
-    .moduleTitle {
-        font-size: var(--text-xs);
-    }
-
-    /* Expert mode adjustments */
-    .expertWrapper {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .expertGroupDesc {
-        display: none;
-    }
-}
-
-@media (max-width: 1000px) {
-    .stepLabelShort {
-        font-size: 10px;
-    }
-
-    .stepNumber {
-        font-size: 9px;
-    }
-
-    .stepCircle {
-        width: 36px;
-        height: 36px;
-    }
-
-    .stepCircle svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    .moduleSection {
-        padding: var(--space-sm);
-    }
-
-    .moduleHeader {
-        margin-bottom: var(--space-sm);
-    }
-
-    .moduleTitle {
-        font-size: 10px;
-    }
-
-    /* Header responsive */
-    .stepperHeader {
-        flex-direction: column;
-        gap: var(--space-sm);
-        align-items: stretch;
-    }
-
-    .progressInfo {
-        justify-content: center;
-    }
-
-    .modeSwitcher {
-        justify-content: center;
-    }
-}
-
-@media (max-width: 850px) {
-    .stepperWrapper {
-        display: none;
-    }
-
-    .expertWrapper {
-        display: none;
-    }
-
-    .mobileProgress {
-        display: block;
-    }
-
-    .stepperHeader {
-        display: none;
-    }
-}
-
-/* === DARK MODE ADJUSTMENTS === */

@@ -34,7 +34,7 @@ import {
   type ProjectorQuorum,
 } from '@/types/projector';
 import { useCopro } from '@/providers/CoproContext';
-import { useAgDetail, useEligibleVoters, useCastVote, useRegisterAttendance, useStartAg } from '@/hooks/modules/useAgData';
+import { useAgDetail, useAgVoters, useCastVote, useRegisterAttendance, useStartAg } from '@/hooks/modules/useAgData';
 import type { VoteDirection, MajorityType as DbMajorityType } from '@/lib/ag/types';
 import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 
@@ -97,7 +97,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
 
   // Supabase data
   const { meeting, resolutions: dbResolutions, attendance: dbAttendance, quorum: dbQuorum, isLoading: dbLoading, refreshAttendance } = useAgDetail(agId);
-  const { voters } = useEligibleVoters();
+  const { voters } = useAgVoters(agId);
   const castVoteMutation = useCastVote();
   const registerAttendanceMutation = useRegisterAttendance();
   const startAgMutation = useStartAg();
@@ -239,27 +239,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams) {
             setVariableValues(mergedVariables);
           }
         }
-      } else if (!isValidUUID(agId)) {
-        // Fallback to loadDraft (which uses localStorage) for non-UUID (legacy) AGs
-        const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', 'ag-resolutions-' + agId);
-        if (savedResolutions) {
-          setResolutions(savedResolutions);
-          // Also merge resolution variables for legacy mode
-          const mergedVariables: Record<string, string> = {};
-          for (const res of savedResolutions) {
-            if (res.variables && typeof res.variables === 'object') {
-              for (const [key, value] of Object.entries(res.variables)) {
-                if (value !== null && value !== undefined) {
-                  mergedVariables[key] = String(value);
-                }
-              }
-            }
-          }
-          if (Object.keys(mergedVariables).length > 0) {
-            setVariableValues(prev => ({ ...mergedVariables, ...prev }));
-          }
-        }
       }
+      // Note: Legacy non-UUID AGs are no longer supported - all AGs must be Supabase UUIDs
 
       // Load votes draft from Supabase
       const votesDraft = await loadDraft<VoteData[]>(agId, 'votes');

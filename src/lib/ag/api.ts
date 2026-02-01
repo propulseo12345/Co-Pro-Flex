@@ -179,7 +179,45 @@ export async function listVotes(resolutionId: string): Promise<AgVoteDetailed[]>
 }
 
 /**
+ * Liste les copropriétaires éligibles pour une AG via RPC sécurisée
+ * Utilise rpc_get_ag_coproprietaires qui dérive copro_id depuis l'AG
+ */
+export async function listAgVoters(agId: string): Promise<Array<{
+  coproprietaire_id: string;
+  name: string;
+  email: string | null;
+  lot_ids: string[];
+  lot_refs: string[];
+  tantiemes: number;
+}>> {
+  const supabase = createUntypedClient();
+
+  const { data, error } = await supabase.rpc('rpc_get_ag_coproprietaires', {
+    p_ag_id: agId,
+  });
+
+  if (error) throw new Error(error.message);
+
+  // Map RPC result to expected format
+  return (data || []).map((row: {
+    id: string;
+    display_name: string;
+    email: string | null;
+    total_tantiemes: number;
+    lots_count: number;
+  }) => ({
+    coproprietaire_id: row.id,
+    name: row.display_name || 'Inconnu',
+    email: row.email,
+    lot_ids: [], // Not returned by RPC, but not critical
+    lot_refs: [],
+    tantiemes: row.total_tantiemes || 0,
+  }));
+}
+
+/**
  * Liste les copropriétaires éligibles pour une AG (avec leurs lots)
+ * @deprecated Utiliser listAgVoters(agId) pour un scoping sécurisé
  */
 export async function listEligibleVoters(coproId: string): Promise<Array<{
   coproprietaire_id: string;

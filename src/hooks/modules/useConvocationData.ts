@@ -1,30 +1,40 @@
 /**
  * Hook pour charger les données de la page Convocation
  *
- * Gère:
- * - Chargement depuis Supabase (ag_meetings + ag_session_drafts)
- * - Fallback localStorage pour les AG legacy (non-UUID)
- * - États: loading / ready / error / degraded
- * - Mode dégradé si chargement partiel
- * - Logging structuré des erreurs
+ * ÉTAPE 3 - 100% DB-driven
+ *
+ * Charge depuis Supabase:
+ * - Données AG (étape 1) depuis ag_meetings + v_ag_overview
+ * - Résolutions (étape 2) depuis v_ag_resolutions_results
+ * - Copropriétaires depuis v_coproprietaires_overview
+ * - Copropriété depuis copros
+ *
+ * Aucun fallback localStorage pour les données métier.
+ * États: loading / ready / error / degraded
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { logger, CONVOCATION_ERROR_CODES } from '@/lib/utils/logger';
 import { DEFAULT_TIMEOUTS } from '@/lib/utils/timeout';
-import { MOCK_COPROPRIETAIRES, Coproprietaire, AdressePostale } from '@/data/mock';
-export type { AdressePostale };
 import { AGFormat } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
-import { useCopro } from '@/providers/CoproContext';
 import type { AgMeeting } from '@/lib/ag/types';
 
 // Helper: Create untyped client for tables not in generated types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
 
-// Types pour les données de l'AG
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface AdressePostale {
+  rue: string;
+  codePostal: string;
+  ville: string;
+}
+
 export interface AGData {
   type: 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'URGENTE';
   format?: AGFormat | 'PRESENTIEL' | 'VISIO' | 'MIXTE';
@@ -49,15 +59,40 @@ export interface Resolution {
   templateId?: string;
 }
 
+export interface Coproprietaire {
+  id: string;
+  nom: string;
+  lot: string;
+  email?: string;
+  telephone?: string;
+  adressePostale?: AdressePostale;
+  tantiemes: number;
+}
+
+export interface CoproprietaireEditable extends Coproprietaire {
+  isEditing?: boolean;
+}
+
+export interface CoproprieteInfo {
+  id: string;
+  nom: string;
+  adresse: string;
+  ville: string;
+  codePostal: string;
+}
+
+export interface SyndicInfo {
+  nom: string;
+  adresse: string;
+  codePostal: string;
+  ville: string;
+}
+
 export type SendingMethod = 'RECOMMANDE' | 'LETTRE_SIMPLE' | 'AVIS_ELECTRONIQUE' | 'EMAIL' | 'REMISE_MAIN_PROPRE';
 
 export interface SendingChoice {
   coproprietaireId: string;
   methods: SendingMethod[];
-}
-
-export interface CoproprietaireEditable extends Coproprietaire {
-  isEditing?: boolean;
 }
 
 // État du chargement
@@ -68,6 +103,8 @@ export interface ConvocationState {
   agData: AGData | null;
   resolutions: Resolution[];
   coproprietaires: CoproprietaireEditable[];
+  copropriete: CoproprieteInfo | null;
+  syndic: SyndicInfo | null;
   sendingChoices: SendingChoice[];
   error: {
     code: string;
@@ -94,6 +131,10 @@ interface UseConvocationDataReturn extends ConvocationState {
   saveSendingChoices: (choices: SendingChoice[]) => void;
 }
 
+// ============================================================================
+// HELPERS
+// ============================================================================
+
 /**
  * Mapping des types AG depuis la DB vers le frontend
  */
@@ -103,19 +144,6 @@ const TYPE_MAPPING_FROM_DB: Record<string, AGData['type']> = {
   'mixed': 'URGENTE',
   'special': 'URGENTE',
 };
-
-/**
- * Charge les données depuis localStorage de manière sécurisée (pour legacy)
- */
-function safeJsonParse<T>(key: string, fallback: T): T {
-  try {
-    const data = localStorage.getItem(key);
-    if (!data) return fallback;
-    return JSON.parse(data) as T;
-  } catch {
-    return fallback;
-  }
-}
 
 /**
  * Extrait la date (sans heure) d'un datetime ISO
@@ -144,7 +172,7 @@ function extractTimeFromISO(isoString: string | null): string {
 }
 
 /**
- * Désérialise les métadonnées depuis opening_notes
+ * Désérialise les métadonnées depuis opening_notes ou session draft
  */
 interface DraftMetadata {
   format?: AGFormat;
@@ -155,6 +183,7 @@ interface DraftMetadata {
   budget?: boolean;
   budgetMontant?: string;
   budgetExercice?: string;
+  syndic?: SyndicInfo;
 }
 
 function deserializeMetadata(raw: string | null): DraftMetadata {
@@ -166,19 +195,25 @@ function deserializeMetadata(raw: string | null): DraftMetadata {
   }
 }
 
+// ============================================================================
+// HOOK PRINCIPAL
+// ============================================================================
+
 /**
  * Hook principal pour le chargement des données de convocation
+ * 100% DB-driven - Supabase seule source de vérité
  */
 export function useConvocationData({
   agId,
   timeoutMs = DEFAULT_TIMEOUTS.LOAD_DATA,
 }: UseConvocationDataOptions): UseConvocationDataReturn {
-  const { currentCoproId } = useCopro();
   const [state, setState] = useState<ConvocationState>({
     status: 'loading',
     agData: null,
     resolutions: [],
     coproprietaires: [],
+    copropriete: null,
+    syndic: null,
     sendingChoices: [],
     error: null,
     degradedMode: {
@@ -192,12 +227,12 @@ export function useConvocationData({
   const loadAttemptRef = useRef(0);
 
   /**
-   * Charge toutes les données avec gestion du timeout
+   * Charge toutes les données depuis Supabase
    */
   const loadData = useCallback(async () => {
-    // Vérifier que l'agId est valide
-    if (!agId || agId === 'undefined' || agId === 'null') {
-      logger.error('ID AG invalide', {
+    // Vérifier que l'agId est un UUID valide
+    if (!agId || !isValidUUID(agId)) {
+      logger.error('ID AG invalide ou non-UUID', {
         agId,
         step: 'convocation',
         action: 'loadData',
@@ -209,7 +244,7 @@ export function useConvocationData({
         error: {
           code: CONVOCATION_ERROR_CODES.INVALID_AG_ID,
           message: 'Identifiant AG invalide',
-          details: `L'identifiant "${agId}" n'est pas valide.`,
+          details: `L'identifiant "${agId}" n'est pas un UUID valide. Créez une AG via la page de planification.`,
         },
       }));
       return;
@@ -218,7 +253,7 @@ export function useConvocationData({
     loadAttemptRef.current += 1;
     const currentAttempt = loadAttemptRef.current;
 
-    logger.debug('Début chargement données convocation', {
+    logger.debug('Début chargement données convocation depuis Supabase', {
       agId,
       step: 'convocation',
       action: 'loadData',
@@ -251,8 +286,8 @@ export function useConvocationData({
       }
     }, timeoutMs);
 
-    // Charger les données
     try {
+      const supabase = createUntypedClient();
       const degradedMode = {
         agDataFailed: false,
         resolutionsFailed: false,
@@ -262,231 +297,261 @@ export function useConvocationData({
       let agData: AGData | null = null;
       let resolutions: Resolution[] = [];
       let coproprietaires: CoproprietaireEditable[] = [];
+      let copropriete: CoproprieteInfo | null = null;
+      let syndic: SyndicInfo | null = null;
       let sendingChoices: SendingChoice[] = [];
+      let coproId: string | null = null;
 
-      // Déterminer si c'est un UUID Supabase ou un ID legacy
-      const useSupabase = isValidUUID(agId);
+      // ========================================
+      // 1. Charger les données de l'AG depuis ag_meetings
+      // ========================================
+      try {
+        const { data: meeting, error: meetingError } = await supabase
+          .from('ag_meetings')
+          .select('*')
+          .eq('id', agId)
+          .single();
 
-      if (useSupabase) {
-        // === CHARGEMENT SUPABASE ===
+        if (meetingError || !meeting) {
+          logger.error('AG non trouvée dans Supabase', {
+            agId,
+            step: 'convocation',
+            action: 'loadAgData',
+            error: meetingError?.message,
+          });
+          // Erreur critique - on ne peut pas continuer sans l'AG
+          throw new Error(`AG non trouvée: ${meetingError?.message || 'ID inconnu'}`);
+        }
 
-        // 1. Charger les données de l'AG depuis ag_meetings
+        const m = meeting as AgMeeting;
+        coproId = m.copro_id;
+
+        // Charger les métadonnées depuis ag_session_drafts
+        let sessionMetadata: DraftMetadata = {};
         try {
-          const supabase = createUntypedClient();
-          const { data: meeting, error: meetingError } = await supabase
-            .from('ag_meetings')
-            .select('*')
-            .eq('id', agId)
-            .single();
-
-          if (meetingError || !meeting) {
-            logger.warn('AG non trouvée dans Supabase', {
-              agId,
-              step: 'convocation',
-              action: 'loadAgData',
-              error: meetingError?.message,
-            });
-            degradedMode.agDataFailed = true;
+          const { data: sessionData } = await loadDraft<DraftMetadata>(agId, 'session', `ag-session-${agId}`);
+          if (sessionData) {
+            sessionMetadata = sessionData;
           } else {
-            const m = meeting as AgMeeting;
+            // Fallback: opening_notes pour compatibilité
+            sessionMetadata = deserializeMetadata(m.opening_notes);
+          }
+        } catch {
+          sessionMetadata = deserializeMetadata(m.opening_notes);
+        }
 
-            // Charger les métadonnées depuis ag_session_drafts (session data)
-            // ou depuis opening_notes (pour les brouillons créés via useAgDraftEdit)
-            let sessionMetadata: DraftMetadata = {};
-            try {
-              const { data: sessionData } = await loadDraft<DraftMetadata>(agId, 'session', `ag-session-${agId}`);
-              if (sessionData) {
-                sessionMetadata = sessionData;
-              } else {
-                // Fallback to opening_notes if session draft not found
-                sessionMetadata = deserializeMetadata(m.opening_notes);
-              }
-            } catch {
-              // Fallback to opening_notes on error
-              sessionMetadata = deserializeMetadata(m.opening_notes);
+        agData = {
+          type: TYPE_MAPPING_FROM_DB[m.meeting_type] || 'ORDINAIRE',
+          format: sessionMetadata.format || AGFormat.PRESENTIEL,
+          date: extractDateFromISO(m.meeting_date),
+          heure: sessionMetadata.heure || extractTimeFromISO(m.meeting_date) || '',
+          lieu: m.location || '',
+          adresse: sessionMetadata.adresse || {
+            nomLieu: '',
+            rue: '',
+            codePostal: '',
+            ville: '',
+          },
+          adresseComplete: m.location || '',
+          visioUrl: sessionMetadata.visioUrl || '',
+          visioProvider: sessionMetadata.visioProvider,
+          budget: sessionMetadata.budget || false,
+          budgetMontant: sessionMetadata.budgetMontant || '',
+          budgetExercice: sessionMetadata.budgetExercice || (new Date().getFullYear() + 1 + ''),
+        };
+
+        // Récupérer le syndic depuis les métadonnées si disponible
+        if (sessionMetadata.syndic) {
+          syndic = sessionMetadata.syndic;
+        }
+
+      } catch (err) {
+        logger.convocationError(
+          agId,
+          'loadAgData',
+          CONVOCATION_ERROR_CODES.LOAD_AG_DATA_FAILED,
+          err instanceof Error ? err : undefined
+        );
+        degradedMode.agDataFailed = true;
+      }
+
+      // Si on n'a pas de copro_id, on ne peut pas continuer
+      if (!coproId) {
+        throw new Error('Impossible de déterminer la copropriété liée à cette AG');
+      }
+
+      // ========================================
+      // 2. Charger les résolutions depuis v_ag_resolutions_results
+      // ========================================
+      try {
+        const { data: dbResolutions, error: resError } = await supabase
+          .from('v_ag_resolutions_results')
+          .select('*')
+          .eq('ag_id', agId)
+          .order('resolution_number', { ascending: true });
+
+        if (resError) {
+          throw resError;
+        }
+
+        if (dbResolutions && Array.isArray(dbResolutions)) {
+          resolutions = dbResolutions.map((dbRes: {
+            id: string;
+            title: string;
+            description: string | null;
+            majority_type: string;
+            variables?: Record<string, unknown> | null;
+          }) => ({
+            id: dbRes.id,
+            titre: dbRes.title,
+            texte: dbRes.description || '',
+            majorite: dbRes.majority_type,
+            variables: dbRes.variables
+              ? Object.fromEntries(
+                  Object.entries(dbRes.variables).map(([k, v]) => [k, String(v ?? '')])
+                )
+              : undefined,
+          }));
+        }
+
+        if (resolutions.length === 0) {
+          logger.debug('Aucune résolution trouvée en DB pour cette AG', {
+            agId,
+            step: 'convocation',
+            action: 'loadResolutions',
+          });
+        }
+      } catch (err) {
+        logger.convocationError(
+          agId,
+          'loadResolutions',
+          CONVOCATION_ERROR_CODES.LOAD_RESOLUTIONS_FAILED,
+          err instanceof Error ? err : undefined
+        );
+        degradedMode.resolutionsFailed = true;
+      }
+
+      // ========================================
+      // 3. Charger les copropriétaires depuis v_coproprietaires_overview
+      // ========================================
+      try {
+        const { data: dbOwners, error: ownersError } = await supabase
+          .from('v_coproprietaires_overview')
+          .select('*')
+          .eq('copro_id', coproId)
+          .eq('owner_type', 'COPROPRIETAIRE')
+          .order('display_name', { ascending: true });
+
+        if (ownersError) {
+          throw ownersError;
+        }
+
+        if (dbOwners && Array.isArray(dbOwners)) {
+          coproprietaires = dbOwners.map((owner: {
+            id: string;
+            display_name: string;
+            email: string | null;
+            phone: string | null;
+            mobile: string | null;
+            address_line1: string | null;
+            postal_code: string | null;
+            city: string | null;
+            total_tantiemes: number;
+            lots_count: number;
+          }) => {
+            // Construire l'adresse postale si disponible
+            let adressePostale: AdressePostale | undefined;
+            if (owner.address_line1 && owner.postal_code && owner.city) {
+              adressePostale = {
+                rue: owner.address_line1,
+                codePostal: owner.postal_code,
+                ville: owner.city,
+              };
             }
 
-            agData = {
-              type: TYPE_MAPPING_FROM_DB[m.meeting_type] || 'ORDINAIRE',
-              format: sessionMetadata.format || AGFormat.PRESENTIEL,
-              date: extractDateFromISO(m.meeting_date),
-              heure: sessionMetadata.heure || extractTimeFromISO(m.meeting_date) || '',
-              lieu: m.location || '',
-              adresse: sessionMetadata.adresse || {
-                nomLieu: '',
-                rue: '',
-                codePostal: '',
-                ville: '',
-              },
-              adresseComplete: m.location || '',
-              visioUrl: sessionMetadata.visioUrl || '',
-              visioProvider: sessionMetadata.visioProvider,
-              budget: sessionMetadata.budget || false,
-              budgetMontant: sessionMetadata.budgetMontant || '',
-              budgetExercice: sessionMetadata.budgetExercice || (new Date().getFullYear() + 1 + ''),
+            return {
+              id: owner.id,
+              nom: owner.display_name || 'Sans nom',
+              lot: `${owner.lots_count} lot${owner.lots_count > 1 ? 's' : ''}`,
+              email: owner.email || undefined,
+              telephone: owner.mobile || owner.phone || undefined,
+              adressePostale,
+              tantiemes: owner.total_tantiemes || 0,
             };
-          }
-        } catch (err) {
-          logger.convocationError(
-            agId,
-            'loadAgData',
-            CONVOCATION_ERROR_CODES.LOAD_AG_DATA_FAILED,
-            err instanceof Error ? err : undefined
-          );
-          degradedMode.agDataFailed = true;
+          });
         }
 
-        // 2. Charger les résolutions depuis la vue v_ag_resolutions_results (Supabase)
-        try {
-          const supabaseRes = createUntypedClient();
-          const { data: dbResolutions, error: resError } = await supabaseRes
-            .from('v_ag_resolutions_results')
-            .select('*')
-            .eq('ag_id', agId)
-            .order('resolution_number', { ascending: true });
-
-          if (resError) {
-            throw resError;
-          }
-
-          if (dbResolutions && Array.isArray(dbResolutions)) {
-            // Convertir les résolutions Supabase au format frontend
-            resolutions = dbResolutions.map((dbRes: {
-              id: string;
-              title: string;
-              description: string | null;
-              majority_type: string;
-              variables?: Record<string, unknown> | null;
-            }) => ({
-              id: dbRes.id,
-              titre: dbRes.title,
-              texte: dbRes.description || '',
-              majorite: dbRes.majority_type,
-              variables: dbRes.variables
-                ? Object.fromEntries(
-                    Object.entries(dbRes.variables).map(([k, v]) => [k, String(v ?? '')])
-                  )
-                : undefined,
-            }));
-          }
-
-          if (resolutions.length === 0) {
-            // Fallback: essayer loadDraft si aucune résolution en Supabase
-            const { data: savedResolutions } = await loadDraft<Resolution[]>(agId, 'resolutions', `ag-resolutions-${agId}`);
-            if (savedResolutions && Array.isArray(savedResolutions)) {
-              resolutions = savedResolutions;
-            }
-          }
-
-          if (resolutions.length === 0) {
-            logger.debug('Aucune résolution trouvée', {
-              agId,
-              step: 'convocation',
-              action: 'loadResolutions',
-            });
-          }
-        } catch (err) {
-          logger.convocationError(
+        if (coproprietaires.length === 0) {
+          logger.warn('Aucun copropriétaire trouvé en DB pour cette copropriété', {
             agId,
-            'loadResolutions',
-            CONVOCATION_ERROR_CODES.LOAD_RESOLUTIONS_FAILED,
-            err instanceof Error ? err : undefined
-          );
-          degradedMode.resolutionsFailed = true;
+            coproId,
+            step: 'convocation',
+            action: 'loadCoproprietaires',
+          });
+        }
+      } catch (err) {
+        logger.convocationError(
+          agId,
+          'loadCoproprietaires',
+          CONVOCATION_ERROR_CODES.LOAD_COPROPRIETAIRES_FAILED,
+          err instanceof Error ? err : undefined
+        );
+        degradedMode.coproprietairesFailed = true;
+      }
+
+      // ========================================
+      // 4. Charger les infos de la copropriété depuis copros
+      // ========================================
+      try {
+        const { data: coproData, error: coproError } = await supabase
+          .from('copros')
+          .select('id, name, address, city, postal_code')
+          .eq('id', coproId)
+          .single();
+
+        if (coproError) {
+          throw coproError;
         }
 
-        // 3. Charger les copropriétaires (mock pour l'instant)
-        coproprietaires = MOCK_COPROPRIETAIRES;
+        if (coproData) {
+          copropriete = {
+            id: coproData.id,
+            nom: coproData.name || 'Copropriété',
+            adresse: coproData.address || '',
+            ville: coproData.city || '',
+            codePostal: coproData.postal_code || '',
+          };
+        }
+      } catch (err) {
+        logger.warn('Impossible de charger les infos copropriété', {
+          agId,
+          coproId,
+          step: 'convocation',
+          action: 'loadCopropriete',
+          error: err instanceof Error ? err.message : 'Unknown',
+        });
+        // Non bloquant - on continue avec les valeurs par défaut
+      }
 
-        // 4. Charger les choix d'envoi depuis ag_session_drafts
-        try {
-          const { data: savedChoices } = await loadDraft<SendingChoice[]>(agId, 'session', `ag-sending-${agId}`);
-          if (savedChoices && Array.isArray(savedChoices)) {
-            sendingChoices = savedChoices;
-          } else {
-            sendingChoices = coproprietaires.map((copro) => ({
-              coproprietaireId: copro.id,
-              methods: [] as SendingMethod[],
-            }));
-          }
-        } catch {
+      // ========================================
+      // 5. Charger les choix d'envoi depuis ag_session_drafts
+      // ========================================
+      try {
+        const { data: savedChoices } = await loadDraft<SendingChoice[]>(agId, 'session', `ag-sending-${agId}`);
+        if (savedChoices && Array.isArray(savedChoices)) {
+          sendingChoices = savedChoices;
+        } else {
+          // Initialiser les choix d'envoi vides pour chaque copropriétaire
           sendingChoices = coproprietaires.map((copro) => ({
             coproprietaireId: copro.id,
             methods: [] as SendingMethod[],
           }));
         }
-
-      } else {
-        // === CHARGEMENT LEGACY (localStorage) ===
-
-        // 1. Charger les données de l'AG
-        try {
-          agData = safeJsonParse<AGData | null>(`ag-draft-${agId}`, null);
-          if (!agData) {
-            logger.warn('Données AG non trouvées dans localStorage', {
-              agId,
-              step: 'convocation',
-              action: 'loadAgData',
-            });
-            degradedMode.agDataFailed = true;
-          }
-        } catch (err) {
-          logger.convocationError(
-            agId,
-            'loadAgData',
-            CONVOCATION_ERROR_CODES.LOAD_AG_DATA_FAILED,
-            err instanceof Error ? err : undefined
-          );
-          degradedMode.agDataFailed = true;
-        }
-
-        // 2. Charger les résolutions
-        try {
-          resolutions = safeJsonParse<Resolution[]>(`ag-resolutions-${agId}`, []);
-        } catch (err) {
-          logger.convocationError(
-            agId,
-            'loadResolutions',
-            CONVOCATION_ERROR_CODES.LOAD_RESOLUTIONS_FAILED,
-            err instanceof Error ? err : undefined
-          );
-          degradedMode.resolutionsFailed = true;
-        }
-
-        // 3. Charger les copropriétaires
-        try {
-          coproprietaires = safeJsonParse<CoproprietaireEditable[]>(
-            `ag-coproprietaires-${agId}`,
-            MOCK_COPROPRIETAIRES
-          );
-        } catch (err) {
-          logger.convocationError(
-            agId,
-            'loadCoproprietaires',
-            CONVOCATION_ERROR_CODES.LOAD_COPROPRIETAIRES_FAILED,
-            err instanceof Error ? err : undefined
-          );
-          coproprietaires = MOCK_COPROPRIETAIRES;
-          degradedMode.coproprietairesFailed = true;
-        }
-
-        // 4. Charger les choix d'envoi
-        try {
-          const savedChoices = localStorage.getItem(`ag-sending-${agId}`);
-          if (savedChoices) {
-            sendingChoices = JSON.parse(savedChoices);
-          } else {
-            sendingChoices = coproprietaires.map((copro) => ({
-              coproprietaireId: copro.id,
-              methods: [] as SendingMethod[],
-            }));
-          }
-        } catch {
-          sendingChoices = coproprietaires.map((copro) => ({
-            coproprietaireId: copro.id,
-            methods: [] as SendingMethod[],
-          }));
-        }
+      } catch {
+        sendingChoices = coproprietaires.map((copro) => ({
+          coproprietaireId: copro.id,
+          methods: [] as SendingMethod[],
+        }));
       }
 
       // Clear timeout
@@ -497,31 +562,32 @@ export function useConvocationData({
 
       // Déterminer le statut final
       const hasCriticalError = degradedMode.agDataFailed && !agData;
-      const hasDegradedData =
-        degradedMode.resolutionsFailed || degradedMode.coproprietairesFailed;
+      const hasDegradedData = degradedMode.resolutionsFailed || degradedMode.coproprietairesFailed;
 
       if (hasCriticalError) {
-        // L'AG n'existe pas ou données critiques manquantes
         setState({
           status: 'error',
           agData: null,
           resolutions: [],
           coproprietaires,
+          copropriete,
+          syndic,
           sendingChoices,
           error: {
             code: CONVOCATION_ERROR_CODES.AG_NOT_FOUND,
             message: 'Assemblée générale non trouvée',
-            details: `Aucune AG avec l'identifiant "${agId}" n'a été trouvée. Créez d'abord une AG ou vérifiez l'URL.`,
+            details: `Aucune AG avec l'identifiant "${agId}" n'a été trouvée dans Supabase. Créez d'abord une AG ou vérifiez l'URL.`,
           },
           degradedMode,
         });
       } else if (hasDegradedData) {
-        // Certaines données sont en mode dégradé mais on peut continuer
         setState({
           status: 'degraded',
           agData,
           resolutions,
           coproprietaires,
+          copropriete,
+          syndic,
           sendingChoices,
           error: null,
           degradedMode,
@@ -530,14 +596,16 @@ export function useConvocationData({
           agId,
           step: 'convocation',
           action: 'loadData',
+          degradedMode,
         });
       } else {
-        // Tout est OK
         setState({
           status: 'ready',
           agData,
           resolutions,
           coproprietaires,
+          copropriete,
+          syndic,
           sendingChoices,
           error: null,
           degradedMode,
@@ -546,6 +614,8 @@ export function useConvocationData({
           agId,
           step: 'convocation',
           action: 'loadData',
+          resolutionsCount: resolutions.length,
+          coproprietairesCount: coproprietaires.length,
         });
       }
     } catch (err) {
@@ -555,7 +625,7 @@ export function useConvocationData({
         timeoutRef.current = null;
       }
 
-      logger.error('Erreur inattendue lors du chargement', {
+      logger.error('Erreur lors du chargement depuis Supabase', {
         agId,
         step: 'convocation',
         action: 'loadData',
@@ -567,12 +637,12 @@ export function useConvocationData({
         status: 'error',
         error: {
           code: CONVOCATION_ERROR_CODES.UNEXPECTED_ERROR,
-          message: 'Erreur inattendue',
+          message: 'Erreur de chargement',
           details: err instanceof Error ? err.message : 'Une erreur inattendue est survenue.',
         },
       }));
     }
-  }, [agId, timeoutMs, currentCoproId]);
+  }, [agId, timeoutMs]);
 
   // Charger au montage
   useEffect(() => {
@@ -585,7 +655,10 @@ export function useConvocationData({
     };
   }, [loadData]);
 
-  // Fonctions de mise à jour
+  // ========================================
+  // SETTERS ET PERSISTANCE
+  // ========================================
+
   const setCoproprietaires = useCallback(
     (value: React.SetStateAction<CoproprietaireEditable[]>) => {
       setState((prev) => ({
@@ -606,23 +679,29 @@ export function useConvocationData({
     []
   );
 
+  /**
+   * Sauvegarde les copropriétaires modifiés
+   * Note: Pour l'instant, on ne modifie pas les copropriétaires directement
+   * car ils viennent de la DB. Cette fonction est gardée pour compatibilité.
+   */
   const saveCoproprietaires = useCallback(
     async (copros: CoproprietaireEditable[]) => {
+      // Les modifications de copropriétaires devraient passer par updateCoproprietaire
+      // Pour l'instant on sauvegarde dans un draft temporaire
       if (isValidUUID(agId)) {
-        await saveDraft(agId, 'session', copros, `ag-coproprietaires-${agId}`);
-      } else {
-        localStorage.setItem(`ag-coproprietaires-${agId}`, JSON.stringify(copros));
+        await saveDraft(agId, 'session', copros, `ag-coproprietaires-temp-${agId}`);
       }
     },
     [agId]
   );
 
+  /**
+   * Sauvegarde les choix d'envoi dans ag_session_drafts
+   */
   const saveSendingChoices = useCallback(
     async (choices: SendingChoice[]) => {
       if (isValidUUID(agId)) {
         await saveDraft(agId, 'session', choices, `ag-sending-${agId}`);
-      } else {
-        localStorage.setItem(`ag-sending-${agId}`, JSON.stringify(choices));
       }
     },
     [agId]

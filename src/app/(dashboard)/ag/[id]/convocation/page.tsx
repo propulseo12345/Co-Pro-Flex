@@ -24,21 +24,15 @@ import { useDeliveryConfig, type CoproprietaireDelivery } from '@/hooks/modules/
 import { validateResolutionVariables } from '@/lib/utils/variable-resolution';
 import styles from './convocation.module.css';
 
-const SYNDIC_INFO = {
-  nom: 'Cabinet Immobilier Martin',
-  adresse: '10 place Bellecour',
-  codePostal: '69002',
-  ville: 'Lyon',
-};
-
 export default function ConvocationPage() {
   const router = useRouter();
   const params = useParams();
   const agId = params.id as string;
 
-  // Hook de chargement des données
+  // Hook de chargement des données depuis Supabase
   const {
     status, agData, resolutions, coproprietaires,
+    copropriete, syndic,
     error, degradedMode, reload,
   } = useConvocationData({ agId, timeoutMs: 10000 });
 
@@ -57,13 +51,46 @@ export default function ConvocationPage() {
   // Hook de gestion des modes d'envoi
   const delivery = useDeliveryConfig({ agId, coproprietaires: deliveryCopros });
 
-  // Hook de prévisualisation PDF
+  // Infos syndic depuis DB ou valeur par défaut
+  const syndicInfo = useMemo(() => {
+    if (syndic) {
+      return {
+        nom: syndic.nom,
+        adresse: syndic.adresse,
+        codePostal: syndic.codePostal,
+        ville: syndic.ville,
+      };
+    }
+    // Valeur par défaut si pas de syndic en DB
+    return {
+      nom: 'Syndic',
+      adresse: '',
+      codePostal: '',
+      ville: '',
+    };
+  }, [syndic]);
+
+  // Infos copropriété depuis DB
+  const coproprieteInfo = useMemo(() => {
+    if (copropriete) {
+      const adresseComplete = [copropriete.adresse, copropriete.codePostal, copropriete.ville]
+        .filter(Boolean)
+        .join(', ');
+      return {
+        nom: copropriete.nom,
+        adresse: adresseComplete || copropriete.nom,
+      };
+    }
+    return { nom: 'Copropriété', adresse: '' };
+  }, [copropriete]);
+
+  // Hook de prévisualisation PDF - utilise les données DB
   const preview = useConvocationPreview({
     agId,
     agData,
     resolutions,
-    copropriete: { nom: 'Résidence Les Jardins', adresse: '25 avenue Victor Hugo, 69003 Lyon' },
-    syndic: { nom: SYNDIC_INFO.nom, adresse: SYNDIC_INFO.ville },
+    copropriete: coproprieteInfo,
+    syndic: { nom: syndicInfo.nom, adresse: `${syndicInfo.adresse}, ${syndicInfo.codePostal} ${syndicInfo.ville}`.trim() },
   });
 
   // Onglet actif (configuration / tracking)
@@ -75,7 +102,7 @@ export default function ConvocationPage() {
     return validateResolutionVariables(resolutions);
   }, [resolutions]);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!delivery.canValidate) {
       alert('Veuillez compléter les données manquantes avant de continuer.');
       return;
@@ -85,8 +112,9 @@ export default function ConvocationPage() {
       preview.toggleReviewMode();
       return;
     }
-    localStorage.setItem('ag-sent-' + agId, 'true');
-    router.push(`/ag/${agId}/preparation`);
+    // Naviguer vers l'étape suivante (envoi)
+    // Le statut sera mis à jour lors de l'envoi effectif des convocations
+    router.push(`/ag/${agId}/envoi`);
   };
 
   // États de chargement/erreur
@@ -230,7 +258,7 @@ export default function ConvocationPage() {
                   <PostalLabelsGeneratorButton
                     postalRecipients={delivery.getOwnersForPostal()}
                     sendType={delivery.config.postalSettings.sendType}
-                    sender={SYNDIC_INFO}
+                    sender={syndicInfo}
                     agTitle={agData?.type}
                   />
                 </div>

@@ -9,8 +9,7 @@ import type { Json } from '@/types/supabase';
 
 /**
  * Draft types supported by the database enum
- * Note: 'variables', 'milestones', 'signataires' were added via migration
- * but TypeScript types may not be regenerated yet
+ * Note: Types added via migrations - check 20260201_envoi_security.sql for latest
  */
 export type AgDraftType =
   | 'attendance'
@@ -20,9 +19,11 @@ export type AgDraftType =
   | 'session'
   | 'variables'
   | 'milestones'
-  | 'signataires';
+  | 'signataires'
+  | 'envoi'; // Added in 20260201_envoi_security.sql
 
-// Type for RPC calls - uses base types until Supabase types are regenerated
+// Type for RPC calls - base types that exist in Supabase generated types
+// New types ('envoi', 'milestones') should use dedicated RPCs or untyped client
 type RpcDraftType = 'attendance' | 'votes' | 'roles' | 'resolutions' | 'session';
 
 /**

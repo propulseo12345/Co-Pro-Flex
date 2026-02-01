@@ -9,6 +9,7 @@ import {
   listAttendance,
   listVotes,
   listEligibleVoters,
+  listAgVoters,
   createAg,
   addResolution,
   registerAttendance,
@@ -411,6 +412,58 @@ export function useEligibleVoters() {
       setIsLoading(false);
     }
   }, [currentCoproId]);
+
+  useEffect(() => {
+    loadVoters();
+  }, [loadVoters]);
+
+  return {
+    voters,
+    isLoading,
+    error,
+    refresh: loadVoters,
+  };
+}
+
+// ============================================================================
+// useAgVoters - Liste des copropriétaires pour une AG spécifique (DB-first)
+// ============================================================================
+
+/**
+ * Charge les copropriétaires éligibles pour une AG via RPC sécurisée
+ * Utilise rpc_get_ag_coproprietaires qui dérive copro_id depuis l'AG
+ * C'est la version DB-first recommandée (vs useEligibleVoters qui utilise le contexte)
+ */
+export function useAgVoters(agId: string | undefined) {
+  const [voters, setVoters] = useState<Array<{
+    coproprietaire_id: string;
+    name: string;
+    email: string | null;
+    lot_ids: string[];
+    lot_refs: string[];
+    tantiemes: number;
+  }>>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadVoters = useCallback(async () => {
+    if (!agId) {
+      setVoters([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await listAgVoters(agId);
+      setVoters(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [agId]);
 
   useEffect(() => {
     loadVoters();

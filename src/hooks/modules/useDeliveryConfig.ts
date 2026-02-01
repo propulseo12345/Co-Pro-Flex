@@ -1,18 +1,23 @@
 /**
  * Hook pour la gestion de la configuration d'envoi des convocations
  *
+ * ÉTAPE 3 - 100% DB-driven
+ *
+ * Persiste la configuration dans ag_session_drafts (Supabase)
+ * au lieu de localStorage.
+ *
  * Gère:
  * - Mode d'envoi global (email, courrier, les deux, par copropriétaire)
  * - Overrides par copropriétaire
- * - Préférences persistées (mock localStorage)
- * - Tracking email (mock)
+ * - Tracking email (via ag_notifications à terme)
  * - Paramètres courrier (LRAR)
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DeliveryMode, EmailSendStatus, PostalSendType, ARStatus } from '@/types/enums';
 import { modeRequiresEmail, modeRequiresAddress } from '@/lib/constants/delivery';
 import { logger } from '@/lib/utils/logger';
+import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 
 // Types
 export interface CoproprietaireDelivery {
@@ -94,6 +99,7 @@ interface UseDeliveryConfigReturn {
   stats: DeliveryStats;
   canValidate: boolean;
   validationErrors: string[];
+  isLoading: boolean;
   setGlobalMode: (mode: DeliveryMode | 'PAR_COPROPRIETAIRE') => void;
   setOwnerMode: (ownerId: string, mode: DeliveryMode) => void;
   setPostalRegistered: (isRegistered: boolean) => void;
@@ -105,75 +111,161 @@ interface UseDeliveryConfigReturn {
   getOwnersForEmail: () => OwnerDeliveryStatus[];
 }
 
-const STORAGE_KEY_PREFIX = 'ag-delivery-';
-const PREFERENCES_KEY = 'copro-delivery-preferences';
+const DRAFT_KEY_CONFIG = 'ag-delivery-config';
+const DRAFT_KEY_PREFERENCES = 'copro-delivery-preferences';
 
-function safeJsonParse<T>(key: string, fallback: T): T {
-  try {
-    const data = localStorage.getItem(key);
-    if (!data) return fallback;
-    return JSON.parse(data) as T;
-  } catch {
-    return fallback;
-  }
+/**
+ * Crée la configuration initiale
+ */
+function createInitialConfig(coproprietaires: CoproprietaireDelivery[]): DeliveryConfigState {
+  const deliveryByOwner: Record<string, DeliveryMode> = {};
+  coproprietaires.forEach((c) => {
+    deliveryByOwner[c.id] = c.preferredDeliveryMode || DeliveryMode.EMAIL;
+  });
+
+  return {
+    globalMode: DeliveryMode.EMAIL,
+    overridesEnabled: false,
+    deliveryByOwner,
+    emailTracking: Object.fromEntries(
+      coproprietaires.map((c) => [c.id, { status: EmailSendStatus.A_ENVOYER }])
+    ),
+    postalTracking: {},
+    postalSettings: {
+      isRegistered: false,
+      sendType: PostalSendType.LETTRE_SIMPLE,
+    },
+  };
 }
 
 export function useDeliveryConfig({
   agId,
   coproprietaires,
 }: UseDeliveryConfigOptions): UseDeliveryConfigReturn {
-  // État de la configuration
-  const [config, setConfig] = useState<DeliveryConfigState>(() => {
-    // Charger depuis localStorage si disponible
-    const saved = safeJsonParse<DeliveryConfigState | null>(
-      `${STORAGE_KEY_PREFIX}${agId}`,
-      null
-    );
+  const [config, setConfig] = useState<DeliveryConfigState>(() =>
+    createInitialConfig(coproprietaires)
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const initialLoadDone = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    if (saved) return saved;
-
-    // Charger les préférences des copropriétaires
-    const preferences = safeJsonParse<Record<string, DeliveryMode>>(
-      PREFERENCES_KEY,
-      {}
-    );
-
-    // Initialiser avec les préférences ou le mode par défaut
-    const deliveryByOwner: Record<string, DeliveryMode> = {};
-    coproprietaires.forEach((c) => {
-      deliveryByOwner[c.id] = c.preferredDeliveryMode || preferences[c.id] || DeliveryMode.EMAIL;
-    });
-
-    return {
-      globalMode: DeliveryMode.EMAIL,
-      overridesEnabled: false,
-      deliveryByOwner,
-      emailTracking: Object.fromEntries(
-        coproprietaires.map((c) => [c.id, { status: EmailSendStatus.A_ENVOYER }])
-      ),
-      postalTracking: {},
-      postalSettings: {
-        isRegistered: false,
-        sendType: PostalSendType.LETTRE_SIMPLE,
-      },
-    };
-  });
-
-  // Sauvegarder dans localStorage à chaque changement
+  // ========================================
+  // Chargement initial depuis Supabase
+  // ========================================
   useEffect(() => {
-    try {
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}${agId}`, JSON.stringify(config));
-    } catch (err) {
-      logger.error('Erreur sauvegarde config delivery', {
-        agId,
-        step: 'delivery',
-        action: 'saveConfig',
-        errorCode: 'ERR-DELIVERY-001',
-      });
+    if (!isValidUUID(agId) || initialLoadDone.current) {
+      setIsLoading(false);
+      return;
     }
+
+    const loadConfig = async () => {
+      try {
+        // Charger la config depuis ag_session_drafts
+        const { data: savedConfig } = await loadDraft<DeliveryConfigState>(
+          agId,
+          'session',
+          `${DRAFT_KEY_CONFIG}-${agId}`
+        );
+
+        if (savedConfig) {
+          // Merger avec les nouveaux copropriétaires (si ajoutés depuis)
+          const mergedDeliveryByOwner = { ...savedConfig.deliveryByOwner };
+          const mergedEmailTracking = { ...savedConfig.emailTracking };
+
+          coproprietaires.forEach((c) => {
+            if (!mergedDeliveryByOwner[c.id]) {
+              mergedDeliveryByOwner[c.id] = c.preferredDeliveryMode || DeliveryMode.EMAIL;
+            }
+            if (!mergedEmailTracking[c.id]) {
+              mergedEmailTracking[c.id] = { status: EmailSendStatus.A_ENVOYER };
+            }
+          });
+
+          // S'assurer que postalSettings existe (compatibilité avec anciens formats)
+          const postalSettings = savedConfig.postalSettings || {
+            isRegistered: false,
+            sendType: PostalSendType.LETTRE_SIMPLE,
+          };
+
+          setConfig({
+            ...savedConfig,
+            deliveryByOwner: mergedDeliveryByOwner,
+            emailTracking: mergedEmailTracking,
+            postalSettings,
+            postalTracking: savedConfig.postalTracking || {},
+          });
+        } else {
+          // Pas de config sauvegardée, charger les préférences générales
+          const { data: preferences } = await loadDraft<Record<string, DeliveryMode>>(
+            agId,
+            'session',
+            DRAFT_KEY_PREFERENCES
+          );
+
+          if (preferences) {
+            const deliveryByOwner: Record<string, DeliveryMode> = {};
+            coproprietaires.forEach((c) => {
+              deliveryByOwner[c.id] = preferences[c.id] || c.preferredDeliveryMode || DeliveryMode.EMAIL;
+            });
+            setConfig((prev) => ({ ...prev, deliveryByOwner }));
+          }
+        }
+      } catch (err) {
+        logger.warn('Erreur chargement config delivery', {
+          agId,
+          step: 'delivery',
+          action: 'loadConfig',
+          error: err instanceof Error ? err.message : 'Unknown',
+        });
+      } finally {
+        initialLoadDone.current = true;
+        setIsLoading(false);
+      }
+    };
+
+    loadConfig();
+  }, [agId, coproprietaires]);
+
+  // ========================================
+  // Sauvegarde automatique (debounced)
+  // ========================================
+  useEffect(() => {
+    if (!isValidUUID(agId) || !initialLoadDone.current) return;
+
+    // Debounce la sauvegarde
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await saveDraft(agId, 'session', config, `${DRAFT_KEY_CONFIG}-${agId}`);
+        logger.debug('Config delivery sauvegardée', {
+          agId,
+          step: 'delivery',
+          action: 'saveConfig',
+        });
+      } catch (err) {
+        logger.error('Erreur sauvegarde config delivery', {
+          agId,
+          step: 'delivery',
+          action: 'saveConfig',
+          errorCode: 'ERR-DELIVERY-001',
+          error: err instanceof Error ? err.message : 'Unknown',
+        });
+      }
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [agId, config]);
 
-  // Calculer le mode effectif pour chaque copropriétaire
+  // ========================================
+  // Calcul du mode effectif pour chaque copropriétaire
+  // ========================================
   const ownerStatuses = useMemo<OwnerDeliveryStatus[]>(() => {
     return coproprietaires.map((copro) => {
       const effectiveMode =
@@ -226,12 +318,16 @@ export function useDeliveryConfig({
     });
   }, [coproprietaires, config]);
 
+  // ========================================
   // Statistiques
+  // ========================================
   const stats = useMemo<DeliveryStats>(() => {
+    // Protection défensive pour postalSettings
+    const sendType = config.postalSettings?.sendType || PostalSendType.LETTRE_SIMPLE;
     const postalCost =
-      config.postalSettings.sendType === PostalSendType.LRAR
+      sendType === PostalSendType.LRAR
         ? 6.5
-        : config.postalSettings.sendType === PostalSendType.AR_EXTERNE
+        : sendType === PostalSendType.AR_EXTERNE
           ? 8.9
           : 1.49;
 
@@ -268,9 +364,11 @@ export function useDeliveryConfig({
       emailsFailed,
       estimatedPostalCost: postalRecipients * postalCost,
     };
-  }, [ownerStatuses, coproprietaires.length, config.postalSettings.sendType]);
+  }, [ownerStatuses, coproprietaires.length, config.postalSettings?.sendType]);
 
+  // ========================================
   // Validation
+  // ========================================
   const { canValidate, validationErrors } = useMemo(() => {
     const errors: string[] = [];
 
@@ -285,7 +383,9 @@ export function useDeliveryConfig({
     };
   }, [ownerStatuses]);
 
+  // ========================================
   // Actions
+  // ========================================
   const setGlobalMode = useCallback((mode: DeliveryMode | 'PAR_COPROPRIETAIRE') => {
     setConfig((prev) => ({
       ...prev,
@@ -319,7 +419,8 @@ export function useDeliveryConfig({
     const owner = ownerStatuses.find((o) => o.id === ownerId);
     if (!owner || !owner.hasEmail) return;
 
-    // Mock: simulation d'envoi
+    // TODO: Intégrer avec ag_notifications pour le vrai envoi
+    // Pour l'instant, simulation
     const success = Math.random() > 0.1; // 90% de succès
 
     setConfig((prev) => ({
@@ -334,7 +435,7 @@ export function useDeliveryConfig({
       },
     }));
 
-    logger.info('Email envoyé (mock)', {
+    logger.info('Email envoyé (simulation)', {
       agId,
       step: 'delivery',
       action: 'sendEmail',
@@ -355,8 +456,8 @@ export function useDeliveryConfig({
     const newTracking: Record<string, EmailTracking> = { ...config.emailTracking };
 
     emailRecipients.forEach((owner) => {
-      // Mock: 95% de succès pour l'envoi en masse
-      const success = Math.random() > 0.05;
+      // TODO: Intégrer avec ag_notifications
+      const success = Math.random() > 0.05; // 95% de succès en masse
       newTracking[owner.id] = {
         status: success ? EmailSendStatus.ENVOYE : EmailSendStatus.ECHEC,
         sentAt: success ? new Date().toISOString() : undefined,
@@ -369,7 +470,7 @@ export function useDeliveryConfig({
       emailTracking: newTracking,
     }));
 
-    logger.info('Envoi en masse emails (mock)', {
+    logger.info('Envoi en masse emails (simulation)', {
       agId,
       step: 'delivery',
       action: 'sendAllEmails',
@@ -377,15 +478,18 @@ export function useDeliveryConfig({
     });
   }, [agId, ownerStatuses, config.emailTracking]);
 
-  const saveAsPreferences = useCallback(() => {
+  const saveAsPreferences = useCallback(async () => {
+    if (!isValidUUID(agId)) return;
+
     try {
       const preferences: Record<string, DeliveryMode> = {};
       ownerStatuses.forEach((owner) => {
         preferences[owner.id] = owner.effectiveMode;
       });
-      localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
 
-      logger.info('Préférences sauvegardées', {
+      await saveDraft(agId, 'session', preferences, DRAFT_KEY_PREFERENCES);
+
+      logger.info('Préférences delivery sauvegardées', {
         agId,
         step: 'delivery',
         action: 'savePreferences',
@@ -396,25 +500,41 @@ export function useDeliveryConfig({
         step: 'delivery',
         action: 'savePreferences',
         errorCode: 'ERR-DELIVERY-002',
+        error: err instanceof Error ? err.message : 'Unknown',
       });
     }
   }, [agId, ownerStatuses]);
 
-  const resetToPreferences = useCallback(() => {
-    const preferences = safeJsonParse<Record<string, DeliveryMode>>(PREFERENCES_KEY, {});
+  const resetToPreferences = useCallback(async () => {
+    if (!isValidUUID(agId)) return;
 
-    setConfig((prev) => {
-      const deliveryByOwner: Record<string, DeliveryMode> = {};
-      coproprietaires.forEach((c) => {
-        deliveryByOwner[c.id] =
-          c.preferredDeliveryMode || preferences[c.id] || DeliveryMode.EMAIL;
+    try {
+      const { data: preferences } = await loadDraft<Record<string, DeliveryMode>>(
+        agId,
+        'session',
+        DRAFT_KEY_PREFERENCES
+      );
+
+      setConfig((prev) => {
+        const deliveryByOwner: Record<string, DeliveryMode> = {};
+        coproprietaires.forEach((c) => {
+          deliveryByOwner[c.id] =
+            (preferences && preferences[c.id]) || c.preferredDeliveryMode || DeliveryMode.EMAIL;
+        });
+        return {
+          ...prev,
+          deliveryByOwner,
+        };
       });
-      return {
-        ...prev,
-        deliveryByOwner,
-      };
-    });
-  }, [coproprietaires]);
+    } catch (err) {
+      logger.warn('Erreur restauration préférences', {
+        agId,
+        step: 'delivery',
+        action: 'resetPreferences',
+        error: err instanceof Error ? err.message : 'Unknown',
+      });
+    }
+  }, [agId, coproprietaires]);
 
   const getOwnersForPostal = useCallback(() => {
     return ownerStatuses.filter(
@@ -440,6 +560,7 @@ export function useDeliveryConfig({
     stats,
     canValidate,
     validationErrors,
+    isLoading,
     setGlobalMode,
     setOwnerMode,
     setPostalRegistered,

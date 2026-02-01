@@ -242,17 +242,22 @@ export function useVotesCorrespondance({
                 }));
                 setResolutions(mappedResolutions);
 
-                // 3. Load coproprietaires for this copro
+                // 3. Load coproprietaires via secure RPC (derives copro from AG)
                 const { data: coprosData, error: coprosError } = await supabase
-                    .from('coproprietaires')
-                    .select('id, full_name, email, tantiemes, lot_ids')
-                    .eq('copro_id', coproprieteId);
+                    .rpc('rpc_get_ag_coproprietaires', { p_ag_id: agId });
 
                 if (coprosError) {
                     console.error('[useVotesCorrespondance] Error loading coproprietaires:', coprosError);
                 }
 
-                const copros: CoproprietaireDB[] = coprosData || [];
+                // Map RPC result to expected format
+                const copros: CoproprietaireDB[] = (coprosData || []).map((c: { id: string; display_name: string; email: string | null; total_tantiemes: number }) => ({
+                    id: c.id,
+                    full_name: c.display_name,
+                    email: c.email,
+                    tantiemes: c.total_tantiemes,
+                    lot_ids: [],
+                }));
                 setCoproprietairesDB(copros);
 
                 // 4. Load existing correspondence votes via RPC

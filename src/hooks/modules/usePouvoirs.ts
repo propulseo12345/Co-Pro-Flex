@@ -312,19 +312,23 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
                     return;
                 }
 
-                const coproId = agData.copro_id;
-
-                // 2. Load coproprietaires for this copro
+                // 2. Load coproprietaires via secure RPC (derives copro from AG)
                 const { data: coprosData, error: coprosError } = await supabase
-                    .from('coproprietaires')
-                    .select('id, full_name, email, tantiemes')
-                    .eq('copro_id', coproId);
+                    .rpc('rpc_get_ag_coproprietaires', { p_ag_id: agId });
 
                 if (coprosError) {
                     console.error('[usePouvoirs] Error loading coproprietaires:', coprosError);
                 }
 
-                setCoproprietairesDB(coprosData || []);
+                // Map RPC result to expected format
+                const mappedCopros = (coprosData || []).map((c: { id: string; display_name: string; email: string | null; total_tantiemes: number }) => ({
+                    id: c.id,
+                    full_name: c.display_name,
+                    email: c.email,
+                    tantiemes: c.total_tantiemes,
+                }));
+
+                setCoproprietairesDB(mappedCopros);
 
                 // 3. Load pouvoirs via RPC
                 const { data: pouvoirsData, error: pouvoirsError } = await supabase

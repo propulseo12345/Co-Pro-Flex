@@ -19,6 +19,7 @@ import {
 import type { AGData, Resolution } from '@/hooks/modules/useConvocationData';
 import { logger } from '@/lib/utils/logger';
 import { withTimeoutSafe, DEFAULT_TIMEOUTS } from '@/lib/utils/timeout';
+import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 
 // Types pour le versioning
 export interface ConvocationVersion {
@@ -388,11 +389,11 @@ export function useConvocationPreview({
       canSend: calculateCanSend(prev.checklist, validation),
     }));
 
-    // Sauvegarder dans localStorage
-    try {
-      localStorage.setItem(`ag-review-${agId}`, JSON.stringify(validation));
-    } catch {
-      // Ignorer les erreurs localStorage
+    // Sauvegarder dans Supabase (ag_session_drafts)
+    if (isValidUUID(agId)) {
+      saveDraft(agId, 'session', validation, `ag-review-${agId}`).catch(() => {
+        // Ignorer les erreurs de sauvegarde
+      });
     }
 
     logger.info('Relecture validée', { agId, step: 'convocation', action: 'validateReview' });
@@ -409,10 +410,12 @@ export function useConvocationPreview({
       canSend: false,
     }));
 
-    try {
-      localStorage.removeItem(`ag-review-${agId}`);
-    } catch {
-      // Ignorer
+    // Supprimer de Supabase
+    if (isValidUUID(agId)) {
+      // Sauvegarder null pour "supprimer" la validation
+      saveDraft(agId, 'session', null, `ag-review-${agId}`).catch(() => {
+        // Ignorer
+      });
     }
   }, [agId]);
 
@@ -455,24 +458,31 @@ export function useConvocationPreview({
     };
   }, [agData, resolutions, annexes, autoGenerate, debounceMs, generatePreview]);
 
-  // Charger la validation depuis localStorage au montage
+  // Charger la validation depuis Supabase au montage
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`ag-review-${agId}`);
-      if (saved) {
-        const validation = JSON.parse(saved) as ReviewValidation;
-        // Vérifier que la version correspond
-        if (validation.version === state.currentVersion) {
+    if (!isValidUUID(agId)) return;
+
+    const loadReviewValidation = async () => {
+      try {
+        const { data: validation } = await loadDraft<ReviewValidation>(
+          agId,
+          'session',
+          `ag-review-${agId}`
+        );
+
+        if (validation && validation.version === state.currentVersion) {
           setState((prev) => ({
             ...prev,
             reviewValidation: validation,
             canSend: calculateCanSend(prev.checklist, validation),
           }));
         }
+      } catch {
+        // Ignorer les erreurs de chargement
       }
-    } catch {
-      // Ignorer
-    }
+    };
+
+    loadReviewValidation();
   }, [agId, state.currentVersion, calculateCanSend]);
 
   // Cleanup des URLs au démontage

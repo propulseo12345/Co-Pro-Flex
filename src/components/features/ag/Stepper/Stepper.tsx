@@ -1,16 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, SkipForward, HelpCircle, Zap, Clock, ChevronDown, ChevronUp, Lock } from 'lucide-react';
-import { useState, useMemo } from 'react';
-import { useAGWorkflow, type StepWithStatus, type ExpertGroupWithStatus } from '@/hooks/modules/useAGWorkflow';
-import {
-    AG_WORKFLOW_STEPS,
-    EXPERT_GROUPS_ORDER,
-    EXPERT_GROUPS,
-    buildPrerequisitesContext,
-    getStepBlockedReason,
-} from '@/lib/constants/ag-workflow';
+import { Check, Lock, Calendar, ListChecks, Mail, Send, Vote, Users, FileText } from 'lucide-react';
+import { useMemo } from 'react';
 import styles from './Stepper.module.css';
 
 interface StepperProps {
@@ -18,339 +10,249 @@ interface StepperProps {
     agId?: string;
 }
 
+// Configuration des étapes
+const STEPS = [
+    { id: 'planification', numero: 1, titre: 'Planification', path: 'edit', icon: Calendar },
+    { id: 'ordre-jour', numero: 2, titre: 'Ordre du jour', path: 'agenda', icon: ListChecks },
+    { id: 'preparation-convoc', numero: 3, titre: 'Préparation convocations', path: 'convocation', icon: Mail },
+    { id: 'envoi-convoc', numero: 4, titre: 'Envoi convocations', path: 'envoi', icon: Send },
+    { id: 'votes-corresp', numero: 5, titre: 'Votes par correspondance', path: 'votes-correspondance', icon: Vote, optional: true },
+    { id: 'tenue-ag', numero: 6, titre: 'Tenue de l\'AG', path: 'session', icon: Users },
+    { id: 'pv', numero: 7, titre: 'Procès-verbal', path: 'pv', icon: FileText },
+];
+
 export default function Stepper({ currentStep, agId }: StepperProps) {
     const router = useRouter();
-    const {
-        mode,
-        setMode,
-        steps,
-        expertGroups,
-        progress,
-        goToStep,
-        completeStep,
-        completedSteps,
-    } = useAGWorkflow(agId, currentStep);
 
-    // État pour afficher/masquer les groupes expert en mobile
-    const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+    // Déterminer le module actif (1-4 = Préparation, 5-7 = Déroulement)
+    const isPreparationModule = currentStep <= 4;
 
-    // Construire le contexte pour obtenir les raisons de blocage
-    const prerequisitesContext = useMemo(() => {
-        if (!agId) return null;
-        return buildPrerequisitesContext(agId);
-    }, [agId]);
+    // Calculer la progression de chaque module
+    const { prepProgress, deroulProgress } = useMemo(() => {
+        // Module Préparation: étapes 1-4
+        const prepCompleted = Math.min(currentStep - 1, 4);
+        const prepTotal = 4;
+        const prepPercent = (prepCompleted / prepTotal) * 100;
 
-    // Obtenir la raison de blocage d'une étape
-    const getBlockedReasonForStep = (stepId: string): string | undefined => {
-        if (!prerequisitesContext) return undefined;
-        return getStepBlockedReason(stepId, prerequisitesContext);
-    };
+        // Module Déroulement: étapes 5-7
+        const deroulCompleted = currentStep > 4 ? Math.min(currentStep - 4 - 1, 3) : 0;
+        const deroulTotal = 3;
+        const deroulPercent = currentStep > 4 ? (deroulCompleted / deroulTotal) * 100 : 0;
 
-    // Navigation vers une étape
-    const handleStepClick = (stepId: string, path: string) => {
+        return { prepProgress: prepPercent, deroulProgress: deroulPercent };
+    }, [currentStep]);
+
+    // Navigation
+    const handleStepClick = (step: typeof STEPS[0]) => {
         if (!agId) return;
 
-        const step = steps.find(s => s.id === stepId);
-        if (!step) return;
-
-        // Permettre la navigation vers toutes les étapes sauf celles verrouillées
-        // Une étape est verrouillée uniquement si elle n'a pas de données ET que ses prérequis ne sont pas remplis
-        if (step.status === 'locked') return;
-
-        // Pour l'étape 1 (planification), utiliser une route d'édition
-        if (step.numero === 1) {
-            router.push(`/ag/${agId}/edit`);
-            return;
+        // Permettre navigation vers étapes complétées ou étape actuelle
+        if (step.numero <= currentStep) {
+            if (step.numero === 1) {
+                router.push(`/ag/${agId}/edit`);
+            } else {
+                router.push(`/ag/${agId}/${step.path}`);
+            }
         }
-
-        // Permettre la navigation vers toutes les étapes accessibles (completed, available, in_progress)
-        router.push(`/ag/${agId}/${path}`);
     };
 
-    // Rendre une étape en mode guidé
-    const renderGuidedStep = (step: StepWithStatus) => {
-        const Icon = step.icon;
-        // Permettre de cliquer sur toutes les étapes accessibles (pas seulement celles après l'étape 1)
-        const isClickable = agId && step.status !== 'locked';
-        const isLocked = step.status === 'locked';
-        const blockedReason = isLocked ? getBlockedReasonForStep(step.id) : undefined;
+    const getStepStatus = (stepNum: number) => {
+        if (stepNum < currentStep) return 'completed';
+        if (stepNum === currentStep) return 'current';
+        return 'pending';
+    };
 
-        return (
-            <div
-                key={step.id}
-                className={`${styles.stepItem} ${styles[`step${step.status.charAt(0).toUpperCase() + step.status.slice(1)}`]} ${isClickable ? styles.stepClickable : ''}`}
-                onClick={() => isClickable && handleStepClick(step.id, step.path)}
-                role={isClickable ? 'button' : undefined}
-                tabIndex={isClickable ? 0 : undefined}
-                onKeyDown={(e) => {
-                    if (isClickable && (e.key === 'Enter' || e.key === ' ')) {
-                        e.preventDefault();
-                        handleStepClick(step.id, step.path);
-                    }
-                }}
-                title={blockedReason}
-            >
-                <div className={styles.stepCircle}>
-                    {step.status === 'completed' ? (
-                        <Check size={16} strokeWidth={3} aria-hidden="true" />
-                    ) : step.status === 'skipped' ? (
-                        <SkipForward size={14} aria-hidden="true" />
-                    ) : isLocked ? (
-                        <Lock size={14} aria-hidden="true" />
-                    ) : (
-                        <Icon size={18} aria-hidden="true" />
-                    )}
-                </div>
-                <div className={styles.stepContent}>
-                    <span className={styles.stepNumber}>Étape {step.numero}</span>
-                    <span className={styles.stepLabel}>{step.titre}</span>
-                    <span className={styles.stepLabelShort}>{step.titre_court}</span>
-                    {isLocked && blockedReason && (
-                        <span className={styles.lockedBadge}>Prérequis manquant</span>
-                    )}
-                    {!step.obligatoire && step.status !== 'completed' && step.status !== 'skipped' && !isLocked && (
-                        <span className={styles.optionalBadge}>Optionnel</span>
-                    )}
+    const preparationSteps = STEPS.filter(s => s.numero <= 4);
+    const deroulementSteps = STEPS.filter(s => s.numero >= 5);
+
+    // Progression globale
+    const globalProgress = Math.round(((currentStep - 1) / 7) * 100);
+
+    return (
+        <div className={styles.container}>
+            {/* Header avec progression globale */}
+            <div className={styles.header}>
+                <div className={styles.globalProgress}>
+                    <span className={styles.progressLabel}>Progression</span>
+                    <div className={styles.progressBar}>
+                        <div
+                            className={styles.progressFill}
+                            style={{ width: `${globalProgress}%` }}
+                        />
+                    </div>
+                    <span className={styles.progressValue}>{globalProgress}%</span>
                 </div>
             </div>
-        );
-    };
 
-    // Rendre un groupe en mode expert
-    const renderExpertGroup = (group: ExpertGroupWithStatus) => {
-        const Icon = group.icon;
-        const isExpanded = expandedGroup === group.id;
-        const firstAvailableStep = group.steps.find(s =>
-            s.status !== 'locked' && s.status !== 'completed' && s.status !== 'skipped'
-        );
-        const isClickable = agId && group.status !== 'locked' && firstAvailableStep;
-
-        const handleGroupClick = () => {
-            if (isClickable && firstAvailableStep) {
-                handleStepClick(firstAvailableStep.id, firstAvailableStep.path);
-            }
-        };
-
-        return (
-            <div
-                key={group.id}
-                className={`${styles.expertGroup} ${styles[`group${group.status.charAt(0).toUpperCase() + group.status.slice(1)}`]}`}
-            >
-                <div
-                    className={`${styles.expertGroupHeader} ${isClickable ? styles.groupClickable : ''}`}
-                    onClick={handleGroupClick}
-                    role={isClickable ? 'button' : undefined}
-                    tabIndex={isClickable ? 0 : undefined}
-                >
-                    <div className={styles.expertGroupIcon}>
-                        {group.status === 'completed' ? (
-                            <Check size={20} strokeWidth={3} aria-hidden="true" />
-                        ) : (
-                            <Icon size={20} aria-hidden="true" />
-                        )}
-                    </div>
-                    <div className={styles.expertGroupInfo}>
-                        <span className={styles.expertGroupTitle}>{group.titre}</span>
-                        <span className={styles.expertGroupDesc}>{group.description}</span>
-                    </div>
-                    <div className={styles.expertGroupProgress}>
-                        <span className={styles.expertGroupCount}>
-                            {group.completedCount}/{group.totalCount}
-                        </span>
-                        <div className={styles.expertGroupProgressBar}>
-                            <div
-                                className={styles.expertGroupProgressFill}
-                                style={{ width: `${(group.completedCount / group.totalCount) * 100}%` }}
-                            />
+            {/* Modules */}
+            <div className={styles.modules}>
+                {/* Module 1: Préparation AG */}
+                <div className={`${styles.module} ${isPreparationModule ? styles.moduleActive : styles.moduleCompleted}`}>
+                    <div className={styles.moduleHeader}>
+                        <div className={styles.moduleIcon}>
+                            {!isPreparationModule ? <Check size={16} /> : <Calendar size={16} />}
+                        </div>
+                        <div className={styles.moduleInfo}>
+                            <span className={styles.moduleTitle}>Préparation AG</span>
+                            <span className={styles.moduleSubtitle}>Étapes 1-4</span>
+                        </div>
+                        <div className={styles.moduleProgress}>
+                            <div className={styles.moduleProgressBar}>
+                                <div
+                                    className={styles.moduleProgressFill}
+                                    style={{ width: `${prepProgress}%` }}
+                                />
+                            </div>
+                            <span className={styles.moduleProgressText}>
+                                {Math.min(currentStep - 1, 4)}/4
+                            </span>
                         </div>
                     </div>
-                    <button
-                        className={styles.expertGroupExpand}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedGroup(isExpanded ? null : group.id);
-                        }}
-                        aria-label={isExpanded ? 'Réduire' : 'Développer'}
-                    >
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </button>
-                </div>
 
-                {isExpanded && (
-                    <div className={styles.expertGroupSteps}>
-                        {group.steps.map(step => {
-                            const StepIcon = step.icon;
-                            // Permettre de cliquer sur toutes les étapes accessibles
-                            const stepClickable = agId && step.status !== 'locked';
-                            const stepLocked = step.status === 'locked';
-                            const stepBlockedReason = stepLocked ? getBlockedReasonForStep(step.id) : undefined;
+                    <div className={styles.steps}>
+                        {preparationSteps.map((step, index) => {
+                            const status = getStepStatus(step.numero);
+                            const Icon = step.icon;
+                            const isClickable = agId && step.numero <= currentStep;
 
                             return (
-                                <div
-                                    key={step.id}
-                                    className={`${styles.expertStep} ${styles[`step${step.status.charAt(0).toUpperCase() + step.status.slice(1)}`]} ${stepClickable ? styles.stepClickable : ''}`}
-                                    onClick={() => stepClickable && handleStepClick(step.id, step.path)}
-                                    title={stepBlockedReason}
-                                >
-                                    <div className={styles.expertStepIcon}>
-                                        {step.status === 'completed' ? (
-                                            <Check size={14} strokeWidth={3} />
-                                        ) : step.status === 'skipped' ? (
-                                            <SkipForward size={12} />
-                                        ) : stepLocked ? (
-                                            <Lock size={12} />
-                                        ) : (
-                                            <StepIcon size={14} />
-                                        )}
+                                <div key={step.id} className={styles.stepWrapper}>
+                                    {/* Connecteur entre les étapes */}
+                                    {index > 0 && (
+                                        <div className={`${styles.connector} ${status !== 'pending' || step.numero <= currentStep ? styles.connectorActive : ''}`} />
+                                    )}
+
+                                    <div
+                                        className={`${styles.step} ${styles[`step${status.charAt(0).toUpperCase() + status.slice(1)}`]} ${isClickable ? styles.stepClickable : ''}`}
+                                        onClick={() => isClickable && handleStepClick(step)}
+                                        role={isClickable ? 'button' : undefined}
+                                        tabIndex={isClickable ? 0 : undefined}
+                                    >
+                                        <div className={styles.stepCircle}>
+                                            {status === 'completed' ? (
+                                                <Check size={14} strokeWidth={3} />
+                                            ) : (
+                                                <Icon size={16} />
+                                            )}
+                                        </div>
+                                        <div className={styles.stepContent}>
+                                            <span className={styles.stepNumber}>Étape {step.numero}</span>
+                                            <span className={styles.stepTitle}>{step.titre}</span>
+                                        </div>
                                     </div>
-                                    <span className={styles.expertStepTitle}>{step.titre_court}</span>
-                                    {stepLocked && (
-                                        <span className={styles.lockedBadgeSmall}>Bloqué</span>
-                                    )}
-                                    {!step.obligatoire && !stepLocked && (
-                                        <span className={styles.optionalBadgeSmall}>Opt.</span>
-                                    )}
                                 </div>
                             );
                         })}
                     </div>
-                )}
-            </div>
-        );
-    };
-
-    // Séparer les étapes pour le mode guidé
-    const preparationSteps = steps.filter(s => s.numero <= 4);
-    const deroulementSteps = steps.filter(s => s.numero >= 5);
-
-    // Calcul du progrès pour chaque module (mode guidé)
-    const prepProgress = currentStep <= 4
-        ? ((currentStep - 1) / 3) * 100
-        : 100;
-    const deroulProgress = currentStep <= 4
-        ? 0
-        : ((currentStep - 5) / 2) * 100;
-
-    // Données pour l'affichage mobile
-    const currentStepData = steps[currentStep - 1];
-    const currentModule = currentStep <= 4 ? 'Préparation AG' : 'Déroulement + PV';
-
-    return (
-        <div className={styles.stepperContainer}>
-            {/* Header avec mode switcher et progression */}
-            <div className={styles.stepperHeader}>
-                <div className={styles.progressInfo}>
-                    <span className={styles.progressText}>
-                        {progress.percentage}% complété
-                    </span>
-                    <span className={styles.timeEstimate}>
-                        <Clock size={12} aria-hidden="true" />
-                        ~{progress.remainingTime} min restantes
-                    </span>
                 </div>
 
-                <div className={styles.modeSwitcher}>
-                    <button
-                        className={`${styles.modeButton} ${mode === 'guided' ? styles.modeButtonActive : ''}`}
-                        onClick={() => setMode('guided')}
-                        title="Mode guidé : affiche les 7 étapes"
-                    >
-                        <HelpCircle size={14} aria-hidden="true" />
-                        <span>Guidé</span>
-                    </button>
-                    <button
-                        className={`${styles.modeButton} ${mode === 'expert' ? styles.modeButtonActive : ''}`}
-                        onClick={() => setMode('expert')}
-                        title="Mode expert : affiche 4 groupes condensés"
-                    >
-                        <Zap size={14} aria-hidden="true" />
-                        <span>Expert</span>
-                    </button>
+                {/* Séparateur */}
+                <div className={styles.moduleSeparator}>
+                    <div className={styles.separatorLine} />
+                    <div className={styles.separatorIcon}>
+                        <Send size={14} />
+                    </div>
+                    <div className={styles.separatorLine} />
                 </div>
-            </div>
 
-            {/* Contenu selon le mode */}
-            {mode === 'guided' ? (
-                // Mode Guidé : 7 étapes en 2 modules
-                <div className={styles.stepperWrapper}>
-                    {/* Module 1: Préparation AG */}
-                    <div className={styles.moduleSection}>
-                        <div className={styles.moduleHeader}>
-                            <span className={styles.moduleTitle}>Préparation AG</span>
+                {/* Module 2: Déroulement + PV */}
+                <div className={`${styles.module} ${!isPreparationModule ? styles.moduleActive : currentStep > 4 ? styles.moduleCompleted : styles.modulePending}`}>
+                    <div className={styles.moduleHeader}>
+                        <div className={styles.moduleIcon}>
+                            {currentStep > 7 ? <Check size={16} /> : <Users size={16} />}
                         </div>
-                        <div className={styles.moduleContent}>
-                            <div className={styles.progressTrack}>
-                                <div
-                                    className={styles.progressFill}
-                                    style={{ width: `${prepProgress}%` }}
-                                />
-                            </div>
-                            <div className={styles.stepsRow}>
-                                {preparationSteps.map(renderGuidedStep)}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Séparateur */}
-                    <div className={styles.moduleDivider}>
-                        <div className={styles.dividerLine} />
-                    </div>
-
-                    {/* Module 2: Déroulement + PV */}
-                    <div className={styles.moduleSection}>
-                        <div className={styles.moduleHeader}>
+                        <div className={styles.moduleInfo}>
                             <span className={styles.moduleTitle}>Déroulement + PV</span>
+                            <span className={styles.moduleSubtitle}>Étapes 5-7</span>
                         </div>
-                        <div className={styles.moduleContent}>
-                            <div className={styles.progressTrack}>
+                        <div className={styles.moduleProgress}>
+                            <div className={`${styles.moduleProgressBar} ${currentStep <= 4 ? styles.moduleProgressBarInactive : ''}`}>
                                 <div
-                                    className={`${styles.progressFill} ${currentStep <= 4 ? styles.progressInactive : ''}`}
+                                    className={styles.moduleProgressFill}
                                     style={{ width: `${deroulProgress}%` }}
                                 />
                             </div>
-                            <div className={styles.stepsRow}>
-                                {deroulementSteps.map(renderGuidedStep)}
-                            </div>
+                            <span className={styles.moduleProgressText}>
+                                {currentStep > 4 ? Math.min(currentStep - 5, 3) : 0}/3
+                            </span>
                         </div>
                     </div>
-                </div>
-            ) : (
-                // Mode Expert : 4 groupes condensés
-                <div className={styles.expertWrapper}>
-                    {expertGroups.map(renderExpertGroup)}
-                </div>
-            )}
 
-            {/* Mobile compact view */}
-            <div className={styles.mobileProgress}>
-                <div className={styles.mobileModuleBadge}>
-                    {currentModule}
+                    <div className={styles.steps}>
+                        {deroulementSteps.map((step, index) => {
+                            const status = getStepStatus(step.numero);
+                            const Icon = step.icon;
+                            const isClickable = agId && step.numero <= currentStep;
+                            const isLocked = currentStep < 5 && step.numero > currentStep;
+
+                            return (
+                                <div key={step.id} className={styles.stepWrapper}>
+                                    {/* Connecteur entre les étapes */}
+                                    {index > 0 && (
+                                        <div className={`${styles.connector} ${status !== 'pending' || step.numero <= currentStep ? styles.connectorActive : ''}`} />
+                                    )}
+
+                                    <div
+                                        className={`${styles.step} ${styles[`step${status.charAt(0).toUpperCase() + status.slice(1)}`]} ${isClickable ? styles.stepClickable : ''} ${isLocked ? styles.stepLocked : ''}`}
+                                        onClick={() => isClickable && handleStepClick(step)}
+                                        role={isClickable ? 'button' : undefined}
+                                        tabIndex={isClickable ? 0 : undefined}
+                                    >
+                                        <div className={styles.stepCircle}>
+                                            {status === 'completed' ? (
+                                                <Check size={14} strokeWidth={3} />
+                                            ) : isLocked ? (
+                                                <Lock size={14} />
+                                            ) : (
+                                                <Icon size={16} />
+                                            )}
+                                        </div>
+                                        <div className={styles.stepContent}>
+                                            <span className={styles.stepNumber}>
+                                                Étape {step.numero}
+                                                {step.optional && <span className={styles.optionalTag}>Optionnel</span>}
+                                            </span>
+                                            <span className={styles.stepTitle}>{step.titre}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-                <div className={styles.mobileProgressInfo}>
-                    <span className={styles.mobileStepCurrent}>Étape {currentStep}/7</span>
-                    <span className={styles.mobileStepLabel}>{currentStepData?.titre}</span>
+            </div>
+
+            {/* Vue mobile compacte */}
+            <div className={styles.mobileView}>
+                <div className={styles.mobileHeader}>
+                    <span className={styles.mobileModule}>
+                        {isPreparationModule ? 'Préparation AG' : 'Déroulement + PV'}
+                    </span>
+                    <span className={styles.mobileStep}>
+                        Étape {currentStep}/7
+                    </span>
+                </div>
+                <div className={styles.mobileTitle}>
+                    {STEPS[currentStep - 1]?.titre}
                 </div>
                 <div className={styles.mobileProgressBar}>
                     <div
                         className={styles.mobileProgressFill}
-                        style={{ width: `${progress.percentage}%` }}
+                        style={{ width: `${globalProgress}%` }}
                     />
                 </div>
-                {/* Mini-navigation mobile */}
-                <div className={styles.mobileStepsNav}>
-                    {steps.map((step) => {
-                        // Permettre de cliquer sur toutes les étapes accessibles
-                        const isClickable = agId && step.status !== 'locked';
-
+                <div className={styles.mobileDots}>
+                    {STEPS.map((step) => {
+                        const status = getStepStatus(step.numero);
                         return (
                             <button
-                                key={step.numero}
-                                className={`${styles.mobileStepDot} ${styles[`mobileStepDot${step.status.charAt(0).toUpperCase() + step.status.slice(1)}`]}`}
-                                onClick={() => isClickable && handleStepClick(step.id, step.path)}
-                                disabled={!isClickable}
+                                key={step.id}
+                                className={`${styles.mobileDot} ${styles[`mobileDot${status.charAt(0).toUpperCase() + status.slice(1)}`]}`}
+                                onClick={() => step.numero <= currentStep && agId && handleStepClick(step)}
+                                disabled={step.numero > currentStep}
                                 title={step.titre}
                             >
-                                {step.status === 'completed' ? (
+                                {status === 'completed' ? (
                                     <Check size={10} strokeWidth={3} />
                                 ) : (
                                     step.numero
