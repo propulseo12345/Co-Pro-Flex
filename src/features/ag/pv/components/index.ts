@@ -11,3 +11,5 @@ export { SignaturePadModal } from './SignaturePadModal';
 export { AutoFillConfirmModal } from './AutoFillConfirmModal';
 export { LoadingState } from './LoadingState';
 export { ErrorState } from './ErrorState';
+export { PvPageContent } from './PvPageContent';
+export { PvGuardStates } from './PvGuardStates';

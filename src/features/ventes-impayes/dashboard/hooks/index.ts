@@ -1,0 +1,1 @@
+export { useVentesImpayesDashboard } from './useVentesImpayesDashboard';

@@ -2,28 +2,14 @@
 
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Stepper from '@/components/features/ag/Stepper';
-import { StepUnavailable, AgDocumentActions } from '@/components/features/ag';
 import { useAGStepGuard } from '@/hooks/modules/useAGStepGuard';
 import { updateAgCurrentStep } from '@/lib/ag/api';
 import { useCopro } from '@/providers/CoproContext';
 import {
-  Header,
-  SuccessBanner,
-  SummarySection,
-  PDFSection,
-  ResolutionsSummary,
-  TextPreviewSection,
-  Sidebar,
-  Footer,
-  SignatairesModal,
-  SignaturePadModal,
-  AutoFillConfirmModal,
-  LoadingState,
-  ErrorState,
+  PvPageContent,
+  PvGuardStates,
 } from '../../../../../features/ag/pv/components';
 import { usePVPage, useSignaturePad } from '../../../../../features/ag/pv/hooks';
-import styles from './pv.module.css';
 
 export default function PVPage() {
   const params = useParams();
@@ -42,222 +28,87 @@ export default function PVPage() {
     redirectDelay: 100,
   });
 
-  const {
-    canvasRef,
-    agId: _agId,
-    agData,
-    resolutions,
-    pvText,
-    signataires,
-    stats,
-    isPreviewMode,
-    isSigned,
-    isDataLoading,
-    dataLoadError,
-    showSignatairesModal,
-    showSignaturePadModal,
-    currentSignataire,
-    showAutoFillConfirm,
-    autoFillData,
-    autoFillSuccess,
-    modeSignature,
-    modeConfig,
-    isEmailObligatoire,
-    pdfUrl,
-    isGeneratingPdf,
-    pdfError,
-    isDrawing,
-    setIsPreviewMode,
-    setShowSignatairesModal,
-    setShowSignaturePadModal,
-    setShowAutoFillConfirm,
-    setModeSignature,
-    setPdfUrl,
-    setPdfError,
-    setIsDrawing,
-    getResolutionResult,
-    handleDownloadPDF,
-    handlePreviewPDF,
-    handleOpenSignatairesModal,
-    updateSignataire,
-    handleAutoFillFromAG,
-    applyAutoFill,
-    handleSendSignatureRequests,
-    handleOpenSignaturePad,
-    clearSignature,
-    saveSignature,
-    handleFinish,
-    handleGoBack,
-  } = usePVPage({ agId });
+  const pvPage = usePVPage({ agId });
 
   const { startDrawing, draw, stopDrawing, clearCanvas } = useSignaturePad({
-    canvasRef,
-    isOpen: showSignaturePadModal,
-    isDrawing,
-    setIsDrawing,
+    canvasRef: pvPage.canvasRef,
+    isOpen: pvPage.showSignaturePadModal,
+    isDrawing: pvPage.isDrawing,
+    setIsDrawing: pvPage.setIsDrawing,
   });
 
-  // Mise à jour de l'étape courante en DB (étape 7 = Procès-verbal)
+  // Update current step in DB (step 8 = Proces-verbal)
   useEffect(() => {
-    if (guardState === 'allowed' && !isDataLoading && agData && agId) {
-      updateAgCurrentStep(agId, 7);
+    if (guardState === 'allowed' && !pvPage.isDataLoading && pvPage.agData && agId) {
+      updateAgCurrentStep(agId, 8);
     }
-  }, [guardState, isDataLoading, agData, agId]);
+  }, [guardState, pvPage.isDataLoading, pvPage.agData, agId]);
 
-  // Guard states
-  if (guardState === 'loading') {
-    return <LoadingState message="Vérification des prérequis..." />;
-  }
+  // Handle guard states
+  const guardContent = PvGuardStates({
+    guardState,
+    blockReason,
+    redirectUrl,
+    agId,
+    isDataLoading: pvPage.isDataLoading,
+    dataLoadError: pvPage.dataLoadError,
+    hasAgData: !!pvPage.agData,
+    onGoBack: pvPage.handleGoBack,
+    onRefresh: pvPage.handleRetry,
+    onHome: () => router.push('/ag/dashboard'),
+  });
 
-  if (guardState === 'redirecting') {
-    return (
-      <div className="container">
-        <StepUnavailable
-          reason={blockReason || 'Prérequis non satisfaits'}
-          redirectUrl={redirectUrl || undefined}
-          redirectLabel="Accéder à l'ordre du jour"
-          backUrl={`/ag/${agId}/session`}
-          backLabel="Retour à la session"
-          isRedirecting
-        />
-      </div>
-    );
-  }
-
-  if (guardState === 'blocked' || guardState === 'error') {
-    return (
-      <div className="container">
-        <StepUnavailable
-          reason={blockReason || "Cette étape n'est pas accessible."}
-          redirectUrl={redirectUrl || `/ag/${agId}/agenda`}
-          redirectLabel="Accéder à l'ordre du jour"
-          backUrl={`/ag/${agId}/session`}
-          backLabel="Retour à la session"
-        />
-      </div>
-    );
-  }
-
-  // Data loading states
-  if (isDataLoading) {
-    return (
-      <LoadingState
-        message="Chargement des données de l'AG..."
-        hint="Si le chargement persiste, vérifiez vos données ou rafraîchissez la page."
-      />
-    );
-  }
-
-  if (dataLoadError) {
-    return (
-      <ErrorState
-        title="Erreur de chargement"
-        message={dataLoadError}
-        onRefresh={() => window.location.reload()}
-        onBack={handleGoBack}
-      />
-    );
-  }
-
-  if (!agData) {
-    return (
-      <ErrorState
-        title="Assemblée non trouvée"
-        message="Les données de cette AG n'ont pas été trouvées. Vérifiez que vous avez bien complété les étapes précédentes."
-        iconColor="var(--color-warning)"
-        onBack={handleGoBack}
-        onHome={() => router.push('/ag/dashboard')}
-      />
-    );
+  if (guardContent) {
+    return guardContent;
   }
 
   return (
-    <div className="container">
-      <Header onBack={handleGoBack} />
-
-      <Stepper currentStep={7} agId={agId} />
-
-      {isSigned && <SuccessBanner />}
-
-      <div className={styles.layout}>
-        <div className={styles.mainContent}>
-          <SummarySection stats={stats} />
-
-          <PDFSection
-            pdfUrl={pdfUrl}
-            isGeneratingPdf={isGeneratingPdf}
-            pdfError={pdfError}
-            onPreview={handlePreviewPDF}
-            onDownload={handleDownloadPDF}
-            onClosePdf={() => setPdfUrl(null)}
-            onDismissError={() => setPdfError(null)}
-          />
-
-          {/* Archivage Supabase */}
-          {currentCoproId && (
-            <AgDocumentActions
-              agId={agId}
-              docType="pv"
-              title="Archiver le PV dans la GED"
-              description="Générez et archivez le procès-verbal officiel dans le système documentaire (conservation 10 ans)"
-              showHistory
-            />
-          )}
-
-          <ResolutionsSummary resolutions={resolutions} getResolutionResult={getResolutionResult} />
-
-          <TextPreviewSection
-            pvText={pvText}
-            isPreviewMode={isPreviewMode}
-            onTogglePreview={() => setIsPreviewMode(!isPreviewMode)}
-            onDownloadPDF={handleDownloadPDF}
-          />
-        </div>
-
-        <Sidebar
-          isSigned={isSigned}
-          onOpenSignatairesModal={handleOpenSignatairesModal}
-          onShowSignatairesModal={() => setShowSignatairesModal(true)}
-          onFinish={handleFinish}
-        />
-      </div>
-
-      <Footer isSigned={isSigned} onBack={handleGoBack} onFinish={handleFinish} />
-
-      <SignatairesModal
-        isOpen={showSignatairesModal}
-        signataires={signataires}
-        modeSignature={modeSignature}
-        modeConfig={modeConfig}
-        isEmailObligatoire={isEmailObligatoire}
-        autoFillSuccess={autoFillSuccess}
-        onClose={() => setShowSignatairesModal(false)}
-        onAutoFill={handleAutoFillFromAG}
-        onUpdateSignataire={updateSignataire}
-        onOpenSignaturePad={handleOpenSignaturePad}
-        onClearSignature={clearSignature}
-        onSetModeSignature={setModeSignature}
-        onSendSignatureRequests={handleSendSignatureRequests}
-      />
-
-      <SignaturePadModal
-        isOpen={showSignaturePadModal}
-        currentSignataire={currentSignataire}
-        canvasRef={canvasRef}
-        onClose={() => setShowSignaturePadModal(false)}
-        onClear={clearCanvas}
-        onSave={saveSignature}
-        onStartDrawing={startDrawing}
-        onDraw={draw}
-        onStopDrawing={stopDrawing}
-      />
-
-      <AutoFillConfirmModal
-        isOpen={showAutoFillConfirm}
-        autoFillData={autoFillData}
-        onClose={() => setShowAutoFillConfirm(false)}
-        onApply={applyAutoFill}
-      />
-    </div>
+    <PvPageContent
+      agId={agId}
+      currentCoproId={currentCoproId}
+      stats={pvPage.stats}
+      resolutions={pvPage.resolutions}
+      pvText={pvPage.pvText}
+      signataires={pvPage.signataires}
+      currentSignataire={pvPage.currentSignataire}
+      autoFillData={pvPage.autoFillData}
+      isPreviewMode={pvPage.isPreviewMode}
+      isSigned={pvPage.isSigned}
+      pdfUrl={pvPage.pdfUrl}
+      isGeneratingPdf={pvPage.isGeneratingPdf}
+      pdfError={pvPage.pdfError}
+      showSignatairesModal={pvPage.showSignatairesModal}
+      showSignaturePadModal={pvPage.showSignaturePadModal}
+      showAutoFillConfirm={pvPage.showAutoFillConfirm}
+      autoFillSuccess={pvPage.autoFillSuccess}
+      modeSignature={pvPage.modeSignature}
+      modeConfig={pvPage.modeConfig}
+      isEmailObligatoire={pvPage.isEmailObligatoire}
+      canvasRef={pvPage.canvasRef}
+      onGoBack={pvPage.handleGoBack}
+      setIsPreviewMode={pvPage.setIsPreviewMode}
+      setShowSignatairesModal={pvPage.setShowSignatairesModal}
+      setShowSignaturePadModal={pvPage.setShowSignaturePadModal}
+      setShowAutoFillConfirm={pvPage.setShowAutoFillConfirm}
+      setModeSignature={pvPage.setModeSignature}
+      setPdfUrl={pvPage.setPdfUrl}
+      setPdfError={pvPage.setPdfError}
+      getResolutionResult={pvPage.getResolutionResult}
+      onDownloadPDF={pvPage.handleDownloadPDF}
+      onPreviewPDF={pvPage.handlePreviewPDF}
+      onOpenSignatairesModal={pvPage.handleOpenSignatairesModal}
+      onUpdateSignataire={pvPage.updateSignataire}
+      onAutoFillFromAG={pvPage.handleAutoFillFromAG}
+      onApplyAutoFill={pvPage.applyAutoFill}
+      onSendSignatureRequests={pvPage.handleSendSignatureRequests}
+      onOpenSignaturePad={pvPage.handleOpenSignaturePad}
+      onClearSignature={pvPage.clearSignature}
+      onSaveSignature={pvPage.saveSignature}
+      onFinish={pvPage.handleFinish}
+      onStartDrawing={startDrawing}
+      onDraw={draw}
+      onStopDrawing={stopDrawing}
+      onClearCanvas={clearCanvas}
+    />
   );
 }

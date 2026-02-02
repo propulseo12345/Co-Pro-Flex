@@ -11,7 +11,7 @@
  *
  * Usage:
  *   const wizard = useAgWizardState(agId);
- *   wizard.currentStep  // Étape actuelle (1-7)
+ *   wizard.currentStep  // Étape actuelle (1-8)
  *   wizard.goToStep(3)  // Naviguer vers étape 3
  *   wizard.completeStep(2)  // Marquer étape 2 comme complétée
  *   wizard.stepData  // Données de progression par étape
@@ -107,15 +107,16 @@ interface UseAgWizardStateReturn {
   navigateToCurrentStep: () => void;
 }
 
-// Mapping étape -> path
+// Mapping étape -> path (8 étapes)
 const STEP_PATHS: Record<number, string> = {
   1: 'edit',
   2: 'agenda',
   3: 'convocation',
   4: 'envoi',
-  5: 'preparation',
-  6: 'session',
-  7: 'pv',
+  5: 'votes-correspondance',
+  6: 'feuille-presence',
+  7: 'session',
+  8: 'pv',
 };
 
 // Prérequis par étape (quelles étapes doivent être complétées avant)
@@ -126,7 +127,8 @@ const STEP_PREREQUISITES: Record<number, number[]> = {
   4: [3], // Nécessite convocation préparée
   5: [4], // Nécessite envoi fait
   6: [4], // Nécessite envoi fait (peut skip votes par correspondance)
-  7: [6], // Nécessite session terminée
+  7: [6], // Nécessite feuille de présence validée
+  8: [7], // Nécessite session terminée
 };
 
 export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
@@ -349,7 +351,8 @@ export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
     if (step === 4) return state.stats.resolutions_count > 0;
     if (step === 5) return state.stats.resolutions_count > 0;
     if (step === 6) return state.stats.resolutions_count > 0;
-    if (step === 7) return state.stats.resolutions_count > 0 && isStepCompleted(6);
+    if (step === 7) return state.stats.resolutions_count > 0;
+    if (step === 8) return state.stats.resolutions_count > 0 && isStepCompleted(7);
 
     return prerequisites.every(prereq => isStepCompleted(prereq));
   }, [state, isStepCompleted]);

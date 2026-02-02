@@ -42,7 +42,14 @@
       "Bash(node:*)",
       "Bash(if not exist \"C:\\\\Users\\\\etien\\\\Desktop\\\\Co-Pro-Flex-main\\\\scripts\" mkdir \"C:\\\\Users\\\\etien\\\\Desktop\\\\Co-Pro-Flex-main\\\\scripts\")",
       "Bash(npm install:*)",
-      "Bash(npx playwright install chromium)"
+      "Bash(npx playwright install chromium)",
+      "Bash(for file in src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/convocation/page.tsx src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/preparation/page.tsx src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/envoi/page.tsx src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/feuille-presence/page.tsx src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/pv/page.tsx src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/session/page.tsx src/app/\\\\\\(dashboard\\\\\\)/ag/[id]/votes-correspondance/page.tsx)",
+      "Bash(while read file)",
+      "Bash(do wc -l:*)",
+      "Bash(powershell -Command \"Get-Content ''$env:APPDATA\\\\Claude\\\\claude_desktop_config.json'' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell:*)",
+      "Bash(npx next info:*)",
+      "Bash(for f in *.ts)"
     ]
   }
 }

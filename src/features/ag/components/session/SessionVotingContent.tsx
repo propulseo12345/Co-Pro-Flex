@@ -4,11 +4,17 @@ import { ArrowLeft, ArrowRight, AlertCircle, Edit3, ChevronDown } from 'lucide-r
 import { SessionStats, SessionVotingTable } from '@/components/features/ag/Session';
 import { MAJORITES, type MajorityType } from '@/lib/constants/resolutions';
 import { isRoleVariable } from '@/components/features/ag/Session/utils';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import type { Resolution, VoteData, VoteChoice, VoteStats } from '../../types';
 import styles from '../../../../app/(dashboard)/ag/[id]/session/session.module.css';
 
+interface Coproprietaire {
+  id: string;
+  nom: string;
+  tantiemes: number;
+}
+
 interface SessionVotingContentProps {
+  coproprietaires: Coproprietaire[];
   currentResolution: Resolution;
   currentResolutionIndex: number;
   totalResolutions: number;
@@ -34,6 +40,7 @@ interface SessionVotingContentProps {
 }
 
 export function SessionVotingContent({
+  coproprietaires,
   currentResolution,
   currentResolutionIndex,
   totalResolutions,
@@ -91,7 +98,7 @@ export function SessionVotingContent({
                 {showPrefillDropdown === variableName && (
                   <div className={styles.prefillDropdown}>
                     <div className={styles.prefillDropdownHeader}>Sélectionner :</div>
-                    {MOCK_COPROPRIETAIRES.map(copro => (
+                    {coproprietaires.map(copro => (
                       <button
                         key={copro.id}
                         type="button"
@@ -165,6 +172,7 @@ export function SessionVotingContent({
         <>
           {stats && <SessionStats stats={stats} />}
           <SessionVotingTable
+            coproprietaires={coproprietaires}
             resolutionId={currentResolution.id}
             votes={votes}
             presences={presences}

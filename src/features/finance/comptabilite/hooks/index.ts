@@ -1,0 +1,1 @@
+export { useComptabilitePage } from './useComptabilitePage';

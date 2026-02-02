@@ -19,15 +19,16 @@ const TYPE_LABELS: Record<string, string> = {
   mixed: 'AG Mixte',
 };
 
-// Labels pour les 7 étapes du wizard
+// Labels pour les 8 étapes du wizard
 const STEP_LABELS: Record<number, string> = {
-  1: 'Étape 1/7 : Planification',
-  2: 'Étape 2/7 : Ordre du jour',
-  3: 'Étape 3/7 : Préparation convocations',
-  4: 'Étape 4/7 : Envoi convocations',
-  5: 'Étape 5/7 : Votes par correspondance',
-  6: 'Étape 6/7 : Tenue de l\'AG',
-  7: 'Étape 7/7 : Procès-verbal',
+  1: 'Étape 1/8 : Planification',
+  2: 'Étape 2/8 : Ordre du jour',
+  3: 'Étape 3/8 : Préparation convocations',
+  4: 'Étape 4/8 : Envoi convocations',
+  5: 'Étape 5/8 : Votes par correspondance',
+  6: 'Étape 6/8 : Feuille de présence',
+  7: 'Étape 7/8 : Tenue de l\'AG',
+  8: 'Étape 8/8 : Procès-verbal',
 };
 
 function formatDate(dateStr: string | null): string | null {
@@ -71,10 +72,12 @@ function getResumeUrl(draft: AgDraft): string {
     case 4:
       return `/ag/${draft.id}/envoi`;
     case 5:
-      return `/ag/${draft.id}/preparation`;
+      return `/ag/${draft.id}/votes-correspondance`;
     case 6:
-      return `/ag/${draft.id}/session`;
+      return `/ag/${draft.id}/feuille-presence`;
     case 7:
+      return `/ag/${draft.id}/session`;
+    case 8:
       return `/ag/${draft.id}/pv`;
     default:
       return `/ag/${draft.id}/edit`;
@@ -166,7 +169,7 @@ export function AgDraftCard({ draft, onDelete }: AgDraftCardProps) {
 
         <div className={styles.draftStep}>
           <ArrowRight size={14} aria-hidden="true" />
-          {STEP_LABELS[draft.currentStep] || `Étape ${draft.currentStep}/7`}
+          {STEP_LABELS[draft.currentStep] || `Étape ${draft.currentStep}/8`}
         </div>
       </div>
 

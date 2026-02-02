@@ -1,5 +1,4 @@
 import { VoteData, VoteStats, MajorityResult, Resolution, VoteChoice } from './types';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import { MAJORITES, type MajorityType } from '@/lib/constants/resolutions';
 
 export const getResolutionStats = (votes: VoteData[], resolutionId: string): VoteStats => {
@@ -23,7 +22,17 @@ export const getResolutionStats = (votes: VoteData[], resolutionId: string): Vot
   return { pour, contre, abstention, nonVote, total, pourcentagePour };
 };
 
-export const checkMajority = (resolution: Resolution, stats: VoteStats, votes: VoteData[]): MajorityResult => {
+export interface CheckMajorityOptions {
+  totalTantiemes: number;
+  totalCoproprietaires: number;
+}
+
+export const checkMajority = (
+  resolution: Resolution,
+  stats: VoteStats,
+  votes: VoteData[],
+  options?: CheckMajorityOptions
+): MajorityResult => {
   const majoriteType = resolution.majorite as MajorityType;
   const majoriteInfo = MAJORITES[majoriteType];
 
@@ -31,7 +40,9 @@ export const checkMajority = (resolution: Resolution, stats: VoteStats, votes: V
     return { adopted: false, reason: 'Type de majorité non reconnu' };
   }
 
-  const totalTantiemes = MOCK_COPROPRIETAIRES.reduce((sum, c) => sum + c.tantiemes, 0);
+  // Use provided totals or compute from votes
+  const totalTantiemes = options?.totalTantiemes ?? stats.total;
+  const totalCoproprietaires = options?.totalCoproprietaires ?? 0;
   const voixExprimees = stats.pour + stats.contre + stats.abstention;
   const resolutionVotes = votes.filter(v => v.resolutionId === resolution.id);
 
@@ -67,7 +78,7 @@ export const checkMajority = (resolution: Resolution, stats: VoteStats, votes: V
     }
 
     case 'ART_25_1': {
-      const seuilCopros = Math.floor(MOCK_COPROPRIETAIRES.length / 2) + 1;
+      const seuilCopros = Math.floor(totalCoproprietaires / 2) + 1;
       const coprosPour = resolutionVotes.filter(v => v.vote === 'POUR').length;
       const seuilTantiemes = (totalTantiemes * 2) / 3;
       const adoptedArt251 = coprosPour >= seuilCopros && stats.pour >= seuilTantiemes;
@@ -82,7 +93,7 @@ export const checkMajority = (resolution: Resolution, stats: VoteStats, votes: V
     case 'ART_26': {
       const seuilTantiemesArt26 = (totalTantiemes * 2) / 3;
       const coprosPourArt26 = resolutionVotes.filter(v => v.vote === 'POUR').length;
-      const seuilCoprosArt26 = Math.floor(MOCK_COPROPRIETAIRES.length / 2) + 1;
+      const seuilCoprosArt26 = Math.floor(totalCoproprietaires / 2) + 1;
       const adoptedArt26 = coprosPourArt26 >= seuilCoprosArt26 && stats.pour >= seuilTantiemesArt26;
       return {
         adopted: adoptedArt26,
@@ -93,7 +104,7 @@ export const checkMajority = (resolution: Resolution, stats: VoteStats, votes: V
     }
 
     case 'UNANIMITE': {
-      const tousPour = resolutionVotes.length === MOCK_COPROPRIETAIRES.length && resolutionVotes.every(v => v.vote === 'POUR');
+      const tousPour = totalCoproprietaires > 0 && resolutionVotes.length === totalCoproprietaires && resolutionVotes.every(v => v.vote === 'POUR');
       return {
         adopted: tousPour,
         reason: tousPour

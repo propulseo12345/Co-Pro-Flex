@@ -1,8 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import clsx from 'clsx';
-import { Home, ChevronRight, Wrench, TrendingUp, Shield } from 'lucide-react';
 import {
     LogbookHeader,
     LogbookInfoSection,
@@ -11,276 +8,120 @@ import {
     InterventionsTab,
     TravauxTab,
     DocumentsTab,
-    EquipementModal,
-    DocumentModal,
-    InterventionFormModal,
-    AssuranceModal,
-    ToastCreation,
-    Intervention
 } from '@/components/features/maintenance/Logbook';
-import { useLogbook } from '@/hooks/modules/useLogbook';
-import styles from './logbook.module.css';
+import {
+    useLogbookPage,
+    LogbookBreadcrumb,
+    LogbookTabs,
+    LogbookModals,
+    LogbookToast,
+} from '@/features/maintenance/logbook-page';
 
 export default function LogbookPage() {
     const {
-        // Données statiques
-        coproprieteInfo,
-        contrats,
-        travaux,
-        documents,
-        assurances,
-        allPrestataires,
-
-        // États
-        activeTab,
-        interventionView,
-        filtreKpiActif,
-        searchTerm,
-        statutFilter,
-        prestataireFilter,
-        equipementFilter,
-        anneeFilter,
-        searchDocuments,
-        categorieDocFilter,
-        expandedCategories,
-        showExportMenu,
-        isEditing,
-        isSimplifiedView,
-        selectedEquipement,
-        showNewInterventionModal,
-        editingIntervention,
-        selectedAssurance,
-        selectedDocument,
-        newInterventionForm,
-        formData,
-        toastCreation,
-
-        // Données calculées
-        filteredInterventions,
-        interventionsCourantes,
-        travauxImportants,
-        years,
-        equipements,
-        statsCategorie,
-        filteredDocuments,
-        documentsByCategory,
-        documentStats,
-        kpis,
-
-        // Setters
-        setActiveTab,
-        setInterventionView,
-        setSearchTerm,
-        setStatutFilter,
-        setPrestataireFilter,
-        setEquipementFilter,
-        setAnneeFilter,
-        setSearchDocuments,
-        setCategorieDocFilter,
-        setShowExportMenu,
-        setIsEditing,
-        setIsSimplifiedView,
-        setSelectedEquipement,
-        setShowNewInterventionModal,
-        setEditingIntervention,
-        setSelectedAssurance,
-        setSelectedDocument,
-        setNewInterventionForm,
-        setFormData,
-
-        // Helpers
-        getContratsForEquipement,
-        getInterventionsForEquipement,
-        getDocumentsForEquipement,
-
-        // Handlers
-        handleSaveInfo,
-        handleCreateIntervention,
-        handleEditIntervention,
-        handleSaveIntervention,
-        handleFiltreKpiChange,
-        handleExport,
-        toggleCategory,
-        handleFilterByEquipement,
-        fermerToastCreation,
-        voirInterventionCreee,
-    } = useLogbook();
+        breadcrumb,
+        header,
+        infoSection,
+        assurancesSection,
+        contratsSection,
+        tabs,
+        interventionsTab,
+        documentsTab,
+        modals,
+        modalsHandlers,
+        toast,
+    } = useLogbookPage();
 
     return (
         <div className="container">
-            {/* Breadcrumb */}
-            <div className={styles.breadcrumb}>
-                <Link href="/maintenance" className={styles.breadcrumbLink}>
-                    <Home size={14} aria-hidden="true" /> Maintenance
-                </Link>
-                <ChevronRight size={14} aria-hidden="true" />
-                <span>Carnet d&apos;entretien</span>
-            </div>
+            <LogbookBreadcrumb config={breadcrumb} />
 
-            {/* Header avec KPIs interactifs */}
             <LogbookHeader
-                formData={formData}
-                kpis={kpis}
-                showExportMenu={showExportMenu}
-                filtreActif={filtreKpiActif}
-                onToggleExportMenu={() => setShowExportMenu(!showExportMenu)}
-                onExport={handleExport}
-                onNewIntervention={() => setShowNewInterventionModal(true)}
-                onFiltreChange={handleFiltreKpiChange}
+                formData={header.formData}
+                kpis={header.kpis}
+                showExportMenu={header.showExportMenu}
+                filtreActif={header.filtreActif}
+                onToggleExportMenu={header.handlers.onToggleExportMenu}
+                onExport={header.handlers.onExport}
+                onNewIntervention={header.handlers.onNewIntervention}
+                onFiltreChange={header.handlers.onFiltreChange}
             />
 
-            {/* Section Informations générales */}
             <LogbookInfoSection
-                formData={formData}
-                coproprieteInfo={coproprieteInfo}
-                isEditing={isEditing}
-                isSimplifiedView={isSimplifiedView}
-                equipementsPrincipaux={coproprieteInfo.equipementsPrincipaux}
-                onFormDataChange={setFormData}
-                onToggleEdit={() => setIsEditing(!isEditing)}
-                onToggleSimplifiedView={() => setIsSimplifiedView(!isSimplifiedView)}
-                onSaveInfo={handleSaveInfo}
-                onSelectEquipement={setSelectedEquipement}
+                formData={infoSection.formData}
+                coproprieteInfo={infoSection.coproprieteInfo}
+                isEditing={infoSection.isEditing}
+                isSimplifiedView={infoSection.isSimplifiedView}
+                equipementsPrincipaux={infoSection.equipementsPrincipaux}
+                onFormDataChange={infoSection.handlers.onFormDataChange}
+                onToggleEdit={infoSection.handlers.onToggleEdit}
+                onToggleSimplifiedView={infoSection.handlers.onToggleSimplifiedView}
+                onSaveInfo={infoSection.handlers.onSaveInfo}
+                onSelectEquipement={infoSection.handlers.onSelectEquipement}
             />
 
-            {/* Section Assurances */}
             <LogbookAssurances
-                assurances={assurances}
-                onSelectAssurance={setSelectedAssurance}
+                assurances={assurancesSection.assurances}
+                onSelectAssurance={assurancesSection.onSelectAssurance}
             />
 
-            {/* Section Contrats */}
-            <LogbookContrats contrats={contrats} />
+            <LogbookContrats contrats={contratsSection.contrats} />
 
-            {/* Onglets */}
-            <div className={styles.tabs}>
-                <button
-                    className={clsx(styles.tab, activeTab === 'interventions' && styles.activeTab)}
-                    onClick={() => setActiveTab('interventions')}
-                >
-                    <Wrench size={18} aria-hidden="true" /> Interventions ({filteredInterventions.length})
-                </button>
-                <button
-                    className={clsx(styles.tab, activeTab === 'travaux' && styles.activeTab)}
-                    onClick={() => setActiveTab('travaux')}
-                >
-                    <TrendingUp size={18} aria-hidden="true" /> Travaux prévisionnels ({travaux.length})
-                </button>
-                <button
-                    className={clsx(styles.tab, activeTab === 'documents' && styles.activeTab)}
-                    onClick={() => setActiveTab('documents')}
-                >
-                    <Shield size={18} aria-hidden="true" /> Documents techniques ({documents.length})
-                </button>
-            </div>
+            <LogbookTabs
+                activeTab={tabs.activeTab}
+                onTabChange={tabs.setActiveTab}
+                interventionsCount={tabs.filteredInterventions.length}
+                travauxCount={tabs.travaux.length}
+                documentsCount={tabs.documents.length}
+            />
 
-            {/* Contenu des onglets */}
-            {activeTab === 'interventions' && (
+            {tabs.activeTab === 'interventions' && (
                 <InterventionsTab
-                    interventions={filteredInterventions}
-                    allInterventions={filteredInterventions}
-                    interventionsCourantes={interventionsCourantes}
-                    travauxImportants={travauxImportants}
-                    statsCategorie={statsCategorie}
-                    interventionView={interventionView}
-                    searchTerm={searchTerm}
-                    statutFilter={statutFilter}
-                    prestataireFilter={prestataireFilter}
-                    equipementFilter={equipementFilter}
-                    anneeFilter={anneeFilter}
-                    years={years}
-                    equipements={equipements}
-                    allPrestataires={allPrestataires}
-                    onInterventionViewChange={setInterventionView}
-                    onSearchChange={setSearchTerm}
-                    onStatutFilterChange={setStatutFilter}
-                    onPrestataireFilterChange={setPrestataireFilter}
-                    onEquipementFilterChange={setEquipementFilter}
-                    onAnneeFilterChange={setAnneeFilter}
-                    onEditIntervention={handleEditIntervention}
+                    interventions={interventionsTab.interventions}
+                    allInterventions={interventionsTab.allInterventions}
+                    interventionsCourantes={interventionsTab.interventionsCourantes}
+                    travauxImportants={interventionsTab.travauxImportants}
+                    statsCategorie={interventionsTab.statsCategorie}
+                    interventionView={interventionsTab.interventionView}
+                    searchTerm={interventionsTab.searchTerm}
+                    statutFilter={interventionsTab.statutFilter}
+                    prestataireFilter={interventionsTab.prestataireFilter}
+                    equipementFilter={interventionsTab.equipementFilter}
+                    anneeFilter={interventionsTab.anneeFilter}
+                    years={interventionsTab.years}
+                    equipements={interventionsTab.equipements}
+                    allPrestataires={interventionsTab.allPrestataires}
+                    onInterventionViewChange={interventionsTab.handlers.onInterventionViewChange}
+                    onSearchChange={interventionsTab.handlers.onSearchChange}
+                    onStatutFilterChange={interventionsTab.handlers.onStatutFilterChange}
+                    onPrestataireFilterChange={interventionsTab.handlers.onPrestataireFilterChange}
+                    onEquipementFilterChange={interventionsTab.handlers.onEquipementFilterChange}
+                    onAnneeFilterChange={interventionsTab.handlers.onAnneeFilterChange}
+                    onEditIntervention={interventionsTab.handlers.onEditIntervention}
                 />
             )}
 
-            {activeTab === 'travaux' && (
-                <TravauxTab travaux={travaux} />
-            )}
+            {tabs.activeTab === 'travaux' && <TravauxTab travaux={tabs.travaux} />}
 
-            {activeTab === 'documents' && (
+            {tabs.activeTab === 'documents' && (
                 <DocumentsTab
-                    documents={documents}
-                    filteredDocuments={filteredDocuments}
-                    documentsByCategory={documentsByCategory}
-                    documentStats={documentStats}
-                    searchDocuments={searchDocuments}
-                    categorieDocFilter={categorieDocFilter}
-                    expandedCategories={expandedCategories}
-                    onSearchChange={setSearchDocuments}
-                    onCategorieFilterChange={setCategorieDocFilter}
-                    onToggleCategory={toggleCategory}
-                    onSelectDocument={setSelectedDocument}
+                    documents={documentsTab.documents}
+                    filteredDocuments={documentsTab.filteredDocuments}
+                    documentsByCategory={documentsTab.documentsByCategory}
+                    documentStats={documentsTab.documentStats}
+                    searchDocuments={documentsTab.searchDocuments}
+                    categorieDocFilter={documentsTab.categorieDocFilter}
+                    expandedCategories={documentsTab.expandedCategories}
+                    onSearchChange={documentsTab.handlers.onSearchChange}
+                    onCategorieFilterChange={documentsTab.handlers.onCategorieFilterChange}
+                    onToggleCategory={documentsTab.handlers.onToggleCategory}
+                    onSelectDocument={documentsTab.handlers.onSelectDocument}
                 />
             )}
 
-            {/* Modals */}
-            {selectedEquipement && (
-                <EquipementModal
-                    equipement={selectedEquipement}
-                    contrats={getContratsForEquipement(selectedEquipement)}
-                    interventions={getInterventionsForEquipement(selectedEquipement) as Intervention[]}
-                    documents={getDocumentsForEquipement(selectedEquipement)}
-                    onClose={() => setSelectedEquipement(null)}
-                    onFilterByEquipement={handleFilterByEquipement}
-                />
-            )}
+            <LogbookModals modals={modals} handlers={modalsHandlers} />
 
-            {selectedDocument && (
-                <DocumentModal
-                    document={selectedDocument}
-                    onClose={() => setSelectedDocument(null)}
-                />
-            )}
-
-            <InterventionFormModal
-                isOpen={showNewInterventionModal}
-                isEditing={false}
-                formData={newInterventionForm}
-                equipementsPrincipaux={coproprieteInfo.equipementsPrincipaux}
-                onFormDataChange={setNewInterventionForm}
-                onSubmit={handleCreateIntervention}
-                onClose={() => setShowNewInterventionModal(false)}
-            />
-
-            <InterventionFormModal
-                isOpen={!!editingIntervention}
-                isEditing={true}
-                formData={newInterventionForm}
-                equipementsPrincipaux={coproprieteInfo.equipementsPrincipaux}
-                onFormDataChange={setNewInterventionForm}
-                onSubmit={handleSaveIntervention}
-                onClose={() => setEditingIntervention(null)}
-            />
-
-            {selectedAssurance && (
-                <AssuranceModal
-                    assurance={selectedAssurance}
-                    onClose={() => setSelectedAssurance(null)}
-                />
-            )}
-
-            {/* Toast de confirmation après création d'intervention */}
-            {toastCreation && (
-                <ToastCreation
-                    visible={toastCreation.visible}
-                    type={toastCreation.type}
-                    titre={toastCreation.titre}
-                    message={toastCreation.message}
-                    intervention={toastCreation.intervention}
-                    estVisibleAvecFiltre={toastCreation.estVisibleAvecFiltre}
-                    labelFiltre={toastCreation.labelFiltre}
-                    onClose={fermerToastCreation}
-                    onAfficherTout={voirInterventionCreee}
-                />
-            )}
+            <LogbookToast toast={toast} />
         </div>
     );
 }

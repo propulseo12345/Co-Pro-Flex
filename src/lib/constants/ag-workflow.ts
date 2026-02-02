@@ -1,7 +1,7 @@
 /**
  * Configuration du workflow AG avec support des modes Guidé et Expert
  *
- * Le mode Guidé affiche les 7 étapes séquentiellement
+ * Le mode Guidé affiche les 8 étapes séquentiellement
  * Le mode Expert regroupe les étapes en 4 groupes pour une navigation plus rapide
  */
 
@@ -10,6 +10,7 @@ import {
     FileText,
     Send,
     ClipboardList,
+    ClipboardCheck,
     Users,
     FileCheck,
     Settings,
@@ -80,7 +81,7 @@ export interface ExpertGroup {
 }
 
 /**
- * Définition des 7 étapes du workflow AG
+ * Définition des 8 étapes du workflow AG
  */
 export const AG_WORKFLOW_STEPS: WorkflowStep[] = [
     // ═══════════════════════════════════════════════════════════════
@@ -153,22 +154,35 @@ export const AG_WORKFLOW_STEPS: WorkflowStep[] = [
         titre_court: 'Votes',
         description: 'Enregistrer les votes reçus avant l\'AG',
         icon: ClipboardList,
-        path: 'preparation',
+        path: 'votes-correspondance',
         obligatoire: false, // Optionnel
         prerequis: ['envoi'],
         temps_estime_minutes: 10,
         groupe_expert: 'session',
     },
     {
-        id: 'session_ag',
+        id: 'feuille_presence',
         numero: 6,
+        titre: 'Feuille de présence',
+        titre_court: 'Présence',
+        description: 'Enregistrer les présences et signatures',
+        icon: ClipboardCheck,
+        path: 'feuille-presence',
+        obligatoire: true,
+        prerequis: ['envoi'],
+        temps_estime_minutes: 15,
+        groupe_expert: 'session',
+    },
+    {
+        id: 'session_ag',
+        numero: 7,
         titre: 'Tenue de l\'AG',
         titre_court: 'Session',
         description: 'Gérer la session le jour J',
         icon: Users,
         path: 'session',
         obligatoire: true,
-        prerequis: ['envoi'],
+        prerequis: ['feuille_presence'],
         temps_estime_minutes: 60,
         groupe_expert: 'session',
     },
@@ -178,7 +192,7 @@ export const AG_WORKFLOW_STEPS: WorkflowStep[] = [
     // ═══════════════════════════════════════════════════════════════
     {
         id: 'proces_verbal',
-        numero: 7,
+        numero: 8,
         titre: 'Procès-verbal',
         titre_court: 'PV',
         description: 'Rédiger et diffuser le PV',
@@ -212,8 +226,8 @@ export const EXPERT_GROUPS: Record<ExpertGroupId, ExpertGroup> = {
     session: {
         id: 'session',
         titre: 'Session',
-        description: 'Votes et tenue de l\'AG',
-        steps: ['votes_correspondance', 'session_ag'],
+        description: 'Présences, votes et tenue de l\'AG',
+        steps: ['votes_correspondance', 'feuille_presence', 'session_ag'],
         icon: Users,
     },
     cloture: {
@@ -337,6 +351,9 @@ export function hasStepData(stepId: string, agId: string): boolean {
             return context.hasResolutions;
         case 'votes_correspondance':
             // Accessible si les résolutions existent (optionnel mais nécessite des résolutions)
+            return context.hasResolutions;
+        case 'feuille_presence':
+            // Accessible si les résolutions existent
             return context.hasResolutions;
         case 'session_ag':
             // Accessible si les résolutions existent
@@ -466,6 +483,24 @@ export const STEP_BUSINESS_VALIDATORS: Record<string, StepPrerequisiteValidator>
             return {
                 isAccessible: false,
                 reason: 'Vous devez définir au moins une résolution avant d\'accéder aux votes par correspondance.',
+                redirectStepId: 'ordre_du_jour',
+            };
+        }
+        return { isAccessible: true };
+    },
+
+    feuille_presence: (ctx) => {
+        if (!ctx.agExists) {
+            return {
+                isAccessible: false,
+                reason: 'Vous devez d\'abord créer l\'AG.',
+                redirectTo: '/ag/new',
+            };
+        }
+        if (!ctx.hasResolutions) {
+            return {
+                isAccessible: false,
+                reason: 'Vous devez définir au moins une résolution avant d\'accéder à la feuille de présence.',
                 redirectStepId: 'ordre_du_jour',
             };
         }

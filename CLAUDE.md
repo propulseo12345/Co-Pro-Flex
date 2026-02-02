@@ -19,7 +19,7 @@ Fournir aux syndics professionnels et bénévoles un outil complet pour gérer :
 
 ### État actuel
 - **Frontend** : Fonctionnel avec données mockées
-- **Backend** : Migration Supabase prévue (non commencée)
+- **Backend** : Supabase
 - **Pages** : ~100 pages fonctionnelles
 - **Score qualité** : ~75/100
 

@@ -1,0 +1,1 @@
+export { useTantiemesPage } from './useTantiemesPage';

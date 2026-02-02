@@ -1,4 +1,5 @@
 export { SessionStartScreen } from './SessionStartScreen';
+export { SessionReadyScreen } from './SessionReadyScreen';
 export { SessionStats } from './SessionStats';
 export { SessionVotingTable } from './SessionVotingTable';
 export { SessionSidebar } from './SessionSidebar';

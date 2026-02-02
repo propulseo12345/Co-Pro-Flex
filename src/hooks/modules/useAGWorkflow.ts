@@ -164,7 +164,7 @@ export function useAGWorkflow(
         const stats = wizard.stats;
         if (!stats) return stepNumber === 1 ? 'available' : 'locked';
 
-        // Logique d'accessibilité basée sur les données existantes
+        // Logique d'accessibilité basée sur les données existantes (8 étapes)
         switch (stepNumber) {
             case 1: return 'available';
             case 2: return 'available'; // Toujours accessible après étape 1
@@ -172,9 +172,10 @@ export function useAGWorkflow(
             case 4: return stats.resolutions_count > 0 ? 'available' : 'locked';
             case 5: return stats.resolutions_count > 0 ? 'available' : 'locked';
             case 6: return stats.resolutions_count > 0 ? 'available' : 'locked';
-            case 7:
-                const step6Info = wizard.stepData['6'];
-                return step6Info?.status === 'completed' ? 'available' : 'locked';
+            case 7: return stats.resolutions_count > 0 ? 'available' : 'locked';
+            case 8:
+                const step7Info = wizard.stepData['7'];
+                return step7Info?.status === 'completed' ? 'available' : 'locked';
             default: return 'locked';
         }
     }, [wizard.stepData, wizard.state, wizard.stats, currentStepId]);

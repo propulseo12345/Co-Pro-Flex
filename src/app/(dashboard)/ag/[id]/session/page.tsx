@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Stepper from '@/components/features/ag/Stepper';
 import { StepUnavailable } from '@/components/features/ag';
 import { useAGStepGuard } from '@/hooks/modules/useAGStepGuard';
 import {
-  SessionStartScreen,
+  SessionReadyScreen,
   SessionSidebar,
   ResolutionNavBar,
   ResultModal,
@@ -32,7 +32,12 @@ import styles from './session.module.css';
 
 export default function SessionPage() {
   const params = useParams();
+  const router = useRouter();
   const agId = params.id as string;
+
+  const goToFeuillePresence = useCallback(() => {
+    router.push(`/ag/${agId}/feuille-presence`);
+  }, [router, agId]);
 
   const { state: guardState, blockReason, redirectUrl } = useAGStepGuard({
     agId,
@@ -43,10 +48,10 @@ export default function SessionPage() {
 
   const session = useAgSessionPage({ agId });
 
-  // Mise à jour de l'étape courante en DB (étape 6 = Tenue de l'AG)
+  // Mise à jour de l'étape courante en DB (étape 7 = Tenue de l'AG)
   useEffect(() => {
     if (guardState === 'allowed' && !session.isRestoring && agId) {
-      updateAgCurrentStep(agId, 6);
+      updateAgCurrentStep(agId, 7);
     }
   }, [guardState, session.isRestoring, agId]);
 
@@ -85,18 +90,17 @@ export default function SessionPage() {
         lastSaveDate={session.lastSaveDate}
       />
 
-      <Stepper currentStep={6} agId={agId} />
+      <Stepper currentStep={7} agId={agId} />
 
       {!session.sessionState.started ? (
-        <SessionStartScreen
+        <SessionReadyScreen
+          agId={agId}
+          coproprietaires={session.coproprietaires}
           presences={session.presences}
           presencesEnrichies={session.presencesEnrichies}
           votesCorrespondanceCount={session.votesCorrespondanceCount}
-          onPresenceToggle={session.handlePresenceToggle}
-          onSelectAll={session.selectAllPresences}
-          onBasculerPresent={session.handleBasculerPresent}
-          onAnnulerBascule={session.handleAnnulerBascule}
           onStart={session.handleStartSession}
+          onBackToPresences={goToFeuillePresence}
         />
       ) : (
         <>
@@ -112,6 +116,7 @@ export default function SessionPage() {
             <div className={styles.mainContent}>
               {session.currentResolution && (
                 <SessionVotingContent
+                  coproprietaires={session.coproprietaires}
                   currentResolution={session.currentResolution}
                   currentResolutionIndex={session.sessionState.currentResolutionIndex}
                   totalResolutions={session.resolutions.length}
@@ -138,6 +143,7 @@ export default function SessionPage() {
               )}
             </div>
             <SessionSidebar
+              coproprietaires={session.coproprietaires}
               currentResolutionIndex={session.sessionState.currentResolutionIndex}
               totalResolutions={session.resolutions.length}
               presences={session.presences}
@@ -170,7 +176,7 @@ export default function SessionPage() {
         <ResultModal
           resolution={session.currentResolution}
           stats={session.stats}
-          result={checkMajority(session.currentResolution, session.stats, session.votes)}
+          result={checkMajority(session.currentResolution, session.stats, session.votes, { totalTantiemes: session.totalTantiemes, totalCoproprietaires: session.coproprietaires.length })}
           pendingNextResolution={session.pendingNextResolution}
           onClose={session.closeResultModal}
           onConfirmNext={session.confirmNextFromModal}

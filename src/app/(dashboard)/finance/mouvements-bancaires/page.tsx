@@ -1,14 +1,5 @@
 'use client';
 
-import {
-  Download,
-  Upload,
-  RefreshCw,
-  Bell,
-  X,
-  CreditCard,
-  Link as LinkIcon,
-} from 'lucide-react';
 import { useMouvementsBancairesPage } from '../../../../features/finance/mouvements-bancaires/hooks';
 import {
   SyncSection,
@@ -21,266 +12,143 @@ import {
   RapprochementModal,
   EntityDetailModal,
   ImportModal,
+  PageHeader,
+  NewMovementsNotification,
+  TabsNavigation,
 } from '../../../../features/finance/mouvements-bancaires/components';
 import styles from './mouvements-bancaires.module.css';
 
 export default function MouvementsBancairesPage() {
-  const {
-    // State
-    compteActif,
-    ongletActif,
-    searchTerm,
-    typeFilter,
-    categorieFilter,
-    isRefreshing,
-    alerteNouveauxMouvements,
-    showHistoriqueSync,
-    showImportModal,
-    showCategorieModal,
-    showDetailModal,
-    showRapprochementModal,
-    importType,
-    importFile,
-    isImporting,
-
-    // Computed values
-    mouvements,
-    filteredMouvements,
-    statutConnexion,
-    historiqueSync,
-    erreurs,
-    alertesNonCategorises,
-    statutCloture,
-    soldeActuel,
-    soldeInitial,
-    totalEntrees,
-    totalSorties,
-    ecartSoldes,
-    compteCourant,
-    compteTravaux,
-    ecrituresComptables,
-
-    // Modal state
-    selectedMouvement,
-    selectedMouvementRapprochement,
-    suggestions,
-    selectedSuggestion,
-    selectedCategorie,
-    selectedCompte,
-    selectedEntite,
-    suggestionsRapprochement,
-
-    // Setters
-    setCompteActif,
-    setOngletActif,
-    setSearchTerm,
-    setTypeFilter,
-    setCategorieFilter,
-    setAlerteNouveauxMouvements,
-    setShowHistoriqueSync,
-    setShowImportModal,
-    setShowCategorieModal,
-    setShowDetailModal,
-    setShowRapprochementModal,
-    setImportType,
-    setImportFile,
-
-    // Handlers
-    handleRefresh,
-    handleToggleModeSync,
-    handleImportFile,
-    handleCategoriserClick,
-    handleApplySuggestion,
-    handleSaveCategorie,
-    handleCategorieChange,
-    handleCompteChange,
-    handleOpenEntityDetail,
-    handleNavigateToEntity,
-    handleOpenRapprochement,
-    handleRapprocher,
-    handleAnnulerRapprochement,
-
-    // Utils
-    getTempsDepuisDerniereSync,
-    getTempsJusquaProchaineSync,
-    isMouvementRapproche,
-    getEcritureRapprochee,
-  } = useMouvementsBancairesPage();
+  const hook = useMouvementsBancairesPage();
 
   const downloadRIB = () => {
-    // Téléchargement du RIB
+    // Placeholder for RIB download
   };
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Mouvements bancaires</h1>
-          <p className={styles.subtitle}>Suivi en temps réel de vos comptes bancaires</p>
-        </div>
-        <div className={styles.headerActions}>
-          <button className={styles.downloadRibButton} onClick={downloadRIB}>
-            <Download size={18} aria-hidden="true" />
-            Télécharger RIB
-          </button>
-          <button
-            className={styles.importButton}
-            onClick={() => setShowImportModal(true)}
-            title="Importer un fichier bancaire (CSV, OFX, QIF)"
-          >
-            <Upload size={18} aria-hidden="true" />
-            Import manuel
-          </button>
-          <button
-            className={styles.refreshButton}
-            onClick={handleRefresh}
-            disabled={isRefreshing || statutConnexion.statut === 'en_cours'}
-          >
-            <RefreshCw size={18} className={isRefreshing ? styles.spinning : ''} aria-hidden="true" />
-            {isRefreshing ? 'Synchronisation...' : 'Synchroniser'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        isRefreshing={hook.isRefreshing}
+        isSyncing={hook.statutConnexion.statut === 'en_cours'}
+        onDownloadRIB={downloadRIB}
+        onImportClick={() => hook.setShowImportModal(true)}
+        onRefresh={hook.handleRefresh}
+      />
 
-      {/* Notification nouveaux mouvements */}
-      {alerteNouveauxMouvements && (
-        <div className={styles.notificationNouveauxMouvements}>
-          <Bell size={18} />
-          <span>{alerteNouveauxMouvements} nouveau{alerteNouveauxMouvements > 1 ? 'x' : ''} mouvement{alerteNouveauxMouvements > 1 ? 's' : ''} importé{alerteNouveauxMouvements > 1 ? 's' : ''}</span>
-          <button onClick={() => setAlerteNouveauxMouvements(null)}>
-            <X size={16} />
-          </button>
-        </div>
+      {hook.alerteNouveauxMouvements && (
+        <NewMovementsNotification
+          count={hook.alerteNouveauxMouvements}
+          onDismiss={() => hook.setAlerteNouveauxMouvements(null)}
+        />
       )}
 
-      {/* Synchronisation bancaire */}
       <SyncSection
-        statutConnexion={statutConnexion}
-        historiqueSync={historiqueSync}
-        showHistoriqueSync={showHistoriqueSync}
-        getTempsDepuisDerniereSync={getTempsDepuisDerniereSync}
-        getTempsJusquaProchaineSync={getTempsJusquaProchaineSync}
-        onToggleHistorique={() => setShowHistoriqueSync(!showHistoriqueSync)}
-        onToggleModeSync={handleToggleModeSync}
-        onRefresh={handleRefresh}
+        statutConnexion={hook.statutConnexion}
+        historiqueSync={hook.historiqueSync}
+        showHistoriqueSync={hook.showHistoriqueSync}
+        getTempsDepuisDerniereSync={hook.getTempsDepuisDerniereSync}
+        getTempsJusquaProchaineSync={hook.getTempsJusquaProchaineSync}
+        onToggleHistorique={() => hook.setShowHistoriqueSync(!hook.showHistoriqueSync)}
+        onToggleModeSync={hook.handleToggleModeSync}
+        onRefresh={hook.handleRefresh}
       />
 
-      {/* Alertes */}
       <AlertsSection
-        erreurs={erreurs}
-        alertesNonCategorises={alertesNonCategorises}
-        statutCloture={statutCloture}
-        mouvements={mouvements}
-        onCategoriserClick={handleCategoriserClick}
+        erreurs={hook.erreurs}
+        alertesNonCategorises={hook.alertesNonCategorises}
+        statutCloture={hook.statutCloture}
+        mouvements={hook.mouvements}
+        onCategoriserClick={hook.handleCategoriserClick}
       />
 
-      {/* Cartes comptes bancaires */}
       <AccountCards
-        compteActif={compteActif}
-        soldeActuel={soldeActuel}
-        compteCourant={compteCourant}
-        compteTravaux={compteTravaux}
-        onCompteChange={setCompteActif}
+        compteActif={hook.compteActif}
+        soldeActuel={hook.soldeActuel}
+        compteCourant={hook.compteCourant}
+        compteTravaux={hook.compteTravaux}
+        onCompteChange={hook.setCompteActif}
       />
 
-      {/* Statistiques */}
       <StatsCards
-        totalEntrees={totalEntrees}
-        totalSorties={totalSorties}
-        soldeActuel={soldeActuel}
-        soldeInitial={soldeInitial}
+        totalEntrees={hook.totalEntrees}
+        totalSorties={hook.totalSorties}
+        soldeActuel={hook.soldeActuel}
+        soldeInitial={hook.soldeInitial}
       />
 
-      {/* Onglets */}
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${ongletActif === 'mouvements' ? styles.tabActive : ''}`}
-          onClick={() => setOngletActif('mouvements')}
-        >
-          <CreditCard size={18} />
-          Mouvements bancaires
-        </button>
-        <button
-          className={`${styles.tab} ${ongletActif === 'rapprochement' ? styles.tabActive : ''}`}
-          onClick={() => setOngletActif('rapprochement')}
-        >
-          <LinkIcon size={18} />
-          Rapprochement bancaire
-          {ecartSoldes.ecart !== 0 && (
-            <span className={styles.tabBadgeWarning}>{ecartSoldes.ecrituresNonRapprochees}</span>
-          )}
-        </button>
-      </div>
+      <TabsNavigation
+        activeTab={hook.ongletActif}
+        onTabChange={hook.setOngletActif}
+        unreconciliedCount={hook.ecartSoldes.ecrituresNonRapprochees}
+        hasDiscrepancy={hook.ecartSoldes.ecart !== 0}
+      />
 
-      {/* Contenu des onglets */}
-      {ongletActif === 'mouvements' && (
+      {hook.ongletActif === 'mouvements' && (
         <MovementsTab
-          searchTerm={searchTerm}
-          typeFilter={typeFilter}
-          categorieFilter={categorieFilter}
-          filteredMouvements={filteredMouvements}
-          onSearchChange={setSearchTerm}
-          onTypeFilterChange={setTypeFilter}
-          onCategorieFilterChange={setCategorieFilter}
-          onCategoriserClick={handleCategoriserClick}
-          onOpenEntityDetail={handleOpenEntityDetail}
+          searchTerm={hook.searchTerm}
+          typeFilter={hook.typeFilter}
+          categorieFilter={hook.categorieFilter}
+          filteredMouvements={hook.filteredMouvements}
+          onSearchChange={hook.setSearchTerm}
+          onTypeFilterChange={hook.setTypeFilter}
+          onCategorieFilterChange={hook.setCategorieFilter}
+          onCategoriserClick={hook.handleCategoriserClick}
+          onOpenEntityDetail={hook.handleOpenEntityDetail}
         />
       )}
 
-      {ongletActif === 'rapprochement' && (
+      {hook.ongletActif === 'rapprochement' && (
         <RapprochementTab
-          mouvements={mouvements}
-          ecrituresComptables={ecrituresComptables}
-          ecartSoldes={ecartSoldes}
-          soldeActuel={soldeActuel}
-          isMouvementRapproche={isMouvementRapproche}
-          getEcritureRapprochee={getEcritureRapprochee}
-          onOpenRapprochement={handleOpenRapprochement}
-          onAnnulerRapprochement={handleAnnulerRapprochement}
+          mouvements={hook.mouvements}
+          ecrituresComptables={hook.ecrituresComptables}
+          ecartSoldes={hook.ecartSoldes}
+          soldeActuel={hook.soldeActuel}
+          isMouvementRapproche={hook.isMouvementRapproche}
+          getEcritureRapprochee={hook.getEcritureRapprochee}
+          onOpenRapprochement={hook.handleOpenRapprochement}
+          onAnnulerRapprochement={hook.handleAnnulerRapprochement}
         />
       )}
 
-      {/* Modals */}
       <CategorisationModal
-        isOpen={showCategorieModal}
-        selectedMouvement={selectedMouvement}
-        suggestions={suggestions}
-        selectedSuggestion={selectedSuggestion}
-        selectedCategorie={selectedCategorie}
-        selectedCompte={selectedCompte}
-        onClose={() => setShowCategorieModal(false)}
-        onApplySuggestion={handleApplySuggestion}
-        onCategorieChange={handleCategorieChange}
-        onCompteChange={handleCompteChange}
-        onSave={handleSaveCategorie}
+        isOpen={hook.showCategorieModal}
+        selectedMouvement={hook.selectedMouvement}
+        suggestions={hook.suggestions}
+        selectedSuggestion={hook.selectedSuggestion}
+        selectedCategorie={hook.selectedCategorie}
+        selectedCompte={hook.selectedCompte}
+        onClose={() => hook.setShowCategorieModal(false)}
+        onApplySuggestion={hook.handleApplySuggestion}
+        onCategorieChange={hook.handleCategorieChange}
+        onCompteChange={hook.handleCompteChange}
+        onSave={hook.handleSaveCategorie}
       />
 
       <RapprochementModal
-        isOpen={showRapprochementModal}
-        selectedMouvement={selectedMouvementRapprochement}
-        suggestions={suggestionsRapprochement}
-        ecrituresComptables={ecrituresComptables}
-        onClose={() => setShowRapprochementModal(false)}
-        onRapprocher={handleRapprocher}
+        isOpen={hook.showRapprochementModal}
+        selectedMouvement={hook.selectedMouvementRapprochement}
+        suggestions={hook.suggestionsRapprochement}
+        ecrituresComptables={hook.ecrituresComptables}
+        onClose={() => hook.setShowRapprochementModal(false)}
+        onRapprocher={hook.handleRapprocher}
       />
 
       <EntityDetailModal
-        isOpen={showDetailModal}
-        selectedEntite={selectedEntite}
-        onClose={() => setShowDetailModal(false)}
-        onNavigate={handleNavigateToEntity}
+        isOpen={hook.showDetailModal}
+        selectedEntite={hook.selectedEntite}
+        onClose={() => hook.setShowDetailModal(false)}
+        onNavigate={hook.handleNavigateToEntity}
       />
 
       <ImportModal
-        isOpen={showImportModal}
-        importType={importType}
-        importFile={importFile}
-        isImporting={isImporting}
-        onClose={() => setShowImportModal(false)}
-        onImportTypeChange={setImportType}
-        onFileChange={setImportFile}
-        onImport={handleImportFile}
+        isOpen={hook.showImportModal}
+        importType={hook.importType}
+        importFile={hook.importFile}
+        isImporting={hook.isImporting}
+        onClose={() => hook.setShowImportModal(false)}
+        onImportTypeChange={hook.setImportType}
+        onFileChange={hook.setImportFile}
+        onImport={hook.handleImportFile}
       />
     </div>
   );

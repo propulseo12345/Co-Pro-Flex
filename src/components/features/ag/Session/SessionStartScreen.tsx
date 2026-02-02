@@ -1,12 +1,20 @@
 'use client';
 
 import { Play, CheckSquare, Mail, UserCheck, AlertCircle, Undo } from 'lucide-react';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import { SyntheseTantiemes } from './SyntheseTantiemes';
 import type { PresenceData } from '@/lib/utils/ag-session';
 import styles from './Session.module.css';
 
+interface Coproprietaire {
+  id: string;
+  nom: string;
+  tantiemes: number;
+  lot?: string;
+  lotRefs?: string[];
+}
+
 interface SessionStartScreenProps {
+  coproprietaires: Coproprietaire[];
   presences: Record<string, boolean>;
   presencesEnrichies?: Record<string, PresenceData>;
   votesCorrespondanceCount?: number;
@@ -18,6 +26,7 @@ interface SessionStartScreenProps {
 }
 
 export function SessionStartScreen({
+  coproprietaires,
   presences,
   presencesEnrichies,
   votesCorrespondanceCount = 0,
@@ -28,14 +37,14 @@ export function SessionStartScreen({
   onStart
 }: SessionStartScreenProps) {
   // Calculer le total des tantièmes
-  const totalTantiemes = MOCK_COPROPRIETAIRES.reduce((sum, c) => sum + c.tantiemes, 0);
+  const totalTantiemes = coproprietaires.reduce((sum, c) => sum + c.tantiemes, 0);
 
   // Calculer tantièmes présents et correspondance
   let tantièmesPresents = 0;
   let tantièmesCorrespondance = 0;
 
   if (presencesEnrichies) {
-    for (const copro of MOCK_COPROPRIETAIRES) {
+    for (const copro of coproprietaires) {
       const presence = presencesEnrichies[copro.id];
       if (presence?.mode === 'present' || presence?.mode === 'represente') {
         tantièmesPresents += copro.tantiemes;
@@ -44,7 +53,7 @@ export function SessionStartScreen({
       }
     }
   } else {
-    tantièmesPresents = MOCK_COPROPRIETAIRES
+    tantièmesPresents = coproprietaires
       .filter(c => presences[c.id])
       .reduce((sum, c) => sum + c.tantiemes, 0);
   }
@@ -79,7 +88,7 @@ export function SessionStartScreen({
 
         {/* Synthèse des tantièmes - mise à jour en temps réel */}
         <SyntheseTantiemes
-          coproprietaires={MOCK_COPROPRIETAIRES}
+          coproprietaires={coproprietaires}
           presences={presences}
           presencesEnrichies={presencesEnrichies}
           totalTantiemes={totalTantiemes}
@@ -101,7 +110,7 @@ export function SessionStartScreen({
             Cochez les copropriétaires présents ou représentés
           </p>
           <div className={styles.presenceList}>
-            {MOCK_COPROPRIETAIRES.map(copro => {
+            {coproprietaires.map(copro => {
               const isPresent = presences[copro.id] || false;
               const presenceData = presencesEnrichies?.[copro.id];
               const isCorrespondance = presenceData?.mode === 'correspondance';
@@ -124,7 +133,7 @@ export function SessionStartScreen({
                       <div className={styles.presenceInfo}>
                         <span className={styles.presenceName}>{copro.nom}</span>
                         <span className={styles.presenceDetails}>
-                          Lot {copro.lot} • <strong>{copro.tantiemes}</strong> tantièmes
+                          Lot {copro.lotRefs?.join(', ') || copro.lot || '-'} • <strong>{copro.tantiemes}</strong> tantièmes
                         </span>
                       </div>
                     </label>
@@ -142,7 +151,7 @@ export function SessionStartScreen({
                           </span>
                         </span>
                         <span className={styles.presenceDetails}>
-                          Lot {copro.lot} • <strong>{copro.tantiemes}</strong> tantièmes
+                          Lot {copro.lotRefs?.join(', ') || copro.lot || '-'} • <strong>{copro.tantiemes}</strong> tantièmes
                         </span>
                       </div>
                       {onBasculerPresent && (
@@ -175,7 +184,7 @@ export function SessionStartScreen({
                           </span>
                         </span>
                         <span className={styles.presenceDetails}>
-                          Lot {copro.lot} • <strong>{copro.tantiemes}</strong> tantièmes
+                          Lot {copro.lotRefs?.join(', ') || copro.lot || '-'} • <strong>{copro.tantiemes}</strong> tantièmes
                         </span>
                       </div>
                       {onAnnulerBascule && (

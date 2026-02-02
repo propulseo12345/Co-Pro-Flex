@@ -2,18 +2,75 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import type { AGData, Resolution, VoteData, Signataire, PresenceData } from '../domain/types';
 import { INITIAL_SIGNATAIRES, LOAD_TIMEOUT_MS } from '../domain/constants';
 import { generatePVText, generatePDFDocument, getResolutionResult, calculatePVStats } from '../domain/utils';
-import { MOCK_COPROPRIETAIRES, MOCK_ASSEMBLEES } from '@/data/mock';
 import { useGlobalVariables } from '@/hooks/useGlobalVariables';
 import { parseFullName, type ExtractedSignataire } from '@/lib/utils/variable-resolution';
 import type { ModeSignature } from '@/types/models/pv-signature';
 import { LABELS_MODE_SIGNATURE } from '@/types/models/pv-signature';
-import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+import { saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+import { logger } from '@/lib/utils/logger';
 
 interface UsePVPageProps {
   agId: string;
+}
+
+interface PVBundleResponse {
+  agData: {
+    id: string;
+    type: 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'MIXTE';
+    date: string;
+    heure: string;
+    lieu: string;
+    adresse: string;
+    title: string;
+    status: string;
+    coproName: string;
+    presidentName?: string;
+    secretaryName?: string;
+    scrutineer1Name?: string;
+    scrutineer2Name?: string;
+    openingNotes?: string;
+    closingNotes?: string;
+  };
+  resolutions: Array<{
+    id: string;
+    titre: string;
+    texte: string;
+    majorite: string;
+    resolution_number: number;
+    status: string;
+    is_approved: boolean | null;
+    variables: Record<string, unknown>;
+  }>;
+  presences: Array<{
+    coproprietaireId: string;
+    statut: 'PRESENT' | 'REPRESENTE' | 'CORRESPONDANCE' | 'ABSENT';
+    nom: string;
+    tantiemes: number;
+    mandataireId?: string;
+  }>;
+  votes: Array<{
+    resolutionId: string;
+    coproprietaireId: string;
+    vote: 'POUR' | 'CONTRE' | 'ABSTENTION' | null;
+    tantiemes: number;
+    source: 'CORRESPONDANCE' | 'DIRECT';
+  }>;
+  drafts: {
+    session?: unknown;
+    variables?: Record<string, string>;
+    roles?: {
+      presidentSeance?: { nom?: string; coproprietaireId?: string };
+      secretaireSeance?: { nom?: string; coproprietaireId?: string; estGestionnaire?: boolean; representeSyndic?: string };
+      scrutateur?: { nom?: string; coproprietaireId?: string };
+    };
+    signataires?: Signataire[];
+  };
+  totalTantiemes: number;
+  loadedAt: string;
 }
 
 export function usePVPage({ agId }: UsePVPageProps) {
@@ -32,6 +89,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
   const [isSigned, setIsSigned] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Signataires state
   const [showSignatairesModal, setShowSignatairesModal] = useState(false);
@@ -79,210 +137,172 @@ export function usePVPage({ agId }: UsePVPageProps) {
     [allVariables]
   );
 
+  // Load data using bundle RPC
+  const loadPVData = useCallback(async () => {
+    if (!isValidUUID(agId)) {
+      setDataLoadError('ID AG invalide');
+      setIsDataLoading(false);
+      return;
+    }
+
+    const startTime = Date.now();
+    logger.debug('PV: Starting data load', { agId, attempt: retryCount + 1 });
+
+    setIsDataLoading(true);
+    setDataLoadError(null);
+
+    try {
+      const supabase = createClient();
+
+      // Check session first
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session) {
+        logger.error('PV: No auth session', { agId, error: sessionError?.message });
+        setDataLoadError('Session expirée. Veuillez vous reconnecter.');
+        setIsDataLoading(false);
+        return;
+      }
+
+      // Single RPC call for all data
+      const { data: bundle, error } = await supabase.rpc('rpc_get_ag_pv_bundle', {
+        p_ag_id: agId,
+      });
+
+      const duration = Date.now() - startTime;
+      logger.debug('PV: Bundle RPC completed', { agId, duration, hasError: !!error });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!bundle) {
+        throw new Error('Aucune donnée reçue');
+      }
+
+      const data = bundle as unknown as PVBundleResponse;
+
+      // Set AG data
+      setAgData({
+        type: data.agData.type,
+        date: data.agData.date,
+        heure: data.agData.heure,
+        lieu: data.agData.lieu,
+        adresse: data.agData.adresse,
+      });
+
+      // Set resolutions
+      if (data.resolutions && data.resolutions.length > 0) {
+        setResolutions(data.resolutions.map(r => ({
+          id: r.id,
+          titre: r.titre,
+          texte: r.texte || '',
+          majorite: r.majorite,
+          variables: r.variables as Record<string, string> || {},
+          resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
+        })));
+      }
+
+      // Set votes
+      if (data.votes) {
+        setVotes(data.votes.map(v => ({
+          resolutionId: v.resolutionId,
+          coproprietaireId: v.coproprietaireId,
+          vote: v.vote,
+          tantiemes: v.tantiemes,
+          source: v.source,
+        })));
+      }
+
+      // Set presences
+      if (data.presences) {
+        setPresences(data.presences.map(p => ({
+          coproprietaireId: p.coproprietaireId,
+          statut: p.statut === 'CORRESPONDANCE' ? 'PRESENT' : p.statut,
+          mandataireId: p.mandataireId,
+        })));
+      }
+
+      // Set variables from drafts
+      if (data.drafts?.variables) {
+        setVariableValues(data.drafts.variables);
+      }
+
+      // Set signataires from roles
+      if (data.drafts?.roles) {
+        const roles = data.drafts.roles;
+        const parseNom = (nom: string) => {
+          if (!nom) return { prenom: '', nomFamille: '' };
+          const parts = nom.split(' ');
+          return {
+            prenom: parts.slice(0, -1).join(' '),
+            nomFamille: parts[parts.length - 1] || '',
+          };
+        };
+
+        const presidentNom = parseNom(roles.presidentSeance?.nom || data.agData.presidentName || '');
+        const secretaireNom = parseNom(roles.secretaireSeance?.nom || data.agData.secretaryName || '');
+        const scrutateurNom = parseNom(roles.scrutateur?.nom || data.agData.scrutineer1Name || '');
+
+        setSignataires([
+          {
+            id: '1',
+            role: 'president',
+            roleLabel: 'Président de séance',
+            nom: presidentNom.nomFamille,
+            prenom: presidentNom.prenom,
+            email: '',
+            telephone: '',
+          },
+          {
+            id: '2',
+            role: 'secretaire',
+            roleLabel: roles.secretaireSeance?.estGestionnaire
+              ? `Secrétaire de séance (représentant le syndic ${roles.secretaireSeance.representeSyndic || ''})`
+              : 'Secrétaire de séance',
+            nom: secretaireNom.nomFamille,
+            prenom: secretaireNom.prenom,
+            email: '',
+            telephone: '',
+            estGestionnaire: roles.secretaireSeance?.estGestionnaire,
+            representeSyndic: roles.secretaireSeance?.representeSyndic,
+          },
+          {
+            id: '3',
+            role: 'scrutateur',
+            roleLabel: 'Scrutateur',
+            nom: scrutateurNom.nomFamille,
+            prenom: scrutateurNom.prenom,
+            email: '',
+            telephone: '',
+          },
+        ]);
+      }
+
+      logger.info('PV: Data loaded successfully', { agId, duration, resolutionsCount: data.resolutions?.length });
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.error('PV: Load error', { agId, duration, error: error instanceof Error ? error.message : 'Unknown' });
+
+      if (duration >= LOAD_TIMEOUT_MS) {
+        setDataLoadError('Le chargement des données a pris trop de temps. Veuillez réessayer.');
+      } else {
+        setDataLoadError(error instanceof Error ? error.message : 'Erreur lors du chargement des données');
+      }
+    } finally {
+      setIsDataLoading(false);
+    }
+  }, [agId, retryCount]);
+
+  // Retry handler
+  const handleRetry = useCallback(() => {
+    setRetryCount(prev => prev + 1);
+  }, []);
+
   // Load data effect
   useEffect(() => {
-    const loadTimeout = setTimeout(() => {
-      if (isDataLoading) {
-        setIsDataLoading(false);
-        setDataLoadError('Le chargement des données a pris trop de temps. Veuillez rafraîchir la page.');
-      }
-    }, LOAD_TIMEOUT_MS);
-
-    const loadData = async () => {
-      try {
-        setIsDataLoading(true);
-        setDataLoadError(null);
-
-        let agDataLoaded = false;
-
-        // Load AG data - try Supabase draft first, then localStorage fallback
-        const { data: draftData } = await loadDraft<AGData>(agId, 'session', 'ag-draft-' + agId);
-        if (draftData) {
-          setAgData(draftData);
-          agDataLoaded = true;
-        }
-
-        // Fallback to mock data
-        if (!agDataLoaded) {
-          const mockAg = MOCK_ASSEMBLEES.find((a: { id: string }) => a.id === agId);
-          if (mockAg) {
-            setAgData({
-              type: (mockAg as { type: string }).type.toUpperCase() as 'ORDINAIRE' | 'EXTRAORDINAIRE',
-              date: (mockAg as { date: string }).date,
-              heure: '',
-              lieu: (mockAg as { lieu?: string }).lieu || '',
-              adresse: (mockAg as { lieu?: string }).lieu || '',
-            });
-            agDataLoaded = true;
-
-            if ((mockAg as { ordreDuJour?: unknown[] }).ordreDuJour && Array.isArray((mockAg as { ordreDuJour?: unknown[] }).ordreDuJour)) {
-              setResolutions(
-                ((mockAg as { ordreDuJour: { id?: string; titre?: string; description?: string; majorite?: string }[] }).ordreDuJour).map((res, index) => ({
-                  id: res.id || `res-${index}-${Date.now()}`,
-                  titre: res.titre || `Résolution ${index + 1}`,
-                  texte: res.description || res.titre || '',
-                  majorite: res.majorite || 'ART_24',
-                  variables: {},
-                }))
-              );
-            }
-          }
-        }
-
-        // Load resolutions from Supabase/localStorage
-        const { data: resolutionsData } = await loadDraft<Resolution[]>(agId, 'resolutions', 'ag-resolutions-' + agId);
-        if (resolutionsData && Array.isArray(resolutionsData) && resolutionsData.length > 0) {
-          setResolutions(resolutionsData);
-        }
-
-        // Load votes from Supabase/localStorage
-        const { data: votesData } = await loadDraft<VoteData[]>(agId, 'votes', 'ag-votes-' + agId);
-        if (votesData) {
-          setVotes(votesData);
-        }
-
-        // Load presences/session from Supabase/localStorage
-        // Try 'attendance' draft type first, then 'session' as fallback
-        let presencesLoaded = false;
-        const { data: attendanceData } = await loadDraft<PresenceData[] | { presencesEnrichies?: Record<string, { mode?: string; mandataireId?: string }> }>(
-          agId, 'attendance', 'ag-presences-' + agId
-        );
-
-        if (attendanceData) {
-          if (Array.isArray(attendanceData)) {
-            setPresences(attendanceData);
-            presencesLoaded = true;
-          } else if ((attendanceData as { presencesEnrichies?: unknown }).presencesEnrichies) {
-            const presencesEnrichies = (attendanceData as { presencesEnrichies: Record<string, { mode?: string; mandataireId?: string }> }).presencesEnrichies;
-            const presencesArray: PresenceData[] = [];
-            for (const [coproId, data] of Object.entries(presencesEnrichies)) {
-              let statut: 'PRESENT' | 'REPRESENTE' | 'ABSENT' | null = null;
-              if (data.mode === 'present') statut = 'PRESENT';
-              else if (data.mode === 'represente') statut = 'REPRESENTE';
-
-              if (statut !== null) {
-                presencesArray.push({
-                  coproprietaireId: coproId,
-                  statut,
-                  mandataireId: data.mandataireId,
-                });
-              }
-            }
-            setPresences(presencesArray);
-            presencesLoaded = true;
-          }
-        }
-
-        // Fallback to session draft for presences
-        if (!presencesLoaded) {
-          const { data: sessionData } = await loadDraft<{ presencesEnrichies?: Record<string, { mode?: string; mandataireId?: string }> }>(
-            agId, 'session', 'ag-session-' + agId
-          );
-          if (sessionData?.presencesEnrichies) {
-            const presencesArray: PresenceData[] = [];
-            for (const [coproId, data] of Object.entries(sessionData.presencesEnrichies)) {
-              let statut: 'PRESENT' | 'REPRESENTE' | 'ABSENT' | null = null;
-              if (data.mode === 'present') statut = 'PRESENT';
-              else if (data.mode === 'represente') statut = 'REPRESENTE';
-
-              if (statut !== null) {
-                presencesArray.push({
-                  coproprietaireId: coproId,
-                  statut,
-                  mandataireId: data.mandataireId,
-                });
-              }
-            }
-            setPresences(presencesArray);
-          }
-        }
-
-        // Load variables from Supabase/localStorage
-        const { data: variablesData } = await loadDraft<Record<string, string>>(agId, 'variables', 'ag-variables-' + agId);
-        if (variablesData) {
-          setVariableValues(variablesData);
-        }
-
-        // Load roles for signataires from Supabase/localStorage
-        interface RolesData {
-          presidentSeance?: { nom?: string; coproprietaireId?: string };
-          secretaireSeance?: { nom?: string; coproprietaireId?: string; estGestionnaire?: boolean; representeSyndic?: string };
-          scrutateur?: { nom?: string; coproprietaireId?: string };
-        }
-        const { data: rolesData } = await loadDraft<RolesData>(agId, 'roles', `roles-ag-${agId}`);
-        if (rolesData) {
-          const roles = rolesData;
-
-          const presidentCopro = roles.presidentSeance?.coproprietaireId
-            ? MOCK_COPROPRIETAIRES.find((c) => c.id === roles.presidentSeance?.coproprietaireId)
-            : null;
-          const secretaireCopro = roles.secretaireSeance?.coproprietaireId
-            ? MOCK_COPROPRIETAIRES.find((c) => c.id === roles.secretaireSeance?.coproprietaireId)
-            : null;
-          const scrutateurCopro = roles.scrutateur?.coproprietaireId
-            ? MOCK_COPROPRIETAIRES.find((c) => c.id === roles.scrutateur?.coproprietaireId)
-            : null;
-
-          const parseNom = (nom: string) => {
-            if (!nom) return { prenom: '', nomFamille: '' };
-            const parts = nom.split(' ');
-            return {
-              prenom: parts.slice(0, -1).join(' '),
-              nomFamille: parts[parts.length - 1] || '',
-            };
-          };
-
-          const presidentNom = parseNom(roles.presidentSeance?.nom || '');
-          const secretaireNom = parseNom(roles.secretaireSeance?.nom || '');
-          const scrutateurNom = parseNom(roles.scrutateur?.nom || '');
-
-          setSignataires([
-            {
-              id: '1',
-              role: 'president',
-              roleLabel: 'Président de séance',
-              nom: presidentNom.nomFamille,
-              prenom: presidentNom.prenom,
-              email: presidentCopro?.email || '',
-              telephone: presidentCopro?.telephone || '',
-            },
-            {
-              id: '2',
-              role: 'secretaire',
-              roleLabel: roles.secretaireSeance?.estGestionnaire
-                ? `Secrétaire de séance (représentant le syndic ${roles.secretaireSeance.representeSyndic || ''})`
-                : 'Secrétaire de séance',
-              nom: secretaireNom.nomFamille,
-              prenom: secretaireNom.prenom,
-              email: secretaireCopro?.email || '',
-              telephone: secretaireCopro?.telephone || '',
-              estGestionnaire: roles.secretaireSeance?.estGestionnaire,
-              representeSyndic: roles.secretaireSeance?.representeSyndic,
-            },
-            {
-              id: '3',
-              role: 'scrutateur',
-              roleLabel: 'Scrutateur',
-              nom: scrutateurNom.nomFamille,
-              prenom: scrutateurNom.prenom,
-              email: scrutateurCopro?.email || '',
-              telephone: scrutateurCopro?.telephone || '',
-            },
-          ]);
-        }
-      } catch (error) {
-        setDataLoadError(error instanceof Error ? error.message : 'Erreur lors du chargement des données');
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-
-    loadData();
-
-    return () => {
-      clearTimeout(loadTimeout);
-    };
-  }, [agId]);
+    loadPVData();
+  }, [loadPVData]);
 
   // Generate PV text effect
   useEffect(() => {
@@ -361,68 +381,14 @@ export function usePVPage({ agId }: UsePVPageProps) {
   };
 
   const handleAutoFillFromAG = async () => {
-    interface RolesData {
-      presidentSeance?: { nom?: string; coproprietaireId?: string };
-      secretaireSeance?: { nom?: string; coproprietaireId?: string; estGestionnaire?: boolean; representeSyndic?: string };
-      scrutateur?: { nom?: string; coproprietaireId?: string };
-    }
-    const { data: roles } = await loadDraft<RolesData>(agId, 'roles', `roles-ag-${agId}`);
-
-    if (!roles) {
-      alert("Aucun rôle n'a été désigné lors de la session AG.");
-      return;
-    }
-    const extracted: ExtractedSignataire[] = [];
-
-    // Extract president
-    const president = roles.presidentSeance;
-    if (president?.nom) {
-      const copro = president.coproprietaireId
-        ? MOCK_COPROPRIETAIRES.find((c) => c.id === president.coproprietaireId)
-        : null;
-      extracted.push({
-        role: 'president',
-        roleLabel: 'Président de séance',
-        name: president.nom,
-        coproprietaire: copro || null,
-      });
-    } else {
-      extracted.push({ role: 'president', roleLabel: 'Président de séance', name: '', coproprietaire: null });
-    }
-
-    // Extract secretaire
-    const secretaire = roles.secretaireSeance;
-    if (secretaire?.nom) {
-      const copro = secretaire.coproprietaireId
-        ? MOCK_COPROPRIETAIRES.find((c) => c.id === secretaire.coproprietaireId)
-        : null;
-      extracted.push({
-        role: 'secretaire',
-        roleLabel: secretaire.estGestionnaire
-          ? `Secrétaire de séance (représentant le syndic ${secretaire.representeSyndic || ''})`
-          : 'Secrétaire de séance',
-        name: secretaire.nom,
-        coproprietaire: copro || null,
-      });
-    } else {
-      extracted.push({ role: 'secretaire', roleLabel: 'Secrétaire de séance', name: '', coproprietaire: null });
-    }
-
-    // Extract scrutateur
-    const scrutateur = roles.scrutateur;
-    if (scrutateur?.nom) {
-      const copro = scrutateur.coproprietaireId
-        ? MOCK_COPROPRIETAIRES.find((c) => c.id === scrutateur.coproprietaireId)
-        : null;
-      extracted.push({
-        role: 'scrutateur',
-        roleLabel: 'Scrutateur',
-        name: scrutateur.nom,
-        coproprietaire: copro || null,
-      });
-    } else {
-      extracted.push({ role: 'scrutateur', roleLabel: 'Scrutateur', name: '', coproprietaire: null });
-    }
+    // Use data already loaded from bundle
+    const roles = signataires;
+    const extracted: ExtractedSignataire[] = roles.map(s => ({
+      role: s.role as 'president' | 'secretaire' | 'scrutateur',
+      roleLabel: s.roleLabel,
+      name: `${s.prenom} ${s.nom}`.trim(),
+      coproprietaire: null,
+    }));
 
     const hasExistingData = signataires.some((s) => s.nom || s.prenom || s.email);
 
@@ -616,5 +582,6 @@ export function usePVPage({ agId }: UsePVPageProps) {
     saveSignature,
     handleFinish,
     handleGoBack,
+    handleRetry,
   };
 }

@@ -1,11 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Plus, ArrowLeft, ArrowRight, CheckCircle, ListChecks, AlertTriangle, Info } from 'lucide-react';
-import Link from 'next/link';
-import { MAJORITES, type MajorityType, type TypeAG } from '@/lib/constants/resolutions';
-import Stepper from '@/components/features/ag/Stepper';
+import type { MajorityType, TypeAG } from '@/lib/constants/resolutions';
 import {
   VariableEditor,
   BibliothequeResolutions,
@@ -17,6 +14,13 @@ import {
 import { MOCK_CONTRAT_SYNDIC } from '@/data/mock';
 import { useAgAgendaPage } from '@/features/ag/hooks/useAgAgendaPage';
 import { updateAgCurrentStep } from '@/lib/ag/api';
+import {
+  CustomResolutionModal,
+  AgendaHeader,
+  AgendaActions,
+  AgendaMessages,
+  AgendaFooter,
+} from '@/features/ag/agenda';
 import styles from './agenda.module.css';
 
 export default function AgendaPage() {
@@ -24,7 +28,6 @@ export default function AgendaPage() {
   const agId = params.id as string;
   const page = useAgAgendaPage({ agId });
 
-  // Mise à jour de l'étape courante en DB (étape 2 = Ordre du jour)
   useEffect(() => {
     if (!page.isLoading && page.meeting && agId) {
       updateAgCurrentStep(agId, 2);
@@ -95,14 +98,7 @@ export default function AgendaPage() {
   if (page.isLoading) {
     return (
       <div className="container">
-        <div className={styles.header}>
-          <button onClick={page.goBack} className={styles.backButton}><ArrowLeft size={20} /> Retour</button>
-          <div className={styles.headerContent}>
-            <h1 className={styles.title}>Construction de l'ordre du jour</h1>
-            <p className={styles.subtitle}>Ajoutez et organisez les résolutions de votre AG</p>
-          </div>
-        </div>
-        <Stepper currentStep={2} agId={agId} />
+        <AgendaHeader agId={agId} onGoBack={page.goBack} />
         <div className={styles.loadingState}><p>Chargement...</p></div>
       </div>
     );
@@ -110,99 +106,31 @@ export default function AgendaPage() {
 
   return (
     <div className="container">
-      <div className={styles.header}>
-        <button onClick={page.goBack} className={styles.backButton}><ArrowLeft size={20} /> Retour</button>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>Construction de l'ordre du jour</h1>
-          <p className={styles.subtitle}>Ajoutez et organisez les résolutions de votre AG</p>
-        </div>
-      </div>
-      <Stepper currentStep={2} agId={agId} />
+      <AgendaHeader agId={agId} onGoBack={page.goBack} />
 
       <div className={styles.layoutWithPreview}>
         <div className={styles.mainContent}>
-          <div className={styles.actions}>
-            <button
-              className="btn btn-primary"
-              onClick={page.handlePrefillObligatoires}
-              disabled={page.saveState?.isSaving}
-            >
-              <ListChecks size={16} />
-              {page.saveState?.isSaving ? 'Création en cours...' : 'Pré-remplir les résolutions obligatoires'}
-            </button>
-            <button className="btn btn-secondary" onClick={() => page.setShowBankModal(true)} disabled={page.saveState?.isSaving}>
-              <Plus size={16} /> Ajouter une résolution
-            </button>
-            <button className="btn btn-secondary" onClick={() => page.setShowCustomModal(true)} disabled={page.saveState?.isSaving}>
-              <Plus size={16} /> Résolution personnalisée
-            </button>
-          </div>
+          <AgendaActions
+            onPrefillObligatoires={page.handlePrefillObligatoires}
+            onOpenBank={() => page.setShowBankModal(true)}
+            onOpenCustom={() => page.setShowCustomModal(true)}
+            isSaving={page.saveState?.isSaving ?? false}
+          />
 
-          {/* Afficher les erreurs de sauvegarde ou DB */}
-          {(page.saveState?.error || page.dbError) && (
-            <div className={styles.warningMessage}>
-              <AlertTriangle size={20} />
-              <span><strong>Erreur:</strong> {page.saveState?.error || page.dbError}</span>
-            </div>
-          )}
-
-          {/* Debug info si aucune résolution */}
-          {!page.isLoading && page.resolutions.length === 0 && !page.meeting && (
-            <div className={styles.warningMessage}>
-              <AlertTriangle size={20} />
-              <span><strong>AG non trouvée</strong> - Vérifiez que l'AG existe dans Supabase (ID: {agId})</span>
-            </div>
-          )}
-
-          {/* Debug panel - TODO: supprimer après debug */}
-          <details className={styles.infoMessage} style={{ cursor: 'pointer' }} open>
-            <summary><Info size={16} style={{ display: 'inline', marginRight: '8px' }} /><strong>Debug Info</strong> (cliquer pour fermer)</summary>
-            <div style={{ marginTop: '8px', fontSize: '12px', fontFamily: 'monospace', lineHeight: '1.6' }}>
-              <p>AG ID: <code>{agId}</code></p>
-              <p>Meeting trouvé: {page.meeting ? '✓ Oui' : '✗ Non'}</p>
-              <p>Meeting type: {page.meeting?.meeting_type || 'N/A'}</p>
-              <p>isManager: {page.isManager ? '✓ Oui' : '✗ Non'}</p>
-              <p>Résolutions en DB: {page.resolutions.length}</p>
-              <p>Loading: {page.isLoading ? 'Oui' : 'Non'}</p>
-              <p>DB Error: <span style={{ color: page.dbError ? 'red' : 'inherit' }}>{page.dbError || 'Aucune'}</span></p>
-              <p>Save Error: <span style={{ color: page.saveState?.error ? 'red' : 'inherit' }}>{page.saveState?.error || 'Aucune'}</span></p>
-              <p>isSaving: {page.saveState?.isSaving ? 'Oui' : 'Non'}</p>
-            </div>
-          </details>
-
-          {/* Avertissement si exercice comptable non configuré */}
-          {!page.accountingPeriod && (
-            <div className={styles.infoMessage}>
-              <Info size={20} />
-              <span>
-                <strong>Exercice comptable non configuré</strong> pour l'année {page.agFormData?.budgetExercice || new Date().getFullYear() + 1}.
-                Les dates de l'exercice ne seront pas pré-remplies automatiquement.{' '}
-                <Link href="/finance/budgets">Configurer l'exercice dans Finance</Link>
-              </span>
-            </div>
-          )}
-
-          {page.showSuccessMessage && page.successMessageCount > 0 && (
-            <div className={styles.successMessage}>
-              <CheckCircle size={20} />
-              <span><strong>{page.successMessageCount} résolutions</strong> ont été ajoutées automatiquement.</span>
-            </div>
-          )}
-
-          {page.prefillWarning && (
-            <div className={page.prefillWarning.added > 0 ? styles.successMessage : styles.warningMessage}>
-              {page.prefillWarning.added > 0 ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
-              <span>
-                {page.prefillWarning.added > 0 ? (
-                  <><strong>{page.prefillWarning.added} résolution{page.prefillWarning.added > 1 ? 's' : ''}</strong> ajoutée{page.prefillWarning.added > 1 ? 's' : ''}.
-                    {page.prefillWarning.skipped > 0 && <> {page.prefillWarning.skipped} résolution{page.prefillWarning.skipped > 1 ? 's étaient' : ' était'} déjà présente{page.prefillWarning.skipped > 1 ? 's' : ''}.</>}
-                  </>
-                ) : (
-                  <>Toutes les <strong>{page.prefillWarning.total} résolutions obligatoires</strong> sont déjà présentes.</>
-                )}
-              </span>
-            </div>
-          )}
+          <AgendaMessages
+            agId={agId}
+            meeting={page.meeting}
+            agFormData={page.agFormData}
+            saveStateError={page.saveState?.error ?? null}
+            dbError={page.dbError ?? null}
+            isLoading={page.isLoading}
+            resolutionsCount={page.resolutions.length}
+            accountingPeriod={page.accountingPeriod}
+            showSuccessMessage={page.showSuccessMessage}
+            successMessageCount={page.successMessageCount}
+            prefillWarning={page.prefillWarning}
+            isManager={page.isManager}
+          />
 
           <ResolutionsReorderList
             resolutions={page.resolutions}
@@ -212,12 +140,11 @@ export default function AgendaPage() {
             renderVariables={renderVariables}
           />
 
-          <div className={styles.footer}>
-            <button onClick={page.goBack} className="btn btn-secondary">Retour</button>
-            <button onClick={page.handleContinue} className="btn btn-primary" disabled={page.resolutions.length === 0}>
-              Continuer <ArrowRight size={16} />
-            </button>
-          </div>
+          <AgendaFooter
+            onGoBack={page.goBack}
+            onContinue={page.handleContinue}
+            canContinue={page.resolutions.length > 0}
+          />
         </div>
 
         <aside className={styles.previewSidebar}>
@@ -238,13 +165,17 @@ export default function AgendaPage() {
         />
       )}
 
-      {page.showCustomModal && <CustomModal onSave={page.handleAddCustom} onClose={() => page.setShowCustomModal(false)} />}
+      {page.showCustomModal && (
+        <CustomResolutionModal
+          onSave={page.handleAddCustom}
+          onClose={() => page.setShowCustomModal(false)}
+        />
+      )}
 
-      {/* Modal d'édition inline */}
       {page.editingResolution && (
         <div className={styles.modalOverlay} onClick={page.handleCancelEditResolution}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-            <h2>Modifier la résolution</h2>
+            <h2>Modifier la resolution</h2>
             <InlineResolutionEditor
               resolution={{
                 id: page.editingResolution.id,
@@ -260,33 +191,6 @@ export default function AgendaPage() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-interface CustomModalProps {
-  onSave: (titre: string, texte: string, majorite: MajorityType) => void;
-  onClose: () => void;
-}
-
-function CustomModal({ onSave, onClose }: CustomModalProps) {
-  const [titre, setTitre] = useState('');
-  const [texte, setTexte] = useState('');
-  const [majorite, setMajorite] = useState<MajorityType>('ART_24');
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <h2>Résolution personnalisée</h2>
-        <input value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Titre" className={styles.modalInput} />
-        <textarea value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Texte" rows={6} className={styles.modalTextarea} />
-        <select value={majorite} onChange={(e) => setMajorite(e.target.value as MajorityType)} className={styles.modalSelect}>
-          {Object.entries(MAJORITES).map(([key, maj]) => <option key={key} value={key}>{maj.nom}</option>)}
-        </select>
-        <div className={styles.modalActions}>
-          <button onClick={onClose} className="btn btn-secondary">Annuler</button>
-          <button onClick={() => onSave(titre, texte, majorite)} className="btn btn-primary" disabled={!titre.trim()}>Ajouter</button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -485,9 +485,128 @@ async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolu
 
 /**
  * Enregistrer une présence
+ * Essaie d'abord via edge function, puis fallback sur upsert direct si échec auth
  */
 export async function registerAttendance(input: RegisterAttendanceInput): Promise<RegisterAttendanceResponse> {
-  return invokeEdgeFunction<RegisterAttendanceResponse>('ag_register_attendance', input);
+  try {
+    return await invokeEdgeFunction<RegisterAttendanceResponse>('ag_register_attendance', input);
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : '';
+
+    // Si c'est une erreur d'auth ou si l'edge function n'existe pas, utiliser upsert direct
+    if (errorMsg.includes('401') || errorMsg.includes('JWT') || errorMsg.includes('auth') ||
+        errorMsg.includes('Session') || errorMsg.includes('FunctionsFetchError') ||
+        errorMsg.includes('non_2xx_response')) {
+      console.log('[registerAttendance] Edge function échouée, tentative d\'upsert direct...');
+      return registerAttendanceDirect(input);
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * Insertion directe d'une présence (fallback si edge function indisponible)
+ */
+async function registerAttendanceDirect(input: RegisterAttendanceInput): Promise<RegisterAttendanceResponse> {
+  const supabase = createUntypedClient();
+
+  console.log('[registerAttendanceDirect] Upsert direct pour:', input.coproprietaire_id);
+
+  try {
+    // Get tantiemes for this coproprietaire from their lots
+    const { data: lotsData, error: lotsError } = await supabase
+      .from('lots')
+      .select('tantiemes_generaux')
+      .eq('copro_id', input.copro_id)
+      .in('id', input.lot_ids.length > 0 ? input.lot_ids : ['00000000-0000-0000-0000-000000000000']);
+
+    let tantiemes = 0;
+    if (!lotsError && lotsData) {
+      tantiemes = lotsData.reduce((sum: number, lot: { tantiemes_generaux: number }) => sum + (lot.tantiemes_generaux || 0), 0);
+    }
+
+    // If no lot_ids provided, get all lots for this coproprietaire
+    if (input.lot_ids.length === 0) {
+      const { data: ownerLots } = await supabase
+        .from('lot_owners')
+        .select('lots!inner(id, tantiemes_generaux)')
+        .eq('coproprietaire_id', input.coproprietaire_id)
+        .is('end_date', null);
+
+      if (ownerLots && ownerLots.length > 0) {
+        tantiemes = ownerLots.reduce((sum: number, lo: { lots: { tantiemes_generaux: number } }) =>
+          sum + (lo.lots?.tantiemes_generaux || 0), 0);
+      }
+    }
+
+    // Check if attendance record already exists
+    const { data: existing } = await supabase
+      .from('ag_attendance')
+      .select('id')
+      .eq('ag_id', input.ag_id)
+      .eq('coproprietaire_id', input.coproprietaire_id)
+      .maybeSingle();
+
+    const attendanceData = {
+      ag_id: input.ag_id,
+      copro_id: input.copro_id,
+      coproprietaire_id: input.coproprietaire_id,
+      lot_ids: input.lot_ids,
+      tantiemes,
+      presence_type: input.presence_type,
+      represented_by_id: input.represented_by_id || null,
+      represented_by_name: input.represented_by_name || null,
+      signed: false,
+      updated_at: new Date().toISOString(),
+    };
+
+    let result;
+    if (existing) {
+      // Update existing record
+      const { data, error } = await supabase
+        .from('ag_attendance')
+        .update(attendanceData)
+        .eq('id', existing.id)
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('[registerAttendanceDirect] Update error:', error);
+        return { success: false, error: error.message };
+      }
+      result = data;
+    } else {
+      // Insert new record
+      const { data, error } = await supabase
+        .from('ag_attendance')
+        .insert({
+          ...attendanceData,
+          created_at: new Date().toISOString(),
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('[registerAttendanceDirect] Insert error:', error);
+        return { success: false, error: error.message };
+      }
+      result = data;
+    }
+
+    console.log('[registerAttendanceDirect] Attendance enregistrée avec ID:', result?.id);
+
+    return {
+      success: true,
+      attendance_id: result?.id,
+      tantiemes,
+      presence_type: input.presence_type,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('[registerAttendanceDirect] Exception:', err);
+    return { success: false, error: errorMsg };
+  }
 }
 
 /**

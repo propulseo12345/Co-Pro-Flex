@@ -2,6 +2,7 @@
 
 /**
  * Feuille de présence AG - 100% DB-First
+ * Étape 6/8 du workflow AG
  *
  * Sources Supabase :
  * - rpc_get_ag_coproprietaires : copropriétaires avec tantièmes
@@ -11,357 +12,160 @@
  * Zéro mock, zéro localStorage, zéro state comme vérité métier.
  */
 
-import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, ArrowRight, Users } from 'lucide-react';
+import Stepper from '@/components/features/ag/Stepper';
+import { updateAgCurrentStep } from '@/lib/ag/api';
+import { useFeuillePresencePage } from '@/features/ag/feuille-presence';
 import {
-  ArrowLeft,
-  UserCheck,
-  Users,
-  FileDown,
-  Eye,
-  EyeOff,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Loader2,
-  RefreshCw,
-  CheckSquare,
-  Square,
-} from 'lucide-react';
-import SignatureCanvas from '@/ui/SignatureCanvas';
-import { useFeuillePresence } from '@/hooks/modules/useFeuillePresence';
-import type { AttendanceType } from '@/lib/ag/types';
-import styles from './feuille-presence.module.css';
+  FeuillePresenceHeader,
+  QuorumStats,
+  QuorumThresholds,
+  PresenceActions,
+  PresenceTable,
+  SignatureModal,
+  PresenceEmptyState,
+  PresenceLoadingState,
+  PresenceErrorState,
+} from '@/features/ag/feuille-presence';
 
 export default function FeuillePresencePage() {
-  const router = useRouter();
   const params = useParams();
+  const router = useRouter();
   const agId = params.id as string;
 
-  // DB-first hook
   const {
+    // Data
     coproprietaires,
     attendanceByCoprId,
     quorumStats,
     quorumThresholds,
     agInfo,
+
+    // Loading states
     isLoading,
     isSaving,
     error,
-    togglePresence,
-    setRepresentedBy,
-    bulkSetPresence,
-    saveSignature,
+
+    // UI state
+    showSignatures,
+    showSignatureModal,
+    currentCopro,
+
+    // Handlers
+    handleBack,
+    handlePresenceChange,
+    handleRepresentantChange,
+    handleBulkPresent,
+    handleBulkAbsent,
+    handleOpenSignature,
+    handleSaveSignature,
+    handleCloseSignatureModal,
+    handleExportPDF,
+    handleToggleSignatures,
     refresh,
-  } = useFeuillePresence({ agId });
+  } = useFeuillePresencePage();
 
-  // Local UI state
-  const [showSignatures, setShowSignatures] = useState(false);
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
-  const [currentSignatureCoproId, setCurrentSignatureCoproId] = useState<string | null>(null);
-
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
-
-  const handlePresenceChange = async (coproId: string, newValue: string) => {
-    const presenceType = newValue as AttendanceType | 'absent';
-    await togglePresence(coproId, presenceType);
-  };
-
-  const handleRepresentantChange = async (coproId: string, representantName: string) => {
-    if (representantName.trim()) {
-      await setRepresentedBy(coproId, representantName.trim());
+  // Update current step in DB (step 6 = Feuille de présence)
+  useEffect(() => {
+    if (!isLoading && agId) {
+      updateAgCurrentStep(agId, 6);
     }
-  };
+  }, [isLoading, agId]);
 
-  const handleBulkPresent = async () => {
-    await bulkSetPresence('present');
-  };
-
-  const handleBulkAbsent = async () => {
-    await bulkSetPresence('absent');
-  };
-
-  const handleOpenSignature = (coproId: string) => {
-    setCurrentSignatureCoproId(coproId);
-    setShowSignatureModal(true);
-  };
-
-  const handleSaveSignature = async (signatureData: string) => {
-    if (currentSignatureCoproId) {
-      await saveSignature(currentSignatureCoproId, signatureData);
-    }
-    setShowSignatureModal(false);
-    setCurrentSignatureCoproId(null);
-  };
-
-  const handleExportPDF = () => {
-    alert('Export PDF en cours de développement.');
-  };
-
-  // ============================================================================
-  // LOADING STATE
-  // ============================================================================
-
+  // Loading state
   if (isLoading) {
-    return (
-      <div className="container">
-        <div className={styles.loadingState}>
-          <Loader2 size={48} className={styles.spinner} />
-          <h2>Chargement de la feuille de présence...</h2>
-          <p>Récupération des données depuis Supabase</p>
-        </div>
-      </div>
-    );
+    return <PresenceLoadingState />;
   }
 
-  // ============================================================================
-  // ERROR STATE
-  // ============================================================================
-
+  // Error state
   if (error) {
-    return (
-      <div className="container">
-        <div className={styles.errorState}>
-          <XCircle size={48} className={styles.errorIcon} />
-          <h2>Erreur de chargement</h2>
-          <p className={styles.errorDetails}>{error}</p>
-          <button onClick={refresh} className="btn btn-primary">
-            <RefreshCw size={16} />
-            Réessayer
-          </button>
-        </div>
-      </div>
-    );
+    return <PresenceErrorState error={error} onRefresh={refresh} />;
   }
-
-  // ============================================================================
-  // RENDER
-  // ============================================================================
-
-  const currentCopro = currentSignatureCoproId
-    ? coproprietaires.find(c => c.id === currentSignatureCoproId)
-    : null;
 
   return (
     <div className="container">
-      {/* Header */}
-      <div className={styles.header}>
-        <button onClick={() => router.back()} className={styles.backButton}>
-          <ArrowLeft size={20} aria-hidden="true" />
+      <FeuillePresenceHeader
+        agTitle={agInfo?.title}
+        isSaving={isSaving}
+        onBack={handleBack}
+      />
+
+      <Stepper currentStep={6} agId={agId} />
+
+      {quorumStats && <QuorumStats stats={quorumStats} />}
+
+      {quorumThresholds && <QuorumThresholds thresholds={quorumThresholds} />}
+
+      <PresenceActions
+        showSignatures={showSignatures}
+        isSaving={isSaving}
+        isLoading={isLoading}
+        onBulkPresent={handleBulkPresent}
+        onBulkAbsent={handleBulkAbsent}
+        onExportPDF={handleExportPDF}
+        onToggleSignatures={handleToggleSignatures}
+        onRefresh={refresh}
+      />
+
+      {coproprietaires.length === 0 && <PresenceEmptyState />}
+
+      {coproprietaires.length > 0 && (
+        <PresenceTable
+          coproprietaires={coproprietaires}
+          attendanceByCoprId={attendanceByCoprId}
+          showSignatures={showSignatures}
+          isSaving={isSaving}
+          onPresenceChange={handlePresenceChange}
+          onRepresentantChange={handleRepresentantChange}
+          onOpenSignature={handleOpenSignature}
+        />
+      )}
+
+      {showSignatureModal && currentCopro && (
+        <SignatureModal
+          copro={currentCopro}
+          initialSignature={attendanceByCoprId.get(currentCopro.id)?.signatureData}
+          onSave={handleSaveSignature}
+          onCancel={handleCloseSignatureModal}
+        />
+      )}
+
+      {/* Footer avec navigation */}
+      <div style={{
+        marginTop: 'var(--spacing-6)',
+        padding: 'var(--spacing-4)',
+        borderTop: '1px solid var(--color-border)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 'var(--spacing-4)',
+      }}>
+        <button
+          className="btn btn-secondary"
+          onClick={handleBack}
+        >
+          <ArrowLeft size={16} style={{ marginRight: 8 }} />
           Retour
         </button>
-        <div>
-          <h1 className={styles.title}>Feuille de présence</h1>
-          <p className={styles.subtitle}>
-            {agInfo?.title || 'Assemblée Générale'}
-            {isSaving && <span className={styles.savingIndicator}><Loader2 size={14} className={styles.spinnerSmall} /> Enregistrement...</span>}
-          </p>
-        </div>
-      </div>
 
-      {/* Statistiques Quorum */}
-      {quorumStats && (
-        <div className={styles.stats}>
-          <div className={styles.statCard}>
-            <UserCheck size={24} aria-hidden="true" />
-            <div>
-              <div className={styles.statValue}>{quorumStats.attendeesCount}</div>
-              <div className={styles.statLabel}>
-                Présents ({quorumStats.presentCount}) / Représentés ({quorumStats.proxyCount})
-              </div>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <Users size={24} aria-hidden="true" />
-            <div>
-              <div className={styles.statValue}>
-                {quorumStats.presentTantiemes} / {quorumStats.totalTantiemes}
-              </div>
-              <div className={styles.statLabel}>Tantièmes</div>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>{quorumStats.quorumRatio.toFixed(2)}%</div>
-            <div className={styles.statLabel}>Taux de participation</div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+          <Users size={16} />
+          <span>
+            {quorumStats ? `${quorumStats.presentCount + quorumStats.proxyCount} présent(s)` : '0 présent'}
+          </span>
         </div>
-      )}
 
-      {/* Seuils Art. 24/25/26 */}
-      {quorumThresholds && (
-        <div className={styles.thresholdsGrid}>
-          <div className={`${styles.thresholdCard} ${quorumThresholds.art24.reached ? styles.thresholdReached : styles.thresholdNotReached}`}>
-            {quorumThresholds.art24.reached ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
-            <div>
-              <div className={styles.thresholdLabel}>{quorumThresholds.art24.label}</div>
-              <div className={styles.thresholdValue}>
-                Seuil: {quorumThresholds.art24.threshold} tantièmes
-              </div>
-            </div>
-          </div>
-          <div className={`${styles.thresholdCard} ${quorumThresholds.art25.reached ? styles.thresholdReached : styles.thresholdNotReached}`}>
-            {quorumThresholds.art25.reached ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
-            <div>
-              <div className={styles.thresholdLabel}>{quorumThresholds.art25.label}</div>
-              <div className={styles.thresholdValue}>
-                Seuil: {quorumThresholds.art25.threshold} tantièmes
-              </div>
-            </div>
-          </div>
-          <div className={`${styles.thresholdCard} ${quorumThresholds.art26.reached ? styles.thresholdReached : styles.thresholdNotReached}`}>
-            {quorumThresholds.art26.reached ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
-            <div>
-              <div className={styles.thresholdLabel}>{quorumThresholds.art26.label}</div>
-              <div className={styles.thresholdValue}>
-                Seuil: {quorumThresholds.art26.threshold} tantièmes
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className={styles.actions}>
-        <button onClick={handleBulkPresent} className="btn btn-primary" disabled={isSaving}>
-          <CheckSquare size={16} />
-          Tout cocher présent
-        </button>
-        <button onClick={handleBulkAbsent} className="btn btn-secondary" disabled={isSaving}>
-          <Square size={16} />
-          Tout décocher
-        </button>
-        <button onClick={handleExportPDF} className="btn btn-secondary">
-          <FileDown size={16} />
-          Exporter PDF
-        </button>
-        <button onClick={() => setShowSignatures(!showSignatures)} className="btn btn-secondary">
-          {showSignatures ? <EyeOff size={16} /> : <Eye size={16} />}
-          {showSignatures ? 'Masquer' : 'Afficher'} signatures
-        </button>
-        <button onClick={refresh} className="btn btn-secondary" disabled={isLoading}>
-          <RefreshCw size={16} />
-          Actualiser
+        <button
+          className="btn btn-primary"
+          onClick={() => router.push(`/ag/${agId}/session`)}
+          disabled={isSaving || !quorumStats || (quorumStats.presentCount + quorumStats.proxyCount) === 0}
+        >
+          Continuer vers la session
+          <ArrowRight size={16} style={{ marginLeft: 8 }} />
         </button>
       </div>
-
-      {/* Empty state */}
-      {coproprietaires.length === 0 && (
-        <div className={styles.emptyState}>
-          <Users size={48} />
-          <p>Aucun copropriétaire trouvé pour cette AG</p>
-          <p className={styles.emptyHint}>Vérifiez que des copropriétaires sont associés à la copropriété.</p>
-        </div>
-      )}
-
-      {/* Liste des copropriétaires */}
-      {coproprietaires.length > 0 && (
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Copropriétaire</th>
-                <th>Tantièmes</th>
-                <th>Statut</th>
-                <th>Représentant</th>
-                <th>Signature</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coproprietaires.map((copro) => {
-                const attendance = attendanceByCoprId.get(copro.id);
-                const presenceType = attendance?.presenceType || 'absent';
-                const isPresent = presenceType !== 'absent';
-
-                return (
-                  <tr key={copro.id} className={isPresent ? styles.rowPresent : ''}>
-                    <td>
-                      <div className={styles.coproName}>{copro.displayName}</div>
-                      {copro.email && <div className={styles.coproEmail}>{copro.email}</div>}
-                    </td>
-                    <td className={styles.tantiemes}>{copro.tantiemes}</td>
-                    <td>
-                      <select
-                        value={presenceType}
-                        onChange={(e) => handlePresenceChange(copro.id, e.target.value)}
-                        className={styles.statutSelect}
-                        disabled={isSaving}
-                      >
-                        <option value="absent">Absent</option>
-                        <option value="present">Présent</option>
-                        <option value="proxy">Représenté</option>
-                        <option value="correspondence">Vote correspondance</option>
-                      </select>
-                    </td>
-                    <td>
-                      {presenceType === 'proxy' && (
-                        <input
-                          type="text"
-                          placeholder="Nom du représentant"
-                          defaultValue={attendance?.representedByName || ''}
-                          onBlur={(e) => handleRepresentantChange(copro.id, e.target.value)}
-                          className={styles.representantInput}
-                          disabled={isSaving}
-                        />
-                      )}
-                    </td>
-                    <td>
-                      {isPresent && presenceType !== 'correspondence' && (
-                        <div className={styles.signatureCell}>
-                          {attendance?.signed && showSignatures && attendance.signatureData && (
-                            <img
-                              src={attendance.signatureData}
-                              alt="Signature"
-                              className={styles.signaturePreview}
-                            />
-                          )}
-                          <button
-                            onClick={() => handleOpenSignature(copro.id)}
-                            className="btn btn-sm btn-secondary"
-                            disabled={isSaving}
-                          >
-                            {attendance?.signed ? 'Modifier' : 'Signer'}
-                          </button>
-                          {attendance?.signedAt && (
-                            <div className={styles.signatureDate}>
-                              {new Date(attendance.signedAt).toLocaleString('fr-FR')}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Modal de signature */}
-      {showSignatureModal && currentCopro && (
-        <div className={styles.modalOverlay} onClick={() => setShowSignatureModal(false)}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
-            <h2 className={styles.modalTitle}>
-              Signature de {currentCopro.displayName}
-            </h2>
-            <SignatureCanvas
-              onSave={handleSaveSignature}
-              onCancel={() => {
-                setShowSignatureModal(false);
-                setCurrentSignatureCoproId(null);
-              }}
-              initialSignature={attendanceByCoprId.get(currentCopro.id)?.signatureData}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

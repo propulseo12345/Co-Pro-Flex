@@ -1,326 +1,55 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
-import { Calendar, Users, FileText, Plus, Mail, Play, ClipboardList, Copy, Eye, Edit3, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2 } from 'lucide-react';
 import { AGQuickActions, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
 import type { AgListItemAction } from '@/components/features/ag/Dashboard';
 import { AgDocumentQuickActions } from '@/components/features/ag';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
-import { useCopro } from '@/providers/CoproContext';
-import { useAgMeetings } from '@/hooks/modules/useAgData';
-import { useAgDrafts, type AgDraft } from '@/hooks/modules/useAgDrafts';
-import { createClient } from '@/lib/supabase/client';
-import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
+import { useAgDashboardPage, NextAgCard, getTypeLabel, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
 import styles from './dashboard.module.css';
 import clsx from 'clsx';
-import Link from 'next/link';
-
-// Type for localStorage draft AG
-interface LocalStorageDraft {
-  id: string;
-  type: string;
-  date: string;
-  heure?: string;
-  lieu?: string;
-  adresse?: string;
-}
-
-// Helper to map backend meeting_type to display label
-function getTypeLabel(type: AgMeetingType): string {
-  switch (type) {
-    case 'ordinary': return 'Ordinaire';
-    case 'extraordinary': return 'Extraordinaire';
-    case 'special': return 'Mixte';
-    default: return type;
-  }
-}
-
-// Helper to map backend status to display badge
-function getStatusBadge(status: AgStatus): { label: string; className: string } {
-  switch (status) {
-    case 'draft': return { label: 'En préparation', className: styles.planifiee };
-    case 'convoked': return { label: 'Convoquée', className: styles.convoquee };
-    case 'in_progress': return { label: 'En cours', className: styles.ready };
-    case 'closed': return { label: 'Clôturée', className: styles.closed };
-    case 'pv_generated': return { label: 'PV généré', className: styles.closed };
-    default: return { label: status, className: '' };
-  }
-}
-
-// Helper to map step number to path (source of truth for wizard navigation)
-const STEP_PATHS: Record<number, string> = {
-  1: 'edit',
-  2: 'agenda',
-  3: 'convocation',
-  4: 'envoi',
-  5: 'preparation',
-  6: 'session',
-  7: 'pv',
-};
-
-function getStepPath(step: number): string {
-  return STEP_PATHS[step] || 'edit';
-}
-
-// Component for displaying the next AG card
-function NextAgCard({ ag, isConvoked }: { ag: AgOverview; isConvoked: boolean }) {
-  const typeLabel = getTypeLabel(ag.meeting_type);
-  const statusBadge = getStatusBadge(ag.status);
-
-  return (
-    <>
-      {/* Module Déroulement + PV - affiché si convocations envoyées */}
-      {isConvoked && (
-        <div className={clsx(styles.nextAgCard, styles.deroulementCard)}>
-          <div className={styles.nextAgHeader}>
-            <span className={styles.nextAgLabel}>Déroulement + PV</span>
-            <span className={clsx(styles.badge, styles.ready)}>Prêt à démarrer</span>
-          </div>
-
-          <h2 className={styles.nextAgTitle}>{ag.title || `AG ${typeLabel}`}</h2>
-
-          <div className={styles.nextAgInfo}>
-            <div className={styles.infoItem}>
-              <Calendar size={20} aria-hidden="true" />
-              <span>
-                {new Date(ag.meeting_date).toLocaleDateString('fr-FR', {
-                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                })}
-              </span>
-            </div>
-            <div className={styles.infoItem}>
-              <Users size={20} aria-hidden="true" />
-              <span>{ag.location || 'Lieu à définir'}</span>
-            </div>
-            {ag.quorum_ratio !== null && (
-              <div className={styles.infoItem}>
-                <span className={styles.quorumBadge}>Quorum: {ag.quorum_ratio?.toFixed(1)}%</span>
-              </div>
-            )}
-          </div>
-
-          <div className={styles.nextAgActions}>
-            <Link href={`/ag/${ag.id}/preparation`} className={styles.actionButton}>
-              <Mail size={18} style={{ marginRight: 8 }} aria-hidden="true" />
-              Votes par correspondance
-            </Link>
-            <Link href={`/ag/${ag.id}/session`} className={clsx(styles.actionButton, styles.actionButtonPrimary)}>
-              <Play size={18} style={{ marginRight: 8 }} aria-hidden="true" />
-              Commencer l'AG
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* Module Préparation AG */}
-      <div className={clsx(styles.nextAgCard, isConvoked && styles.preparationCardCompact)}>
-        <div className={styles.nextAgHeader}>
-          <span className={styles.nextAgLabel}>
-            {isConvoked ? 'Préparation AG' : 'Prochaine Assemblée'}
-          </span>
-          <span className={clsx(styles.badge, statusBadge.className)}>{statusBadge.label}</span>
-        </div>
-
-        {!isConvoked && (
-          <>
-            <h2 className={styles.nextAgTitle}>{ag.title || `AG ${typeLabel}`}</h2>
-            <div className={styles.nextAgInfo}>
-              <div className={styles.infoItem}>
-                <Calendar size={20} aria-hidden="true" />
-                <span>
-                  {new Date(ag.meeting_date).toLocaleDateString('fr-FR', {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                  })}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <Users size={20} aria-hidden="true" />
-                <span>{ag.location || 'Lieu à définir'}</span>
-              </div>
-            </div>
-          </>
-        )}
-
-        <div className={styles.nextAgStats}>
-          <span>{ag.resolutions_count || 0} résolution(s)</span>
-          {ag.attendees_count !== null && ag.attendees_count > 0 && (
-            <span> • {ag.attendees_count} présence(s) enregistrée(s)</span>
-          )}
-        </div>
-
-        <div className={styles.nextAgActions}>
-          <Link href={`/ag/${ag.id}/agenda`} className={styles.actionButton}>
-            <ClipboardList size={18} style={{ marginRight: 8 }} aria-hidden="true" />
-            {isConvoked ? 'Ordre du jour' : 'Préparer l\'ordre du jour'}
-          </Link>
-          <Link href={`/ag/${ag.id}/convocation`} className={styles.actionButton}>
-            <FileText size={18} style={{ marginRight: 8 }} aria-hidden="true" />
-            {isConvoked ? 'Convocations' : 'Gérer les convocations'}
-          </Link>
-        </div>
-      </div>
-    </>
-  );
-}
 
 export default function AGDashboardPage() {
-  const { currentCoproId, isManager } = useCopro();
-  const { meetings, nextMeeting, pastMeetings, isLoading, error, refresh } = useAgMeetings();
-  const { drafts: supabaseDrafts, deleteDraft, isLoading: draftsLoading } = useAgDrafts();
-
-  // State for localStorage drafts
-  const [localStorageDrafts, setLocalStorageDrafts] = useState<LocalStorageDraft[]>([]);
-
-  // State for delete confirmation
-  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; title: string } | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  // State pour les IDs supprimés (évite le refresh qui scroll en haut)
-  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
-
-  // State pour le renommage
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renamedTitles, setRenamedTitles] = useState<Map<string, string>>(new Map());
-
-  // Load localStorage drafts on mount
-  useEffect(() => {
-    const loadLocalStorageDrafts = () => {
-      if (typeof window === 'undefined') return;
-
-      const agKeys = Object.keys(localStorage).filter(key => key.startsWith('ag-draft-'));
-      const drafts: LocalStorageDraft[] = [];
-
-      for (const key of agKeys) {
-        const agId = key.replace('ag-draft-', '');
-        const isCompleted = localStorage.getItem(`ag-completed-${agId}`);
-
-        if (!isCompleted) {
-          try {
-            const draftData = JSON.parse(localStorage.getItem(key) || '{}');
-            drafts.push({
-              id: agId,
-              type: draftData.type || 'ORDINAIRE',
-              date: draftData.date || '',
-              heure: draftData.heure,
-              lieu: draftData.lieu,
-              adresse: draftData.adresse,
-            });
-          } catch { /* ignore invalid JSON */ }
-        }
-      }
-
-      drafts.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-      setLocalStorageDrafts(drafts);
-    };
-
-    loadLocalStorageDrafts();
-  }, []);
-
-  // Delete a localStorage draft
-  const handleDeleteLocalDraft = (draftId: string) => {
-    if (confirm('Supprimer ce brouillon ?')) {
-      localStorage.removeItem(`ag-draft-${draftId}`);
-      localStorage.removeItem(`ag-resolutions-${draftId}`);
-      localStorage.removeItem(`ag-resolutions-created-${draftId}`);
-      setLocalStorageDrafts(prev => prev.filter(d => d.id !== draftId));
-    }
-  };
-
-  // Open delete confirmation for Supabase draft
-  const handleOpenDeleteConfirm = (id: string, title: string) => {
-    setDeleteConfirm({ id, title });
-  };
-
-  // Cancel delete
-  const handleCancelDelete = () => {
-    setDeleteConfirm(null);
-  };
-
-  // Rename a Supabase draft
-  const handleRename = async (id: string, newTitle: string) => {
-    setRenamingId(id);
-    try {
-      const supabase = createClient();
-      const { error } = await (supabase as any)
-        .from('ag_meetings')
-        .update({ title: newTitle })
-        .eq('id', id);
-
-      if (!error) {
-        setRenamedTitles(prev => new Map(prev).set(id, newTitle));
-      }
-    } finally {
-      setRenamingId(null);
-    }
-  };
-
-  // Confirm delete Supabase draft
-  const handleConfirmDelete = async () => {
-    if (!deleteConfirm) return;
-
-    setIsDeleting(true);
-    setDeletingId(deleteConfirm.id);
-
-    try {
-      const success = await deleteDraft(deleteConfirm.id);
-      if (success) {
-        setDeletedIds(prev => new Set(prev).add(deleteConfirm.id));
-      }
-    } finally {
-      setIsDeleting(false);
-      setDeletingId(null);
-      setDeleteConfirm(null);
-    }
-  };
-
-  // Determine if the next meeting is convoked
-  const isConvoked = useMemo(() => {
-    if (!nextMeeting) return false;
-    return nextMeeting.status === 'convoked' || nextMeeting.status === 'in_progress';
-  }, [nextMeeting]);
-
-  // Get all draft meetings from Supabase (via useAgDrafts qui a currentStep)
-  // Exclure les supprimés, appliquer les titres renommés
-  const draftMeetings = useMemo(() => {
-    return supabaseDrafts
-      .filter((d) => !deletedIds.has(d.id))
-      .map((d) => ({ ...d, title: renamedTitles.get(d.id) || d.title }));
-  }, [supabaseDrafts, deletedIds, renamedTitles]);
-
-  const totalDraftsCount = draftMeetings.length + localStorageDrafts.length;
+  const {
+    currentCoproId,
+    isManager,
+    nextMeeting,
+    pastMeetings,
+    isLoading,
+    error,
+    refresh,
+    localStorageDrafts,
+    draftMeetings,
+    totalDraftsCount,
+    deleteConfirm,
+    isDeleting,
+    deletingId,
+    renamingId,
+    isConvoked,
+    handleDeleteLocalDraft,
+    handleOpenDeleteConfirm,
+    handleCancelDelete,
+    handleRename,
+    handleConfirmDelete,
+  } = useAgDashboardPage();
 
   if (!currentCoproId) {
     return <LoadingState message="Chargement de la copropriété..." />;
   }
 
-  // Build actions for Supabase draft items - utilise currentStep de la DB pour la navigation
   const buildDraftActions = (draft: AgDraft): AgListItemAction[] => [
-    {
-      icon: <Edit3 size={16} />,
-      label: 'Continuer',
-      href: `/ag/${draft.id}/${getStepPath(draft.currentStep)}`,
-      title: `Reprendre à l'étape ${draft.currentStep}`,
-    },
+    { icon: <Edit3 size={16} />, label: 'Continuer', href: `/ag/${draft.id}/${getStepPath(draft.currentStep)}`, title: `Reprendre à l'étape ${draft.currentStep}` },
     { icon: <ClipboardList size={16} />, label: 'Agenda', href: `/ag/${draft.id}/agenda`, title: 'Ordre du jour' },
-    {
-      icon: <Trash2 size={16} />,
-      onClick: () => handleOpenDeleteConfirm(draft.id, draft.title || `AG ${getTypeLabel(draft.meeting_type)}`),
-      title: 'Supprimer le brouillon',
-      variant: 'danger',
-      disabled: deletingId === draft.id,
-      isLoading: deletingId === draft.id,
-    },
+    { icon: <Trash2 size={16} />, onClick: () => handleOpenDeleteConfirm(draft.id, draft.title || `AG ${getTypeLabel(draft.meeting_type)}`), title: 'Supprimer le brouillon', variant: 'danger', disabled: deletingId === draft.id, isLoading: deletingId === draft.id },
   ];
 
-  // Build actions for localStorage draft items
-  const buildLocalDraftActions = (draft: LocalStorageDraft): AgListItemAction[] => [
+  const buildLocalDraftActions = (draft: { id: string; type: string }) => [
     { icon: <Edit3 size={16} />, label: 'Continuer', href: `/ag/${draft.id}/edit`, title: 'Continuer la préparation' },
     { icon: <ClipboardList size={16} />, label: 'Agenda', href: `/ag/${draft.id}/agenda`, title: 'Ordre du jour' },
-    { icon: <Trash2 size={16} />, onClick: () => handleDeleteLocalDraft(draft.id), title: 'Supprimer le brouillon', variant: 'danger' },
+    { icon: <Trash2 size={16} />, onClick: () => handleDeleteLocalDraft(draft.id), title: 'Supprimer le brouillon', variant: 'danger' as const },
   ];
 
-  // Build actions for history items
   const buildHistoryActions = (ag: AgOverview): AgListItemAction[] => {
     const hasPV = ag.status === 'pv_generated' || ag.status === 'closed';
     return [
@@ -346,13 +75,7 @@ export default function AGDashboardPage() {
         )}
       </div>
 
-      <DataState
-        isLoading={isLoading}
-        error={error}
-        isEmpty={false}
-        loadingMessage="Chargement des assemblées générales..."
-        onRetry={refresh}
-      >
+      <DataState isLoading={isLoading} error={error} isEmpty={false} loadingMessage="Chargement des assemblées générales..." onRetry={refresh}>
         <div className={styles.grid}>
           <div className={styles.mainColumn}>
             {nextMeeting ? (
@@ -370,7 +93,6 @@ export default function AGDashboardPage() {
               </div>
             )}
 
-            {/* Section Brouillons */}
             <div className="card">
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>
@@ -387,26 +109,15 @@ export default function AGDashboardPage() {
                 <div className={clsx(styles.list, styles.listDraft)}>
                   {draftMeetings.map((draft) => {
                     const typeLabel = getTypeLabel(draft.meeting_type);
-                    const stepLabel = `Étape ${draft.currentStep}/7`;
                     const meta = [
                       draft.meeting_date ? `Prévue le ${new Date(draft.meeting_date).toLocaleDateString('fr-FR')}` : 'Date non définie',
                       draft.location,
                       `${draft.resolutionsCount || 0} résolution(s)`,
-                      stepLabel,
+                      `Étape ${draft.currentStep}/8`,
                     ].filter(Boolean).join(' • ');
 
                     return (
-                      <AgListItem
-                        key={draft.id}
-                        icon={<Edit3 size={20} aria-hidden="true" />}
-                        title={draft.title || `AG ${typeLabel}`}
-                        meta={meta}
-                        actions={buildDraftActions(draft)}
-                        variant="draft"
-                        editable
-                        onRename={(newTitle) => handleRename(draft.id, newTitle)}
-                        isRenaming={renamingId === draft.id}
-                      />
+                      <AgListItem key={draft.id} icon={<Edit3 size={20} aria-hidden="true" />} title={draft.title || `AG ${typeLabel}`} meta={meta} actions={buildDraftActions(draft)} variant="draft" editable onRename={(newTitle) => handleRename(draft.id, newTitle)} isRenaming={renamingId === draft.id} />
                     );
                   })}
                   {localStorageDrafts.map((draft) => {
@@ -417,16 +128,7 @@ export default function AGDashboardPage() {
                       draft.adresse,
                     ].filter(Boolean).join(' • ');
 
-                    return (
-                      <AgListItem
-                        key={draft.id}
-                        icon={<Edit3 size={20} aria-hidden="true" />}
-                        title={`AG ${typeLabel}`}
-                        meta={meta}
-                        actions={buildLocalDraftActions(draft)}
-                        variant="draft"
-                      />
-                    );
+                    return <AgListItem key={draft.id} icon={<Edit3 size={20} aria-hidden="true" />} title={`AG ${typeLabel}`} meta={meta} actions={buildLocalDraftActions(draft)} variant="draft" />;
                   })}
                 </div>
               ) : (
@@ -438,7 +140,6 @@ export default function AGDashboardPage() {
               )}
             </div>
 
-            {/* Historique */}
             <div className="card">
               <h3 className={styles.sectionTitle}>Historique ({pastMeetings.length} AG)</h3>
               <div className={styles.list}>
@@ -448,22 +149,9 @@ export default function AGDashboardPage() {
                   pastMeetings.map((ag) => {
                     const typeLabel = getTypeLabel(ag.meeting_type);
                     const participantsCount = (ag.present_count || 0) + (ag.proxy_count || 0) + (ag.correspondence_count || 0);
-                    const meta = [
-                      ag.location || 'Lieu non défini',
-                      participantsCount > 0 && `${participantsCount} participants`,
-                      ag.approved_count > 0 && `${ag.approved_count}/${ag.resolutions_count} adoptées`,
-                    ].filter(Boolean).join(' • ');
+                    const meta = [ag.location || 'Lieu non défini', participantsCount > 0 && `${participantsCount} participants`, ag.approved_count > 0 && `${ag.approved_count}/${ag.resolutions_count} adoptées`].filter(Boolean).join(' • ');
 
-                    return (
-                      <AgListItem
-                        key={ag.id}
-                        icon={<FileText size={20} aria-hidden="true" />}
-                        title={`${ag.title || `AG ${typeLabel}`} du ${new Date(ag.meeting_date).toLocaleDateString('fr-FR')}`}
-                        meta={meta}
-                        actions={buildHistoryActions(ag)}
-                        variant="history"
-                      />
-                    );
+                    return <AgListItem key={ag.id} icon={<FileText size={20} aria-hidden="true" />} title={`${ag.title || `AG ${typeLabel}`} du ${new Date(ag.meeting_date).toLocaleDateString('fr-FR')}`} meta={meta} actions={buildHistoryActions(ag)} variant="history" />;
                   })
                 )}
               </div>
@@ -476,7 +164,6 @@ export default function AGDashboardPage() {
         </div>
       </DataState>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         open={!!deleteConfirm}
         icon={<Trash2 size={32} aria-hidden="true" />}

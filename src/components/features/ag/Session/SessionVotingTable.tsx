@@ -3,10 +3,16 @@
 import { CheckCircle, XCircle, MinusCircle, CheckSquare, Mail } from 'lucide-react';
 import { VoteChoice, VoteData } from './types';
 import { getVoteForCopro, hasVotedByCorrespondance } from './utils';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import styles from './Session.module.css';
 
+interface Coproprietaire {
+  id: string;
+  nom: string;
+  tantiemes: number;
+}
+
 interface SessionVotingTableProps {
+  coproprietaires: Coproprietaire[];
   resolutionId: string;
   votes: VoteData[];
   presences: Record<string, boolean>;
@@ -15,6 +21,7 @@ interface SessionVotingTableProps {
 }
 
 export function SessionVotingTable({
+  coproprietaires,
   resolutionId,
   votes,
   presences,
@@ -68,7 +75,7 @@ export function SessionVotingTable({
           </div>
         </div>
         <div className={styles.votingTableBody}>
-          {MOCK_COPROPRIETAIRES.filter(copro => presences[copro.id]).map(copro => {
+          {coproprietaires.filter(copro => presences[copro.id]).map(copro => {
             const vote = getVoteForCopro(votes, resolutionId, copro.id);
             const isCorrespondanceVoter = hasVotedByCorrespondance(votes, resolutionId, copro.id);
 

@@ -8,3 +8,6 @@ export { CategorisationModal } from './CategorisationModal';
 export { RapprochementModal } from './RapprochementModal';
 export { EntityDetailModal } from './EntityDetailModal';
 export { ImportModal } from './ImportModal';
+export { PageHeader } from './PageHeader';
+export { NewMovementsNotification } from './NewMovementsNotification';
+export { TabsNavigation } from './TabsNavigation';

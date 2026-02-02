@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { UserCheck, Users, Mail, UserX } from 'lucide-react';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import {
   type PresenceData,
   type ModeParticipation,
@@ -10,7 +9,14 @@ import {
 } from '@/lib/utils/ag-session';
 import styles from './Session.module.css';
 
+interface Coproprietaire {
+  id: string;
+  nom: string;
+  tantiemes: number;
+}
+
 interface SessionSidebarProps {
+  coproprietaires: Coproprietaire[];
   currentResolutionIndex: number;
   totalResolutions: number;
   presences: Record<string, boolean>;
@@ -18,6 +24,7 @@ interface SessionSidebarProps {
 }
 
 export function SessionSidebar({
+  coproprietaires,
   currentResolutionIndex,
   totalResolutions,
   presences,
@@ -27,7 +34,7 @@ export function SessionSidebar({
   const stats = useMemo(() => {
     if (!presencesEnrichies) {
       // Fallback sans présences enrichies
-      const presents = MOCK_COPROPRIETAIRES.filter(c => presences[c.id]);
+      const presents = coproprietaires.filter(c => presences[c.id]);
       const tantiemes = presents.reduce((sum, c) => sum + c.tantiemes, 0);
       return {
         total: tantiemes,
@@ -39,30 +46,30 @@ export function SessionSidebar({
           presentsCount: presents.length,
           representesCount: 0,
           correspondanceCount: 0,
-          absentsCount: MOCK_COPROPRIETAIRES.length - presents.length
+          absentsCount: coproprietaires.length - presents.length
         }
       };
     }
 
     return calculerStatsParticipation(
       presencesEnrichies,
-      MOCK_COPROPRIETAIRES.map(c => ({ id: c.id, tantiemes: c.tantiemes }))
+      coproprietaires.map(c => ({ id: c.id, tantiemes: c.tantiemes }))
     );
-  }, [presences, presencesEnrichies]);
+  }, [presences, presencesEnrichies, coproprietaires]);
 
-  const totalTantiemes = MOCK_COPROPRIETAIRES.reduce((sum, c) => sum + c.tantiemes, 0);
+  const totalTantiemes = coproprietaires.reduce((sum, c) => sum + c.tantiemes, 0);
   const pourcentage = ((stats.total / totalTantiemes) * 100).toFixed(1);
 
   // Grouper les participants par type
   const participantsParType = useMemo(() => {
-    const result: Record<ModeParticipation, typeof MOCK_COPROPRIETAIRES> = {
+    const result: Record<ModeParticipation, Coproprietaire[]> = {
       present: [],
       represente: [],
       correspondance: [],
       absent: []
     };
 
-    MOCK_COPROPRIETAIRES.forEach(copro => {
+    coproprietaires.forEach(copro => {
       if (presencesEnrichies) {
         const presence = presencesEnrichies[copro.id];
         if (presence) {
@@ -86,7 +93,7 @@ export function SessionSidebar({
     });
 
     return result;
-  }, [presences, presencesEnrichies]);
+  }, [presences, presencesEnrichies, coproprietaires]);
 
   return (
     <div className={styles.sidebar}>

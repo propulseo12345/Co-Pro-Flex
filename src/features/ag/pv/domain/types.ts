@@ -22,7 +22,7 @@ export interface AutoTableOptions {
 
 // Types métier
 export interface AGData {
-  type: 'ORDINAIRE' | 'EXTRAORDINAIRE';
+  type: 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'MIXTE';
   date: string;
   heure: string;
   lieu: string;
