@@ -1,0 +1,255 @@
+/* Styles pour la liste de presence / checklist */
+
+.checklist {
+    margin-bottom: var(--space-2xl);
+}
+
+.checklistHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.checklist h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.selectAllPresencesButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+    font-weight: 500;
+}
+
+.selectAllPresencesButton:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.checklistDescription {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.presenceList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.presenceItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.presenceItem:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.presenceItem input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.presenceItemChecked {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
+}
+
+.presenceItemCorrespondance {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.1) 100%);
+    border-color: var(--info);
+    cursor: default;
+}
+
+.presenceItemCorrespondance:hover {
+    background: linear-gradient(135deg, var(--info-light) 0%, var(--primary-light) 100%);
+    border-color: var(--info);
+}
+
+.presenceLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    flex: 1;
+}
+
+.presenceInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.presenceName {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.presenceDetails {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.presenceStats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-light) 100%);
+    border-radius: var(--radius-md);
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.presenceCorrespondanceRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: var(--space-md);
+}
+
+/* Boutons bascule present/correspondance */
+.basculerPresentBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--success);
+    background: var(--surface-secondary);
+    border: 1px solid var(--success);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.basculerPresentBtn:hover {
+    background: var(--success);
+    color: white;
+}
+
+.annulerBasculeBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.annulerBasculeBtn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+/* Banniere correspondance */
+.correspondanceBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid var(--info);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    color: var(--text-main);
+}
+
+.correspondanceBanner svg {
+    flex-shrink: 0;
+    color: var(--info);
+    margin-top: 2px;
+}
+
+.correspondanceBanner strong {
+    display: block;
+    font-size: var(--text-md);
+    margin-bottom: var(--space-xs);
+    color: var(--text-main);
+}
+
+.correspondanceBanner p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.correspondanceHint {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* Bouton demarrage + Quorum */
+.startButtonContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+}
+
+.quorumWarning {
+    padding: var(--space-md) var(--space-lg);
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    color: #FCD34D;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-align: center;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .startButtonContainer {
+        flex-direction: column;
+    }
+
+    .startButtonContainer button {
+        width: 100%;
+    }
+}

@@ -2,7 +2,7 @@
 
 import { AlertCircle } from 'lucide-react';
 import { Resolution, PasserelleVoteInitial } from '../types';
-import styles from '../Session.module.css';
+import modalsStyles from '../styles/modals.module.css';
 
 interface PasserelleModalProps {
   resolution: Resolution;
@@ -20,23 +20,23 @@ export function PasserelleModal({
   onAjournement
 }: PasserelleModalProps) {
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={modalsStyles.modalOverlay} onClick={onClose}>
       <div
-        className={styles.modalContent}
+        className={modalsStyles.modalContent}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
-        <div className={styles.passerelleAlert}>
+        <div className={modalsStyles.passerelleAlert}>
           <AlertCircle size={32} color="var(--warning)" aria-hidden="true" />
-          <h2 className={styles.modalTitle}>Passerelle Article 25-1 applicable</h2>
+          <h2 className={modalsStyles.modalTitle}>Passerelle Article 25-1 applicable</h2>
         </div>
 
-        <div className={styles.modalResolutionInfo}>
+        <div className={modalsStyles.modalResolutionInfo}>
           <h3>{resolution.titre}</h3>
         </div>
 
-        <div className={styles.passerelleExplanation}>
+        <div className={modalsStyles.passerelleExplanation}>
           <p>
             Cette résolution n'a pas obtenu la majorité de l'article 25 requise
             (50% + 1 des tantièmes) mais a dépassé le seuil de 1/3 des tantièmes.
@@ -51,26 +51,26 @@ export function PasserelleModal({
           </ul>
         </div>
 
-        <div className={styles.modalStats}>
-          <div className={styles.modalStatItem}>
+        <div className={modalsStyles.modalStats}>
+          <div className={modalsStyles.modalStatItem}>
             <span>Tantièmes POUR :</span>
             <strong>{voteInitial.stats.pour}</strong>
           </div>
-          <div className={styles.modalStatItem}>
+          <div className={modalsStyles.modalStatItem}>
             <span>Seuil Article 25 :</span>
             <strong>{Math.floor(voteInitial.result.passerelle251Data!.totalTantiemes / 2) + 1}</strong>
           </div>
-          <div className={styles.modalStatItem}>
+          <div className={modalsStyles.modalStatItem}>
             <span>Seuil 1/3 :</span>
             <strong>{voteInitial.result.passerelle251Data!.seuilUntiers}</strong>
           </div>
-          <div className={styles.modalStatItem}>
+          <div className={modalsStyles.modalStatItem}>
             <span>Total tantièmes :</span>
             <strong>{voteInitial.result.passerelle251Data!.totalTantiemes}</strong>
           </div>
         </div>
 
-        <div className={styles.modalActions}>
+        <div className={modalsStyles.modalActions}>
           <button onClick={onAjournement} className="btn btn-secondary">
             Ajourner à nouvelle AG
           </button>

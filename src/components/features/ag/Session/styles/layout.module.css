@@ -1,0 +1,132 @@
+/* Layout principal Session AG */
+
+.header {
+    margin-bottom: var(--space-lg);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-sm);
+    margin-left: calc(var(--space-sm) * -1);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    margin-bottom: var(--space-sm);
+}
+
+.backButton:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.startScreen {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sectionTitle {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.sectionDescription {
+    font-size: var(--text-md);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+}
+
+.navigationRight {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .navigation {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .navigation button {
+        width: 100%;
+    }
+
+    .footer {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .footer button {
+        width: 100%;
+    }
+
+    .navigationRight {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navigationRight button {
+        width: 100%;
+    }
+}

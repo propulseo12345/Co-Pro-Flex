@@ -1,9 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, Lock, Calendar, ListChecks, Mail, Send, Vote, Users, FileText, ClipboardCheck } from 'lucide-react';
-import { useMemo, useEffect, useState } from 'react';
+import { Check, Calendar, ListChecks, Mail, Send, Vote, Users, FileText, ClipboardCheck } from 'lucide-react';
+import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { StepGroupCard } from './StepGroupCard';
+import type { StepConfig, StepStatus, StepItemModel, StepGroupModel } from './types';
 import styles from './Stepper.module.css';
 
 interface StepperProps {
@@ -11,9 +13,10 @@ interface StepperProps {
     agId?: string;
 }
 
-// Configuration des étapes
-// Préparation AG: 1-4, Déroulement + PV: 5-8
-const STEPS = [
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+const STEPS_CONFIG: StepConfig[] = [
     { id: 'planification', numero: 1, titre: 'Planification', path: 'edit', icon: Calendar },
     { id: 'ordre-jour', numero: 2, titre: 'Ordre du jour', path: 'agenda', icon: ListChecks },
     { id: 'preparation-convoc', numero: 3, titre: 'Préparation convocations', path: 'convocation', icon: Mail },
@@ -24,23 +27,165 @@ const STEPS = [
     { id: 'pv', numero: 8, titre: 'Procès-verbal', path: 'pv', icon: FileText },
 ];
 
+// Retry config
+const FETCH_RETRY_ATTEMPTS = 2;
+const FETCH_RETRY_DELAYS = [300, 800]; // ms
+
+// Debug mode (dev only)
+const DEBUG_STEPPER = process.env.NODE_ENV === 'development';
+
+// ============================================================================
+// CACHE HELPERS (sessionStorage - UX fallback, synchronized with DB)
+// ============================================================================
+function getCacheKey(agId: string): string {
+    return `ag:${agId}:maxStepReached`;
+}
+
+function getCachedMaxStep(agId: string): number | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const cached = sessionStorage.getItem(getCacheKey(agId));
+        if (cached) {
+            const value = parseInt(cached, 10);
+            if (!isNaN(value) && value >= 1 && value <= 8) {
+                return value;
+            }
+        }
+    } catch {
+        // sessionStorage may be unavailable
+    }
+    return null;
+}
+
+function setCachedMaxStep(agId: string, value: number): void {
+    if (typeof window === 'undefined') return;
+    try {
+        sessionStorage.setItem(getCacheKey(agId), String(value));
+        if (DEBUG_STEPPER) {
+            console.info('[Stepper] Cache updated:', { agId, value });
+        }
+    } catch {
+        // ignore
+    }
+}
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+function getStepUrl(agId: string, stepConfig: StepConfig): string {
+    return stepConfig.numero === 1
+        ? `/ag/${agId}/edit`
+        : `/ag/${agId}/${stepConfig.path}`;
+}
+
+function isStepClickable(stepNumber: number, maxStepReached: number, hasAgId: boolean): boolean {
+    if (!hasAgId) return false;
+    return stepNumber <= maxStepReached;
+}
+
+function getStepStatus(stepNumber: number, currentStep: number, maxStepReached: number): StepStatus {
+    if (stepNumber === currentStep) return 'current';
+    if (stepNumber <= maxStepReached) return 'completed';
+    return 'pending';
+}
+
+// ============================================================================
+// COMPUTE INITIAL MAX STEP (sticky: never goes down)
+// CRITICAL: Cache is the primary source for initial render to avoid flash
+// ============================================================================
+function computeInitialMaxStep(currentStep: number, agId?: string): number {
+    // Start with currentStep as minimum
+    let initial = Math.max(1, currentStep);
+
+    // Check cache for potentially higher value
+    if (agId) {
+        const cached = getCachedMaxStep(agId);
+        if (DEBUG_STEPPER) {
+            console.info('[Stepper] computeInitialMaxStep:', {
+                agId,
+                currentStep,
+                cached,
+                willUse: cached !== null ? Math.max(initial, cached) : initial
+            });
+        }
+        if (cached !== null && cached >= 1 && cached <= 8) {
+            initial = Math.max(initial, cached);
+        }
+    }
+
+    return initial;
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 export default function Stepper({ currentStep, agId }: StepperProps) {
     const router = useRouter();
 
-    // DB-FIRST: maxStepReached vient UNIQUEMENT de Supabase, pas de la prop
-    const [maxStepReached, setMaxStepReached] = useState<number | null>(null);
+    // ========================================================================
+    // STATE: maxStepReached - STICKY (never decreases)
+    // Initialized with max(currentStep, cache) to avoid showing steps as locked
+    // ========================================================================
+    const [maxStepReached, setMaxStepReached] = useState<number>(() =>
+        computeInitialMaxStep(currentStep, agId)
+    );
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchFailed, setFetchFailed] = useState(false);
 
-    // Fetch max_step_reached from database - SOURCE DE VÉRITÉ UNIQUE
+    // Track if component is mounted for async safety
+    const isMountedRef = useRef(true);
+
+    // Track maxStepReached for logging in effects without adding as dependency
+    const maxStepReachedRef = useRef(maxStepReached);
     useEffect(() => {
+        maxStepReachedRef.current = maxStepReached;
+    }, [maxStepReached]);
+
+    // ========================================================================
+    // STICKY UPDATER: maxStepReached can only increase, never decrease
+    // CRITICAL: This is the core of the fix - value can ONLY go UP
+    // ========================================================================
+    const updateMaxStepReached = useCallback((newValue: number, source: string = 'unknown') => {
+        setMaxStepReached(prev => {
+            // STICKY: Always take the maximum of all known values
+            const updated = Math.max(prev, newValue);
+
+            if (DEBUG_STEPPER) {
+                console.info('[Stepper] updateMaxStepReached:', {
+                    source,
+                    prev,
+                    newValue,
+                    updated,
+                    currentStep,
+                    changed: updated !== prev
+                });
+            }
+
+            // CRITICAL FIX: Always sync cache if updated > cached value
+            // This ensures cache is written even on first visit to a step
+            if (agId) {
+                const cached = getCachedMaxStep(agId);
+                if (cached === null || updated > cached) {
+                    setCachedMaxStep(agId, updated);
+                }
+            }
+
+            return updated;
+        });
+    }, [agId, currentStep]);
+
+    // ========================================================================
+    // FETCH with retry logic - DB is source of truth for max_step_reached
+    // ========================================================================
+    useEffect(() => {
+        isMountedRef.current = true;
+
         if (!agId) {
             setIsLoading(false);
             return;
         }
 
-        let isMounted = true;
-
-        const fetchMaxStep = async () => {
+        const fetchWithRetry = async (attempt: number = 0): Promise<void> => {
             try {
                 const supabase = createClient();
                 const { data, error } = await supabase
@@ -49,95 +194,246 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                     .eq('id', agId)
                     .single();
 
-                if (!isMounted) return;
+                if (!isMountedRef.current) return;
 
                 if (!error && data) {
-                    // DB est la source de vérité - on prend le max entre les valeurs DB
-                    // currentStep prop est ignoré pour le calcul du max (c'est juste la route active)
-                    const dbMax = Math.max(
-                        data.max_step_reached || 1,
-                        data.current_step || 1
-                    );
-                    setMaxStepReached(dbMax);
+                    // SUCCESS: Compute dbMax from DB values
+                    const dbMaxStepReached = data.max_step_reached || 1;
+                    const dbCurrentStep = data.current_step || 1;
+                    const dbMax = Math.max(dbMaxStepReached, dbCurrentStep);
+
+                    // Get current values for comparison
+                    const currentCached = getCachedMaxStep(agId);
+                    const currentState = maxStepReachedRef.current;
+
+                    // CRITICAL: Compute the TRUE max from ALL sources
+                    // Never let any value go DOWN
+                    const trueMax = Math.max(dbMax, currentCached ?? 1, currentState, currentStep);
+
+                    // ============================================================
+                    // AUDIT LOG (dev only) - as requested
+                    // ============================================================
+                    if (DEBUG_STEPPER) {
+                        console.info('[Stepper] AUDIT FETCH:', {
+                            agId,
+                            'DB.current_step': dbCurrentStep,
+                            'DB.max_step_reached': dbMaxStepReached,
+                            'dbMax (from DB)': dbMax,
+                            'route currentStep': currentStep,
+                            'state maxStepReached': currentState,
+                            'cache': currentCached,
+                            'trueMax (computed)': trueMax,
+                        });
+                    }
+
+                    // CRITICAL: Write to cache with TRUE MAX (never decrease)
+                    if (currentCached === null || trueMax > currentCached) {
+                        setCachedMaxStep(agId, trueMax);
+                        if (DEBUG_STEPPER) {
+                            console.info('[Stepper] Cache written:', { agId, trueMax });
+                        }
+                    }
+
+                    // Update state with TRUE MAX (sticky - only increases)
+                    updateMaxStepReached(trueMax, 'fetch');
+                    setFetchFailed(false);
                 } else {
-                    // Fallback si erreur DB
-                    setMaxStepReached(currentStep);
+                    // ERROR: Retry or fallback
+                    if (attempt < FETCH_RETRY_ATTEMPTS) {
+                        const delay = FETCH_RETRY_DELAYS[attempt] || 500;
+                        if (DEBUG_STEPPER) {
+                            console.warn(`[Stepper] Fetch failed, retry ${attempt + 1}/${FETCH_RETRY_ATTEMPTS} in ${delay}ms`, error?.message);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        if (isMountedRef.current) {
+                            return fetchWithRetry(attempt + 1);
+                        }
+                    } else {
+                        // All retries exhausted: keep current state (don't downgrade)
+                        if (DEBUG_STEPPER) {
+                            console.warn('[Stepper] Fetch failed after retries, keeping current state:', {
+                                currentStep,
+                                maxStepReached: maxStepReachedRef.current,
+                                error: error?.message
+                            });
+                        }
+                        // DON'T call updateMaxStepReached with currentStep - keep existing state
+                        setFetchFailed(true);
+                    }
                 }
             } catch (err) {
-                console.warn('[Stepper] Failed to fetch max step:', err);
-                if (isMounted) {
-                    setMaxStepReached(currentStep);
+                if (!isMountedRef.current) return;
+
+                // Exception: Retry or fallback
+                if (attempt < FETCH_RETRY_ATTEMPTS) {
+                    const delay = FETCH_RETRY_DELAYS[attempt] || 500;
+                    if (DEBUG_STEPPER) {
+                        console.warn(`[Stepper] Exception, retry ${attempt + 1}/${FETCH_RETRY_ATTEMPTS} in ${delay}ms`, err);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    if (isMountedRef.current) {
+                        return fetchWithRetry(attempt + 1);
+                    }
+                } else {
+                    if (DEBUG_STEPPER) {
+                        console.warn('[Stepper] Exception after retries, keeping current state:', err);
+                    }
+                    // DON'T downgrade - keep existing state
+                    setFetchFailed(true);
                 }
             } finally {
-                if (isMounted) {
+                if (isMountedRef.current) {
                     setIsLoading(false);
                 }
             }
         };
 
-        fetchMaxStep();
+        fetchWithRetry();
 
         return () => {
-            isMounted = false;
+            isMountedRef.current = false;
         };
-    }, [agId, currentStep]);
+    }, [agId]); // CRITICAL: Remove currentStep from deps to avoid re-fetch on navigation
 
-    // effectiveMaxStep = valeur DB (ou currentStep en fallback si pas encore chargé)
-    const effectiveMaxStep = maxStepReached ?? currentStep;
-
-    // Déterminer le module actif (1-4 = Préparation, 5-8 = Déroulement)
-    const isPreparationModule = currentStep <= 4;
-
-    // Calculer la progression de chaque module - basée sur effectiveMaxStep, pas currentStep
-    const { prepProgress, deroulProgress } = useMemo(() => {
-        // Module Préparation: étapes 1-4
-        const prepCompleted = Math.min(effectiveMaxStep - 1, 4);
-        const prepTotal = 4;
-        const prepPercent = Math.max(0, (prepCompleted / prepTotal) * 100);
-
-        // Module Déroulement: étapes 5-8
-        const deroulCompleted = effectiveMaxStep > 4 ? Math.min(effectiveMaxStep - 4, 4) : 0;
-        const deroulTotal = 4;
-        const deroulPercent = (deroulCompleted / deroulTotal) * 100;
-
-        return { prepProgress: prepPercent, deroulProgress: deroulPercent };
-    }, [effectiveMaxStep]);
-
-    // Navigation - allow access to any step up to effectiveMaxStep
-    const handleStepClick = (step: typeof STEPS[0]) => {
+    // ========================================================================
+    // CRITICAL: Sync state with cache when component updates (not just mounts)
+    // This handles the case where Next.js doesn't remount the component
+    // ========================================================================
+    useEffect(() => {
         if (!agId) return;
 
-        // Permettre navigation vers étapes jusqu'à l'étape max atteinte (DB)
-        if (step.numero <= effectiveMaxStep) {
-            if (step.numero === 1) {
-                router.push(`/ag/${agId}/edit`);
-            } else {
-                router.push(`/ag/${agId}/${step.path}`);
-            }
+        const cached = getCachedMaxStep(agId);
+        const currentMax = maxStepReachedRef.current;
+
+        if (DEBUG_STEPPER) {
+            console.info('[Stepper] Sync check on navigation:', {
+                currentStep,
+                stateMaxStepReached: currentMax,
+                cached,
+            });
         }
-    };
 
-    // DB-FIRST: Le statut dépend de effectiveMaxStep (DB), pas de currentStep (route)
-    // currentStep ne sert qu'à highlighter l'étape active visuellement
-    const getStepStatus = (stepNum: number): 'completed' | 'current' | 'pending' => {
-        // L'étape courante (route active) est marquée "current"
-        if (stepNum === currentStep) return 'current';
+        // Compute the true max from all sources
+        const trueMax = Math.max(currentStep, cached ?? 1, currentMax);
 
-        // Toutes les étapes <= effectiveMaxStep (DB) sont "completed"
-        // SAUF l'étape courante qui est "current"
-        if (stepNum <= effectiveMaxStep) return 'completed';
+        // If true max is higher than current state, update
+        if (trueMax > currentMax) {
+            if (DEBUG_STEPPER) {
+                console.info('[Stepper] Syncing to trueMax:', { trueMax, currentMax });
+            }
+            setMaxStepReached(trueMax);
+            // Also update cache
+            setCachedMaxStep(agId, trueMax);
+        }
+    }, [agId, currentStep]); // Runs on every navigation - uses ref for current state
 
-        // Les étapes au-delà de effectiveMaxStep sont "pending"
-        return 'pending';
-    };
+    // ========================================================================
+    // Log state changes for debugging (dev only)
+    // ========================================================================
+    useEffect(() => {
+        if (DEBUG_STEPPER) {
+            console.info('[Stepper] STATE:', {
+                agId,
+                currentStep,
+                maxStepReached,
+                isLoading,
+                fetchFailed,
+                cached: agId ? getCachedMaxStep(agId) : null,
+            });
+        }
+    }, [agId, currentStep, maxStepReached, isLoading, fetchFailed]);
 
-    const preparationSteps = STEPS.filter(s => s.numero <= 4);
-    const deroulementSteps = STEPS.filter(s => s.numero >= 5);
+    // ========================================================================
+    // NAVIGATION HANDLER
+    // ========================================================================
+    const handleStepClick = useCallback((stepConfig: StepConfig) => {
+        if (!agId) return;
 
-    // Progression globale basée sur effectiveMaxStep (DB), pas currentStep
-    const globalProgress = Math.round(((effectiveMaxStep - 1) / 8) * 100);
+        const targetUrl = getStepUrl(agId, stepConfig);
+        const clickable = isStepClickable(stepConfig.numero, maxStepReached, true);
 
-    // Loading state pendant le fetch DB
+        if (process.env.NODE_ENV === 'development') {
+            console.info('[Stepper] Click:', {
+                step: stepConfig.numero,
+                targetUrl,
+                maxStepReached,
+                clickable
+            });
+        }
+
+        if (clickable) {
+            router.push(targetUrl);
+        }
+    }, [agId, maxStepReached, router]);
+
+    // ========================================================================
+    // COMPUTED VALUES
+    // ========================================================================
+    const isPreparationModule = currentStep <= 4;
+
+    const { preparationGroup, deroulementGroup } = useMemo(() => {
+        const hasAgId = !!agId;
+
+        const buildStepItems = (configs: StepConfig[]): StepItemModel[] => {
+            return configs.map(config => {
+                const status = getStepStatus(config.numero, currentStep, maxStepReached);
+                const clickable = isStepClickable(config.numero, maxStepReached, hasAgId);
+
+                return {
+                    id: config.id,
+                    numero: config.numero,
+                    titre: config.titre,
+                    icon: config.icon,
+                    status,
+                    optional: config.optional,
+                    isClickable: clickable,
+                    onClick: clickable ? () => handleStepClick(config) : undefined,
+                };
+            });
+        };
+
+        // Préparation (1-4)
+        const prepConfigs = STEPS_CONFIG.filter(s => s.numero <= 4);
+        const prepItems = buildStepItems(prepConfigs);
+        const prepCompletedCount = prepItems.filter(s => s.status === 'completed').length;
+
+        const preparation: StepGroupModel = {
+            id: 'preparation',
+            titre: 'Préparation AG',
+            subtitle: 'Étapes 1-4',
+            icon: Calendar,
+            steps: prepItems,
+            completedCount: prepCompletedCount,
+            totalCount: 4,
+            isActive: isPreparationModule,
+            isCompleted: maxStepReached > 4,
+        };
+
+        // Déroulement (5-8)
+        const deroulConfigs = STEPS_CONFIG.filter(s => s.numero >= 5);
+        const deroulItems = buildStepItems(deroulConfigs);
+        const deroulCompletedCount = deroulItems.filter(s => s.status === 'completed').length;
+
+        const deroulement: StepGroupModel = {
+            id: 'deroulement',
+            titre: 'Déroulement + PV',
+            subtitle: 'Étapes 5-8',
+            icon: Users,
+            steps: deroulItems,
+            completedCount: deroulCompletedCount,
+            totalCount: 4,
+            isActive: !isPreparationModule,
+            isCompleted: maxStepReached > 8,
+        };
+
+        return { preparationGroup: preparation, deroulementGroup: deroulement };
+    }, [currentStep, maxStepReached, agId, isPreparationModule, handleStepClick]);
+
+    const globalProgress = Math.round(((maxStepReached - 1) / 8) * 100);
+
+    // ========================================================================
+    // RENDER: Loading
+    // ========================================================================
     if (isLoading) {
         return (
             <div className={styles.container}>
@@ -153,12 +449,18 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
         );
     }
 
+    // ========================================================================
+    // RENDER: Main
+    // ========================================================================
     return (
         <div className={styles.container}>
-            {/* Header avec progression globale */}
+            {/* Header */}
             <div className={styles.header}>
                 <div className={styles.globalProgress}>
-                    <span className={styles.progressLabel}>Progression</span>
+                    <span className={styles.progressLabel}>
+                        Progression
+                        {fetchFailed && <span title="Mode hors-ligne"> ⚠️</span>}
+                    </span>
                     <div className={styles.progressBar}>
                         <div
                             className={styles.progressFill}
@@ -169,70 +471,14 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                 </div>
             </div>
 
-            {/* Modules */}
-            <div className={styles.modules}>
-                {/* Module 1: Préparation AG */}
-                <div className={`${styles.module} ${isPreparationModule ? styles.moduleActive : styles.moduleCompleted}`}>
-                    <div className={styles.moduleHeader}>
-                        <div className={styles.moduleIcon}>
-                            {effectiveMaxStep > 4 ? <Check size={16} /> : <Calendar size={16} />}
-                        </div>
-                        <div className={styles.moduleInfo}>
-                            <span className={styles.moduleTitle}>Préparation AG</span>
-                            <span className={styles.moduleSubtitle}>Étapes 1-4</span>
-                        </div>
-                        <div className={styles.moduleProgress}>
-                            <div className={styles.moduleProgressBar}>
-                                <div
-                                    className={styles.moduleProgressFill}
-                                    style={{ width: `${prepProgress}%` }}
-                                />
-                            </div>
-                            <span className={styles.moduleProgressText}>
-                                {Math.min(effectiveMaxStep - 1, 4)}/4
-                            </span>
-                        </div>
-                    </div>
+            {/* Groupes d'étapes */}
+            <div className={styles.groups}>
+                <StepGroupCard
+                    group={preparationGroup}
+                    maxStepReached={maxStepReached}
+                />
 
-                    <div className={styles.steps}>
-                        {preparationSteps.map((step, index) => {
-                            const status = getStepStatus(step.numero);
-                            const Icon = step.icon;
-                            const isClickable = agId && step.numero <= effectiveMaxStep;
-
-                            return (
-                                <div key={step.id} className={styles.stepWrapper}>
-                                    {/* Connecteur entre les étapes */}
-                                    {index > 0 && (
-                                        <div className={`${styles.connector} ${step.numero <= effectiveMaxStep ? styles.connectorActive : ''}`} />
-                                    )}
-
-                                    <div
-                                        className={`${styles.step} ${styles[`step${status.charAt(0).toUpperCase() + status.slice(1)}`]} ${isClickable ? styles.stepClickable : ''}`}
-                                        onClick={() => isClickable && handleStepClick(step)}
-                                        role={isClickable ? 'button' : undefined}
-                                        tabIndex={isClickable ? 0 : undefined}
-                                    >
-                                        <div className={styles.stepCircle}>
-                                            {status === 'completed' ? (
-                                                <Check size={14} strokeWidth={3} />
-                                            ) : (
-                                                <Icon size={16} />
-                                            )}
-                                        </div>
-                                        <div className={styles.stepContent}>
-                                            <span className={styles.stepNumber}>Étape {step.numero}</span>
-                                            <span className={styles.stepTitle}>{step.titre}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Séparateur */}
-                <div className={styles.moduleSeparator}>
+                <div className={styles.groupSeparator}>
                     <div className={styles.separatorLine} />
                     <div className={styles.separatorIcon}>
                         <Send size={14} />
@@ -240,74 +486,13 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                     <div className={styles.separatorLine} />
                 </div>
 
-                {/* Module 2: Déroulement + PV */}
-                <div className={`${styles.module} ${!isPreparationModule ? styles.moduleActive : effectiveMaxStep > 4 ? styles.moduleCompleted : styles.modulePending}`}>
-                    <div className={styles.moduleHeader}>
-                        <div className={styles.moduleIcon}>
-                            {effectiveMaxStep > 8 ? <Check size={16} /> : <Users size={16} />}
-                        </div>
-                        <div className={styles.moduleInfo}>
-                            <span className={styles.moduleTitle}>Déroulement + PV</span>
-                            <span className={styles.moduleSubtitle}>Étapes 5-8</span>
-                        </div>
-                        <div className={styles.moduleProgress}>
-                            <div className={`${styles.moduleProgressBar} ${effectiveMaxStep <= 4 ? styles.moduleProgressBarInactive : ''}`}>
-                                <div
-                                    className={styles.moduleProgressFill}
-                                    style={{ width: `${deroulProgress}%` }}
-                                />
-                            </div>
-                            <span className={styles.moduleProgressText}>
-                                {effectiveMaxStep > 4 ? Math.min(effectiveMaxStep - 4, 4) : 0}/4
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className={styles.steps}>
-                        {deroulementSteps.map((step, index) => {
-                            const status = getStepStatus(step.numero);
-                            const Icon = step.icon;
-                            const isClickable = agId && step.numero <= effectiveMaxStep;
-                            const isLocked = step.numero > effectiveMaxStep;
-
-                            return (
-                                <div key={step.id} className={styles.stepWrapper}>
-                                    {/* Connecteur entre les étapes */}
-                                    {index > 0 && (
-                                        <div className={`${styles.connector} ${step.numero <= effectiveMaxStep ? styles.connectorActive : ''}`} />
-                                    )}
-
-                                    <div
-                                        className={`${styles.step} ${styles[`step${status.charAt(0).toUpperCase() + status.slice(1)}`]} ${isClickable ? styles.stepClickable : ''} ${isLocked ? styles.stepLocked : ''}`}
-                                        onClick={() => isClickable && handleStepClick(step)}
-                                        role={isClickable ? 'button' : undefined}
-                                        tabIndex={isClickable ? 0 : undefined}
-                                    >
-                                        <div className={styles.stepCircle}>
-                                            {status === 'completed' ? (
-                                                <Check size={14} strokeWidth={3} />
-                                            ) : isLocked ? (
-                                                <Lock size={14} />
-                                            ) : (
-                                                <Icon size={16} />
-                                            )}
-                                        </div>
-                                        <div className={styles.stepContent}>
-                                            <span className={styles.stepNumber}>
-                                                Étape {step.numero}
-                                                {step.optional && <span className={styles.optionalTag}>Optionnel</span>}
-                                            </span>
-                                            <span className={styles.stepTitle}>{step.titre}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
+                <StepGroupCard
+                    group={deroulementGroup}
+                    maxStepReached={maxStepReached}
+                />
             </div>
 
-            {/* Vue mobile compacte */}
+            {/* Vue mobile */}
             <div className={styles.mobileView}>
                 <div className={styles.mobileHeader}>
                     <span className={styles.mobileModule}>
@@ -318,7 +503,7 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                     </span>
                 </div>
                 <div className={styles.mobileTitle}>
-                    {STEPS[currentStep - 1]?.titre}
+                    {STEPS_CONFIG[currentStep - 1]?.titre}
                 </div>
                 <div className={styles.mobileProgressBar}>
                     <div
@@ -327,20 +512,23 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                     />
                 </div>
                 <div className={styles.mobileDots}>
-                    {STEPS.map((step) => {
-                        const status = getStepStatus(step.numero);
+                    {STEPS_CONFIG.map((stepConfig) => {
+                        const status = getStepStatus(stepConfig.numero, currentStep, maxStepReached);
+                        const clickable = isStepClickable(stepConfig.numero, maxStepReached, !!agId);
+                        const statusClass = styles[`mobileDot${status.charAt(0).toUpperCase() + status.slice(1)}`];
+
                         return (
                             <button
-                                key={step.id}
-                                className={`${styles.mobileDot} ${styles[`mobileDot${status.charAt(0).toUpperCase() + status.slice(1)}`]}`}
-                                onClick={() => step.numero <= effectiveMaxStep && agId && handleStepClick(step)}
-                                disabled={step.numero > effectiveMaxStep}
-                                title={step.titre}
+                                key={stepConfig.id}
+                                className={`${styles.mobileDot} ${statusClass}`}
+                                onClick={() => clickable && handleStepClick(stepConfig)}
+                                disabled={!clickable}
+                                title={stepConfig.titre}
                             >
                                 {status === 'completed' ? (
                                     <Check size={10} strokeWidth={3} />
                                 ) : (
-                                    step.numero
+                                    stepConfig.numero
                                 )}
                             </button>
                         );

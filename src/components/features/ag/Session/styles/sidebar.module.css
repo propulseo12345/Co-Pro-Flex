@@ -1,0 +1,236 @@
+/* Sidebar Session */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.sidebarTitle {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+/* Progress bar (version sidebar) */
+.progressBar {
+    height: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: var(--space-sm);
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #60a5fa 0%, #6EE7B7 100%);
+    transition: width 0.3s ease;
+}
+
+.progressText {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Ancienne liste (fallback) */
+.presentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.presentItem {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-sm);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.presentName {
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.presentTantiemes {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Synthese des participants */
+.participantsSynthese {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border);
+}
+
+.syntheseTotal {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.syntheseTotalValue {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: #93C5FD;
+}
+
+.syntheseTotalLabel {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+/* Ventilation par type */
+.syntheseByType {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.syntheseTypeItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+}
+
+.syntheseTypeIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.syntheseTypeInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.syntheseTypeLabel {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.syntheseTypeValue {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Couleurs par type */
+.syntheseTypePresent .syntheseTypeIcon {
+    background: rgba(52, 211, 153, 0.2);
+    color: #6EE7B7;
+}
+
+.syntheseTypeRepresente .syntheseTypeIcon {
+    background: rgba(251, 191, 36, 0.2);
+    color: #FCD34D;
+}
+
+.syntheseTypeCorrespondance .syntheseTypeIcon {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
+}
+
+.syntheseTypeAbsent .syntheseTypeIcon {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+
+.syntheseTypeAbsent {
+    opacity: 0.7;
+}
+
+/* Liste des participants groupee */
+.participantsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.participantsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.participantsGroupHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+}
+
+.headerPresent {
+    background: rgba(52, 211, 153, 0.15);
+    color: #6EE7B7;
+}
+
+.headerRepresente {
+    background: rgba(251, 191, 36, 0.15);
+    color: #FCD34D;
+}
+
+.headerCorrespondance {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93C5FD;
+}
+
+.participantsGroupList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.participantItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.participantName {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.participantTantiemes {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.neutraliseBadgeSmall {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: #FCD34D;
+    background: rgba(251, 191, 36, 0.15);
+    padding: 1px 4px;
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-xs);
+}

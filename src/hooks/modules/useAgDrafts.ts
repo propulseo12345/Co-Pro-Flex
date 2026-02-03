@@ -28,6 +28,7 @@ interface AgDraftProgress {
   location: string | null;
   status: string;
   current_step: number;
+  max_step_reached: number | null;
   step_data: Record<string, unknown> | null;
   wizard_mode: string | null;
   created_at: string;
@@ -62,6 +63,8 @@ export interface AgDraft {
   suggestedStep: number;
   // Étape courante (source DB - utilisée pour la navigation)
   currentStep: number;
+  // Étape maximale atteinte (pour l'affichage de la progression)
+  maxStepReached: number;
   // Ratio de complétion (0..1)
   completionRatio: number;
   // Dernière activité
@@ -121,6 +124,9 @@ function calculateSuggestedStep(draft: {
  * Convertit les données de la vue en AgDraft
  */
 function mapProgressToDraft(row: AgDraftProgress): AgDraft {
+  const currentStep = row.current_step || 1;
+  const maxStepReached = row.max_step_reached || currentStep;
+
   return {
     id: row.ag_id,
     title: row.title,
@@ -144,7 +150,9 @@ function mapProgressToDraft(row: AgDraftProgress): AgDraft {
       location: row.location,
     }),
     // Source de vérité DB pour la navigation
-    currentStep: row.current_step || 1,
+    currentStep: currentStep,
+    // Étape maximale atteinte pour l'affichage
+    maxStepReached: Math.max(maxStepReached, currentStep),
     completionRatio: row.completion_ratio,
     lastActivityAt: row.last_activity_at,
   };
@@ -172,6 +180,14 @@ export function useAgDrafts(): UseAgDraftsReturn {
 
     try {
       const supabase = createUntypedClient();
+
+      // S'assurer que l'utilisateur a un membership admin pour voir les brouillons
+      // (RLS: seuls les managers voient les drafts)
+      try {
+        await supabase.rpc('ensure_dev_membership', { p_copro_id: currentCoproId });
+      } catch {
+        // Ignorer les erreurs (ex: utilisateur non authentifié)
+      }
 
       // Essayer d'abord la vue agrégée optimisée
       let progressData: AgDraftProgress[] | null = null;
@@ -220,28 +236,34 @@ export function useAgDrafts(): UseAgDraftsReturn {
           meeting_date: string | null;
           location: string | null;
           current_step?: number;
+          max_step_reached?: number;
           created_at: string;
           updated_at: string;
-        }) => ({
-          id: m.id,
-          title: m.title,
-          meeting_type: m.meeting_type,
-          meeting_date: m.meeting_date,
-          location: m.location,
-          status: 'draft' as const,
-          created_at: m.created_at,
-          updated_at: m.updated_at,
-          hasResolutions: false,
-          resolutionsCount: 0,
-          hasAttendance: false,
-          attendanceCount: 0,
-          hasVotes: false,
-          votesCount: 0,
-          suggestedStep: 1,
-          currentStep: m.current_step || 1,
-          completionRatio: 0,
-          lastActivityAt: m.updated_at,
-        }));
+        }) => {
+          const currentStep = m.current_step || 1;
+          const maxStepReached = m.max_step_reached || currentStep;
+          return {
+            id: m.id,
+            title: m.title,
+            meeting_type: m.meeting_type,
+            meeting_date: m.meeting_date,
+            location: m.location,
+            status: 'draft' as const,
+            created_at: m.created_at,
+            updated_at: m.updated_at,
+            hasResolutions: false,
+            resolutionsCount: 0,
+            hasAttendance: false,
+            attendanceCount: 0,
+            hasVotes: false,
+            votesCount: 0,
+            suggestedStep: 1,
+            currentStep: currentStep,
+            maxStepReached: Math.max(maxStepReached, currentStep),
+            completionRatio: 0,
+            lastActivityAt: m.updated_at,
+          };
+        });
 
         setDrafts(fallbackDrafts);
         setIsLoading(false);

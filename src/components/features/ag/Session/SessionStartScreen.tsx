@@ -3,7 +3,9 @@
 import { Play, CheckSquare, Mail, UserCheck, AlertCircle, Undo } from 'lucide-react';
 import { SyntheseTantiemes } from './SyntheseTantiemes';
 import type { PresenceData } from '@/lib/utils/ag-session';
-import styles from './Session.module.css';
+import layoutStyles from './styles/layout.module.css';
+import presenceStyles from './styles/presence.module.css';
+import badgesStyles from './styles/badges.module.css';
 
 interface Coproprietaire {
   id: string;
@@ -62,16 +64,16 @@ export function SessionStartScreen({
   const pourcentageParticipants = totalTantiemes > 0 ? (tantièmesTotalParticipants / totalTantiemes) * 100 : 0;
 
   return (
-    <div className={styles.startScreen}>
+    <div className={layoutStyles.startScreen}>
       <div className="card">
-        <h2 className={styles.sectionTitle}>Avant de commencer</h2>
-        <p className={styles.sectionDescription}>
+        <h2 className={layoutStyles.sectionTitle}>Avant de commencer</h2>
+        <p className={layoutStyles.sectionDescription}>
           Prenez quelques instants pour préparer la session. Cochez les copropriétaires présents ou représentés pour calculer la représentativité de l&apos;assemblée.
         </p>
 
         {/* Bannière votes par correspondance */}
         {votesCorrespondanceCount > 0 && (
-          <div className={styles.correspondanceBanner}>
+          <div className={presenceStyles.correspondanceBanner}>
             <Mail size={20} aria-hidden="true" />
             <div>
               <strong>{votesCorrespondanceCount} vote{votesCorrespondanceCount > 1 ? 's' : ''} par correspondance</strong>
@@ -79,7 +81,7 @@ export function SessionStartScreen({
                 Ces copropriétaires sont automatiquement intégrés comme participants.
                 Leurs tantièmes sont comptabilisés dans le quorum et les majorités.
               </p>
-              <p className={styles.correspondanceHint}>
+              <p className={presenceStyles.correspondanceHint}>
                 Si un copropriétaire se présente physiquement, cliquez sur &quot;Marquer présent&quot; pour neutraliser son vote par correspondance.
               </p>
             </div>
@@ -94,22 +96,22 @@ export function SessionStartScreen({
           totalTantiemes={totalTantiemes}
         />
 
-        <div className={styles.checklist}>
-          <div className={styles.checklistHeader}>
+        <div className={presenceStyles.checklist}>
+          <div className={presenceStyles.checklistHeader}>
             <h3>Présences</h3>
             <button
               type="button"
               onClick={onSelectAll}
-              className={styles.selectAllPresencesButton}
+              className={presenceStyles.selectAllPresencesButton}
             >
               <CheckSquare size={16} aria-hidden="true" />
               Tout cocher / décocher
             </button>
           </div>
-          <p className={styles.checklistDescription}>
+          <p className={presenceStyles.checklistDescription}>
             Cochez les copropriétaires présents ou représentés
           </p>
-          <div className={styles.presenceList}>
+          <div className={presenceStyles.presenceList}>
             {coproprietaires.map(copro => {
               const isPresent = presences[copro.id] || false;
               const presenceData = presencesEnrichies?.[copro.id];
@@ -120,19 +122,19 @@ export function SessionStartScreen({
               return (
                 <div
                   key={copro.id}
-                  className={`${styles.presenceItem} ${isPresent ? styles.presenceItemChecked : ''} ${isCorrespondance ? styles.presenceItemCorrespondance : ''}`}
+                  className={`${presenceStyles.presenceItem} ${isPresent ? presenceStyles.presenceItemChecked : ''} ${isCorrespondance ? presenceStyles.presenceItemCorrespondance : ''}`}
                 >
                   {/* Case à cocher pour les non-correspondance */}
                   {!isCorrespondance && !isPresentFromCorrespondance && (
-                    <label className={styles.presenceLabel}>
+                    <label className={presenceStyles.presenceLabel}>
                       <input
                         type="checkbox"
                         checked={isPresent}
                         onChange={() => onPresenceToggle(copro.id)}
                       />
-                      <div className={styles.presenceInfo}>
-                        <span className={styles.presenceName}>{copro.nom}</span>
-                        <span className={styles.presenceDetails}>
+                      <div className={presenceStyles.presenceInfo}>
+                        <span className={presenceStyles.presenceName}>{copro.nom}</span>
+                        <span className={presenceStyles.presenceDetails}>
                           Lot {copro.lotRefs?.join(', ') || copro.lot || '-'} • <strong>{copro.tantiemes}</strong> tantièmes
                         </span>
                       </div>
@@ -141,16 +143,16 @@ export function SessionStartScreen({
 
                   {/* Affichage pour correspondance */}
                   {isCorrespondance && !isNeutralise && (
-                    <div className={styles.presenceCorrespondanceRow}>
-                      <div className={styles.presenceInfo}>
-                        <span className={styles.presenceName}>
+                    <div className={presenceStyles.presenceCorrespondanceRow}>
+                      <div className={presenceStyles.presenceInfo}>
+                        <span className={presenceStyles.presenceName}>
                           {copro.nom}
-                          <span className={styles.correspondanceBadge}>
+                          <span className={badgesStyles.correspondanceBadge}>
                             <Mail size={12} aria-hidden="true" />
                             Correspondance
                           </span>
                         </span>
-                        <span className={styles.presenceDetails}>
+                        <span className={presenceStyles.presenceDetails}>
                           Lot {copro.lotRefs?.join(', ') || copro.lot || '-'} • <strong>{copro.tantiemes}</strong> tantièmes
                         </span>
                       </div>
@@ -158,7 +160,7 @@ export function SessionStartScreen({
                         <button
                           type="button"
                           onClick={() => onBasculerPresent(copro.id)}
-                          className={styles.basculerPresentBtn}
+                          className={presenceStyles.basculerPresentBtn}
                           title="Le copropriétaire est finalement présent physiquement"
                         >
                           <UserCheck size={14} aria-hidden="true" />
@@ -170,20 +172,20 @@ export function SessionStartScreen({
 
                   {/* Affichage pour présent avec vote neutralisé */}
                   {isPresentFromCorrespondance && (
-                    <div className={styles.presenceCorrespondanceRow}>
-                      <div className={styles.presenceInfo}>
-                        <span className={styles.presenceName}>
+                    <div className={presenceStyles.presenceCorrespondanceRow}>
+                      <div className={presenceStyles.presenceInfo}>
+                        <span className={presenceStyles.presenceName}>
                           {copro.nom}
-                          <span className={styles.presentBadge}>
+                          <span className={badgesStyles.presentBadge}>
                             <UserCheck size={12} aria-hidden="true" />
                             Présent
                           </span>
-                          <span className={styles.neutraliseBadge}>
+                          <span className={badgesStyles.neutraliseBadge}>
                             <AlertCircle size={12} aria-hidden="true" />
                             Vote neutralisé
                           </span>
                         </span>
-                        <span className={styles.presenceDetails}>
+                        <span className={presenceStyles.presenceDetails}>
                           Lot {copro.lotRefs?.join(', ') || copro.lot || '-'} • <strong>{copro.tantiemes}</strong> tantièmes
                         </span>
                       </div>
@@ -191,7 +193,7 @@ export function SessionStartScreen({
                         <button
                           type="button"
                           onClick={() => onAnnulerBascule(copro.id)}
-                          className={styles.annulerBasculeBtn}
+                          className={presenceStyles.annulerBasculeBtn}
                           title="Annuler et revenir au vote par correspondance"
                         >
                           <Undo size={14} aria-hidden="true" />
@@ -207,9 +209,9 @@ export function SessionStartScreen({
         </div>
 
         {/* Bouton de démarrage avec avertissement si quorum insuffisant */}
-        <div className={styles.startButtonContainer}>
+        <div className={presenceStyles.startButtonContainer}>
           {pourcentageParticipants < 50 && (
-            <p className={styles.quorumWarning}>
+            <p className={presenceStyles.quorumWarning}>
               ⚠️ Attention : moins de 50% des tantièmes sont représentés. Certaines décisions pourraient ne pas pouvoir être votées.
             </p>
           )}

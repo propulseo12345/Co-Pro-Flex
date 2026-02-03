@@ -1,0 +1,11 @@
+// Re-export de tous les styles modulaires Session
+export { default as layoutStyles } from './layout.module.css';
+export { default as presenceStyles } from './presence.module.css';
+export { default as syntheseStyles } from './synthese.module.css';
+export { default as votingStyles } from './voting.module.css';
+export { default as statsStyles } from './stats.module.css';
+export { default as sidebarStyles } from './sidebar.module.css';
+export { default as modalsStyles } from './modals.module.css';
+export { default as badgesStyles } from './badges.module.css';
+export { default as readyscreenStyles } from './readyscreen.module.css';
+export { default as variablesStyles } from './variables.module.css';

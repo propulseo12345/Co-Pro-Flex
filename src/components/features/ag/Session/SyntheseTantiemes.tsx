@@ -2,7 +2,7 @@
 
 import { Scale, Users, Mail, UserCheck } from 'lucide-react';
 import type { PresenceData } from '@/lib/utils/ag-session';
-import styles from './Session.module.css';
+import syntheseStyles from './styles/synthese.module.css';
 
 interface Coproprietaire {
     id: string;
@@ -65,30 +65,30 @@ export function SyntheseTantiemes({
     const seuilArt26Atteint = pourcentage >= 66.67;
 
     return (
-        <div className={styles.syntheseTantiemes}>
-            <div className={styles.syntheseHeader}>
+        <div className={syntheseStyles.syntheseTantiemes}>
+            <div className={syntheseStyles.syntheseHeader}>
                 <Scale size={24} aria-hidden="true" />
                 <h3>Synthèse des tantièmes</h3>
             </div>
 
-            <div className={styles.syntheseContent}>
+            <div className={syntheseStyles.syntheseContent}>
                 {/* Statistiques principales */}
-                <div className={styles.syntheseStats}>
-                    <div className={styles.syntheseStatMain}>
-                        <span className={styles.syntheseStatValue}>{tantièmesTotalParticipants.toLocaleString('fr-FR')}</span>
-                        <span className={styles.syntheseStatSeparator}>/</span>
-                        <span className={styles.syntheseStatTotal}>{total.toLocaleString('fr-FR')}</span>
-                        <span className={styles.syntheseStatLabel}>tantièmes</span>
+                <div className={syntheseStyles.syntheseStats}>
+                    <div className={syntheseStyles.syntheseStatMain}>
+                        <span className={syntheseStyles.syntheseStatValue}>{tantièmesTotalParticipants.toLocaleString('fr-FR')}</span>
+                        <span className={syntheseStyles.syntheseStatSeparator}>/</span>
+                        <span className={syntheseStyles.syntheseStatTotal}>{total.toLocaleString('fr-FR')}</span>
+                        <span className={syntheseStyles.syntheseStatLabel}>tantièmes</span>
                     </div>
-                    <div className={styles.syntheseStatSecondary}>
-                        <span className={styles.synthesePourcentage}>{pourcentage.toFixed(1)}%</span>
-                        <div className={styles.syntheseStatDetails}>
-                            <span className={styles.syntheseStatDetail}>
+                    <div className={syntheseStyles.syntheseStatSecondary}>
+                        <span className={syntheseStyles.synthesePourcentage}>{pourcentage.toFixed(1)}%</span>
+                        <div className={syntheseStyles.syntheseStatDetails}>
+                            <span className={syntheseStyles.syntheseStatDetail}>
                                 <UserCheck size={14} aria-hidden="true" />
                                 {nombrePresents} présent{nombrePresents > 1 ? 's' : ''} ({tantièmesPresents.toLocaleString('fr-FR')} t.)
                             </span>
                             {nombreCorrespondance > 0 && (
-                                <span className={styles.syntheseStatDetail}>
+                                <span className={syntheseStyles.syntheseStatDetail}>
                                     <Mail size={14} aria-hidden="true" />
                                     {nombreCorrespondance} correspondance ({tantièmesCorrespondance.toLocaleString('fr-FR')} t.)
                                 </span>
@@ -98,63 +98,63 @@ export function SyntheseTantiemes({
                 </div>
 
                 {/* Barre de progression avec seuils */}
-                <div className={styles.progressContainer}>
-                    <div className={styles.progressBar}>
+                <div className={syntheseStyles.progressContainer}>
+                    <div className={syntheseStyles.progressBar}>
                         <div
-                            className={styles.progressFill}
+                            className={syntheseStyles.progressFill}
                             style={{ width: `${Math.min(pourcentage, 100)}%` }}
                         />
                         {/* Marqueurs de seuils */}
-                        <div className={styles.progressMarker} style={{ left: '50%' }} title="Article 24/25 - 50%">
-                            <div className={styles.progressMarkerLine} />
-                            <span className={styles.progressMarkerLabel}>50%</span>
+                        <div className={syntheseStyles.progressMarker} style={{ left: '50%' }} title="Article 24/25 - 50%">
+                            <div className={syntheseStyles.progressMarkerLine} />
+                            <span className={syntheseStyles.progressMarkerLabel}>50%</span>
                         </div>
-                        <div className={styles.progressMarker} style={{ left: '66.67%' }} title="Article 26 - 66,67%">
-                            <div className={styles.progressMarkerLine} />
-                            <span className={styles.progressMarkerLabel}>⅔</span>
+                        <div className={syntheseStyles.progressMarker} style={{ left: '66.67%' }} title="Article 26 - 66,67%">
+                            <div className={syntheseStyles.progressMarkerLine} />
+                            <span className={syntheseStyles.progressMarkerLabel}>⅔</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Indicateurs de seuils de majorité */}
-                <div className={styles.seuilsContainer}>
-                    <div className={`${styles.seuilItem} ${seuilArt24Atteint ? styles.seuilAtteint : styles.seuilNonAtteint}`}>
-                        <div className={styles.seuilHeader}>
-                            <span className={styles.seuilArticle}>Art. 24</span>
-                            <span className={styles.seuilStatus}>
+                <div className={syntheseStyles.seuilsContainer}>
+                    <div className={`${syntheseStyles.seuilItem} ${seuilArt24Atteint ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
+                        <div className={syntheseStyles.seuilHeader}>
+                            <span className={syntheseStyles.seuilArticle}>Art. 24</span>
+                            <span className={syntheseStyles.seuilStatus}>
                                 {seuilArt24Atteint ? '✓' : '○'}
                             </span>
                         </div>
-                        <span className={styles.seuilDescription}>Majorité simple</span>
-                        <span className={styles.seuilValeur}>{Math.ceil(total / 2)} tantièmes</span>
+                        <span className={syntheseStyles.seuilDescription}>Majorité simple</span>
+                        <span className={syntheseStyles.seuilValeur}>{Math.ceil(total / 2)} tantièmes</span>
                     </div>
 
-                    <div className={`${styles.seuilItem} ${seuilArt24Atteint ? styles.seuilAtteint : styles.seuilNonAtteint}`}>
-                        <div className={styles.seuilHeader}>
-                            <span className={styles.seuilArticle}>Art. 25</span>
-                            <span className={styles.seuilStatus}>
+                    <div className={`${syntheseStyles.seuilItem} ${seuilArt24Atteint ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
+                        <div className={syntheseStyles.seuilHeader}>
+                            <span className={syntheseStyles.seuilArticle}>Art. 25</span>
+                            <span className={syntheseStyles.seuilStatus}>
                                 {seuilArt24Atteint ? '✓' : '○'}
                             </span>
                         </div>
-                        <span className={styles.seuilDescription}>Majorité absolue</span>
-                        <span className={styles.seuilValeur}>{Math.ceil(total / 2) + 1} tantièmes</span>
+                        <span className={syntheseStyles.seuilDescription}>Majorité absolue</span>
+                        <span className={syntheseStyles.seuilValeur}>{Math.ceil(total / 2) + 1} tantièmes</span>
                     </div>
 
-                    <div className={`${styles.seuilItem} ${seuilArt26Atteint ? styles.seuilAtteint : styles.seuilNonAtteint}`}>
-                        <div className={styles.seuilHeader}>
-                            <span className={styles.seuilArticle}>Art. 26</span>
-                            <span className={styles.seuilStatus}>
+                    <div className={`${syntheseStyles.seuilItem} ${seuilArt26Atteint ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
+                        <div className={syntheseStyles.seuilHeader}>
+                            <span className={syntheseStyles.seuilArticle}>Art. 26</span>
+                            <span className={syntheseStyles.seuilStatus}>
                                 {seuilArt26Atteint ? '✓' : '○'}
                             </span>
                         </div>
-                        <span className={styles.seuilDescription}>Double majorité</span>
-                        <span className={styles.seuilValeur}>{Math.ceil(total * 2 / 3)} tantièmes</span>
+                        <span className={syntheseStyles.seuilDescription}>Double majorité</span>
+                        <span className={syntheseStyles.seuilValeur}>{Math.ceil(total * 2 / 3)} tantièmes</span>
                     </div>
                 </div>
 
                 {/* Message de validation juridique */}
                 {pourcentage < 50 && (
-                    <div className={styles.syntheseWarning}>
+                    <div className={syntheseStyles.syntheseWarning}>
                         <span>⚠️ Quorum insuffisant pour les décisions à l&apos;article 25</span>
                     </div>
                 )}

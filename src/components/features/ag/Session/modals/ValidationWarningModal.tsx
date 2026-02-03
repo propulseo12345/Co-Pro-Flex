@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle } from 'lucide-react';
-import styles from '../Session.module.css';
+import modalsStyles from '../styles/modals.module.css';
 
 interface ValidationWarningModalProps {
   missingVariables: string[];
@@ -15,26 +15,26 @@ export function ValidationWarningModal({
   onConfirmContinue
 }: ValidationWarningModalProps) {
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.warningModalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.warningHeader}>
+    <div className={modalsStyles.modalOverlay} onClick={onClose}>
+      <div className={modalsStyles.warningModalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={modalsStyles.warningHeader}>
           <AlertTriangle size={32} color="var(--warning)" aria-hidden="true" />
-          <h2 className={styles.warningTitle}>Champs non remplis</h2>
+          <h2 className={modalsStyles.warningTitle}>Champs non remplis</h2>
         </div>
-        <p className={styles.warningDescription}>
+        <p className={modalsStyles.warningDescription}>
           Les champs suivants ne sont pas encore remplis pour cette résolution :
         </p>
-        <ul className={styles.warningList}>
+        <ul className={modalsStyles.warningList}>
           {missingVariables.map((varName, index) => (
-            <li key={index} className={styles.warningListItem}>
-              <span className={styles.warningVariable}>{varName}</span>
+            <li key={index} className={modalsStyles.warningListItem}>
+              <span className={modalsStyles.warningVariable}>{varName}</span>
             </li>
           ))}
         </ul>
-        <p className={styles.warningQuestion}>
+        <p className={modalsStyles.warningQuestion}>
           Voulez-vous continuer malgré tout ?
         </p>
-        <div className={styles.modalActions}>
+        <div className={modalsStyles.modalActions}>
           <button onClick={onClose} className="btn btn-primary">
             Remplir les champs
           </button>

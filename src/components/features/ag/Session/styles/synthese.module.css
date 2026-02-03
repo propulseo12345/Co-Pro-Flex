@@ -1,0 +1,228 @@
+/* Synthese des tantiemes */
+
+.syntheseTantiemes {
+    background: var(--surface-secondary);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.syntheseHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    color: var(--primary);
+}
+
+.syntheseHeader h3 {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.syntheseContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.syntheseStats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.syntheseStatMain {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.syntheseStatValue {
+    font-size: var(--text-4xl);
+    font-weight: 800;
+    color: #93C5FD;
+    line-height: 1;
+}
+
+.syntheseStatSeparator {
+    font-size: var(--text-2xl);
+    color: var(--text-tertiary);
+}
+
+.syntheseStatTotal {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.syntheseStatLabel {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    margin-left: var(--space-xs);
+}
+
+.syntheseStatSecondary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.synthesePourcentage {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: #6EE7B7;
+    background: rgba(52, 211, 153, 0.2);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+}
+
+.syntheseStatDetails {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.syntheseStatDetail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+}
+
+/* Barre de progression */
+.progressContainer {
+    padding: var(--space-md) 0;
+}
+
+.progressBar {
+    position: relative;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    overflow: visible;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #60a5fa 0%, #6EE7B7 100%);
+    border-radius: var(--radius-lg);
+    transition: width 0.3s ease;
+}
+
+.progressMarker {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+}
+
+.progressMarkerLine {
+    width: 2px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.progressMarkerLabel {
+    margin-top: var(--space-xs);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Seuils de majorite */
+.seuilsContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+.seuilItem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    transition: all var(--transition-base);
+}
+
+.seuilAtteint {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: #6EE7B7;
+}
+
+.seuilNonAtteint {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+.seuilHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.seuilArticle {
+    font-weight: 700;
+    font-size: var(--text-sm);
+}
+
+.seuilAtteint .seuilArticle {
+    color: var(--success);
+}
+
+.seuilNonAtteint .seuilArticle {
+    color: var(--text-secondary);
+}
+
+.seuilStatus {
+    font-size: var(--text-lg);
+}
+
+.seuilAtteint .seuilStatus {
+    color: var(--success);
+}
+
+.seuilNonAtteint .seuilStatus {
+    color: var(--text-tertiary);
+}
+
+.seuilDescription {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.seuilValeur {
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.seuilAtteint .seuilValeur {
+    color: #6EE7B7;
+}
+
+.seuilNonAtteint .seuilValeur {
+    color: var(--text-tertiary);
+}
+
+/* Avertissement de quorum */
+.syntheseWarning {
+    padding: var(--space-md);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    color: var(--warning-dark, #92400e);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}

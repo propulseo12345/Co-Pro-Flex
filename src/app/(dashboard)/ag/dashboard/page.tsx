@@ -38,11 +38,15 @@ export default function AGDashboardPage() {
     return <LoadingState message="Chargement de la copropriété..." />;
   }
 
-  const buildDraftActions = (draft: AgDraft): AgListItemAction[] => [
-    { icon: <Edit3 size={16} />, label: 'Continuer', href: `/ag/${draft.id}/${getStepPath(draft.currentStep)}`, title: `Reprendre à l'étape ${draft.currentStep}` },
+  const buildDraftActions = (draft: AgDraft): AgListItemAction[] => {
+    // Utiliser maxStepReached pour la navigation (reprend là où l'utilisateur s'est arrêté)
+    const resumeStep = draft.maxStepReached || draft.currentStep || 1;
+    return [
+    { icon: <Edit3 size={16} />, label: 'Continuer', href: `/ag/${draft.id}/${getStepPath(resumeStep)}`, title: `Reprendre à l'étape ${resumeStep}` },
     { icon: <ClipboardList size={16} />, label: 'Agenda', href: `/ag/${draft.id}/agenda`, title: 'Ordre du jour' },
     { icon: <Trash2 size={16} />, onClick: () => handleOpenDeleteConfirm(draft.id, draft.title || `AG ${getTypeLabel(draft.meeting_type)}`), title: 'Supprimer le brouillon', variant: 'danger', disabled: deletingId === draft.id, isLoading: deletingId === draft.id },
   ];
+  };
 
   const buildLocalDraftActions = (draft: { id: string; type: string }) => [
     { icon: <Edit3 size={16} />, label: 'Continuer', href: `/ag/${draft.id}/edit`, title: 'Continuer la préparation' },
@@ -109,11 +113,13 @@ export default function AGDashboardPage() {
                 <div className={clsx(styles.list, styles.listDraft)}>
                   {draftMeetings.map((draft) => {
                     const typeLabel = getTypeLabel(draft.meeting_type);
+                    // Utiliser maxStepReached pour l'affichage de la progression
+                    const displayStep = draft.maxStepReached || draft.currentStep || 1;
                     const meta = [
                       draft.meeting_date ? `Prévue le ${new Date(draft.meeting_date).toLocaleDateString('fr-FR')}` : 'Date non définie',
                       draft.location,
                       `${draft.resolutionsCount || 0} résolution(s)`,
-                      `Étape ${draft.currentStep}/8`,
+                      `Étape ${displayStep}/8`,
                     ].filter(Boolean).join(' • ');
 
                     return (

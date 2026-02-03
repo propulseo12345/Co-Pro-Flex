@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import { ArrowLeft, ArrowRight, Info, CheckSquare, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
 import { useAgEnvoiPage, SENDING_METHODS } from '@/features/ag/hooks/useAgEnvoiPage';
@@ -11,6 +13,16 @@ export default function EnvoiPage() {
   const params = useParams();
   const agId = params.id as string;
   const page = useAgEnvoiPage({ agId });
+
+  // Mise à jour de l'étape courante en DB (étape 4 = Envoi convocations)
+  // Utilise un ref pour ne l'appeler qu'une seule fois
+  const stepUpdatedRef = useRef(false);
+  useEffect(() => {
+    if (agId && !page.isLoading && !stepUpdatedRef.current) {
+      stepUpdatedRef.current = true;
+      updateAgCurrentStep(agId, 4);
+    }
+  }, [agId, page.isLoading]);
 
   // État de chargement
   if (page.isLoading) {

@@ -1,0 +1,293 @@
+/* Modals Session */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+}
+
+.modalContent {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modalTitle {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: var(--space-xl);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.modalResolutionInfo {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--border);
+}
+
+.modalResolutionInfo h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+}
+
+.modalMajorityInfo {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.modalMajorityInfo strong {
+    color: var(--text-main);
+}
+
+.modalStats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.modalStatItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+}
+
+.modalResult {
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.modalResultAdopted {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, var(--success) 100%);
+    color: white;
+}
+
+.modalResultRejected {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.3) 0%, var(--danger) 100%);
+    color: white;
+}
+
+.modalResult h3 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin: var(--space-md) 0;
+}
+
+.modalResultReason {
+    font-size: var(--text-sm);
+    margin-top: var(--space-md);
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+.modalActions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+}
+
+/* Passerelle 25-1 */
+.passerelleAlert {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.passerelleExplanation {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    line-height: 1.6;
+}
+
+.passerelleExplanation p {
+    margin-bottom: var(--space-md);
+    color: var(--text-secondary);
+}
+
+.passerelleExplanation ul {
+    margin: var(--space-md) 0;
+    padding-left: var(--space-xl);
+}
+
+.passerelleExplanation li {
+    margin-bottom: var(--space-sm);
+    color: var(--text-main);
+}
+
+.secondVoteBanner {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, #ff9800 100%);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    color: white;
+}
+
+.secondVoteBanner strong {
+    display: block;
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xs);
+}
+
+.secondVoteBanner p {
+    margin: 0;
+    margin-bottom: var(--space-xs);
+    font-size: var(--text-sm);
+    opacity: 0.95;
+}
+
+.warningText {
+    margin-top: var(--space-sm) !important;
+    font-weight: 600;
+    opacity: 1 !important;
+}
+
+/* Warning Modal */
+.warningModalContent {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.warningHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.warningTitle {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.warningDescription {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.warningList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-lg) 0;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.warningListItem {
+    padding: var(--space-xs) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.warningListItem::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--warning);
+    border-radius: 50%;
+}
+
+.warningVariable {
+    font-family: monospace;
+    font-size: var(--text-sm);
+    color: var(--warning);
+    background: var(--warning-light);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.warningQuestion {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+/* Variable Modal */
+.variableForm {
+    margin: var(--space-xl) 0;
+}
+
+.variableLabel {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.variableInput {
+    width: 100%;
+    padding: var(--space-md);
+    font-size: var(--text-base);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-main);
+    transition: all var(--transition-base);
+}
+
+.variableInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modalContent {
+        padding: var(--space-lg);
+    }
+
+    .modalStats {
+        grid-template-columns: 1fr;
+    }
+
+    .modalActions {
+        flex-direction: column;
+    }
+
+    .modalActions button {
+        width: 100%;
+    }
+}

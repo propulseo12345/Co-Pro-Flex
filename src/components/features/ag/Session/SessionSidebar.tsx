@@ -7,7 +7,7 @@ import {
   type ModeParticipation,
   calculerStatsParticipation
 } from '@/lib/utils/ag-session';
-import styles from './Session.module.css';
+import sidebarStyles from './styles/sidebar.module.css';
 
 interface Coproprietaire {
   id: string;
@@ -96,45 +96,45 @@ export function SessionSidebar({
   }, [presences, presencesEnrichies, coproprietaires]);
 
   return (
-    <div className={styles.sidebar}>
+    <div className={sidebarStyles.sidebar}>
       {/* Progression */}
       <div className="card">
-        <h3 className={styles.sidebarTitle}>Progression</h3>
-        <div className={styles.progressBar}>
+        <h3 className={sidebarStyles.sidebarTitle}>Progression</h3>
+        <div className={sidebarStyles.progressBar}>
           <div
-            className={styles.progressFill}
+            className={sidebarStyles.progressFill}
             style={{ width: `${((currentResolutionIndex + 1) / totalResolutions) * 100}%` }}
           />
         </div>
-        <p className={styles.progressText}>
+        <p className={sidebarStyles.progressText}>
           {currentResolutionIndex + 1} / {totalResolutions} résolutions
         </p>
       </div>
 
       {/* Synthèse des participants */}
       <div className="card">
-        <h3 className={styles.sidebarTitle}>Participants</h3>
+        <h3 className={sidebarStyles.sidebarTitle}>Participants</h3>
 
         {/* Total */}
-        <div className={styles.participantsSynthese}>
-          <div className={styles.syntheseTotal}>
-            <span className={styles.syntheseTotalValue}>{stats.total}</span>
-            <span className={styles.syntheseTotalLabel}>
+        <div className={sidebarStyles.participantsSynthese}>
+          <div className={sidebarStyles.syntheseTotal}>
+            <span className={sidebarStyles.syntheseTotalValue}>{stats.total}</span>
+            <span className={sidebarStyles.syntheseTotalLabel}>
               / {totalTantiemes} tantièmes ({pourcentage}%)
             </span>
           </div>
         </div>
 
         {/* Ventilation par type */}
-        <div className={styles.syntheseByType}>
+        <div className={sidebarStyles.syntheseByType}>
           {/* Présents */}
-          <div className={`${styles.syntheseTypeItem} ${styles.syntheseTypePresent}`}>
-            <div className={styles.syntheseTypeIcon}>
+          <div className={`${sidebarStyles.syntheseTypeItem} ${sidebarStyles.syntheseTypePresent}`}>
+            <div className={sidebarStyles.syntheseTypeIcon}>
               <UserCheck size={16} aria-hidden="true" />
             </div>
-            <div className={styles.syntheseTypeInfo}>
-              <span className={styles.syntheseTypeLabel}>Présents</span>
-              <span className={styles.syntheseTypeValue}>
+            <div className={sidebarStyles.syntheseTypeInfo}>
+              <span className={sidebarStyles.syntheseTypeLabel}>Présents</span>
+              <span className={sidebarStyles.syntheseTypeValue}>
                 {stats.presents} t. ({stats.detail.presentsCount})
               </span>
             </div>
@@ -142,13 +142,13 @@ export function SessionSidebar({
 
           {/* Représentés */}
           {stats.detail.representesCount > 0 && (
-            <div className={`${styles.syntheseTypeItem} ${styles.syntheseTypeRepresente}`}>
-              <div className={styles.syntheseTypeIcon}>
+            <div className={`${sidebarStyles.syntheseTypeItem} ${sidebarStyles.syntheseTypeRepresente}`}>
+              <div className={sidebarStyles.syntheseTypeIcon}>
                 <Users size={16} aria-hidden="true" />
               </div>
-              <div className={styles.syntheseTypeInfo}>
-                <span className={styles.syntheseTypeLabel}>Représentés</span>
-                <span className={styles.syntheseTypeValue}>
+              <div className={sidebarStyles.syntheseTypeInfo}>
+                <span className={sidebarStyles.syntheseTypeLabel}>Représentés</span>
+                <span className={sidebarStyles.syntheseTypeValue}>
                   {stats.representes} t. ({stats.detail.representesCount})
                 </span>
               </div>
@@ -157,13 +157,13 @@ export function SessionSidebar({
 
           {/* Correspondance */}
           {stats.detail.correspondanceCount > 0 && (
-            <div className={`${styles.syntheseTypeItem} ${styles.syntheseTypeCorrespondance}`}>
-              <div className={styles.syntheseTypeIcon}>
+            <div className={`${sidebarStyles.syntheseTypeItem} ${sidebarStyles.syntheseTypeCorrespondance}`}>
+              <div className={sidebarStyles.syntheseTypeIcon}>
                 <Mail size={16} aria-hidden="true" />
               </div>
-              <div className={styles.syntheseTypeInfo}>
-                <span className={styles.syntheseTypeLabel}>Correspondance</span>
-                <span className={styles.syntheseTypeValue}>
+              <div className={sidebarStyles.syntheseTypeInfo}>
+                <span className={sidebarStyles.syntheseTypeLabel}>Correspondance</span>
+                <span className={sidebarStyles.syntheseTypeValue}>
                   {stats.correspondance} t. ({stats.detail.correspondanceCount})
                 </span>
               </div>
@@ -171,13 +171,13 @@ export function SessionSidebar({
           )}
 
           {/* Absents */}
-          <div className={`${styles.syntheseTypeItem} ${styles.syntheseTypeAbsent}`}>
-            <div className={styles.syntheseTypeIcon}>
+          <div className={`${sidebarStyles.syntheseTypeItem} ${sidebarStyles.syntheseTypeAbsent}`}>
+            <div className={sidebarStyles.syntheseTypeIcon}>
               <UserX size={16} aria-hidden="true" />
             </div>
-            <div className={styles.syntheseTypeInfo}>
-              <span className={styles.syntheseTypeLabel}>Absents</span>
-              <span className={styles.syntheseTypeValue}>
+            <div className={sidebarStyles.syntheseTypeInfo}>
+              <span className={sidebarStyles.syntheseTypeLabel}>Absents</span>
+              <span className={sidebarStyles.syntheseTypeValue}>
                 {stats.absents} t. ({stats.detail.absentsCount})
               </span>
             </div>
@@ -187,31 +187,31 @@ export function SessionSidebar({
 
       {/* Liste détaillée des participants */}
       <div className="card">
-        <h3 className={styles.sidebarTitle}>Détail des présences</h3>
-        <div className={styles.participantsList}>
+        <h3 className={sidebarStyles.sidebarTitle}>Détail des présences</h3>
+        <div className={sidebarStyles.participantsList}>
           {/* Présents */}
           {participantsParType.present.length > 0 && (
-            <div className={styles.participantsGroup}>
-              <div className={`${styles.participantsGroupHeader} ${styles.headerPresent}`}>
+            <div className={sidebarStyles.participantsGroup}>
+              <div className={`${sidebarStyles.participantsGroupHeader} ${sidebarStyles.headerPresent}`}>
                 <UserCheck size={14} aria-hidden="true" />
                 <span>Présents ({participantsParType.present.length})</span>
               </div>
-              <div className={styles.participantsGroupList}>
+              <div className={sidebarStyles.participantsGroupList}>
                 {participantsParType.present.map(copro => {
                   const presence = presencesEnrichies?.[copro.id];
                   const wasCorrespondance = presence?.voteCorrespondanceNeutralise;
 
                   return (
-                    <div key={copro.id} className={styles.participantItem}>
-                      <span className={styles.participantName}>
+                    <div key={copro.id} className={sidebarStyles.participantItem}>
+                      <span className={sidebarStyles.participantName}>
                         {copro.nom}
                         {wasCorrespondance && (
-                          <span className={styles.neutraliseBadgeSmall} title="Vote par correspondance neutralisé">
+                          <span className={sidebarStyles.neutraliseBadgeSmall} title="Vote par correspondance neutralisé">
                             ex-corresp.
                           </span>
                         )}
                       </span>
-                      <span className={styles.participantTantiemes}>{copro.tantiemes}</span>
+                      <span className={sidebarStyles.participantTantiemes}>{copro.tantiemes}</span>
                     </div>
                   );
                 })}
@@ -221,16 +221,16 @@ export function SessionSidebar({
 
           {/* Représentés */}
           {participantsParType.represente.length > 0 && (
-            <div className={styles.participantsGroup}>
-              <div className={`${styles.participantsGroupHeader} ${styles.headerRepresente}`}>
+            <div className={sidebarStyles.participantsGroup}>
+              <div className={`${sidebarStyles.participantsGroupHeader} ${sidebarStyles.headerRepresente}`}>
                 <Users size={14} aria-hidden="true" />
                 <span>Représentés ({participantsParType.represente.length})</span>
               </div>
-              <div className={styles.participantsGroupList}>
+              <div className={sidebarStyles.participantsGroupList}>
                 {participantsParType.represente.map(copro => (
-                  <div key={copro.id} className={styles.participantItem}>
-                    <span className={styles.participantName}>{copro.nom}</span>
-                    <span className={styles.participantTantiemes}>{copro.tantiemes}</span>
+                  <div key={copro.id} className={sidebarStyles.participantItem}>
+                    <span className={sidebarStyles.participantName}>{copro.nom}</span>
+                    <span className={sidebarStyles.participantTantiemes}>{copro.tantiemes}</span>
                   </div>
                 ))}
               </div>
@@ -239,16 +239,16 @@ export function SessionSidebar({
 
           {/* Correspondance */}
           {participantsParType.correspondance.length > 0 && (
-            <div className={styles.participantsGroup}>
-              <div className={`${styles.participantsGroupHeader} ${styles.headerCorrespondance}`}>
+            <div className={sidebarStyles.participantsGroup}>
+              <div className={`${sidebarStyles.participantsGroupHeader} ${sidebarStyles.headerCorrespondance}`}>
                 <Mail size={14} aria-hidden="true" />
                 <span>Correspondance ({participantsParType.correspondance.length})</span>
               </div>
-              <div className={styles.participantsGroupList}>
+              <div className={sidebarStyles.participantsGroupList}>
                 {participantsParType.correspondance.map(copro => (
-                  <div key={copro.id} className={styles.participantItem}>
-                    <span className={styles.participantName}>{copro.nom}</span>
-                    <span className={styles.participantTantiemes}>{copro.tantiemes}</span>
+                  <div key={copro.id} className={sidebarStyles.participantItem}>
+                    <span className={sidebarStyles.participantName}>{copro.nom}</span>
+                    <span className={sidebarStyles.participantTantiemes}>{copro.tantiemes}</span>
                   </div>
                 ))}
               </div>

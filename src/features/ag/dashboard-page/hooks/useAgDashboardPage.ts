@@ -41,9 +41,10 @@ const STEP_PATHS: Record<number, string> = {
   2: 'agenda',
   3: 'convocation',
   4: 'envoi',
-  5: 'preparation',
-  6: 'session',
-  7: 'pv',
+  5: 'votes-correspondance',
+  6: 'feuille-presence',
+  7: 'session',
+  8: 'pv',
 };
 
 export function getStepPath(step: number): string {

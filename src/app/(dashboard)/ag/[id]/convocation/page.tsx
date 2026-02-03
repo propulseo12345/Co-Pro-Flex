@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Stepper from '@/components/features/ag/Stepper';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import {
   ConvocationErrorState,
   ConvocationLoadingState,
@@ -35,6 +37,16 @@ export default function ConvocationPage() {
     handleContinue,
     handleBack,
   } = useConvocationPage();
+
+  // Mise à jour de l'étape courante en DB (étape 3 = Préparation convocations)
+  // Utilise un ref pour ne l'appeler qu'une seule fois
+  const stepUpdatedRef = useRef(false);
+  useEffect(() => {
+    if (agId && status === 'ready' && !stepUpdatedRef.current) {
+      stepUpdatedRef.current = true;
+      updateAgCurrentStep(agId, 3);
+    }
+  }, [agId, status]);
 
   // Loading state
   if (status === 'loading') {

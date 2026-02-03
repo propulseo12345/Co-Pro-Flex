@@ -68,6 +68,18 @@ export function useConvocationCore({
   const coproprietairesHook = useConvocationCoproprietaires();
   const draftHook = useConvocationDraft();
 
+  // Refs pour éviter les re-renders infinis (les hooks changent à chaque render)
+  const agHookRef = useRef(agHook);
+  const resolutionsHookRef = useRef(resolutionsHook);
+  const coproprietairesHookRef = useRef(coproprietairesHook);
+  const draftHookRef = useRef(draftHook);
+
+  // Mettre à jour les refs à chaque render
+  agHookRef.current = agHook;
+  resolutionsHookRef.current = resolutionsHook;
+  coproprietairesHookRef.current = coproprietairesHook;
+  draftHookRef.current = draftHook;
+
   const loadData = useCallback(async () => {
     if (!agId || !isValidUUID(agId)) {
       logger.error('ID AG invalide ou non-UUID', {
@@ -120,10 +132,20 @@ export function useConvocationCore({
       const degradedMode = createInitialDegradedMode();
 
       // 1. Attendre la session auth
-      const hasSession = await coproprietairesHook.waitForSession();
+      const hasSession = await coproprietairesHookRef.current.waitForSession();
 
       // 2. Charger les données AG
-      const agResult = await agHook.loadAgData(agId);
+      const agResult = await agHookRef.current.loadAgData(agId);
+
+      // Si la requête a été annulée (AbortError), ne rien faire - le prochain mount refera la requête
+      if (agResult.isLoading && !agResult.coproId) {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+        return; // Silencieusement ignorer - le composant va se remonter
+      }
+
       if (agResult.failed) {
         degradedMode.agDataFailed = true;
       }
@@ -145,7 +167,7 @@ export function useConvocationCore({
       }
 
       // 3. Charger les résolutions (en parallèle si possible)
-      const resolutionsResult = await resolutionsHook.loadResolutions(agId);
+      const resolutionsResult = await resolutionsHookRef.current.loadResolutions(agId);
       if (resolutionsResult.failed) {
         degradedMode.resolutionsFailed = true;
       }
@@ -155,7 +177,7 @@ export function useConvocationCore({
       let copropriete = null;
 
       if (hasSession) {
-        const coproResult = await coproprietairesHook.loadCoproprietaires(agId, agResult.coproId);
+        const coproResult = await coproprietairesHookRef.current.loadCoproprietaires(agId, agResult.coproId);
         if (coproResult.failed) {
           degradedMode.coproprietairesFailed = true;
         }
@@ -172,7 +194,7 @@ export function useConvocationCore({
       }
 
       // 5. Charger les choix d'envoi
-      const sendingChoices = await draftHook.loadSendingChoices(agId, coproprietaires);
+      const sendingChoices = await draftHookRef.current.loadSendingChoices(agId, coproprietaires);
 
       // Clear timeout
       if (timeoutRef.current) {
@@ -256,7 +278,7 @@ export function useConvocationCore({
         error: createUnexpectedError(err),
       }));
     }
-  }, [agId, timeoutMs, agHook, resolutionsHook, coproprietairesHook, draftHook]);
+  }, [agId, timeoutMs]); // Les hooks sont accédés via refs pour éviter les re-renders infinis
 
   // Charger au montage
   useEffect(() => {
@@ -284,29 +306,31 @@ export function useConvocationCore({
 
   const setSendingChoices = useCallback(
     (value: React.SetStateAction<SendingChoice[]>) => {
-      setState((prev) => ({
-        ...prev,
-        sendingChoices: typeof value === 'function' ? value(prev.sendingChoices) : value,
-      }));
-      // Also update draft hook state
-      const newChoices = typeof value === 'function' ? value(state.sendingChoices) : value;
-      draftHook.setSendingChoices(newChoices);
+      setState((prev) => {
+        const newChoices = typeof value === 'function' ? value(prev.sendingChoices) : value;
+        // Also update draft hook state
+        draftHookRef.current.setSendingChoices(newChoices);
+        return {
+          ...prev,
+          sendingChoices: newChoices,
+        };
+      });
     },
-    [state.sendingChoices, draftHook]
+    []
   );
 
   const saveCoproprietaires = useCallback(
     (copros: CoproprietaireEditable[]) => {
-      draftHook.saveCoproprietaires(agId, copros);
+      draftHookRef.current.saveCoproprietaires(agId, copros);
     },
-    [agId, draftHook]
+    [agId]
   );
 
   const saveSendingChoices = useCallback(
     (choices: SendingChoice[]) => {
-      draftHook.saveSendingChoices(agId, choices);
+      draftHookRef.current.saveSendingChoices(agId, choices);
     },
-    [agId, draftHook]
+    [agId]
   );
 
   return {

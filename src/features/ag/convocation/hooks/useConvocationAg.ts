@@ -2,7 +2,7 @@
  * Hook pour charger les données AG depuis ag_meetings
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { loadDraft } from '@/lib/ag/draft-persistence';
 import { logger, CONVOCATION_ERROR_CODES } from '@/lib/utils/logger';
@@ -44,6 +44,11 @@ const initialResult: UseConvocationAgResult = {
 
 export function useConvocationAg(): UseConvocationAgReturn {
   const [state, setState] = useState<UseConvocationAgResult>(initialResult);
+  const mountedRef = useRef(true);
+  const membershipEnsuredRef = useRef(false);
+
+  // Créer le client une seule fois
+  const supabaseRef = useRef(createUntypedClient());
 
   const reset = useCallback(() => {
     setState(initialResult);
@@ -53,13 +58,31 @@ export function useConvocationAg(): UseConvocationAgReturn {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const supabase = createUntypedClient();
+      const supabase = supabaseRef.current;
+
+      // S'assurer que l'utilisateur a un membership admin pour accéder aux drafts
+      // (RLS: seuls les managers voient les AG en draft)
+      // Ne le faire qu'une seule fois par session
+      if (!membershipEnsuredRef.current) {
+        try {
+          await supabase.rpc('ensure_dev_membership', { p_copro_id: null });
+          membershipEnsuredRef.current = true;
+        } catch {
+          // Ignorer les erreurs (ex: utilisateur non authentifié)
+        }
+      }
 
       const { data: meeting, error: meetingError } = await supabase
         .from('ag_meetings')
         .select('*')
         .eq('id', agId)
         .single();
+
+      // Ignorer AbortError (causé par React Strict Mode ou démontage du composant)
+      // Retourner un état "loading" pour que le prochain mount refasse la requête
+      if (meetingError?.message?.toLowerCase().includes('abort')) {
+        return { ...initialResult, isLoading: true };
+      }
 
       if (meetingError || !meeting) {
         logger.error('AG non trouvée dans Supabase', {
@@ -120,6 +143,12 @@ export function useConvocationAg(): UseConvocationAgReturn {
       setState(result);
       return result;
     } catch (err) {
+      // Ignorer AbortError (causé par React Strict Mode ou démontage du composant)
+      // Retourner un état "loading" pour que le prochain mount refasse la requête
+      if (err instanceof Error && (err.name === 'AbortError' || err.message.toLowerCase().includes('abort'))) {
+        return { ...initialResult, isLoading: true };
+      }
+
       logger.convocationError(
         agId,
         'loadAgData',

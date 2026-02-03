@@ -60,9 +60,11 @@ function formatUpdatedAt(dateStr: string): string {
   return date.toLocaleDateString('fr-FR');
 }
 
-// URLs pour reprendre à chaque étape (basé sur currentStep depuis DB)
+// URLs pour reprendre à l'étape maximale atteinte
 function getResumeUrl(draft: AgDraft): string {
-  switch (draft.currentStep) {
+  // Utiliser maxStepReached pour la navigation (reprend là où l'utilisateur s'est arrêté)
+  const step = draft.maxStepReached || draft.currentStep || 1;
+  switch (step) {
     case 1:
       return `/ag/${draft.id}/edit`;
     case 2:
@@ -169,7 +171,7 @@ export function AgDraftCard({ draft, onDelete }: AgDraftCardProps) {
 
         <div className={styles.draftStep}>
           <ArrowRight size={14} aria-hidden="true" />
-          {STEP_LABELS[draft.currentStep] || `Étape ${draft.currentStep}/8`}
+          {STEP_LABELS[draft.maxStepReached] || `Étape ${draft.maxStepReached}/8`}
         </div>
       </div>
 

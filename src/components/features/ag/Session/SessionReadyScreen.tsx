@@ -3,7 +3,9 @@
 import { Play, Users, Mail, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import { SyntheseTantiemes } from './SyntheseTantiemes';
 import type { PresenceData } from '@/lib/utils/ag-session';
-import styles from './Session.module.css';
+import layoutStyles from './styles/layout.module.css';
+import presenceStyles from './styles/presence.module.css';
+import readyscreenStyles from './styles/readyscreen.module.css';
 
 interface Coproprietaire {
   id: string;
@@ -71,47 +73,47 @@ export function SessionReadyScreen({
   const hasQuorum = pourcentageParticipants >= 50;
 
   return (
-    <div className={styles.startScreen}>
+    <div className={layoutStyles.startScreen}>
       <div className="card">
-        <h2 className={styles.sectionTitle}>Session prete a demarrer</h2>
-        <p className={styles.sectionDescription}>
+        <h2 className={layoutStyles.sectionTitle}>Session prete a demarrer</h2>
+        <p className={layoutStyles.sectionDescription}>
           Les presences ont ete enregistrees a l&apos;etape precedente. Vous pouvez maintenant demarrer la session de vote.
         </p>
 
         {/* Resume des presences */}
-        <div className={styles.presenceSummary}>
-          <div className={styles.presenceSummaryHeader}>
+        <div className={readyscreenStyles.presenceSummary}>
+          <div className={readyscreenStyles.presenceSummaryHeader}>
             <Users size={20} aria-hidden="true" />
             <h3>Resume des presences</h3>
           </div>
 
-          <div className={styles.presenceStats}>
-            <div className={styles.presenceStat}>
-              <span className={styles.presenceStatValue}>{presentCount}</span>
-              <span className={styles.presenceStatLabel}>Present{presentCount > 1 ? 's' : ''}</span>
+          <div className={readyscreenStyles.presenceStats}>
+            <div className={readyscreenStyles.presenceStat}>
+              <span className={readyscreenStyles.presenceStatValue}>{presentCount}</span>
+              <span className={readyscreenStyles.presenceStatLabel}>Present{presentCount > 1 ? 's' : ''}</span>
             </div>
             {representeCount > 0 && (
-              <div className={styles.presenceStat}>
-                <span className={styles.presenceStatValue}>{representeCount}</span>
-                <span className={styles.presenceStatLabel}>Represente{representeCount > 1 ? 's' : ''}</span>
+              <div className={readyscreenStyles.presenceStat}>
+                <span className={readyscreenStyles.presenceStatValue}>{representeCount}</span>
+                <span className={readyscreenStyles.presenceStatLabel}>Represente{representeCount > 1 ? 's' : ''}</span>
               </div>
             )}
             {correspondanceCount > 0 && (
-              <div className={styles.presenceStat}>
-                <span className={styles.presenceStatValue}>{correspondanceCount}</span>
-                <span className={styles.presenceStatLabel}>Correspondance</span>
+              <div className={readyscreenStyles.presenceStat}>
+                <span className={readyscreenStyles.presenceStatValue}>{correspondanceCount}</span>
+                <span className={readyscreenStyles.presenceStatLabel}>Correspondance</span>
               </div>
             )}
-            <div className={styles.presenceStatTotal}>
-              <span className={styles.presenceStatValue}>{totalParticipants}</span>
-              <span className={styles.presenceStatLabel}>Total participants</span>
+            <div className={readyscreenStyles.presenceStatTotal}>
+              <span className={readyscreenStyles.presenceStatValue}>{totalParticipants}</span>
+              <span className={readyscreenStyles.presenceStatLabel}>Total participants</span>
             </div>
           </div>
         </div>
 
         {/* Banniere votes par correspondance */}
         {votesCorrespondanceCount > 0 && (
-          <div className={styles.correspondanceBanner}>
+          <div className={presenceStyles.correspondanceBanner}>
             <Mail size={20} aria-hidden="true" />
             <div>
               <strong>{votesCorrespondanceCount} vote{votesCorrespondanceCount > 1 ? 's' : ''} par correspondance</strong>
@@ -132,7 +134,7 @@ export function SessionReadyScreen({
         />
 
         {/* Indicateur de quorum */}
-        <div className={`${styles.quorumIndicator} ${hasQuorum ? styles.quorumOk : styles.quorumWarning}`}>
+        <div className={`${readyscreenStyles.quorumIndicator} ${hasQuorum ? readyscreenStyles.quorumOk : presenceStyles.quorumWarning}`}>
           {hasQuorum ? (
             <>
               <CheckCircle size={20} aria-hidden="true" />
@@ -147,7 +149,7 @@ export function SessionReadyScreen({
         </div>
 
         {/* Boutons d'action */}
-        <div className={styles.startButtonContainer}>
+        <div className={presenceStyles.startButtonContainer}>
           <button
             type="button"
             onClick={onBackToPresences}

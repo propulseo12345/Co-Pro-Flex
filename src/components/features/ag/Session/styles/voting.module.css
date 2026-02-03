@@ -1,0 +1,280 @@
+/* Section de vote et table */
+
+.resolutionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--border);
+}
+
+.resolutionNumber {
+    font-size: var(--text-sm);
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+}
+
+.resolutionTitle {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.resolutionText {
+    font-size: var(--text-md);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-lg);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+/* Section de vote */
+.votingSection {
+    margin-bottom: var(--space-2xl);
+}
+
+.votingSection h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+.votingTable {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.votingTableHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border);
+}
+
+.votingTableHeaderCell {
+    padding: var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+    text-align: center;
+}
+
+.votingTableHeaderCell:first-child {
+    text-align: left;
+}
+
+.votingTableHeaderContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.selectAllButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.selectAllButton:hover {
+    background: var(--primary-light);
+}
+
+.votingTableBody {
+    display: flex;
+    flex-direction: column;
+}
+
+.votingTableRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border-light);
+    transition: background var(--transition-base);
+}
+
+.votingTableRow:last-child {
+    border-bottom: none;
+}
+
+.votingTableRow:hover {
+    background: var(--bg-secondary);
+}
+
+.votingTableRowDisabled {
+    opacity: 0.7;
+    background: var(--bg-secondary);
+}
+
+.votingTableRowDisabled:hover {
+    background: var(--bg-secondary);
+}
+
+.votingTableRowDisabled .voteButton {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.votingTableRowDisabled .voteButton:hover {
+    border-color: var(--border);
+    background: var(--surface);
+    color: inherit;
+}
+
+.votingTableCell {
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.votingTableCell:first-child {
+    justify-content: flex-start;
+}
+
+/* Info coproprietaire dans table */
+.coproList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.coproCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    gap: var(--space-lg);
+}
+
+.coproInfo {
+    flex: 1;
+}
+
+.coproName {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--space-xs);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.coproDetails {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+/* Boutons de vote */
+.voteButtons {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.voteButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+.voteButtonPour:hover {
+    border-color: #6EE7B7;
+    background-color: #6EE7B7;
+    color: #6EE7B7;
+}
+
+.voteButtonPour.voteButtonActive {
+    border-color: white;
+    background-color: white;
+    color: white;
+}
+
+.voteButtonContre:hover {
+    border-color: #F87171;
+    background-color: #F87171;
+    color: #F87171;
+}
+
+.voteButtonContre.voteButtonActive {
+    border-color: white;
+    background-color: white;
+    color: white;
+}
+
+.voteButtonAbstention:hover {
+    border-color: #FCD34D;
+    background-color: #FCD34D;
+    color: #FCD34D;
+}
+
+.voteButtonAbstention.voteButtonActive {
+    border-color: white;
+    background-color: white;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .resolutionHeader {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .coproCard {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .voteButtons {
+        width: 100%;
+    }
+
+    .voteButton {
+        flex: 1;
+    }
+
+    .votingTableHeader,
+    .votingTableRow {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+    }
+
+    .votingTableHeaderCell,
+    .votingTableCell {
+        padding: var(--space-sm);
+    }
+
+    .votingTableHeaderContent {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+}

@@ -1,0 +1,101 @@
+/* Session Ready Screen */
+
+.presenceSummary {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.presenceSummaryHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    color: var(--primary);
+}
+
+.presenceSummaryHeader h3 {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.presenceStats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+    justify-content: center;
+}
+
+.presenceStat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    min-width: 100px;
+}
+
+.presenceStatValue {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.presenceStatLabel {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.presenceStatTotal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-light) 100%);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-md);
+    min-width: 120px;
+}
+
+.presenceStatTotal .presenceStatValue {
+    color: #93C5FD;
+}
+
+.quorumIndicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+.quorumOk {
+    background: rgba(52, 211, 153, 0.15);
+    border: 1px solid #6EE7B7;
+    color: #6EE7B7;
+}
+
+/* Note: quorumWarning est dans presence.module.css car partage avec startScreen */
+
+@media (max-width: 600px) {
+    .presenceStats {
+        flex-direction: column;
+    }
+
+    .presenceStat,
+    .presenceStatTotal {
+        width: 100%;
+    }
+}
