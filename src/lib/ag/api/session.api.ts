@@ -154,24 +154,10 @@ export async function listEligibleVoters(coproId: string): Promise<Array<{
 
 /**
  * Enregistrer une présence
- * Essaie d'abord via edge function, puis fallback sur upsert direct si échec auth
+ * Utilise l'upsert direct (l'edge function n'est pas déployée)
  */
 export async function registerAttendance(input: RegisterAttendanceInput): Promise<RegisterAttendanceResponse> {
-  try {
-    return await invokeEdgeFunction<RegisterAttendanceResponse>('ag_register_attendance', input);
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : '';
-
-    // Si c'est une erreur d'auth ou si l'edge function n'existe pas, utiliser upsert direct
-    if (errorMsg.includes('401') || errorMsg.includes('JWT') || errorMsg.includes('auth') ||
-        errorMsg.includes('Session') || errorMsg.includes('FunctionsFetchError') ||
-        errorMsg.includes('non_2xx_response')) {
-      console.log('[registerAttendance] Edge function échouée, tentative d\'upsert direct...');
-      return registerAttendanceDirect(input);
-    }
-
-    throw err;
-  }
+  return registerAttendanceDirect(input);
 }
 
 /**
@@ -183,29 +169,43 @@ async function registerAttendanceDirect(input: RegisterAttendanceInput): Promise
   console.log('[registerAttendanceDirect] Upsert direct pour:', input.coproprietaire_id);
 
   try {
-    // Get tantiemes for this coproprietaire from their lots
-    const { data: lotsData, error: lotsError } = await supabase
-      .from('lots')
-      .select('tantiemes_generaux')
-      .eq('copro_id', input.copro_id)
-      .in('id', input.lot_ids.length > 0 ? input.lot_ids : ['00000000-0000-0000-0000-000000000000']);
-
     let tantiemes = 0;
-    if (!lotsError && lotsData) {
-      tantiemes = lotsData.reduce((sum: number, lot: { tantiemes_generaux: number }) => sum + (lot.tantiemes_generaux || 0), 0);
+
+    if (input.lot_ids.length > 0) {
+      // Get tantiemes from specified lots
+      const { data: lotsData } = await supabase
+        .from('lots')
+        .select('tantiemes_generaux')
+        .eq('copro_id', input.copro_id)
+        .in('id', input.lot_ids);
+
+      if (lotsData) {
+        tantiemes = lotsData.reduce((sum: number, lot: { tantiemes_generaux: number }) => sum + (lot.tantiemes_generaux || 0), 0);
+      }
     }
 
-    // If no lot_ids provided, get all lots for this coproprietaire
-    if (input.lot_ids.length === 0) {
+    // If no lot_ids or tantiemes still 0, get all lots for this coproprietaire via lot_owners
+    if (tantiemes === 0) {
       const { data: ownerLots } = await supabase
         .from('lot_owners')
-        .select('lots!inner(id, tantiemes_generaux)')
+        .select('lot_id')
         .eq('coproprietaire_id', input.coproprietaire_id)
         .is('end_date', null);
 
       if (ownerLots && ownerLots.length > 0) {
-        tantiemes = ownerLots.reduce((sum: number, lo: { lots: { tantiemes_generaux: number } }) =>
-          sum + (lo.lots?.tantiemes_generaux || 0), 0);
+        const lotIds = ownerLots.map((lo: { lot_id: string }) => lo.lot_id);
+        const { data: lotsData } = await supabase
+          .from('lots')
+          .select('id, tantiemes_generaux')
+          .in('id', lotIds);
+
+        if (lotsData) {
+          tantiemes = lotsData.reduce((sum: number, lot: { tantiemes_generaux: number }) => sum + (lot.tantiemes_generaux || 0), 0);
+          // Also populate lot_ids for the attendance record
+          if (input.lot_ids.length === 0) {
+            input.lot_ids = lotsData.map((l: { id: string }) => l.id);
+          }
+        }
       }
     }
 

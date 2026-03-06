@@ -16,6 +16,7 @@ interface BudgetSectionProps {
   editing: EditingPosteState;
   isImporting?: boolean;
   importError?: string | null;
+  availableBudgetYears: number[];
   onBudgetChange: (value: boolean) => void;
   onExerciceChange: (value: string) => void;
   onNewPosteChange: (value: { poste: string; montant: string }) => void;
@@ -26,7 +27,7 @@ interface BudgetSectionProps {
   onSavePoste: () => void;
   onCancelEdit: () => void;
   onEditKeyDown: (e: React.KeyboardEvent) => void;
-  onImportBudget: () => void;
+  onImportBudget: (params: { source: 'current_priority'; budgetId?: null }) => void;
   onUpdateEditingData: (field: 'poste' | 'montant', value: string) => void;
 }
 
@@ -41,6 +42,7 @@ export function BudgetSection({
   editing,
   isImporting = false,
   importError = null,
+  availableBudgetYears,
   onBudgetChange,
   onExerciceChange,
   onNewPosteChange,
@@ -54,6 +56,13 @@ export function BudgetSection({
   onImportBudget,
   onUpdateEditingData,
 }: BudgetSectionProps) {
+  const handleImportClick = () => {
+    onImportBudget({
+      source: 'current_priority',
+      budgetId: null,
+    });
+  };
+
   return (
     <div className={styles.section}>
       <h2 className={styles.sectionTitle}>Informations facultatives</h2>
@@ -66,7 +75,7 @@ export function BudgetSection({
               <DollarSign size={20} aria-hidden="true" />
               Inclure la préparation du budget prévisionnel
             </div>
-            <div className={styles.checkboxDescription}>Cette AG comprendra le vote du budget pour l'exercice à venir</div>
+            <div className={styles.checkboxDescription}>Cette AG comprendra le vote du budget pour l&apos;exercice à venir</div>
           </div>
         </label>
 
@@ -76,14 +85,24 @@ export function BudgetSection({
               <label htmlFor="budgetExercice" className={styles.label}>
                 Exercice
               </label>
-              <input
-                type="text"
+              <select
                 id="budgetExercice"
-                className={styles.input}
-                placeholder="Ex: 2026"
+                className={styles.select}
                 value={budgetExercice}
                 onChange={(e) => onExerciceChange(e.target.value)}
-              />
+              >
+                {budgetExercice && !availableBudgetYears.includes(Number.parseInt(budgetExercice, 10)) && (
+                  <option value={budgetExercice}>{budgetExercice}</option>
+                )}
+                {availableBudgetYears.length === 0 && (
+                  <option value={budgetExercice || ''}>{budgetExercice || 'Aucun exercice disponible'}</option>
+                )}
+                {availableBudgetYears.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className={styles.budgetSection}>
@@ -91,10 +110,10 @@ export function BudgetSection({
                 <h3 className={styles.budgetSectionTitle}>Détail du budget par postes</h3>
                 <button
                   type="button"
-                  onClick={onImportBudget}
+                  onClick={handleImportClick}
                   className={styles.importBudgetBtn}
                   title="Récupérer le budget depuis Finance > Budgets"
-                  disabled={isImporting}
+                  disabled={isImporting || !budgetExercice.trim()}
                 >
                   {isImporting ? (
                     <Loader2 size={16} className={styles.spinnerIcon} aria-hidden="true" />

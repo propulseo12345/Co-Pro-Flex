@@ -66,21 +66,25 @@ export function useAgNewPage() {
   }, [formData.budgetPostes, formData.budget, budgetTotal, updateField]);
 
   // Google Maps Autocomplete
-  const { autocompleteRef, isGoogleMapsLoaded } = useGoogleMapsAutocomplete({
+  const {
+    searchValue,
+    suggestions,
+    isSearching,
+    setSearchValue,
+    selectSuggestion,
+    isGoogleMapsLoaded,
+    googleMapsStatus,
+  } = useGoogleMapsAutocomplete({
     onPlaceSelect: setAdresseFromAutocomplete,
-    formatAdresseComplete: (adresse: AdresseAG) => {
-      const parts: string[] = [];
-      if (adresse.nomLieu) parts.push(adresse.nomLieu);
-      if (adresse.rue) parts.push(adresse.rue);
-      if (adresse.codePostal || adresse.ville) {
-        parts.push(`${adresse.codePostal} ${adresse.ville}`.trim());
-      }
-      return parts.join(', ');
-    },
   });
 
   // Budget import from Supabase
-  const { importBudget, isLoading: isBudgetImporting, error: budgetImportError } = useBudgetImport();
+  const {
+    importBudget,
+    isLoading: isBudgetImporting,
+    error: budgetImportError,
+    availableYears,
+  } = useBudgetImport();
 
   // Budget posts manager with Supabase import
   const budgetPostesManager = useBudgetPostes({
@@ -257,10 +261,16 @@ export function useAgNewPage() {
     budgetPostesManager,
     isBudgetImporting,
     budgetImportError,
+    availableBudgetYears: availableYears,
 
     // Google Maps
-    autocompleteRef,
+    addressSearchValue: searchValue,
+    addressSuggestions: suggestions,
+    isAddressSearching: isSearching,
+    setAddressSearchValue: setSearchValue,
+    selectAddressSuggestion: selectSuggestion,
     isGoogleMapsLoaded,
+    googleMapsStatus,
 
     // Handlers
     handleChange,

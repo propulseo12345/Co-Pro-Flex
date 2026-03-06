@@ -15,6 +15,7 @@ import {
   ClotureModal,
   HistoriqueModal,
 } from '@/components/features/finance/Comptabilite';
+import { FinanceAnnexeStats } from '@/components/features/finance/FinanceAnnexeStats';
 import styles from './comptabilite.module.css';
 
 export default function ComptabilitePage() {
@@ -47,13 +48,20 @@ export default function ComptabilitePage() {
     <div className={styles.container}>
       <ComptaHeader
         etatCloture={page.etatCloture}
+        startDate={page.openPeriod.start_date}
+        endDate={page.openPeriod.end_date}
         onShowHistorique={() => page.setShowHistoriqueModal(true)}
         onShowCloture={() => page.setShowClotureModal(true)}
         onExportPDF={page.exportToPDF}
         onExportExcel={page.exportToExcel}
       />
 
-      <ComptaInfoBanner periodName={page.openPeriod.name} onRefresh={page.handleRefresh} />
+      <FinanceAnnexeStats />
+      <ComptaInfoBanner
+        periodName={page.openPeriod.name}
+        onRefresh={page.handleRefresh}
+        isReadOnly={page.isReadOnly}
+      />
       <ComptaTabs activeTab={page.activeTab} onTabChange={page.setActiveTab} />
 
       <ComptaStats
@@ -91,6 +99,9 @@ export default function ComptabilitePage() {
         lignesBalance={page.lignesBalance}
         annee={page.etatCloture.annee}
         onViewOperationDetail={page.handleViewOperationDetail}
+        coproId={page.currentCoproId}
+        periodId={page.openPeriod?.id ?? null}
+        coproName={page.openPeriod?.name}
       />
 
       <DetailModal
@@ -99,17 +110,19 @@ export default function ComptabilitePage() {
         selectedOperation={page.selectedOperation}
         selectedDepense={page.selectedDepense}
       />
-      <ClotureModal
-        isOpen={page.showClotureModal}
-        onClose={() => page.setShowClotureModal(false)}
-        etatCloture={page.etatCloture}
-        mouvementsNonCategorises={page.mouvementsNonCategorises}
-        totalDebit={page.totalDebit}
-        totalCredit={page.totalCredit}
-        isBalanced={page.isBalanced}
-        ecart={page.ecart}
-        onValiderCloture={page.handleValiderCloture}
-      />
+      {!page.isReadOnly && (
+        <ClotureModal
+          isOpen={page.showClotureModal}
+          onClose={() => page.setShowClotureModal(false)}
+          etatCloture={page.etatCloture}
+          mouvementsNonCategorises={page.mouvementsNonCategorises}
+          totalDebit={page.totalDebit}
+          totalCredit={page.totalCredit}
+          isBalanced={page.isBalanced}
+          ecart={page.ecart}
+          onValiderCloture={page.handleValiderCloture}
+        />
+      )}
       <HistoriqueModal
         isOpen={page.showHistoriqueModal}
         onClose={() => page.setShowHistoriqueModal(false)}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Clock, Calendar, MapPin, ArrowRight, Trash2 } from 'lucide-react';
+import { ArrowRight, Trash2 } from 'lucide-react';
 import type { AgDraft } from '@/hooks/modules/useAgDrafts';
 import { DeleteDraftModal } from './DeleteDraftModal';
 import clsx from 'clsx';
@@ -110,79 +110,31 @@ export function AgDraftCard({ draft, onDelete }: AgDraftCardProps) {
   );
 
   return (
-    <div className={styles.draftCard}>
-      <div className={styles.draftCardHeader}>
-        <div className={styles.draftCardType}>
-          <span className={clsx(styles.draftTypeBadge, styles[`draftType${draft.meeting_type}`])}>
-            {TYPE_LABELS[draft.meeting_type] || 'AG'}
-          </span>
-        </div>
-        <div className={styles.draftCardMeta}>
-          <Clock size={12} aria-hidden="true" />
-          Modifié {formatUpdatedAt(draft.updated_at)}
-        </div>
+    <div className={styles.draftRow}>
+      <span className={clsx(styles.draftTypeBadge, styles[`draftType${draft.meeting_type}`])}>
+        {TYPE_LABELS[draft.meeting_type] || 'AG'}
+      </span>
+
+      <div className={styles.draftRowInfo}>
+        <span className={styles.draftRowTitle}>{draft.title}</span>
+        <span className={styles.draftRowMeta}>
+          {draft.meeting_date ? formatDate(draft.meeting_date) : 'Date non définie'}
+        </span>
       </div>
 
-      <div className={styles.draftCardBody}>
-        <h3 className={styles.draftTitle}>{draft.title}</h3>
+      <span className={styles.draftRowStep}>
+        {STEP_LABELS[draft.maxStepReached] || `Étape ${draft.maxStepReached}/8`}
+      </span>
 
-        <div className={styles.draftInfoRow}>
-          <Calendar size={16} className={styles.draftInfoIcon} aria-hidden="true" />
-          <div className={styles.draftInfoContent}>
-            {draft.meeting_date ? (
-              <span className={styles.draftInfoValue}>{formatDate(draft.meeting_date)}</span>
-            ) : (
-              <span className={styles.draftInfoMissing}>Date non définie</span>
-            )}
-          </div>
-        </div>
+      <span className={styles.draftRowProgress}>{progressPercent}%</span>
 
-        <div className={styles.draftInfoRow}>
-          <MapPin size={16} className={styles.draftInfoIcon} aria-hidden="true" />
-          <div className={styles.draftInfoContent}>
-            {draft.location ? (
-              <span className={styles.draftInfoValue}>{draft.location}</span>
-            ) : (
-              <span className={styles.draftInfoMissing}>Lieu non défini</span>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.draftCounters}>
-          <span className={clsx(styles.draftCounter, draft.hasResolutions && styles.draftCounterDone)}>
-            {draft.resolutionsCount} résolution{draft.resolutionsCount > 1 ? 's' : ''}
-          </span>
-          <span className={clsx(styles.draftCounter, draft.hasAttendance && styles.draftCounterDone)}>
-            {draft.attendanceCount} participant{draft.attendanceCount > 1 ? 's' : ''}
-          </span>
-          {draft.hasVotes && (
-            <span className={clsx(styles.draftCounter, styles.draftCounterDone)}>
-              {draft.votesCount} vote{draft.votesCount > 1 ? 's' : ''}
-            </span>
-          )}
-        </div>
-
-        <div className={styles.draftProgress}>
-          <div className={styles.draftProgressBar}>
-            <div className={styles.draftProgressFill} style={{ width: `${progressPercent}%` }} />
-          </div>
-          <span className={styles.draftProgressText}>{progressPercent}%</span>
-        </div>
-
-        <div className={styles.draftStep}>
-          <ArrowRight size={14} aria-hidden="true" />
-          {STEP_LABELS[draft.maxStepReached] || `Étape ${draft.maxStepReached}/8`}
-        </div>
-      </div>
-
-      <div className={styles.draftCardFooter}>
+      <div className={styles.draftRowActions}>
         <button
           onClick={handleOpenDeleteModal}
           className={styles.draftDeleteBtn}
           title="Supprimer le brouillon"
         >
           <Trash2 size={16} aria-hidden="true" />
-          Supprimer
         </button>
         <Link href={getResumeUrl(draft)} className={styles.draftContinueBtn}>
           Continuer

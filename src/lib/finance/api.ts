@@ -563,6 +563,60 @@ export async function getOpenPeriod(coproId: string): Promise<ApiResult<Accounti
   return { data: data as AccountingPeriod | null, error: null };
 }
 
+export async function getActivePeriod(coproId: string): Promise<ApiResult<AccountingPeriod | null>> {
+  const supabase = getSupabaseClient();
+
+  // Try open period first
+  const { data: openData, error: openError } = await supabase
+    .from('accounting_periods')
+    .select('id, copro_id, name, start_date, end_date, status')
+    .eq('copro_id', coproId)
+    .eq('status', 'open')
+    .single();
+
+  if (openData) {
+    return { data: openData as AccountingPeriod, error: null };
+  }
+
+  if (openError && openError.code !== 'PGRST116') {
+    return { data: null, error: openError.message };
+  }
+
+  // Fallback: most recent closed period
+  const { data: closedData, error: closedError } = await supabase
+    .from('accounting_periods')
+    .select('id, copro_id, name, start_date, end_date, status')
+    .eq('copro_id', coproId)
+    .eq('status', 'closed')
+    .order('end_date', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (closedError && closedError.code !== 'PGRST116') {
+    return { data: null, error: closedError.message };
+  }
+
+  return { data: closedData as AccountingPeriod | null, error: null };
+}
+
+export async function closePeriod(periodId: string): Promise<ApiResult<boolean>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc('close_period', {
+    p_period_id: periodId,
+  });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  if (data !== true) {
+    return { data: false, error: null };
+  }
+
+  return { data: true, error: null };
+}
+
 export async function listAccounts(coproId: string, accountType?: string): Promise<ApiResult<Array<{ id: string; code: string; name: string; account_type: string }>>> {
   const supabase = getSupabaseClient();
 

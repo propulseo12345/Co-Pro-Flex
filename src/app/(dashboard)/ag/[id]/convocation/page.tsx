@@ -13,7 +13,6 @@ import {
   ConvocationHeader,
   ConvocationAlerts,
   ConvocationPreviewColumn,
-  ConvocationSendingColumn,
   ConvocationFooter,
 } from '@/features/ag/convocation';
 import styles from './convocation.module.css';
@@ -109,27 +108,6 @@ export default function ConvocationPage() {
           onDownload={() => preview.downloadPDF()}
           onModeChange={preview.setPreviewMode}
           onToggleReviewMode={preview.toggleReviewMode}
-        />
-
-        <ConvocationSendingColumn
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          globalMode={delivery.config.globalMode}
-          isRegistered={delivery.config.postalSettings.isRegistered}
-          sendType={delivery.config.postalSettings.sendType}
-          stats={delivery.stats}
-          ownerStatuses={delivery.ownerStatuses}
-          syndicInfo={syndicInfo}
-          agTitle={agData?.type}
-          onModeChange={delivery.setGlobalMode}
-          onRegisteredChange={delivery.setPostalRegistered}
-          onOwnerModeChange={delivery.setOwnerMode}
-          onSavePreferences={delivery.saveAsPreferences}
-          onResetPreferences={delivery.resetToPreferences}
-          onSendEmail={delivery.sendEmail}
-          onSendAllEmails={delivery.sendAllEmails}
-          getOwnersForPostal={delivery.getOwnersForPostal}
-          getOwnersForEmail={delivery.getOwnersForEmail}
         />
       </div>
 

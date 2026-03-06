@@ -182,16 +182,11 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         id: 'ag-04',
         titre: 'Compte rendu d\'activité du conseil syndical',
         categorie: 'Assemblée Générale',
-        texte: 'L\'assemblée générale prend connaissance du compte rendu d\'activité du conseil syndical pour l\'exercice écoulé. Le conseil syndical a tenu {nombre_reunions} réunions et a traité les dossiers suivants : {resume_activites}.',
+        texte: 'L\'assemblée générale prend connaissance du compte rendu d\'activité du conseil syndical pour l\'exercice écoulé. Le compte rendu est présenté en séance par le conseil syndical.',
         majorite: 'INFORMATION',
         isInformation: true,
-        variables: ['nombre_reunions', 'resume_activites'],
-        variablesTypees: [
-            { name: 'nombre_reunions', type: 'numero', label: 'Nombre de réunions', placeholder: 'Ex: 4', required: true },
-            { name: 'resume_activites', type: 'textarea', label: 'Résumé des activités', placeholder: 'Liste des dossiers traités...', required: false }
-        ],
-        applicable_ag: ['ORDINAIRE'],
-        obligatoire_pour: ['ORDINAIRE'],
+        applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
+        obligatoire_pour: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         ordre_suggere: 4,
         tags: ['conseil syndical', 'rapport']
     },
@@ -450,6 +445,11 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         texte: 'L\'assemblée générale approuve les comptes de l\'exercice du {date_debut} au {date_fin}, faisant apparaître un résultat de {montant} euros.',
         majorite: 'ART_24',
         variables: ['date_debut', 'date_fin', 'montant'],
+        variablesTypees: [
+            { name: 'date_debut', type: 'date', label: 'Date de début d\'exercice', required: true },
+            { name: 'date_fin', type: 'date', label: 'Date de fin d\'exercice', required: true },
+            { name: 'montant', type: 'montant', label: 'Résultat de l\'exercice', required: true }
+        ],
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 5,

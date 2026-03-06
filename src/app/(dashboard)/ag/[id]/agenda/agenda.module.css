@@ -514,34 +514,148 @@
 }
 
 .variablePlaceholder {
-    display: inline;
-    padding: 2px 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
     font-weight: 600;
+    border: 1px solid transparent;
+    font-size: 0.95em;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+.variablePlaceholder:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.variablePlaceholderLabel {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.variableMenuContainer {
+    display: inline-flex;
+    position: relative;
+    vertical-align: middle;
 }
 
 .variableEmpty {
-    background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
-    border: 1px dashed var(--warning);
+    background: rgba(59, 130, 246, 0.2);
+    color: #DBEAFE;
+    border-color: #93C5FD;
 }
 
 .variableEmpty:hover {
-    background: var(--warning);
-    color: white;
+    background: rgba(59, 130, 246, 0.35);
+    border-color: #BFDBFE;
+    transform: translateY(-1px);
 }
 
 .variableFilled {
-    background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
-    border: 1px solid var(--success-light);
+    background: rgba(34, 197, 94, 0.22);
+    color: #BBF7D0;
+    border-color: #4ADE80;
 }
 
 .variableFilled:hover {
-    background: var(--success);
-    color: white;
+    background: rgba(34, 197, 94, 0.34);
+    color: #DCFCE7;
+    transform: translateY(-1px);
+}
+
+.coproMenu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 150;
+    min-width: 280px;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    overflow: hidden;
+}
+
+.coproMenuFilter {
+    padding: var(--space-sm);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.coproMenuFilterInput {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-main);
+    font-size: var(--text-sm);
+}
+
+.coproMenuFilterInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.coproMenuList {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.coproMenuItem {
+    width: 100%;
+    display: block;
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    text-align: left;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.coproMenuItem:hover,
+.coproMenuItem:focus-visible {
+    outline: none;
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.coproMenuEmpty {
+    padding: var(--space-md);
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: var(--text-sm);
+}
+
+.coproMenuManual {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    text-align: left;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: color var(--transition-base), background-color var(--transition-base);
+}
+
+.coproMenuManual:hover,
+.coproMenuManual:focus-visible {
+    outline: none;
+    background: var(--primary-light);
+    color: var(--primary);
 }
 
 /* Édition inline */

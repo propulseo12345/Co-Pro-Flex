@@ -55,6 +55,7 @@ interface NavSection {
 
 const TOP_LEVEL_ITEMS: NavItem[] = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Assemblées Générales', href: '/ag', icon: Users },
 ];
 
 const NAV_SECTIONS: NavSection[] = [
@@ -69,19 +70,12 @@ const NAV_SECTIONS: NavSection[] = [
     name: 'Finance & Comptabilité',
     icon: DollarSign,
     items: [
+      { name: 'Comptabilité', href: '/finance/comptabilite', icon: Calculator },
       { name: 'Budgets', href: '/finance/budgets', icon: FileText },
       { name: 'Factures', href: '/finance/factures', icon: Receipt },
       { name: 'Appels de fonds', href: '/finance/appels-fonds', icon: DollarSign },
       { name: 'Mouvements bancaires', href: '/finance/mouvements-bancaires', icon: ArrowLeftRight },
-      { name: 'Comptabilité', href: '/finance/comptabilite', icon: Calculator },
-    ]
-  },
-  {
-    name: 'Assemblées Générales',
-    icon: Users,
-    items: [
-      { name: 'Dashboard AG', href: '/ag/dashboard', icon: LayoutDashboard },
-      { name: 'Bibliothèque de résolutions', href: '/ag/resolutions', icon: FileText },
+      { name: 'Tantièmes', href: '/finance/tantiemes', icon: BarChart3 },
     ]
   },
   {
@@ -89,6 +83,7 @@ const NAV_SECTIONS: NavSection[] = [
     icon: FileText,
     items: [
       { name: 'GED - Mes documents', href: '/documents/ged', icon: FileText },
+      { name: 'Annexes comptables', href: '/documents/annexes', icon: Calculator },
       { name: 'Grand livre', href: '/documents/ledger', icon: FileText },
       { name: 'Balance comptable', href: '/documents/balance', icon: FileText },
       { name: 'Dépenses', href: '/documents/expenses', icon: FileText },

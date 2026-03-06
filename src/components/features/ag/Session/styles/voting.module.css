@@ -207,38 +207,38 @@
 
 .voteButtonPour:hover {
     border-color: #6EE7B7;
-    background-color: #6EE7B7;
+    background-color: rgba(110, 231, 183, 0.15);
     color: #6EE7B7;
 }
 
 .voteButtonPour.voteButtonActive {
-    border-color: white;
-    background-color: white;
-    color: white;
+    border-color: #6EE7B7;
+    background-color: #6EE7B7;
+    color: #065F46;
 }
 
 .voteButtonContre:hover {
     border-color: #F87171;
-    background-color: #F87171;
+    background-color: rgba(248, 113, 113, 0.15);
     color: #F87171;
 }
 
 .voteButtonContre.voteButtonActive {
-    border-color: white;
-    background-color: white;
-    color: white;
+    border-color: #F87171;
+    background-color: #F87171;
+    color: #7F1D1D;
 }
 
 .voteButtonAbstention:hover {
     border-color: #FCD34D;
-    background-color: #FCD34D;
+    background-color: rgba(252, 211, 77, 0.15);
     color: #FCD34D;
 }
 
 .voteButtonAbstention.voteButtonActive {
-    border-color: white;
-    background-color: white;
-    color: white;
+    border-color: #FCD34D;
+    background-color: #FCD34D;
+    color: #78350F;
 }
 
 /* Responsive */

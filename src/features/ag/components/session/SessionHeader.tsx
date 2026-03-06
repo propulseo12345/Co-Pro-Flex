@@ -20,40 +20,42 @@ export function SessionHeader({
   lastSaveDate,
 }: SessionHeaderProps) {
   return (
-    <div className={styles.header}>
-      <button onClick={onBack} className={styles.backButton}>
-        <ArrowLeft size={20} aria-hidden="true" />
-        Retour
-      </button>
-      <div className={styles.headerContent}>
-        <h1 className={styles.title}>Session en direct</h1>
-        <p className={styles.subtitle}>Enregistrez les votes en temps réel</p>
-        <div className={styles.saveIndicators}>
-          {!isOnline && (
-            <span className={styles.offlineIndicator}>
-              <WifiOff size={14} aria-hidden="true" />
-              Hors-ligne
-            </span>
-          )}
-          {persistenceStatus === 'degraded' && isOnline && (
-            <span className={styles.degradedIndicator}>
-              <AlertCircle size={14} aria-hidden="true" />
-              Mode dégradé
-            </span>
-          )}
-          {hasUnsavedChanges && (
-            <span className={styles.unsavedIndicator}>
-              <AlertCircle size={14} aria-hidden="true" />
-              Modifications non enregistrées
-            </span>
-          )}
-          {lastSaveDate && !hasUnsavedChanges && (
-            <span className={styles.lastSaveIndicator}>
-              <CheckCircle size={14} aria-hidden="true" />
-              Dernière sauvegarde : {lastSaveDate.toLocaleTimeString('fr-FR')}
-            </span>
-          )}
+    <div className={styles.headerCompact}>
+      <div className={styles.headerLeft}>
+        <button onClick={onBack} className={styles.backButtonCompact}>
+          <ArrowLeft size={16} aria-hidden="true" />
+          Retour
+        </button>
+        <div className={styles.headerTitleGroup}>
+          <h1 className={styles.titleCompact}>Session en direct</h1>
+          <span className={styles.subtitleCompact}>Enregistrez les votes en temps réel</span>
         </div>
+      </div>
+      <div className={styles.saveIndicators}>
+        {!isOnline && (
+          <span className={styles.offlineIndicator}>
+            <WifiOff size={14} aria-hidden="true" />
+            Hors-ligne
+          </span>
+        )}
+        {persistenceStatus === 'degraded' && isOnline && (
+          <span className={styles.degradedIndicator}>
+            <AlertCircle size={14} aria-hidden="true" />
+            Mode dégradé
+          </span>
+        )}
+        {hasUnsavedChanges && (
+          <span className={styles.unsavedIndicator}>
+            <AlertCircle size={14} aria-hidden="true" />
+            Modifications non enregistrées
+          </span>
+        )}
+        {lastSaveDate && !hasUnsavedChanges && (
+          <span className={styles.lastSaveIndicator}>
+            <CheckCircle size={14} aria-hidden="true" />
+            Dernière sauvegarde : {lastSaveDate.toLocaleTimeString('fr-FR')}
+          </span>
+        )}
       </div>
     </div>
   );

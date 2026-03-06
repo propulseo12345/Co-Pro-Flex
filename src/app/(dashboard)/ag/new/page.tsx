@@ -41,10 +41,16 @@ export default function NewAGPage() {
     budgetPostesManager,
     isBudgetImporting,
     budgetImportError,
+    availableBudgetYears,
 
     // Google Maps
-    autocompleteRef,
+    addressSearchValue,
+    addressSuggestions,
+    isAddressSearching,
+    setAddressSearchValue,
+    selectAddressSuggestion,
     isGoogleMapsLoaded,
+    googleMapsStatus,
 
     // Handlers
     handleChange,
@@ -78,8 +84,13 @@ export default function NewAGPage() {
           errors={errors}
           validationDateAG={validationDateAG}
           datesMinimales={datesMinimales}
-          autocompleteRef={autocompleteRef}
+          addressSearchValue={addressSearchValue}
+          addressSuggestions={addressSuggestions}
+          isAddressSearching={isAddressSearching}
+          onAddressSearchChange={setAddressSearchValue}
+          onAddressSuggestionSelect={selectAddressSuggestion}
           isGoogleMapsLoaded={isGoogleMapsLoaded}
+          googleMapsStatus={googleMapsStatus}
           jalons={jalons}
           alertes={alertes}
           showCalendrierJalons={showCalendrierJalons}
@@ -88,6 +99,7 @@ export default function NewAGPage() {
           budgetPostesManager={budgetPostesManager}
           isBudgetImporting={isBudgetImporting}
           budgetImportError={budgetImportError}
+          availableBudgetYears={availableBudgetYears}
           onTypeChange={(type: AGFormData['type']) => handleChange('type', type)}
           onFormatChange={(format: AGFormat) => handleChange('format', format)}
           onDateChange={(date: string) => handleChange('date', date)}

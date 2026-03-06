@@ -31,13 +31,25 @@
 }
 
 /* ================================================
-   Métriques clés - 3 cards compactes (1 ligne)
+   Métriques clés - cards compactes (auto-fit)
    ================================================ */
 .metricsRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
   margin-bottom: var(--space-2xl);
+}
+
+@media (min-width: 1200px) {
+  .metricsRow:has(:nth-child(4)) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .metricsRow {
+    grid-template-columns: 1fr;
+  }
 }
 
 .metricCard {

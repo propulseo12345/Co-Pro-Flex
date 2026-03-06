@@ -1,16 +1,24 @@
 'use client';
 
-import { RefObject } from 'react';
-import { MapPin } from 'lucide-react';
-import type { AdresseAG } from '../domain/types';
+import { AlertTriangle, MapPin } from 'lucide-react';
+import type {
+  AdresseAG,
+  GoogleMapsAutocompleteStatus,
+  AdresseAutocompleteSuggestion,
+} from '../domain/types';
 import styles from '../../../../app/(dashboard)/ag/new/new-ag.module.css';
 
 interface AdresseSectionProps {
   adresse: AdresseAG;
   adresseComplete: string;
   errors: Record<string, string>;
-  autocompleteRef: RefObject<HTMLInputElement | null>;
+  addressSearchValue: string;
+  addressSuggestions: AdresseAutocompleteSuggestion[];
+  isAddressSearching: boolean;
+  onAddressSearchChange: (value: string) => void;
+  onAddressSuggestionSelect: (suggestion: AdresseAutocompleteSuggestion) => void;
   isGoogleMapsLoaded: boolean;
+  googleMapsStatus: GoogleMapsAutocompleteStatus;
   onAdresseChange: (field: keyof AdresseAG, value: string) => void;
 }
 
@@ -18,15 +26,20 @@ export function AdresseSection({
   adresse,
   adresseComplete,
   errors,
-  autocompleteRef,
+  addressSearchValue,
+  addressSuggestions = [],
+  isAddressSearching,
+  onAddressSearchChange,
+  onAddressSuggestionSelect,
   isGoogleMapsLoaded,
+  googleMapsStatus,
   onAdresseChange,
 }: AdresseSectionProps) {
   return (
     <div className={styles.addressSection}>
       <h3 className={styles.addressSectionTitle}>
         <MapPin size={18} aria-hidden="true" />
-        Lieu physique de l'assemblée générale <span className={styles.asterisk}>*</span>
+        Lieu physique de l&apos;assemblée générale <span className={styles.asterisk}>*</span>
       </h3>
 
       <div className={styles.formGroup}>
@@ -35,17 +48,44 @@ export function AdresseSection({
         </label>
         <div className={styles.addressContainer}>
           <input
-            ref={autocompleteRef}
             type="text"
             id="addressSearch"
             className={styles.input}
             placeholder="Tapez une adresse pour remplir automatiquement..."
             autoComplete="off"
+            value={addressSearchValue}
+            onChange={(e) => onAddressSearchChange(e.target.value)}
           />
+          {addressSuggestions.length > 0 && (
+            <div className={styles.addressSuggestions}>
+              {addressSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion.id}
+                  type="button"
+                  className={styles.addressSuggestionItem}
+                  onClick={() => onAddressSuggestionSelect(suggestion)}
+                >
+                  {suggestion.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {isAddressSearching && (
+            <div className={styles.addressHint}>
+              <MapPin size={14} aria-hidden="true" />
+              <span>Recherche d&apos;adresses en cours...</span>
+            </div>
+          )}
           {isGoogleMapsLoaded && (
             <div className={styles.addressHint}>
               <MapPin size={14} aria-hidden="true" />
-              <span>Recherche Google Maps activée</span>
+              <span>Recherche BAN / IGN activée (gratuite)</span>
+            </div>
+          )}
+          {googleMapsStatus === 'loading_error' && (
+            <div className={`${styles.addressHint} ${styles.addressHintError}`}>
+              <AlertTriangle size={14} aria-hidden="true" />
+              <span>Impossible de charger la recherche BAN / IGN. Réessaie dans quelques instants.</span>
             </div>
           )}
         </div>

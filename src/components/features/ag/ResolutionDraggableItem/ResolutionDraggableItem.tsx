@@ -2,7 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, ChevronUp, ChevronDown, Trash2, Pencil, ChevronDown as ExpandIcon, ChevronUp as CollapseIcon } from 'lucide-react';
+import { GripVertical, ChevronUp, ChevronDown, Trash2, Pencil } from 'lucide-react';
 import { type MajorityType, MAJORITES } from '@/lib/constants/resolutions';
 import styles from './ResolutionDraggableItem.module.css';
 
@@ -21,8 +21,7 @@ interface ResolutionDraggableItemProps {
     resolution: Resolution;
     index: number;
     totalCount: number;
-    isExpanded: boolean;
-    onToggleExpand: (id: string) => void;
+    variant?: 'table' | 'cards';
     onMoveUp: (index: number) => void;
     onMoveDown: (index: number) => void;
     onDelete: (id: string) => void;
@@ -34,8 +33,7 @@ export function ResolutionDraggableItem({
     resolution,
     index,
     totalCount,
-    isExpanded,
-    onToggleExpand,
+    variant = 'table',
     onMoveUp,
     onMoveDown,
     onDelete,
@@ -82,17 +80,13 @@ export function ResolutionDraggableItem({
         }
     };
 
-    const handleToggle = () => {
-        onToggleExpand(resolution.id);
-    };
-
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className={`${styles.item} ${isDragging ? styles.dragging : ''}`}
+            className={`${styles.item} ${variant === 'cards' ? styles.itemCards : ''} ${isDragging ? styles.dragging : ''}`}
         >
-            <div className={styles.row} onClick={handleToggle}>
+            <div className={`${styles.row} ${variant === 'cards' ? styles.rowCards : ''}`}>
                 {/* Handle de drag */}
                 <div
                     className={styles.dragHandle}
@@ -109,85 +103,95 @@ export function ResolutionDraggableItem({
                 {/* Titre */}
                 <span className={styles.title}>{resolution.titre}</span>
 
-                {/* Catégorie (thème) */}
-                {resolution.categorie && (
-                    <span className={styles.categorie}>{resolution.categorie}</span>
+                {variant === 'table' && (
+                    <>
+                        {/* Catégorie (thème) */}
+                        {resolution.categorie && (
+                            <span className={styles.categorie}>{resolution.categorie}</span>
+                        )}
+
+                        {/* Majorité */}
+                        <span className={styles.majority}>
+                            <span className={styles.majorityBadge}>
+                                {MAJORITES[resolution.majorite].nom}
+                            </span>
+                        </span>
+
+                        {/* Statut */}
+                        <span className={styles.status}>
+                            {hasEmptyVars ? (
+                                <span className={styles.statusIncomplete}>À compléter</span>
+                            ) : (
+                                <span className={styles.statusComplete}>Complet</span>
+                            )}
+                        </span>
+                    </>
                 )}
 
-                {/* Majorité */}
-                <span className={styles.majority}>
-                    <span className={styles.majorityBadge}>
-                        {MAJORITES[resolution.majorite].nom}
-                    </span>
-                </span>
-
-                {/* Statut */}
-                <span className={styles.status}>
-                    {hasEmptyVars ? (
-                        <span className={styles.statusIncomplete}>À compléter</span>
-                    ) : (
-                        <span className={styles.statusComplete}>Complet</span>
-                    )}
-                </span>
-
-                {/* Boutons de réordonnancement */}
-                <div className={styles.reorderButtons}>
-                    <button
-                        type="button"
-                        onClick={handleMoveUp}
-                        disabled={isFirst}
-                        className={styles.reorderBtn}
-                        title="Remonter"
-                        aria-label="Remonter la résolution"
-                    >
-                        <ChevronUp size={16} />
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleMoveDown}
-                        disabled={isLast}
-                        className={styles.reorderBtn}
-                        title="Descendre"
-                        aria-label="Descendre la résolution"
-                    >
-                        <ChevronDown size={16} />
-                    </button>
-                </div>
-
-                {/* Expand toggle */}
-                <span className={styles.expandToggle}>
-                    {isExpanded ? <CollapseIcon size={16} /> : <ExpandIcon size={16} />}
-                </span>
-            </div>
-
-            {/* Contenu étendu */}
-            {isExpanded && (
-                <div className={styles.expandedContent}>
-                    <div className={styles.resolutionText}>
-                        {renderVariables ? renderVariables(resolution) : resolution.texte}
-                    </div>
-                    <div className={styles.expandedActions}>
-                        {onEdit && (
-                            <button
-                                type="button"
-                                onClick={handleEdit}
-                                className={styles.editBtn}
-                                title="Modifier"
-                            >
-                                <Pencil size={14} /> Modifier
-                            </button>
-                        )}
+                {/* Boutons de réordonnancement (masqués en version cartes) */}
+                {variant === 'table' && (
+                    <div className={styles.reorderButtons}>
                         <button
                             type="button"
-                            onClick={handleDelete}
-                            className={styles.deleteBtn}
-                            title="Supprimer"
+                            onClick={handleMoveUp}
+                            disabled={isFirst}
+                            className={styles.reorderBtn}
+                            title="Remonter"
+                            aria-label="Remonter la résolution"
                         >
-                            <Trash2 size={14} /> Supprimer
+                            <ChevronUp size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleMoveDown}
+                            disabled={isLast}
+                            className={styles.reorderBtn}
+                            title="Descendre"
+                            aria-label="Descendre la résolution"
+                        >
+                            <ChevronDown size={16} />
                         </button>
                     </div>
+                )}
+
+            </div>
+
+            <div className={styles.expandedContent}>
+                {variant === 'cards' && (
+                    <div className={styles.metaLine}>
+                        {resolution.categorie && <span className={styles.categorie}>{resolution.categorie}</span>}
+                        <span className={styles.majorityBadge}>{MAJORITES[resolution.majorite].nom}</span>
+                        {hasEmptyVars ? (
+                            <span className={styles.statusIncomplete}>À compléter</span>
+                        ) : (
+                            <span className={styles.statusComplete}>Complet</span>
+                        )}
+                    </div>
+                )}
+                <div className={styles.resolutionText}>
+                    {renderVariables ? renderVariables(resolution) : resolution.texte}
                 </div>
-            )}
+                <div className={styles.expandedActions}>
+                    {onEdit && (
+                        <button
+                            type="button"
+                            onClick={handleEdit}
+                            className={styles.editBtn}
+                            title="Modifier"
+                        >
+                            <Pencil size={14} /> Modifier
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={handleDelete}
+                        className={styles.deleteBtn}
+                        title="Supprimer"
+                    >
+                        <Trash2 size={14} /> Supprimer
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

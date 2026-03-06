@@ -11,17 +11,19 @@ interface FormatAGSectionProps {
 
 export function FormatAGSection({ format, onChange }: FormatAGSectionProps) {
   return (
-    <div className={styles.section}>
+    <div className={`${styles.section} ${styles.compactChoiceSection}`}>
       <h2 className={styles.sectionTitle}>
         <Video size={20} className={styles.sectionIcon} />
-        Format de l'assemblée
+        Format de l&apos;assemblée
       </h2>
-      <p className={styles.sectionSubtitle}>
+      <p className={`${styles.sectionSubtitle} ${styles.compactSectionSubtitle}`}>
         Une AG doit obligatoirement se tenir dans un lieu physique. La visioconférence (loi ELAN 2018) permet une
         participation à distance en complément.
       </p>
-      <div className={styles.formatGroup}>
-        <label className={`${styles.formatCard} ${format === AGFormat.PRESENTIEL ? styles.formatCardActive : ''}`}>
+      <div className={`${styles.formatGroup} ${styles.formatGroupCompact}`}>
+        <label
+          className={`${styles.formatCard} ${styles.formatCardCompact} ${format === AGFormat.PRESENTIEL ? styles.formatCardActive : ''}`}
+        >
           <input
             type="radio"
             name="format"
@@ -37,7 +39,9 @@ export function FormatAGSection({ format, onChange }: FormatAGSectionProps) {
             <div className={styles.formatDescription}>{AG_FORMAT_DESCRIPTIONS[AGFormat.PRESENTIEL]}</div>
           </div>
         </label>
-        <label className={`${styles.formatCard} ${format === AGFormat.MIXTE ? styles.formatCardActive : ''}`}>
+        <label
+          className={`${styles.formatCard} ${styles.formatCardCompact} ${format === AGFormat.MIXTE ? styles.formatCardActive : ''}`}
+        >
           <input
             type="radio"
             name="format"

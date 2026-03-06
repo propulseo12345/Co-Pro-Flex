@@ -28,7 +28,7 @@ import {
 } from '@/hooks/modules/useAgData';
 import type { AgResolutionResult, MajorityType as DbMajorityType, AgMeeting } from '@/lib/ag/types';
 import { createClient } from '@/lib/supabase/client';
-import { getActiveAccountingPeriod, type AccountingPeriodInfo } from '@/lib/finance/accounting-period';
+import { getActiveAccountingPeriod, getClosedPeriodForYear, type AccountingPeriodInfo, type ClosedPeriodWithResult } from '@/lib/finance/accounting-period';
 
 // ============================================================================
 // TYPES
@@ -150,6 +150,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const [prefillWarning, setPrefillWarning] = useState<{ total: number; added: number; skipped: number } | null>(null);
   const [editingResolution, setEditingResolution] = useState<Resolution | null>(null);
   const [accountingPeriod, setAccountingPeriod] = useState<AccountingPeriodInfo | null>(null);
+  const [lastClosedPeriod, setLastClosedPeriod] = useState<ClosedPeriodWithResult | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
   // -------------------------------------------------------------------------
@@ -219,35 +220,147 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     fetchAccountingPeriod();
   }, [currentCoproId]);
 
+  // Fetch la période clôturée N-1 (basé sur la date de l'AG)
+  useEffect(() => {
+    if (!currentCoproId || !meeting?.meeting_date) return;
+
+    const agDate = new Date(meeting.meeting_date);
+    const nMinus1Year = (Number.isNaN(agDate.getTime()) ? new Date().getFullYear() : agDate.getFullYear()) - 1;
+
+    const fetchClosedPeriod = async () => {
+      const result = await getClosedPeriodForYear(currentCoproId, nMinus1Year);
+      if (result.data) {
+        setLastClosedPeriod(result.data);
+      }
+    };
+
+    fetchClosedPeriod();
+  }, [currentCoproId, meeting?.meeting_date]);
+
   // -------------------------------------------------------------------------
   // SUGGESTIONS DE VARIABLES (basé sur données DB)
   // -------------------------------------------------------------------------
   const getGlobalSuggestions = useCallback((variableNames: string[]): Record<string, string> => {
     const suggestions: Record<string, string> = {};
-    const exercice = (new Date().getFullYear() + 1).toString();
 
-    const periodStartDate = accountingPeriod?.start_date
-      ? new Date(accountingPeriod.start_date).toLocaleDateString('fr-FR')
-      : `01/01/${exercice}`;
-    const periodEndDate = accountingPeriod?.end_date
-      ? new Date(accountingPeriod.end_date).toLocaleDateString('fr-FR')
-      : `31/12/${exercice}`;
-    const periodYear = accountingPeriod?.year?.toString() || exercice;
-
+    // Global suggestions = uniquement les variables génériques (date du jour)
+    // Les dates d'exercice (date_debut, date_fin) dépendent du contexte
+    // de chaque résolution → gérées dans getTemplateSuggestions
     for (const name of variableNames) {
       const lowerName = name.toLowerCase();
       if (lowerName === 'date' || lowerName === 'date_du_jour') {
         suggestions[name] = formatDateFR(new Date());
-      } else if (lowerName === 'date_debut' || lowerName === 'exercice_debut') {
-        suggestions[name] = periodStartDate;
-      } else if (lowerName === 'date_fin' || lowerName === 'exercice_fin' || lowerName === 'date_cloture') {
-        suggestions[name] = periodEndDate;
-      } else if (lowerName === 'annee' || lowerName === 'exercice' || lowerName === 'annee_exercice') {
-        suggestions[name] = periodYear;
       }
     }
     return suggestions;
-  }, [accountingPeriod]);
+  }, []);
+
+  // Helpers pour pré-remplir les dates d'exercice
+  const agYear = useMemo(() => {
+    const d = meeting?.meeting_date ? new Date(meeting.meeting_date) : new Date();
+    return Number.isNaN(d.getTime()) ? new Date().getFullYear() : d.getFullYear();
+  }, [meeting?.meeting_date]);
+
+  const nMinus1 = useMemo(() => {
+    if (lastClosedPeriod) {
+      return {
+        startDate: new Date(lastClosedPeriod.start_date).toLocaleDateString('fr-FR'),
+        endDate: new Date(lastClosedPeriod.end_date).toLocaleDateString('fr-FR'),
+        year: String(lastClosedPeriod.year),
+        // Total des charges de l'exercice (en partie double, résultat = 0 toujours)
+        montant: formatMontant(lastClosedPeriod.totalDebit),
+      };
+    }
+    // Fallback si pas de période clôturée en DB
+    const y = agYear - 1;
+    return {
+      startDate: `01/01/${y}`,
+      endDate: `31/12/${y}`,
+      year: String(y),
+      montant: '',
+    };
+  }, [lastClosedPeriod, agYear]);
+
+  // Montant du budget prévisionnel configuré dans la préparation de l'AG
+  const agBudgetMontant = useMemo(() => {
+    if (!meeting?.opening_notes) return '';
+    try {
+      const meta = JSON.parse(meeting.opening_notes);
+      return meta.budgetMontant || '';
+    } catch {
+      return '';
+    }
+  }, [meeting?.opening_notes]);
+
+  const nPlus1 = useMemo(() => {
+    if (accountingPeriod) {
+      return {
+        startDate: new Date(accountingPeriod.start_date).toLocaleDateString('fr-FR'),
+        endDate: new Date(accountingPeriod.end_date).toLocaleDateString('fr-FR'),
+        year: String(accountingPeriod.year),
+        montant: agBudgetMontant ? formatMontant(Number(agBudgetMontant)) : '',
+      };
+    }
+    const y = agYear + 1;
+    return {
+      startDate: `01/01/${y}`,
+      endDate: `31/12/${y}`,
+      year: String(y),
+      montant: agBudgetMontant ? formatMontant(Number(agBudgetMontant)) : '',
+    };
+  }, [accountingPeriod, agYear, agBudgetMontant]);
+
+  // Résolutions N-1 (exercice écoulé) : approbation comptes, quitus
+  const RESOLUTIONS_N_MINUS_1 = useMemo(() => new Set([
+    'fin-05',  // Approbation des comptes
+    'ag-05',   // Quitus au syndic
+    'fin-10',  // Situation de trésorerie et quitus
+  ]), []);
+
+  // Résolutions N+1 (prochain exercice) : budget prévisionnel
+  const RESOLUTIONS_N_PLUS_1 = useMemo(() => new Set([
+    'fin-06',  // Budget prévisionnel
+  ]), []);
+
+  const getTemplateSuggestions = useCallback((
+    template: ResolutionTemplate,
+    variableNames: string[]
+  ): Record<string, string> => {
+    const suggestions: Record<string, string> = {};
+
+    if (RESOLUTIONS_N_MINUS_1.has(template.id)) {
+      // Exercice écoulé (N-1) : données de la dernière période clôturée
+      for (const name of variableNames) {
+        const lowerName = name.toLowerCase();
+        if (lowerName === 'date_debut' || lowerName === 'exercice_debut') {
+          suggestions[name] = nMinus1.startDate;
+        } else if (lowerName === 'date_fin' || lowerName === 'exercice_fin' || lowerName === 'date_cloture') {
+          suggestions[name] = nMinus1.endDate;
+        } else if (lowerName === 'annee' || lowerName === 'annee_exercice' || lowerName === 'exercice') {
+          suggestions[name] = nMinus1.year;
+        } else if (lowerName === 'montant' || lowerName === 'resultat') {
+          suggestions[name] = nMinus1.montant;
+        }
+      }
+    } else if (RESOLUTIONS_N_PLUS_1.has(template.id)) {
+      // Prochain exercice (N+1) : période ouverte ou calculée
+      // Montant = budget prévisionnel configuré dans la préparation de l'AG
+      for (const name of variableNames) {
+        const lowerName = name.toLowerCase();
+        if (lowerName === 'date_debut' || lowerName === 'exercice_debut') {
+          suggestions[name] = nPlus1.startDate;
+        } else if (lowerName === 'date_fin' || lowerName === 'exercice_fin' || lowerName === 'date_cloture') {
+          suggestions[name] = nPlus1.endDate;
+        } else if (lowerName === 'annee' || lowerName === 'annee_exercice' || lowerName === 'exercice') {
+          suggestions[name] = nPlus1.year;
+        } else if (lowerName === 'montant' || lowerName === 'budget' || lowerName === 'montant_budget') {
+          suggestions[name] = nPlus1.montant;
+        }
+      }
+    }
+
+    return suggestions;
+  }, [RESOLUTIONS_N_MINUS_1, RESOLUTIONS_N_PLUS_1, nMinus1, nPlus1]);
 
   // -------------------------------------------------------------------------
   // MUTATIONS: AJOUTER DEPUIS BIBLIOTHÈQUE
@@ -264,9 +377,10 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       // Pré-remplir les variables
       const variableNames = extractVariableNames(template.texte);
       const globalSuggestions = getGlobalSuggestions(variableNames);
+      const templateSuggestions = getTemplateSuggestions(template, variableNames);
       const variables: Record<string, string> = {};
       for (const varName of variableNames) {
-        variables[varName] = globalSuggestions[varName] || '';
+        variables[varName] = templateSuggestions[varName] || globalSuggestions[varName] || '';
       }
 
       // Persister immédiatement en DB
@@ -292,7 +406,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       const message = err instanceof Error ? err.message : 'Erreur inconnue';
       setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
-  }, [currentCoproId, isManager, agId, dbResolutions.length, addResolutionMutation, refreshResolutions, getGlobalSuggestions]);
+  }, [currentCoproId, isManager, agId, dbResolutions.length, addResolutionMutation, refreshResolutions, getGlobalSuggestions, getTemplateSuggestions]);
 
   // -------------------------------------------------------------------------
   // MUTATIONS: AJOUTER RÉSOLUTION PERSONNALISÉE
@@ -407,9 +521,10 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         // Pré-remplir les variables
         const variableNames = extractVariableNames(template.texte);
         const globalSuggestions = getGlobalSuggestions(variableNames);
+        const templateSuggestions = getTemplateSuggestions(template, variableNames);
         const variables: Record<string, string> = {};
         for (const varName of variableNames) {
-          variables[varName] = globalSuggestions[varName] || '';
+          variables[varName] = templateSuggestions[varName] || globalSuggestions[varName] || '';
         }
 
         // Persister en DB via edge function
@@ -469,7 +584,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       console.error('[handlePrefillObligatoires] Exception:', err);
       setSaveState({ isSaving: false, lastSaved: null, error: `Exception: ${message}` });
     }
-  }, [currentCoproId, isManager, meeting, dbResolutions, agId, addResolutionMutation, refreshResolutions, getGlobalSuggestions]);
+  }, [currentCoproId, isManager, meeting, dbResolutions, agId, addResolutionMutation, refreshResolutions, getGlobalSuggestions, getTemplateSuggestions]);
 
   // -------------------------------------------------------------------------
   // MUTATIONS: RÉORDONNER
@@ -556,6 +671,30 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
   }, [editingVariable, tempVariableValue, isManager, dbResolutions, updateResolutionMutation, refreshResolutions]);
+
+  const handleQuickSetVariable = useCallback(async (resId: string, varName: string, value: string) => {
+    if (!isManager) return;
+
+    const targetDbResolution = dbResolutions.find(r => r.id === resId);
+    if (!targetDbResolution) return;
+
+    setSaveState({ isSaving: true, lastSaved: null, error: null });
+
+    try {
+      const existingVariables = (targetDbResolution.variables as Record<string, unknown>) || {};
+      const newVars = { ...existingVariables, [varName]: value };
+
+      await updateResolutionMutation.execute(resId, {
+        variables: newVars,
+      });
+
+      await refreshResolutions();
+      setSaveState({ isSaving: false, lastSaved: new Date(), error: null });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+      setSaveState({ isSaving: false, lastSaved: null, error: message });
+    }
+  }, [isManager, dbResolutions, updateResolutionMutation, refreshResolutions]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingVariable(null);
@@ -714,6 +853,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     handleDelete,
     handleStartEditVariable,
     handleSaveVariable,
+    handleQuickSetVariable,
     handleCancelEdit,
     handleEditResolution,
     handleUpdateResolution,

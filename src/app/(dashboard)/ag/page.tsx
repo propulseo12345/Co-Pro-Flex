@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { AGQuickActions } from '@/components/features/ag/Dashboard';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgMeetings } from '@/hooks/modules/useAgData';
@@ -61,8 +60,7 @@ export default function AGPage() {
         loadingMessage="Chargement des assemblées générales..."
         onRetry={refresh}
       >
-        <div className={styles.grid}>
-          <div className={styles.mainColumn}>
+        <div className={styles.centered}>
             {/* Drafts Section */}
             <AgDraftsSection
               drafts={drafts}
@@ -79,21 +77,14 @@ export default function AGPage() {
               !drafts.length && <AgEmptyState isManager={isManager} />
             )}
 
+            {/* Stats Card */}
+            {stats && <AgStatsCard stats={stats} />}
+
             {/* History */}
             <AgHistorySection pastMeetings={pastMeetings} />
 
             {/* Resolutions Library Link */}
             <AgResolutionsLink />
-          </div>
-
-          <div className={styles.sideColumn}>
-            <div className="card">
-              <AGQuickActions />
-            </div>
-
-            {/* Stats Card */}
-            {stats && <AgStatsCard stats={stats} />}
-          </div>
         </div>
       </DataState>
     </div>

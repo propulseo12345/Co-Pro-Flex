@@ -279,6 +279,37 @@ export function useOpenPeriod() {
   return { data, isLoading, error, refresh };
 }
 
+export function useActivePeriod() {
+  const { currentCoproId } = useCopro();
+  const [data, setData] = useState<financeApi.AccountingPeriod | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!currentCoproId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await financeApi.getActivePeriod(currentCoproId);
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setData(result.data);
+    }
+
+    setIsLoading(false);
+  }, [currentCoproId]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { data, isLoading, error, refresh };
+}
+
 export function useAccounts(accountType?: string) {
   const { currentCoproId } = useCopro();
   const [data, setData] = useState<Array<{ id: string; code: string; name: string; account_type: string }> | null>(null);

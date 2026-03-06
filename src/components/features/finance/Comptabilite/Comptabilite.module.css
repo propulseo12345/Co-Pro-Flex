@@ -30,6 +30,16 @@
     color: var(--text-secondary);
 }
 
+.exercicePeriod {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
 .headerActions {
     display: flex;
     gap: var(--space-sm);
@@ -860,6 +870,19 @@
 
 .clotureButtonWarning:hover {
     background: var(--warning-dark);
+}
+
+.clotureButtonClosed {
+    background: var(--success);
+    cursor: default;
+}
+
+.clotureButtonClosed:hover {
+    background: var(--success);
+}
+
+.clotureButton:disabled {
+    opacity: 1;
 }
 
 .alertBadge {

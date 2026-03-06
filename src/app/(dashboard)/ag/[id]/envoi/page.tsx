@@ -3,10 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { updateAgCurrentStep } from '@/lib/ag/api';
-import { ArrowLeft, ArrowRight, Info, CheckSquare, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Info, AlertCircle, Loader2, X } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
 import { useAgEnvoiPage, SENDING_METHODS } from '@/features/ag/hooks/useAgEnvoiPage';
-import { EnvoiSidebar } from '@/features/ag/components/envoi';
 import styles from './envoi.module.css';
 
 export default function EnvoiPage() {
@@ -14,8 +13,6 @@ export default function EnvoiPage() {
   const agId = params.id as string;
   const page = useAgEnvoiPage({ agId });
 
-  // Mise à jour de l'étape courante en DB (étape 4 = Envoi convocations)
-  // Utilise un ref pour ne l'appeler qu'une seule fois
   const stepUpdatedRef = useRef(false);
   useEffect(() => {
     if (agId && !page.isLoading && !stepUpdatedRef.current) {
@@ -24,40 +21,34 @@ export default function EnvoiPage() {
     }
   }, [agId, page.isLoading]);
 
-  // État de chargement
   if (page.isLoading) {
     return (
       <div className="container">
         <div className={styles.loadingState}>
           <Loader2 size={48} className={styles.spinner} />
           <h2>Chargement des données d&apos;envoi...</h2>
-          <p>Récupération des copropriétaires depuis Supabase</p>
         </div>
       </div>
     );
   }
 
-  // État d'erreur
   if (page.status === 'error' && page.error) {
     return (
       <div className="container">
         <div className={styles.errorState}>
-          <AlertCircle size={48} className={styles.errorIcon} />
+          <AlertCircle size={48} />
           <h2>{page.error.message}</h2>
-          {page.error.details && <p className={styles.errorDetails}>{page.error.details}</p>}
-          <p className={styles.errorCode}>Code: {page.error.code}</p>
-          <div className={styles.errorActions}>
-            <button onClick={page.reload} className="btn btn-primary">
-              Réessayer
-            </button>
-            <button onClick={page.goBack} className="btn btn-secondary">
-              <ArrowLeft size={16} /> Retour
-            </button>
-          </div>
+          <button onClick={page.reload} className="btn btn-primary">Réessayer</button>
         </div>
       </div>
     );
   }
+
+  // Count selections per method
+  const methodCounts = SENDING_METHODS.map(method => ({
+    ...method,
+    count: page.sendingChoices.filter(c => c.methods.includes(method.value)).length,
+  }));
 
   return (
     <div className="container">
@@ -66,142 +57,130 @@ export default function EnvoiPage() {
           <ArrowLeft size={20} aria-hidden="true" />
           Retour
         </button>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>Envoi des convocations</h1>
-          <p className={styles.subtitle}>Sélectionnez les modes d&apos;envoi pour chaque copropriétaire</p>
-        </div>
+        <h1 className={styles.title}>Envoi des convocations</h1>
+        <p className={styles.subtitle}>Sélectionnez les modes d&apos;envoi pour chaque copropriétaire</p>
       </div>
 
       <Stepper currentStep={4} agId={agId} />
 
-      <div className={styles.layout}>
-        <div className={styles.mainContent}>
-          <div className={styles.statusMessage}>
-            <p className={styles.statusText}>
-              {page.selectedMethods.length === 0
-                ? "Vous n'avez envoyé le procès-verbal à aucun copropriétaire."
-                : `${page.sendingChoices.filter(c => c.methods.length > 0).length} copropriétaire(s) sélectionné(s).`}
-            </p>
-            {page.isSaving && (
-              <span className={styles.savingIndicator}>
-                <Loader2 size={14} className={styles.spinnerSmall} /> Sauvegarde...
-              </span>
-            )}
-          </div>
+      {/* Status */}
+      <p className={styles.statusText}>
+        {page.sendingChoices.filter(c => c.methods.length > 0).length === 0
+          ? "Vous n'avez envoyé la convocation à aucun copropriétaire."
+          : `${page.sendingChoices.filter(c => c.methods.length > 0).length} copropriétaire(s) configuré(s).`}
+      </p>
 
-          <div className={styles.instructionsBox}>
-            <Info size={18} className={styles.infoIcon} aria-hidden="true" />
-            <div className={styles.instructionsText}>
-              <p>
-                À tous les copropriétaires absents ou opposants (c&apos;est-à-dire ceux qui ont voté contre la majorité à au moins une décision) : vous devez envoyer les procès-verbaux par recommandés ou les remettre en main propre contre émargement. Pour les autres, vous pouvez l&apos;envoyer par le moyen de votre choix. Concernant les avis électroniques, ils ont la même valeur qu&apos;un recommandé physique, mais vous devez avoir l&apos;accord écrit du destinataire avant de l&apos;envoyer.
-              </p>
-            </div>
-          </div>
+      {/* Legal info */}
+      <div className={styles.infoBox}>
+        <Info size={16} aria-hidden="true" />
+        <p>
+          L&apos;envoi des convocations doit être fait par avis électronique ou remise en main propre avec émargement.
+          Les notifications par avis électronique deviennent une pratique par défaut, sauf si un copropriétaire vous a demandé de les recevoir par voie papier.
+        </p>
+      </div>
 
-          {page.selectedMethods.length > 0 && (
-            <div className={styles.selectedMethodsBox}>
-              <h3 className={styles.selectedMethodsTitle}>Actuellement sélectionné :</h3>
-              <ul className={styles.selectedMethodsList}>
-                {page.selectedMethods.map(method => (
-                  <li key={method}>{SENDING_METHODS.find(m => m.value === method)?.label}</li>
+      {/* Summary */}
+      <div className={styles.summary}>
+        <strong>Actuellement sélectionné :</strong>
+        <ul>
+          {methodCounts.map(m => (
+            <li key={m.value}>{m.count} {m.label.toLowerCase()}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Quick action buttons */}
+      <div className={styles.docButtons}>
+        <button className={styles.docButton}>Feuille d&apos;émargement</button>
+        <button className={styles.docButton}>Convocation</button>
+      </div>
+
+      {/* Table */}
+      {page.coproprietaires.length === 0 ? (
+        <div className={styles.emptyState}>
+          <AlertCircle size={32} />
+          <p>Aucun copropriétaire trouvé pour cette copropriété.</p>
+        </div>
+      ) : (
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.thName}>Copropriétaire</th>
+                {SENDING_METHODS.map(method => (
+                  <th key={method.value} className={styles.thMethod}>
+                    {method.label}
+                    <button
+                      className={styles.selectAllBtn}
+                      onClick={() => page.selectAllForMethod(method.value)}
+                      disabled={page.isSent}
+                    >
+                      Tout cocher
+                    </button>
+                  </th>
                 ))}
-              </ul>
-            </div>
-          )}
-
-          <div className={styles.quickActions}>
-            <h3 className={styles.quickActionsTitle}>Actions rapides</h3>
-            <div className={styles.quickActionsGrid}>
-              {SENDING_METHODS.map(method => (
-                <button
-                  key={method.value}
-                  type="button"
-                  onClick={() => page.selectAllForMethod(method.value)}
-                  className={styles.quickActionBtn}
-                  disabled={page.isSent}
-                >
-                  <CheckSquare size={16} aria-hidden="true" />
-                  <span>Tout en {method.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {page.coproprietaires.length === 0 ? (
-            <div className={styles.emptyState}>
-              <AlertCircle size={32} />
-              <p>Aucun copropriétaire trouvé pour cette copropriété.</p>
-              <p className={styles.emptyHint}>Vérifiez que des copropriétaires sont enregistrés dans Supabase.</p>
-            </div>
-          ) : (
-            <div className={styles.coproList}>
+              </tr>
+            </thead>
+            <tbody>
               {page.coproprietaires.map(copro => {
                 const choice = page.sendingChoices.find(c => c.coproprietaireId === copro.id);
                 const coproMethods = choice?.methods || [];
-                const hasSelection = coproMethods.length > 0;
+                const hasEmail = !!copro.email;
 
                 return (
-                  <div key={copro.id} className={`${styles.coproCard} ${hasSelection ? styles.coproCardSelected : ''}`}>
-                    <div className={styles.coproHeader}>
-                      <div className={styles.coproInfo}>
-                        <span className={styles.coproName}>{copro.nom}</span>
-                        <span className={styles.coproDetails}>{copro.lot} • {copro.tantiemes} tantièmes</span>
-                        {copro.email && <span className={styles.coproEmail}>{copro.email}</span>}
-                      </div>
-                      {hasSelection && (
-                        <span className={styles.selectionBadge}>
-                          {coproMethods.length} méthode{coproMethods.length > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                    <div className={styles.methodsGrid}>
-                      {SENDING_METHODS.map(method => {
-                        const isChecked = coproMethods.includes(method.value);
-                        return (
-                          <button
-                            type="button"
-                            key={method.value}
-                            onClick={() => !page.isSent && page.toggleMethod(copro.id, method.value)}
-                            className={`${styles.methodOption} ${isChecked ? styles.methodOptionActive : ''} ${page.isSent ? styles.methodOptionDisabled : ''}`}
-                            disabled={page.isSent}
-                          >
-                            <div className={styles.methodContent}>
-                              <span className={styles.methodName}>{method.label}</span>
-                              <span className={styles.methodCost}>
-                                {page.SENDING_COSTS[method.value] === 0 ? 'Gratuit' : `${page.SENDING_COSTS[method.value].toFixed(2)} €`}
-                              </span>
-                            </div>
-                            <div className={styles.checkIndicator}>
-                              {isChecked && <CheckCircle size={18} aria-hidden="true" />}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <tr key={copro.id} className={styles.row}>
+                    <td className={styles.tdName}>
+                      <button
+                        className={styles.removeBtn}
+                        onClick={() => {
+                          // Deselect all methods for this copro
+                          coproMethods.forEach(m => page.toggleMethod(copro.id, m));
+                        }}
+                        disabled={page.isSent}
+                        title="Désélectionner tout"
+                      >
+                        <X size={14} />
+                      </button>
+                      <span>{copro.nom}</span>
+                    </td>
+                    {SENDING_METHODS.map(method => {
+                      const isChecked = coproMethods.includes(method.value);
+                      const needsEmail = (method.value === 'AVIS_ELECTRONIQUE' || method.value === 'EMAIL') && !hasEmail;
+
+                      return (
+                        <td key={method.value} className={styles.tdMethod}>
+                          {needsEmail ? (
+                            <button className={styles.emailMissing} disabled>
+                              Renseigner l&apos;email
+                            </button>
+                          ) : (
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => page.toggleMethod(copro.id, method.value)}
+                              disabled={page.isSent}
+                              className={styles.checkbox}
+                            />
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </div>
-          )}
+            </tbody>
+          </table>
         </div>
+      )}
 
-        <EnvoiSidebar
-          stats={page.stats}
-          totalCost={page.totalCost}
-          sendingCosts={page.SENDING_COSTS}
-          isSent={page.isSent}
-          onSend={page.handleSend}
-        />
-      </div>
-
+      {/* Footer */}
       <div className={styles.footer}>
         <button onClick={page.goBack} className="btn btn-secondary">
           <ArrowLeft size={16} aria-hidden="true" />
-          Retour à la convocation
+          Modifier l&apos;ordre du jour
         </button>
-        <button onClick={page.handleContinue} className="btn btn-primary">
-          Continuer vers la préparation
-          <ArrowRight size={16} aria-hidden="true" />
+        <button onClick={page.handleSend} className="btn btn-primary" disabled={page.isSent}>
+          Envoyer la convocation
         </button>
       </div>
     </div>

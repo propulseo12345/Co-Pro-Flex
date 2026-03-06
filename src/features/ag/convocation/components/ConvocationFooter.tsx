@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import styles from '@/app/(dashboard)/ag/[id]/convocation/convocation.module.css';
 
 interface ConvocationFooterProps {
@@ -11,8 +11,6 @@ interface ConvocationFooterProps {
 }
 
 export function ConvocationFooter({
-  canValidate,
-  canSend,
   onBack,
   onContinue,
 }: ConvocationFooterProps) {
@@ -24,9 +22,8 @@ export function ConvocationFooter({
       <button
         onClick={onContinue}
         className="btn btn-primary"
-        disabled={!canValidate || !canSend}
       >
-        <Send size={16} aria-hidden="true" /> Envoyer et continuer{' '}
+        Continuer vers l&apos;envoi{' '}
         <ArrowRight size={16} aria-hidden="true" />
       </button>
     </div>

@@ -5,14 +5,27 @@
  * Utilise la même source de données que /finance/budgets
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useCopro } from '@/providers/CoproContext';
-import { useBudgetData } from '@/hooks/modules/useBudgetData';
+import { listBudgets, listBudgetLines } from '@/lib/budget/api';
 import type { BudgetPoste } from '../domain/types';
+import type { BudgetOverview } from '@/lib/budget/api';
+
+export type BudgetImportSource = 'current_priority' | 'all_budgets' | 'manual';
+
+export interface BudgetImportOption {
+  id: string;
+  coproId: string;
+  year: number;
+  name: string;
+  type: BudgetOverview['budget_type'];
+  status: BudgetOverview['status'];
+  totalPlanned: number;
+}
 
 export interface UseBudgetImportReturn {
   /** Charge les postes du budget pour une année */
-  importBudget: (exercice: number) => Promise<BudgetPoste[]>;
+  importBudget: (params: { exercice: number; source: BudgetImportSource; budgetId?: string | null }) => Promise<BudgetPoste[]>;
   /** Total du budget importé */
   budgetTotal: number | null;
   /** Année du budget chargé */
@@ -23,6 +36,12 @@ export interface UseBudgetImportReturn {
   error: string | null;
   /** Indique si un budget existe pour l'année demandée */
   budgetExists: boolean;
+  /** Liste des exercices disponibles */
+  availableYears: number[];
+  /** Budgets disponibles (catalogue) */
+  availableBudgets: BudgetImportOption[];
+  /** Chargement du catalogue de budgets */
+  isCatalogLoading: boolean;
 }
 
 /**
@@ -30,33 +49,70 @@ export interface UseBudgetImportReturn {
  * Utilise EXACTEMENT la même source que /finance/budgets
  */
 export function useBudgetImport(): UseBudgetImportReturn {
-  const { currentCoproId } = useCopro();
+  const { currentCoproId: contextCoproId } = useCopro();
+  const currentCoproId = contextCoproId || '11111111-aaaa-bbbb-cccc-111111111111';
   const [isLoading, setIsLoading] = useState(false);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [budgetTotal, setBudgetTotal] = useState<number | null>(null);
   const [budgetExercice, setBudgetExercice] = useState<number | null>(null);
   const [budgetExists, setBudgetExists] = useState(false);
+  const [catalogBudgets, setCatalogBudgets] = useState<BudgetOverview[]>([]);
 
-  // Utiliser le hook budget data pour accéder aux mêmes données que /finance/budgets
-  const { budgets, lines, loadBudgetLines, isLoading: isDataLoading } = useBudgetData({});
-
-  const importBudget = useCallback(async (exercice: number): Promise<BudgetPoste[]> => {
-    if (!currentCoproId) {
-      setError('Copropriété non sélectionnée');
-      return [];
+  const loadCatalog = useCallback(async () => {
+    setIsCatalogLoading(true);
+    try {
+      const budgets = await fetchBudgetsCatalog(currentCoproId);
+      setCatalogBudgets(budgets);
+    } catch (err) {
+      console.error('[useBudgetImport] Error loading catalog:', err);
+      setCatalogBudgets([]);
+    } finally {
+      setIsCatalogLoading(false);
     }
+  }, [currentCoproId]);
 
+  useEffect(() => {
+    loadCatalog();
+  }, [loadCatalog]);
+
+  const availableBudgets = useMemo<BudgetImportOption[]>(
+    () =>
+      catalogBudgets.map((budget) => ({
+        id: budget.id,
+        coproId: budget.copro_id,
+        year: budget.period_year,
+        name: budget.name,
+        type: budget.budget_type,
+        status: budget.status,
+        totalPlanned: Number(budget.total_planned) || 0,
+      })),
+    [catalogBudgets]
+  );
+
+  const availableYears = useMemo<number[]>(
+    () => Array.from(new Set(availableBudgets.map((b) => b.year))).sort((a, b) => b - a),
+    [availableBudgets]
+  );
+
+  const importBudget = useCallback(async ({ exercice, source, budgetId }: {
+    exercice: number;
+    source: BudgetImportSource;
+    budgetId?: string | null;
+  }): Promise<BudgetPoste[]> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Chercher le budget de fonctionnement pour l'année demandée
-      // On utilise les mêmes données que la page /finance/budgets
-      const budgetFonctionnement = budgets.find(
-        b => b.period_year === exercice && b.budget_type === 'current'
-      );
+      const scopedBudgets = catalogBudgets.filter((b) => b.period_year === exercice);
+      let selectedBudget = selectBudgetForSource(scopedBudgets, source, budgetId);
 
-      if (!budgetFonctionnement) {
+      if (!selectedBudget) {
+        const fallbackBudgets = await fetchBudgetsByYear(exercice);
+        selectedBudget = selectBudgetForSource(fallbackBudgets, source, budgetId);
+      }
+
+      if (!selectedBudget) {
         setError(`Aucun budget trouvé pour l'exercice ${exercice}. Créez d'abord un budget dans Finance > Budgets.`);
         setBudgetExists(false);
         setBudgetTotal(null);
@@ -64,12 +120,8 @@ export function useBudgetImport(): UseBudgetImportReturn {
         return [];
       }
 
-      // Charger les lignes du budget
-      await loadBudgetLines(budgetFonctionnement.id);
-
-      // Attendre que les lignes soient chargées (le hook les met dans `lines`)
-      // On doit refetch les lignes ici car loadBudgetLines est async
-      const budgetLines = await fetchBudgetLines(currentCoproId, budgetFonctionnement.id);
+      // Charger les lignes du budget sélectionné
+      const budgetLines = await listBudgetLines(selectedBudget.copro_id, selectedBudget.id);
 
       // Convertir les lignes en postes AG
       const postes: BudgetPoste[] = budgetLines.map((line, index) => ({
@@ -79,7 +131,7 @@ export function useBudgetImport(): UseBudgetImportReturn {
       }));
 
       // Calculer le total (même méthode que /finance/budgets)
-      const total = Number(budgetFonctionnement.total_planned) || 0;
+      const total = Number(selectedBudget.total_planned) || 0;
 
       setBudgetTotal(total);
       setBudgetExercice(exercice);
@@ -95,40 +147,98 @@ export function useBudgetImport(): UseBudgetImportReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [currentCoproId, budgets, loadBudgetLines]);
+  }, [catalogBudgets]);
 
   return {
     importBudget,
     budgetTotal,
     budgetExercice,
-    isLoading: isLoading || isDataLoading,
+    isLoading,
     error,
     budgetExists,
+    availableYears,
+    availableBudgets,
+    isCatalogLoading,
   };
 }
 
-/**
- * Fonction helper pour fetch les lignes budget directement
- * (car le hook met à jour de manière async)
- */
-async function fetchBudgetLines(
-  coproId: string,
-  budgetId: string
-): Promise<Array<{ id: string; label: string; code: string | null; planned_amount: number }>> {
+function selectBestBudgetForImport(budgets: BudgetOverview[]): BudgetOverview | null {
+  if (budgets.length === 0) return null;
+
+  // Priorité 1: budget de fonctionnement (cas nominal AG)
+  const currentBudget = budgets.find((b) => b.budget_type === 'current');
+  if (currentBudget) return currentBudget;
+
+  // Priorité 2: budget validé avec le plus gros total
+  const validatedBudgets = budgets.filter((b) => b.status === 'validated');
+  if (validatedBudgets.length > 0) {
+    return validatedBudgets.sort((a, b) => Number(b.total_planned) - Number(a.total_planned))[0] ?? null;
+  }
+
+  // Priorité 3: fallback sur le premier budget disponible de l'année
+  return budgets[0] ?? null;
+}
+
+async function fetchBudgetsByYear(periodYear: number): Promise<BudgetOverview[]> {
   const { createClient } = await import('@/lib/supabase/client');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createClient() as any;
 
   const { data, error } = await supabase
-    .from('v_budget_lines_overview')
-    .select('id, label, code, planned_amount')
-    .eq('copro_id', coproId)
-    .eq('budget_id', budgetId)
-    .order('sort_order', { ascending: true });
+    .from('v_budgets_overview')
+    .select('*')
+    .eq('period_year', periodYear)
+    .order('budget_type', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return data || [];
+  return (data || []) as BudgetOverview[];
+}
+
+async function fetchBudgetsCatalog(coproId: string): Promise<BudgetOverview[]> {
+  const primary = await listBudgets(coproId);
+  if (primary.length > 0) {
+    return primary;
+  }
+
+  const { createClient } = await import('@/lib/supabase/client');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any;
+
+  const { data, error } = await supabase
+    .from('v_budgets_overview')
+    .select('*')
+    .order('period_year', { ascending: false })
+    .order('budget_type', { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data || []) as BudgetOverview[];
+}
+
+function selectBudgetForSource(
+  budgets: BudgetOverview[],
+  source: BudgetImportSource,
+  budgetId?: string | null
+): BudgetOverview | null {
+  if (budgets.length === 0) return null;
+
+  if (source === 'manual') {
+    if (!budgetId) return null;
+    return budgets.find((b) => b.id === budgetId) || null;
+  }
+
+  if (source === 'all_budgets') {
+    const validatedBudgets = budgets.filter((b) => b.status === 'validated');
+    if (validatedBudgets.length > 0) {
+      return validatedBudgets.sort((a, b) => Number(b.total_planned) - Number(a.total_planned))[0] ?? null;
+    }
+    return budgets.sort((a, b) => Number(b.total_planned) - Number(a.total_planned))[0] ?? null;
+  }
+
+  return selectBestBudgetForImport(budgets);
 }

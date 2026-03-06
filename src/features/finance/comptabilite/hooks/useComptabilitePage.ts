@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useCopro } from '@/providers/CoproContext';
-import { useGeneralLedger, useTrialBalance, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+import { useGeneralLedger, useTrialBalance, useActivePeriod } from '@/hooks/modules/useFinanceData';
+import * as financeApi from '@/lib/finance/api';
 import {
   TabCompta,
   OperationComptable,
@@ -19,9 +20,13 @@ import {
 
 export function useComptabilitePage() {
   const { currentCoproId } = useCopro();
+  const [isClosingPeriod, setIsClosingPeriod] = useState(false);
+  const [lastClosedPeriodId, setLastClosedPeriodId] = useState<string | null>(null);
+  const [lastClosedYear, setLastClosedYear] = useState<number | null>(null);
 
   // Supabase hooks
-  const { data: openPeriod, isLoading: periodLoading } = useOpenPeriod();
+  const { data: openPeriod, isLoading: periodLoading, refresh: refreshOpenPeriod } = useActivePeriod();
+  const isReadOnly = openPeriod?.status === 'closed';
   const {
     data: ledgerEntries,
     isLoading: ledgerLoading,
@@ -76,19 +81,27 @@ export function useComptabilitePage() {
   // Data not available from DB yet - use empty defaults
   const etatCloture: EtatCloture = useMemo(
     () => ({
-      annee: openPeriod ? new Date(openPeriod.start_date).getFullYear() : new Date().getFullYear(),
-      estCloturee: openPeriod?.status === 'closed',
+      annee: openPeriod
+        ? new Date(openPeriod.start_date).getFullYear()
+        : (lastClosedYear ?? new Date().getFullYear()),
+      estCloturee:
+        openPeriod?.status === 'closed' ||
+        openPeriod?.id === lastClosedPeriodId ||
+        (!openPeriod && lastClosedYear !== null),
       mouvementsNonCategorises: 0,
       alertes: [],
     }),
-    [openPeriod]
+    [openPeriod, lastClosedPeriodId, lastClosedYear]
   );
 
   const historique: HistoriqueModification[] = [];
   const mouvementsNonCategorises: MouvementNonCategorise[] = [];
 
   // Filters & filtered operations
-  const filters = { searchTerm, dateDebut, dateFin, compteFilter, typeDepenseFilter };
+  const filters = useMemo(
+    () => ({ searchTerm, dateDebut, dateFin, compteFilter, typeDepenseFilter }),
+    [searchTerm, dateDebut, dateFin, compteFilter, typeDepenseFilter]
+  );
   const filteredOperations = useMemo(() => filterOperations(operations, filters), [operations, filters]);
 
   // Totals
@@ -121,18 +134,51 @@ export function useComptabilitePage() {
     setShowDetailModal(true);
   }, []);
 
-  const handleValiderCloture = useCallback(() => {
+  const handleValiderCloture = useCallback(async () => {
+    const anneeCloture = etatCloture.annee;
+    const mouvementsRestants = etatCloture.mouvementsNonCategorises;
+
     if (!isBalanced) {
       alert('Impossible de clôturer !\n\nLe grand livre présente un déséquilibre comptable.');
       return;
     }
-    if (etatCloture.mouvementsNonCategorises > 0) {
+    if (mouvementsRestants > 0) {
       alert('Impossible de clôturer !\n\nIl reste des mouvements bancaires non catégorisés.');
       return;
     }
-    alert(`Clôture de l'exercice ${etatCloture.annee} validée avec succès !`);
+
+    if (!openPeriod?.id || !currentCoproId) {
+      alert('Aucune période ouverte trouvée pour clôturer l’exercice.');
+      return;
+    }
+
+    setIsClosingPeriod(true);
+
+    const result = await financeApi.closePeriod(openPeriod.id);
+    if (result.error || result.data !== true) {
+      const errorMessage = result.error || 'La clôture a échoué.';
+      alert(`Échec de la clôture de l'exercice ${anneeCloture}.\n\n${errorMessage}`);
+      setIsClosingPeriod(false);
+      return;
+    }
+
+    setLastClosedPeriodId(openPeriod.id);
+    setLastClosedYear(anneeCloture);
+    await Promise.all([refreshOpenPeriod(), refreshLedger(), refreshBalance()]);
+
     setShowClotureModal(false);
-  }, [isBalanced, etatCloture]);
+    setIsClosingPeriod(false);
+    alert(`Clôture de l'exercice ${anneeCloture} validée avec succès !`);
+  }, [
+    isBalanced,
+    etatCloture.annee,
+    etatCloture.mouvementsNonCategorises,
+    openPeriod,
+    currentCoproId,
+    refreshOpenPeriod,
+    refreshLedger,
+    refreshBalance,
+  ]);
 
   const exportToPDF = useCallback(() => {}, []);
   const exportToExcel = useCallback(() => {}, []);
@@ -145,9 +191,11 @@ export function useComptabilitePage() {
     isLoading,
     error,
     handleRefresh,
+    isClosingPeriod,
 
     // Period
     openPeriod,
+    isReadOnly,
 
     // Data
     operations,

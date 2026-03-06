@@ -15,7 +15,7 @@ const createUntypedClient = () => createClient() as any;
 interface GooglePlaceResult {
   address_components?: Array<{
     long_name: string;
-    short_name: string;
+    short_name?: string;
     types: string[];
   }>;
   name?: string;
@@ -322,12 +322,18 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
 
   // Google Maps autocomplete
   useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
+    if (!apiKey) {
+      setIsGoogleMapsLoaded(false);
+      return;
+    }
+
     if (typeof window !== 'undefined' && window.google?.maps?.places) {
       setIsGoogleMapsLoaded(true);
       return;
     }
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&libraries=places&language=fr`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=fr`;
     script.async = true;
     script.defer = true;
     script.onload = () => setIsGoogleMapsLoaded(true);
@@ -335,9 +341,12 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
   }, []);
 
   useEffect(() => {
-    if (!isGoogleMapsLoaded || !autocompleteRef.current || typeof window === 'undefined' || !window.google) return;
+    if (!isGoogleMapsLoaded || !autocompleteRef.current || typeof window === 'undefined') return;
+    const googleMaps = window.google?.maps;
+    if (!googleMaps?.places || !googleMaps.event) return;
+    const googleMapsEvent = googleMaps.event;
 
-    const autocomplete = new window.google.maps.places.Autocomplete(autocompleteRef.current, {
+    const autocomplete = new googleMaps.places.Autocomplete(autocompleteRef.current, {
       types: ['address'],
       componentRestrictions: { country: 'fr' },
       fields: ['formatted_address', 'address_components', 'geometry', 'name']
@@ -376,8 +385,8 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
     autocompleteInstance.current = autocomplete;
 
     return () => {
-      if (autocompleteInstance.current && window.google) {
-        window.google.maps.event.clearInstanceListeners(autocompleteInstance.current);
+      if (autocompleteInstance.current) {
+        googleMapsEvent.clearInstanceListeners(autocompleteInstance.current);
       }
     };
   }, [isGoogleMapsLoaded]);

@@ -33,32 +33,12 @@
    Grid Layout
    ═══════════════════════════════════════════════════════════════ */
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: var(--space-xl);
-}
-
-.mainColumn {
+.centered {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-}
-
-.sideColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-@media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sideColumn {
-    order: -1;
-  }
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════

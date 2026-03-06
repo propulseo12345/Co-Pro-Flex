@@ -11,10 +11,10 @@ interface TypeAGSectionProps {
 
 export function TypeAGSection({ type, onChange }: TypeAGSectionProps) {
   return (
-    <div className={styles.section}>
-      <h2 className={styles.sectionTitle}>Type d'assemblée</h2>
-      <div className={styles.radioGroup}>
-        <label className={styles.radioCard}>
+    <div className={`${styles.section} ${styles.compactChoiceSection}`}>
+      <h2 className={styles.sectionTitle}>Type d&apos;assemblée</h2>
+      <div className={`${styles.radioGroup} ${styles.choiceGroupCompact}`}>
+        <label className={`${styles.radioCard} ${styles.choiceCardCompact}`}>
           <input
             type="radio"
             name="type"
@@ -24,10 +24,12 @@ export function TypeAGSection({ type, onChange }: TypeAGSectionProps) {
           />
           <div className={styles.radioContent}>
             <div className={styles.radioTitle}>Assemblée Générale Ordinaire</div>
-            <div className={styles.radioDescription}>Vote du budget, approbation des comptes, travaux courants</div>
+            <div className={`${styles.radioDescription} ${styles.radioDescriptionCompact}`}>
+              Vote du budget, approbation des comptes, travaux courants
+            </div>
           </div>
         </label>
-        <label className={styles.radioCard}>
+        <label className={`${styles.radioCard} ${styles.choiceCardCompact}`}>
           <input
             type="radio"
             name="type"
@@ -37,10 +39,12 @@ export function TypeAGSection({ type, onChange }: TypeAGSectionProps) {
           />
           <div className={styles.radioContent}>
             <div className={styles.radioTitle}>Assemblée Générale Extraordinaire</div>
-            <div className={styles.radioDescription}>Modification du règlement, gros travaux, litiges</div>
+            <div className={`${styles.radioDescription} ${styles.radioDescriptionCompact}`}>
+              Modification du règlement, gros travaux, litiges
+            </div>
           </div>
         </label>
-        <label className={`${styles.radioCard} ${styles.radioCardUrgente}`}>
+        <label className={`${styles.radioCard} ${styles.radioCardUrgente} ${styles.choiceCardCompact}`}>
           <input
             type="radio"
             name="type"
@@ -53,8 +57,8 @@ export function TypeAGSection({ type, onChange }: TypeAGSectionProps) {
               <Zap size={18} className={styles.urgentIcon} aria-hidden="true" />
               Assemblée Générale Urgente
             </div>
-            <div className={styles.radioDescription}>
-              Situation d'urgence nécessitant une décision rapide (dégât des eaux, sinistre, sécurité)
+            <div className={`${styles.radioDescription} ${styles.radioDescriptionCompact}`}>
+              Situation d&apos;urgence nécessitant une décision rapide (dégât des eaux, sinistre, sécurité)
             </div>
           </div>
         </label>
@@ -68,14 +72,14 @@ export function TypeAGSection({ type, onChange }: TypeAGSectionProps) {
           </div>
           <div className={styles.urgentInfoContent}>
             <p>
-              En cas d'urgence avérée (article 37 du décret du 17 mars 1967), les délais de convocation peuvent être
+              En cas d&apos;urgence avérée (article 37 du décret du 17 mars 1967), les délais de convocation peuvent être
               réduits. Cependant, vous devez :
             </p>
             <ul>
               <li>Justifier le caractère urgent de la situation</li>
               <li>Envoyer les convocations le plus tôt possible</li>
-              <li>Limiter l'ordre du jour aux seules questions urgentes</li>
-              <li>Documenter les raisons de l'urgence dans le PV</li>
+              <li>Limiter l&apos;ordre du jour aux seules questions urgentes</li>
+              <li>Documenter les raisons de l&apos;urgence dans le PV</li>
             </ul>
             <div className={styles.urgentWarning}>
               <AlertTriangle size={16} aria-hidden="true" />

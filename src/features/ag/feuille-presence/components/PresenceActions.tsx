@@ -27,11 +27,11 @@ export function PresenceActions({
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
       <button onClick={onBulkPresent} className="btn btn-primary" disabled={isSaving}>
         <CheckSquare size={16} />
-        Tout cocher présent
+        Marquer tous présents
       </button>
       <button onClick={onBulkAbsent} className="btn btn-secondary" disabled={isSaving}>
         <Square size={16} />
-        Tout décocher
+        Marquer tous absents
       </button>
       <button onClick={onExportPDF} className="btn btn-secondary">
         <FileDown size={16} />

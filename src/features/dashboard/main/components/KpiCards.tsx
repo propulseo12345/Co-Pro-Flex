@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Wallet, AlertTriangle, Calendar } from 'lucide-react';
+import { Wallet, AlertTriangle, Calendar, TrendingUp, Landmark, Wrench } from 'lucide-react';
 import { formatDateFR } from '@/lib/time/period';
 import { formatCurrency, type KpisData } from '../hooks/useDashboardMainPage';
 import styles from '@/app/(dashboard)/dashboard/dashboard.module.css';
@@ -53,6 +53,47 @@ export function KpiCards({ kpis }: KpiCardsProps) {
           </span>
         </div>
       </Link>
+
+      {/* Budget consommé — depuis annexe 2 */}
+      {kpis.budget_pct !== undefined && (
+        <Link href="/finance/budget-current" className={styles.metricCard}>
+          <div className={styles.metricIcon}>
+            <TrendingUp size={20} />
+          </div>
+          <div className={styles.metricContent}>
+            <span className={styles.metricLabel}>Budget consommé</span>
+            <span className={styles.metricValue}>{kpis.budget_pct}%</span>
+          </div>
+        </Link>
+      )}
+
+      {/* Provisions travaux — depuis annexe 1 */}
+      {kpis.provisions_travaux !== undefined && kpis.provisions_travaux > 0 && (
+        <Link href="/documents/annexes" className={styles.metricCard}>
+          <div className={styles.metricIcon}>
+            <Landmark size={20} />
+          </div>
+          <div className={styles.metricContent}>
+            <span className={styles.metricLabel}>Provisions travaux</span>
+            <span className={styles.metricValue}>{formatCurrency(kpis.provisions_travaux)}</span>
+          </div>
+        </Link>
+      )}
+
+      {/* Travaux en cours — depuis annexe 4 */}
+      {kpis.nb_travaux_ouverts !== undefined && kpis.nb_travaux_ouverts > 0 && (
+        <Link href="/documents/annexes" className={styles.metricCard}>
+          <div className={styles.metricIcon}>
+            <Wrench size={20} />
+          </div>
+          <div className={styles.metricContent}>
+            <span className={styles.metricLabel}>Travaux en cours</span>
+            <span className={styles.metricValue}>
+              {kpis.nb_travaux_ouverts} ({formatCurrency(kpis.travaux_en_cours ?? 0)})
+            </span>
+          </div>
+        </Link>
+      )}
     </section>
   );
 }

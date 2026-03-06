@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import type { MajorityType, TypeAG } from '@/lib/constants/resolutions';
+import { ChevronDown } from 'lucide-react';
+import { getVariableDefinition, type TypeAG } from '@/lib/constants/resolutions';
 import {
   VariableEditor,
   BibliothequeResolutions,
@@ -27,6 +28,8 @@ export default function AgendaPage() {
   const params = useParams();
   const agId = params.id as string;
   const page = useAgAgendaPage({ agId });
+  const [openCoproMenu, setOpenCoproMenu] = useState<string | null>(null);
+  const [coproFilter, setCoproFilter] = useState('');
 
   useEffect(() => {
     if (!page.isLoading && page.meeting && agId) {
@@ -45,9 +48,47 @@ export default function AgendaPage() {
       if (match.index > lastIndex) parts.push(texte.slice(lastIndex, match.index));
       const varName = match[1];
       const varValue = variables[varName] || '';
+      const variableKey = `${id}:${varName}`;
+      const template = templateId ? page.getResolutionById(templateId) : undefined;
+      const variableType = template ? getVariableDefinition(template, varName).type : null;
+      const isCoproVariableType = variableType === 'coproprietaire' || variableType === 'coproprietaire_present';
+      const isLikelyCoproVariableName =
+        varName.includes('coproprietaire') ||
+        varName === 'nom_president' ||
+        varName === 'nom_secretaire' ||
+        varName === 'nom_scrutateur' ||
+        varName === 'nom' ||
+        varName === 'nom_ancien' ||
+        varName === 'noms';
+      const isCoproLinkedVariable = isCoproVariableType || isLikelyCoproVariableName;
       const isEditing = page.editingVariable?.resId === id && page.editingVariable?.varName === varName;
+      const isMenuOpen = openCoproMenu === variableKey;
+      const filter = coproFilter.trim().toLowerCase();
+      const filteredCopros = filter.length > 0
+        ? page.coproprietairesForEditor.filter(c =>
+          `${c.prenom} ${c.nom}`.toLowerCase().includes(filter) ||
+          `${c.nom} ${c.prenom}`.toLowerCase().includes(filter)
+        )
+        : page.coproprietairesForEditor;
+
+      const handleSelectCopro = async (fullName: string) => {
+        const nextValue = varName === 'noms'
+          ? Array.from(
+            new Set(
+              [varValue, fullName]
+                .join(',')
+                .split(',')
+                .map((value) => value.trim())
+                .filter(Boolean)
+            )
+          ).join(', ')
+          : fullName;
+        await page.handleQuickSetVariable(id, varName, nextValue);
+        setOpenCoproMenu(null);
+        setCoproFilter('');
+      };
+
       if (isEditing) {
-        const template = templateId ? page.getResolutionById(templateId) : undefined;
         parts.push(
           <span key={`${id}-${varName}`} className={styles.variableEditorContainer} ref={page.editorContainerRef}>
             {template ? (
@@ -78,22 +119,92 @@ export default function AgendaPage() {
           </span>
         );
       } else {
-        parts.push(
-          <span
-            key={`${id}-${varName}`}
-            className={`${styles.variablePlaceholder} ${varValue ? styles.variableFilled : styles.variableEmpty}`}
-            onClick={() => page.handleStartEditVariable(id, varName, varValue, templateId)}
-            title={`Cliquer pour modifier: ${varName}`}
-          >
-            {varValue || `{${varName}}`}
-          </span>
-        );
+        if (isCoproLinkedVariable) {
+          parts.push(
+            <span key={`${id}-${varName}`} className={styles.variableMenuContainer}>
+              <button
+                type="button"
+                className={`${styles.variablePlaceholder} ${varValue ? styles.variableFilled : styles.variableEmpty}`}
+                onClick={() => {
+                  setOpenCoproMenu(isMenuOpen ? null : variableKey);
+                  setCoproFilter('');
+                }}
+                title={`Sélectionner depuis les copropriétaires: ${varName}`}
+                aria-label={`Sélectionner une valeur pour ${varName}`}
+                aria-expanded={isMenuOpen}
+                aria-haspopup="listbox"
+              >
+                <span className={styles.variablePlaceholderLabel}>{varValue || `{${varName}}`}</span>
+                <ChevronDown size={14} aria-hidden="true" />
+              </button>
+              {isMenuOpen && (
+                <div className={styles.coproMenu} role="listbox" aria-label={`Sélection copropriétaire pour ${varName}`}>
+                  <div className={styles.coproMenuFilter}>
+                    <input
+                      type="text"
+                      value={coproFilter}
+                      onChange={(e) => setCoproFilter(e.target.value)}
+                      className={styles.coproMenuFilterInput}
+                      placeholder="Rechercher un copropriétaire..."
+                      aria-label="Rechercher un copropriétaire"
+                    />
+                  </div>
+                  <div className={styles.coproMenuList}>
+                    {filteredCopros.length === 0 ? (
+                      <div className={styles.coproMenuEmpty}>Aucun copropriétaire trouvé</div>
+                    ) : (
+                      filteredCopros.map(copro => {
+                        const fullName = `${copro.prenom} ${copro.nom}`.trim();
+                        return (
+                          <button
+                            key={`${id}-${varName}-${copro.id}`}
+                            type="button"
+                            className={styles.coproMenuItem}
+                            role="option"
+                            aria-selected="false"
+                            onClick={() => void handleSelectCopro(fullName)}
+                          >
+                            {fullName}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.coproMenuManual}
+                    onClick={() => {
+                      setOpenCoproMenu(null);
+                      page.handleStartEditVariable(id, varName, varValue, templateId);
+                    }}
+                  >
+                    Saisie manuelle
+                  </button>
+                </div>
+              )}
+            </span>
+          );
+        } else {
+          parts.push(
+            <button
+              key={`${id}-${varName}`}
+              type="button"
+              className={`${styles.variablePlaceholder} ${varValue ? styles.variableFilled : styles.variableEmpty}`}
+              onClick={() => page.handleStartEditVariable(id, varName, varValue, templateId)}
+              title={`Modifier: ${varName}`}
+              aria-label={`Modifier la valeur pour ${varName}`}
+            >
+              <span className={styles.variablePlaceholderLabel}>{varValue || `{${varName}}`}</span>
+              <ChevronDown size={14} aria-hidden="true" />
+            </button>
+          );
+        }
       }
       lastIndex = match.index + match[0].length;
     }
     if (lastIndex < texte.length) parts.push(texte.slice(lastIndex));
     return parts;
-  }, [page]);
+  }, [page, openCoproMenu, coproFilter]);
 
   if (page.isLoading) {
     return (
@@ -138,6 +249,7 @@ export default function AgendaPage() {
             onDelete={page.handleDelete}
             onEdit={page.handleEditResolution}
             renderVariables={renderVariables}
+            variant="cards"
           />
 
           <AgendaFooter

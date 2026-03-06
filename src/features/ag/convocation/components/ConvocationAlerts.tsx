@@ -45,14 +45,12 @@ export function ConvocationAlerts({
       {/* Variable validation warning */}
       {variableValidation && !variableValidation.isComplete && (
         <div className={`${styles.alertBanner} ${styles.alertBannerWarning}`}>
-          <AlertCircle size={20} aria-hidden="true" />
-          <div>
-            <strong>Variables non remplies</strong>
-            <p>{variableValidation.unfilledVariables.length} variable(s) à compléter.</p>
-            <button onClick={onNavigateToAgenda} className={styles.alertLink}>
-              Retourner à l&apos;ordre du jour
-            </button>
-          </div>
+          <AlertCircle size={18} aria-hidden="true" />
+          <strong>Variables non remplies</strong>
+          <p>{variableValidation.unfilledVariables.length} variable(s) à compléter.</p>
+          <button onClick={onNavigateToAgenda} className={styles.alertLink}>
+            Retourner à l&apos;ordre du jour
+          </button>
         </div>
       )}
 

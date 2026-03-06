@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { ArrowLeft, ArrowRight, AlertCircle, Edit3, ChevronDown } from 'lucide-react';
 import { SessionStats, SessionVotingTable } from '@/components/features/ag/Session';
 import { MAJORITES, type MajorityType } from '@/lib/constants/resolutions';
@@ -64,58 +65,126 @@ export function SessionVotingContent({
   onPrevResolution,
   onGoToPV,
 }: SessionVotingContentProps) {
+  const [prefillFilter, setPrefillFilter] = useState('');
+
   const renderTextWithVariables = (text: string) => {
     if (!text) return null;
     const parts = text.split(/(\{[^}]+\})/g);
-    return parts.map((part, index) => {
+    let cursor = 0;
+
+    return parts.map((part) => {
+      const partKey = `${cursor}-${part}`;
+      cursor += part.length;
+
       const match = part.match(/^\{(.+)\}$/);
       if (match) {
         const variableName = match[1];
         const value = allVariables[variableName];
+        const hasValue = Boolean(value?.trim());
         const isRole = isRoleVariable(variableName);
         const isGlobalPrefilled = prefillVariables[variableName] && !variableValues[variableName];
+        const displayValue = hasValue ? value : `{${variableName}}`;
+        const variableHint = hasValue ? 'Valeur renseignée (cliquer pour modifier)' : 'Champ à renseigner';
+        const variableTitle = isGlobalPrefilled
+          ? `Pré-remplissage disponible pour : ${variableName}`
+          : hasValue
+            ? `Modifier la valeur : ${variableName}`
+            : `Renseigner le champ : ${variableName}`;
+        const isSelectMenuOpen = showPrefillDropdown === variableName;
+        const normalizedFilter = prefillFilter.trim().toLowerCase();
+        const filteredCoproprietaires = normalizedFilter.length > 0
+          ? coproprietaires.filter(copro => copro.nom.toLowerCase().includes(normalizedFilter))
+          : coproprietaires;
+
+        const handleSelectMenuToggle = () => {
+          const nextValue = isSelectMenuOpen ? null : variableName;
+          onPrefillDropdownToggle(nextValue);
+          setPrefillFilter('');
+        };
+
+        const handlePrefillSelect = (coproId: string) => {
+          onPrefillFromCopro(variableName, coproId);
+          setPrefillFilter('');
+        };
+
         return (
-          <span key={index} className={styles.variableWrapper}>
-            <button
-              type="button"
-              onClick={() => onVariableClick(variableName)}
-              className={`${styles.variableButton} ${value ? styles.variableButtonFilled : ''} ${isGlobalPrefilled ? styles.variableButtonPrefilled : ''}`}
-              title={isGlobalPrefilled ? `Pré-rempli automatiquement : ${variableName}` : `Cliquez pour définir : ${variableName}`}
-            >
-              <Edit3 size={12} aria-hidden="true" />
-              {value || variableName}
-            </button>
-            {isRole && !value && (
-              <div className={styles.prefillDropdownWrapper}>
+          <span key={partKey} className={styles.variableWrapper}>
+            {isRole ? (
+              <div className={styles.selectMenuWrapper}>
                 <button
                   type="button"
-                  onClick={() => onPrefillDropdownToggle(showPrefillDropdown === variableName ? null : variableName)}
-                  className={styles.prefillButton}
-                  title="Sélectionner un copropriétaire"
+                  onClick={handleSelectMenuToggle}
+                  className={`${styles.selectMenuTrigger} ${!hasValue ? styles.variableButtonMissing : ''} ${hasValue ? styles.variableButtonFilled : ''} ${isGlobalPrefilled ? styles.variableButtonPrefilled : ''}`}
+                  title={variableTitle}
+                  aria-label={`${variableName} - ${variableHint}`}
+                  aria-expanded={isSelectMenuOpen}
+                  aria-haspopup="listbox"
                 >
-                  <ChevronDown size={14} aria-hidden="true" />
+                  <span className={styles.selectMenuTriggerLabel}>{displayValue}</span>
+                  <ChevronDown
+                    size={14}
+                    aria-hidden="true"
+                    className={`${styles.selectMenuTriggerChevron} ${isSelectMenuOpen ? styles.selectMenuTriggerChevronOpen : ''}`}
+                  />
                 </button>
-                {showPrefillDropdown === variableName && (
-                  <div className={styles.prefillDropdown}>
-                    <div className={styles.prefillDropdownHeader}>Sélectionner :</div>
-                    {coproprietaires.map(copro => (
-                      <button
-                        key={copro.id}
-                        type="button"
-                        onClick={() => onPrefillFromCopro(variableName, copro.id)}
-                        className={styles.prefillDropdownItem}
-                      >
-                        {copro.nom}
-                      </button>
-                    ))}
+                <button
+                  type="button"
+                  onClick={() => onVariableClick(variableName)}
+                  className={styles.variableEditButton}
+                  title={`Éditer manuellement ${variableName}`}
+                  aria-label={`Éditer manuellement ${variableName}`}
+                >
+                  <Edit3 size={12} aria-hidden="true" />
+                </button>
+                {isSelectMenuOpen && (
+                  <div className={styles.selectMenuPopover} role="listbox" aria-label={`Pré-remplissage ${variableName}`}>
+                    <div className={styles.selectMenuFilterRow}>
+                      <input
+                        type="text"
+                        value={prefillFilter}
+                        onChange={(event) => setPrefillFilter(event.target.value)}
+                        className={styles.selectMenuFilterInput}
+                        placeholder="Rechercher un copropriétaire..."
+                        aria-label="Rechercher un copropriétaire"
+                      />
+                    </div>
+                    <div className={styles.selectMenuOptions}>
+                      {filteredCoproprietaires.length === 0 ? (
+                        <div className={styles.selectMenuEmpty}>Aucun copropriétaire disponible</div>
+                      ) : (
+                        filteredCoproprietaires.map(copro => (
+                          <button
+                            key={copro.id}
+                            type="button"
+                            onClick={() => handlePrefillSelect(copro.id)}
+                            className={styles.selectMenuOption}
+                            role="option"
+                            aria-selected="false"
+                          >
+                            {copro.nom}
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onVariableClick(variableName)}
+                className={`${styles.variableButton} ${!hasValue ? styles.variableButtonMissing : ''} ${hasValue ? styles.variableButtonFilled : ''} ${isGlobalPrefilled ? styles.variableButtonPrefilled : ''}`}
+                title={variableTitle}
+                aria-label={`${variableName} - ${variableHint}`}
+              >
+                <Edit3 size={12} aria-hidden="true" />
+                {displayValue}
+              </button>
             )}
           </span>
         );
       }
-      return <span key={index}>{part}</span>;
+      return <span key={partKey}>{part}</span>;
     });
   };
 
@@ -145,9 +214,9 @@ export function SessionVotingContent({
         </div>
       )}
 
-      <p className={styles.resolutionText}>
+      <div className={styles.resolutionText}>
         {renderTextWithVariables(currentResolution.texte)}
-      </p>
+      </div>
 
       {isCurrentResolutionInfo ? (
         <div className={styles.informationSection}>

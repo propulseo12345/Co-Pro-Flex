@@ -14,8 +14,9 @@ import {
   InfoBox,
 } from './index';
 import type { AdresseAG, BudgetPoste, EditingPosteState } from '../domain/types';
+import type { GoogleMapsAutocompleteStatus, AdresseAutocompleteSuggestion } from '../domain/types';
+import type { BudgetImportSource } from '../hooks/useBudgetImport';
 import styles from '@/app/(dashboard)/ag/new/new-ag.module.css';
-import type { RefObject } from 'react';
 
 interface BudgetPostesManager {
   newPoste: { poste: string; montant: string };
@@ -31,7 +32,10 @@ interface BudgetPostesManager {
   handleSavePoste: () => void;
   handleCancelEdit: () => void;
   handleEditKeyDown: (e: React.KeyboardEvent) => void;
-  handleImportBudgetPrecedent: () => void;
+  handleImportBudgetPrecedent: (params: {
+    source: BudgetImportSource;
+    budgetId?: string | null;
+  }) => void;
   updateEditingData: (field: 'poste' | 'montant', value: string) => void;
 }
 
@@ -54,8 +58,13 @@ interface AgNewFormContentProps {
   errors: Record<string, string>;
   validationDateAG: ValidationDateAG | null;
   datesMinimales: DatesMinimales;
-  autocompleteRef: RefObject<HTMLInputElement | null>;
+  addressSearchValue: string;
+  addressSuggestions: AdresseAutocompleteSuggestion[];
+  isAddressSearching: boolean;
+  onAddressSearchChange: (value: string) => void;
+  onAddressSuggestionSelect: (suggestion: AdresseAutocompleteSuggestion) => void;
   isGoogleMapsLoaded: boolean;
+  googleMapsStatus: GoogleMapsAutocompleteStatus;
   jalons: JalonAG[];
   alertes: AlerteDelai[];
   showCalendrierJalons: boolean;
@@ -64,6 +73,7 @@ interface AgNewFormContentProps {
   budgetPostesManager: BudgetPostesManager;
   isBudgetImporting: boolean;
   budgetImportError: string | null;
+  availableBudgetYears: number[];
   onTypeChange: (type: 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'URGENTE') => void;
   onFormatChange: (format: AGFormat) => void;
   onDateChange: (date: string) => void;
@@ -80,8 +90,13 @@ export function AgNewFormContent({
   errors,
   validationDateAG,
   datesMinimales,
-  autocompleteRef,
+  addressSearchValue,
+  addressSuggestions,
+  isAddressSearching,
+  onAddressSearchChange,
+  onAddressSuggestionSelect,
   isGoogleMapsLoaded,
+  googleMapsStatus,
   jalons,
   alertes,
   showCalendrierJalons,
@@ -90,6 +105,7 @@ export function AgNewFormContent({
   budgetPostesManager,
   isBudgetImporting,
   budgetImportError,
+  availableBudgetYears,
   onTypeChange,
   onFormatChange,
   onDateChange,
@@ -131,8 +147,13 @@ export function AgNewFormContent({
           adresse={formData.adresse}
           adresseComplete={formData.adresseComplete}
           errors={errors}
-          autocompleteRef={autocompleteRef}
+          addressSearchValue={addressSearchValue}
+          addressSuggestions={addressSuggestions}
+          isAddressSearching={isAddressSearching}
+          onAddressSearchChange={onAddressSearchChange}
+          onAddressSuggestionSelect={onAddressSuggestionSelect}
           isGoogleMapsLoaded={isGoogleMapsLoaded}
+          googleMapsStatus={googleMapsStatus}
           onAdresseChange={onAdresseChange}
         />
 
@@ -167,6 +188,7 @@ export function AgNewFormContent({
         editing={budgetPostesManager.editing}
         isImporting={budgetPostesManager.isImporting || isBudgetImporting}
         importError={budgetPostesManager.importError || budgetImportError}
+        availableBudgetYears={availableBudgetYears}
         onBudgetChange={onBudgetChange}
         onExerciceChange={onExerciceChange}
         onNewPosteChange={budgetPostesManager.setNewPoste}

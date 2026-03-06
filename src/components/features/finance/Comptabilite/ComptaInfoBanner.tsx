@@ -1,13 +1,17 @@
 'use client';
 
-import { Info, RefreshCw } from 'lucide-react';
+import { Info, Lock, RefreshCw } from 'lucide-react';
 
 interface ComptaInfoBannerProps {
   periodName: string;
   onRefresh: () => void;
+  isReadOnly?: boolean;
 }
 
-export function ComptaInfoBanner({ periodName, onRefresh }: ComptaInfoBannerProps) {
+export function ComptaInfoBanner({ periodName, onRefresh, isReadOnly }: ComptaInfoBannerProps) {
+  const bgColor = isReadOnly ? 'var(--color-warning-bg, #fef3c7)' : 'var(--color-info-bg, #e0f2fe)';
+  const textColor = isReadOnly ? 'var(--color-warning-text, #92400e)' : 'var(--color-info-text, #0369a1)';
+
   return (
     <div
       style={{
@@ -15,16 +19,19 @@ export function ComptaInfoBanner({ periodName, onRefresh }: ComptaInfoBannerProp
         alignItems: 'center',
         gap: '0.5rem',
         padding: '0.75rem 1rem',
-        backgroundColor: 'var(--color-info-bg, #e0f2fe)',
+        backgroundColor: bgColor,
         borderRadius: 'var(--radius-md)',
         marginBottom: '1rem',
         fontSize: '0.875rem',
-        color: 'var(--color-info-text, #0369a1)',
+        color: textColor,
       }}
     >
-      <Info size={16} />
+      {isReadOnly ? <Lock size={16} /> : <Info size={16} />}
       <span>
-        Données issues de Supabase (v_general_ledger, v_trial_balance) - Période: {periodName}
+        {isReadOnly
+          ? `Exercice clôturé — Consultation en lecture seule - Période: ${periodName}`
+          : `Données issues de Supabase (v_general_ledger, v_trial_balance) - Période: ${periodName}`
+        }
       </span>
       <button
         onClick={onRefresh}

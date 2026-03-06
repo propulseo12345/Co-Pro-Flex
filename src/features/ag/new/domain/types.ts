@@ -1,41 +1,12 @@
 import { AGFormat } from '@/types';
 
-export interface GooglePlaceResult {
-  address_components?: Array<{
-    long_name: string;
-    short_name: string;
-    types: string[];
-  }>;
-  name?: string;
-}
+export type GoogleMapsAutocompleteStatus = 'idle' | 'ready' | 'missing_api_key' | 'loading_error';
 
-export interface GoogleAutocomplete {
-  addListener: (event: string, callback: () => void) => void;
-  getPlace: () => GooglePlaceResult;
-}
-
-export interface GoogleAutocompleteOptions {
-  types?: string[];
-  componentRestrictions?: { country: string };
-  fields?: string[];
-}
-
-export interface GoogleMapsAPI {
-  maps: {
-    places: {
-      Autocomplete: new (input: HTMLInputElement, options?: GoogleAutocompleteOptions) => GoogleAutocomplete;
-    };
-    event: {
-      clearInstanceListeners: (instance: GoogleAutocomplete) => void;
-    };
-  };
-}
-
-declare global {
-  interface Window {
-    google: GoogleMapsAPI;
-    initGoogleMaps: () => void;
-  }
+export interface AdresseAutocompleteSuggestion {
+  id: string;
+  label: string;
+  nomLieu: string;
+  adresse: AdresseAG;
 }
 
 export interface BudgetPoste {

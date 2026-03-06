@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgDetail, useAgVoters, useCastVote, useRegisterAttendance, useStartAg } from '@/hooks/modules/useAgData';
@@ -46,6 +46,12 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
         presenceHook.setPresencesEnrichies(data.presencesEnrichies);
         presenceHook.setPresences(presencesEnrichiesVersSimple(data.presencesEnrichies));
       }
+      if (data.votesParResolution) {
+        const restoredVotes = data.votesParResolution as unknown as VoteData[];
+        if (Array.isArray(restoredVotes)) {
+          votingHook.setVotes(restoredVotes);
+        }
+      }
       if (data.sessionStarted !== undefined) {
         resolutionsHook.setSessionState(prev => ({ ...prev, started: data.sessionStarted! }));
       }
@@ -61,17 +67,25 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   // Modals hook
   const modalsHook = useSessionModals();
 
+  // Refs to avoid stale closures in saveSession (initialized with defaults, synced below)
+  const votesRef = useRef<VoteData[]>([]);
+  const sessionStateRef = useRef({ started: false, currentResolutionIndex: 0, completedResolutions: [] as string[] });
+  const presencesEnrichiesRef = useRef<Record<string, import('@/lib/utils/ag-session').PresenceData>>({});
+  const isSecondVoteRef = useRef(false);
+  const passerelleResolutionRef = useRef<import('../types').Resolution | null>(null);
+  const passerelleVoteInitialRef = useRef<import('../types').PasserelleVoteInitial | null>(null);
+
   // Resolutions hook (needs saveSession callback - defined below)
   const saveSession = useCallback(async () => {
     const sessionData: SessionDraftData = {
-      ...resolutionsHook.sessionState,
-      isSecondVote: votingHook.isSecondVote,
-      passerelleResolution: votingHook.passerelleResolution,
-      passerelleVoteInitial: votingHook.passerelleVoteInitial,
-      presencesEnrichies: presenceHook.presencesEnrichies
+      ...sessionStateRef.current,
+      isSecondVote: isSecondVoteRef.current,
+      passerelleResolution: passerelleResolutionRef.current,
+      passerelleVoteInitial: passerelleVoteInitialRef.current,
+      presencesEnrichies: presencesEnrichiesRef.current
     };
     await saveDraft(agId, 'session', sessionData);
-    await saveDraft(agId, 'votes', votingHook.votes);
+    await saveDraft(agId, 'votes', votesRef.current);
   }, [agId]);
 
   const resolutionsHook = useSessionResolutions({
@@ -106,6 +120,21 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     castVote: castVoteMutation.execute,
   });
 
+  // Mark dirty when votes change so auto-save picks them up
+  useEffect(() => {
+    if (votingHook.votes.length > 0) {
+      persistence.markDirty();
+    }
+  }, [votingHook.votes, persistence.markDirty]);
+
+  // Keep refs in sync for saveSession
+  votesRef.current = votingHook.votes;
+  sessionStateRef.current = resolutionsHook.sessionState;
+  presencesEnrichiesRef.current = presenceHook.presencesEnrichies;
+  isSecondVoteRef.current = votingHook.isSecondVote;
+  passerelleResolutionRef.current = votingHook.passerelleResolution;
+  passerelleVoteInitialRef.current = votingHook.passerelleVoteInitial;
+
   // Projector hook
   const projectorHook = useSessionProjector({
     agId,
@@ -120,15 +149,16 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     totalTantiemes,
   });
 
-  // Set persistence data getter
+  // Set persistence data getter (includes votes for auto-save)
   useEffect(() => {
     persistence.setDataGetter(() => ({
       presencesEnrichies: presenceHook.presencesEnrichies,
+      votesParResolution: votingHook.votes as unknown as Record<string, unknown>,
       resolutionActiveIndex: resolutionsHook.sessionState.currentResolutionIndex,
       completedResolutions: resolutionsHook.sessionState.completedResolutions,
       sessionStarted: resolutionsHook.sessionState.started,
     }));
-  }, [presenceHook.presencesEnrichies, resolutionsHook.sessionState, persistence.setDataGetter]);
+  }, [presenceHook.presencesEnrichies, votingHook.votes, resolutionsHook.sessionState, persistence.setDataGetter]);
 
   // Load session data on mount
   useEffect(() => {
@@ -145,12 +175,13 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
         }
       }
 
-      // Load votes draft
+      // Load votes draft (preserve original source if present)
       const votesDraft = await loadDraft<VoteData[]>(agId, 'votes');
       let loadedVotes: VoteData[] = [];
       if (votesDraft.data && Array.isArray(votesDraft.data)) {
         loadedVotes = votesDraft.data.map(v => ({
-          ...v, source: v.vote !== null ? 'CORRESPONDANCE' as VoteSource : null
+          ...v,
+          source: v.source || (v.vote !== null ? 'CORRESPONDANCE' as VoteSource : null)
         }));
         votingHook.setVotes(loadedVotes);
       }
@@ -225,7 +256,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   }, [agId, coproprietaires, presenceHook.presencesEnrichies, resolutionsHook.resolutions, votingHook.votes, totalTantiemes]);
 
   const goBack = useCallback(() => {
-    router.push(`/ag/${agId}/preparation`);
+    router.push(`/ag/${agId}/feuille-presence`);
   }, [router, agId]);
 
   const goToPV = useCallback(() => {

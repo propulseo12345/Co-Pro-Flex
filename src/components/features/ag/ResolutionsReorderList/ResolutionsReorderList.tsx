@@ -26,18 +26,29 @@ interface ResolutionsReorderListProps {
     onDelete: (id: string) => void;
     onEdit?: (resolution: Resolution) => void;
     renderVariables?: (resolution: Resolution) => React.ReactNode;
+    variant?: 'table' | 'cards';
 }
 
 type GroupedResolutions = Record<string, Resolution[]>;
+
+const THEME_ORDER = [
+    'Assemblée Générale',
+    'Finances',
+    'Travaux',
+    'Conseil syndical et syndic',
+    'Contrats',
+    'Autres'
+];
 
 export function ResolutionsReorderList({
     resolutions,
     onReorder,
     onDelete,
     onEdit,
-    renderVariables
+    renderVariables,
+    variant = 'table'
 }: ResolutionsReorderListProps) {
-    const [expandedResolutions, setExpandedResolutions] = useState<Set<string>>(new Set());
+    const isCardsVariant = variant === 'cards';
     const [groupByTheme, setGroupByTheme] = useState(false);
 
     const sensors = useSensors(
@@ -50,18 +61,6 @@ export function ResolutionsReorderList({
             coordinateGetter: sortableKeyboardCoordinates
         })
     );
-
-    const toggleExpand = useCallback((id: string) => {
-        setExpandedResolutions(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-                newSet.delete(id);
-            } else {
-                newSet.add(id);
-            }
-            return newSet;
-        });
-    }, []);
 
     const handleMoveUp = useCallback((index: number) => {
         if (index === 0) return;
@@ -107,20 +106,11 @@ export function ResolutionsReorderList({
         }, {} as GroupedResolutions);
     }, [resolutions, groupByTheme]);
 
-    const themeOrder = [
-        'Assemblée Générale',
-        'Finances',
-        'Travaux',
-        'Conseil syndical et syndic',
-        'Contrats',
-        'Autres'
-    ];
-
     const orderedThemes = useMemo(() => {
         if (!groupByTheme) return [];
         const themes = Object.keys(groupedResolutions);
-        return themeOrder.filter(t => themes.includes(t)).concat(
-            themes.filter(t => !themeOrder.includes(t))
+        return THEME_ORDER.filter(t => themes.includes(t)).concat(
+            themes.filter(t => !THEME_ORDER.includes(t))
         );
     }, [groupedResolutions, groupByTheme]);
 
@@ -140,38 +130,41 @@ export function ResolutionsReorderList({
     return (
         <div className={styles.container}>
             {/* Toggle groupement par thème */}
-            <div className={styles.toolbar}>
-                <button
-                    type="button"
-                    onClick={() => setGroupByTheme(!groupByTheme)}
-                    className={`${styles.toggleBtn} ${groupByTheme ? styles.toggleBtnActive : ''}`}
-                >
-                    {groupByTheme ? <Layers size={16} /> : <List size={16} />}
-                    {groupByTheme ? 'Vue groupée' : 'Vue liste'}
-                </button>
-                <span className={styles.hint}>
-                    Glissez les éléments ou utilisez les boutons ↑↓ pour réordonner
-                </span>
-            </div>
+            {!isCardsVariant && (
+                <div className={styles.toolbar}>
+                    <button
+                        type="button"
+                        onClick={() => setGroupByTheme(!groupByTheme)}
+                        className={`${styles.toggleBtn} ${groupByTheme ? styles.toggleBtnActive : ''}`}
+                    >
+                        {groupByTheme ? <Layers size={16} /> : <List size={16} />}
+                        {groupByTheme ? 'Vue groupée' : 'Vue liste'}
+                    </button>
+                    <span className={styles.hint}>
+                        Glissez les éléments ou utilisez les boutons ↑↓ pour réordonner
+                    </span>
+                </div>
+            )}
 
             {/* Header */}
-            <div className={styles.listHeader}>
-                <span className={styles.headerHandle}></span>
-                <span className={styles.headerNum}>#</span>
-                <span className={styles.headerTitle}>Titre</span>
-                <span className={styles.headerCategorie}>Thème</span>
-                <span className={styles.headerMaj}>Majorité</span>
-                <span className={styles.headerStatus}>Statut</span>
-                <span className={styles.headerActions}>Ordre</span>
-                <span className={styles.headerExpand}></span>
-            </div>
+            {variant === 'table' && (
+                <div className={styles.listHeader}>
+                    <span className={styles.headerHandle}></span>
+                    <span className={styles.headerNum}>#</span>
+                    <span className={styles.headerTitle}>Titre</span>
+                    <span className={styles.headerCategorie}>Thème</span>
+                    <span className={styles.headerMaj}>Majorité</span>
+                    <span className={styles.headerStatus}>Statut</span>
+                    <span className={styles.headerActions}>Ordre</span>
+                </div>
+            )}
 
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
             >
-                {groupByTheme ? (
+                {!isCardsVariant && groupByTheme ? (
                     // Vue groupée par thème
                     <div className={styles.groupedView}>
                         {orderedThemes.map(theme => (
@@ -195,8 +188,7 @@ export function ResolutionsReorderList({
                                                     resolution={resolution}
                                                     index={globalIndex}
                                                     totalCount={resolutions.length}
-                                                    isExpanded={expandedResolutions.has(resolution.id)}
-                                                    onToggleExpand={toggleExpand}
+                                                    variant={variant}
                                                     onMoveUp={handleMoveUp}
                                                     onMoveDown={handleMoveDown}
                                                     onDelete={handleDelete}
@@ -223,8 +215,7 @@ export function ResolutionsReorderList({
                                     resolution={resolution}
                                     index={index}
                                     totalCount={resolutions.length}
-                                    isExpanded={expandedResolutions.has(resolution.id)}
-                                    onToggleExpand={toggleExpand}
+                                    variant={variant}
                                     onMoveUp={handleMoveUp}
                                     onMoveDown={handleMoveDown}
                                     onDelete={handleDelete}

@@ -52,28 +52,30 @@
 /* Alert Banner */
 .alertBanner {
     display: flex;
-    gap: var(--space-md);
-    padding: var(--space-md) var(--space-lg);
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
     background: rgba(245, 158, 11, 0.15);
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
     color: var(--warning-dark);
+    font-size: var(--text-sm);
 }
 
 .alertBanner svg {
     flex-shrink: 0;
-    margin-top: 2px;
 }
 
 .alertBanner strong {
-    display: block;
-    margin-bottom: var(--space-xs);
+    display: inline;
+    margin-right: var(--space-xs);
 }
 
 .alertBanner p {
     margin: 0;
     font-size: var(--text-sm);
+    display: inline;
 }
 
 .alertBannerWarning {
@@ -574,11 +576,10 @@
     color: white;
 }
 
-/* Main Layout - Two Columns */
+/* Main Layout - Centered Preview */
 .mainLayout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-xl);
+    display: flex;
+    justify-content: center;
     margin-bottom: var(--space-xl);
     min-height: 600px;
 }
@@ -587,7 +588,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    min-width: 0;
+    width: 100%;
+    max-width: 900px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -750,13 +752,7 @@
 /* Responsive */
 @media (max-width: 1200px) {
     .mainLayout {
-        grid-template-columns: 1fr;
         gap: var(--space-lg);
-    }
-
-    .sendingColumn {
-        max-height: none;
-        min-height: 500px;
     }
 }
 

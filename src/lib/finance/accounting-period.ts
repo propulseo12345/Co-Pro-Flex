@@ -163,6 +163,89 @@ export async function getAccountingPeriodByYear(
   }
 }
 
+export interface ClosedPeriodWithResult extends AccountingPeriodInfo {
+  totalCredit: number;
+  totalDebit: number;
+  resultat: number;
+}
+
+/**
+ * Get a closed accounting period for a copropriété by year, with financial result.
+ * If no year is specified, returns the most recent closed period with actual entries.
+ */
+export async function getClosedPeriodForYear(
+  coproId: string,
+  year?: number
+): Promise<{ data: ClosedPeriodWithResult | null; error: string | null }> {
+  const supabase = createUntypedClient();
+
+  try {
+    let query = supabase
+      .from('accounting_periods')
+      .select('id, copro_id, name, start_date, end_date, status')
+      .eq('copro_id', coproId)
+      .eq('status', 'closed');
+
+    if (year) {
+      query = query
+        .gte('end_date', `${year}-01-01`)
+        .lte('end_date', `${year}-12-31`);
+    } else {
+      query = query.order('end_date', { ascending: false }).limit(1);
+    }
+
+    const { data, error } = await query.single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return { data: null, error: null };
+      }
+      return { data: null, error: error.message };
+    }
+
+    if (!data) {
+      return { data: null, error: null };
+    }
+
+    // Fetch financial totals for this period
+    const { data: entries, error: entriesError } = await supabase
+      .from('ledger_entries')
+      .select('direction, amount')
+      .eq('period_id', data.id);
+
+    let totalCredit = 0;
+    let totalDebit = 0;
+
+    if (!entriesError && entries) {
+      for (const entry of entries) {
+        if (entry.direction === 'credit') {
+          totalCredit += Number(entry.amount);
+        } else {
+          totalDebit += Number(entry.amount);
+        }
+      }
+    }
+
+    return {
+      data: {
+        id: data.id,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        label: formatPeriodLabel(data.start_date, data.end_date),
+        year: extractYear(data.end_date),
+        status: data.status,
+        totalCredit,
+        totalDebit,
+        resultat: totalCredit - totalDebit,
+      },
+      error: null,
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erreur inconnue';
+    return { data: null, error: message };
+  }
+}
+
 /**
  * Get all accounting periods for a copropriété
  *

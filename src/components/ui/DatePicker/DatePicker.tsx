@@ -41,6 +41,7 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   clearable?: boolean;
+  inputClassName?: string;
 
   // Aide
   hint?: string;
@@ -67,6 +68,7 @@ export function DatePicker({
   placeholder = 'JJ/MM/AAAA',
   disabled = false,
   clearable = true,
+  inputClassName,
   hint,
   validate,
 }: DatePickerProps) {
@@ -256,7 +258,7 @@ export function DatePicker({
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className={`${styles.input} ${error ? styles.inputError : ''}`}
+          className={`${styles.input} ${error ? styles.inputError : ''} ${inputClassName || ''}`.trim()}
           aria-required={required}
           aria-invalid={!!error}
           aria-describedby={[errorId, hintId].filter(Boolean).join(' ') || undefined}

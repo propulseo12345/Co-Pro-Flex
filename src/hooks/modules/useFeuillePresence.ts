@@ -364,6 +364,7 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
 
   /**
    * Bulk set all coproprietaires as present or absent
+   * Uses direct DB operations (no edge function) for performance
    */
   const bulkSetPresence = useCallback(async (
     presenceType: AttendanceType | 'absent'
@@ -372,22 +373,56 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
 
     setIsSaving(true);
     try {
-      // Process all copropriétaires
-      for (const copro of coproprietaires) {
-        const existingRecord = attendanceByCoprId.get(copro.id);
+      const supabase = createUntypedClient();
 
-        if (presenceType === 'absent') {
-          if (existingRecord) {
-            await removeAttendance(existingRecord.id);
+      if (presenceType === 'absent') {
+        // Delete all attendance records for this AG
+        await supabase
+          .from('ag_attendance')
+          .delete()
+          .eq('ag_id', agId);
+      } else {
+        // Get tantièmes for all copropriétaires via lot_owners
+        const { data: allLotOwners } = await supabase
+          .from('lot_owners')
+          .select('coproprietaire_id, lot_id, lots(id, tantiemes_generaux)')
+          .eq('copro_id', agInfo.coproId)
+          .is('end_date', null);
+
+        // Build tantiemes map per coproprietaire
+        const tantMap = new Map<string, { tantiemes: number; lotIds: string[] }>();
+        if (allLotOwners) {
+          for (const lo of allLotOwners) {
+            const cId = lo.coproprietaire_id as string;
+            const lot = lo.lots as { id: string; tantiemes_generaux: number } | null;
+            const existing = tantMap.get(cId) || { tantiemes: 0, lotIds: [] };
+            existing.tantiemes += lot?.tantiemes_generaux || 0;
+            if (lot?.id) existing.lotIds.push(lot.id);
+            tantMap.set(cId, existing);
           }
-        } else {
-          await registerAttendance({
+        }
+
+        // Upsert attendance for all copropriétaires
+        const records = coproprietaires.map(copro => {
+          const info = tantMap.get(copro.id) || { tantiemes: 0, lotIds: [] };
+          return {
             ag_id: agId,
             copro_id: agInfo.coproId,
             coproprietaire_id: copro.id,
-            lot_ids: existingRecord?.lotIds || [],
+            lot_ids: info.lotIds,
+            tantiemes: info.tantiemes,
             presence_type: presenceType,
-          });
+            signed: false,
+            updated_at: new Date().toISOString(),
+          };
+        });
+
+        const { error: upsertError } = await supabase
+          .from('ag_attendance')
+          .upsert(records, { onConflict: 'ag_id,coproprietaire_id' });
+
+        if (upsertError) {
+          throw new Error(upsertError.message);
         }
       }
 
@@ -402,7 +437,7 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
     } finally {
       setIsSaving(false);
     }
-  }, [agId, agInfo, attendanceByCoprId, coproprietaires, loadData]);
+  }, [agId, agInfo, coproprietaires, loadData]);
 
   /**
    * Save signature for a coproprietaire

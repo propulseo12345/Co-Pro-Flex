@@ -3,35 +3,54 @@
 .variableButton {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 10px;
-    margin: 0 2px;
-    font-size: inherit;
+    gap: 6px;
+    min-height: 30px;
+    padding: 4px 10px;
+    margin: 0 3px;
+    font-size: 0.95em;
+    font-weight: 600;
+    line-height: 1.2;
     font-family: inherit;
-    background: rgba(251, 191, 36, 0.2);
-    border: 1px dashed var(--warning);
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #93C5FD;
     border-radius: var(--radius-sm);
-    color: #FCD34D;
+    color: #DBEAFE;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .variableButton:hover {
-    background: var(--warning);
-    color: white;
-    border-style: solid;
+    background: rgba(59, 130, 246, 0.35);
+    border-color: #BFDBFE;
+    transform: translateY(-1px);
+}
+
+.variableButton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.variableButtonMissing {
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px dashed var(--warning);
+    color: #FCD34D;
+}
+
+.variableButtonMissing:hover {
+    background: rgba(245, 158, 11, 0.35);
+    border-color: #FBBF24;
+    color: #FEF3C7;
 }
 
 .variableButtonFilled {
     background: rgba(96, 165, 250, 0.2);
-    border-color: #93C5FD;
-    border-style: solid;
-    color: #93C5FD;
+    border-color: #60A5FA;
+    color: #BFDBFE;
 }
 
 .variableButtonFilled:hover {
-    background: var(--primary);
-    color: white;
+    background: rgba(59, 130, 246, 0.45);
+    color: #EFF6FF;
 }
 
 /* Wrapper pour variable avec dropdown preremplissage */
@@ -50,20 +69,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     background: var(--primary-light);
     border: 1px solid var(--primary);
     border-radius: var(--radius-sm);
     color: var(--primary);
     cursor: pointer;
-    margin-left: 2px;
+    margin-left: 4px;
     transition: all var(--transition-base);
 }
 
 .prefillButton:hover {
     background: var(--primary);
     color: white;
+}
+
+.prefillButton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .prefillDropdown {
@@ -106,6 +130,12 @@
 }
 
 .prefillDropdownItem:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.prefillDropdownItem:focus-visible {
+    outline: none;
     background: var(--primary-light);
     color: var(--primary);
 }

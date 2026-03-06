@@ -43,6 +43,79 @@
     margin: 0;
 }
 
+/* Header compact pour la session en cours */
+.headerCompact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+    gap: var(--space-lg);
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.backButtonCompact {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.backButtonCompact:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-main);
+}
+
+.headerTitleGroup {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    border-left: 1px solid var(--border);
+    padding-left: var(--space-md);
+}
+
+.titleCompact {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.subtitleCompact {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .headerCompact {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+
+    .headerTitleGroup {
+        border-left: none;
+        padding-left: 0;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+}
+
 .startScreen {
     max-width: 800px;
     margin: 0 auto;
@@ -885,35 +958,54 @@
 .variableButton {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 10px;
-    margin: 0 2px;
-    font-size: inherit;
+    gap: 6px;
+    min-height: 30px;
+    padding: 4px 10px;
+    margin: 0 3px;
+    font-size: 0.95em;
+    font-weight: 600;
+    line-height: 1.2;
     font-family: inherit;
-    background: rgba(251, 191, 36, 0.2);
-    border: 1px dashed var(--warning);
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #93C5FD;
     border-radius: var(--radius-sm);
-    color: #FCD34D;
+    color: #DBEAFE;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .variableButton:hover {
-    background: var(--warning);
-    color: white;
-    border-style: solid;
+    background: rgba(59, 130, 246, 0.35);
+    border-color: #BFDBFE;
+    transform: translateY(-1px);
+}
+
+.variableButton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.variableButtonMissing {
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px dashed var(--warning);
+    color: #FCD34D;
+}
+
+.variableButtonMissing:hover {
+    background: rgba(245, 158, 11, 0.35);
+    border-color: #FBBF24;
+    color: #FEF3C7;
 }
 
 .variableButtonFilled {
     background: rgba(96, 165, 250, 0.2);
-    border-color: #93C5FD;
-    border-style: solid;
-    color: #93C5FD;
+    border-color: #60A5FA;
+    color: #BFDBFE;
 }
 
 .variableButtonFilled:hover {
-    background: var(--primary);
-    color: white;
+    background: rgba(59, 130, 246, 0.45);
+    color: #EFF6FF;
 }
 
 /* Wrapper pour variable avec dropdown préremplissage */
@@ -921,6 +1013,149 @@
     display: inline-flex;
     align-items: center;
     position: relative;
+}
+
+.selectMenuWrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.selectMenuTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #93C5FD;
+    background: rgba(59, 130, 246, 0.2);
+    color: #DBEAFE;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.selectMenuTrigger:hover {
+    background: rgba(59, 130, 246, 0.35);
+    border-color: #BFDBFE;
+}
+
+.selectMenuTrigger:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.selectMenuTriggerLabel {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selectMenuTriggerChevron {
+    flex-shrink: 0;
+    transition: transform var(--transition-base);
+}
+
+.selectMenuTriggerChevronOpen {
+    transform: rotate(180deg);
+}
+
+.variableEditButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.variableEditButton:hover {
+    color: var(--text-main);
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.variableEditButton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.selectMenuPopover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 120;
+    min-width: 260px;
+    max-width: 340px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    overflow: hidden;
+}
+
+.selectMenuFilterRow {
+    padding: var(--space-sm);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+}
+
+.selectMenuFilterInput {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-main);
+    font-size: var(--text-sm);
+}
+
+.selectMenuFilterInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.selectMenuOptions {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.selectMenuOption {
+    width: 100%;
+    display: block;
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    text-align: left;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.selectMenuOption:hover,
+.selectMenuOption:focus-visible {
+    outline: none;
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.selectMenuEmpty {
+    padding: var(--space-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    text-align: center;
 }
 
 .prefillDropdownWrapper {
@@ -932,20 +1167,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     background: var(--primary-light);
     border: 1px solid var(--primary);
     border-radius: var(--radius-sm);
     color: var(--primary);
     cursor: pointer;
-    margin-left: 2px;
+    margin-left: 4px;
     transition: all var(--transition-base);
 }
 
 .prefillButton:hover {
     background: var(--primary);
     color: white;
+}
+
+.prefillButton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .prefillDropdown {
@@ -988,6 +1228,12 @@
 }
 
 .prefillDropdownItem:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.prefillDropdownItem:focus-visible {
+    outline: none;
     background: var(--primary-light);
     color: var(--primary);
 }
@@ -1102,15 +1348,14 @@
 
 /* Variables pré-remplies automatiquement (syndic, modalités, etc.) */
 .variableButtonPrefilled {
-    background: rgba(34, 197, 94, 0.2);
-    border-color: #86EFAC;
-    border-style: solid;
-    color: #86EFAC;
+    background: rgba(34, 197, 94, 0.22);
+    border-color: #4ADE80;
+    color: #BBF7D0;
 }
 
 .variableButtonPrefilled:hover {
-    background: var(--success);
-    color: white;
+    background: rgba(34, 197, 94, 0.32);
+    color: #DCFCE7;
 }
 
 /* ========================================
@@ -1142,11 +1387,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
     background: rgba(96, 165, 250, 0.15);
     border: 1px solid var(--info);
     border-radius: var(--radius-md);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-sm);
     font-size: var(--text-sm);
     color: #93C5FD;
 }

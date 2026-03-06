@@ -167,18 +167,9 @@ export function useConvocationPage(): UseConvocationPageResult {
 
   // Handle continue action
   const handleContinue = useCallback(async () => {
-    if (!delivery.canValidate) {
-      alert('Veuillez compléter les données manquantes avant de continuer.');
-      return;
-    }
-    if (!preview.canSend) {
-      alert("Veuillez valider la relecture avant d'envoyer les convocations.");
-      preview.toggleReviewMode();
-      return;
-    }
-    // Naviguer vers l'étape suivante (envoi)
+    // Naviguer vers l'étape suivante (envoi des convocations)
     router.push(`/ag/${agId}/envoi`);
-  }, [delivery.canValidate, preview.canSend, preview.toggleReviewMode, router, agId]);
+  }, [router, agId]);
 
   // Handle back action
   const handleBack = useCallback(() => {

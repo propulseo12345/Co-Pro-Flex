@@ -22,6 +22,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { isValidUUID } from '@/lib/ag/draft-persistence';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 import { logger } from '@/lib/utils/logger';
 import type { SendingMethod, SendingChoice } from '../types';
 
@@ -511,7 +512,11 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
           action: 'handleSend',
           milestones: newMilestones,
         });
+        // Advance to step 5 in DB (marks step 4 as completed in stepper)
+        await updateAgCurrentStep(agId, 5);
         alert('Convocations envoyées avec succès !');
+        // Navigate to next step (votes par correspondance)
+        router.push(`/ag/${agId}/votes-correspondance`);
       } else {
         throw new Error('Le milestone n\'a pas été correctement sauvegardé');
       }
@@ -527,7 +532,7 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
     } finally {
       setIsSaving(false);
     }
-  }, [sendingChoices, agId, saveChoicesToDB]);
+  }, [sendingChoices, agId, saveChoicesToDB, router]);
 
   // ========================================
   // MISE À JOUR DE L'ÉTAPE COURANTE EN DB
@@ -565,7 +570,7 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
   // ========================================
 
   const handleContinue = useCallback(() => {
-    router.push(`/ag/${agId}/preparation`);
+    router.push(`/ag/${agId}/votes-correspondance`);
   }, [router, agId]);
 
   const goBack = useCallback(() => {

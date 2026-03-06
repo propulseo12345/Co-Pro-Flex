@@ -2,12 +2,17 @@
 
 import { useState, useCallback } from 'react';
 import type { BudgetPoste, EditingPosteState } from '../domain/types';
+import type { BudgetImportSource } from './useBudgetImport';
 
 interface UseBudgetPostesProps {
   budgetPostes: BudgetPoste[];
   onPostesChange: (postes: BudgetPoste[]) => void;
   /** Fonction async pour importer le budget (depuis Supabase) */
-  importBudgetFn?: (exercice: number) => Promise<BudgetPoste[]>;
+  importBudgetFn?: (params: {
+    exercice: number;
+    source: BudgetImportSource;
+    budgetId?: string | null;
+  }) => Promise<BudgetPoste[]>;
   /** Année d'exercice pour l'import */
   exercice?: number;
 }
@@ -113,14 +118,21 @@ export function useBudgetPostes({
     [handleSavePoste, handleCancelEdit]
   );
 
-  const handleImportBudgetPrecedent = useCallback(async () => {
+  const handleImportBudgetPrecedent = useCallback(async (params: {
+    source: BudgetImportSource;
+    budgetId?: string | null;
+  }) => {
     // Si on a une fonction d'import Supabase, l'utiliser
     if (importBudgetFn && exercice) {
       setIsImporting(true);
       setImportError(null);
 
       try {
-        const postes = await importBudgetFn(exercice);
+        const postes = await importBudgetFn({
+          exercice,
+          source: params.source,
+          budgetId: params.budgetId,
+        });
         if (postes.length > 0) {
           onPostesChange(postes);
         }
