@@ -7,6 +7,7 @@
 
 import { useState, useCallback } from 'react';
 import { useCopro } from '@/providers/CoproContext';
+import { useAnnexeContext } from '@/providers/AnnexeContext';
 import * as budgetApi from '@/lib/budget/api';
 import { BudgetStatut, DepenseStatut } from '@/types/enums/statuts';
 
@@ -84,6 +85,7 @@ export function useBudgetMutations(
   options: UseBudgetMutationsOptions = {}
 ): UseBudgetMutationsReturn {
   const { currentCoproId } = useCopro();
+  const { refresh: refreshAnnexes } = useAnnexeContext();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,6 +107,7 @@ export function useBudgetMutations(
       try {
         const result = await operation();
         options.onSuccess?.();
+        refreshAnnexes();
         return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Erreur inconnue';
@@ -115,7 +118,7 @@ export function useBudgetMutations(
         setIsSaving(false);
       }
     },
-    [currentCoproId, options]
+    [currentCoproId, options, refreshAnnexes]
   );
 
   // ============================================================================

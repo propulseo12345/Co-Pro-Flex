@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useCopro } from '@/providers/CoproContext';
+import { useAnnexeContext } from '@/providers/AnnexeContext';
 import * as financeApi from '@/lib/finance/api';
 
 // ============================================================================
@@ -324,6 +325,7 @@ interface MutationState {
 
 export function useCreateCall() {
   const { currentCoproId } = useCopro();
+  const { refresh: refreshAnnexes } = useAnnexeContext();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
 
   const mutate = useCallback(async (payload: Omit<financeApi.CreateCallPayload, 'copro_id'>) => {
@@ -340,14 +342,17 @@ export function useCreateCall() {
 
     setState({ isLoading: false, error: result.error });
 
+    if (!result.error) refreshAnnexes();
+
     return result;
-  }, [currentCoproId]);
+  }, [currentCoproId, refreshAnnexes]);
 
   return { ...state, mutate };
 }
 
 export function useRecordPayment() {
   const { currentCoproId } = useCopro();
+  const { refresh: refreshAnnexes } = useAnnexeContext();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
 
   const mutate = useCallback(async (payload: Omit<financeApi.RecordPaymentPayload, 'copro_id'>) => {
@@ -364,14 +369,17 @@ export function useRecordPayment() {
 
     setState({ isLoading: false, error: result.error });
 
+    if (!result.error) refreshAnnexes();
+
     return result;
-  }, [currentCoproId]);
+  }, [currentCoproId, refreshAnnexes]);
 
   return { ...state, mutate };
 }
 
 export function useCreateSupplierInvoice() {
   const { currentCoproId } = useCopro();
+  const { refresh: refreshAnnexes } = useAnnexeContext();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
 
   const mutate = useCallback(async (payload: Omit<financeApi.CreateSupplierInvoicePayload, 'copro_id'>) => {
@@ -388,8 +396,10 @@ export function useCreateSupplierInvoice() {
 
     setState({ isLoading: false, error: result.error });
 
+    if (!result.error) refreshAnnexes();
+
     return result;
-  }, [currentCoproId]);
+  }, [currentCoproId, refreshAnnexes]);
 
   return { ...state, mutate };
 }
@@ -421,6 +431,7 @@ export function useCreateSupplierInvoiceDirect() {
 
 export function usePaySupplierInvoice() {
   const { currentCoproId } = useCopro();
+  const { refresh: refreshAnnexes } = useAnnexeContext();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
 
   const mutate = useCallback(async (payload: Omit<financeApi.PaySupplierInvoicePayload, 'copro_id'>) => {
@@ -437,8 +448,10 @@ export function usePaySupplierInvoice() {
 
     setState({ isLoading: false, error: result.error });
 
+    if (!result.error) refreshAnnexes();
+
     return result;
-  }, [currentCoproId]);
+  }, [currentCoproId, refreshAnnexes]);
 
   return { ...state, mutate };
 }
