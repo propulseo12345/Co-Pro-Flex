@@ -29,6 +29,13 @@ export interface KpisData {
   unpaid_total: number;
   next_ag_date: string | null;
   next_ag_id: string | null;
+  budget_vote?: number;
+  budget_realise?: number;
+  budget_pct?: number;
+  tresorerie?: number;
+  provisions_travaux?: number;
+  travaux_en_cours?: number;
+  nb_travaux_ouverts?: number;
 }
 
 export interface ComputedDashboardData {

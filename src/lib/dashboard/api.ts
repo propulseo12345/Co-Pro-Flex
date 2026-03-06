@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { getActiveAccountingPeriod } from '@/lib/finance/accounting-period';
 
 // Helper: Create untyped client for views not yet in generated types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,6 +23,13 @@ export interface DashboardKpis {
   next_ag_date: string | null;
   next_ag_id: string | null;
   next_ag_title: string | null;
+  budget_vote?: number;
+  budget_realise?: number;
+  budget_pct?: number;
+  tresorerie?: number;
+  provisions_travaux?: number;
+  travaux_en_cours?: number;
+  nb_travaux_ouverts?: number;
 }
 
 export type ActivityType = 'AG' | 'FINANCE' | 'MAINT' | 'DOC';
@@ -193,10 +201,35 @@ export async function getDashboardData(coproId: string): Promise<ApiResult<Dashb
     return { data: null, error: kpisResult.error };
   }
 
+  const kpis = kpisResult.data!;
+
+  // Supplement with annexe KPIs (best-effort, non-blocking)
+  try {
+    const periodResult = await getActiveAccountingPeriod(coproId);
+    if (!periodResult.error && periodResult.data) {
+      const supabase = createUntypedClient();
+      const { data: annexeKpis } = await supabase.rpc(
+        'fn_dashboard_kpis',
+        { p_copro_id: coproId, p_period_id: periodResult.data.id }
+      );
+      if (annexeKpis) {
+        kpis.budget_vote = annexeKpis.budget_vote ?? 0;
+        kpis.budget_realise = annexeKpis.budget_realise ?? 0;
+        kpis.budget_pct = annexeKpis.budget_pct ?? 0;
+        kpis.tresorerie = annexeKpis.tresorerie ?? 0;
+        kpis.provisions_travaux = annexeKpis.provisions_travaux ?? 0;
+        kpis.travaux_en_cours = annexeKpis.travaux_en_cours ?? 0;
+        kpis.nb_travaux_ouverts = annexeKpis.nb_travaux_ouverts ?? 0;
+      }
+    }
+  } catch {
+    // Annexe KPIs are supplementary - don't fail the dashboard
+  }
+
   // Pour activities et todos, on tolère les erreurs (retourne tableau vide)
   return {
     data: {
-      kpis: kpisResult.data!,
+      kpis,
       activities: activitiesResult.data || [],
       todos: todosResult.data || [],
     },
