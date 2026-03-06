@@ -2,6 +2,7 @@
 
 import { useBudget } from '@/hooks/modules/useBudget';
 import { Download, PieChart, Loader2 } from 'lucide-react';
+import { BudgetAnnexeStats } from '@/components/features/finance/Budget/BudgetAnnexeStats';
 import styles from './budget-current.module.css';
 
 export default function CurrentBudgetPage() {
@@ -40,6 +41,7 @@ export default function CurrentBudgetPage() {
 
     return (
         <div className="container">
+            <BudgetAnnexeStats />
             <div className={styles.header}>
                 <div>
                     <h1 className={styles.title}>Suivi du budget courant {selectedYear}</h1>
