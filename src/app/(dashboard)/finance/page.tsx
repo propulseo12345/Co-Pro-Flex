@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { DollarSign, TrendingUp, Receipt, AlertTriangle, CreditCard, ArrowLeftRight, PieChart, ChevronRight, ChevronDown, Clock, Calendar } from 'lucide-react';
 import { getAllAlerts, Alert } from '@/lib/utils/alerts';
+import { FinanceAnnexeStats } from '@/components/features/finance/FinanceAnnexeStats';
 import styles from './finance.module.css';
 
 export default function FinancePage() {
@@ -94,6 +95,8 @@ export default function FinancePage() {
                     </div>
                 )}
             </div>
+
+            <FinanceAnnexeStats />
 
             {/* Section Alertes */}
             {alerts.length > 0 && (
