@@ -93,79 +93,148 @@ export interface LigneBalance {
   variationPourcent?: number;
 }
 
-// Types pour les Annexes comptables (Décret n°2005-240)
+// ============================================================================
+// ANNEXES COMPTABLES - Format légal (Décret n°2005-240)
+// Types alignés sur le format Matera / réglementaire
+// ============================================================================
+
+// Shared types for annexe data
+export interface LigneCompte {
+  compte: string;
+  libelle: string;
+  exercice_precedent: number;
+  exercice_clos: number;
+}
+
+export interface TotalSection {
+  exercice_precedent: number;
+  exercice_clos: number;
+}
 
 /**
  * Annexe 1 - État financier après répartition
- * Situation de trésorerie et des créances/dettes
+ * Section I : Trésorerie (50, 51) + Provisions (12, 105, 1031)
+ * Section II : Créances / Dettes (40, 47, 450)
  */
-export interface LigneAnnexe1 {
-  id: string;
-  rubrique: string;
-  sousRubrique?: string;
-  montant: number;
-  montantN1?: number;
-  type: 'actif' | 'passif';
+export interface AnnexeData1 {
+  section_i: {
+    tresorerie: LigneCompte[];
+    total_tresorerie: TotalSection;
+    provisions: LigneCompte[];
+    total_provisions: TotalSection;
+  };
+  section_ii: {
+    creances: LigneCompte[];
+    total_creances: TotalSection;
+    dettes: LigneCompte[];
+    total_dettes: TotalSection;
+  };
+  total_general_creances: TotalSection;
+  total_general_dettes: TotalSection;
+}
+
+export interface DetailCopro {
+  nom: string;
+  solde_avant_regularisation: number;
+  regularisation: number;
+  solde_apres_regularisation: number;
+}
+
+export interface AnnexeData1DetailCopros {
+  copros: DetailCopro[];
+  total: { solde_avant: number; regularisation: number; solde_apres: number };
 }
 
 /**
- * Annexe 2 - Compte de gestion général
- * Synthèse des charges et produits de l'exercice
+ * Annexe 2 & 3 - 5 colonnes légales
+ * Exercice précédent approuvé | Exercice clos budget voté | Exercice clos réalisé |
+ * BP en cours voté | BP à voter
  */
-export interface LigneAnnexe2 {
-  id: string;
-  compte: string;
-  libelle: string;
-  budgetVote: number;
-  depensesReelles: number;
-  ecart: number;
-  pourcentageRealisation: number;
-  categorie: 'charges-courantes' | 'charges-travaux' | 'charges-exceptionnelles' | 'produits';
+export interface Ligne5Colonnes {
+  compte?: string;
+  libelle?: string;
+  type?: 'charge' | 'produit';
+  ex_precedent_approuve: number;
+  ex_clos_budget_vote: number;
+  ex_clos_realise: number;
+  bp_en_cours_vote: number;
+  bp_a_voter: number;
+}
+
+export interface AnnexeData2 {
+  charges_courantes: Ligne5Colonnes[];
+  sous_total_charges: Ligne5Colonnes;
+  solde_charges: Ligne5Colonnes;
+  total_i_charges: Ligne5Colonnes;
+  produits_courants: Ligne5Colonnes[];
+  sous_total_produits: Ligne5Colonnes;
+  charges_travaux: Ligne5Colonnes[];
+}
+
+export interface CleAnnexe3 {
+  nom: string;
+  lignes: Ligne5Colonnes[];
+  total_charges: Ligne5Colonnes;
+  total_produits: Ligne5Colonnes;
+  total_net: Ligne5Colonnes;
+}
+
+export interface AnnexeData3 {
+  cles: CleAnnexe3[];
+  total_general: Ligne5Colonnes;
 }
 
 /**
- * Annexe 3 - Compte de gestion pour opérations courantes
- * Détail par clé de répartition
- */
-export interface LigneAnnexe3 {
-  id: string;
-  compte: string;
-  libelle: string;
-  cleRepartition: string;
-  montantTotal: number;
-  montantN1?: number;
-  details?: { lot: string; tantieme: number; montant: number }[];
-}
-
-/**
- * Annexe 4 - Compte de gestion pour travaux et opérations exceptionnelles
+ * Annexe 4 - Travaux et opérations exceptionnelles
+ * Colonnes : Dépenses votées / Réalisées / Provisions appelées / Solde
  */
 export interface LigneAnnexe4 {
-  id: string;
-  operationId: string;
   libelle: string;
-  dateDebut: string;
-  dateFin?: string;
-  budgetVote: number;
-  depensesEngagees: number;
-  depensesReglees: number;
-  soldeAFinancer: number;
-  statut: 'en-cours' | 'terminee' | 'a-venir';
+  depenses_votees: number;
+  depenses_realisees: number;
+  provisions_appelees: number;
+  solde: number;
+}
+
+export interface AnnexeData4 {
+  operations: LigneAnnexe4[];
+  total: LigneAnnexe4;
 }
 
 /**
- * Annexe 5 - État des dettes et créances
- * Situation détaillée vis-à-vis des tiers
+ * Annexe 5 - Travaux votés non clôturés
+ * Colonnes A-F : Votés / Payés / Réalisés / Appels reçus / Solde en attente / Subventions
  */
 export interface LigneAnnexe5 {
-  id: string;
-  tiers: string;
-  typeTiers: 'coproprietaire' | 'fournisseur' | 'syndic' | 'autre';
-  nature: string;
-  dateOrigine: string;
-  dateEcheance?: string;
-  montantInitial: number;
-  montantRestant: number;
-  type: 'creance' | 'dette';
-  anciennete: number; // en jours
+  libelle: string;
+  date_ag: string;
+  cle_repartition: string;
+  travaux_votes_a: number;
+  travaux_payes_b: number;
+  travaux_realises_c: number;
+  appels_recus_d: number;
+  solde_attente_e: number;
+  subventions_f: number;
+}
+
+export interface AnnexeData5 {
+  operations: LigneAnnexe5[];
+  total: Omit<LigneAnnexe5, 'libelle' | 'date_ag' | 'cle_repartition'>;
+}
+
+/**
+ * KPIs aggreges depuis fn_dashboard_kpis
+ * Combine annexe 1 (tresorerie, impayes, provisions, dettes),
+ * annexe 2 (budget vote/realise), annexe 4 (travaux)
+ */
+export interface AnnexeKpis {
+  tresorerie: number;
+  total_impayes: number;
+  provisions_travaux: number;
+  dettes: number;
+  budget_vote: number;
+  budget_realise: number;
+  budget_pct: number;
+  travaux_en_cours: number;
+  nb_travaux_ouverts: number;
 }
