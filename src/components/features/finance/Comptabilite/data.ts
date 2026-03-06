@@ -1,4 +1,4 @@
-import { TypeDepense, OperationComptable, Depense, HistoriqueModification, MouvementNonCategorise, EtatCloture, LigneAnnexe1, LigneAnnexe2, LigneAnnexe3, LigneAnnexe4, LigneAnnexe5 } from './types';
+import { TypeDepense, OperationComptable, Depense, HistoriqueModification, MouvementNonCategorise, EtatCloture } from './types';
 
 export const TYPE_DEPENSE_LABELS: Record<TypeDepense, string> = {
   eau: 'Eau',
@@ -374,81 +374,3 @@ export const MOCK_ETAT_CLOTURE: EtatCloture = {
   alertes: ['2 mouvements bancaires non catégorisés', '1 facture en attente de validation comptable']
 };
 
-// ============================================
-// ANNEXES COMPTABLES (Décret n°2005-240)
-// ============================================
-
-/**
- * Annexe 1 - État financier après répartition
- * Situation de trésorerie et créances/dettes
- */
-export const MOCK_ANNEXE_1: LigneAnnexe1[] = [
-  // ACTIF
-  { id: 'A1-001', rubrique: 'Banque', montant: 38245.50, montantN1: 42500.00, type: 'actif' },
-  { id: 'A1-002', rubrique: 'Placements', montant: 12585.50, montantN1: 6200.00, type: 'actif' },
-  { id: 'A1-003', rubrique: 'Créances copropriétaires', montant: 2450.00, montantN1: 3200.00, type: 'actif' },
-  { id: 'A1-004', rubrique: 'Charges à répartir', montant: 0, montantN1: 0, type: 'actif' },
-  // PASSIF
-  { id: 'A1-005', rubrique: 'Provisions pour travaux décidés', montant: 31000.00, montantN1: 25000.00, type: 'passif' },
-  { id: 'A1-006', rubrique: 'Fonds de travaux ALUR (art. 14-2)', montant: 21200.00, montantN1: 15000.00, type: 'passif' },
-  { id: 'A1-007', rubrique: 'Dettes fournisseurs', montant: 0, montantN1: 5700.00, type: 'passif' },
-  { id: 'A1-008', rubrique: 'Avances copropriétaires', montant: 1081.00, montantN1: 1200.00, type: 'passif' },
-];
-
-/**
- * Annexe 2 - Compte de gestion général
- * Synthèse charges/produits exercice
- */
-export const MOCK_ANNEXE_2: LigneAnnexe2[] = [
-  // Charges courantes
-  { id: 'A2-001', compte: '606', libelle: 'Eau et électricité', budgetVote: 9150.00, depensesReelles: 10876.00, ecart: -1726.00, pourcentageRealisation: 118.86, categorie: 'charges-courantes' },
-  { id: 'A2-002', compte: '614', libelle: 'Personnel extérieur (ménage)', budgetVote: 5400.00, depensesReelles: 450.00, ecart: 4950.00, pourcentageRealisation: 8.33, categorie: 'charges-courantes' },
-  { id: 'A2-003', compte: '615', libelle: 'Entretien et réparations', budgetVote: 8000.00, depensesReelles: 7560.00, ecart: 440.00, pourcentageRealisation: 94.50, categorie: 'charges-courantes' },
-  { id: 'A2-004', compte: '616', libelle: "Primes d'assurance", budgetVote: 4250.00, depensesReelles: 4250.00, ecart: 0, pourcentageRealisation: 100.00, categorie: 'charges-courantes' },
-  { id: 'A2-005', compte: '622', libelle: 'Honoraires syndic', budgetVote: 7400.00, depensesReelles: 7400.00, ecart: 0, pourcentageRealisation: 100.00, categorie: 'charges-courantes' },
-  { id: 'A2-006', compte: '627', libelle: 'Services bancaires', budgetVote: 200.00, depensesReelles: 180.00, ecart: 20.00, pourcentageRealisation: 90.00, categorie: 'charges-courantes' },
-  // Charges travaux et provisions
-  { id: 'A2-007', compte: '681', libelle: 'Dotations aux provisions', budgetVote: 6000.00, depensesReelles: 6000.00, ecart: 0, pourcentageRealisation: 100.00, categorie: 'charges-travaux' },
-  // Produits
-  { id: 'A2-008', compte: '701', libelle: 'Appels de fonds courants', budgetVote: 24720.00, depensesReelles: 24720.00, ecart: 0, pourcentageRealisation: 100.00, categorie: 'produits' },
-  { id: 'A2-009', compte: '703', libelle: 'Fonds de travaux ALUR', budgetVote: 6200.00, depensesReelles: 6200.00, ecart: 0, pourcentageRealisation: 100.00, categorie: 'produits' },
-  { id: 'A2-010', compte: '76', libelle: 'Produits financiers', budgetVote: 100.00, depensesReelles: 185.50, ecart: 85.50, pourcentageRealisation: 185.50, categorie: 'produits' },
-];
-
-/**
- * Annexe 3 - Compte de gestion pour opérations courantes
- * Répartition par clé
- */
-export const MOCK_ANNEXE_3: LigneAnnexe3[] = [
-  { id: 'A3-001', compte: '606', libelle: 'Eau', cleRepartition: 'Tantièmes généraux', montantTotal: 4598.70, montantN1: 4250.00 },
-  { id: 'A3-002', compte: '606', libelle: 'Électricité parties communes', cleRepartition: 'Tantièmes généraux', montantTotal: 6277.30, montantN1: 5800.00 },
-  { id: 'A3-003', compte: '614', libelle: 'Ménage parties communes', cleRepartition: 'Tantièmes généraux', montantTotal: 450.00, montantN1: 5400.00 },
-  { id: 'A3-004', compte: '615', libelle: 'Maintenance ascenseur', cleRepartition: 'Tantièmes ascenseur', montantTotal: 7560.00, montantN1: 7200.00 },
-  { id: 'A3-005', compte: '616', libelle: "Assurance MRI", cleRepartition: 'Tantièmes généraux', montantTotal: 4250.00, montantN1: 4100.00 },
-  { id: 'A3-006', compte: '622', libelle: 'Honoraires syndic', cleRepartition: 'Tantièmes généraux', montantTotal: 7400.00, montantN1: 7200.00 },
-  { id: 'A3-007', compte: '627', libelle: 'Frais bancaires', cleRepartition: 'Tantièmes généraux', montantTotal: 180.00, montantN1: 160.00 },
-];
-
-/**
- * Annexe 4 - Compte de gestion travaux et opérations exceptionnelles
- */
-export const MOCK_ANNEXE_4: LigneAnnexe4[] = [
-  { id: 'A4-001', operationId: 'TRAV-2023-001', libelle: 'Ravalement façade', dateDebut: '2023-06-15', dateFin: '2023-09-30', budgetVote: 45000.00, depensesEngagees: 45000.00, depensesReglees: 45000.00, soldeAFinancer: 0, statut: 'terminee' },
-  { id: 'A4-002', operationId: 'TRAV-2024-001', libelle: 'Réfection toiture partielle', dateDebut: '2024-04-01', budgetVote: 18000.00, depensesEngagees: 15200.00, depensesReglees: 10000.00, soldeAFinancer: 8000.00, statut: 'en-cours' },
-  { id: 'A4-003', operationId: 'TRAV-2025-001', libelle: 'Mise aux normes ascenseur', dateDebut: '2025-03-01', budgetVote: 25000.00, depensesEngagees: 0, depensesReglees: 0, soldeAFinancer: 25000.00, statut: 'a-venir' },
-];
-
-/**
- * Annexe 5 - État des dettes et créances
- */
-export const MOCK_ANNEXE_5: LigneAnnexe5[] = [
-  // Créances copropriétaires
-  { id: 'A5-001', tiers: 'LEBLANC Marie - Lot 1', typeTiers: 'coproprietaire', nature: 'Appels de fonds impayés', dateOrigine: '2024-10-01', montantInitial: 310.00, montantRestant: 310.00, type: 'creance', anciennete: 113 },
-  { id: 'A5-002', tiers: 'DUBOIS Jean - Lot 4', typeTiers: 'coproprietaire', nature: 'Appels de fonds impayés', dateOrigine: '2024-07-01', dateEcheance: '2024-08-01', montantInitial: 1290.00, montantRestant: 890.00, type: 'creance', anciennete: 205 },
-  { id: 'A5-003', tiers: 'MARTIN Anne - Lot 5', typeTiers: 'coproprietaire', nature: 'Appels de fonds impayés', dateOrigine: '2024-10-01', montantInitial: 1660.00, montantRestant: 1250.00, type: 'creance', anciennete: 113 },
-  // Avances copropriétaires
-  { id: 'A5-004', tiers: 'LAURENT Sophie - Lot 3', typeTiers: 'coproprietaire', nature: 'Avance sur charges', dateOrigine: '2024-01-15', montantInitial: 500.00, montantRestant: 500.00, type: 'dette', anciennete: 372 },
-  { id: 'A5-005', tiers: 'MOREAU Pierre - Lot 2', typeTiers: 'coproprietaire', nature: 'Avance sur charges', dateOrigine: '2024-06-01', montantInitial: 581.00, montantRestant: 581.00, type: 'dette', anciennete: 235 },
-  // Dettes fournisseurs
-  { id: 'A5-006', tiers: 'Otis Ascenseurs', typeTiers: 'fournisseur', nature: 'Facture maintenance T4', dateOrigine: '2024-12-12', dateEcheance: '2025-01-12', montantInitial: 1890.00, montantRestant: 0, type: 'dette', anciennete: 41 },
-];
