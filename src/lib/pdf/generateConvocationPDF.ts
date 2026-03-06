@@ -17,6 +17,7 @@ import {
   VISIO_PROVIDER_LABELS,
   getVisioInstructions,
 } from '@/types';
+import { renderAllAnnexes, type AnnexeAccountingData } from './annexe-pdf-tables';
 
 export interface ConvocationPDFParams {
   agData: AGData;
@@ -30,7 +31,15 @@ export interface ConvocationPDFParams {
     adresse: string;
   };
   annexes?: string[];
+  annexesStructured?: ConvocationAnnexePDF[];
+  accountingData?: AnnexeAccountingData | null;
   version?: number;
+}
+
+export interface ConvocationAnnexePDF {
+  label: string;
+  category: 'legal' | 'comptable' | 'contextuel';
+  obligatoire: boolean;
 }
 
 export interface ConvocationPDFResult {
@@ -49,7 +58,7 @@ const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
  * Génère le PDF de convocation et retourne un Blob + URL
  */
 export function generateConvocationPDF(params: ConvocationPDFParams): ConvocationPDFResult {
-  const { agData, resolutions, copropriete, syndic, annexes = [], version = 1 } = params;
+  const { agData, resolutions, copropriete, syndic, annexes = [], annexesStructured, accountingData, version = 1 } = params;
 
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -258,7 +267,64 @@ export function generateConvocationPDF(params: ConvocationPDFParams): Convocatio
   });
 
   // === DOCUMENTS ANNEXÉS ===
-  if (annexes.length > 0) {
+  if (annexesStructured && annexesStructured.length > 0) {
+    checkNewPage(40);
+    addSection('DOCUMENTS ANNEXÉS À LA CONVOCATION');
+
+    const CATEGORY_LABELS: Record<string, string> = {
+      legal: 'Documents obligatoires',
+      comptable: 'Annexes comptables',
+      contextuel: 'Documents complémentaires',
+    };
+    const categoryOrder: Array<'legal' | 'comptable' | 'contextuel'> = ['legal', 'comptable', 'contextuel'];
+
+    const grouped = annexesStructured.reduce<Record<string, ConvocationAnnexePDF[]>>((acc, a) => {
+      if (!acc[a.category]) acc[a.category] = [];
+      acc[a.category].push(a);
+      return acc;
+    }, {});
+
+    let docIndex = 1;
+    categoryOrder.forEach((cat) => {
+      const items = grouped[cat];
+      if (!items || items.length === 0) return;
+
+      checkNewPage(20);
+
+      // Sous-titre de catégorie
+      doc.setFillColor(241, 245, 249);
+      doc.rect(MARGIN, y, CONTENT_WIDTH, 6, 'F');
+      addText(CATEGORY_LABELS[cat].toUpperCase(), MARGIN + 3, y + 4.2, {
+        fontSize: 8,
+        fontStyle: 'bold',
+        color: [71, 85, 105],
+      });
+      y += 10;
+
+      items.forEach((item) => {
+        checkNewPage(10);
+
+        // Numéro + label
+        addText(`${docIndex}. ${item.label}`, MARGIN + 4, y, { fontSize: 9, fontStyle: 'normal' });
+
+        // Badge obligatoire
+        if (item.obligatoire) {
+          const labelWidth = doc.getTextWidth(`${docIndex}. ${item.label}`);
+          const badgeX = MARGIN + 4 + labelWidth + 3;
+          doc.setFillColor(37, 99, 235);
+          doc.roundedRect(badgeX, y - 3.2, 18, 4.5, 1, 1, 'F');
+          addText('obligatoire', badgeX + 1.5, y, { fontSize: 6, color: [255, 255, 255] });
+        }
+
+        y += 6;
+        docIndex++;
+      });
+
+      y += 2;
+    });
+
+    y += 2;
+  } else if (annexes.length > 0) {
     checkNewPage(30);
     addSection('DOCUMENTS ANNEXÉS');
 
@@ -277,6 +343,11 @@ export function generateConvocationPDF(params: ConvocationPDFParams): Convocatio
   addText(syndic.nom, PAGE_WIDTH - MARGIN - 50, y, { fontStyle: 'bold', align: 'right' });
   y += 5;
   addText(syndic.adresse, PAGE_WIDTH - MARGIN - 50, y, { fontSize: 8, color: [100, 116, 139], align: 'right' });
+
+  // === ANNEXES COMPTABLES (tableaux complets) ===
+  if (accountingData) {
+    renderAllAnnexes(doc, accountingData);
+  }
 
   // === PIED DE PAGE SUR TOUTES LES PAGES ===
   const totalPages = doc.getNumberOfPages();

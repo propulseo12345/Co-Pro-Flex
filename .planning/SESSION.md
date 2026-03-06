@@ -1,22 +1,22 @@
-# Session State — 2026-03-06 21:30
+# Session State — 2026-03-06 22:00
 
 ## Branch
 main
 
 ## Completed This Session
-- Session header compact: moved "Session en direct" / Retour to horizontal top-left bar, reduced title size
-- Vote persistence fix: fixed stale closure in saveSession (votes always empty), added votes to auto-save, restored votes in onRestore, fixed source overwrite on load
-- Votes correspondance "Voir les votes": button now toggles detail section showing owners with forms/votes + status tags
-- Detail shows form status (Rejete/Integre/En attente) even when no vote details recorded
+- Annexes convocation: section UI (ConvocationAnnexesSection) avec toggles par categorie
+- Annexes convocation: liste structuree dans le PDF (categories + badges obligatoire)
+- Annexes comptables: renderers PDF jspdf-autotable pour annexes 1-5 (annexe-pdf-tables.ts)
+- Annexes comptables: hook useConvocationAccountingData charge fn_annexe_1..5 depuis Supabase
+- Integration complete: donnees comptables passees au generateur PDF via preview hook
 
 ## Next Task
-- Investigate why correspondence form has integration_status='rejected' with 0 vote details (RPC may have failed)
-- Continue AG session workflow testing (step 7 - tenue de l'AG)
+Tester le rendu PDF sur /ag/[id]/convocation (AGO). Debugger si les annexes n'apparaissent pas dans l'iframe.
 
 ## Blockers
-None
+User a signale "les annexes ne s'affichent pas" — peut etre timing (accountingData arrive apres premiere generation). A verifier.
 
 ## Key Context
-- AG bce6a089 has 1 corr form (copro 7b866635) status 'rejected', 0 vote details
-- Two persistence systems coexist: useAGSessionPersistence + saveDraft/loadDraft — both use ag_session_drafts via same RPC
-- Session votes now saved via refs pattern to avoid stale closures
+- jspdf-autotable utilise pour les tableaux comptables dans le PDF
+- accountingData ne charge que pour agType === 'ORDINAIRE'
+- Le PDF se regenere auto quand accountingData change (hash dans useConvocationPreview)

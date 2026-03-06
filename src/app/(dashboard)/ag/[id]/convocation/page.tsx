@@ -13,6 +13,7 @@ import {
   ConvocationHeader,
   ConvocationAlerts,
   ConvocationPreviewColumn,
+  ConvocationAnnexesSection,
   ConvocationFooter,
 } from '@/features/ag/convocation';
 import styles from './convocation.module.css';
@@ -31,6 +32,7 @@ export default function ConvocationPage() {
     variableValidation,
     preview,
     delivery,
+    annexes,
     activeTab,
     setActiveTab,
     handleContinue,
@@ -108,6 +110,15 @@ export default function ConvocationPage() {
           onDownload={() => preview.downloadPDF()}
           onModeChange={preview.setPreviewMode}
           onToggleReviewMode={preview.toggleReviewMode}
+        />
+      </div>
+
+      {/* Annexes */}
+      <div className={styles.mainLayout}>
+        <ConvocationAnnexesSection
+          annexes={annexes.annexes}
+          onToggle={annexes.toggleAnnexe}
+          agType={agData?.type ?? 'ORDINAIRE'}
         />
       </div>
 

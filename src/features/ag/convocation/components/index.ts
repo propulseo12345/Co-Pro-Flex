@@ -3,3 +3,4 @@ export { ConvocationAlerts } from './ConvocationAlerts';
 export { ConvocationPreviewColumn } from './ConvocationPreviewColumn';
 export { ConvocationSendingColumn } from './ConvocationSendingColumn';
 export { ConvocationFooter } from './ConvocationFooter';
+export { ConvocationAnnexesSection } from './ConvocationAnnexesSection';

@@ -8,6 +8,8 @@ import { useConvocationPreview } from '@/hooks/modules/useConvocationPreview';
 import { useDeliveryConfig } from '@/hooks/modules/useDeliveryConfig';
 import { validateResolutionVariables, type VariableValidationResult } from '@/lib/utils/variable-resolution';
 import { updateAgCurrentStep } from '@/lib/ag/api';
+import { useConvocationAnnexes, type UseConvocationAnnexesReturn } from './useConvocationAnnexes';
+import { useConvocationAccountingData } from './useConvocationAccountingData';
 
 // ============================================================================
 // TYPES
@@ -54,6 +56,9 @@ export interface UseConvocationPageResult {
 
   // Preview hook
   preview: ReturnType<typeof useConvocationPreview>;
+
+  // Annexes hook
+  annexes: UseConvocationAnnexesReturn;
 
   // Delivery hook
   delivery: ReturnType<typeof useDeliveryConfig>;
@@ -104,6 +109,17 @@ export function useConvocationPage(): UseConvocationPageResult {
     }));
   }, [coproprietaires]);
 
+  // Hook de gestion des annexes
+  const annexesHook = useConvocationAnnexes(agData?.type ?? null);
+
+  // Hook de chargement des données comptables (annexes 1-5, AGO uniquement)
+  const { accountingData } = useConvocationAccountingData({
+    coproId: copropriete?.id ?? null,
+    coproName: copropriete?.nom ?? 'Copropriété',
+    agType: agData?.type ?? null,
+    exercice: agData?.budgetExercice,
+  });
+
   // Hook de gestion des modes d'envoi
   const delivery = useDeliveryConfig({ agId, coproprietaires: deliveryCopros });
 
@@ -145,6 +161,9 @@ export function useConvocationPage(): UseConvocationPageResult {
     agId,
     agData,
     resolutions,
+    annexes: annexesHook.annexeNames,
+    annexesStructured: annexesHook.annexesForPDF,
+    accountingData,
     copropriete: coproprieteInfo,
     syndic: {
       nom: syndicInfo.nom,
@@ -190,6 +209,7 @@ export function useConvocationPage(): UseConvocationPageResult {
     coproprieteInfo,
     variableValidation,
     preview,
+    annexes: annexesHook,
     delivery,
     activeTab,
     setActiveTab,

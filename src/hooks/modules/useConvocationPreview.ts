@@ -15,7 +15,9 @@ import {
   downloadConvocationPDF,
   type ConvocationPDFParams,
   type ConvocationPDFResult,
+  type ConvocationAnnexePDF,
 } from '@/lib/pdf/generateConvocationPDF';
+import type { AnnexeAccountingData } from '@/lib/pdf/annexe-pdf-tables';
 import type { AGData, Resolution } from '@/hooks/modules/useConvocationData';
 import { logger } from '@/lib/utils/logger';
 import { withTimeoutSafe, DEFAULT_TIMEOUTS } from '@/lib/utils/timeout';
@@ -73,6 +75,8 @@ interface UseConvocationPreviewOptions {
   agData: AGData | null;
   resolutions: Resolution[];
   annexes?: string[];
+  annexesStructured?: ConvocationAnnexePDF[];
+  accountingData?: AnnexeAccountingData | null;
   copropriete?: { nom: string; adresse: string };
   syndic?: { nom: string; adresse: string };
   autoGenerate?: boolean;
@@ -141,6 +145,8 @@ export function useConvocationPreview({
   agData,
   resolutions,
   annexes = [],
+  annexesStructured,
+  accountingData,
   copropriete = { nom: 'Copropriété', adresse: '' },
   syndic = { nom: 'Le Syndic', adresse: '' },
   autoGenerate = true,
@@ -183,7 +189,7 @@ export function useConvocationPreview({
       return;
     }
 
-    const currentHash = hashData({ agData, resolutions, annexes });
+    const currentHash = hashData({ agData, resolutions, annexes, annexesStructured, accountingData });
 
     // Si rien n'a changé, ne pas régénérer
     if (currentHash === lastHashRef.current && state.pdfUrl) {
@@ -206,6 +212,8 @@ export function useConvocationPreview({
             copropriete,
             syndic,
             annexes,
+            annexesStructured,
+            accountingData,
             version: state.currentVersion,
           });
           resolve(result);
@@ -295,7 +303,7 @@ export function useConvocationPreview({
         error: errorMessage,
       }));
     }
-  }, [agData, resolutions, annexes, copropriete, syndic, agId, state.currentVersion, state.pdfUrl, calculateCanSend]);
+  }, [agData, resolutions, annexes, annexesStructured, accountingData, copropriete, syndic, agId, state.currentVersion, state.pdfUrl, calculateCanSend]);
 
   /**
    * Force la régénération (bouton retry)
@@ -319,6 +327,8 @@ export function useConvocationPreview({
           copropriete,
           syndic,
           annexes,
+          annexesStructured,
+          accountingData,
           version: state.currentVersion,
         },
         filename
@@ -333,7 +343,7 @@ export function useConvocationPreview({
         errorCode: 'ERR-PDF-DOWNLOAD',
       });
     }
-  }, [agData, resolutions, copropriete, syndic, annexes, state.currentVersion, agId]);
+  }, [agData, resolutions, copropriete, syndic, annexes, annexesStructured, accountingData, state.currentVersion, agId]);
 
   /**
    * Change le mode de prévisualisation
@@ -456,7 +466,7 @@ export function useConvocationPreview({
         clearTimeout(debounceRef.current);
       }
     };
-  }, [agData, resolutions, annexes, autoGenerate, debounceMs, generatePreview]);
+  }, [agData, resolutions, annexes, annexesStructured, accountingData, autoGenerate, debounceMs, generatePreview]);
 
   // Charger la validation depuis Supabase au montage
   useEffect(() => {
