@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { VentesProvider } from '@/providers/VentesProvider';
 import { CoproProvider } from '@/providers/CoproContext';
+import { AnnexeProvider } from '@/providers/AnnexeContext';
 
 function LoadingFallback() {
   return (
@@ -21,19 +22,21 @@ export default function DashboardLayout({
   return (
     <ThemeProvider>
       <CoproProvider>
-        <VentesProvider>
-          <div className="app-container">
-            <Sidebar aria-hidden="true" />
-            <div className="main-wrapper">
-              <Header />
-              <main className="main-content">
-                <Suspense fallback={<LoadingFallback />}>
-                  {children}
-                </Suspense>
-              </main>
+        <AnnexeProvider>
+          <VentesProvider>
+            <div className="app-container">
+              <Sidebar aria-hidden="true" />
+              <div className="main-wrapper">
+                <Header />
+                <main className="main-content">
+                  <Suspense fallback={<LoadingFallback />}>
+                    {children}
+                  </Suspense>
+                </main>
+              </div>
             </div>
-          </div>
-        </VentesProvider>
+          </VentesProvider>
+        </AnnexeProvider>
       </CoproProvider>
     </ThemeProvider>
   );
