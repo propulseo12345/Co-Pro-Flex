@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, Book, Scale, Receipt } from 'lucide-react';
+import { FileText, Book, Scale, Receipt, ClipboardList } from 'lucide-react';
 import styles from './documents.module.css';
 
 export default function DocumentsPage() {
@@ -29,6 +29,12 @@ export default function DocumentsPage() {
             description: 'Suivi détaillé des dépenses',
             icon: Receipt,
             href: '/documents/expenses'
+        },
+        {
+            title: 'Annexes comptables',
+            description: 'Annexes réglementaires (Décret 2005-240)',
+            icon: ClipboardList,
+            href: '/documents/annexes'
         }
     ];
 
