@@ -205,6 +205,17 @@ export function SessionVotingContent({
         </div>
       </div>
 
+      <SessionNavigation
+        isFirstResolution={currentResolutionIndex === 0}
+        isLastResolution={isLastResolution}
+        isSecondVote={isSecondVote}
+        isInfoPoint={isCurrentResolutionInfo}
+        onPrev={onPrevResolution}
+        onValidate={isCurrentResolutionInfo ? undefined : (isSecondVote ? onValidateSecondVote : onValidateVote)}
+        onNext={onNextWithValidation}
+        onFinish={onGoToPV}
+      />
+
       {isSecondVote && (
         <div className={styles.secondVoteBanner}>
           <AlertCircle size={20} aria-hidden="true" />

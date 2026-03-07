@@ -151,8 +151,10 @@ export const validateResolutionVariables = (resolution: Resolution, variableValu
 };
 
 export const isRoleVariable = (name: string): boolean => {
-  const roleKeywords = ['president', 'secretaire', 'scrutateur', 'gestionnaire', 'syndic', 'nom', 'prenom'];
-  return roleKeywords.some(keyword => name.toLowerCase().includes(keyword));
+  // Seuls les rôles de séance AG qui correspondent à des copropriétaires
+  const roleNames = ['nom_president', 'nom_secretaire', 'nom_scrutateur', 'noms'];
+  const n = name.toLowerCase();
+  return roleNames.includes(n) || n.startsWith('nom_membre') || n.startsWith('nom_ancien');
 };
 
 export const generatePasserelleMentionPV = (

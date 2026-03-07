@@ -38,6 +38,16 @@ export default function EnvoiPage() {
         <div className={styles.errorState}>
           <AlertCircle size={48} />
           <h2>{page.error.message}</h2>
+          {page.error.code && (
+            <p style={{ color: '#f59e0b', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+              Code: {page.error.code}
+            </p>
+          )}
+          {page.error.details && (
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontFamily: 'monospace', maxWidth: '600px', wordBreak: 'break-word' }}>
+              Détails: {page.error.details}
+            </p>
+          )}
           <button onClick={page.reload} className="btn btn-primary">Réessayer</button>
         </div>
       </div>

@@ -1,24 +1,23 @@
-# Session State — 2026-03-07 16:00
+# Session State — 2026-03-07 18:40
 
 ## Branch
 main
 
 ## Completed This Session
-- PV PDF redesign: created `src/lib/pdf/generatePVPDF.ts` with Institutional Elegance design (navy+gold, same as convocation)
-- Updated `pv-generation.service.ts` and `pv/domain/utils.ts` to use new PDF generator
-- Auto-fill signataires: PV page now auto-fills from `ag_meetings` columns + drafts on load
-- Designation roles sync: `useDesignationRolesPage` now syncs roles to `ag_meetings` (persists after draft cleanup)
-- Auto-fill button fix: `handleAutoFillFromAG` queries Supabase directly (ag_meetings → drafts → fallback)
-- PV page layout fix: sidebar 300px, min-width:0, breakpoint 1100px
-- Context bar: created `.planning/context-bar.sh` + added rule in CLAUDE.md
+- fix(ag): templateId mapping — dbToFrontendResolution matches templates by title via getResolutionByTitle()
+- feat(ag): ALUR fund — % first, auto-calc montant; fonds travaux uses same FinancingScheduleEditor
+- fix(ag-session): isRoleVariable narrowed — nom_syndic no longer treated as copro selector
+- feat(ag-session): scroll to top on resolution change + nav buttons at top
+- fix(db): RPCs rpc_get_ag_coproprietaires + rpc_get_ag_pv_bundle — removed auth.uid() checks (RLS off)
 
 ## Next Task
-Test auto-fill button end-to-end (verify ag_meetings has role data for test AG, check button fills fields)
+- Page envoi: "Erreur lors de l'envoi" au clic "Envoyer la convocation" — probablement RPC avec auth check
+- Nettoyer styles inline debug dans envoi/page.tsx (error details)
 
 ## Blockers
-None
+- Auth Supabase client-side: auth.uid() NULL sur RPCs. RLS off donc .from() marche, mais RPCs avec auth echouent.
 
 ## Key Context
-- `ag_session_drafts` are cleared on AG close (trigger `trg_ag_close_clear_drafts`), so roles must be in `ag_meetings`
-- `jspdf-autotable` import removed from service, kept only in test file
-- PV PDF returns `jsPDF` doc (not Blob), callers use `.output('blob')` or `.save()`
+- RLS desactive sur toutes les tables — securite par RPCs uniquement
+- getResolutionByTitle() dans resolutions.ts pour mapper templateId sans colonne DB
+- totalFondsAlur calcule depuis resolution ALUR pour FinancingScheduleEditor fonds travaux

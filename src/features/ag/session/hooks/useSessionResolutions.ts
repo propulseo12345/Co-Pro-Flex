@@ -93,6 +93,7 @@ export function useSessionResolutions({
 
       saveResolutionState(newIndex, newCompleted);
       saveSession();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [sessionState, resolutions, saveResolutionState, saveSession]);
 
@@ -101,12 +102,14 @@ export function useSessionResolutions({
       ...prev,
       currentResolutionIndex: Math.max(0, prev.currentResolutionIndex - 1)
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleNavigateToResolution = useCallback((index: number) => {
     if (index >= 0 && index < resolutions.length && !isSecondVote) {
       setSessionState(prev => ({ ...prev, currentResolutionIndex: index }));
       saveResolutionState(index, sessionState.completedResolutions);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [resolutions.length, isSecondVote, saveResolutionState, sessionState.completedResolutions]);
 

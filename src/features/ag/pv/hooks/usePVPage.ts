@@ -168,15 +168,6 @@ export function usePVPage({ agId }: UsePVPageProps) {
     try {
       const supabase = createClient();
 
-      // Check session first
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData?.session) {
-        logger.error('PV: No auth session', { agId, error: sessionError?.message });
-        setDataLoadError('Session expirée. Veuillez vous reconnecter.');
-        setIsDataLoading(false);
-        return;
-      }
-
       // Single RPC call for all data
       const { data: bundle, error } = await supabase.rpc('rpc_get_ag_pv_bundle', {
         p_ag_id: agId,

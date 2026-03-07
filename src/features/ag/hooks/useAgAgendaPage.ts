@@ -13,7 +13,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MajorityType, TypeAG, ResolutionTemplate } from '@/lib/constants/resolutions';
-import { getResolutionById, generateEcheancesDates, getResolutionsObligatoires } from '@/lib/constants/resolutions';
+import { getResolutionById, getResolutionByTitle, generateEcheancesDates, getResolutionsObligatoires } from '@/lib/constants/resolutions';
 import { extractVariableNames, formatDateFR, formatMontant } from '@/lib/utils/resolution-variables';
 import type { Resolution, ResolutionEditData } from '@/components/features/ag';
 import { useCopro } from '@/providers/CoproContext';
@@ -83,8 +83,12 @@ function dbToFrontendResolution(dbRes: AgResolutionResult): Resolution {
       )
     : undefined;
 
+  // Retrouver le templateId par correspondance de titre
+  const matchedTemplate = getResolutionByTitle(dbRes.title);
+
   return {
     id: dbRes.id,
+    templateId: matchedTemplate?.id,
     titre: dbRes.title,
     texte: dbRes.description || '',
     majorite: fromDbMajorityType(dbRes.majority_type),
@@ -197,11 +201,20 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
 
   // Calculer le montant total du budget depuis les résolutions
   const totalBudget = useMemo(() => {
-    const budgetRes = dbResolutions.find(r => r.title?.toLowerCase().includes('budget prévisionnel'));
+    const budgetRes = dbResolutions.find(r => r.title?.toLowerCase().includes('approbation') && r.title?.toLowerCase().includes('budget prévisionnel'));
     if (!budgetRes) return 0;
     const vars = (budgetRes.variables as Record<string, string>) || {};
     const montantStr = vars.montant || '';
     return parseFloat(montantStr.replace(/\s/g, '').replace(',', '.')) || 0;
+  }, [dbResolutions]);
+
+  // Calculer le montant du fonds de travaux ALUR
+  const totalFondsAlur = useMemo(() => {
+    const alurRes = dbResolutions.find(r => r.title?.toLowerCase().includes('fonds de travaux') && r.title?.toLowerCase().includes('alur'));
+    if (!alurRes) return 0;
+    const vars = (alurRes.variables as Record<string, string>) || {};
+    const montantStr = vars.montant || '';
+    return parseFloat(montantStr.replace(/[\s\u00a0]/g, '').replace(',', '.')) || 0;
   }, [dbResolutions]);
 
   const roles = useMemo(() => {
@@ -661,10 +674,23 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       const existingVariables = (targetDbResolution.variables as Record<string, unknown>) || {};
       const newVars = { ...existingVariables, [editingVariable.varName]: tempVariableValue };
 
-      // Gérer les modalités de paiement budget
+      // Gérer les modalités de paiement budget courant
       if (editingVariable.varName === 'modalites_paiement_budget' && tempVariableValue) {
-        const exercice = (new Date().getFullYear() + 1).toString();
+        const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
         newVars['dates_echeances_budget'] = generateEcheancesDates(tempVariableValue, exercice);
+      }
+
+      // Gérer les modalités de paiement fonds de travaux
+      if (editingVariable.varName === 'modalites_paiement_fonds' && tempVariableValue) {
+        const exercice = agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString();
+        newVars['dates_echeances_fonds'] = generateEcheancesDates(tempVariableValue, exercice);
+      }
+
+      // Auto-calcul montant fonds ALUR depuis pourcentage du budget
+      if (editingVariable.varName === 'pourcentage' && totalBudget > 0) {
+        const pct = parseFloat(tempVariableValue) || 0;
+        const montantCalc = Math.round(totalBudget * pct / 100 * 100) / 100;
+        newVars['montant'] = montantCalc.toLocaleString('fr-FR', { minimumFractionDigits: 2 });
       }
 
       // Persister immédiatement en DB
@@ -682,7 +708,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       const message = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
       setSaveState({ isSaving: false, lastSaved: null, error: message });
     }
-  }, [editingVariable, tempVariableValue, isManager, dbResolutions, updateResolutionMutation, refreshResolutions]);
+  }, [editingVariable, tempVariableValue, isManager, dbResolutions, updateResolutionMutation, refreshResolutions, totalBudget, agFormData]);
 
   const handleQuickSetVariable = useCallback(async (resId: string, varName: string, value: string) => {
     if (!isManager) return;
@@ -851,6 +877,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     financingSchedule,
     onFinancingScheduleChange: setFinancingSchedule,
     totalBudget,
+    totalFondsAlur,
     showSuccessMessage,
     successMessageCount,
     prefillWarning,

@@ -105,7 +105,7 @@ export default function AgendaPage() {
                 gestionnaireNom={MOCK_CONTRAT_SYNDIC.nomSyndic}
                 financingSchedule={page.financingSchedule}
                 onFinancingScheduleChange={page.onFinancingScheduleChange}
-                totalBudget={page.totalBudget}
+                totalBudget={varName.includes('fonds') ? page.totalFondsAlur : page.totalBudget}
               />
             ) : (
               <input

@@ -215,12 +215,12 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         id: 'ag-06',
         titre: 'Approvisionnement du fonds de travaux (loi ALUR)',
         categorie: 'Assemblée Générale',
-        texte: 'Conformément à l\'article 14-2 de la loi du 10 juillet 1965, l\'assemblée générale décide de provisionner le fonds de travaux à hauteur de {montant} euros, soit {pourcentage}% du budget prévisionnel de l\'exercice.',
+        texte: 'Conformément à l\'article 14-2 de la loi du 10 juillet 1965, l\'assemblée générale décide de provisionner le fonds de travaux à hauteur de {pourcentage}% du budget prévisionnel de l\'exercice, soit {montant} euros.',
         majorite: 'ART_24',
-        variables: ['montant', 'pourcentage'],
+        variables: ['pourcentage', 'montant'],
         variablesTypees: [
-            { name: 'montant', type: 'montant', label: 'Montant du fonds', required: true },
-            { name: 'pourcentage', type: 'pourcentage', label: 'Pourcentage du budget', required: true }
+            { name: 'pourcentage', type: 'pourcentage', label: 'Pourcentage du budget', required: true },
+            { name: 'montant', type: 'montant', label: 'Montant du fonds (calculé)', required: true }
         ],
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
@@ -277,8 +277,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         majorite: 'ART_24',
         variables: ['modalites_paiement_fonds', 'dates_echeances_fonds'],
         variablesTypees: [
-            { name: 'modalites_paiement_fonds', type: 'modalites_paiement', label: 'Modalités de paiement', required: true },
-            { name: 'dates_echeances_fonds', type: 'text', label: 'Dates d\'échéances', placeholder: 'Ex: 1er janvier, 1er avril, 1er juillet, 1er octobre', required: true }
+            { name: 'modalites_paiement_fonds', type: 'modalites_paiement_budget', label: 'Modalités de paiement', required: true },
+            { name: 'dates_echeances_fonds', type: 'text', label: 'Dates d\'échéances', placeholder: 'Générées automatiquement selon la modalité choisie', required: true }
         ],
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
@@ -1466,6 +1466,11 @@ export function getCategories(): string[] {
 
 export function getResolutionById(id: string): ResolutionTemplate | undefined {
     return RESOLUTIONS_BANK.find(r => r.id === id);
+}
+
+export function getResolutionByTitle(title: string): ResolutionTemplate | undefined {
+    const normalized = title.toLowerCase().trim();
+    return RESOLUTIONS_BANK.find(r => r.titre.toLowerCase().trim() === normalized);
 }
 
 export function replaceVariables(texte: string, variables: Record<string, string>): string {
