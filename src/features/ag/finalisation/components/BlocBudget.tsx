@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { BlocCard } from './BlocCard';
+import { createClient } from '@/lib/supabase/client';
 import { createBudgetFromAg, type BlocPoste, type PendingAction } from '@/lib/ag/api/finalisation.api';
 import styles from './BlocBudget.module.css';
 
@@ -33,6 +34,43 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
       ? [{ label: 'Budget global', amount: montantTotal, sort_order: 0 }]
       : []
   );
+  // Charger les postes detailles depuis opening_notes
+  useEffect(() => {
+    async function loadOpeningNotes() {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const supabase = createClient() as any;
+        const { data: meeting } = await supabase
+          .from('ag_meetings')
+          .select('opening_notes')
+          .eq('id', agId)
+          .single();
+
+        if (meeting?.opening_notes) {
+          const metadata = typeof meeting.opening_notes === 'string'
+            ? JSON.parse(meeting.opening_notes)
+            : meeting.opening_notes;
+
+          if (metadata.budgetPostes && Array.isArray(metadata.budgetPostes) && metadata.budgetPostes.length > 0) {
+            const loadedPostes: BlocPoste[] = metadata.budgetPostes.map(
+              (p: { poste?: string; montant?: number; accountId?: string; repartitionKeyId?: string }, idx: number) => ({
+                label: p.poste || `Poste ${idx + 1}`,
+                amount: p.montant || 0,
+                sort_order: idx,
+                account_id: p.accountId || undefined,
+                repartition_key_id: p.repartitionKeyId || undefined,
+              })
+            );
+            setPostes(loadedPostes);
+          }
+        }
+      } catch (err) {
+        console.error('[BlocBudget] Error loading opening_notes:', err);
+      }
+    }
+    loadOpeningNotes();
+  }, [agId]);
+
   const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(
     action.status as 'pending' | 'activated' | 'failed'
   );

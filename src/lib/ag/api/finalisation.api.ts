@@ -4,6 +4,8 @@ export interface BlocPoste {
   label: string;
   amount: number;
   sort_order: number;
+  account_id?: string;
+  repartition_key_id?: string;
 }
 
 export interface MembreConseil {
