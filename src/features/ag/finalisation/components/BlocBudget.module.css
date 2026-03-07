@@ -1,0 +1,22 @@
+.postesList { display: flex; flex-direction: column; gap: var(--spacing-2); margin-bottom: var(--spacing-3); }
+.posteItem  { display: flex; align-items: center; gap: var(--spacing-2); }
+.posteLabel { flex: 1; font-size: var(--font-size-sm); }
+.posteAmount {
+  width: 100px; padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  text-align: right;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.posteSuffix { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.removeBtn  { background: none; border: none; cursor: pointer; color: var(--color-error); padding: 2px; }
+
+.addRow    { display: flex; gap: var(--spacing-2); margin-bottom: var(--spacing-3); }
+.addLabel  { flex: 1; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); font-size: var(--font-size-sm); }
+.addAmount { width: 100px; padding: 6px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); font-size: var(--font-size-sm); }
+.addBtn    { display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; font-size: var(--font-size-sm); white-space: nowrap; }
+
+.total       { display: flex; justify-content: space-between; padding-top: var(--spacing-3); border-top: 1px solid var(--color-border); font-size: var(--font-size-sm); }
+.totalAmount { font-weight: 700; color: var(--color-primary-600); }
