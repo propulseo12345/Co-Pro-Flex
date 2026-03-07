@@ -72,6 +72,11 @@ export interface BudgetPoste {
   id: string;
   poste: string;
   montant: number;
+  accountId?: string;
+  accountCode?: string;
+  accountName?: string;
+  repartitionKeyId?: string;
+  repartitionKeyName?: string;
 }
 
 export interface AdresseAG {
