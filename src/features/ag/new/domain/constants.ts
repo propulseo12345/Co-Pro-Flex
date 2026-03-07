@@ -30,5 +30,22 @@ export const POSTES_DEPENSES = [
   'Fournitures',
   'Frais de gestion',
   'Honoraires',
+  'Frais AG',
+  'Frais postaux et bancaires',
   'Autre',
 ];
+
+/** Mapping poste prédéfini -> compte comptable + clé de répartition (pré-remplissage auto) */
+export const POSTE_ACCOUNT_MAPPING: Record<string, { accountCode: string; accountName: string; repartitionKeyName: string }> = {
+  'Eau': { accountCode: '605', accountName: 'Eau', repartitionKeyName: 'Eau froide' },
+  'Assurance': { accountCode: '608', accountName: 'Assurances', repartitionKeyName: 'Charges générales' },
+  'Électricité': { accountCode: '606', accountName: 'Électricité', repartitionKeyName: 'Charges générales' },
+  'Entretien': { accountCode: '602', accountName: 'Entretien et réparations', repartitionKeyName: 'Charges générales' },
+  'Nettoyage': { accountCode: '602', accountName: 'Entretien et réparations', repartitionKeyName: 'Charges générales' },
+  'Ascenseur': { accountCode: '604', accountName: 'Ascenseur', repartitionKeyName: 'Ascenseur' },
+  'Frais de gestion': { accountCode: '609', accountName: 'Honoraires syndic', repartitionKeyName: 'Charges générales' },
+  'Honoraires': { accountCode: '609', accountName: 'Honoraires syndic', repartitionKeyName: 'Charges générales' },
+  'Fournitures': { accountCode: '601', accountName: 'Achats - Fournitures', repartitionKeyName: 'Charges générales' },
+  'Frais AG': { accountCode: '612', accountName: "Frais d'AG", repartitionKeyName: 'Charges générales' },
+  'Frais postaux et bancaires': { accountCode: '611', accountName: 'Frais postaux et bancaires', repartitionKeyName: 'Charges générales' },
+};
