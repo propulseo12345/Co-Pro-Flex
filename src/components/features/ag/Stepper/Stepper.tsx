@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, Calendar, ListChecks, Mail, Send, Vote, Users, FileText, ClipboardCheck } from 'lucide-react';
+import { Check, Calendar, ListChecks, Mail, Send, Vote, Users, FileText, ClipboardCheck, CheckCircle } from 'lucide-react';
 import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { StepGroupCard } from './StepGroupCard';
@@ -25,6 +25,7 @@ const STEPS_CONFIG: StepConfig[] = [
     { id: 'feuille-presence', numero: 6, titre: 'Feuille de présence', path: 'feuille-presence', icon: ClipboardCheck },
     { id: 'tenue-ag', numero: 7, titre: 'Tenue de l\'AG', path: 'session', icon: Users },
     { id: 'pv', numero: 8, titre: 'Procès-verbal', path: 'pv', icon: FileText },
+    { id: 'finalisation', numero: 9, titre: 'Finalisation', path: 'finalisation', icon: CheckCircle, optional: true },
 ];
 
 // Retry config
@@ -108,7 +109,7 @@ function computeInitialMaxStep(currentStep: number, agId?: string): number {
                 willUse: cached !== null ? Math.max(initial, cached) : initial
             });
         }
-        if (cached !== null && cached >= 1 && cached <= 8) {
+        if (cached !== null && cached >= 1 && cached <= 9) {
             initial = Math.max(initial, cached);
         }
     }
@@ -417,11 +418,11 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
         const deroulement: StepGroupModel = {
             id: 'deroulement',
             titre: 'Déroulement + PV',
-            subtitle: 'Étapes 5-8',
+            subtitle: 'Étapes 5-9',
             icon: Users,
             steps: deroulItems,
             completedCount: deroulCompletedCount,
-            totalCount: 4,
+            totalCount: 5,
             isActive: !isPreparationModule,
             isCompleted: maxStepReached > 8,
         };
@@ -429,7 +430,7 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
         return { preparationGroup: preparation, deroulementGroup: deroulement };
     }, [currentStep, maxStepReached, agId, isPreparationModule, handleStepClick]);
 
-    const globalProgress = Math.round(((maxStepReached - 1) / 8) * 100);
+    const globalProgress = Math.round(((maxStepReached - 1) / 9) * 100);
 
     // ========================================================================
     // RENDER: Loading
@@ -499,7 +500,7 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                         {isPreparationModule ? 'Préparation AG' : 'Déroulement + PV'}
                     </span>
                     <span className={styles.mobileStep}>
-                        Étape {currentStep}/8
+                        Étape {currentStep}/9
                     </span>
                 </div>
                 <div className={styles.mobileTitle}>
