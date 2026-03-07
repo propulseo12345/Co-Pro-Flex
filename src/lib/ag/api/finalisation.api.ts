@@ -24,15 +24,7 @@ export interface PendingAction {
 
 export async function loadPendingActions(agId: string): Promise<PendingAction[]> {
   const supabase = createUntypedClient();
-  const { data, error } = await supabase
-    .from('ag_pending_actions')
-    .select(`
-      id, action_type, status, error_message, result_data, resolution_id,
-      resolution:ag_resolutions!resolution_id(title, variables)
-    `)
-    .eq('ag_id', agId)
-    .order('created_at');
-
+  const { data, error } = await supabase.rpc('get_ag_pending_actions', { p_ag_id: agId });
   if (error) throw error;
   return (data as unknown as PendingAction[]) || [];
 }
