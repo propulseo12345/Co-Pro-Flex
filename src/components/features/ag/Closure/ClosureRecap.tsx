@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, AlertTriangle, AlertCircle, Lock } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createUntypedClient } from '@/lib/ag/api/utils';
 import { ClosureVariableInline } from './ClosureVariableInline';
 import clsx from 'clsx';
 import styles from './ClosureRecap.module.css';
@@ -71,7 +71,7 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
     const [isClosing, setIsClosing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const supabase = createClient();
+    const supabase = createUntypedClient();
 
     const loadData = useCallback(async () => {
         setIsLoading(true);

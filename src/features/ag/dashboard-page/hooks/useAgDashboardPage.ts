@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgMeetings } from '@/hooks/modules/useAgData';
 import { useAgDrafts, type AgDraft } from '@/hooks/modules/useAgDrafts';
-import { createClient } from '@/lib/supabase/client';
+import { createUntypedClient } from '@/lib/ag/api/utils';
 import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
 import type { ClosedAG } from '@/components/features/ag/Dashboard';
 
@@ -76,7 +76,7 @@ export function useAgDashboardPage() {
     const loadClosedAGs = async () => {
       setClosedAGsLoading(true);
       try {
-        const supabase = createClient();
+        const supabase = createUntypedClient();
         const { data: closedMeetings } = await supabase
           .from('ag_meetings')
           .select(`
@@ -165,7 +165,7 @@ export function useAgDashboardPage() {
   const handleRename = useCallback(async (id: string, newTitle: string) => {
     setRenamingId(id);
     try {
-      const supabase = createClient();
+      const supabase = createUntypedClient();
       const { error } = await (supabase as unknown as { from: (t: string) => { update: (d: object) => { eq: (f: string, v: string) => Promise<{ error: unknown }> } } })
         .from('ag_meetings')
         .update({ title: newTitle })

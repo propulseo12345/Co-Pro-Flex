@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, XCircle, Zap } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createUntypedClient } from '@/lib/ag/api/utils';
 import styles from './ActivationRecap.module.css';
 import clsx from 'clsx';
 
@@ -46,7 +46,7 @@ export function ActivationRecap({ agId, result, onClose }: ActivationRecapProps)
 
   useEffect(() => {
     const loadActions = async () => {
-      const supabase = createClient();
+      const supabase = createUntypedClient();
       const { data } = await supabase
         .from('ag_pending_actions')
         .select(`

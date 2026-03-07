@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { createUntypedClient } from '@/lib/ag/api/utils';
 import type { AGData, Resolution, VoteData, Signataire, PresenceData } from '../domain/types';
 import { INITIAL_SIGNATAIRES, LOAD_TIMEOUT_MS } from '../domain/constants';
 import { generatePVText, generatePDFDocument, getResolutionResult, calculatePVStats } from '../domain/utils';
@@ -596,7 +597,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
 
     // Activate AG decisions
     try {
-      const supabase = createClient();
+      const supabase = createUntypedClient();
       const { data: result } = await supabase.rpc('activate_ag_decisions', {
         p_ag_id: agId,
       });
