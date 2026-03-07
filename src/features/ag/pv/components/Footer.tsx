@@ -1,15 +1,16 @@
 'use client';
 
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft, Home, CheckCircle } from 'lucide-react';
 import styles from '../../../../app/(dashboard)/ag/[id]/pv/pv.module.css';
 
 interface FooterProps {
   isSigned: boolean;
   onBack: () => void;
   onFinish: () => void;
+  onFinalisation?: () => void;
 }
 
-export function Footer({ isSigned, onBack, onFinish }: FooterProps) {
+export function Footer({ isSigned, onBack, onFinish, onFinalisation }: FooterProps) {
   return (
     <div className={styles.footer}>
       <button onClick={onBack} className="btn btn-secondary">
@@ -17,10 +18,18 @@ export function Footer({ isSigned, onBack, onFinish }: FooterProps) {
         Retour à la session
       </button>
       {isSigned && (
-        <button onClick={onFinish} className="btn btn-primary">
-          Terminer
-          <Home size={16} aria-hidden="true" />
-        </button>
+        <>
+          {onFinalisation && (
+            <button onClick={onFinalisation} className="btn btn-secondary">
+              <CheckCircle size={16} aria-hidden="true" />
+              Finaliser les décisions
+            </button>
+          )}
+          <button onClick={onFinish} className="btn btn-primary">
+            Terminer
+            <Home size={16} aria-hidden="true" />
+          </button>
+        </>
       )}
     </div>
   );

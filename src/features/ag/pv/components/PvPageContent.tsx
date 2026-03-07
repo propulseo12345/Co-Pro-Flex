@@ -75,6 +75,7 @@ interface PvPageContentProps {
   onClearSignature: (id: string) => void;
   onSaveSignature: () => void;
   onFinish: () => void;
+  onFinalisation?: () => void;
 
   // Signature pad handlers
   onStartDrawing: (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => void;
@@ -125,6 +126,7 @@ export function PvPageContent({
   onClearSignature,
   onSaveSignature,
   onFinish,
+  onFinalisation,
   onStartDrawing,
   onDraw,
   onStopDrawing,
@@ -180,7 +182,7 @@ export function PvPageContent({
         />
       </div>
 
-      <Footer isSigned={isSigned} onBack={onGoBack} onFinish={onFinish} />
+      <Footer isSigned={isSigned} onBack={onGoBack} onFinish={onFinish} onFinalisation={onFinalisation} />
 
       <SignatairesModal
         isOpen={showSignatairesModal}

@@ -107,6 +107,7 @@ export default function PVPage() {
         onClearSignature={pvPage.clearSignature}
         onSaveSignature={pvPage.saveSignature}
         onFinish={pvPage.handleFinish}
+        onFinalisation={() => router.push(`/ag/${agId}/finalisation`)}
         onStartDrawing={startDrawing}
         onDraw={draw}
         onStopDrawing={stopDrawing}
