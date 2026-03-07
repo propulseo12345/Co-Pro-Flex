@@ -161,7 +161,7 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
       total: meetings.length,
       draft: meetings.filter((m) => m.status === 'draft').length,
       convoked: meetings.filter((m) => m.status === 'convoked').length,
-      inProgress: meetings.filter((m) => m.status === 'in_progress').length,
+      inProgress: meetings.filter((m) => m.status === 'in_progress' || m.status === 'session_active').length,
       closed: meetings.filter((m) => m.status === 'closed').length,
       pvGenerated: meetings.filter((m) => m.status === 'pv_generated').length,
       upcoming: meetings.filter((m) => new Date(m.meeting_date) >= now).length,

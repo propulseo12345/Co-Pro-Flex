@@ -93,7 +93,7 @@ export default function SessionPage() {
 
       <Stepper currentStep={7} agId={agId} />
 
-      {!session.sessionState.started ? (
+      {!session.isSessionActive && !session.sessionState.started ? (
         <SessionReadyScreen
           agId={agId}
           coproprietaires={session.coproprietaires}
@@ -154,9 +154,9 @@ export default function SessionPage() {
         </>
       )}
 
-      {session.sessionState.started && (
+      {(session.isSessionActive || session.sessionState.started) && (
         <SessionFooter
-          onPause={session.handlePauseSession}
+          onCancel={session.handleCancelSession}
           onSave={session.saveSession}
           onOpenProjector={session.handleOpenProjector}
           onExportCSV={session.handleExportCSV}

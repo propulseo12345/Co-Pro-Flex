@@ -1,25 +1,22 @@
 'use client';
 
-import { Pause, Monitor, Download } from 'lucide-react';
+import { XCircle, Monitor, Download } from 'lucide-react';
 import styles from '../../../../app/(dashboard)/ag/[id]/session/session.module.css';
 
 interface SessionFooterProps {
-  onPause: () => void;
+  onCancel: () => void;
   onSave: () => void;
   onOpenProjector: () => void;
   onExportCSV: () => void;
 }
 
-export function SessionFooter({ onPause, onSave, onOpenProjector, onExportCSV }: SessionFooterProps) {
+export function SessionFooter({ onCancel, onSave, onOpenProjector, onExportCSV }: SessionFooterProps) {
   return (
     <div className={styles.footer}>
       <div className={styles.footerLeft}>
-        <button onClick={onPause} className="btn btn-secondary">
-          <Pause size={16} aria-hidden="true" />
-          Mettre en pause
-        </button>
-        <button onClick={onSave} className="btn btn-secondary">
-          Sauvegarder la session
+        <button onClick={onCancel} className="btn btn-danger">
+          <XCircle size={16} aria-hidden="true" />
+          Annuler le déroulé
         </button>
       </div>
       <div className={styles.footerRight}>

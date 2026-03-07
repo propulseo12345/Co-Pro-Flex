@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { updateResolution } from '@/lib/ag/api/resolutions.api';
+import { cancelAgSession } from '@/lib/ag/api';
 import { castVote as castVoteApi } from '@/lib/ag/api/votes.api';
 import type { UseAgSessionPageParams, UseAgSessionPageReturn, SessionDraftData, VoteData, VoteSource } from '../types';
 import { toDbVote } from '../services/sessionHelpers';
@@ -146,12 +147,19 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     castVote: castVoteMutation.execute,
   });
 
-  // Mark dirty when votes change so auto-save picks them up
+  // Auto-save debounced (2s) on any state change
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (votingHook.votes.length > 0) {
-      persistence.markDirty();
-    }
-  }, [votingHook.votes, persistence.markDirty]);
+    if (!resolutionsHook.sessionState.started) return;
+    persistence.markDirty();
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveSession();
+    }, 2000);
+
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [votingHook.votes, resolutionsHook.sessionState, presenceHook.presencesEnrichies]);
 
   // Keep refs in sync for saveSession
   resolutionsRef.current = resolutionsHook.resolutions;
@@ -275,19 +283,27 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
 
       votingHook.setVotes(loadedVotes);
 
-      // Load session draft
-      const sessionDraft = await loadDraft<SessionDraftData>(agId, 'session');
-      if (sessionDraft.data) {
-        const sessionData = sessionDraft.data;
+      // Load session draft + resolutions draft (activeIndex & completedResolutions stored separately)
+      const [sessionDraft, resolutionsDraft] = await Promise.all([
+        loadDraft<SessionDraftData>(agId, 'session'),
+        loadDraft<{ activeIndex: number; completedResolutions: string[] }>(agId, 'resolutions'),
+      ]);
+
+      // Merge: session draft has started/presences, resolutions draft has activeIndex/completedResolutions
+      const sessionData = sessionDraft.data;
+      const resData = resolutionsDraft.data;
+
+      if (sessionData || resData) {
         resolutionsHook.setSessionState({
-          started: sessionData.started || false,
-          currentResolutionIndex: sessionData.currentResolutionIndex || 0,
-          completedResolutions: sessionData.completedResolutions || []
+          started: sessionData?.started || false,
+          currentResolutionIndex: resData?.activeIndex ?? sessionData?.currentResolutionIndex ?? 0,
+          completedResolutions: resData?.completedResolutions ?? sessionData?.completedResolutions ?? [],
         });
-        if (sessionData.isSecondVote) votingHook.setIsSecondVote(sessionData.isSecondVote);
-        if (sessionData.passerelleResolution) votingHook.setPasserelleResolution(sessionData.passerelleResolution);
-        if (sessionData.passerelleVoteInitial) votingHook.setPasserelleVoteInitial(sessionData.passerelleVoteInitial);
-        if (sessionData.presencesEnrichies) {
+
+        if (sessionData?.isSecondVote) votingHook.setIsSecondVote(sessionData.isSecondVote);
+        if (sessionData?.passerelleResolution) votingHook.setPasserelleResolution(sessionData.passerelleResolution);
+        if (sessionData?.passerelleVoteInitial) votingHook.setPasserelleVoteInitial(sessionData.passerelleVoteInitial);
+        if (sessionData?.presencesEnrichies) {
           presenceHook.setPresencesEnrichies(sessionData.presencesEnrichies);
           presenceHook.setPresences(presencesEnrichiesVersSimple(sessionData.presencesEnrichies));
         }
@@ -303,6 +319,16 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
 
     loadSessionData();
   }, [agId, useSupabase, dbResolutions, dbAttendance, coproprietaires]);
+
+  // Derive started from meeting.status (source of truth = DB, not drafts)
+  const isSessionActive = meeting?.status === 'session_active';
+
+  // Sync DB status → local sessionState.started
+  useEffect(() => {
+    if (isSessionActive && !resolutionsHook.sessionState.started) {
+      resolutionsHook.setSessionState(prev => ({ ...prev, started: true }));
+    }
+  }, [isSessionActive]);
 
   // Handlers
   const handleStartSession = useCallback(async () => {
@@ -329,9 +355,15 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     persistence.savePresences(presenceHook.presencesEnrichies);
   }, [useSupabase, isManager, coproprietaires, presenceHook.presencesEnrichies, agId]);
 
-  const handlePauseSession = useCallback(() => {
-    resolutionsHook.setSessionState(prev => ({ ...prev, started: false }));
-  }, []);
+  const handleCancelSession = useCallback(async () => {
+    if (!confirm('Êtes-vous sûr de vouloir annuler le déroulé ? Les votes et la progression seront perdus.')) return;
+    if (currentCoproId) {
+      await cancelAgSession(agId, currentCoproId);
+    }
+    resolutionsHook.setSessionState({ started: false, currentResolutionIndex: 0, completedResolutions: [] });
+    persistence.clearData();
+    router.push(`/ag/${agId}/feuille-presence`);
+  }, [agId, currentCoproId, router]);
 
   const handleExportCSV = useCallback(() => {
     exportSessionToCSV(
@@ -628,7 +660,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
 
     // Session handlers
     handleStartSession,
-    handlePauseSession,
+    handleCancelSession,
+    isSessionActive,
     saveSession,
 
     // Projector handlers

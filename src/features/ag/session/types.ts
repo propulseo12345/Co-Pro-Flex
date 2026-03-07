@@ -117,7 +117,8 @@ export interface UseAgSessionPageReturn {
 
   // Session handlers
   handleStartSession: () => Promise<void>;
-  handlePauseSession: () => void;
+  handleCancelSession: () => Promise<void>;
+  isSessionActive: boolean;
   saveSession: () => Promise<void>;
 
   // Projector handlers

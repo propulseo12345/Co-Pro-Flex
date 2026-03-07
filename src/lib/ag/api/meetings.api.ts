@@ -121,7 +121,7 @@ export async function closeAg(input: CloseAgInput): Promise<CloseAgResponse> {
 }
 
 /**
- * Démarrer une AG (mettre en statut in_progress)
+ * Démarrer une AG (mettre en statut session_active)
  */
 export async function startAg(input: StartAgInput): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
@@ -129,7 +129,7 @@ export async function startAg(input: StartAgInput): Promise<{ success: boolean; 
   const { error } = await supabase
     .from('ag_meetings')
     .update({
-      status: 'in_progress' as AgStatus,
+      status: 'session_active' as AgStatus,
       session_started_at: new Date().toISOString(),
       opening_notes: input.opening_notes || null,
     })
@@ -138,6 +138,39 @@ export async function startAg(input: StartAgInput): Promise<{ success: boolean; 
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Annuler le déroulé d'une AG (revenir à in_progress)
+ */
+export async function cancelAgSession(agId: string, coproId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createUntypedClient();
+
+  const { error } = await supabase
+    .from('ag_meetings')
+    .update({
+      status: 'in_progress' as AgStatus,
+      session_started_at: null,
+    })
+    .eq('id', agId)
+    .eq('copro_id', coproId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  // Clear session drafts
+  try {
+    await supabase
+      .from('ag_session_drafts')
+      .delete()
+      .eq('ag_id', agId)
+      .in('draft_type', ['session', 'votes', 'resolutions', 'resolution_vars']);
+  } catch {
+    // Non-blocking
   }
 
   return { success: true };

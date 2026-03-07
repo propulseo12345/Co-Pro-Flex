@@ -8,7 +8,7 @@
 
 export type AgMeetingType = 'ordinary' | 'extraordinary' | 'special';
 
-export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'closed' | 'pv_generated';
+export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'session_active' | 'closed' | 'pv_generated';
 
 export type ResolutionType = 'budget' | 'accounts' | 'works' | 'appointment' | 'contract' | 'rules' | 'other';
 
