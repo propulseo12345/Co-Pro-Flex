@@ -5,6 +5,8 @@ import { Plus, Trash2 } from 'lucide-react';
 import { BlocCard } from './BlocCard';
 import { createClient } from '@/lib/supabase/client';
 import { createBudgetFromAg, type BlocPoste, type PendingAction } from '@/lib/ag/api/finalisation.api';
+import { useAccountsAndKeys } from '@/features/ag/new/hooks/useAccountsAndKeys';
+import { POSTES_DEPENSES, POSTE_ACCOUNT_MAPPING } from '@/features/ag/new/domain/constants';
 import styles from './BlocBudget.module.css';
 
 function parseFrenchAmount(val: string | undefined): number {
@@ -29,11 +31,11 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
   const exercice = extractYear(vars['date_debut']);
   const montantTotal = parseFrenchAmount(vars['montant']);
 
-  const [postes, setPostes] = useState<BlocPoste[]>(() =>
-    montantTotal > 0
-      ? [{ label: 'Budget global', amount: montantTotal, sort_order: 0 }]
-      : []
-  );
+  const { accounts, repartitionKeys, findAccountByCode, findKeyByName } = useAccountsAndKeys();
+
+  const [postes, setPostes] = useState<BlocPoste[]>([]);
+  const [postesLoaded, setPostesLoaded] = useState(false);
+
   // Charger les postes detailles depuis opening_notes
   useEffect(() => {
     async function loadOpeningNotes() {
@@ -62,11 +64,15 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
               })
             );
             setPostes(loadedPostes);
+            setPostesLoaded(true);
+            return;
           }
         }
       } catch (err) {
         console.error('[BlocBudget] Error loading opening_notes:', err);
       }
+      // Fallback: pas de postes detailles, liste vide (le syndic les ajoutera ici)
+      setPostesLoaded(true);
     }
     loadOpeningNotes();
   }, [agId]);
@@ -75,19 +81,54 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
     action.status as 'pending' | 'activated' | 'failed'
   );
   const [error, setError] = useState<string | null>(null);
-  const [newPoste, setNewPoste] = useState({ label: '', amount: '' });
+  const [selectedPoste, setSelectedPoste] = useState('');
+  const [customLabel, setCustomLabel] = useState('');
+  const [showCustom, setShowCustom] = useState(false);
+  const [newAmount, setNewAmount] = useState('');
 
   const total = postes.reduce((sum, p) => sum + p.amount, 0);
 
+  const resolveAccountData = useCallback((posteName: string) => {
+    const mapping = POSTE_ACCOUNT_MAPPING[posteName];
+    if (!mapping) return {};
+    const account = findAccountByCode(mapping.accountCode);
+    const key = findKeyByName(mapping.repartitionKeyName);
+    return {
+      account_id: account?.id,
+      repartition_key_id: key?.id,
+    };
+  }, [findAccountByCode, findKeyByName]);
+
+  const handlePosteSelect = useCallback((value: string) => {
+    if (value === 'Autre') {
+      setShowCustom(true);
+      setSelectedPoste('');
+      setCustomLabel('');
+    } else {
+      setShowCustom(false);
+      setSelectedPoste(value);
+    }
+  }, []);
+
   const handleAddPoste = useCallback(() => {
-    if (!newPoste.label.trim() || !newPoste.amount) return;
+    const label = showCustom ? customLabel.trim() : selectedPoste;
+    if (!label || !newAmount) return;
+    const amount = parseFloat(newAmount);
+    if (isNaN(amount) || amount <= 0) return;
+
+    const accountData = resolveAccountData(label);
+
     setPostes(prev => [...prev, {
-      label: newPoste.label.trim(),
-      amount: parseFloat(newPoste.amount),
+      label,
+      amount,
       sort_order: prev.length,
+      ...accountData,
     }]);
-    setNewPoste({ label: '', amount: '' });
-  }, [newPoste]);
+    setSelectedPoste('');
+    setCustomLabel('');
+    setShowCustom(false);
+    setNewAmount('');
+  }, [showCustom, customLabel, selectedPoste, newAmount, resolveAccountData]);
 
   const handleRemove = useCallback((idx: number) => {
     setPostes(prev => prev.filter((_, i) => i !== idx).map((p, i) => ({ ...p, sort_order: i })));
@@ -110,6 +151,27 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
     }
   }, [agId, exercice, postes, onActivated]);
 
+  // Trouver le nom du compte par son ID
+  const getAccountLabel = useCallback((accountId?: string) => {
+    if (!accountId) return null;
+    const acc = accounts.find(a => a.id === accountId);
+    return acc ? `${acc.code}` : null;
+  }, [accounts]);
+
+  const getKeyLabel = useCallback((keyId?: string) => {
+    if (!keyId) return null;
+    const key = repartitionKeys.find(k => k.id === keyId);
+    return key ? key.name : null;
+  }, [repartitionKeys]);
+
+  if (!postesLoaded) {
+    return (
+      <BlocCard title={`Budget prévisionnel ${exercice}`} actionType="CREATE_BUDGET" status="pending">
+        <p className={styles.loading}>Chargement des postes…</p>
+      </BlocCard>
+    );
+  }
+
   return (
     <BlocCard
       title={`Budget prévisionnel ${exercice}`}
@@ -120,10 +182,24 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
       confirmLabel="Créer le budget"
       confirmDisabled={postes.length === 0}
     >
+      {montantTotal > 0 && (
+        <div className={styles.budgetRef}>
+          Montant voté : {montantTotal.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+        </div>
+      )}
+
       <div className={styles.postesList}>
         {postes.map((poste, idx) => (
           <div key={idx} className={styles.posteItem}>
-            <span className={styles.posteLabel}>{poste.label}</span>
+            <span className={styles.posteLabel}>
+              {poste.label}
+              {(getAccountLabel(poste.account_id) || getKeyLabel(poste.repartition_key_id)) && (
+                <span className={styles.posteMeta}>
+                  {getAccountLabel(poste.account_id) && <span>Cpt {getAccountLabel(poste.account_id)}</span>}
+                  {getKeyLabel(poste.repartition_key_id) && <span>{getKeyLabel(poste.repartition_key_id)}</span>}
+                </span>
+              )}
+            </span>
             <input
               type="number"
               className={styles.posteAmount}
@@ -143,23 +219,44 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
         ))}
       </div>
 
+      {postes.length === 0 && status !== 'activated' && (
+        <div className={styles.emptyHint}>
+          Ajoutez les postes de dépenses pour détailler le budget.
+        </div>
+      )}
+
       {status !== 'activated' && (
         <div className={styles.addRow}>
-          <input
-            type="text"
-            placeholder="Libellé du poste"
-            value={newPoste.label}
-            onChange={e => setNewPoste(p => ({ ...p, label: e.target.value }))}
-            className={styles.addLabel}
-          />
+          {!showCustom ? (
+            <select
+              value={selectedPoste}
+              onChange={e => handlePosteSelect(e.target.value)}
+              className={styles.addSelect}
+            >
+              <option value="">Sélectionner un poste…</option>
+              {POSTES_DEPENSES.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              placeholder="Libellé personnalisé…"
+              value={customLabel}
+              onChange={e => setCustomLabel(e.target.value)}
+              className={styles.addLabel}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPoste(); } }}
+            />
+          )}
           <input
             type="number"
             placeholder="Montant"
-            value={newPoste.amount}
-            onChange={e => setNewPoste(p => ({ ...p, amount: e.target.value }))}
+            value={newAmount}
+            onChange={e => setNewAmount(e.target.value)}
             className={styles.addAmount}
             min="0"
             step="0.01"
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPoste(); } }}
           />
           <button type="button" onClick={handleAddPoste} className={styles.addBtn}>
             <Plus size={14} /> Ajouter
