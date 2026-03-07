@@ -5,6 +5,18 @@ Placé à la racine du projet, il est lu automatiquement.
 
 ---
 
+## 📊 SUIVI CONTEXTE
+
+A chaque milestone ou toutes les ~10 interactions, afficher la barre de progression du contexte :
+```bash
+.planning/context-bar.sh <tokens_estimes>
+```
+- Estimer les tokens utilises (input + output cumules)
+- Quand le statut passe a **SAVE SOON** (70%), preparer la cloture
+- Quand le statut passe a **SAVE NOW** (90%), executer `/token-saver fin` immediatement
+
+---
+
 ## 🎯 PROJET
 
 **CoProFlex** est une plateforme SaaS de gestion de copropriété pour le marché français.

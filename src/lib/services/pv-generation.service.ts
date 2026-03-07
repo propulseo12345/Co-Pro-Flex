@@ -9,10 +9,9 @@
  * - Les notifications aux copropriétaires
  */
 
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { createClient } from '@/lib/supabase/client';
 import * as documentsApi from '@/lib/documents/api';
+import { generatePVPDF } from '@/lib/pdf/generatePVPDF';
 
 // Constantes pour cleanup legacy localStorage (one-shot en dev)
 const LEGACY_JOBS_KEY = 'pv-generation-jobs';
@@ -346,19 +345,14 @@ export async function getPVDocumentForAG(agId: string, coproId: string): Promise
 
 const GENERATION_STEPS = [
     { name: 'Préparation des données', weight: 10 },
-    { name: 'Génération de l\'en-tête', weight: 15 },
-    { name: 'Génération de la feuille de présence', weight: 20 },
-    { name: 'Génération des résolutions et votes', weight: 35 },
-    { name: 'Génération des signatures', weight: 10 },
-    { name: 'Finalisation et archivage', weight: 10 },
+    { name: 'Génération du document', weight: 70 },
+    { name: 'Finalisation et archivage', weight: 20 },
 ];
 
 async function generatePDF(
     options: GeneratePVOptions,
     onProgress: (progress: PVJobProgress) => void
 ): Promise<Blob> {
-    const { agData, resolutions, participants, signataires, variables = {} } = options;
-
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     // Étape 1: Préparation des données
@@ -371,258 +365,36 @@ async function generatePDF(
     });
     await delay(200);
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 20;
-    let yPos = 20;
-
-    const replaceVars = (text: string): string => {
-        if (!text) return '';
-        return text.replace(/\{([^}]+)\}/g, (_, varName) => {
-            return variables[varName] || `[${varName}]`;
-        });
-    };
-
-    // Étape 2: En-tête
+    // Étape 2: Génération du PDF avec le nouveau design
     onProgress({
         step: GENERATION_STEPS[1].name,
         stepNumber: 2,
         totalSteps: GENERATION_STEPS.length,
-        percentage: 25,
-        message: 'Génération de l\'en-tête du document...',
+        percentage: 50,
+        message: 'Génération du document PDF...',
     });
+
+    const pdfDoc = generatePVPDF({
+        agData: options.agData,
+        resolutions: options.resolutions,
+        participants: options.participants,
+        signataires: options.signataires,
+        variables: options.variables,
+    });
+
     await delay(150);
 
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PROCÈS-VERBAL', pageWidth / 2, yPos, { align: 'center' });
-    yPos += 8;
-
-    doc.setFontSize(14);
-    doc.text(`ASSEMBLÉE GÉNÉRALE ${agData.type}`, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 15;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-
-    const dateFormatted = new Date(agData.date).toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-
-    doc.text(`Date : ${dateFormatted}`, margin, yPos);
-    yPos += 6;
-    doc.text(`Heure : ${agData.heure || 'Non précisée'}`, margin, yPos);
-    yPos += 6;
-    doc.text(`Lieu : ${agData.lieu || 'Non précisé'}`, margin, yPos);
-    yPos += 6;
-    if (agData.adresse) {
-        doc.text(`Adresse : ${agData.adresse}`, margin, yPos);
-        yPos += 10;
-    }
-
-    // Étape 3: Feuille de présence
+    // Étape 3: Finalisation
     onProgress({
         step: GENERATION_STEPS[2].name,
         stepNumber: 3,
-        totalSteps: GENERATION_STEPS.length,
-        percentage: 45,
-        message: 'Génération de la feuille de présence...',
-    });
-    await delay(300);
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PRÉSENCES ET REPRÉSENTATIONS', margin, yPos);
-    yPos += 8;
-
-    const presentsData = participants
-        .filter(p => p.mode === 'present' || p.mode === 'represente' || p.mode === 'correspondance')
-        .map(p => {
-            let statut = 'Présent';
-            if (p.mode === 'represente') statut = `Représenté par ${p.mandataire || 'N/A'}`;
-            if (p.mode === 'correspondance') statut = 'Vote par correspondance';
-            return [p.nom, p.lot || '-', `${p.tantiemes}`, statut];
-        });
-
-    if (presentsData.length > 0) {
-        (doc as unknown as { autoTable: (options: unknown) => void; lastAutoTable: { finalY: number } }).autoTable({
-            startY: yPos,
-            head: [['Copropriétaire', 'Lot', 'Tantièmes', 'Statut']],
-            body: presentsData,
-            margin: { left: margin, right: margin },
-            styles: { fontSize: 9 },
-            headStyles: { fillColor: [16, 185, 129] },
-        });
-        yPos = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
-    }
-
-    const totalTantiemes = participants.reduce((sum, p) => sum + p.tantiemes, 0);
-    const tantiemesPresents = participants
-        .filter(p => p.mode !== 'absent')
-        .reduce((sum, p) => sum + p.tantiemes, 0);
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Total des tantièmes représentés : ${tantiemesPresents} / ${totalTantiemes} (${((tantiemesPresents / totalTantiemes) * 100).toFixed(1)}%)`, margin, yPos);
-    yPos += 15;
-
-    // Étape 4: Résolutions
-    onProgress({
-        step: GENERATION_STEPS[3].name,
-        stepNumber: 4,
-        totalSteps: GENERATION_STEPS.length,
-        percentage: 80,
-        message: 'Génération des résolutions et résultats de votes...',
-    });
-    await delay(400);
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RÉSOLUTIONS VOTÉES', margin, yPos);
-    yPos += 10;
-
-    for (const resolution of resolutions) {
-        if (yPos > 250) {
-            doc.addPage();
-            yPos = 20;
-        }
-
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Résolution ${resolution.numero} : ${resolution.titre}`, margin, yPos);
-        yPos += 6;
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'italic');
-        doc.text(`Majorité requise : ${resolution.majorite}`, margin, yPos);
-        yPos += 6;
-
-        doc.setFont('helvetica', 'normal');
-        const resolutionText = replaceVars(resolution.texte);
-        const splitText = doc.splitTextToSize(resolutionText, pageWidth - 2 * margin);
-        doc.text(splitText, margin, yPos);
-        yPos += splitText.length * 5 + 5;
-
-        if (resolution.passerelle) {
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Vote initial (Article 25) :', margin, yPos);
-            yPos += 5;
-            doc.setFont('helvetica', 'normal');
-            doc.text(
-                `Pour: ${resolution.passerelle.voteInitial.pour} t. | Contre: ${resolution.passerelle.voteInitial.contre} t. | Abstention: ${resolution.passerelle.voteInitial.abstention} t.`,
-                margin + 5,
-                yPos
-            );
-            yPos += 5;
-
-            if (resolution.passerelle.secondVote) {
-                doc.setFont('helvetica', 'bold');
-                doc.text('Second vote (Article 24) :', margin, yPos);
-                yPos += 5;
-                doc.setFont('helvetica', 'normal');
-                doc.text(
-                    `Pour: ${resolution.passerelle.secondVote.pour} t. | Contre: ${resolution.passerelle.secondVote.contre} t. | Abstention: ${resolution.passerelle.secondVote.abstention} t.`,
-                    margin + 5,
-                    yPos
-                );
-                yPos += 5;
-            }
-
-            if (resolution.passerelle.mentionPV) {
-                doc.setFontSize(8);
-                doc.setFont('helvetica', 'italic');
-                const mentionText = doc.splitTextToSize(resolution.passerelle.mentionPV, pageWidth - 2 * margin);
-                doc.text(mentionText, margin, yPos);
-                yPos += mentionText.length * 4 + 3;
-            }
-        } else {
-            doc.setFontSize(9);
-            doc.text(
-                `Pour: ${resolution.votes.pour} t. | Contre: ${resolution.votes.contre} t. | Abstention: ${resolution.votes.abstention} t.`,
-                margin,
-                yPos
-            );
-            yPos += 5;
-        }
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        const isAdopted = resolution.resultat === 'ADOPTEE';
-        const status = resolution.resultat || (isAdopted ? 'ADOPTÉE' : 'REJETÉE');
-        doc.setTextColor(isAdopted ? 16 : 220, isAdopted ? 185 : 38, isAdopted ? 129 : 38);
-        doc.text(`Résolution ${status}`, margin, yPos);
-        doc.setTextColor(0, 0, 0);
-        yPos += 12;
-    }
-
-    // Étape 5: Signatures
-    onProgress({
-        step: GENERATION_STEPS[4].name,
-        stepNumber: 5,
-        totalSteps: GENERATION_STEPS.length,
-        percentage: 90,
-        message: 'Génération de la section signatures...',
-    });
-    await delay(200);
-
-    if (yPos > 220) {
-        doc.addPage();
-        yPos = 20;
-    }
-
-    yPos += 10;
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('SIGNATURES', margin, yPos);
-    yPos += 15;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-
-    for (const sig of signataires) {
-        if (yPos > 260) {
-            doc.addPage();
-            yPos = 20;
-        }
-
-        doc.setFont('helvetica', 'bold');
-        doc.text(sig.roleLabel, margin, yPos);
-        yPos += 5;
-        doc.setFont('helvetica', 'normal');
-        const nomComplet = sig.prenom && sig.nom ? `${sig.prenom} ${sig.nom}` : '[À compléter]';
-        doc.text(nomComplet, margin, yPos);
-        yPos += 5;
-
-        if (sig.signature) {
-            try {
-                doc.addImage(sig.signature, 'PNG', margin, yPos, 60, 20);
-                yPos += 25;
-            } catch (e) {
-                console.warn('Erreur ajout signature:', e);
-                doc.line(margin, yPos + 10, margin + 80, yPos + 10);
-                yPos += 20;
-            }
-        } else {
-            doc.line(margin, yPos + 10, margin + 80, yPos + 10);
-            yPos += 20;
-        }
-    }
-
-    // Étape 6: Finalisation
-    onProgress({
-        step: GENERATION_STEPS[5].name,
-        stepNumber: 6,
         totalSteps: GENERATION_STEPS.length,
         percentage: 100,
         message: 'Finalisation du document...',
     });
     await delay(100);
 
-    return doc.output('blob');
+    return pdfDoc.output('blob');
 }
 
 // ═══════════════════════════════════════════════════════════════

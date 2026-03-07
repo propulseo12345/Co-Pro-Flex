@@ -1,24 +1,24 @@
-# Session State — 2026-03-07 15:00
+# Session State — 2026-03-07 16:00
 
 ## Branch
 main
 
 ## Completed This Session
-- Fix `register_correspondence_form_votes` SQL: 3 bugs (RECORD vs JSONB loop, missing `ag_id` column, missing `updated_at` column)
-- Fix `useCorrespondenceVotes.ts`: PostgrestError not caught properly, showed generic "Erreur de soumission"
-- Fix `useVotesCorrespondanceCoproPage.ts`: better error messages from RPC
-- Fix `ResolutionCard.tsx`: used index+1 instead of resolution.numero
-- Fix `useAgSessionPage.ts`: `persistResolutionResult` used before declaration + null copro_id
-- Fix `validateResolutionVariables`: didn't check `resolution.variables`, only `allVariables`
-- Added `variables?: Record<string, string>` to Resolution type
+- PV PDF redesign: created `src/lib/pdf/generatePVPDF.ts` with Institutional Elegance design (navy+gold, same as convocation)
+- Updated `pv-generation.service.ts` and `pv/domain/utils.ts` to use new PDF generator
+- Auto-fill signataires: PV page now auto-fills from `ag_meetings` columns + drafts on load
+- Designation roles sync: `useDesignationRolesPage` now syncs roles to `ag_meetings` (persists after draft cleanup)
+- Auto-fill button fix: `handleAutoFillFromAG` queries Supabase directly (ag_meetings → drafts → fallback)
+- PV page layout fix: sidebar 300px, min-width:0, breakpoint 1100px
+- Context bar: created `.planning/context-bar.sh` + added rule in CLAUDE.md
 
 ## Next Task
-Test full AG workflow end-to-end (votes correspondance -> presence -> session -> votes -> PV)
+Test auto-fill button end-to-end (verify ag_meetings has role data for test AG, check button fills fields)
 
 ## Blockers
 None
 
 ## Key Context
-- SQL function `register_correspondence_form_votes` was patched live in Supabase (not via migration file)
-- `save_votes_correspondance` (copro page) and `register_correspondence_form_votes` (main page) are two separate RPCs
-- Resolution variables can come from `resolution.variables` (DB/convocation) OR `allVariables` (session state)
+- `ag_session_drafts` are cleared on AG close (trigger `trg_ag_close_clear_drafts`), so roles must be in `ag_meetings`
+- `jspdf-autotable` import removed from service, kept only in test file
+- PV PDF returns `jsPDF` doc (not Blob), callers use `.output('blob')` or `.save()`

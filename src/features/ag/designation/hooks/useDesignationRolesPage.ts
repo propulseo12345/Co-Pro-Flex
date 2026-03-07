@@ -164,6 +164,7 @@ export function useDesignationRolesPage(agId: string) {
     try {
       const supabase = createUntypedClient();
 
+      // 1. Save to drafts (session state)
       const { error } = await supabase.rpc('save_ag_session_draft', {
         p_ag_id: agId,
         p_draft_type: 'roles',
@@ -171,7 +172,30 @@ export function useDesignationRolesPage(agId: string) {
       });
 
       if (error) {
-        console.error('[DesignationRolesPage] Error saving roles:', error);
+        console.error('[DesignationRolesPage] Error saving roles draft:', error);
+      }
+
+      // 2. Sync to ag_meetings (persistent, survives draft cleanup)
+      const meetingUpdate: Record<string, string | null> = {};
+      if (rolesToSave.presidentSeance?.nom) {
+        meetingUpdate.president_name = rolesToSave.presidentSeance.nom;
+      }
+      if (rolesToSave.secretaireSeance?.nom) {
+        meetingUpdate.secretary_name = rolesToSave.secretaireSeance.nom;
+      }
+      if (rolesToSave.scrutateur?.nom) {
+        meetingUpdate.scrutineer1_name = rolesToSave.scrutateur.nom;
+      }
+
+      if (Object.keys(meetingUpdate).length > 0) {
+        const { error: meetingError } = await supabase
+          .from('ag_meetings')
+          .update(meetingUpdate)
+          .eq('id', agId);
+
+        if (meetingError) {
+          console.error('[DesignationRolesPage] Error syncing roles to ag_meetings:', meetingError);
+        }
       }
     } catch (err) {
       console.error('[DesignationRolesPage] Save error:', err);

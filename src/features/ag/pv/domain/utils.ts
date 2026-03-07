@@ -1,7 +1,8 @@
 import type { Resolution, VoteData, ResolutionResult, AGData, Signataire, PresenceData, PVStats } from './types';
 import { MOCK_COPROPRIETAIRES } from '@/data/mock';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import type jsPDF from 'jspdf';
+import { generatePVPDF } from '@/lib/pdf/generatePVPDF';
+import type { ResolutionForPV, ParticipantForPV } from '@/lib/services/pv-generation.service';
 
 export function getResolutionResult(resolution: Resolution, votes: VoteData[]): ResolutionResult {
   if (resolution.passerelle) {
@@ -141,197 +142,75 @@ export function generatePDFDocument(
 ): jsPDF | null {
   if (!agData) return null;
 
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 20;
-  let yPos = 20;
-
-  // En-tête
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`PROCÈS-VERBAL`, pageWidth / 2, yPos, { align: 'center' });
-  yPos += 8;
-  doc.setFontSize(14);
-  doc.text(`ASSEMBLÉE GÉNÉRALE ${agData.type}`, pageWidth / 2, yPos, { align: 'center' });
-  yPos += 15;
-
-  // Informations de l'AG
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-
-  const dateFormatted = new Date(agData.date).toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  // Convert domain types to PV PDF types
+  const pvResolutions: ResolutionForPV[] = resolutions.map((r, index) => {
+    const result = getResolutionResult(r, votes);
+    return {
+      id: r.id,
+      numero: index + 1,
+      titre: r.titre,
+      texte: replaceVariables(r.texte),
+      majorite: r.majorite,
+      resultat: result.adopte ? 'ADOPTEE' as const
+        : r.resultat === 'AJOURNEE' ? 'AJOURNEE' as const
+        : 'REJETEE' as const,
+      votes: {
+        pour: result.pour,
+        contre: result.contre,
+        abstention: result.abstention,
+        total: result.total,
+      },
+      passerelle: result.passerelle ? {
+        type: result.passerelle.type || 'ART_25_1',
+        voteInitial: result.passerelle.voteInitial,
+        secondVote: result.passerelle.secondVote,
+        mentionPV: result.passerelle.mentionPV,
+      } : undefined,
+    };
   });
 
-  doc.text(`Date : ${dateFormatted}`, margin, yPos);
-  yPos += 6;
-  doc.text(`Heure : ${agData.heure}`, margin, yPos);
-  yPos += 6;
-  doc.text(`Lieu : ${agData.lieu || 'Salle de réunion'}`, margin, yPos);
-  yPos += 6;
-  if (agData.adresse) {
-    doc.text(`Adresse : ${agData.adresse}`, margin, yPos);
-    yPos += 10;
-  }
-
-  // Section Présences
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('PRÉSENCES ET REPRÉSENTATIONS', margin, yPos);
-  yPos += 8;
-
-  const presentsData = presences
-    .filter((p) => p.statut === 'PRESENT')
-    .map((p) => {
-      const copro = MOCK_COPROPRIETAIRES.find((c) => c.id === p.coproprietaireId);
-      return [copro?.nom || '', copro?.lot || '', `${copro?.tantiemes || 0}`, 'Présent'];
-    });
-
-  const representesData = presences
-    .filter((p) => p.statut === 'REPRESENTE')
-    .map((p) => {
-      const copro = MOCK_COPROPRIETAIRES.find((c) => c.id === p.coproprietaireId);
-      let mandataire = p.mandataireManuel || '';
+  const pvParticipants: ParticipantForPV[] = presences.map((p) => {
+    const copro = MOCK_COPROPRIETAIRES.find((c) => c.id === p.coproprietaireId);
+    let mandataire: string | undefined;
+    if (p.statut === 'REPRESENTE') {
       if (p.mandataireId) {
-        const mandataireCopro = MOCK_COPROPRIETAIRES.find((c) => c.id === p.mandataireId);
-        mandataire = mandataireCopro?.nom || '';
+        const m = MOCK_COPROPRIETAIRES.find((c) => c.id === p.mandataireId);
+        mandataire = m?.nom;
+      } else {
+        mandataire = p.mandataireManuel;
       }
-      return [copro?.nom || '', copro?.lot || '', `${copro?.tantiemes || 0}`, `Représenté par ${mandataire}`];
-    });
-
-  const allPresenceData = [...presentsData, ...representesData];
-
-  if (allPresenceData.length > 0) {
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Copropriétaire', 'Lot', 'Tantièmes', 'Statut']],
-      body: allPresenceData,
-      margin: { left: margin, right: margin },
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [16, 185, 129] },
-    });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    yPos = (doc as any).lastAutoTable.finalY + 10;
-  }
-
-  // Calcul des totaux
-  const totalTantiemes = MOCK_COPROPRIETAIRES.reduce((sum, c) => sum + c.tantiemes, 0);
-  const tantiemesPresents = presences
-    .filter((p) => p.statut === 'PRESENT' || p.statut === 'REPRESENTE')
-    .reduce((sum, p) => {
-      const copro = MOCK_COPROPRIETAIRES.find((c) => c.id === p.coproprietaireId);
-      return sum + (copro?.tantiemes || 0);
-    }, 0);
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Total des tantièmes représentés : ${tantiemesPresents} / ${totalTantiemes}`, margin, yPos);
-  yPos += 15;
-
-  // Section Résolutions
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('RÉSOLUTIONS VOTÉES', margin, yPos);
-  yPos += 10;
-
-  resolutions.forEach((resolution, index) => {
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
     }
 
-    const result = getResolutionResult(resolution, votes);
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Résolution ${index + 1} : ${resolution.titre}`, margin, yPos);
-    yPos += 6;
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'italic');
-    doc.text(`Majorité requise : ${resolution.majorite}`, margin, yPos);
-    yPos += 6;
-
-    doc.setFont('helvetica', 'normal');
-    const resolutionText = replaceVariables(resolution.texte);
-    const splitText = doc.splitTextToSize(resolutionText, pageWidth - 2 * margin);
-    doc.text(splitText, margin, yPos);
-    yPos += splitText.length * 5 + 5;
-
-    if (result.passerelle) {
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Vote initial (Article 25) :', margin, yPos);
-      yPos += 5;
-      doc.setFont('helvetica', 'normal');
-      doc.text(
-        `Pour: ${result.passerelle.voteInitial.pour} t. | Contre: ${result.passerelle.voteInitial.contre} t. | Abstention: ${result.passerelle.voteInitial.abstention} t.`,
-        margin + 5,
-        yPos
-      );
-      yPos += 5;
-
-      if (result.passerelle.secondVote) {
-        doc.setFont('helvetica', 'bold');
-        doc.text('Second vote (Article 24) :', margin, yPos);
-        yPos += 5;
-        doc.setFont('helvetica', 'normal');
-        doc.text(
-          `Pour: ${result.passerelle.secondVote.pour} t. | Contre: ${result.passerelle.secondVote.contre} t. | Abstention: ${result.passerelle.secondVote.abstention} t.`,
-          margin + 5,
-          yPos
-        );
-        yPos += 5;
-      }
-    } else {
-      doc.setFontSize(9);
-      doc.text(`Pour: ${result.pour} t. | Contre: ${result.contre} t. | Abstention: ${result.abstention} t.`, margin, yPos);
-      yPos += 5;
-    }
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    const status = result.adopte ? 'ADOPTÉE' : resolution.resultat === 'AJOURNEE' ? 'AJOURNÉE' : 'REJETÉE';
-    doc.setTextColor(result.adopte ? 16 : 220, result.adopte ? 185 : 38, result.adopte ? 129 : 38);
-    doc.text(`Résolution ${status}`, margin, yPos);
-    doc.setTextColor(0, 0, 0);
-    yPos += 12;
+    return {
+      id: p.coproprietaireId,
+      nom: copro?.nom || '',
+      lot: copro?.lot,
+      tantiemes: copro?.tantiemes || 0,
+      mode: p.statut === 'PRESENT' ? 'present' as const
+        : p.statut === 'REPRESENTE' ? 'represente' as const
+        : 'absent' as const,
+      mandataire,
+    };
   });
 
-  // Section Signatures
-  if (yPos > 220) {
-    doc.addPage();
-    yPos = 20;
-  }
-
-  yPos += 10;
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('SIGNATURES', margin, yPos);
-  yPos += 15;
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-
-  signataires.forEach((sig) => {
-    if (yPos > 260) {
-      doc.addPage();
-      yPos = 20;
-    }
-
-    doc.setFont('helvetica', 'bold');
-    doc.text(sig.roleLabel, margin, yPos);
-    yPos += 5;
-    doc.setFont('helvetica', 'normal');
-    const nomComplet = sig.prenom && sig.nom ? `${sig.prenom} ${sig.nom}` : '[À compléter]';
-    doc.text(nomComplet, margin, yPos);
-    yPos += 5;
-    doc.line(margin, yPos + 10, margin + 80, yPos + 10);
-    yPos += 20;
+  return generatePVPDF({
+    agData: {
+      id: '',
+      type: agData.type as 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'URGENTE',
+      date: agData.date,
+      heure: agData.heure,
+      lieu: agData.lieu || '',
+      adresse: agData.adresse || '',
+    },
+    resolutions: pvResolutions,
+    participants: pvParticipants,
+    signataires: signataires.map((s) => ({
+      id: s.id,
+      role: s.role as 'president' | 'secretaire' | 'scrutateur',
+      roleLabel: s.roleLabel,
+      nom: s.nom,
+      prenom: s.prenom,
+      signature: s.signature,
+    })),
   });
-
-  return doc;
 }

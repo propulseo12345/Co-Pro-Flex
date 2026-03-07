@@ -83,6 +83,15 @@ export function usePVPage({ agId }: UsePVPageProps) {
   const [presences, setPresences] = useState<PresenceData[]>([]);
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
 
+  // Bureau names from AG bundle (for auto-fill button)
+  const [bureauFromAG, setBureauFromAG] = useState<{
+    presidentName: string;
+    secretaryName: string;
+    scrutineerName: string;
+    secretaireEstGestionnaire?: boolean;
+    secretaireRepresenteSyndic?: string;
+  } | null>(null);
+
   // UI state
   const [pvText, setPvText] = useState('');
   const [isPreviewMode, setIsPreviewMode] = useState(true);
@@ -227,22 +236,38 @@ export function usePVPage({ agId }: UsePVPageProps) {
         setVariableValues(data.drafts.variables);
       }
 
-      // Set signataires from roles
-      if (data.drafts?.roles) {
-        const roles = data.drafts.roles;
-        const parseNom = (nom: string) => {
-          if (!nom) return { prenom: '', nomFamille: '' };
-          const parts = nom.split(' ');
-          return {
-            prenom: parts.slice(0, -1).join(' '),
-            nomFamille: parts[parts.length - 1] || '',
-          };
+      // Set signataires from drafts roles OR ag_meetings data
+      const roles = data.drafts?.roles;
+      const parseNom = (nom: string) => {
+        if (!nom) return { prenom: '', nomFamille: '' };
+        const parts = nom.split(' ');
+        return {
+          prenom: parts.slice(0, -1).join(' '),
+          nomFamille: parts[parts.length - 1] || '',
         };
+      };
 
-        const presidentNom = parseNom(roles.presidentSeance?.nom || data.agData.presidentName || '');
-        const secretaireNom = parseNom(roles.secretaireSeance?.nom || data.agData.secretaryName || '');
-        const scrutateurNom = parseNom(roles.scrutateur?.nom || data.agData.scrutineer1Name || '');
+      // Priority: drafts roles > ag_meetings columns > empty
+      const presidentFullName = roles?.presidentSeance?.nom || data.agData.presidentName || '';
+      const secretaireFullName = roles?.secretaireSeance?.nom || data.agData.secretaryName || '';
+      const scrutateurFullName = roles?.scrutateur?.nom || data.agData.scrutineer1Name || '';
 
+      const presidentNom = parseNom(presidentFullName);
+      const secretaireNom = parseNom(secretaireFullName);
+      const scrutateurNom = parseNom(scrutateurFullName);
+
+      // Store bureau names for auto-fill button
+      setBureauFromAG({
+        presidentName: presidentFullName,
+        secretaryName: secretaireFullName,
+        scrutineerName: scrutateurFullName,
+        secretaireEstGestionnaire: roles?.secretaireSeance?.estGestionnaire,
+        secretaireRepresenteSyndic: roles?.secretaireSeance?.representeSyndic,
+      });
+
+      const hasAnyName = presidentNom.nomFamille || secretaireNom.nomFamille || scrutateurNom.nomFamille;
+
+      if (hasAnyName || roles) {
         setSignataires([
           {
             id: '1',
@@ -256,15 +281,15 @@ export function usePVPage({ agId }: UsePVPageProps) {
           {
             id: '2',
             role: 'secretaire',
-            roleLabel: roles.secretaireSeance?.estGestionnaire
+            roleLabel: roles?.secretaireSeance?.estGestionnaire
               ? `Secrétaire de séance (représentant le syndic ${roles.secretaireSeance.representeSyndic || ''})`
               : 'Secrétaire de séance',
             nom: secretaireNom.nomFamille,
             prenom: secretaireNom.prenom,
             email: '',
             telephone: '',
-            estGestionnaire: roles.secretaireSeance?.estGestionnaire,
-            representeSyndic: roles.secretaireSeance?.representeSyndic,
+            estGestionnaire: roles?.secretaireSeance?.estGestionnaire,
+            representeSyndic: roles?.secretaireSeance?.representeSyndic,
           },
           {
             id: '3',
@@ -381,22 +406,92 @@ export function usePVPage({ agId }: UsePVPageProps) {
   };
 
   const handleAutoFillFromAG = async () => {
-    // Use data already loaded from bundle
-    const roles = signataires;
-    const extracted: ExtractedSignataire[] = roles.map(s => ({
-      role: s.role as 'president' | 'secretaire' | 'scrutateur',
-      roleLabel: s.roleLabel,
-      name: `${s.prenom} ${s.nom}`.trim(),
-      coproprietaire: null,
-    }));
+    try {
+      const supabase = createClient();
 
-    const hasExistingData = signataires.some((s) => s.nom || s.prenom || s.email);
+      // 1. Try ag_meetings columns first
+      const { data: meeting } = await supabase
+        .from('ag_meetings')
+        .select('president_name, secretary_name, scrutineer1_name')
+        .eq('id', agId)
+        .single();
 
-    if (hasExistingData) {
-      setAutoFillData(extracted);
-      setShowAutoFillConfirm(true);
-    } else {
-      applyAutoFill(extracted);
+      let presidentName = meeting?.president_name || '';
+      let secretaryName = meeting?.secretary_name || '';
+      let scrutineerName = meeting?.scrutineer1_name || '';
+      let estGestionnaire = false;
+      let representeSyndic = '';
+
+      // 2. If not found, try session drafts
+      if (!presidentName && !secretaryName && !scrutineerName) {
+        const { data: draftData } = await supabase.rpc('get_ag_session_draft', {
+          p_ag_id: agId,
+          p_draft_type: 'roles',
+        });
+
+        const draft = draftData as { draft_data?: Record<string, unknown> } | null;
+        if (draft?.draft_data) {
+          const roles = draft.draft_data as {
+            presidentSeance?: { nom: string };
+            secretaireSeance?: { nom: string; estGestionnaire?: boolean; representeSyndic?: string };
+            scrutateur?: { nom: string };
+          };
+          presidentName = roles.presidentSeance?.nom || '';
+          secretaryName = roles.secretaireSeance?.nom || '';
+          scrutineerName = roles.scrutateur?.nom || '';
+          estGestionnaire = roles.secretaireSeance?.estGestionnaire || false;
+          representeSyndic = roles.secretaireSeance?.representeSyndic || '';
+        }
+      }
+
+      // 3. Fallback to bureauFromAG (loaded at mount)
+      if (!presidentName && !secretaryName && !scrutineerName && bureauFromAG) {
+        presidentName = bureauFromAG.presidentName;
+        secretaryName = bureauFromAG.secretaryName;
+        scrutineerName = bureauFromAG.scrutineerName;
+        estGestionnaire = bureauFromAG.secretaireEstGestionnaire || false;
+        representeSyndic = bureauFromAG.secretaireRepresenteSyndic || '';
+      }
+
+      if (!presidentName && !secretaryName && !scrutineerName) {
+        alert('Aucune donnée de bureau trouvée pour cette AG. Veuillez remplir manuellement.');
+        return;
+      }
+
+      const extracted: ExtractedSignataire[] = [
+        {
+          role: 'president',
+          roleLabel: 'Président de séance',
+          name: presidentName,
+          coproprietaire: null,
+        },
+        {
+          role: 'secretaire',
+          roleLabel: estGestionnaire
+            ? `Secrétaire de séance (représentant le syndic ${representeSyndic})`
+            : 'Secrétaire de séance',
+          name: secretaryName,
+          coproprietaire: null,
+        },
+        {
+          role: 'scrutateur',
+          roleLabel: 'Scrutateur',
+          name: scrutineerName,
+          coproprietaire: null,
+        },
+      ];
+
+      const hasExistingData = signataires.some((s) => s.nom || s.prenom || s.email);
+
+      if (hasExistingData) {
+        setAutoFillData(extracted);
+        setShowAutoFillConfirm(true);
+      } else {
+        applyAutoFill(extracted);
+      }
+    } catch (err) {
+      logger.error('PV: Auto-fill error', { agId, error: err instanceof Error ? err.message : 'Unknown' });
+      alert('Erreur lors de la récupération des données du bureau.');
     }
   };
 
