@@ -145,6 +145,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [editingVariable, setEditingVariable] = useState<{ resId: string; varName: string; templateId?: string } | null>(null);
   const [tempVariableValue, setTempVariableValue] = useState('');
+  const [financingSchedule, setFinancingSchedule] = useState<import('@/components/features/ag/FinancingScheduleEditor').FinancingSchedule | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageCount, setSuccessMessageCount] = useState(0);
   const [prefillWarning, setPrefillWarning] = useState<{ total: number; added: number; skipped: number } | null>(null);
@@ -193,6 +194,15 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     if (!meeting) return null;
     return meetingToFormData(meeting);
   }, [meeting]);
+
+  // Calculer le montant total du budget depuis les résolutions
+  const totalBudget = useMemo(() => {
+    const budgetRes = dbResolutions.find(r => r.title?.toLowerCase().includes('budget prévisionnel'));
+    if (!budgetRes) return 0;
+    const vars = (budgetRes.variables as Record<string, string>) || {};
+    const montantStr = vars.montant || '';
+    return parseFloat(montantStr.replace(/\s/g, '').replace(',', '.')) || 0;
+  }, [dbResolutions]);
 
   const roles = useMemo(() => {
     if (!meeting) return {};
@@ -838,6 +848,9 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     editingVariable,
     tempVariableValue,
     setTempVariableValue,
+    financingSchedule,
+    onFinancingScheduleChange: setFinancingSchedule,
+    totalBudget,
     showSuccessMessage,
     successMessageCount,
     prefillWarning,

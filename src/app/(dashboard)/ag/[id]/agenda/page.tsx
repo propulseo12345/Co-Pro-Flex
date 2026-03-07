@@ -103,6 +103,9 @@ export default function AgendaPage() {
                 presences={page.presences}
                 exercice={page.agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString()}
                 gestionnaireNom={MOCK_CONTRAT_SYNDIC.nomSyndic}
+                financingSchedule={page.financingSchedule}
+                onFinancingScheduleChange={page.onFinancingScheduleChange}
+                totalBudget={page.totalBudget}
               />
             ) : (
               <input
