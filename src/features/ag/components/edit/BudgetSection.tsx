@@ -16,6 +16,8 @@ interface BudgetSectionProps {
   editingError: string | null;
   postesDepenses: string[];
   budgetPrecedent: { exercice: number; postes: { id: string; poste: string; montant: number }[]; total: number };
+  accounts?: Array<{ id: string; code: string; name: string }>;
+  repartitionKeys?: Array<{ id: string; name: string }>;
   error?: string;
   onToggle: (enabled: boolean) => void;
   onExerciceChange: (value: string) => void;
@@ -43,6 +45,8 @@ export function BudgetSection({
   editingError,
   postesDepenses,
   budgetPrecedent,
+  accounts = [],
+  repartitionKeys = [],
   error,
   onToggle,
   onExerciceChange,
@@ -149,6 +153,8 @@ export function BudgetSection({
               <div className={styles.postesList}>
                 <div className={styles.postesHeader}>
                   <span>Poste</span>
+                  <span>Compte</span>
+                  <span>Clé</span>
                   <span>Montant</span>
                   <span>Actions</span>
                 </div>
@@ -192,6 +198,12 @@ export function BudgetSection({
                     ) : (
                       <>
                         <span className={styles.posteName}>{poste.poste}</span>
+                        <span className={styles.posteAccount}>
+                          {poste.accountCode ? `${poste.accountCode}` : '-'}
+                        </span>
+                        <span className={styles.posteKey}>
+                          {poste.repartitionKeyName || '-'}
+                        </span>
                         <span className={styles.posteMontant}>
                           {poste.montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 })}
                         </span>
