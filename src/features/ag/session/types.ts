@@ -57,6 +57,8 @@ export interface UseAgSessionPageReturn {
   allVariables: Record<string, string>;
   prefillVariables: Record<string, string>;
   variableValues: Record<string, string>;
+  budgetPrevisionnel: number;
+  fondsTravauxMontant: number;
 
   // Modals state
   showResultModal: boolean;
@@ -66,6 +68,7 @@ export interface UseAgSessionPageReturn {
   passerelleVoteInitial: PasserelleVoteInitial | null;
   showVariableModal: boolean;
   showFinancingModal: boolean;
+  showFondsALURModal: boolean;
   financingSchedule: import('@/components/features/ag/FinancingScheduleEditor/FinancingScheduleEditor').FinancingSchedule | null;
   editingVariable: EditingVariable | null;
   showValidationWarning: boolean;
@@ -115,6 +118,8 @@ export interface UseAgSessionPageReturn {
   handleSaveVariable: () => void;
   handleSaveFinancing: (modalite: string, datesEcheances: string, schedule: import('@/components/features/ag/FinancingScheduleEditor/FinancingScheduleEditor').FinancingSchedule) => void;
   closeFinancingModal: () => void;
+  handleSaveFondsALUR: (pourcentage: string, montant: string) => void;
+  closeFondsALURModal: () => void;
   handlePrefillFromCopro: (variableName: string, coproId: string) => void;
   setEditingVariable: React.Dispatch<React.SetStateAction<EditingVariable | null>>;
   setShowPrefillDropdown: React.Dispatch<React.SetStateAction<string | null>>;
@@ -122,6 +127,7 @@ export interface UseAgSessionPageReturn {
   // Session handlers
   handleStartSession: () => Promise<void>;
   handleCancelSession: () => Promise<void>;
+  handleFinishSession: () => Promise<void>;
   isSessionActive: boolean;
   saveSession: () => Promise<void>;
 
