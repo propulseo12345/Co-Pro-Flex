@@ -3,28 +3,39 @@
 import { useState, useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { BlocCard } from './BlocCard';
-import { createBudgetFromAg, type BlocPoste } from '@/lib/ag/api/finalisation.api';
+import { createBudgetFromAg, type BlocPoste, type PendingAction } from '@/lib/ag/api/finalisation.api';
 import styles from './BlocBudget.module.css';
 
-interface BudgetPosteRaw {
-  id?: string;
-  poste: string;
-  montant: number;
+function parseFrenchAmount(val: string | undefined): number {
+  if (!val) return 0;
+  return parseFloat(val.replace(/\s/g, '').replace(',', '.')) || 0;
+}
+
+function extractYear(dateDDMMYYYY: string | undefined): number {
+  if (!dateDDMMYYYY) return new Date().getFullYear() + 1;
+  const parts = dateDDMMYYYY.split('/');
+  return parseInt(parts[2]) || new Date().getFullYear() + 1;
 }
 
 interface BlocBudgetProps {
   agId: string;
-  exercice: number;
-  postesInitiaux: BudgetPosteRaw[];
-  initialStatus: 'pending' | 'activated' | 'failed';
+  action: PendingAction;
   onActivated: () => void;
 }
 
-export function BlocBudget({ agId, exercice, postesInitiaux, initialStatus, onActivated }: BlocBudgetProps) {
-  const [postes, setPostes] = useState<BlocPoste[]>(
-    postesInitiaux.map((p, i) => ({ label: p.poste, amount: p.montant, sort_order: i }))
+export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
+  const vars = action.resolution?.variables || {};
+  const exercice = extractYear(vars['date_debut']);
+  const montantTotal = parseFrenchAmount(vars['montant']);
+
+  const [postes, setPostes] = useState<BlocPoste[]>(() =>
+    montantTotal > 0
+      ? [{ label: 'Budget global', amount: montantTotal, sort_order: 0 }]
+      : []
   );
-  const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(initialStatus);
+  const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(
+    action.status as 'pending' | 'activated' | 'failed'
+  );
   const [error, setError] = useState<string | null>(null);
   const [newPoste, setNewPoste] = useState({ label: '', amount: '' });
 

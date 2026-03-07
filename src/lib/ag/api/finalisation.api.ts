@@ -90,15 +90,13 @@ export async function markActionActivated(
 
 export async function markAgFinalized(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
-  const { data, error } = await supabase.rpc('finish_ag_session', { p_ag_id: agId });
-  if (error) return { success: false, error: error.message };
-
-  // Tenter de passer à 'pv_generated' (peut échouer RLS — non bloquant)
-  await supabase
+  // La session est déjà close (finish_ag_session appelé au moment de l'envoi du PV)
+  // On met juste à jour le statut en 'finalized'
+  const { error } = await supabase
     .from('ag_meetings')
-    .update({ status: 'pv_generated' })
+    .update({ status: 'finalized' })
     .eq('id', agId);
 
-  void data;
+  if (error) return { success: false, error: error.message };
   return { success: true };
 }

@@ -13,6 +13,7 @@ import type { ModeSignature } from '@/types/models/pv-signature';
 import { LABELS_MODE_SIGNATURE } from '@/types/models/pv-signature';
 import { saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import { logger } from '@/lib/utils/logger';
+import { updateAgCurrentStep } from '@/lib/ag/api';
 
 interface UsePVPageProps {
   agId: string;
@@ -659,6 +660,17 @@ export function usePVPage({ agId }: UsePVPageProps) {
     setShowSignatairesModal(false);
     setIsSigned(true);
     await saveDraft(agId, 'milestones', { pvSigned: true }, 'ag-pv-signed-' + agId);
+
+    // Clore la session et créer les ag_pending_actions pour la finalisation
+    try {
+      const supabase = createUntypedClient();
+      await supabase.rpc('finish_ag_session', { p_ag_id: agId });
+      await updateAgCurrentStep(agId, 9);
+      router.push(`/ag/${agId}/finalisation`);
+    } catch (err) {
+      logger.error('PV: finish_ag_session error', { agId, error: err instanceof Error ? err.message : 'Unknown' });
+      router.push(`/ag/${agId}/finalisation`);
+    }
   };
 
   // Signature pad handlers

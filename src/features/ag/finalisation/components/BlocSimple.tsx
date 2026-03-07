@@ -31,7 +31,10 @@ export function BlocSimple({ agId, action, onActivated }: BlocSimpleProps) {
   );
   const [error, setError] = useState<string | null>(null);
 
-  const variables = action.resolution?.variables || {};
+  const allVariables = action.resolution?.variables || {};
+  const variables = Object.fromEntries(
+    Object.entries(allVariables).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+  );
 
   const handleConfirm = useCallback(async () => {
     setStatus('loading');

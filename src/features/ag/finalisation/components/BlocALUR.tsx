@@ -2,21 +2,38 @@
 
 import { useState, useCallback } from 'react';
 import { BlocCard } from './BlocCard';
-import { createAlurFundFromAg } from '@/lib/ag/api/finalisation.api';
-import type { PendingAction } from '@/lib/ag/api/finalisation.api';
+import { createAlurFundFromAg, type PendingAction } from '@/lib/ag/api/finalisation.api';
 import styles from './BlocALUR.module.css';
+
+function parseFrenchAmount(val: string | undefined): number {
+  if (!val) return 0;
+  return parseFloat(val.replace(/\s/g, '').replace(',', '.')) || 0;
+}
+
+function mapModalites(val: string | undefined): string {
+  switch (val?.toLowerCase()) {
+    case 'trimestriel': return 'TRIMESTRIEL';
+    case 'semestriel': return 'SEMESTRIEL';
+    case 'mensuel': return 'MENSUEL';
+    default: return 'UNIQUE';
+  }
+}
 
 interface BlocALURProps {
   agId: string;
   action: PendingAction;
-  montantInitial: number;
-  modalitesInitiales: string;
+  scheduleAction?: PendingAction;
   onActivated: () => void;
 }
 
-export function BlocALUR({ agId, action, montantInitial, modalitesInitiales, onActivated }: BlocALURProps) {
-  const [montant, setMontant] = useState(montantInitial);
-  const [modalites, setModalites] = useState(modalitesInitiales || 'UNIQUE');
+export function BlocALUR({ agId, action, scheduleAction, onActivated }: BlocALURProps) {
+  const vars = action.resolution?.variables || {};
+  const scheduleVars = scheduleAction?.resolution?.variables || {};
+
+  const [montant, setMontant] = useState(() => parseFrenchAmount(vars['montant']));
+  const [modalites, setModalites] = useState(() =>
+    mapModalites(scheduleVars['modalites_paiement_fonds'])
+  );
   const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(
     action.status as 'pending' | 'activated' | 'failed'
   );

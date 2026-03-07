@@ -3,7 +3,6 @@
 import { useParams, useRouter } from 'next/navigation';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { useFinalisationPage } from '@/features/ag/finalisation/hooks/useFinalisationPage';
-import { useFinalisationData } from '@/features/ag/finalisation/hooks/useFinalisationData';
 import { BlocBudget } from '@/features/ag/finalisation/components/BlocBudget';
 import { BlocALUR } from '@/features/ag/finalisation/components/BlocALUR';
 import { BlocSimple } from '@/features/ag/finalisation/components/BlocSimple';
@@ -34,9 +33,7 @@ export default function FinalisationPage() {
     handleFinalize,
   } = useFinalisationPage(agId);
 
-  const { data: srcData, isLoading: srcLoading } = useFinalisationData(agId);
-
-  if (isLoading || srcLoading) {
+  if (isLoading) {
     return <div className={styles.loading}>Chargement des décisions…</div>;
   }
 
@@ -72,6 +69,7 @@ export default function FinalisationPage() {
 
   const budgetAction = actions.find(a => BUDGET_ACTION_TYPES.includes(a.action_type));
   const alurAction = actions.find(a => ALUR_ACTION_TYPES.includes(a.action_type));
+  const scheduleAlurAction = actions.find(a => a.action_type === 'SCHEDULE_ALUR_PAYMENTS');
   const simpleActions = actions.filter(a => SIMPLE_ACTION_TYPES.includes(a.action_type));
 
   return (
@@ -84,22 +82,19 @@ export default function FinalisationPage() {
       </div>
 
       <div className={styles.blocs}>
-        {budgetAction && srcData && (
+        {budgetAction && (
           <BlocBudget
             agId={agId}
-            exercice={srcData.budgetExercice}
-            postesInitiaux={srcData.budgetPostes}
-            initialStatus={budgetAction.status as 'pending' | 'activated' | 'failed'}
+            action={budgetAction}
             onActivated={refreshAction}
           />
         )}
 
-        {alurAction && srcData && (
+        {alurAction && (
           <BlocALUR
             agId={agId}
             action={alurAction}
-            montantInitial={srcData.montantALUR}
-            modalitesInitiales={srcData.modalitesALUR}
+            scheduleAction={scheduleAlurAction}
             onActivated={refreshAction}
           />
         )}

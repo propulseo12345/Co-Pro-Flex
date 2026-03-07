@@ -1,25 +1,30 @@
-# Session State — 2026-03-07 22:00
+# Session State — 2026-03-07 22:45
 
 ## Branch
 main
 
 ## Completed This Session
-- fix(Stepper): ajout étape 9 dans STEPS_CONFIG hardcodé
-- feat(Task 1-10): plan étape 9 complet — RPCs DB, workflow, API, hooks, composants, page
-- fix(RLS): loadPendingActions via RPC get_ag_pending_actions (SECURITY DEFINER)
-- fix(DB): finish_ag_session crée ag_pending_actions depuis ag_resolutions.is_approved
-- fix(Sidebar PV): bouton "Finaliser les décisions" dans état signé
+- fix(finalisation): BlocBudget/BlocALUR lisent resolution.variables au lieu de opening_notes
+- fix(finalisation): BlocSimple filtre les variables vides
+- fix(finalisation): suppression useFinalisationData (inutile)
+- fix(db): RPCs mark_ag_action_activated, create_budget_from_ag, create_alur_fund_from_ag, elect_council_from_ag — updated_at → activated_at
+- fix(db): create_budget_from_ag — budget_type 'previsionnel' → 'current', year → EXTRACT(YEAR FROM start_date), auto-creation periode
+- feat(pv): handleSendSignatureRequests appelle finish_ag_session + redirige vers finalisation (etape 9)
+- fix(finalisation): markAgFinalized ne rappelle plus finish_ag_session, met juste status = 'finalized'
+- feat(db): ajout 'finalized' dans enum ag_status
+- doc: .planning/VARIABLES.md — logique complete des variables AG
+- design: docs/plans/2026-03-07-budget-creation-ag-design.md — design valide
 
 ## Next Task
-- Tester la page /ag/97903758-da07-4583-b01c-ac0e36af592b/finalisation en dev
-- Vérifier que les blocs (Budget, ALUR, Conseil, simples) s'affichent correctement
-- Tester le flux : confirmer un bloc → vérifier ag_pending_actions.status = 'activated'
+- Ecrire le plan d'implementation detaille (writing-plans) pour le design budget AG
+- Fichiers cles a modifier: BudgetPoste type (src/features/ag/types/index.ts:71-75), useAgEditPage (hooks, POSTES_DEPENSES L107, BUDGET_PRECEDENT L93), BudgetSection etape 1, BlocBudget etape 9, RPC create_budget_from_ag
+- Le gap: budget_lines exige account_id + repartition_key_id NOT NULL — enrichir BudgetPoste des l'etape 1
 
 ## Blockers
-None
+- opening_notes est NULL pour toutes les AGs de test (postes jamais sauves a l'etape 1)
+- BUDGET_PRECEDENT est en dur (mock) — a remplacer par chargement DB
 
 ## Key Context
-- ag_pending_actions a colonne target_table NOT NULL — le mapping est dans finish_ag_session et get_ag_pending_actions RPC
-- RLS sur ag_pending_actions : policy "Managers can manage" bloque sans auth → toujours utiliser RPC SECURITY DEFINER pour lire/écrire
-- AG de test avec données : 97903758-da07-4583-b01c-ac0e36af592b (11 pending actions)
-- DESIGNATE_BUREAU apparaît 3x (3 résolutions bureau) — comportement normal
+- Comptes charges copro: 601-615 (expense), 4 cles repartition (Charges generales, Ascenseur, Eau froide, Fonds ALUR)
+- Mapping auto poste→compte predefini mais TOUJOURS modifiable par le gestionnaire
+- Import N-1 ramene account_id + repartition_key_id depuis budget_lines existants
