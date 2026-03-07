@@ -15,6 +15,7 @@ export interface UseSessionVariablesReturn {
   editingVariable: EditingVariable | null;
   showVariableModal: boolean;
   showFinancingModal: boolean;
+  showFondsALURModal: boolean;
   financingSchedule: FinancingSchedule | null;
   showValidationWarning: boolean;
   missingVariables: string[];
@@ -23,10 +24,12 @@ export interface UseSessionVariablesReturn {
   setEditingVariable: React.Dispatch<React.SetStateAction<EditingVariable | null>>;
   setShowVariableModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowPrefillDropdown: React.Dispatch<React.SetStateAction<string | null>>;
-  handleVariableClick: (variableName: string) => void;
+  handleVariableClick: (variableName: string, resolutionTexte?: string) => void;
   handleSaveVariable: () => void;
   handleSaveFinancing: (modalite: string, datesEcheances: string, schedule: FinancingSchedule) => void;
   closeFinancingModal: () => void;
+  handleSaveFondsALUR: (pourcentage: string, montant: string) => void;
+  closeFondsALURModal: () => void;
   handlePrefillFromCopro: (variableName: string, coproId: string) => void;
   closeVariableModal: () => void;
   closeValidationWarning: () => void;
@@ -51,6 +54,7 @@ export function useSessionVariables({
   const [editingVariable, setEditingVariable] = useState<EditingVariable | null>(null);
   const [showVariableModal, setShowVariableModal] = useState(false);
   const [showFinancingModal, setShowFinancingModal] = useState(false);
+  const [showFondsALURModal, setShowFondsALURModal] = useState(false);
   const [financingSchedule, setFinancingSchedule] = useState<FinancingSchedule | null>(null);
   const [showValidationWarning, setShowValidationWarning] = useState(false);
   const [missingVariables, setMissingVariables] = useState<string[]>([]);
@@ -73,10 +77,13 @@ export function useSessionVariables({
     [agId]
   );
 
-  const handleVariableClick = useCallback((variableName: string) => {
-    if (variableName === 'modalites_paiement_budget') {
+  const handleVariableClick = useCallback((variableName: string, resolutionTexte?: string) => {
+    if (variableName === 'modalites_paiement_budget' || variableName === 'modalites_paiement_fonds') {
       setEditingVariable({ name: variableName, value: allVariables[variableName] || '' });
       setShowFinancingModal(true);
+    } else if (variableName === 'pourcentage' && resolutionTexte?.includes('article 14-2')) {
+      setEditingVariable({ name: variableName, value: allVariables[variableName] || '' });
+      setShowFondsALURModal(true);
     } else {
       setEditingVariable({ name: variableName, value: allVariables[variableName] || '' });
       setShowVariableModal(true);
@@ -104,20 +111,41 @@ export function useSessionVariables({
   }, [variableValues, coproprietaires, debouncedSaveVariables]);
 
   const handleSaveFinancing = useCallback((modalite: string, datesEcheances: string, schedule: FinancingSchedule) => {
+    const isFonds = editingVariable?.name === 'modalites_paiement_fonds';
+    const modaliteKey = isFonds ? 'modalites_paiement_fonds' : 'modalites_paiement_budget';
+    const datesKey = isFonds ? 'dates_echeances_fonds' : 'dates_echeances_budget';
     const newValues = {
       ...variableValues,
-      modalites_paiement_budget: modalite,
-      dates_echeances_budget: datesEcheances,
+      [modaliteKey]: modalite,
+      [datesKey]: datesEcheances,
     };
     setVariableValues(newValues);
     setFinancingSchedule(schedule);
     debouncedSaveVariables(newValues);
     setShowFinancingModal(false);
     setEditingVariable(null);
-  }, [variableValues, debouncedSaveVariables]);
+  }, [variableValues, debouncedSaveVariables, editingVariable]);
 
   const closeFinancingModal = useCallback(() => {
     setShowFinancingModal(false);
+    setEditingVariable(null);
+  }, []);
+
+  const handleSaveFondsALUR = useCallback((pourcentage: string, montant: string) => {
+    const newValues = {
+      ...variableValues,
+      pourcentage,
+      montant,
+      montant_fonds_travaux: montant, // clé dédiée pour éviter conflit avec montant budget
+    };
+    setVariableValues(newValues);
+    debouncedSaveVariables(newValues);
+    setShowFondsALURModal(false);
+    setEditingVariable(null);
+  }, [variableValues, debouncedSaveVariables]);
+
+  const closeFondsALURModal = useCallback(() => {
+    setShowFondsALURModal(false);
     setEditingVariable(null);
   }, []);
 
@@ -164,6 +192,7 @@ export function useSessionVariables({
     editingVariable,
     showVariableModal,
     showFinancingModal,
+    showFondsALURModal,
     financingSchedule,
     showValidationWarning,
     missingVariables,
@@ -176,6 +205,8 @@ export function useSessionVariables({
     handleSaveVariable,
     handleSaveFinancing,
     closeFinancingModal,
+    handleSaveFondsALUR,
+    closeFondsALURModal,
     handlePrefillFromCopro,
     closeVariableModal,
     closeValidationWarning,

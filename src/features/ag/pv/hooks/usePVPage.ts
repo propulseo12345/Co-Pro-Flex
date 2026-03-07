@@ -467,16 +467,63 @@ export function usePVPage({ agId }: UsePVPageProps) {
         representeSyndic = bureauFromAG.secretaireRepresenteSyndic || '';
       }
 
+      // 4. Fallback: session draft 'variables' (nom_president, nom_secretaire, nom_scrutateur)
+      if (!presidentName && !secretaryName && !scrutineerName) {
+        const { data: varsDraftData } = await supabase.rpc('get_ag_session_draft', {
+          p_ag_id: agId,
+          p_draft_type: 'variables',
+        });
+        const varsDraft = varsDraftData as { draft_data?: Record<string, string> } | null;
+        if (varsDraft?.draft_data) {
+          presidentName = varsDraft.draft_data['nom_president'] || '';
+          secretaryName = varsDraft.draft_data['nom_secretaire'] || '';
+          scrutineerName = varsDraft.draft_data['nom_scrutateur'] || '';
+        }
+      }
+
       if (!presidentName && !secretaryName && !scrutineerName) {
         alert('Aucune donnée de bureau trouvée pour cette AG. Veuillez remplir manuellement.');
         return;
       }
 
+      // Recherche des copropriétaires par nom complet pour récupérer email/téléphone
+      // (utile quand les noms viennent du draft variables et qu'on n'a pas les IDs)
+      const coproByName: Record<string, { id: string } & CoproContact> = {};
+      const namesToSearch = [presidentName, secretaryName, scrutineerName].filter(Boolean);
+      if (namesToSearch.length > 0) {
+        const { data: allCopros } = await untypedSupabase
+          .from('coproprietaires')
+          .select('id, prenom, nom, email, telephone');
+        if (allCopros) {
+          const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+          for (const c of allCopros as Array<{ id: string; prenom: string; nom: string; email: string | null; telephone: string | null }>) {
+            const fullName = normalize(`${c.prenom} ${c.nom}`);
+            const fullNameRev = normalize(`${c.nom} ${c.prenom}`);
+            for (const searchName of namesToSearch) {
+              const normalizedSearch = normalize(searchName);
+              if (fullName === normalizedSearch || fullNameRev === normalizedSearch) {
+                coproByName[searchName] = c;
+                // Also add to coproContacts by id for buildCoproprietaire
+                coproContacts[c.id] = c;
+              }
+            }
+          }
+        }
+      }
+
       // Build extracted signataires with copro contact info when available
-      const buildCoproprietaire = (coproId: string | undefined | null) => {
-        if (!coproId || !coproContacts[coproId]) return null;
-        const c = coproContacts[coproId];
-        return { id: coproId, nom: `${c.prenom} ${c.nom}`, lot: '', email: c.email || '', telephone: c.telephone || '', tantiemes: 0 };
+      const buildCoproprietaire = (coproId: string | undefined | null, fallbackName?: string) => {
+        // Try by ID first
+        if (coproId && coproContacts[coproId]) {
+          const c = coproContacts[coproId];
+          return { id: coproId, nom: `${c.prenom} ${c.nom}`, lot: '', email: c.email || '', telephone: c.telephone || '', tantiemes: 0 };
+        }
+        // Fallback: search by name
+        if (fallbackName && coproByName[fallbackName]) {
+          const c = coproByName[fallbackName];
+          return { id: c.id, nom: `${c.prenom} ${c.nom}`, lot: '', email: c.email || '', telephone: c.telephone || '', tantiemes: 0 };
+        }
+        return null;
       };
 
       const extracted: ExtractedSignataire[] = [
@@ -484,7 +531,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
           role: 'president',
           roleLabel: 'Président de séance',
           name: presidentName,
-          coproprietaire: buildCoproprietaire(meeting?.president_id),
+          coproprietaire: buildCoproprietaire(meeting?.president_id, presidentName),
         },
         {
           role: 'secretaire',
@@ -492,13 +539,13 @@ export function usePVPage({ agId }: UsePVPageProps) {
             ? `Secrétaire de séance (représentant le syndic ${representeSyndic})`
             : 'Secrétaire de séance',
           name: secretaryName,
-          coproprietaire: buildCoproprietaire(meeting?.secretary_id),
+          coproprietaire: buildCoproprietaire(meeting?.secretary_id, secretaryName),
         },
         {
           role: 'scrutateur',
           roleLabel: 'Scrutateur',
           name: scrutineerName,
-          coproprietaire: buildCoproprietaire(meeting?.scrutineer1_id),
+          coproprietaire: buildCoproprietaire(meeting?.scrutineer1_id, scrutineerName),
         },
       ];
 

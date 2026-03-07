@@ -16,6 +16,7 @@ import {
   AjoutDesignationModal,
 } from '@/components/features/ag/Session';
 import { FinancingVariableModal } from '@/components/features/ag/Session/modals/FinancingVariableModal';
+import { FondsALURModal } from '@/components/features/ag/Session/modals/FondsALURModal';
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { useAgSessionPage } from '@/features/ag/hooks/useAgSessionPage';
 import { updateAgCurrentStep } from '@/lib/ag/api';
@@ -161,6 +162,7 @@ export default function SessionPage() {
           onSave={session.saveSession}
           onOpenProjector={session.handleOpenProjector}
           onExportCSV={session.handleExportCSV}
+          onFinish={session.handleFinishSession}
         />
       )}
 
@@ -197,12 +199,21 @@ export default function SessionPage() {
 
       {session.showFinancingModal && (
         <FinancingVariableModal
-          currentModalite={session.allVariables['modalites_paiement_budget'] || ''}
+          currentModalite={session.allVariables[session.editingVariable?.name || 'modalites_paiement_budget'] || ''}
           currentSchedule={session.financingSchedule}
-          totalBudget={parseFloat(session.allVariables['montant'] || '0')}
+          totalBudget={session.editingVariable?.name === 'modalites_paiement_fonds' ? session.fondsTravauxMontant : session.budgetPrevisionnel}
           exerciceYear={parseInt(session.allVariables['date_fin']?.slice(-4) || String(new Date().getFullYear() + 1))}
           onClose={session.closeFinancingModal}
           onSave={session.handleSaveFinancing}
+        />
+      )}
+
+      {session.showFondsALURModal && (
+        <FondsALURModal
+          currentPourcentage={session.allVariables['pourcentage'] || ''}
+          currentBudget={session.budgetPrevisionnel > 0 ? session.budgetPrevisionnel.toString() : ''}
+          onClose={session.closeFondsALURModal}
+          onSave={session.handleSaveFondsALUR}
         />
       )}
 

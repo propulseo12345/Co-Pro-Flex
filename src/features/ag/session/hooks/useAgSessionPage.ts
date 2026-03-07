@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgDetail, useAgVoters, useCastVote, useRegisterAttendance, useStartAg } from '@/hooks/modules/useAgData';
@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { updateResolution } from '@/lib/ag/api/resolutions.api';
-import { cancelAgSession } from '@/lib/ag/api';
+import { cancelAgSession, finishAgSession } from '@/lib/ag/api';
 import { castVote as castVoteApi } from '@/lib/ag/api/votes.api';
 import type { UseAgSessionPageParams, UseAgSessionPageReturn, SessionDraftData, VoteData, VoteSource } from '../types';
 import { toDbVote } from '../services/sessionHelpers';
@@ -157,6 +157,32 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     isManager,
     castVote: castVoteMutation.execute,
   });
+
+  // Budget prévisionnel: lu depuis la résolution "Approbation du budget prévisionnel" en DB
+  const budgetPrevisionnel = useMemo(() => {
+    const budgetRes = resolutionsHook.resolutions.find(r =>
+      r.titre?.toLowerCase().includes('approbation') &&
+      r.titre?.toLowerCase().includes('budget')
+    );
+    const montantDB = budgetRes?.variables?.montant || '';
+    const montantSession = variablesHook.variableValues['montant'] || '';
+    const raw = montantDB || montantSession;
+    return parseFloat(raw.replace(/[\s\u00a0]/g, '').replace(',', '.')) || 0;
+  }, [resolutionsHook.resolutions, variablesHook.variableValues]);
+
+  // Montant du fonds de travaux: clé dédiée session > DB résolution ALUR
+  const fondsTravauxMontant = useMemo(() => {
+    // 1. Clé dédiée sauvegardée par handleSaveFondsALUR
+    const sessionDedicated = variablesHook.variableValues['montant_fonds_travaux'] || '';
+    if (sessionDedicated) return parseFloat(sessionDedicated.replace(/[\s\u00a0]/g, '').replace(',', '.')) || 0;
+    // 2. Fallback: variables DB de la résolution ALUR
+    const alurRes = resolutionsHook.resolutions.find(r =>
+      r.texte?.includes('article 14-2') ||
+      (r.titre?.toLowerCase().includes('fonds de travaux') && r.titre?.toLowerCase().includes('alur'))
+    );
+    const montantDB = alurRes?.variables?.montant || '';
+    return parseFloat(montantDB.replace(/[\s\u00a0]/g, '').replace(',', '.')) || 0;
+  }, [resolutionsHook.resolutions, variablesHook.variableValues]);
 
   // Auto-save debounced (2s) on any state change
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -404,6 +430,17 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     router.push(`/ag/${agId}/pv`);
   }, [router, agId, saveSession]);
 
+  const handleFinishSession = useCallback(async () => {
+    if (!confirm('Terminer l\'AG et passer au procès-verbal ?')) return;
+    await saveSession();
+    const result = await finishAgSession(agId);
+    if (result.success) {
+      router.push(`/ag/${agId}/pv`);
+    } else {
+      alert(`Erreur lors de la clôture : ${result.error}`);
+    }
+  }, [agId, saveSession, router]);
+
   // Composed handlers
   const handleValidateVote = useCallback(() => {
     votingHook.handleValidateVote(
@@ -581,12 +618,28 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   // Per-resolution variable handlers: read/write from the resolution's own variables
   const handleVariableClick = useCallback((variableName: string) => {
     const currentRes = resolutionsHook.currentResolution;
+    if (variableName === 'modalites_paiement_budget' || variableName === 'modalites_paiement_fonds') {
+      variablesHook.handleVariableClick(variableName);
+      return;
+    }
+    const isBudgetApproval = currentRes?.titre?.toLowerCase().includes('approbation') && currentRes?.titre?.toLowerCase().includes('budget');
+    if (variableName === 'pourcentage' && currentRes?.texte?.includes('article 14-2')) {
+      variablesHook.handleVariableClick(variableName, currentRes.texte);
+      return;
+    }
+    if (variableName === 'montant' && isBudgetApproval) {
+      // Pré-remplir avec budgetPrevisionnel si disponible
+      const initialVal = budgetPrevisionnel > 0 ? budgetPrevisionnel.toString() : (currentRes?.variables?.montant || variablesHook.allVariables['montant'] || '');
+      variablesHook.setEditingVariable({ name: variableName, value: initialVal });
+      variablesHook.setShowVariableModal(true);
+      return;
+    }
     const resValue = currentRes?.variables?.[variableName];
     const globalValue = variablesHook.allVariables[variableName];
     const initialValue = resValue ?? globalValue ?? '';
     variablesHook.setEditingVariable({ name: variableName, value: initialValue });
     variablesHook.setShowVariableModal(true);
-  }, [resolutionsHook.currentResolution, variablesHook.allVariables]);
+  }, [resolutionsHook.currentResolution, variablesHook, budgetPrevisionnel]);
 
   const handleSaveVariable = useCallback(() => {
     const editing = variablesHook.editingVariable;
@@ -656,6 +709,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     allVariables: variablesHook.allVariables,
     prefillVariables: variablesHook.prefillVariables,
     variableValues: variablesHook.variableValues,
+    budgetPrevisionnel,
+    fondsTravauxMontant,
 
     // Modals state
     showResultModal: modalsHook.showResultModal,
@@ -665,6 +720,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     passerelleVoteInitial: votingHook.passerelleVoteInitial,
     showVariableModal: variablesHook.showVariableModal,
     showFinancingModal: variablesHook.showFinancingModal,
+    showFondsALURModal: variablesHook.showFondsALURModal,
     financingSchedule: variablesHook.financingSchedule,
     editingVariable: variablesHook.editingVariable,
     showValidationWarning: variablesHook.showValidationWarning,
@@ -741,6 +797,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     closeVariableModal: variablesHook.closeVariableModal,
     handleSaveFinancing: variablesHook.handleSaveFinancing,
     closeFinancingModal: variablesHook.closeFinancingModal,
+    handleSaveFondsALUR: variablesHook.handleSaveFondsALUR,
+    closeFondsALURModal: variablesHook.closeFondsALURModal,
     closeValidationWarning: variablesHook.closeValidationWarning,
     confirmContinueWithWarning,
     setShowPasserelleModal: modalsHook.setShowPasserelleModal,
@@ -748,6 +806,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     // Navigation
     goBack,
     goToPV,
+    handleFinishSession,
 
     // Supabase integration
     useSupabase: !!useSupabase,

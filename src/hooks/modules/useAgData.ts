@@ -150,7 +150,7 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
   const pastMeetings = useMemo(() => {
     const now = new Date();
     return meetings
-      .filter((m) => new Date(m.meeting_date) < now || m.status === 'closed' || m.status === 'pv_generated')
+      .filter((m) => m.status === 'closed' || m.status === 'pv_generated' || (new Date(m.meeting_date) < now && m.status !== 'draft'))
       .sort((a, b) => new Date(b.meeting_date).getTime() - new Date(a.meeting_date).getTime());
   }, [meetings]);
 

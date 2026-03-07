@@ -1,6 +1,6 @@
 'use client';
 
-import { XCircle, Monitor, Download } from 'lucide-react';
+import { XCircle, Monitor, Download, CheckCircle } from 'lucide-react';
 import styles from '../../../../app/(dashboard)/ag/[id]/session/session.module.css';
 
 interface SessionFooterProps {
@@ -8,9 +8,10 @@ interface SessionFooterProps {
   onSave: () => void;
   onOpenProjector: () => void;
   onExportCSV: () => void;
+  onFinish: () => void;
 }
 
-export function SessionFooter({ onCancel, onSave, onOpenProjector, onExportCSV }: SessionFooterProps) {
+export function SessionFooter({ onCancel, onSave, onOpenProjector, onExportCSV, onFinish }: SessionFooterProps) {
   return (
     <div className={styles.footer}>
       <div className={styles.footerLeft}>
@@ -27,6 +28,10 @@ export function SessionFooter({ onCancel, onSave, onOpenProjector, onExportCSV }
         <button onClick={onExportCSV} className="btn btn-secondary">
           <Download size={16} aria-hidden="true" />
           Exporter CSV
+        </button>
+        <button onClick={onFinish} className="btn btn-primary">
+          <CheckCircle size={16} aria-hidden="true" />
+          Terminer l'AG
         </button>
       </div>
     </div>

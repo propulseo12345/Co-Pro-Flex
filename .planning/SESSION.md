@@ -1,22 +1,29 @@
-# Session State — 2026-03-07 20:45
+# Session State — 2026-03-07 20:15
 
 ## Branch
 main
 
 ## Completed This Session
-- fix(ag): root cause persistence votes — suppression overloads RPC sans auth bypass (save/get_ag_session_draft)
-- fix(ag): resultat ADOPTEE/REJETEE sauvegardé immédiatement dans draft 'resolutions_results'
-- feat(ag): variable input styles alignés sur agenda (bleu vide, vert rempli, ChevronDown)
-- feat(ag): FinancingVariableModal — select modalités + FinancingScheduleEditor complet pour modalites_paiement_budget
+- fix(ag): routing FinancingVariableModal pour modalites_paiement_fonds (fonds ALUR)
+- feat(ag): FondsALURModal — calcul auto montant = budget × % / 100
+- feat(ag): budgetPrevisionnel + fondsTravauxMontant calculés depuis résolutions DB
+- fix(ag): montant_fonds_travaux clé dédiée pour éviter conflit avec montant générique
+- fix(pv): handleAutoFillFromAG — fallback draft 'variables' + recherche copro par nom
+- feat(ag): bouton "Terminer l'AG" → status closed + redirect PV
+- fix(ag): pastMeetings inclut session_active passées dans historique
+- feat(memory): lexique VARIABLES.md créé + règle recherche ciblée
 
 ## Next Task
-- Câbler totalBudget réel dans FinancingVariableModal (budget prévisionnel + fonds travaux depuis allVariables ou DB)
-- Tester la persistence des votes après fix RPC overloads
+- Vérifier que session_ended_at existe dans ag_meetings (migration si besoin)
+- Tester le flux complet : ALUR → calendrier fonds → totalBudget fonds correct
+- Câbler totalBudget réel dans FinancingVariableModal budget (budget prévisionnel depuis DB)
 
 ## Blockers
 None
 
 ## Key Context
-- CAUSE RACINE votes: 2 overloads de save/get_ag_session_draft coexistaient — version sans auth bypass appelée par PostgREST → fix: DROP FUNCTION des versions ag_draft_type (enum), seules versions text restent
-- FinancingVariableModal: totalBudget = allVariables['montant'] pour l'instant, user veut budget_previsionnel + fonds_travaux
-- Migration 20260307_add_resolutions_results_draft_type.sql appliquée en prod
+- FondsALURModal: handleSaveFondsALUR sauvegarde montant_fonds_travaux (clé dédiée) en plus de montant
+- fondsTravauxMontant lit d'abord variableValues['montant_fonds_travaux'], puis DB résolution ALUR
+- budgetPrevisionnel: résolution dont titre contient 'approbation' + 'budget' → variables.montant
+- PV prefill: chaîne ag_meetings → draft roles → bureauFromAG → draft variables → recherche copro par nom
+- finishAgSession: update direct ag_meetings.status = 'closed' (sans edge function)

@@ -144,6 +144,27 @@ export async function startAg(input: StartAgInput): Promise<{ success: boolean; 
 }
 
 /**
+ * Terminer une AG (mettre en statut closed)
+ */
+export async function finishAgSession(agId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createUntypedClient();
+
+  const { error } = await supabase
+    .from('ag_meetings')
+    .update({
+      status: 'closed' as AgStatus,
+      session_ended_at: new Date().toISOString(),
+    })
+    .eq('id', agId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+/**
  * Annuler le déroulé d'une AG (revenir à in_progress)
  */
 export async function cancelAgSession(agId: string, coproId: string): Promise<{ success: boolean; error?: string }> {
