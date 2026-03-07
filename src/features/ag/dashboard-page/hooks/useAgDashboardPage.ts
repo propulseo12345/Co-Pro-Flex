@@ -6,6 +6,7 @@ import { useAgMeetings } from '@/hooks/modules/useAgData';
 import { useAgDrafts, type AgDraft } from '@/hooks/modules/useAgDrafts';
 import { createClient } from '@/lib/supabase/client';
 import type { AgOverview, AgStatus, AgMeetingType } from '@/lib/ag/types';
+import type { ClosedAG } from '@/components/features/ag/Dashboard';
 
 interface LocalStorageDraft {
   id: string;
@@ -56,6 +57,10 @@ export function useAgDashboardPage() {
   const { meetings, nextMeeting, pastMeetings, isLoading, error, refresh } = useAgMeetings();
   const { drafts: supabaseDrafts, deleteDraft, isLoading: draftsLoading } = useAgDrafts();
 
+  const [activeTab, setActiveTab] = useState<'current' | 'archives'>('current');
+  const [closedAGs, setClosedAGs] = useState<ClosedAG[]>([]);
+  const [closedAGsLoading, setClosedAGsLoading] = useState(false);
+
   const [localStorageDrafts, setLocalStorageDrafts] = useState<LocalStorageDraft[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,6 +68,53 @@ export function useAgDashboardPage() {
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamedTitles, setRenamedTitles] = useState<Map<string, string>>(new Map());
+
+  // Load closed AGs with action stats when archives tab is active
+  useEffect(() => {
+    if (activeTab !== 'archives' || !currentCoproId) return;
+
+    const loadClosedAGs = async () => {
+      setClosedAGsLoading(true);
+      try {
+        const supabase = createClient();
+        const { data: closedMeetings } = await supabase
+          .from('ag_meetings')
+          .select(`
+            id, title, meeting_type, meeting_date, session_ended_at,
+            ag_pending_actions(status)
+          `)
+          .eq('copro_id', currentCoproId)
+          .in('status', ['closed', 'pv_generated'])
+          .order('meeting_date', { ascending: false });
+
+        if (closedMeetings) {
+          const mapped: ClosedAG[] = closedMeetings.map((m: Record<string, unknown>) => {
+            const actions = (m.ag_pending_actions || []) as Array<{ status: string }>;
+            const overview = meetings.find((mtg) => mtg.id === m.id);
+            return {
+              id: m.id as string,
+              title: m.title as string,
+              meeting_type: m.meeting_type as ClosedAG['meeting_type'],
+              meeting_date: m.meeting_date as string,
+              session_ended_at: m.session_ended_at as string | null,
+              resolutions_count: overview?.resolutions_count || 0,
+              approved_count: overview?.approved_count || 0,
+              actionStats: {
+                activated: actions.filter((a) => a.status === 'activated').length,
+                pending: actions.filter((a) => a.status === 'pending').length,
+                failed: actions.filter((a) => a.status === 'failed').length,
+              },
+            };
+          });
+          setClosedAGs(mapped);
+        }
+      } finally {
+        setClosedAGsLoading(false);
+      }
+    };
+
+    loadClosedAGs();
+  }, [activeTab, currentCoproId, meetings]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -175,6 +227,10 @@ export function useAgDashboardPage() {
     deletingId,
     renamingId,
     isConvoked,
+    activeTab,
+    setActiveTab,
+    closedAGs,
+    closedAGsLoading,
     handleDeleteLocalDraft,
     handleOpenDeleteConfirm,
     handleCancelDelete,

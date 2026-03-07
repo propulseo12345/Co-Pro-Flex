@@ -10,6 +10,7 @@ import {
   PvGuardStates,
 } from '../../../../../features/ag/pv/components';
 import { usePVPage, useSignaturePad } from '../../../../../features/ag/pv/hooks';
+import { ActivationRecap } from '@/components/features/ag/PV/ActivationRecap';
 
 export default function PVPage() {
   const params = useParams();
@@ -63,52 +64,61 @@ export default function PVPage() {
   }
 
   return (
-    <PvPageContent
-      agId={agId}
-      currentCoproId={currentCoproId}
-      stats={pvPage.stats}
-      resolutions={pvPage.resolutions}
-      pvText={pvPage.pvText}
-      signataires={pvPage.signataires}
-      currentSignataire={pvPage.currentSignataire}
-      autoFillData={pvPage.autoFillData}
-      isPreviewMode={pvPage.isPreviewMode}
-      isSigned={pvPage.isSigned}
-      pdfUrl={pvPage.pdfUrl}
-      isGeneratingPdf={pvPage.isGeneratingPdf}
-      pdfError={pvPage.pdfError}
-      showSignatairesModal={pvPage.showSignatairesModal}
-      showSignaturePadModal={pvPage.showSignaturePadModal}
-      showAutoFillConfirm={pvPage.showAutoFillConfirm}
-      autoFillSuccess={pvPage.autoFillSuccess}
-      modeSignature={pvPage.modeSignature}
-      modeConfig={pvPage.modeConfig}
-      isEmailObligatoire={pvPage.isEmailObligatoire}
-      canvasRef={pvPage.canvasRef}
-      onGoBack={pvPage.handleGoBack}
-      setIsPreviewMode={pvPage.setIsPreviewMode}
-      setShowSignatairesModal={pvPage.setShowSignatairesModal}
-      setShowSignaturePadModal={pvPage.setShowSignaturePadModal}
-      setShowAutoFillConfirm={pvPage.setShowAutoFillConfirm}
-      setModeSignature={pvPage.setModeSignature}
-      setPdfUrl={pvPage.setPdfUrl}
-      setPdfError={pvPage.setPdfError}
-      getResolutionResult={pvPage.getResolutionResult}
-      onDownloadPDF={pvPage.handleDownloadPDF}
-      onPreviewPDF={pvPage.handlePreviewPDF}
-      onOpenSignatairesModal={pvPage.handleOpenSignatairesModal}
-      onUpdateSignataire={pvPage.updateSignataire}
-      onAutoFillFromAG={pvPage.handleAutoFillFromAG}
-      onApplyAutoFill={pvPage.applyAutoFill}
-      onSendSignatureRequests={pvPage.handleSendSignatureRequests}
-      onOpenSignaturePad={pvPage.handleOpenSignaturePad}
-      onClearSignature={pvPage.clearSignature}
-      onSaveSignature={pvPage.saveSignature}
-      onFinish={pvPage.handleFinish}
-      onStartDrawing={startDrawing}
-      onDraw={draw}
-      onStopDrawing={stopDrawing}
-      onClearCanvas={clearCanvas}
-    />
+    <>
+      <PvPageContent
+        agId={agId}
+        currentCoproId={currentCoproId}
+        stats={pvPage.stats}
+        resolutions={pvPage.resolutions}
+        pvText={pvPage.pvText}
+        signataires={pvPage.signataires}
+        currentSignataire={pvPage.currentSignataire}
+        autoFillData={pvPage.autoFillData}
+        isPreviewMode={pvPage.isPreviewMode}
+        isSigned={pvPage.isSigned}
+        pdfUrl={pvPage.pdfUrl}
+        isGeneratingPdf={pvPage.isGeneratingPdf}
+        pdfError={pvPage.pdfError}
+        showSignatairesModal={pvPage.showSignatairesModal}
+        showSignaturePadModal={pvPage.showSignaturePadModal}
+        showAutoFillConfirm={pvPage.showAutoFillConfirm}
+        autoFillSuccess={pvPage.autoFillSuccess}
+        modeSignature={pvPage.modeSignature}
+        modeConfig={pvPage.modeConfig}
+        isEmailObligatoire={pvPage.isEmailObligatoire}
+        canvasRef={pvPage.canvasRef}
+        onGoBack={pvPage.handleGoBack}
+        setIsPreviewMode={pvPage.setIsPreviewMode}
+        setShowSignatairesModal={pvPage.setShowSignatairesModal}
+        setShowSignaturePadModal={pvPage.setShowSignaturePadModal}
+        setShowAutoFillConfirm={pvPage.setShowAutoFillConfirm}
+        setModeSignature={pvPage.setModeSignature}
+        setPdfUrl={pvPage.setPdfUrl}
+        setPdfError={pvPage.setPdfError}
+        getResolutionResult={pvPage.getResolutionResult}
+        onDownloadPDF={pvPage.handleDownloadPDF}
+        onPreviewPDF={pvPage.handlePreviewPDF}
+        onOpenSignatairesModal={pvPage.handleOpenSignatairesModal}
+        onUpdateSignataire={pvPage.updateSignataire}
+        onAutoFillFromAG={pvPage.handleAutoFillFromAG}
+        onApplyAutoFill={pvPage.applyAutoFill}
+        onSendSignatureRequests={pvPage.handleSendSignatureRequests}
+        onOpenSignaturePad={pvPage.handleOpenSignaturePad}
+        onClearSignature={pvPage.clearSignature}
+        onSaveSignature={pvPage.saveSignature}
+        onFinish={pvPage.handleFinish}
+        onStartDrawing={startDrawing}
+        onDraw={draw}
+        onStopDrawing={stopDrawing}
+        onClearCanvas={clearCanvas}
+      />
+      {pvPage.showActivationRecap && pvPage.activationResult && (
+        <ActivationRecap
+          agId={agId}
+          result={pvPage.activationResult}
+          onClose={() => pvPage.setShowActivationRecap(false)}
+        />
+      )}
+    </>
   );
 }

@@ -121,6 +121,10 @@ export function usePVPage({ agId }: UsePVPageProps) {
   const [autoFillData, setAutoFillData] = useState<ExtractedSignataire[]>([]);
   const [autoFillSuccess, setAutoFillSuccess] = useState<string | null>(null);
 
+  // Activation recap state
+  const [showActivationRecap, setShowActivationRecap] = useState(false);
+  const [activationResult, setActivationResult] = useState<{ activated: number; failed: number } | null>(null);
+
   // Global variables hook
   const { mergeVariables } = useGlobalVariables({
     agId,
@@ -409,10 +413,12 @@ export function usePVPage({ agId }: UsePVPageProps) {
     try {
       const supabase = createClient();
 
-      // 1. Try ag_meetings columns first
-      const { data: meeting } = await supabase
+      // 1. Try ag_meetings columns first (including copro_ids for full contact info)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const untypedSupabase = supabase as any;
+      const { data: meeting } = await untypedSupabase
         .from('ag_meetings')
-        .select('president_name, secretary_name, scrutineer1_name')
+        .select('president_name, secretary_name, scrutineer1_name, president_id, secretary_id, scrutineer1_id')
         .eq('id', agId)
         .single();
 
@@ -421,6 +427,22 @@ export function usePVPage({ agId }: UsePVPageProps) {
       let scrutineerName = meeting?.scrutineer1_name || '';
       let estGestionnaire = false;
       let representeSyndic = '';
+
+      // Fetch full contact info from coproprietaires for each role with a copro_id
+      interface CoproContact { prenom: string; nom: string; email: string | null; telephone: string | null }
+      const coproContacts: Record<string, CoproContact> = {};
+      const coproIds = [meeting?.president_id, meeting?.secretary_id, meeting?.scrutineer1_id].filter(Boolean) as string[];
+      if (coproIds.length > 0) {
+        const { data: copros } = await untypedSupabase
+          .from('coproprietaires')
+          .select('id, prenom, nom, email, telephone')
+          .in('id', coproIds);
+        if (copros) {
+          for (const c of copros as Array<{ id: string } & CoproContact>) {
+            coproContacts[c.id] = c;
+          }
+        }
+      }
 
       // 2. If not found, try session drafts
       if (!presidentName && !secretaryName && !scrutineerName) {
@@ -458,12 +480,19 @@ export function usePVPage({ agId }: UsePVPageProps) {
         return;
       }
 
+      // Build extracted signataires with copro contact info when available
+      const buildCoproprietaire = (coproId: string | undefined | null) => {
+        if (!coproId || !coproContacts[coproId]) return null;
+        const c = coproContacts[coproId];
+        return { id: coproId, nom: `${c.prenom} ${c.nom}`, lot: '', email: c.email || '', telephone: c.telephone || '', tantiemes: 0 };
+      };
+
       const extracted: ExtractedSignataire[] = [
         {
           role: 'president',
           roleLabel: 'Président de séance',
           name: presidentName,
-          coproprietaire: null,
+          coproprietaire: buildCoproprietaire(meeting?.president_id),
         },
         {
           role: 'secretaire',
@@ -471,13 +500,13 @@ export function usePVPage({ agId }: UsePVPageProps) {
             ? `Secrétaire de séance (représentant le syndic ${representeSyndic})`
             : 'Secrétaire de séance',
           name: secretaryName,
-          coproprietaire: null,
+          coproprietaire: buildCoproprietaire(meeting?.secretary_id),
         },
         {
           role: 'scrutateur',
           roleLabel: 'Scrutateur',
           name: scrutineerName,
-          coproprietaire: null,
+          coproprietaire: buildCoproprietaire(meeting?.scrutineer1_id),
         },
       ];
 
@@ -563,6 +592,29 @@ export function usePVPage({ agId }: UsePVPageProps) {
 
       await saveDraft(agId, 'signataires', signataires, 'ag-signataires-' + agId);
       alert(`Signatures physiques validées pour :\n${signataires.map((s) => `- ${s.prenom} ${s.nom} (${s.roleLabel})`).join('\n')}`);
+    }
+
+    // Activate AG decisions
+    try {
+      const supabase = createClient();
+      const { data: result } = await supabase.rpc('activate_ag_decisions', {
+        p_ag_id: agId,
+      });
+
+      if (result) {
+        const typedResult = result as { activated: number; failed: number };
+        setActivationResult(typedResult);
+
+        if (typedResult.activated > 0 || typedResult.failed > 0) {
+          setShowActivationRecap(true);
+        }
+
+        if (typedResult.failed > 0) {
+          logger.warn('PV: Activation partielle', { agId, result: typedResult });
+        }
+      }
+    } catch (err) {
+      logger.error('PV: Activation error', { agId, error: err instanceof Error ? err.message : 'Unknown' });
     }
 
     setShowSignatairesModal(false);
@@ -652,6 +704,11 @@ export function usePVPage({ agId }: UsePVPageProps) {
 
     // Drawing state
     isDrawing,
+
+    // Activation
+    showActivationRecap,
+    activationResult,
+    setShowActivationRecap,
 
     // Setters
     setIsPreviewMode,

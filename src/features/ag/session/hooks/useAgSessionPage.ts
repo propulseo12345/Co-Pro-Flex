@@ -504,15 +504,42 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     const editing = variablesHook.editingVariable;
     if (!editing) return;
 
-    // Update the resolution's own variables (per-resolution)
+    // Sync bureau copro_ids to ag_meetings for designation resolutions
     const currentRes = resolutionsHook.currentResolution;
+    if (currentRes?.action_type === 'DESIGNATE_BUREAU' && editing.value.includes('|')) {
+      const [coproId, displayName] = editing.value.split('|');
+      const varName = editing.name;
+      const updateData: Record<string, string> = {};
+
+      if (varName.includes('president')) {
+        updateData.president_id = coproId;
+        updateData.president_name = displayName;
+      } else if (varName.includes('secretaire')) {
+        updateData.secretary_id = coproId;
+        updateData.secretary_name = displayName;
+      } else if (varName.includes('scrutateur')) {
+        updateData.scrutineer1_id = coproId;
+        updateData.scrutineer1_name = displayName;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const supabase = createClient() as any;
+        supabase.from('ag_meetings').update(updateData).eq('id', agId).then();
+      }
+
+      // Store the display name (without copro_id prefix) for the variable value
+      editing.value = displayName;
+    }
+
+    // Update the resolution's own variables (per-resolution)
     if (currentRes) {
       resolutionsHook.updateResolutionVariable(currentRes.id, editing.name, editing.value);
     }
 
     // Also save via the global variable system (for backward compat + draft persistence)
     variablesHook.handleSaveVariable();
-  }, [variablesHook, resolutionsHook.currentResolution, resolutionsHook.updateResolutionVariable]);
+  }, [variablesHook, resolutionsHook.currentResolution, resolutionsHook.updateResolutionVariable, agId]);
 
   const handlePrefillFromCopro = useCallback((variableName: string, coproId: string) => {
     const copro = coproprietaires.find(c => c.id === coproId);

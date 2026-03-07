@@ -391,6 +391,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         majority_type: toDbMajorityType(template.majorite),
         resolution_number: dbResolutions.length + 1,
         variables: variables,
+        action_type: template.action_type,
       });
 
       if (!result.success) {
@@ -536,6 +537,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
           majority_type: toDbMajorityType(template.majorite),
           resolution_number: dbResolutions.length + i + 1,
           variables: variables,
+          action_type: template.action_type,
         });
 
         console.log('[handlePrefillObligatoires] Résultat:', JSON.stringify(result));

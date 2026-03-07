@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { RolesAG } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import type { RoleType } from '@/components/features/ag/RoleSelect';
@@ -47,6 +48,7 @@ export function useDesignationRolesPage(agId: string) {
   const [isSaving, setIsSaving] = useState(false);
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rolesRef = useRef<RolesAG>({}); // Keep latest roles for cleanup
 
   useEffect(() => {
     if (!isValidUUID(agId)) {
@@ -179,12 +181,15 @@ export function useDesignationRolesPage(agId: string) {
       const meetingUpdate: Record<string, string | null> = {};
       if (rolesToSave.presidentSeance?.nom) {
         meetingUpdate.president_name = rolesToSave.presidentSeance.nom;
+        meetingUpdate.president_id = rolesToSave.presidentSeance.coproprietaireId || null;
       }
       if (rolesToSave.secretaireSeance?.nom) {
         meetingUpdate.secretary_name = rolesToSave.secretaireSeance.nom;
+        meetingUpdate.secretary_id = rolesToSave.secretaireSeance.coproprietaireId || null;
       }
       if (rolesToSave.scrutateur?.nom) {
         meetingUpdate.scrutineer1_name = rolesToSave.scrutateur.nom;
+        meetingUpdate.scrutineer1_id = rolesToSave.scrutateur.coproprietaireId || null;
       }
 
       if (Object.keys(meetingUpdate).length > 0) {
@@ -204,6 +209,11 @@ export function useDesignationRolesPage(agId: string) {
     }
   }, [agId]);
 
+  // Keep rolesRef in sync with roles state
+  useEffect(() => {
+    rolesRef.current = roles;
+  }, [roles]);
+
   useEffect(() => {
     if (Object.keys(roles).length === 0) return;
 
@@ -222,6 +232,21 @@ export function useDesignationRolesPage(agId: string) {
     };
   }, [roles, saveRoles]);
 
+  // Save immediately on unmount (when user navigates away)
+  useEffect(() => {
+    return () => {
+      if (Object.keys(rolesRef.current).length > 0) {
+        // Flush pending save immediately on unmount
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        // Synchronous save (fire-and-forget with latest roles)
+        saveRoles(rolesRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveRoles]); // Only saveRoles in deps (rolesRef is always current)
+
   const openModal = useCallback((role: RoleType) => {
     setCurrentRole(role);
     setShowRoleSelectModal(true);
@@ -237,58 +262,69 @@ export function useDesignationRolesPage(agId: string) {
 
     const dateDesignation = new Date().toISOString();
 
-    switch (currentRole) {
-      case 'president':
-        setRoles((prev) => ({
-          ...prev,
-          presidentSeance: {
-            coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
-            nom: personne.nom,
-            dateDesignation
-          }
-        }));
-        break;
-      case 'secretaire':
-        setRoles((prev) => ({
-          ...prev,
-          secretaireSeance: {
-            coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
-            nom: personne.nom,
-            dateDesignation,
-            estGestionnaire: personne.estGestionnaire,
-            representeSyndic: personne.representeSyndic
-          }
-        }));
-        break;
-      case 'scrutateur':
-        setRoles((prev) => ({
-          ...prev,
-          scrutateur: {
-            coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
-            nom: personne.nom,
-            dateDesignation
-          }
-        }));
-        break;
-      case 'conseilTitulaire':
-      case 'conseilSuppleant':
-        setRoles((prev) => ({
-          ...prev,
-          membresConseilSyndical: [
-            ...(prev.membresConseilSyndical || []),
-            {
+    setRoles((prev) => {
+      let updatedRoles: RolesAG = {};
+
+      switch (currentRole) {
+        case 'president':
+          updatedRoles = {
+            ...prev,
+            presidentSeance: {
               coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
               nom: personne.nom,
-              type: currentRole === 'conseilTitulaire' ? 'TITULAIRE' : 'SUPPLEANT',
               dateDesignation
             }
-          ]
-        }));
-        break;
-    }
+          };
+          break;
+        case 'secretaire':
+          updatedRoles = {
+            ...prev,
+            secretaireSeance: {
+              coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
+              nom: personne.nom,
+              dateDesignation,
+              estGestionnaire: personne.estGestionnaire,
+              representeSyndic: personne.representeSyndic
+            }
+          };
+          break;
+        case 'scrutateur':
+          updatedRoles = {
+            ...prev,
+            scrutateur: {
+              coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
+              nom: personne.nom,
+              dateDesignation
+            }
+          };
+          break;
+        case 'conseilTitulaire':
+        case 'conseilSuppleant':
+          updatedRoles = {
+            ...prev,
+            membresConseilSyndical: [
+              ...(prev.membresConseilSyndical || []),
+              {
+                coproprietaireId: personne.type === 'coproprietaire' ? personne.id : undefined,
+                nom: personne.nom,
+                type: currentRole === 'conseilTitulaire' ? 'TITULAIRE' : 'SUPPLEANT',
+                dateDesignation
+              }
+            ]
+          };
+          break;
+        default:
+          updatedRoles = prev;
+      }
+
+      // Save immediately (don't wait for debounce)
+      saveRoles(updatedRoles);
+
+      return updatedRoles;
+    });
 
     closeModal();
-  }, [currentRole, closeModal]);
+  }, [currentRole, closeModal, saveRoles]);
 
   const removeMembre = useCallback((index: number) => {
     setRoles((prev) => ({

@@ -15,6 +15,7 @@ export interface Resolution {
   categorie?: string;
   resultat?: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE';
   passerelle?: PasserelleMajorite;
+  action_type?: string;
 }
 
 export type VoteChoice = 'POUR' | 'CONTRE' | 'ABSTENTION' | null;

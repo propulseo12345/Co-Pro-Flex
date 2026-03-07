@@ -91,6 +91,7 @@ export interface ResolutionTemplate {
     createdAt?: string;             // Date de création ISO
     updatedAt?: string;             // Date de mise à jour ISO
     usageCount?: number;            // Compteur d'utilisation (pour tri par popularité)
+    action_type?: string;           // Action automatisée déclenchée si résolution adoptée (AG Decision Engine)
 }
 
 export const MAJORITES: Record<MajorityType, { nom: string; description: string; seuil: string }> = {
@@ -146,7 +147,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         ordre_suggere: 1,
-        tags: ['organisation', 'bureau']
+        tags: ['organisation', 'bureau'],
+        action_type: 'DESIGNATE_BUREAU'
     },
     {
         id: 'ag-02',
@@ -161,7 +163,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         ordre_suggere: 2,
-        tags: ['organisation', 'bureau']
+        tags: ['organisation', 'bureau'],
+        action_type: 'DESIGNATE_BUREAU'
     },
     {
         id: 'ag-03',
@@ -176,7 +179,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         ordre_suggere: 3,
-        tags: ['organisation', 'bureau']
+        tags: ['organisation', 'bureau'],
+        action_type: 'DESIGNATE_BUREAU'
     },
     {
         id: 'ag-04',
@@ -204,7 +208,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 6,
-        tags: ['syndic', 'quitus', 'gestion']
+        tags: ['syndic', 'quitus', 'gestion'],
+        action_type: 'GRANT_QUITUS'
     },
     {
         id: 'ag-06',
@@ -220,7 +225,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 10,
-        tags: ['fonds travaux', 'ALUR', 'budget']
+        tags: ['fonds travaux', 'ALUR', 'budget'],
+        action_type: 'CREATE_ALUR_FUND'
     },
     {
         id: 'ag-07',
@@ -236,7 +242,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 9,
-        tags: ['budget', 'appels de fonds', 'échéancier']
+        tags: ['budget', 'appels de fonds', 'échéancier'],
+        action_type: 'SCHEDULE_BUDGET_PAYMENTS'
     },
     {
         id: 'ag-08',
@@ -276,7 +283,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 11,
-        tags: ['fonds travaux', 'appels de fonds', 'échéancier']
+        tags: ['fonds travaux', 'appels de fonds', 'échéancier'],
+        action_type: 'SCHEDULE_ALUR_PAYMENTS'
     },
 
     // ========== Travaux (7 résolutions) ==========
@@ -288,7 +296,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         majorite: 'ART_25',
         variables: ['description', 'montant'],
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
-        tags: ['travaux', 'devis', 'consultation']
+        tags: ['travaux', 'devis', 'consultation'],
+        action_type: 'CREATE_WORK_BUDGET'
     },
     {
         id: 'travaux-02',
@@ -406,7 +415,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
             { name: 'date', type: 'date', label: 'Date d\'exigibilité', required: true }
         ],
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
-        tags: ['appel de fonds', 'financement', 'travaux']
+        tags: ['appel de fonds', 'financement', 'travaux'],
+        action_type: 'CREATE_EXCEPTIONAL_CALL'
     },
     {
         id: 'fin-02',
@@ -453,7 +463,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 5,
-        tags: ['comptes', 'approbation', 'exercice']
+        tags: ['comptes', 'approbation', 'exercice'],
+        action_type: 'APPROVE_ACCOUNTS'
     },
     {
         id: 'fin-06',
@@ -470,7 +481,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 8,
-        tags: ['budget', 'prévisionnel', 'exercice']
+        tags: ['budget', 'prévisionnel', 'exercice'],
+        action_type: 'CREATE_BUDGET'
     },
     {
         id: 'fin-07',
@@ -540,7 +552,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 12,
-        tags: ['conseil syndical', 'élection', 'titulaires']
+        tags: ['conseil syndical', 'élection', 'titulaires'],
+        action_type: 'ELECT_COUNCIL'
     },
     {
         id: 'cs-03',
@@ -566,7 +579,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
             { name: 'honoraires_annuels_ttc', type: 'montant', label: 'Honoraires annuels TTC', required: true }
         ],
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
-        tags: ['syndic', 'nomination', 'contrat']
+        tags: ['syndic', 'nomination', 'contrat'],
+        action_type: 'APPOINT_SYNDIC'
     },
     {
         id: 'cs-05',
@@ -583,7 +597,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
         ordre_suggere: 7,
-        tags: ['syndic', 'renouvellement', 'contrat']
+        tags: ['syndic', 'renouvellement', 'contrat'],
+        action_type: 'APPOINT_SYNDIC'
     },
     {
         id: 'cs-06',
@@ -667,7 +682,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         majorite: 'ART_24',
         variables: ['type', 'prestataire', 'montant'],
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
-        tags: ['contrat', 'souscription', 'prestataire']
+        tags: ['contrat', 'souscription', 'prestataire'],
+        action_type: 'MANAGE_CONTRACT'
     },
     {
         id: 'contrat-02',
@@ -677,7 +693,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         majorite: 'ART_24',
         variables: ['type', 'prestataire', 'duree', 'montant'],
         applicable_ag: ['ORDINAIRE'],
-        tags: ['contrat', 'renouvellement', 'prestataire']
+        tags: ['contrat', 'renouvellement', 'prestataire'],
+        action_type: 'MANAGE_CONTRACT'
     },
     {
         id: 'contrat-03',
@@ -687,7 +704,8 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         majorite: 'ART_24',
         variables: ['type', 'prestataire', 'date'],
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
-        tags: ['contrat', 'résiliation', 'prestataire']
+        tags: ['contrat', 'résiliation', 'prestataire'],
+        action_type: 'MANAGE_CONTRACT'
     },
     {
         id: 'contrat-04',

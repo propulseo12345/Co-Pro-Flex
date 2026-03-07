@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2 } from 'lucide-react';
-import { AGQuickActions, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
+import { AGQuickActions, AGArchivesList, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
 import type { AgListItemAction } from '@/components/features/ag/Dashboard';
+import archiveStyles from '@/components/features/ag/Dashboard/AGArchivesList.module.css';
 import { AgDocumentQuickActions } from '@/components/features/ag';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
 import { useAgDashboardPage, NextAgCard, getTypeLabel, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
@@ -27,6 +28,10 @@ export default function AGDashboardPage() {
     deletingId,
     renamingId,
     isConvoked,
+    activeTab,
+    setActiveTab,
+    closedAGs,
+    closedAGsLoading,
     handleDeleteLocalDraft,
     handleOpenDeleteConfirm,
     handleCancelDelete,
@@ -80,8 +85,31 @@ export default function AGDashboardPage() {
       </div>
 
       <DataState isLoading={isLoading} error={error} isEmpty={false} loadingMessage="Chargement des assemblées générales..." onRetry={refresh}>
+        <div className={archiveStyles.tabs}>
+          <button
+            className={clsx(archiveStyles.tab, activeTab === 'current' && archiveStyles.tabActive)}
+            onClick={() => setActiveTab('current')}
+          >
+            AG en cours
+            <span className={archiveStyles.tabCount}>{(nextMeeting ? 1 : 0) + totalDraftsCount}</span>
+          </button>
+          <button
+            className={clsx(archiveStyles.tab, activeTab === 'archives' && archiveStyles.tabActive)}
+            onClick={() => setActiveTab('archives')}
+          >
+            AG passees
+            <span className={archiveStyles.tabCount}>{pastMeetings.length}</span>
+          </button>
+        </div>
+
         <div className={styles.grid}>
           <div className={styles.mainColumn}>
+            {activeTab === 'archives' ? (
+              <div className="card">
+                <h3 className={styles.sectionTitle}>AG cloturees ({closedAGs.length})</h3>
+                <AGArchivesList closedAGs={closedAGs} isLoading={closedAGsLoading} />
+              </div>
+            ) : (<>
             {nextMeeting ? (
               <NextAgCard ag={nextMeeting} isConvoked={isConvoked} />
             ) : (
@@ -162,6 +190,7 @@ export default function AGDashboardPage() {
                 )}
               </div>
             </div>
+            </>)}
           </div>
 
           <div className={styles.sideColumn}>

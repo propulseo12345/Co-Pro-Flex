@@ -60,6 +60,7 @@ export function useSessionResolutions({
       custom: true,
       resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
       variables: r.variables as Record<string, string> | undefined,
+      action_type: r.action_type ?? undefined,
     }));
     setResolutions(frontendRes);
 

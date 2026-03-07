@@ -69,6 +69,7 @@ async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolu
       status: 'draft',
       variables: input.variables || null,
       is_customized: input.is_customized || false,
+      action_type: input.action_type || null,
       tantiemes_for: 0,
       tantiemes_against: 0,
       tantiemes_abstention: 0,

@@ -134,7 +134,13 @@ export default function VariableEditor({
 
     // Sélection d'un copropriétaire
     const handleSelectCoproprietaire = (copro: Coproprietaire) => {
-        onChange(`${copro.prenom} ${copro.nom}`);
+        // Pour les rôles AG (président, secrétaire, scrutateur), inclure le copro_id
+        // pour permettre la synchronisation vers ag_meetings
+        if (isRoleAG) {
+            onChange(`${copro.id}|${copro.prenom} ${copro.nom}`);
+        } else {
+            onChange(`${copro.prenom} ${copro.nom}`);
+        }
         setShowDropdown(false);
         setSearchTerm('');
     };

@@ -1,17 +1,21 @@
 'use client';
 
 import { MOCK_ASSEMBLEES } from '@/data/mock';
-import { ArrowLeft, CheckSquare, Square, Calendar, Mail, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckSquare, Square, Calendar, MapPin } from 'lucide-react';
 import styles from './checklist.module.css';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import clsx from 'clsx';
+import { ClosureRecap } from '@/components/features/ag/Closure/ClosureRecap';
 
 export default function AGChecklistPage() {
     const params = useParams();
+    const router = useRouter();
     const agId = params.id as string;
     const ag = MOCK_ASSEMBLEES.find(a => a.id === agId);
+
+    const [showClosure, setShowClosure] = useState(false);
 
     const [tasks, setTasks] = useState([
         { id: 1, label: 'Réserver la salle', done: true, deadline: 'J-60' },
@@ -27,11 +31,31 @@ export default function AGChecklistPage() {
         setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
     };
 
+    const handleClosureComplete = () => {
+        router.push(`/ag/${agId}/pv`);
+    };
+
     if (!ag) {
         return <div className="container">Assemblée non trouvée.</div>;
     }
 
     const progress = Math.round((tasks.filter(t => t.done).length / tasks.length) * 100);
+
+    // Show ClosureRecap when user activates closure step
+    if (showClosure) {
+        return (
+            <div className="container">
+                <button
+                    onClick={() => setShowClosure(false)}
+                    className={styles.backLink}
+                    type="button"
+                >
+                    <ArrowLeft size={16} aria-hidden="true" /> Retour a la checklist
+                </button>
+                <ClosureRecap agId={agId} onClose={handleClosureComplete} />
+            </div>
+        );
+    }
 
     return (
         <div className="container">
@@ -84,6 +108,20 @@ export default function AGChecklistPage() {
                         </div>
                     ))}
                 </div>
+            </div>
+
+            {/* Closure step button */}
+            <div className="card" style={{ marginTop: '1.5rem' }}>
+                <button
+                    onClick={() => setShowClosure(true)}
+                    className={styles.taskItem}
+                    type="button"
+                >
+                    <div className={styles.taskContent}>
+                        <span className={styles.taskLabel}>Cloturer l&apos;AG - Recapitulatif des decisions</span>
+                        <span className={styles.taskDeadline}>Etape 8</span>
+                    </div>
+                </button>
             </div>
         </div>
     );

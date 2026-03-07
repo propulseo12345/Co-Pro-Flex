@@ -183,6 +183,7 @@ export interface AgResolutionResult {
   // Variables for template interpolation
   variables?: Record<string, unknown> | null;
   is_customized?: boolean;
+  action_type?: string | null;
   created_at: string;
 }
 
@@ -251,6 +252,7 @@ export interface AddResolutionInput {
   resolution_number?: number;
   variables?: Record<string, unknown>;
   is_customized?: boolean;
+  action_type?: string;
 }
 
 export interface RegisterAttendanceInput {
