@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   Paperclip, FileText, Calculator, FileCheck,
   ClipboardList, AlertTriangle, CheckCircle2,
+  Upload, X, File, Loader2, Image as ImageIcon,
 } from 'lucide-react';
+import type { UseConvocationDocumentsReturn } from '../hooks/useConvocationDocuments';
 import styles from './ConvocationAnnexesSection.module.css';
 
 export interface AnnexeItem {
@@ -20,12 +22,13 @@ interface ConvocationAnnexesSectionProps {
   annexes: AnnexeItem[];
   onToggle: (id: string) => void;
   agType: 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'URGENTE';
+  uploadedDocs?: UseConvocationDocumentsReturn;
 }
 
 const CATEGORY_LABELS: Record<AnnexeItem['category'], string> = {
   legal: 'Documents obligatoires',
   comptable: 'Annexes comptables',
-  contextuel: 'Documents complémentaires',
+  contextuel: 'Documents complementaires',
 };
 
 const CATEGORY_ICONS: Record<AnnexeItem['category'], typeof FileText> = {
@@ -34,12 +37,27 @@ const CATEGORY_ICONS: Record<AnnexeItem['category'], typeof FileText> = {
   contextuel: ClipboardList,
 };
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+function getFileIcon(mimeType: string) {
+  if (mimeType === 'application/pdf') return File;
+  if (mimeType.startsWith('image/')) return ImageIcon;
+  return FileText;
+}
+
 export function ConvocationAnnexesSection({
   annexes,
   onToggle,
   agType,
+  uploadedDocs,
 }: ConvocationAnnexesSectionProps) {
   const includedCount = annexes.filter((a) => a.included).length;
+  const uploadedCount = uploadedDocs?.documents.length ?? 0;
+  const totalCount = includedCount + uploadedCount;
   const obligatoiresManquantes = annexes.filter((a) => a.obligatoire && !a.included);
 
   const groupedByCategory = annexes.reduce<Record<string, AnnexeItem[]>>((acc, annexe) => {
@@ -55,15 +73,51 @@ export function ConvocationAnnexesSection({
     onToggle(id);
   }, [onToggle]);
 
+  // Upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleFileSelect = useCallback(async (files: FileList | null) => {
+    if (!files || !uploadedDocs) return;
+    for (let i = 0; i < files.length; i++) {
+      await uploadedDocs.uploadFile(files[i]);
+    }
+    // Rendre les documents pour le PDF après upload
+    await uploadedDocs.renderDocuments();
+  }, [uploadedDocs]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    handleFileSelect(e.dataTransfer.files);
+  }, [handleFileSelect]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragOver(false);
+  }, []);
+
+  const handleRemove = useCallback(async (docId: string) => {
+    if (!uploadedDocs) return;
+    await uploadedDocs.removeFile(docId);
+    if (uploadedDocs.documents.length > 1) {
+      await uploadedDocs.renderDocuments();
+    }
+  }, [uploadedDocs]);
+
   return (
     <div className={styles.section}>
       <div className={styles.header}>
         <h2 className={styles.title}>
           <Paperclip size={22} aria-hidden="true" />
-          Documents annexés
+          Documents annexes
         </h2>
         <span className={styles.count}>
-          {includedCount} document{includedCount > 1 ? 's' : ''} joint{includedCount > 1 ? 's' : ''}
+          {totalCount} document{totalCount > 1 ? 's' : ''} joint{totalCount > 1 ? 's' : ''}
         </span>
       </div>
 
@@ -95,7 +149,7 @@ export function ConvocationAnnexesSection({
                   className={`${styles.annexeItem} ${annexe.included ? styles.annexeItemIncluded : ''} ${annexe.obligatoire ? styles.annexeItemObligatoire : ''}`}
                   onClick={() => handleToggle(annexe.id, annexe.obligatoire)}
                   disabled={annexe.obligatoire}
-                  title={annexe.obligatoire ? 'Document obligatoire (ne peut pas être retiré)' : annexe.description}
+                  title={annexe.obligatoire ? 'Document obligatoire (ne peut pas etre retire)' : annexe.description}
                 >
                   <div className={styles.annexeCheck}>
                     {annexe.included ? (
@@ -118,9 +172,91 @@ export function ConvocationAnnexesSection({
         );
       })}
 
+      {/* Section Upload Documents */}
+      {uploadedDocs && (
+        <div className={styles.categoryGroup}>
+          <h3 className={styles.categoryTitle}>
+            <Upload size={16} aria-hidden="true" />
+            Pieces jointes supplementaires
+          </h3>
+
+          {/* Liste des documents uploades */}
+          {uploadedDocs.documents.length > 0 && (
+            <div className={styles.uploadedList}>
+              {uploadedDocs.documents.map((doc) => {
+                const FileIcon = getFileIcon(doc.mimeType);
+                return (
+                  <div key={doc.id} className={styles.uploadedItem}>
+                    <FileIcon size={18} className={styles.uploadedIcon} />
+                    <div className={styles.uploadedInfo}>
+                      <span className={styles.uploadedName}>{doc.name}</span>
+                      <span className={styles.uploadedMeta}>{formatFileSize(doc.size)}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.removeBtn}
+                      onClick={() => handleRemove(doc.id)}
+                      title="Retirer ce document"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Zone de drop */}
+          <div
+            className={`${styles.dropZone} ${isDragOver ? styles.dropZoneActive : ''} ${uploadedDocs.isUploading ? styles.dropZoneUploading : ''}`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp"
+              multiple
+              className={styles.fileInput}
+              onChange={(e) => handleFileSelect(e.target.files)}
+            />
+            {uploadedDocs.isUploading ? (
+              <>
+                <Loader2 size={24} className={styles.spinner} />
+                <span>Upload en cours...</span>
+              </>
+            ) : (
+              <>
+                <Upload size={24} />
+                <span>Deposer des fichiers ou cliquer pour parcourir</span>
+                <span className={styles.dropZoneHint}>PDF, PNG, JPG — max 20 Mo par fichier</span>
+              </>
+            )}
+          </div>
+
+          {uploadedDocs.error && (
+            <div className={styles.uploadError}>
+              <AlertTriangle size={14} />
+              {uploadedDocs.error}
+            </div>
+          )}
+
+          {uploadedDocs.isRendering && (
+            <div className={styles.renderingNotice}>
+              <Loader2 size={14} className={styles.spinner} />
+              Preparation des documents pour le PDF...
+            </div>
+          )}
+        </div>
+      )}
+
       <p className={styles.legalNote}>
-        Art. 11 du décret du 17 mars 1967 — La convocation doit être accompagnée des documents
-        nécessaires à l&apos;information des copropriétaires.
+        Art. 11 du decret du 17 mars 1967 — La convocation doit etre accompagnee des documents
+        necessaires a l&apos;information des coproprietaires.
       </p>
     </div>
   );

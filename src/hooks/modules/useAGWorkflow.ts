@@ -86,8 +86,9 @@ const STEP_NUMBER_TO_ID: Record<number, string> = {
     3: 'convocation',
     4: 'envoi',
     5: 'votes_correspondance',
-    6: 'session_ag',
-    7: 'proces_verbal',
+    6: 'feuille_presence',
+    7: 'session_ag',
+    8: 'proces_verbal',
 };
 
 const STEP_ID_TO_NUMBER: Record<string, number> = {
@@ -96,8 +97,9 @@ const STEP_ID_TO_NUMBER: Record<string, number> = {
     'convocation': 3,
     'envoi': 4,
     'votes_correspondance': 5,
-    'session_ag': 6,
-    'proces_verbal': 7,
+    'feuille_presence': 6,
+    'session_ag': 7,
+    'proces_verbal': 8,
 };
 
 /**

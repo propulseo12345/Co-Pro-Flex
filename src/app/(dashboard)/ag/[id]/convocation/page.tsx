@@ -33,6 +33,7 @@ export default function ConvocationPage() {
     preview,
     delivery,
     annexes,
+    uploadedDocs,
     activeTab,
     setActiveTab,
     handleContinue,
@@ -119,6 +120,7 @@ export default function ConvocationPage() {
           annexes={annexes.annexes}
           onToggle={annexes.toggleAnnexe}
           agType={agData?.type ?? 'ORDINAIRE'}
+          uploadedDocs={uploadedDocs}
         />
       </div>
 

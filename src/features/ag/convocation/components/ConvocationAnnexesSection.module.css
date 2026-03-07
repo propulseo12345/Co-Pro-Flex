@@ -175,6 +175,152 @@
   border-radius: var(--radius-full);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   UPLOADED DOCUMENTS
+   ═══════════════════════════════════════════════════════════ */
+
+.uploadedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.uploadedItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid var(--success);
+  border-radius: var(--radius-md);
+}
+
+.uploadedIcon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.uploadedInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.uploadedName {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadedMeta {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.removeBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DROP ZONE
+   ═══════════════════════════════════════════════════════════ */
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-md);
+  border: 2px dashed var(--border-dark);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.dropZone:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.dropZoneActive {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.dropZoneUploading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dropZoneHint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.fileInput {
+  display: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.uploadError {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.06);
+  border-radius: var(--radius-sm);
+}
+
+.renderingNotice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--primary);
+}
+
 .legalNote {
   font-size: var(--text-xs);
   color: var(--text-tertiary);

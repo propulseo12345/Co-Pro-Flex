@@ -274,5 +274,5 @@ function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'EUR',
-  }).format(montant);
+  }).format(montant).replace(/\u202F/g, ' ');
 }

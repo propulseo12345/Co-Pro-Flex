@@ -254,7 +254,7 @@ export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
    * Navigue vers une étape
    */
   const goToStep = useCallback(async (step: number) => {
-    if (!agId || step < 1 || step > 7) return;
+    if (!agId || step < 1 || step > 8) return;
 
     await saveState(step);
   }, [agId, saveState]);

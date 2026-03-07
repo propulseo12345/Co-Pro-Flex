@@ -10,6 +10,7 @@ import { validateResolutionVariables, type VariableValidationResult } from '@/li
 import { updateAgCurrentStep } from '@/lib/ag/api';
 import { useConvocationAnnexes, type UseConvocationAnnexesReturn } from './useConvocationAnnexes';
 import { useConvocationAccountingData } from './useConvocationAccountingData';
+import { useConvocationDocuments, type UseConvocationDocumentsReturn } from './useConvocationDocuments';
 
 // ============================================================================
 // TYPES
@@ -59,6 +60,9 @@ export interface UseConvocationPageResult {
 
   // Annexes hook
   annexes: UseConvocationAnnexesReturn;
+
+  // Uploaded documents hook
+  uploadedDocs: UseConvocationDocumentsReturn;
 
   // Delivery hook
   delivery: ReturnType<typeof useDeliveryConfig>;
@@ -113,12 +117,22 @@ export function useConvocationPage(): UseConvocationPageResult {
   const annexesHook = useConvocationAnnexes(agData?.type ?? null);
 
   // Hook de chargement des données comptables (annexes 1-5, AGO uniquement)
+  // Les annexes comptables concernent l'exercice clos (N-1 par rapport à la date de l'AG)
+  const closedExerciceYear = useMemo(() => {
+    if (!agData?.date) return undefined;
+    const agYear = new Date(agData.date).getFullYear();
+    return String(agYear - 1);
+  }, [agData?.date]);
+
   const { accountingData } = useConvocationAccountingData({
     coproId: copropriete?.id ?? null,
     coproName: copropriete?.nom ?? 'Copropriété',
     agType: agData?.type ?? null,
-    exercice: agData?.budgetExercice,
+    exercice: closedExerciceYear,
   });
+
+  // Hook de gestion des documents uploadés (annexes PDF/images)
+  const uploadedDocs = useConvocationDocuments(agId, copropriete?.id ?? null);
 
   // Hook de gestion des modes d'envoi
   const delivery = useDeliveryConfig({ agId, coproprietaires: deliveryCopros });
@@ -164,6 +178,7 @@ export function useConvocationPage(): UseConvocationPageResult {
     annexes: annexesHook.annexeNames,
     annexesStructured: annexesHook.annexesForPDF,
     accountingData,
+    uploadedDocPages: uploadedDocs.renderedPages,
     copropriete: coproprieteInfo,
     syndic: {
       nom: syndicInfo.nom,
@@ -210,6 +225,7 @@ export function useConvocationPage(): UseConvocationPageResult {
     variableValidation,
     preview,
     annexes: annexesHook,
+    uploadedDocs,
     delivery,
     activeTab,
     setActiveTab,
