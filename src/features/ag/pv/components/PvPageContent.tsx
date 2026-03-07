@@ -179,6 +179,7 @@ export function PvPageContent({
           onOpenSignatairesModal={onOpenSignatairesModal}
           onShowSignatairesModal={() => setShowSignatairesModal(true)}
           onFinish={onFinish}
+          onFinalisation={onFinalisation}
         />
       </div>
 

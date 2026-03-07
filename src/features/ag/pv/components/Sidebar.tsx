@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, Send, PenTool, Home } from 'lucide-react';
+import { CheckCircle, Send, PenTool, Home, ListChecks } from 'lucide-react';
 import styles from '../../../../app/(dashboard)/ag/[id]/pv/pv.module.css';
 
 interface SidebarProps {
@@ -8,9 +8,10 @@ interface SidebarProps {
   onOpenSignatairesModal: () => void;
   onShowSignatairesModal: () => void;
   onFinish: () => void;
+  onFinalisation?: () => void;
 }
 
-export function Sidebar({ isSigned, onOpenSignatairesModal, onShowSignatairesModal, onFinish }: SidebarProps) {
+export function Sidebar({ isSigned, onOpenSignatairesModal, onShowSignatairesModal, onFinish, onFinalisation }: SidebarProps) {
   return (
     <div className={styles.sidebar}>
       <div className="card">
@@ -58,10 +59,18 @@ export function Sidebar({ isSigned, onOpenSignatairesModal, onShowSignatairesMod
           </button>
         </div>
       ) : (
-        <button onClick={onFinish} className="btn btn-primary w-full">
-          <Home size={16} aria-hidden="true" />
-          Terminer et retourner au dashboard
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {onFinalisation && (
+            <button onClick={onFinalisation} className="btn btn-secondary w-full">
+              <ListChecks size={16} aria-hidden="true" />
+              Finaliser les décisions
+            </button>
+          )}
+          <button onClick={onFinish} className="btn btn-primary w-full">
+            <Home size={16} aria-hidden="true" />
+            Terminer et retourner au dashboard
+          </button>
+        </div>
       )}
 
       <div className={`${styles.infoBox} card`}>
