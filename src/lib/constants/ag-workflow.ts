@@ -203,6 +203,19 @@ export const AG_WORKFLOW_STEPS: WorkflowStep[] = [
         temps_estime_minutes: 20,
         groupe_expert: 'cloture',
     },
+    {
+        id: 'finalisation',
+        numero: 9,
+        titre: 'Finalisation des décisions',
+        titre_court: 'Finalisation',
+        description: 'Créer les entités issues des votes (budget, conseil, etc.)',
+        icon: CheckCircle,
+        path: 'finalisation',
+        obligatoire: false,
+        prerequis: ['proces_verbal'],
+        temps_estime_minutes: 15,
+        groupe_expert: 'cloture',
+    },
 ];
 
 /**
@@ -233,8 +246,8 @@ export const EXPERT_GROUPS: Record<ExpertGroupId, ExpertGroup> = {
     cloture: {
         id: 'cloture',
         titre: 'Clôture',
-        description: 'Procès-verbal',
-        steps: ['proces_verbal'],
+        description: 'Procès-verbal et finalisation',
+        steps: ['proces_verbal', 'finalisation'],
         icon: CheckCircle,
     },
 };
@@ -361,6 +374,8 @@ export function hasStepData(stepId: string, agId: string): boolean {
         case 'proces_verbal':
             // Accessible si les résolutions existent
             return context.hasResolutions;
+        case 'finalisation':
+            return context.sessionCompleted;
         default:
             return context.agExists;
     }
@@ -538,6 +553,17 @@ export const STEP_BUSINESS_VALIDATORS: Record<string, StepPrerequisiteValidator>
                 isAccessible: false,
                 reason: 'Vous devez définir au moins une résolution à l\'ordre du jour.',
                 redirectStepId: 'ordre_du_jour',
+            };
+        }
+        return { isAccessible: true };
+    },
+
+    finalisation: (ctx) => {
+        if (!ctx.agExists) {
+            return {
+                isAccessible: false,
+                reason: 'AG introuvable.',
+                redirectTo: '/ag/new',
             };
         }
         return { isAccessible: true };

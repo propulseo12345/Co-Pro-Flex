@@ -10,6 +10,7 @@ export {
   closeAg,
   startAg,
   cancelAgSession,
+  finishAgSession,
   updateAg,
   updateAgCurrentStep,
 } from './meetings.api';
@@ -54,3 +55,14 @@ export {
   hasAgDocument,
   markPvGenerated,
 } from './documents.api';
+
+// Finalisation
+export {
+  loadPendingActions,
+  createBudgetFromAg,
+  createAlurFundFromAg,
+  electCouncilFromAg,
+  markActionActivated,
+  markAgFinalized,
+} from './finalisation.api';
+export type { BlocPoste, MembreConseil, PendingAction } from './finalisation.api';
