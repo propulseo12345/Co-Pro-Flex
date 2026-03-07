@@ -184,18 +184,11 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     return parseFloat(montantDB.replace(/[\s\u00a0]/g, '').replace(',', '.')) || 0;
   }, [resolutionsHook.resolutions, variablesHook.variableValues]);
 
-  // Auto-save debounced (2s) on any state change
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Persistance immédiate sur tout changement d'état session
   useEffect(() => {
     if (!resolutionsHook.sessionState.started) return;
     persistence.markDirty();
-
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      saveSession();
-    }, 2000);
-
-    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+    saveSession();
   }, [votingHook.votes, resolutionsHook.sessionState, presenceHook.presencesEnrichies]);
 
   // Keep refs in sync for saveSession

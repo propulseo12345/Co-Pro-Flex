@@ -116,8 +116,6 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
   const [isSent, setIsSent] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Ref pour debounce de sauvegarde
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref pour éviter les saves pendant le chargement initial
   const isInitialLoadRef = useRef(true);
 
@@ -373,26 +371,13 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
     }
   }, [agId]);
 
-  // Sauvegarde debounced quand les choix changent
+  // Persistance immédiate quand les choix changent
   useEffect(() => {
-    // Ne pas sauvegarder pendant le chargement initial
     if (isInitialLoadRef.current || status !== 'ready' || sendingChoices.length === 0) {
       return;
     }
 
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      saveChoicesToDB(sendingChoices);
-    }, 800); // Debounce plus long pour éviter les saves multiples
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
+    saveChoicesToDB(sendingChoices);
   }, [sendingChoices, status, saveChoicesToDB]);
 
   // ========================================

@@ -47,7 +47,6 @@ export function useDesignationRolesPage(agId: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rolesRef = useRef<RolesAG>({}); // Keep latest roles for cleanup
 
   useEffect(() => {
@@ -214,38 +213,11 @@ export function useDesignationRolesPage(agId: string) {
     rolesRef.current = roles;
   }, [roles]);
 
+  // Persistance immédiate quand les rôles changent
   useEffect(() => {
     if (Object.keys(roles).length === 0) return;
-
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      saveRoles(roles);
-    }, 1000);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
+    saveRoles(roles);
   }, [roles, saveRoles]);
-
-  // Save immediately on unmount (when user navigates away)
-  useEffect(() => {
-    return () => {
-      if (Object.keys(rolesRef.current).length > 0) {
-        // Flush pending save immediately on unmount
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current);
-        }
-        // Synchronous save (fire-and-forget with latest roles)
-        saveRoles(rolesRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saveRoles]); // Only saveRoles in deps (rolesRef is always current)
 
   const openModal = useCallback((role: RoleType) => {
     setCurrentRole(role);

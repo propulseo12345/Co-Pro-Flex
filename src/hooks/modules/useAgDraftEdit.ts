@@ -80,8 +80,10 @@ interface UseAgDraftEditReturn {
   updateField: <K extends keyof AGFormData>(field: K, value: AGFormData[K]) => void;
   updateAdresse: (field: keyof AdresseAG, value: string) => void;
   setAdresseFromAutocomplete: (adresse: AdresseAG, nomLieu?: string) => void;
-  // Sauvegarde manuelle (optionnel, auto-save activé par défaut)
+  // Sauvegarde manuelle
   save: () => Promise<boolean>;
+  // Flush avant navigation — garantit la persistance
+  flush: () => Promise<boolean>;
 }
 
 /**
@@ -158,9 +160,9 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Debounce timer pour auto-save
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Persistance immédiate — dedup via lastSavedJson
   const isInitialLoadRef = useRef(true);
+  const lastSavedJsonRef = useRef<string>('');
 
   /**
    * Charge les données du brouillon depuis Supabase
@@ -277,21 +279,10 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
   }, [draftId, currentCoproId, formData]);
 
   /**
-   * Auto-save avec debounce (500ms)
+   * Flush — force la sauvegarde immédiate (à appeler avant navigation)
    */
-  const triggerAutoSave = useCallback(() => {
-    if (isInitialLoadRef.current) {
-      isInitialLoadRef.current = false;
-      return;
-    }
-
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      save();
-    }, 500);
+  const flush = useCallback(async (): Promise<boolean> => {
+    return save();
   }, [save]);
 
   /**
@@ -335,16 +326,32 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
     loadDraft();
   }, [loadDraft]);
 
-  // Auto-save quand formData change
+  // Persistance immédiate quand formData change
   useEffect(() => {
-    triggerAutoSave();
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      lastSavedJsonRef.current = JSON.stringify(formData);
+      return;
+    }
 
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
+    const currentJson = JSON.stringify(formData);
+    if (currentJson === lastSavedJsonRef.current) return;
+    lastSavedJsonRef.current = currentJson;
+
+    save();
+  }, [formData, save]);
+
+  // Sécurité : sauvegarder avant fermeture de la page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const currentJson = JSON.stringify(formData);
+      if (currentJson !== lastSavedJsonRef.current) {
+        save();
       }
     };
-  }, [formData, triggerAutoSave]);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [formData, save]);
 
   return {
     formData,
@@ -356,6 +363,7 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
     updateAdresse,
     setAdresseFromAutocomplete,
     save,
+    flush,
   };
 }
 

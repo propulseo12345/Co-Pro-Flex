@@ -2,7 +2,7 @@
  * Hook pour gérer les drafts de convocation (ag_session_drafts)
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import type { SendingChoice, CoproprietaireEditable } from '../types';
 
@@ -18,12 +18,9 @@ export interface UseConvocationDraftReturn extends UseConvocationDraftResult {
   setSendingChoices: (choices: SendingChoice[]) => void;
 }
 
-const DEBOUNCE_MS = 500;
-
 export function useConvocationDraft(): UseConvocationDraftReturn {
   const [sendingChoices, setSendingChoicesState] = useState<SendingChoice[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadSendingChoices = useCallback(
     async (agId: string, coproprietaires: CoproprietaireEditable[]): Promise<SendingChoice[]> => {
@@ -61,19 +58,12 @@ export function useConvocationDraft(): UseConvocationDraftReturn {
   const saveSendingChoices = useCallback(async (agId: string, choices: SendingChoice[]) => {
     if (!isValidUUID(agId)) return;
 
-    // Debounce
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+    setIsSaving(true);
+    try {
+      await saveDraft(agId, 'session', choices, `ag-sending-${agId}`);
+    } finally {
+      setIsSaving(false);
     }
-
-    saveTimeoutRef.current = setTimeout(async () => {
-      setIsSaving(true);
-      try {
-        await saveDraft(agId, 'session', choices, `ag-sending-${agId}`);
-      } finally {
-        setIsSaving(false);
-      }
-    }, DEBOUNCE_MS);
   }, []);
 
   const saveCoproprietaires = useCallback(async (agId: string, copros: CoproprietaireEditable[]) => {

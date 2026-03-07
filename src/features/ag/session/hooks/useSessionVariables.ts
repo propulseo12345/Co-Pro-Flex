@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import type { Coproprietaire, EditingVariable, Resolution } from '../types';
-import { debounce } from '../services/sessionHelpers';
 import { useGlobalVariables } from '@/hooks/useGlobalVariables';
 import { validateResolutionVariables } from '@/components/features/ag/Session/utils';
 import { saveDraft } from '@/lib/ag/draft-persistence';
@@ -70,12 +69,10 @@ export function useSessionVariables({
     [mergeVariables, variableValues]
   );
 
-  const debouncedSaveVariables = useMemo(
-    () => debounce((values: Record<string, string>) => {
-      saveDraft(agId, 'variables', values);
-    }, 500),
-    [agId]
-  );
+  // Persistance immédiate des variables
+  const saveVariablesNow = useCallback((values: Record<string, string>) => {
+    saveDraft(agId, 'variables', values);
+  }, [agId]);
 
   const handleVariableClick = useCallback((variableName: string, resolutionTexte?: string) => {
     if (variableName === 'modalites_paiement_budget' || variableName === 'modalites_paiement_fonds') {
@@ -94,21 +91,21 @@ export function useSessionVariables({
     if (editingVariable) {
       const newValues = { ...variableValues, [editingVariable.name]: editingVariable.value };
       setVariableValues(newValues);
-      debouncedSaveVariables(newValues);
+      saveVariablesNow(newValues);
       setShowVariableModal(false);
       setEditingVariable(null);
     }
-  }, [editingVariable, variableValues, debouncedSaveVariables]);
+  }, [editingVariable, variableValues, saveVariablesNow]);
 
   const handlePrefillFromCopro = useCallback((variableName: string, coproId: string) => {
     const copro = coproprietaires.find(c => c.id === coproId);
     if (copro) {
       const newValues = { ...variableValues, [variableName]: copro.nom };
       setVariableValues(newValues);
-      debouncedSaveVariables(newValues);
+      saveVariablesNow(newValues);
     }
     setShowPrefillDropdown(null);
-  }, [variableValues, coproprietaires, debouncedSaveVariables]);
+  }, [variableValues, coproprietaires, saveVariablesNow]);
 
   const handleSaveFinancing = useCallback((modalite: string, datesEcheances: string, schedule: FinancingSchedule) => {
     const isFonds = editingVariable?.name === 'modalites_paiement_fonds';
@@ -121,10 +118,10 @@ export function useSessionVariables({
     };
     setVariableValues(newValues);
     setFinancingSchedule(schedule);
-    debouncedSaveVariables(newValues);
+    saveVariablesNow(newValues);
     setShowFinancingModal(false);
     setEditingVariable(null);
-  }, [variableValues, debouncedSaveVariables, editingVariable]);
+  }, [variableValues, saveVariablesNow, editingVariable]);
 
   const closeFinancingModal = useCallback(() => {
     setShowFinancingModal(false);
@@ -139,10 +136,10 @@ export function useSessionVariables({
       montant_fonds_travaux: montant, // clé dédiée pour éviter conflit avec montant budget
     };
     setVariableValues(newValues);
-    debouncedSaveVariables(newValues);
+    saveVariablesNow(newValues);
     setShowFondsALURModal(false);
     setEditingVariable(null);
-  }, [variableValues, debouncedSaveVariables]);
+  }, [variableValues, saveVariablesNow]);
 
   const closeFondsALURModal = useCallback(() => {
     setShowFondsALURModal(false);
