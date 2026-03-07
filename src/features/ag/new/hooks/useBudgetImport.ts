@@ -128,6 +128,8 @@ export function useBudgetImport(): UseBudgetImportReturn {
         id: `import-${line.id}-${Date.now()}-${index}`,
         poste: line.label || line.code || `Poste ${index + 1}`,
         montant: Number(line.planned_amount) || 0,
+        accountId: line.account_id || undefined,
+        repartitionKeyId: line.repartition_key_id || undefined,
       }));
 
       // Calculer le total (même méthode que /finance/budgets)
