@@ -15,6 +15,14 @@ interface UseBudgetPostesProps {
   }) => Promise<BudgetPoste[]>;
   /** Année d'exercice pour l'import */
   exercice?: number;
+  /** Résout les données comptables pour un poste (compte + clé) */
+  resolveAccountData?: (posteName: string) => {
+    accountId?: string;
+    accountCode?: string;
+    accountName?: string;
+    repartitionKeyId?: string;
+    repartitionKeyName?: string;
+  } | null;
 }
 
 export function useBudgetPostes({
@@ -22,6 +30,7 @@ export function useBudgetPostes({
   onPostesChange,
   importBudgetFn,
   exercice,
+  resolveAccountData,
 }: UseBudgetPostesProps) {
   const [newPoste, setNewPoste] = useState({ poste: '', montant: '' });
   const [showCustomPoste, setShowCustomPoste] = useState(false);
@@ -53,16 +62,19 @@ export function useBudgetPostes({
       return;
     }
 
+    const accountData = resolveAccountData?.(newPoste.poste.trim());
+
     const nouveauPoste: BudgetPoste = {
       id: Date.now().toString(),
       poste: newPoste.poste.trim(),
-      montant: montant,
+      montant,
+      ...(accountData || {}),
     };
 
     onPostesChange([...budgetPostes, nouveauPoste]);
     setNewPoste({ poste: '', montant: '' });
     setShowCustomPoste(false);
-  }, [newPoste, budgetPostes, onPostesChange]);
+  }, [newPoste, budgetPostes, onPostesChange, resolveAccountData]);
 
   const handleRemovePoste = useCallback(
     (id: string) => {
