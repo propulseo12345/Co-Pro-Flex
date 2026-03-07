@@ -1,26 +1,25 @@
-# Session State — 2026-03-07 22:30
+# Session State — 2026-03-07 22:00
 
 ## Branch
 main
 
 ## Completed This Session
-- fix: Stepper.tsx hardcodé → ajouté étape 9 (STEPS_CONFIG, totalCount 5, progress /9)
-- feat(Task 1): 4 RPCs DB créés (create_budget_from_ag, create_alur_fund_from_ag, elect_council_from_ag, mark_ag_action_activated) + colonne result_data
-- feat(Task 2): step 9 dans AG_WORKFLOW_STEPS, EXPERT_GROUPS, STEP_PATHS, STEP_BUSINESS_VALIDATORS, hasStepData
-- feat(Task 3): finalisation.api.ts + exports index.ts
-- feat(Tasks 4-7): useFinalisationPage, BlocCard, BlocBudget, BlocSimple, BlocALUR
-- feat(Tasks 8-10): useFinalisationData, page /ag/[id]/finalisation, lien PV → finalisation
+- fix(Stepper): ajout étape 9 dans STEPS_CONFIG hardcodé
+- feat(Task 1-10): plan étape 9 complet — RPCs DB, workflow, API, hooks, composants, page
+- fix(RLS): loadPendingActions via RPC get_ag_pending_actions (SECURITY DEFINER)
+- fix(DB): finish_ag_session crée ag_pending_actions depuis ag_resolutions.is_approved
+- fix(Sidebar PV): bouton "Finaliser les décisions" dans état signé
 
 ## Next Task
-- Tester end-to-end : naviguer vers /ag/[id]/finalisation depuis la page PV
-- Vérifier que ag_pending_actions se peuplent correctement lors d'une session AG
-- Vérifier le budget (source_ag_id column dans budgets table)
+- Tester la page /ag/97903758-da07-4583-b01c-ac0e36af592b/finalisation en dev
+- Vérifier que les blocs (Budget, ALUR, Conseil, simples) s'affichent correctement
+- Tester le flux : confirmer un bloc → vérifier ag_pending_actions.status = 'activated'
 
 ## Blockers
 None
 
 ## Key Context
-- Plan étape 9 COMPLET (10/10 tasks)
-- budgets.source_ag_id : la colonne est référencée dans create_budget_from_ag — vérifier qu'elle existe
-- La page finalisation affiche "Aucune décision à créer" si ag_pending_actions est vide pour l'AG
-- Erreurs TS pré-existantes : session/page.tsx (handleFinishSession), test files sans @types/jest — NON bloquantes
+- ag_pending_actions a colonne target_table NOT NULL — le mapping est dans finish_ag_session et get_ag_pending_actions RPC
+- RLS sur ag_pending_actions : policy "Managers can manage" bloque sans auth → toujours utiliser RPC SECURITY DEFINER pour lire/écrire
+- AG de test avec données : 97903758-da07-4583-b01c-ac0e36af592b (11 pending actions)
+- DESIGNATE_BUREAU apparaît 3x (3 résolutions bureau) — comportement normal
