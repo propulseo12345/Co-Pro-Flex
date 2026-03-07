@@ -407,6 +407,7 @@ export function useAgDraftAutoCreate() {
           meeting_type: 'ordinary',
           meeting_date: getDefaultMeetingDate(),
           status: 'draft',
+          opening_notes: serializeMetadata(INITIAL_FORM_DATA),
         };
 
         const { data: created, error: createError } = await supabase

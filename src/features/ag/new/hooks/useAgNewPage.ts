@@ -34,6 +34,7 @@ export function useAgNewPage() {
     updateField,
     updateAdresse,
     setAdresseFromAutocomplete,
+    flush,
   } = useAgDraftEdit(draftId);
 
   // Local state for validation errors
@@ -213,13 +214,16 @@ export function useAgNewPage() {
         }
       }
 
+      // Flush pending debounced saves before navigating
+      await flush();
+
       // Redirect to next step (agenda)
       router.push(`/ag/${draftId}/agenda`);
     } catch (err) {
       console.error('[NewAGPage] Error:', err);
       setErrors({ form: "Une erreur est survenue lors de la création de l'AG. Veuillez réessayer." });
     }
-  }, [formData.type, formData.format, formData.visioUrl, formData.date, formData.heure, validate, router, draftId, currentCoproId]);
+  }, [formData.type, formData.format, formData.visioUrl, formData.date, formData.heure, validate, router, draftId, currentCoproId, flush]);
 
   // Navigate back
   const handleBack = useCallback(() => {
