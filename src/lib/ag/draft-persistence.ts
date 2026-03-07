@@ -18,6 +18,7 @@ export type AgDraftType =
   | 'resolutions'
   | 'session'
   | 'variables'
+  | 'resolution_vars'
   | 'milestones'
   | 'signataires'
   | 'envoi'; // Added in 20260201_envoi_security.sql

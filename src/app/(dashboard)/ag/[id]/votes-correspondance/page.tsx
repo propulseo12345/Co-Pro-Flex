@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, ArrowRight, ChevronDown, Info, Loader2,
-  ClipboardList, HelpCircle, Vote, Play,
+  ClipboardList, HelpCircle, Vote, Play, Check, X, Minus,
 } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
 import { updateAgCurrentStep } from '@/lib/ag/api';
@@ -159,17 +159,26 @@ export default function VotesCorrespondancePage() {
     }
   }, [owners, selectOwner]);
 
+  const setAllVotes = useCallback((direction: VoteDirection) => {
+    resolutions.forEach((res) => {
+      const existingVote = selectedOwner?.voted_resolutions?.find(
+        (v) => v.resolution_id === res.id
+      )?.vote;
+      if (!existingVote) {
+        setVote(res.id, direction);
+      }
+    });
+  }, [resolutions, selectedOwner, setVote]);
+
   const handlePaperSubmit = useCallback(async () => {
     const result = await submitVotes('postal');
     if (result.success) {
       alert(`${result.votes_registered} vote(s) enregistre(s) avec succes`);
       setSelectedCoproId('');
-      selectOwner(null);
-      refresh();
     } else {
       alert(result.error || 'Erreur lors de l\'enregistrement');
     }
-  }, [submitVotes, selectOwner, refresh]);
+  }, [submitVotes]);
 
   // ========================================
   // Navigation
@@ -397,6 +406,40 @@ export default function VotesCorrespondancePage() {
                     </div>
                   ) : (
                     <>
+                      {/* Bulk vote buttons */}
+                      <div className={styles.bulkVoteBar}>
+                        <span className={styles.bulkVoteLabel}>Vote rapide :</span>
+                        <div className={styles.bulkVoteButtons}>
+                          <button
+                            type="button"
+                            className={`${styles.bulkVoteBtn} ${styles.bulkFor}`}
+                            onClick={() => setAllVotes('for')}
+                            disabled={isSubmitting}
+                          >
+                            <Check size={14} />
+                            Tout Pour
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.bulkVoteBtn} ${styles.bulkAgainst}`}
+                            onClick={() => setAllVotes('against')}
+                            disabled={isSubmitting}
+                          >
+                            <X size={14} />
+                            Tout Contre
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.bulkVoteBtn} ${styles.bulkAbstention}`}
+                            onClick={() => setAllVotes('abstention')}
+                            disabled={isSubmitting}
+                          >
+                            <Minus size={14} />
+                            Tout Abstention
+                          </button>
+                        </div>
+                      </div>
+
                       <div className={styles.resolutionsList}>
                         {resolutions.map((res) => {
                           const vote = pendingVotes.get(res.id);
@@ -405,11 +448,15 @@ export default function VotesCorrespondancePage() {
                             (v) => v.resolution_id === res.id
                           )?.vote;
                           const currentVote = vote || existingVote;
+                          const votedClass = currentVote === 'for' ? styles.resolutionVotedFor
+                            : currentVote === 'against' ? styles.resolutionVotedAgainst
+                            : currentVote === 'abstention' ? styles.resolutionVotedAbstention
+                            : '';
 
                           return (
                             <div
                               key={res.id}
-                              className={`${styles.resolutionItem} ${hasVote || existingVote ? styles.resolutionVoted : ''}`}
+                              className={`${styles.resolutionItem} ${votedClass}`}
                             >
                               <span className={styles.resolutionLabel}>
                                 <span className={styles.resolutionNumber}>

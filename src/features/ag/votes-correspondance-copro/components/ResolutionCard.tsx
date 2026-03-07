@@ -6,7 +6,6 @@ import styles from '@/app/(dashboard)/ag/[id]/votes-correspondance/[coproId]/vot
 
 interface ResolutionCardProps {
   resolution: Resolution;
-  index: number;
   vote: VoteState | undefined;
   isValidated: boolean;
   isSaving: boolean;
@@ -15,19 +14,22 @@ interface ResolutionCardProps {
 
 export function ResolutionCard({
   resolution,
-  index,
   vote,
   isValidated,
   isSaving,
   onVoteChange,
 }: ResolutionCardProps) {
   const isVoted = vote && vote.choix !== 'NON_VOTE';
+  const votedClass = vote?.choix === 'POUR' ? styles.resolutionVotedFor
+    : vote?.choix === 'CONTRE' ? styles.resolutionVotedAgainst
+    : vote?.choix === 'ABSTENTION' ? styles.resolutionVotedAbstention
+    : '';
 
   return (
-    <div className={`${styles.resolutionCard} ${isVoted ? styles.resolutionVoted : ''}`}>
+    <div className={`${styles.resolutionCard} ${votedClass}`}>
       <div className={styles.resolutionHeader}>
         <div className={styles.resolutionNumber}>
-          Resolution #{index + 1}
+          Resolution #{resolution.numero}
           {isVoted && <Check size={16} className={styles.checkIcon} aria-hidden="true" />}
         </div>
       </div>

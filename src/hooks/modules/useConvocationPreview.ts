@@ -400,6 +400,7 @@ export function useConvocationPreview({
     setState((prev) => ({
       ...prev,
       reviewValidation: validation,
+      isReviewMode: false,
       canSend: calculateCanSend(prev.checklist, validation),
     }));
 

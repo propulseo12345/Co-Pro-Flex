@@ -1,22 +1,24 @@
-# Session State — 2026-03-06 22:00
+# Session State — 2026-03-07 15:00
 
 ## Branch
 main
 
 ## Completed This Session
-- Annexes convocation: section UI (ConvocationAnnexesSection) avec toggles par categorie
-- Annexes convocation: liste structuree dans le PDF (categories + badges obligatoire)
-- Annexes comptables: renderers PDF jspdf-autotable pour annexes 1-5 (annexe-pdf-tables.ts)
-- Annexes comptables: hook useConvocationAccountingData charge fn_annexe_1..5 depuis Supabase
-- Integration complete: donnees comptables passees au generateur PDF via preview hook
+- Fix `register_correspondence_form_votes` SQL: 3 bugs (RECORD vs JSONB loop, missing `ag_id` column, missing `updated_at` column)
+- Fix `useCorrespondenceVotes.ts`: PostgrestError not caught properly, showed generic "Erreur de soumission"
+- Fix `useVotesCorrespondanceCoproPage.ts`: better error messages from RPC
+- Fix `ResolutionCard.tsx`: used index+1 instead of resolution.numero
+- Fix `useAgSessionPage.ts`: `persistResolutionResult` used before declaration + null copro_id
+- Fix `validateResolutionVariables`: didn't check `resolution.variables`, only `allVariables`
+- Added `variables?: Record<string, string>` to Resolution type
 
 ## Next Task
-Tester le rendu PDF sur /ag/[id]/convocation (AGO). Debugger si les annexes n'apparaissent pas dans l'iframe.
+Test full AG workflow end-to-end (votes correspondance -> presence -> session -> votes -> PV)
 
 ## Blockers
-User a signale "les annexes ne s'affichent pas" — peut etre timing (accountingData arrive apres premiere generation). A verifier.
+None
 
 ## Key Context
-- jspdf-autotable utilise pour les tableaux comptables dans le PDF
-- accountingData ne charge que pour agType === 'ORDINAIRE'
-- Le PDF se regenere auto quand accountingData change (hash dans useConvocationPreview)
+- SQL function `register_correspondence_form_votes` was patched live in Supabase (not via migration file)
+- `save_votes_correspondance` (copro page) and `register_correspondence_form_votes` (main page) are two separate RPCs
+- Resolution variables can come from `resolution.variables` (DB/convocation) OR `allVariables` (session state)

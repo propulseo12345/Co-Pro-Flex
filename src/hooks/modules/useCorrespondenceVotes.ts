@@ -105,9 +105,15 @@ export function useCorrespondenceVotes({ agId }: UseCorrespondenceVotesParams): 
         setStatus(statusData as CorrespondenceStatus);
       }
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error loading correspondence data:', err);
-      setError(err instanceof Error ? err.message : 'Erreur de chargement');
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Erreur de chargement';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -206,9 +212,14 @@ export function useCorrespondenceVotes({ agId }: UseCorrespondenceVotesParams): 
 
       return result;
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error submitting correspondence votes:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de soumission';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Erreur de soumission';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

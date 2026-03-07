@@ -109,6 +109,16 @@ export function useConvocationDocuments(
     loadDocuments();
   }, [loadDocuments]);
 
+  // Auto-render quand les documents changent
+  useEffect(() => {
+    if (documents.length > 0) {
+      renderDocuments();
+    } else {
+      setRenderedPages([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documents.length]);
+
   // Upload un fichier
   const uploadFile = useCallback(async (file: File): Promise<boolean> => {
     if (!agId || !coproId) {
@@ -149,9 +159,6 @@ export function useConvocationDocuments(
         createdAt: doc.created_at,
       }]);
 
-      // Reset les pages rendues (elles devront être regénérées)
-      setRenderedPages([]);
-
       return true;
     } catch (err) {
       console.error('[useConvocationDocuments] Upload error:', err);
@@ -186,7 +193,6 @@ export function useConvocationDocuments(
       }
 
       setDocuments(prev => prev.filter(d => d.id !== docId));
-      setRenderedPages([]);
 
       return true;
     } catch (err) {

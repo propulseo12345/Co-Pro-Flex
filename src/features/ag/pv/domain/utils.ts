@@ -1,22 +1,7 @@
 import type { Resolution, VoteData, ResolutionResult, AGData, Signataire, PresenceData, PVStats } from './types';
 import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: {
-      startY?: number;
-      head?: string[][];
-      body?: (string | number)[][];
-      theme?: 'striped' | 'grid' | 'plain';
-      styles?: { fontSize?: number };
-      headStyles?: { fillColor?: number[] };
-      margin?: { left?: number; right?: number };
-    }) => jsPDF;
-    lastAutoTable: { finalY: number };
-  }
-}
+import autoTable from 'jspdf-autotable';
 
 export function getResolutionResult(resolution: Resolution, votes: VoteData[]): ResolutionResult {
   if (resolution.passerelle) {
@@ -46,14 +31,24 @@ export function getResolutionResult(resolution: Resolution, votes: VoteData[]): 
   });
 
   const total = pour + contre + abstention;
-  const pourcentagePour = total > 0 ? (pour / total) * 100 : 0;
+
+  // Use is_approved from DB when available (set during session),
+  // otherwise calculate from votes
+  let adopte: boolean;
+  if (resolution.resultat === 'ADOPTEE' || resolution.resultat === 'REJETEE') {
+    adopte = resolution.resultat === 'ADOPTEE';
+  } else if (total > 0) {
+    adopte = (pour / total) * 100 > 50;
+  } else {
+    adopte = false;
+  }
 
   return {
     pour,
     contre,
     abstention,
     total,
-    adopte: pourcentagePour > 50,
+    adopte,
   };
 }
 
@@ -210,7 +205,7 @@ export function generatePDFDocument(
   const allPresenceData = [...presentsData, ...representesData];
 
   if (allPresenceData.length > 0) {
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['Copropriétaire', 'Lot', 'Tantièmes', 'Statut']],
       body: allPresenceData,
@@ -218,7 +213,8 @@ export function generatePDFDocument(
       styles: { fontSize: 9 },
       headStyles: { fillColor: [16, 185, 129] },
     });
-    yPos = doc.lastAutoTable.finalY + 10;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    yPos = (doc as any).lastAutoTable.finalY + 10;
   }
 
   // Calcul des totaux

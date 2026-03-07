@@ -91,8 +91,18 @@ export default function EnvoiPage() {
 
       {/* Quick action buttons */}
       <div className={styles.docButtons}>
-        <button className={styles.docButton}>Feuille d&apos;émargement</button>
-        <button className={styles.docButton}>Convocation</button>
+        <button
+          className={styles.docButton}
+          onClick={() => window.open(`/ag/${agId}/feuille-presence`, '_blank')}
+        >
+          Feuille d&apos;émargement
+        </button>
+        <button
+          className={styles.docButton}
+          onClick={() => window.open(`/ag/${agId}/convocation`, '_blank')}
+        >
+          Convocation
+        </button>
       </div>
 
       {/* Table */}

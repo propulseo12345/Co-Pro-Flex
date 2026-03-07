@@ -298,6 +298,10 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
       }
 
       if (newPresenceType === 'absent') {
+        // Block setting absent if copro has correspondence votes
+        if (existingRecord?.presenceType === 'correspondence') {
+          return { success: false, error: 'Vote par correspondance : présence obligatoire' };
+        }
         // Remove attendance record
         if (existingRecord) {
           await removeAttendance(existingRecord.id);
@@ -376,11 +380,12 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
       const supabase = createUntypedClient();
 
       if (presenceType === 'absent') {
-        // Delete all attendance records for this AG
+        // Delete attendance records except correspondence votes
         await supabase
           .from('ag_attendance')
           .delete()
-          .eq('ag_id', agId);
+          .eq('ag_id', agId)
+          .neq('presence_type', 'correspondence');
       } else {
         // Get tantièmes for all copropriétaires via lot_owners
         const { data: allLotOwners } = await supabase
@@ -402,20 +407,29 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
           }
         }
 
-        // Upsert attendance for all copropriétaires
-        const records = coproprietaires.map(copro => {
-          const info = tantMap.get(copro.id) || { tantiemes: 0, lotIds: [] };
-          return {
-            ag_id: agId,
-            copro_id: agInfo.coproId,
-            coproprietaire_id: copro.id,
-            lot_ids: info.lotIds,
-            tantiemes: info.tantiemes,
-            presence_type: presenceType,
-            signed: false,
-            updated_at: new Date().toISOString(),
-          };
-        });
+        // Exclure les copropriétaires ayant voté par correspondance
+        const correspondenceIds = new Set(
+          attendanceRecords
+            .filter(a => a.presenceType === 'correspondence')
+            .map(a => a.coproprietaireId)
+        );
+
+        // Upsert attendance for all copropriétaires (sauf correspondance)
+        const records = coproprietaires
+          .filter(copro => !correspondenceIds.has(copro.id))
+          .map(copro => {
+            const info = tantMap.get(copro.id) || { tantiemes: 0, lotIds: [] };
+            return {
+              ag_id: agId,
+              copro_id: agInfo.coproId,
+              coproprietaire_id: copro.id,
+              lot_ids: info.lotIds,
+              tantiemes: info.tantiemes,
+              presence_type: presenceType,
+              signed: false,
+              updated_at: new Date().toISOString(),
+            };
+          });
 
         const { error: upsertError } = await supabase
           .from('ag_attendance')
@@ -437,7 +451,7 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
     } finally {
       setIsSaving(false);
     }
-  }, [agId, agInfo, coproprietaires, loadData]);
+  }, [agId, agInfo, coproprietaires, attendanceRecords, loadData]);
 
   /**
    * Save signature for a coproprietaire

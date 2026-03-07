@@ -36,6 +36,7 @@ interface VotesPanelProps {
   onSelectOwner: (owner: EligibleOwner | null) => void;
   onModeReceptionChange: (mode: 'postal' | 'email' | 'remise_main') => void;
   onSetVote: (resolutionId: string, vote: VoteDirection) => void;
+  onSetAllVotes: (vote: VoteDirection) => void;
   onClearVotes: () => void;
   onSubmit: () => void;
   getExistingVote: (resolutionId: string) => VoteDirection | null;
@@ -54,6 +55,7 @@ export function VotesPanel({
   onSelectOwner,
   onModeReceptionChange,
   onSetVote,
+  onSetAllVotes,
   onClearVotes,
   onSubmit,
   getExistingVote,
@@ -98,11 +100,42 @@ export function VotesPanel({
         </select>
       </div>
 
+      {/* Bulk vote buttons */}
+      <div className={styles.bulkVoteBar}>
+        <span className={styles.bulkVoteLabel}>Vote rapide :</span>
+        <div className={styles.bulkVoteButtons}>
+          <button
+            type="button"
+            className={clsx(styles.bulkVoteBtn, styles.bulkFor)}
+            onClick={() => onSetAllVotes('for')}
+          >
+            <Check size={14} />
+            Tout Pour
+          </button>
+          <button
+            type="button"
+            className={clsx(styles.bulkVoteBtn, styles.bulkAgainst)}
+            onClick={() => onSetAllVotes('against')}
+          >
+            <X size={14} />
+            Tout Contre
+          </button>
+          <button
+            type="button"
+            className={clsx(styles.bulkVoteBtn, styles.bulkAbstention)}
+            onClick={() => onSetAllVotes('abstention')}
+          >
+            Tout Abstention
+          </button>
+        </div>
+      </div>
+
       {/* Resolutions list */}
       <div className={styles.resolutionsList}>
         {resolutions.map((resolution) => {
           const existingVote = getExistingVote(resolution.id);
           const pendingVote = pendingVotes.get(resolution.id);
+          const currentVote = pendingVote || existingVote;
           const hasExistingVote = existingVote !== null;
 
           return (
@@ -110,7 +143,9 @@ export function VotesPanel({
               key={resolution.id}
               className={clsx(
                 styles.resolutionItem,
-                hasExistingVote && styles.resolutionVoted
+                currentVote === 'for' && styles.resolutionVotedFor,
+                currentVote === 'against' && styles.resolutionVotedAgainst,
+                currentVote === 'abstention' && styles.resolutionVotedAbstention,
               )}
             >
               <div className={styles.resolutionHeader}>

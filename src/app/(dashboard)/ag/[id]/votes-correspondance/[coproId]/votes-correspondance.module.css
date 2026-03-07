@@ -109,6 +109,80 @@
     color: var(--primary);
 }
 
+/* Vote rapide */
+.bulkVoteBar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.bulkVoteLabel {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.bulkVoteButtons {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.bulkVoteBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    border: 1px solid;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    background: var(--surface);
+}
+
+.bulkVoteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bulkFor {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.bulkFor:hover:not(:disabled) {
+    background: var(--success);
+    color: white;
+}
+
+.bulkAgainst {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.bulkAgainst:hover:not(:disabled) {
+    background: var(--danger);
+    color: white;
+}
+
+.bulkAbstention {
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+.bulkAbstention:hover:not(:disabled) {
+    background: var(--text-secondary);
+    color: white;
+}
+
 /* Liste des résolutions */
 .resolutionsList {
     display: flex;
@@ -125,9 +199,19 @@
     transition: all var(--transition-base);
 }
 
-.resolutionVoted {
+.resolutionVotedFor {
     border-color: var(--success);
     background: var(--success-light);
+}
+
+.resolutionVotedAgainst {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.resolutionVotedAbstention {
+    border-color: var(--warning, #f59e0b);
+    background: rgba(245, 158, 11, 0.05);
 }
 
 .resolutionHeader {

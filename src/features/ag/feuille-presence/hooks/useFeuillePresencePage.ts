@@ -28,6 +28,7 @@ export function useFeuillePresencePage() {
   } = useFeuillePresence({ agId });
 
   // Local UI state
+  const [lastBulkAction, setLastBulkAction] = useState<'present' | 'absent' | null>(null);
   const [showSignatures, setShowSignatures] = useState(false);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [currentSignatureCoproId, setCurrentSignatureCoproId] = useState<string | null>(null);
@@ -52,10 +53,12 @@ export function useFeuillePresencePage() {
 
   const handleBulkPresent = useCallback(async () => {
     await bulkSetPresence('present');
+    setLastBulkAction('present');
   }, [bulkSetPresence]);
 
   const handleBulkAbsent = useCallback(async () => {
     await bulkSetPresence('absent');
+    setLastBulkAction('absent');
   }, [bulkSetPresence]);
 
   const handleOpenSignature = useCallback((coproId: string) => {
@@ -106,6 +109,7 @@ export function useFeuillePresencePage() {
     error,
 
     // UI state
+    lastBulkAction,
     showSignatures,
     showSignatureModal,
     currentCopro,

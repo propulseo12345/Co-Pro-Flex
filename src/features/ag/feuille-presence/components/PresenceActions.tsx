@@ -6,6 +6,7 @@ interface PresenceActionsProps {
   showSignatures: boolean;
   isSaving: boolean;
   isLoading: boolean;
+  lastBulkAction?: 'present' | 'absent' | null;
   onBulkPresent: () => void;
   onBulkAbsent: () => void;
   onExportPDF: () => void;
@@ -17,6 +18,7 @@ export function PresenceActions({
   showSignatures,
   isSaving,
   isLoading,
+  lastBulkAction,
   onBulkPresent,
   onBulkAbsent,
   onExportPDF,
@@ -25,11 +27,19 @@ export function PresenceActions({
 }: PresenceActionsProps) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-      <button onClick={onBulkPresent} className="btn btn-primary" disabled={isSaving}>
+      <button
+        onClick={onBulkPresent}
+        className={`btn ${lastBulkAction === 'present' ? 'btn-primary' : 'btn-secondary'}`}
+        disabled={isSaving}
+      >
         <CheckSquare size={16} />
         Marquer tous présents
       </button>
-      <button onClick={onBulkAbsent} className="btn btn-secondary" disabled={isSaving}>
+      <button
+        onClick={onBulkAbsent}
+        className={`btn ${lastBulkAction === 'absent' ? 'btn-primary' : 'btn-secondary'}`}
+        disabled={isSaving}
+      >
         <Square size={16} />
         Marquer tous absents
       </button>

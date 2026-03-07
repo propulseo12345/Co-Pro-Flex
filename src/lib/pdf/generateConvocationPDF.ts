@@ -101,15 +101,17 @@ function txt(
   } = {}
 ): number {
   const { f = 'helvetica', s = 'normal', sz = 10, c = TEXT, a = 'left', mw } = opts;
+  // Remplacer U+202F (espace fine insécable) par espace normal — jsPDF le rend comme "/"
+  const safe = text.replace(/\u202F/g, ' ');
   doc.setFont(f, s);
   doc.setFontSize(sz);
   doc.setTextColor(...c);
   if (mw) {
-    const lines = doc.splitTextToSize(text, mw);
+    const lines = doc.splitTextToSize(safe, mw);
     doc.text(lines, x, y, { align: a });
     return lines.length * sz * 0.4;
   }
-  doc.text(text, x, y, { align: a });
+  doc.text(safe, x, y, { align: a });
   return sz * 0.4;
 }
 

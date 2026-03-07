@@ -82,8 +82,6 @@ export function ConvocationAnnexesSection({
     for (let i = 0; i < files.length; i++) {
       await uploadedDocs.uploadFile(files[i]);
     }
-    // Rendre les documents pour le PDF après upload
-    await uploadedDocs.renderDocuments();
   }, [uploadedDocs]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -104,9 +102,6 @@ export function ConvocationAnnexesSection({
   const handleRemove = useCallback(async (docId: string) => {
     if (!uploadedDocs) return;
     await uploadedDocs.removeFile(docId);
-    if (uploadedDocs.documents.length > 1) {
-      await uploadedDocs.renderDocuments();
-    }
   }, [uploadedDocs]);
 
   return (

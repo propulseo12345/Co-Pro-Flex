@@ -53,6 +53,7 @@ export function PresenceTable({
             const attendance = attendanceByCoprId.get(copro.id);
             const presenceType = attendance?.presenceType || 'absent';
             const isPresent = presenceType !== 'absent';
+            const isCorrespondence = presenceType === 'correspondence';
 
             return (
               <tr key={copro.id} className={isPresent ? styles.rowPresent : ''}>
@@ -66,7 +67,8 @@ export function PresenceTable({
                     value={presenceType}
                     onChange={(e) => onPresenceChange(copro.id, e.target.value)}
                     className={styles.statutSelect}
-                    disabled={isSaving}
+                    disabled={isSaving || isCorrespondence}
+                    title={isCorrespondence ? 'Vote par correspondance : présence obligatoire' : undefined}
                   >
                     <option value="absent">Absent</option>
                     <option value="present">Présent</option>

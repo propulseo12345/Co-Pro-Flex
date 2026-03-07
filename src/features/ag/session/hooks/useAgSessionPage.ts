@@ -7,8 +7,13 @@ import { useAgDetail, useAgVoters, useCastVote, useRegisterAttendance, useStartA
 import { useAGSessionPersistence } from '@/hooks/modules/useAGSessionPersistence';
 import { loadDraft, saveDraft } from '@/lib/ag/draft-persistence';
 import { presencesEnrichiesVersSimple } from '@/lib/utils/ag-session';
+import { createClient } from '@/lib/supabase/client';
 
+import { checkMajority } from '@/components/features/ag/Session/utils';
+import { updateResolution } from '@/lib/ag/api/resolutions.api';
+import { castVote as castVoteApi } from '@/lib/ag/api/votes.api';
 import type { UseAgSessionPageParams, UseAgSessionPageReturn, SessionDraftData, VoteData, VoteSource } from '../types';
+import { toDbVote } from '../services/sessionHelpers';
 
 import { useSessionParticipants } from './useSessionParticipants';
 import { useSessionPresence } from './useSessionPresence';
@@ -18,6 +23,15 @@ import { useSessionVariables } from './useSessionVariables';
 import { useSessionProjector } from './useSessionProjector';
 import { useSessionModals } from './useSessionModals';
 import { exportSessionToCSV } from '../services/sessionExport';
+
+type DesignationCategorie = 'scrutateur' | 'conseil_syndical';
+
+function getDesignationCategorie(titre: string): DesignationCategorie | null {
+  const lower = titre.toLowerCase();
+  if (lower.includes('scrutateur')) return 'scrutateur';
+  if (lower.includes('membre') && lower.includes('conseil syndical')) return 'conseil_syndical';
+  return null;
+}
 
 export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSessionPageReturn {
   const router = useRouter();
@@ -75,6 +89,9 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   const passerelleResolutionRef = useRef<import('../types').Resolution | null>(null);
   const passerelleVoteInitialRef = useRef<import('../types').PasserelleVoteInitial | null>(null);
 
+  // Ref for resolutions (to persist per-resolution variables without stale closure)
+  const resolutionsRef = useRef<import('../types').Resolution[]>([]);
+
   // Resolutions hook (needs saveSession callback - defined below)
   const saveSession = useCallback(async () => {
     const sessionData: SessionDraftData = {
@@ -86,6 +103,15 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     };
     await saveDraft(agId, 'session', sessionData);
     await saveDraft(agId, 'votes', votesRef.current);
+
+    // Save per-resolution variable overrides
+    const resVarOverrides: Record<string, Record<string, string>> = {};
+    for (const res of resolutionsRef.current) {
+      if (res.variables && Object.keys(res.variables).length > 0) {
+        resVarOverrides[res.id] = res.variables;
+      }
+    }
+    await saveDraft(agId, 'resolution_vars', resVarOverrides);
   }, [agId]);
 
   const resolutionsHook = useSessionResolutions({
@@ -128,6 +154,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   }, [votingHook.votes, persistence.markDirty]);
 
   // Keep refs in sync for saveSession
+  resolutionsRef.current = resolutionsHook.resolutions;
   votesRef.current = votingHook.votes;
   sessionStateRef.current = resolutionsHook.sessionState;
   presencesEnrichiesRef.current = presenceHook.presencesEnrichies;
@@ -149,16 +176,28 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     totalTantiemes,
   });
 
-  // Set persistence data getter (includes votes for auto-save)
+  // Set persistence data getter (includes votes + per-resolution vars for auto-save)
   useEffect(() => {
-    persistence.setDataGetter(() => ({
-      presencesEnrichies: presenceHook.presencesEnrichies,
-      votesParResolution: votingHook.votes as unknown as Record<string, unknown>,
-      resolutionActiveIndex: resolutionsHook.sessionState.currentResolutionIndex,
-      completedResolutions: resolutionsHook.sessionState.completedResolutions,
-      sessionStarted: resolutionsHook.sessionState.started,
-    }));
-  }, [presenceHook.presencesEnrichies, votingHook.votes, resolutionsHook.sessionState, persistence.setDataGetter]);
+    persistence.setDataGetter(() => {
+      // Build per-resolution variable overrides for auto-save
+      const resVarOverrides: Record<string, Record<string, string>> = {};
+      for (const res of resolutionsHook.resolutions) {
+        if (res.variables && Object.keys(res.variables).length > 0) {
+          resVarOverrides[res.id] = res.variables;
+        }
+      }
+      // Save per-resolution vars draft alongside auto-save
+      saveDraft(agId, 'resolution_vars', resVarOverrides);
+
+      return {
+        presencesEnrichies: presenceHook.presencesEnrichies,
+        votesParResolution: votingHook.votes as unknown as Record<string, unknown>,
+        resolutionActiveIndex: resolutionsHook.sessionState.currentResolutionIndex,
+        completedResolutions: resolutionsHook.sessionState.completedResolutions,
+        sessionStarted: resolutionsHook.sessionState.started,
+      };
+    });
+  }, [agId, presenceHook.presencesEnrichies, votingHook.votes, resolutionsHook.resolutions, resolutionsHook.sessionState, persistence.setDataGetter]);
 
   // Load session data on mount
   useEffect(() => {
@@ -166,12 +205,24 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       if (useSupabase && dbResolutions.length > 0) {
         const mergedVariables = resolutionsHook.initializeResolutions(dbResolutions);
 
-        // Load variables draft
+        // Restore per-resolution variable overrides from draft
+        const resVarsDraft = await loadDraft<Record<string, Record<string, string>>>(agId, 'resolution_vars');
+        if (resVarsDraft.data) {
+          for (const [resId, vars] of Object.entries(resVarsDraft.data)) {
+            for (const [varName, value] of Object.entries(vars)) {
+              resolutionsHook.updateResolutionVariable(resId, varName, value);
+            }
+          }
+        }
+
+        // Load global variables draft and merge with DB resolution variables
         const variablesDraft = await loadDraft<Record<string, string>>(agId, 'variables');
+        const baseVariables = { ...mergedVariables };
         if (variablesDraft.data) {
-          variablesHook.setVariableValues(variablesDraft.data);
-        } else if (Object.keys(mergedVariables).length > 0) {
-          variablesHook.setVariableValues(mergedVariables);
+          Object.assign(baseVariables, variablesDraft.data);
+        }
+        if (Object.keys(baseVariables).length > 0) {
+          variablesHook.setVariableValues(baseVariables);
         }
       }
 
@@ -183,8 +234,46 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
           ...v,
           source: v.source || (v.vote !== null ? 'CORRESPONDANCE' as VoteSource : null)
         }));
-        votingHook.setVotes(loadedVotes);
       }
+
+      // Load correspondence votes from Supabase and merge them in
+      if (useSupabase) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const supabase = createClient() as any;
+          const resolutionIds = dbResolutions.map(r => r.id);
+          if (resolutionIds.length > 0) {
+            const { data: corrVotes } = await supabase
+              .from('ag_votes')
+              .select('resolution_id, coproprietaire_id, vote, tantiemes')
+              .in('resolution_id', resolutionIds)
+              .eq('vote_source', 'correspondence');
+
+            if (corrVotes && corrVotes.length > 0) {
+              const dbVoteMap: Record<string, string> = { for: 'POUR', against: 'CONTRE', abstention: 'ABSTENTION' };
+              for (const cv of corrVotes as Array<{ resolution_id: string; coproprietaire_id: string; vote: string; tantiemes: number }>) {
+                const mappedVote = dbVoteMap[cv.vote] as VoteData['vote'];
+                if (!mappedVote) continue;
+                // Remove any existing draft entry for this resolution+copro
+                loadedVotes = loadedVotes.filter(
+                  v => !(v.resolutionId === cv.resolution_id && v.coproprietaireId === cv.coproprietaire_id)
+                );
+                loadedVotes.push({
+                  resolutionId: cv.resolution_id,
+                  coproprietaireId: cv.coproprietaire_id,
+                  vote: mappedVote,
+                  tantiemes: cv.tantiemes || 0,
+                  source: 'CORRESPONDANCE' as VoteSource,
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.error('[useAgSessionPage] Error loading correspondence votes:', err);
+        }
+      }
+
+      votingHook.setVotes(loadedVotes);
 
       // Load session draft
       const sessionDraft = await loadDraft<SessionDraftData>(agId, 'session');
@@ -299,9 +388,100 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     );
   }, [votingHook, resolutionsHook, modalsHook]);
 
+  // Persist vote result + batch votes to Supabase when moving to next resolution
+  const persistResolutionResult = useCallback(async () => {
+    if (!useSupabase || !isManager) return;
+    const current = resolutionsHook.currentResolution;
+    if (!current || !votingHook.stats) return;
+
+    // 1. Compute result and save is_approved
+    const result = checkMajority(current, votingHook.stats, votingHook.votes, {
+      totalTantiemes,
+      totalCoproprietaires: coproprietaires.length,
+    });
+
+    // Only persist if resolution ID is a real UUID (not a duplicated one)
+    if (!current.id.includes('_dup_')) {
+      try {
+        await updateResolution(current.id, { is_approved: result.adopted });
+      } catch (err) {
+        console.error('[persistResolutionResult] is_approved update failed:', err);
+      }
+
+      // 2. Batch-save DIRECT votes that might not have been individually persisted
+      const resVotes = votingHook.votes.filter(
+        v => v.resolutionId === current.id && v.source === 'DIRECT' && v.vote
+      );
+      for (const v of resVotes) {
+        const dbVote = toDbVote(v.vote);
+        if (!dbVote) continue;
+        try {
+          await castVoteApi({
+            resolution_id: current.id,
+            copro_id: currentCoproId!,
+            coproprietaire_id: v.coproprietaireId,
+            vote: dbVote,
+            vote_source: 'live',
+          });
+        } catch {
+          // Individual vote save failure — non-blocking
+        }
+      }
+    }
+  }, [useSupabase, isManager, resolutionsHook.currentResolution, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, currentCoproId]);
+
   const confirmNextFromModal = useCallback(() => {
+    // Persist votes + is_approved to Supabase (fire-and-forget)
+    persistResolutionResult();
+
+    const current = resolutionsHook.currentResolution;
+
+    // Check if this is an adopted designation resolution
+    if (current) {
+      const categorie = getDesignationCategorie(current.titre);
+      if (categorie) {
+        const result = checkMajority(current, votingHook.stats!, votingHook.votes, {
+          totalTantiemes,
+          totalCoproprietaires: coproprietaires.length,
+        });
+
+        if (result.adopted) {
+          const nombreActuel = resolutionsHook.resolutions
+            .filter(r => {
+              const cat = getDesignationCategorie(r.titre);
+              return cat === categorie && r.resultat === 'ADOPTEE';
+            })
+            .length + 1;
+
+          modalsHook.setShowResultModal(false);
+          modalsHook.setPendingNextResolution(false);
+          modalsHook.setDesignationCategorie(categorie);
+          modalsHook.setDesignationNombreActuel(nombreActuel);
+          modalsHook.setShowAjoutDesignationModal(true);
+          return;
+        }
+      }
+    }
+
     modalsHook.confirmNextFromModal(resolutionsHook.handleNextResolution);
-  }, [modalsHook, resolutionsHook]);
+  }, [modalsHook, resolutionsHook, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, persistResolutionResult]);
+
+  const handleDesignationConfirmAjout = useCallback(() => {
+    resolutionsHook.insertResolutionAfterCurrent();
+    resolutionsHook.handleNextResolution();
+    modalsHook.setShowAjoutDesignationModal(false);
+  }, [resolutionsHook, modalsHook]);
+
+  const handleDesignationRefuserAjout = useCallback(() => {
+    modalsHook.setShowAjoutDesignationModal(false);
+    resolutionsHook.handleNextResolution();
+  }, [resolutionsHook, modalsHook]);
+
+  // Also persist when closing result modal without navigating
+  const handleCloseResultModal = useCallback(() => {
+    persistResolutionResult();
+    modalsHook.closeResultModal();
+  }, [persistResolutionResult, modalsHook]);
 
   const confirmContinueWithWarning = useCallback(() => {
     variablesHook.confirmContinueWithWarning(
@@ -309,6 +489,41 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       () => modalsHook.setPendingNextResolution(true)
     );
   }, [variablesHook, modalsHook]);
+
+  // Per-resolution variable handlers: read/write from the resolution's own variables
+  const handleVariableClick = useCallback((variableName: string) => {
+    const currentRes = resolutionsHook.currentResolution;
+    const resValue = currentRes?.variables?.[variableName];
+    const globalValue = variablesHook.allVariables[variableName];
+    const initialValue = resValue ?? globalValue ?? '';
+    variablesHook.setEditingVariable({ name: variableName, value: initialValue });
+    variablesHook.setShowVariableModal(true);
+  }, [resolutionsHook.currentResolution, variablesHook.allVariables]);
+
+  const handleSaveVariable = useCallback(() => {
+    const editing = variablesHook.editingVariable;
+    if (!editing) return;
+
+    // Update the resolution's own variables (per-resolution)
+    const currentRes = resolutionsHook.currentResolution;
+    if (currentRes) {
+      resolutionsHook.updateResolutionVariable(currentRes.id, editing.name, editing.value);
+    }
+
+    // Also save via the global variable system (for backward compat + draft persistence)
+    variablesHook.handleSaveVariable();
+  }, [variablesHook, resolutionsHook.currentResolution, resolutionsHook.updateResolutionVariable]);
+
+  const handlePrefillFromCopro = useCallback((variableName: string, coproId: string) => {
+    const copro = coproprietaires.find(c => c.id === coproId);
+    if (copro) {
+      const currentRes = resolutionsHook.currentResolution;
+      if (currentRes) {
+        resolutionsHook.updateResolutionVariable(currentRes.id, variableName, copro.nom);
+      }
+    }
+    variablesHook.handlePrefillFromCopro(variableName, coproId);
+  }, [coproprietaires, resolutionsHook.currentResolution, resolutionsHook.updateResolutionVariable, variablesHook]);
 
   return {
     // State
@@ -338,6 +553,9 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     showValidationWarning: variablesHook.showValidationWarning,
     missingVariables: variablesHook.missingVariables,
     showPrefillDropdown: variablesHook.showPrefillDropdown,
+    showAjoutDesignationModal: modalsHook.showAjoutDesignationModal,
+    designationCategorie: modalsHook.designationCategorie,
+    designationNombreActuel: modalsHook.designationNombreActuel,
     showProjectorModal: projectorHook.showProjectorModal,
     projectorUrl: projectorHook.projectorUrl,
     copiedToClipboard: projectorHook.copiedToClipboard,
@@ -374,10 +592,10 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     handlePasserelleSecondVote,
     handlePasserelleAjournement,
 
-    // Variable handlers
-    handleVariableClick: variablesHook.handleVariableClick,
-    handleSaveVariable: variablesHook.handleSaveVariable,
-    handlePrefillFromCopro: variablesHook.handlePrefillFromCopro,
+    // Variable handlers (per-resolution aware)
+    handleVariableClick,
+    handleSaveVariable,
+    handlePrefillFromCopro,
     setEditingVariable: variablesHook.setEditingVariable,
     setShowPrefillDropdown: variablesHook.setShowPrefillDropdown,
 
@@ -395,8 +613,12 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     // Export
     handleExportCSV,
 
+    // Designation handlers
+    handleDesignationConfirmAjout,
+    handleDesignationRefuserAjout,
+
     // Modal handlers
-    closeResultModal: modalsHook.closeResultModal,
+    closeResultModal: handleCloseResultModal,
     confirmNextFromModal,
     closeVariableModal: variablesHook.closeVariableModal,
     closeValidationWarning: variablesHook.closeValidationWarning,

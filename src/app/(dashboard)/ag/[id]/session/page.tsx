@@ -13,6 +13,7 @@ import {
   PasserelleModal,
   VariableModal,
   ValidationWarningModal,
+  AjoutDesignationModal,
 } from '@/components/features/ag/Session';
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { useAgSessionPage } from '@/features/ag/hooks/useAgSessionPage';
@@ -198,6 +199,23 @@ export default function SessionPage() {
           missingVariables={session.missingVariables}
           onClose={session.closeValidationWarning}
           onConfirmContinue={session.confirmContinueWithWarning}
+        />
+      )}
+
+      {session.showAjoutDesignationModal && session.designationCategorie && (
+        <AjoutDesignationModal
+          isOpen={session.showAjoutDesignationModal}
+          onClose={session.handleDesignationRefuserAjout}
+          onConfirm={session.handleDesignationConfirmAjout}
+          onCancel={session.handleDesignationRefuserAjout}
+          categorie={session.designationCategorie}
+          question={
+            session.designationCategorie === 'scrutateur'
+              ? 'Voulez-vous désigner un autre scrutateur ?'
+              : 'Voulez-vous élire un autre membre du conseil syndical ?'
+          }
+          nombreActuel={session.designationNombreActuel}
+          nombreMinimum={1}
         />
       )}
 

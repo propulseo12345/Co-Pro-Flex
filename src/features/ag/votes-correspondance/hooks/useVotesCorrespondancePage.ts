@@ -52,6 +52,18 @@ export function useVotesCorrespondancePage() {
     );
   }, [owners, searchTerm]);
 
+  // Bulk vote: set all resolutions to same direction (skip already voted)
+  const setAllVotes = useCallback((direction: VoteDirection) => {
+    resolutions.forEach((res) => {
+      const existingVote = selectedOwner?.voted_resolutions?.find(
+        (v: { resolution_id: string }) => v.resolution_id === res.id
+      )?.vote;
+      if (!existingVote) {
+        setVote(res.id, direction);
+      }
+    });
+  }, [resolutions, selectedOwner, setVote]);
+
   // Handle vote submission
   const handleSubmit = useCallback(async () => {
     const result = await submitVotes(modeReception);
@@ -109,6 +121,7 @@ export function useVotesCorrespondancePage() {
     filteredOwners,
     // Handlers
     handleSubmit,
+    setAllVotes,
     getExistingVote,
   };
 }

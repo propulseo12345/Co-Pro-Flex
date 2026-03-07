@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getActiveAccountingPeriod } from '@/lib/finance/accounting-period';
+import { getActiveAccountingPeriod, getClosedPeriodForYear } from '@/lib/finance/accounting-period';
 import type {
   AnnexeData1,
   AnnexeData2,
@@ -60,16 +60,32 @@ export function useConvocationAccountingData({
     setError(null);
 
     try {
-      // 1. Récupérer la période comptable active
-      const periodResult = await getActiveAccountingPeriod(coproId);
-      if (!periodResult.data) {
-        setError('Aucune période comptable ouverte');
+      // 1. Récupérer la période comptable
+      // Pour une AGO, les annexes concernent l'exercice CLOS (N-1), pas l'exercice en cours.
+      // On cherche d'abord la période fermée, puis en fallback la période ouverte.
+      let periodId: string | null = null;
+      let ex = exercice || '';
+
+      // Essayer la période fermée la plus récente (ou par année si exercice spécifié)
+      const exerciceYear = exercice ? parseInt(exercice, 10) : undefined;
+      const closedResult = await getClosedPeriodForYear(coproId, exerciceYear && !isNaN(exerciceYear) ? exerciceYear : undefined);
+      if (closedResult.data) {
+        periodId = closedResult.data.id;
+        ex = ex || closedResult.data.label || String(closedResult.data.year);
+      } else {
+        // Fallback: période ouverte (exercice en cours)
+        const openResult = await getActiveAccountingPeriod(coproId);
+        if (openResult.data) {
+          periodId = openResult.data.id;
+          ex = ex || openResult.data.label || String(openResult.data.year);
+        }
+      }
+
+      if (!periodId) {
+        setError('Aucune période comptable disponible');
         setIsLoading(false);
         return;
       }
-
-      const periodId = periodResult.data.id;
-      const ex = exercice || periodResult.data.label || String(periodResult.data.year);
 
       const supabase = createUntypedClient();
 

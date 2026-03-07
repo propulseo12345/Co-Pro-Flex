@@ -217,6 +217,7 @@ async function registerAttendanceDirect(input: RegisterAttendanceInput): Promise
       .eq('coproprietaire_id', input.coproprietaire_id)
       .maybeSingle();
 
+    const isCorrespondence = input.presence_type === 'correspondence';
     const attendanceData = {
       ag_id: input.ag_id,
       copro_id: input.copro_id,
@@ -226,7 +227,8 @@ async function registerAttendanceDirect(input: RegisterAttendanceInput): Promise
       presence_type: input.presence_type,
       represented_by_id: input.represented_by_id || null,
       represented_by_name: input.represented_by_name || null,
-      signed: false,
+      signed: isCorrespondence,
+      signed_at: isCorrespondence ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     };
 

@@ -20,6 +20,8 @@ export interface UseSessionResolutionsReturn {
   handlePrevResolution: () => void;
   handleNavigateToResolution: (index: number) => void;
   updateResolutionWithPasserelle: (resolutionId: string, passerelleData: PasserelleMajorite, resultat: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE') => void;
+  updateResolutionVariable: (resolutionId: string, varName: string, value: string) => void;
+  insertResolutionAfterCurrent: () => void;
 }
 
 interface UseSessionResolutionsParams {
@@ -123,6 +125,32 @@ export function useSessionResolutions({
     saveDraft(agId, 'resolutions', updatedResolutions);
   }, [resolutions, agId]);
 
+  const updateResolutionVariable = useCallback((resolutionId: string, varName: string, value: string) => {
+    setResolutions(prev => prev.map(r =>
+      r.id === resolutionId
+        ? { ...r, variables: { ...r.variables, [varName]: value } }
+        : r
+    ));
+  }, []);
+
+  const insertResolutionAfterCurrent = useCallback(() => {
+    const current = resolutions[sessionState.currentResolutionIndex];
+    if (!current) return;
+
+    const duplicate: Resolution = {
+      id: `${current.id}_dup_${Date.now()}`,
+      titre: current.titre,
+      texte: current.texte,
+      majorite: current.majorite,
+    };
+
+    setResolutions(prev => {
+      const next = [...prev];
+      next.splice(sessionState.currentResolutionIndex + 1, 0, duplicate);
+      return next;
+    });
+  }, [resolutions, sessionState.currentResolutionIndex]);
+
   return {
     resolutions,
     sessionState,
@@ -135,5 +163,7 @@ export function useSessionResolutions({
     handlePrevResolution,
     handleNavigateToResolution,
     updateResolutionWithPasserelle,
+    updateResolutionVariable,
+    insertResolutionAfterCurrent,
   };
 }

@@ -69,6 +69,9 @@ export interface UseAgSessionPageReturn {
   showValidationWarning: boolean;
   missingVariables: string[];
   showPrefillDropdown: string | null;
+  showAjoutDesignationModal: boolean;
+  designationCategorie: 'scrutateur' | 'conseil_syndical' | null;
+  designationNombreActuel: number;
   showProjectorModal: boolean;
   projectorUrl: string;
   copiedToClipboard: boolean;
@@ -125,6 +128,10 @@ export interface UseAgSessionPageReturn {
 
   // Export
   handleExportCSV: () => void;
+
+  // Designation handlers
+  handleDesignationConfirmAjout: () => void;
+  handleDesignationRefuserAjout: () => void;
 
   // Modal handlers
   closeResultModal: () => void;

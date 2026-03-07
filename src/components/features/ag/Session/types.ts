@@ -8,6 +8,7 @@ export interface Resolution {
   majorite: string;
   passerelle?: unknown;
   resultat?: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE';
+  variables?: Record<string, string>;
 }
 
 export interface VoteData {

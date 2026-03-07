@@ -141,7 +141,8 @@ export const validateResolutionVariables = (resolution: Resolution, variableValu
 
   while ((match = variablePattern.exec(resolution.texte)) !== null) {
     const variableName = match[1];
-    if (!variableValues[variableName]) {
+    const value = resolution.variables?.[variableName] || variableValues[variableName];
+    if (!value) {
       missing.push(variableName);
     }
   }

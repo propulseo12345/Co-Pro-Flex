@@ -27,6 +27,7 @@ export default function VotesCorrespondanceCoproPage() {
     totalVotes,
     progression,
     handleVoteChange,
+    handleSetAllVotes,
     handleSave,
     handleValider,
     handleBack,
@@ -66,6 +67,7 @@ export default function VotesCorrespondanceCoproPage() {
         isValidated={isValidated}
         isSaving={isSaving}
         onVoteChange={handleVoteChange}
+        onSetAllVotes={handleSetAllVotes}
       />
 
       {!isValidated && (

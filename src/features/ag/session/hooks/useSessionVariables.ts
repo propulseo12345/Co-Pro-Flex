@@ -18,6 +18,7 @@ export interface UseSessionVariablesReturn {
   showPrefillDropdown: string | null;
   setVariableValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   setEditingVariable: React.Dispatch<React.SetStateAction<EditingVariable | null>>;
+  setShowVariableModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowPrefillDropdown: React.Dispatch<React.SetStateAction<string | null>>;
   handleVariableClick: (variableName: string) => void;
   handleSaveVariable: () => void;
@@ -137,6 +138,7 @@ export function useSessionVariables({
     showPrefillDropdown,
     setVariableValues,
     setEditingVariable,
+    setShowVariableModal,
     setShowPrefillDropdown,
     handleVariableClick,
     handleSaveVariable,

@@ -181,6 +181,17 @@ export function useVotesCorrespondanceCoproPage() {
     );
   }, [isValidated]);
 
+  const handleSetAllVotes = useCallback((choix: VoteChoice) => {
+    if (isValidated) return;
+    setVotes(prev =>
+      prev.map(vote => ({
+        ...vote,
+        choix,
+        dateVote: new Date().toISOString(),
+      }))
+    );
+  }, [isValidated]);
+
   const handleSave = useCallback(async () => {
     if (!isValidUUID(agId) || !copro) return;
 
@@ -189,7 +200,6 @@ export function useVotesCorrespondanceCoproPage() {
     try {
       const supabase = createUntypedClient();
 
-      // Build votes array for RPC
       const votesToSave = votes
         .filter(v => v.choix !== 'NON_VOTE')
         .map(v => ({
@@ -207,10 +217,12 @@ export function useVotesCorrespondanceCoproPage() {
 
       if (error) {
         console.error('[VotesCorrespondanceCoproPage] Error saving:', error);
-        alert('Erreur lors de la sauvegarde');
+        alert(`Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`);
       } else if (data?.success) {
         setSavedMessage(true);
         setTimeout(() => setSavedMessage(false), 3000);
+      } else if (data?.error) {
+        alert(`Erreur: ${data.error}`);
       }
     } catch (err) {
       console.error('[VotesCorrespondanceCoproPage] Save error:', err);
@@ -223,7 +235,6 @@ export function useVotesCorrespondanceCoproPage() {
   const handleValider = useCallback(async () => {
     if (!isValidUUID(agId) || !copro) return;
 
-    // Check incomplete votes
     const votesNonRenseignes = votes.filter(v => v.choix === 'NON_VOTE').length;
     if (votesNonRenseignes > 0) {
       if (!confirm(`${votesNonRenseignes} vote(s) n'est/ne sont pas renseigne(s). Voulez-vous quand meme valider ?`)) {
@@ -236,7 +247,6 @@ export function useVotesCorrespondanceCoproPage() {
     try {
       const supabase = createUntypedClient();
 
-      // Build votes array for RPC
       const votesToSave = votes
         .filter(v => v.choix !== 'NON_VOTE')
         .map(v => ({
@@ -254,11 +264,13 @@ export function useVotesCorrespondanceCoproPage() {
 
       if (error) {
         console.error('[VotesCorrespondanceCoproPage] Error validating:', error);
-        alert('Erreur lors de la validation');
+        alert(`Erreur lors de la validation: ${error.message || 'Erreur inconnue'}`);
       } else if (data?.success) {
         setIsValidated(true);
         alert('Vote par correspondance valide avec succes !');
         router.back();
+      } else if (data?.error) {
+        alert(`Erreur: ${data.error}`);
       }
     } catch (err) {
       console.error('[VotesCorrespondanceCoproPage] Validate error:', err);
@@ -292,6 +304,7 @@ export function useVotesCorrespondanceCoproPage() {
     progression,
     // Handlers
     handleVoteChange,
+    handleSetAllVotes,
     handleSave,
     handleValider,
     handleBack,

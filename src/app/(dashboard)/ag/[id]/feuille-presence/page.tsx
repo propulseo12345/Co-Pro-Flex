@@ -12,7 +12,7 @@
  * Zéro mock, zéro localStorage, zéro state comme vérité métier.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Users } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
@@ -49,6 +49,7 @@ export default function FeuillePresencePage() {
     error,
 
     // UI state
+    lastBulkAction,
     showSignatures,
     showSignatureModal,
     currentCopro,
@@ -102,6 +103,7 @@ export default function FeuillePresencePage() {
         showSignatures={showSignatures}
         isSaving={isSaving}
         isLoading={isLoading}
+        lastBulkAction={lastBulkAction}
         onBulkPresent={handleBulkPresent}
         onBulkAbsent={handleBulkAbsent}
         onExportPDF={handleExportPDF}
@@ -159,7 +161,27 @@ export default function FeuillePresencePage() {
 
         <button
           className="btn btn-primary"
-          onClick={() => router.push(`/ag/${agId}/session`)}
+          onClick={() => {
+            // Check for unsigned present/proxy attendees (correspondence excluded)
+            const unsignedNames: string[] = [];
+            coproprietaires.forEach((copro) => {
+              const att = attendanceByCoprId.get(copro.id);
+              if (att && att.presenceType !== 'correspondence' && !att.signed) {
+                unsignedNames.push(copro.displayName);
+              }
+            });
+
+            if (unsignedNames.length > 0) {
+              const proceed = confirm(
+                `${unsignedNames.length} copropriétaire(s) présent(s) n'ont pas encore signé la feuille de présence :\n\n` +
+                `${unsignedNames.slice(0, 10).join('\n')}${unsignedNames.length > 10 ? `\n... et ${unsignedNames.length - 10} autre(s)` : ''}\n\n` +
+                `Voulez-vous continuer malgré tout ?`
+              );
+              if (!proceed) return;
+            }
+
+            router.push(`/ag/${agId}/session`);
+          }}
           disabled={isSaving || !quorumStats || (quorumStats.presentCount + quorumStats.proxyCount) === 0}
         >
           Continuer vers la session

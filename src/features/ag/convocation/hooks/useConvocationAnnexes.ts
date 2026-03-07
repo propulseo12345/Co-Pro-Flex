@@ -135,7 +135,13 @@ export function useConvocationAnnexes(agType: AGType | null): UseConvocationAnne
     );
   }, [type]);
 
-  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
+  // Les documents optionnels sont exclus par defaut (seuls les obligatoires sont inclus)
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(() => {
+    const optionalIds = ANNEXES_DEFINITIONS
+      .filter((def) => !def.obligatoire && (!def.agTypes || def.agTypes.includes(type)))
+      .map((def) => def.id);
+    return new Set(optionalIds);
+  });
 
   const annexes = useMemo<AnnexeItem[]>(() => {
     return filteredDefinitions.map((def) => ({

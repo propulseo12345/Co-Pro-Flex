@@ -79,7 +79,8 @@ export function SessionVotingContent({
       const match = part.match(/^\{(.+)\}$/);
       if (match) {
         const variableName = match[1];
-        const value = allVariables[variableName];
+        // Priority: resolution's own variables (per-resolution, updated on edit) > global allVariables
+        const value = currentResolution.variables?.[variableName] || allVariables[variableName] || '';
         const hasValue = Boolean(value?.trim());
         const isRole = isRoleVariable(variableName);
         const isGlobalPrefilled = prefillVariables[variableName] && !variableValues[variableName];

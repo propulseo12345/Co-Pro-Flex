@@ -556,16 +556,14 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         id: 'cs-04',
         titre: 'Nomination du syndic',
         categorie: 'Conseil syndical et syndic',
-        texte: 'L\'assemblée générale nomme {nom_syndic} en qualité de syndic de la copropriété pour une durée de {duree_mandat_mois}, à compter du {date_debut}. Les honoraires sont fixés à {honoraires_annuels_ttc} TTC par an. Le forfait par assemblée générale supplémentaire est fixé à {forfait_ag_ttc} TTC. Les frais de mutation sont fixés à {frais_mutation_ttc} TTC.',
+        texte: 'L\'assemblée générale nomme {nom_syndic} en qualité de syndic de la copropriété pour une durée de {duree_mandat_mois}, à compter du {date_debut}. Les honoraires sont fixés à {honoraires_annuels_ttc} TTC par an.',
         majorite: 'ART_24',
-        variables: ['nom_syndic', 'duree_mandat_mois', 'date_debut', 'honoraires_annuels_ttc', 'forfait_ag_ttc', 'frais_mutation_ttc'],
+        variables: ['nom_syndic', 'duree_mandat_mois', 'date_debut', 'honoraires_annuels_ttc'],
         variablesTypees: [
             { name: 'nom_syndic', type: 'gestionnaire', label: 'Nom du syndic', required: true },
             { name: 'duree_mandat_mois', type: 'duree_mois', label: 'Durée du mandat (3 à 36 mois)', placeholder: 'Ex: 12', required: true },
             { name: 'date_debut', type: 'date', label: 'Date de début du mandat', required: true },
-            { name: 'honoraires_annuels_ttc', type: 'montant', label: 'Honoraires annuels TTC', required: true },
-            { name: 'forfait_ag_ttc', type: 'montant', label: 'Forfait AG supplémentaire TTC', required: true },
-            { name: 'frais_mutation_ttc', type: 'montant', label: 'Frais de mutation TTC', required: true }
+            { name: 'honoraires_annuels_ttc', type: 'montant', label: 'Honoraires annuels TTC', required: true }
         ],
         applicable_ag: ['ORDINAIRE', 'EXTRAORDINAIRE'],
         tags: ['syndic', 'nomination', 'contrat']
@@ -574,15 +572,13 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
         id: 'cs-05',
         titre: 'Renouvellement du mandat du syndic',
         categorie: 'Conseil syndical et syndic',
-        texte: 'L\'assemblée générale renouvelle le mandat du syndic {nom_syndic} pour une durée de {duree_mandat_mois}. Les honoraires sont fixés à {honoraires_annuels_ttc} TTC par an. Le forfait par assemblée générale supplémentaire est fixé à {forfait_ag_ttc} TTC. Les frais de mutation sont fixés à {frais_mutation_ttc} TTC.',
+        texte: 'L\'assemblée générale renouvelle le mandat du syndic {nom_syndic} pour une durée de {duree_mandat_mois}. Les honoraires sont fixés à {honoraires_annuels_ttc} TTC par an.',
         majorite: 'ART_24',
-        variables: ['nom_syndic', 'duree_mandat_mois', 'honoraires_annuels_ttc', 'forfait_ag_ttc', 'frais_mutation_ttc'],
+        variables: ['nom_syndic', 'duree_mandat_mois', 'honoraires_annuels_ttc'],
         variablesTypees: [
             { name: 'nom_syndic', type: 'gestionnaire', label: 'Nom du syndic', required: true },
             { name: 'duree_mandat_mois', type: 'duree_mois', label: 'Durée du mandat (3 à 36 mois)', placeholder: 'Ex: 12', required: true },
-            { name: 'honoraires_annuels_ttc', type: 'montant', label: 'Honoraires annuels TTC', required: true },
-            { name: 'forfait_ag_ttc', type: 'montant', label: 'Forfait AG supplémentaire TTC', required: true },
-            { name: 'frais_mutation_ttc', type: 'montant', label: 'Frais de mutation TTC', required: true }
+            { name: 'honoraires_annuels_ttc', type: 'montant', label: 'Honoraires annuels TTC', required: true }
         ],
         applicable_ag: ['ORDINAIRE'],
         obligatoire_pour: ['ORDINAIRE'],
