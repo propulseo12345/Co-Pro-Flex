@@ -8,6 +8,8 @@ import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import { createClient } from '@/lib/supabase/client';
 import { AGFormat } from '@/types';
 import type { AgMeeting, AgMeetingType } from '@/lib/ag/types';
+import { POSTES_DEPENSES, BUDGET_PRECEDENT, POSTE_ACCOUNT_MAPPING } from '@/features/ag/new/domain/constants';
+import { useAccountsAndKeys } from '@/features/ag/new/hooks/useAccountsAndKeys';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
@@ -90,32 +92,13 @@ function combineDateAndTime(date: string, heure: string): string {
   return `${date}T${heure}:00`;
 }
 
-const BUDGET_PRECEDENT = {
-  exercice: new Date().getFullYear(),
-  postes: [
-    { id: 'prev-1', poste: 'Eau', montant: 2500 },
-    { id: 'prev-2', poste: 'Assurance', montant: 4200 },
-    { id: 'prev-3', poste: 'Électricité', montant: 1800 },
-    { id: 'prev-4', poste: 'Entretien', montant: 3500 },
-    { id: 'prev-5', poste: 'Nettoyage', montant: 2800 },
-    { id: 'prev-6', poste: 'Ascenseur', montant: 2200 },
-    { id: 'prev-7', poste: 'Frais de gestion', montant: 5500 },
-  ],
-  total: 22500
-};
-
-const POSTES_DEPENSES = [
-  'Eau', 'Assurance', 'Électricité', 'Chauffage', 'Entretien', 'Nettoyage',
-  'Gardiennage', 'Ascenseur', 'Éclairage', 'Télésurveillance', 'Travaux',
-  'Maintenance', 'Fournitures', 'Frais de gestion', 'Honoraires', 'Autre'
-];
-
 interface UseAgEditPageParams {
   agId: string;
 }
 
 export function useAgEditPage({ agId }: UseAgEditPageParams) {
   const router = useRouter();
+  const { accounts, repartitionKeys, findAccountByCode, findKeyByName } = useAccountsAndKeys();
 
   const [formData, setFormData] = useState<AGFormData>({
     type: 'ORDINAIRE',
@@ -264,20 +247,37 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
     }
   }, []);
 
+  const resolveAccountData = useCallback((posteName: string) => {
+    const mapping = POSTE_ACCOUNT_MAPPING[posteName];
+    if (!mapping) return null;
+    const account = findAccountByCode(mapping.accountCode);
+    const key = findKeyByName(mapping.repartitionKeyName);
+    return {
+      accountId: account?.id,
+      accountCode: mapping.accountCode,
+      accountName: mapping.accountName,
+      repartitionKeyId: key?.id,
+      repartitionKeyName: mapping.repartitionKeyName,
+    };
+  }, [findAccountByCode, findKeyByName]);
+
   const handleAddPoste = useCallback(() => {
     if (!newPoste.poste.trim() || !newPoste.montant) return;
     const montant = parseFloat(newPoste.montant);
     if (isNaN(montant) || montant <= 0) return;
 
+    const accountData = resolveAccountData(newPoste.poste.trim());
+
     const nouveauPoste: BudgetPoste = {
       id: Date.now().toString(),
       poste: newPoste.poste.trim(),
-      montant
+      montant,
+      ...(accountData || {}),
     };
     handleChange('budgetPostes', [...formData.budgetPostes, nouveauPoste]);
     setNewPoste({ poste: '', montant: '' });
     setShowCustomPoste(false);
-  }, [newPoste, formData.budgetPostes, handleChange]);
+  }, [newPoste, formData.budgetPostes, handleChange, resolveAccountData]);
 
   const handleRemovePoste = useCallback((id: string) => {
     handleChange('budgetPostes', formData.budgetPostes.filter(p => p.id !== id));
@@ -491,6 +491,8 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
     autocompleteRef,
     budgetTotal,
     isLoading,
+    accounts,
+    repartitionKeys,
     POSTES_DEPENSES,
     BUDGET_PRECEDENT,
     handleChange,
