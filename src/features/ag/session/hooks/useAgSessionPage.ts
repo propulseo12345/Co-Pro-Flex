@@ -113,6 +113,17 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       }
     }
     await saveDraft(agId, 'resolution_vars', resVarOverrides);
+
+    // Save vote results per resolution (resultat field)
+    const resResults: Record<string, 'ADOPTEE' | 'REJETEE' | 'AJOURNEE'> = {};
+    for (const res of resolutionsRef.current) {
+      if (res.resultat) {
+        resResults[res.id] = res.resultat;
+      }
+    }
+    if (Object.keys(resResults).length > 0) {
+      await saveDraft(agId, 'resolutions_results', resResults);
+    }
   }, [agId]);
 
   const resolutionsHook = useSessionResolutions({
@@ -220,6 +231,14 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
             for (const [varName, value] of Object.entries(vars)) {
               resolutionsHook.updateResolutionVariable(resId, varName, value);
             }
+          }
+        }
+
+        // Restore vote results (resultat) from draft
+        const resResultsDraft = await loadDraft<Record<string, 'ADOPTEE' | 'REJETEE' | 'AJOURNEE'>>(agId, 'resolutions_results');
+        if (resResultsDraft.data) {
+          for (const [resId, resultat] of Object.entries(resResultsDraft.data)) {
+            resolutionsHook.updateResolutionResultat(resId, resultat);
           }
         }
 
@@ -468,6 +487,24 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
 
     const current = resolutionsHook.currentResolution;
 
+    // Update resultat in local state + save draft immediately (don't wait for React cycle)
+    if (current && votingHook.stats) {
+      const result = checkMajority(current, votingHook.stats, votingHook.votes, {
+        totalTantiemes,
+        totalCoproprietaires: coproprietaires.length,
+      });
+      const resultat = result.adopted ? 'ADOPTEE' as const : 'REJETEE' as const;
+      resolutionsHook.updateResolutionResultat(current.id, resultat);
+
+      // Build results map from current ref + this new result, and save immediately
+      const resResults: Record<string, 'ADOPTEE' | 'REJETEE' | 'AJOURNEE'> = {};
+      for (const res of resolutionsRef.current) {
+        if (res.resultat) resResults[res.id] = res.resultat;
+      }
+      resResults[current.id] = resultat;
+      saveDraft(agId, 'resolutions_results', resResults);
+    }
+
     // Check if this is an adopted designation resolution
     if (current) {
       const categorie = getDesignationCategorie(current.titre);
@@ -496,7 +533,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     }
 
     modalsHook.confirmNextFromModal(resolutionsHook.handleNextResolution);
-  }, [modalsHook, resolutionsHook, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, persistResolutionResult]);
+  }, [agId, modalsHook, resolutionsHook, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, persistResolutionResult]);
 
   const handleDesignationConfirmAjout = useCallback(() => {
     resolutionsHook.insertResolutionAfterCurrent();
@@ -512,8 +549,27 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   // Also persist when closing result modal without navigating
   const handleCloseResultModal = useCallback(() => {
     persistResolutionResult();
+
+    // Save resultat to local state + draft immediately
+    const current = resolutionsHook.currentResolution;
+    if (current && votingHook.stats) {
+      const result = checkMajority(current, votingHook.stats, votingHook.votes, {
+        totalTantiemes,
+        totalCoproprietaires: coproprietaires.length,
+      });
+      const resultat = result.adopted ? 'ADOPTEE' as const : 'REJETEE' as const;
+      resolutionsHook.updateResolutionResultat(current.id, resultat);
+
+      const resResults: Record<string, 'ADOPTEE' | 'REJETEE' | 'AJOURNEE'> = {};
+      for (const res of resolutionsRef.current) {
+        if (res.resultat) resResults[res.id] = res.resultat;
+      }
+      resResults[current.id] = resultat;
+      saveDraft(agId, 'resolutions_results', resResults);
+    }
+
     modalsHook.closeResultModal();
-  }, [persistResolutionResult, modalsHook]);
+  }, [agId, persistResolutionResult, modalsHook, resolutionsHook.currentResolution, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length]);
 
   const confirmContinueWithWarning = useCallback(() => {
     variablesHook.confirmContinueWithWarning(
@@ -608,6 +664,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     passerelleResolution: votingHook.passerelleResolution,
     passerelleVoteInitial: votingHook.passerelleVoteInitial,
     showVariableModal: variablesHook.showVariableModal,
+    showFinancingModal: variablesHook.showFinancingModal,
+    financingSchedule: variablesHook.financingSchedule,
     editingVariable: variablesHook.editingVariable,
     showValidationWarning: variablesHook.showValidationWarning,
     missingVariables: variablesHook.missingVariables,
@@ -681,6 +739,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     closeResultModal: handleCloseResultModal,
     confirmNextFromModal,
     closeVariableModal: variablesHook.closeVariableModal,
+    handleSaveFinancing: variablesHook.handleSaveFinancing,
+    closeFinancingModal: variablesHook.closeFinancingModal,
     closeValidationWarning: variablesHook.closeValidationWarning,
     confirmContinueWithWarning,
     setShowPasserelleModal: modalsHook.setShowPasserelleModal,

@@ -65,6 +65,8 @@ export interface UseAgSessionPageReturn {
   passerelleResolution: Resolution | null;
   passerelleVoteInitial: PasserelleVoteInitial | null;
   showVariableModal: boolean;
+  showFinancingModal: boolean;
+  financingSchedule: import('@/components/features/ag/FinancingScheduleEditor/FinancingScheduleEditor').FinancingSchedule | null;
   editingVariable: EditingVariable | null;
   showValidationWarning: boolean;
   missingVariables: string[];
@@ -111,6 +113,8 @@ export interface UseAgSessionPageReturn {
   // Variable handlers
   handleVariableClick: (variableName: string) => void;
   handleSaveVariable: () => void;
+  handleSaveFinancing: (modalite: string, datesEcheances: string, schedule: import('@/components/features/ag/FinancingScheduleEditor/FinancingScheduleEditor').FinancingSchedule) => void;
+  closeFinancingModal: () => void;
   handlePrefillFromCopro: (variableName: string, coproId: string) => void;
   setEditingVariable: React.Dispatch<React.SetStateAction<EditingVariable | null>>;
   setShowPrefillDropdown: React.Dispatch<React.SetStateAction<string | null>>;

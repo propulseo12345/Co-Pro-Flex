@@ -178,8 +178,8 @@ export function SessionVotingContent({
                 title={variableTitle}
                 aria-label={`${variableName} - ${variableHint}`}
               >
-                <Edit3 size={12} aria-hidden="true" />
-                {displayValue}
+                <span className={styles.variablePlaceholderLabel}>{displayValue}</span>
+                <ChevronDown size={14} aria-hidden="true" />
               </button>
             )}
           </span>

@@ -20,6 +20,7 @@ export interface UseSessionResolutionsReturn {
   handlePrevResolution: () => void;
   handleNavigateToResolution: (index: number) => void;
   updateResolutionWithPasserelle: (resolutionId: string, passerelleData: PasserelleMajorite, resultat: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE') => void;
+  updateResolutionResultat: (resolutionId: string, resultat: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE') => void;
   updateResolutionVariable: (resolutionId: string, varName: string, value: string) => void;
   insertResolutionAfterCurrent: () => void;
 }
@@ -129,6 +130,12 @@ export function useSessionResolutions({
     saveDraft(agId, 'resolutions', updatedResolutions);
   }, [resolutions, agId]);
 
+  const updateResolutionResultat = useCallback((resolutionId: string, resultat: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE') => {
+    setResolutions(prev => prev.map(r =>
+      r.id === resolutionId ? { ...r, resultat } : r
+    ));
+  }, []);
+
   const updateResolutionVariable = useCallback((resolutionId: string, varName: string, value: string) => {
     setResolutions(prev => prev.map(r =>
       r.id === resolutionId
@@ -167,6 +174,7 @@ export function useSessionResolutions({
     handlePrevResolution,
     handleNavigateToResolution,
     updateResolutionWithPasserelle,
+    updateResolutionResultat,
     updateResolutionVariable,
     insertResolutionAfterCurrent,
   };

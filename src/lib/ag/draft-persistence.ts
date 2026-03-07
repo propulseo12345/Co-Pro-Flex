@@ -21,7 +21,8 @@ export type AgDraftType =
   | 'resolution_vars'
   | 'milestones'
   | 'signataires'
-  | 'envoi'; // Added in 20260201_envoi_security.sql
+  | 'envoi'
+  | 'resolutions_results';
 
 // Type for RPC calls - base types that exist in Supabase generated types
 // New types ('envoi', 'milestones') should use dedicated RPCs or untyped client

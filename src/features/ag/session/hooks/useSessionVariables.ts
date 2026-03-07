@@ -6,6 +6,7 @@ import { debounce } from '../services/sessionHelpers';
 import { useGlobalVariables } from '@/hooks/useGlobalVariables';
 import { validateResolutionVariables } from '@/components/features/ag/Session/utils';
 import { saveDraft } from '@/lib/ag/draft-persistence';
+import type { FinancingSchedule } from '@/components/features/ag/FinancingScheduleEditor/FinancingScheduleEditor';
 
 export interface UseSessionVariablesReturn {
   variableValues: Record<string, string>;
@@ -13,6 +14,8 @@ export interface UseSessionVariablesReturn {
   prefillVariables: Record<string, string>;
   editingVariable: EditingVariable | null;
   showVariableModal: boolean;
+  showFinancingModal: boolean;
+  financingSchedule: FinancingSchedule | null;
   showValidationWarning: boolean;
   missingVariables: string[];
   showPrefillDropdown: string | null;
@@ -22,6 +25,8 @@ export interface UseSessionVariablesReturn {
   setShowPrefillDropdown: React.Dispatch<React.SetStateAction<string | null>>;
   handleVariableClick: (variableName: string) => void;
   handleSaveVariable: () => void;
+  handleSaveFinancing: (modalite: string, datesEcheances: string, schedule: FinancingSchedule) => void;
+  closeFinancingModal: () => void;
   handlePrefillFromCopro: (variableName: string, coproId: string) => void;
   closeVariableModal: () => void;
   closeValidationWarning: () => void;
@@ -45,6 +50,8 @@ export function useSessionVariables({
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
   const [editingVariable, setEditingVariable] = useState<EditingVariable | null>(null);
   const [showVariableModal, setShowVariableModal] = useState(false);
+  const [showFinancingModal, setShowFinancingModal] = useState(false);
+  const [financingSchedule, setFinancingSchedule] = useState<FinancingSchedule | null>(null);
   const [showValidationWarning, setShowValidationWarning] = useState(false);
   const [missingVariables, setMissingVariables] = useState<string[]>([]);
   const [showPrefillDropdown, setShowPrefillDropdown] = useState<string | null>(null);
@@ -67,8 +74,13 @@ export function useSessionVariables({
   );
 
   const handleVariableClick = useCallback((variableName: string) => {
-    setEditingVariable({ name: variableName, value: allVariables[variableName] || '' });
-    setShowVariableModal(true);
+    if (variableName === 'modalites_paiement_budget') {
+      setEditingVariable({ name: variableName, value: allVariables[variableName] || '' });
+      setShowFinancingModal(true);
+    } else {
+      setEditingVariable({ name: variableName, value: allVariables[variableName] || '' });
+      setShowVariableModal(true);
+    }
   }, [allVariables]);
 
   const handleSaveVariable = useCallback(() => {
@@ -90,6 +102,24 @@ export function useSessionVariables({
     }
     setShowPrefillDropdown(null);
   }, [variableValues, coproprietaires, debouncedSaveVariables]);
+
+  const handleSaveFinancing = useCallback((modalite: string, datesEcheances: string, schedule: FinancingSchedule) => {
+    const newValues = {
+      ...variableValues,
+      modalites_paiement_budget: modalite,
+      dates_echeances_budget: datesEcheances,
+    };
+    setVariableValues(newValues);
+    setFinancingSchedule(schedule);
+    debouncedSaveVariables(newValues);
+    setShowFinancingModal(false);
+    setEditingVariable(null);
+  }, [variableValues, debouncedSaveVariables]);
+
+  const closeFinancingModal = useCallback(() => {
+    setShowFinancingModal(false);
+    setEditingVariable(null);
+  }, []);
 
   const closeVariableModal = useCallback(() => {
     setShowVariableModal(false);
@@ -133,6 +163,8 @@ export function useSessionVariables({
     prefillVariables,
     editingVariable,
     showVariableModal,
+    showFinancingModal,
+    financingSchedule,
     showValidationWarning,
     missingVariables,
     showPrefillDropdown,
@@ -142,6 +174,8 @@ export function useSessionVariables({
     setShowPrefillDropdown,
     handleVariableClick,
     handleSaveVariable,
+    handleSaveFinancing,
+    closeFinancingModal,
     handlePrefillFromCopro,
     closeVariableModal,
     closeValidationWarning,

@@ -1,23 +1,22 @@
-# Session State — 2026-03-07 18:40
+# Session State — 2026-03-07 20:45
 
 ## Branch
 main
 
 ## Completed This Session
-- fix(ag): templateId mapping — dbToFrontendResolution matches templates by title via getResolutionByTitle()
-- feat(ag): ALUR fund — % first, auto-calc montant; fonds travaux uses same FinancingScheduleEditor
-- fix(ag-session): isRoleVariable narrowed — nom_syndic no longer treated as copro selector
-- feat(ag-session): scroll to top on resolution change + nav buttons at top
-- fix(db): RPCs rpc_get_ag_coproprietaires + rpc_get_ag_pv_bundle — removed auth.uid() checks (RLS off)
+- fix(ag): root cause persistence votes — suppression overloads RPC sans auth bypass (save/get_ag_session_draft)
+- fix(ag): resultat ADOPTEE/REJETEE sauvegardé immédiatement dans draft 'resolutions_results'
+- feat(ag): variable input styles alignés sur agenda (bleu vide, vert rempli, ChevronDown)
+- feat(ag): FinancingVariableModal — select modalités + FinancingScheduleEditor complet pour modalites_paiement_budget
 
 ## Next Task
-- Page envoi: "Erreur lors de l'envoi" au clic "Envoyer la convocation" — probablement RPC avec auth check
-- Nettoyer styles inline debug dans envoi/page.tsx (error details)
+- Câbler totalBudget réel dans FinancingVariableModal (budget prévisionnel + fonds travaux depuis allVariables ou DB)
+- Tester la persistence des votes après fix RPC overloads
 
 ## Blockers
-- Auth Supabase client-side: auth.uid() NULL sur RPCs. RLS off donc .from() marche, mais RPCs avec auth echouent.
+None
 
 ## Key Context
-- RLS desactive sur toutes les tables — securite par RPCs uniquement
-- getResolutionByTitle() dans resolutions.ts pour mapper templateId sans colonne DB
-- totalFondsAlur calcule depuis resolution ALUR pour FinancingScheduleEditor fonds travaux
+- CAUSE RACINE votes: 2 overloads de save/get_ag_session_draft coexistaient — version sans auth bypass appelée par PostgREST → fix: DROP FUNCTION des versions ag_draft_type (enum), seules versions text restent
+- FinancingVariableModal: totalBudget = allVariables['montant'] pour l'instant, user veut budget_previsionnel + fonds_travaux
+- Migration 20260307_add_resolutions_results_draft_type.sql appliquée en prod

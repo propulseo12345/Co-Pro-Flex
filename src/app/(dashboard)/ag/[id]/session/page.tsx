@@ -15,6 +15,7 @@ import {
   ValidationWarningModal,
   AjoutDesignationModal,
 } from '@/components/features/ag/Session';
+import { FinancingVariableModal } from '@/components/features/ag/Session/modals/FinancingVariableModal';
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { useAgSessionPage } from '@/features/ag/hooks/useAgSessionPage';
 import { updateAgCurrentStep } from '@/lib/ag/api';
@@ -191,6 +192,17 @@ export default function SessionPage() {
           onChange={(value) => session.setEditingVariable({ ...session.editingVariable!, value })}
           onClose={session.closeVariableModal}
           onSave={session.handleSaveVariable}
+        />
+      )}
+
+      {session.showFinancingModal && (
+        <FinancingVariableModal
+          currentModalite={session.allVariables['modalites_paiement_budget'] || ''}
+          currentSchedule={session.financingSchedule}
+          totalBudget={parseFloat(session.allVariables['montant'] || '0')}
+          exerciceYear={parseInt(session.allVariables['date_fin']?.slice(-4) || String(new Date().getFullYear() + 1))}
+          onClose={session.closeFinancingModal}
+          onSave={session.handleSaveFinancing}
         />
       )}
 
