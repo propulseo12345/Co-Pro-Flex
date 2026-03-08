@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import Sidebar from '@/components/layout/Sidebar';
-import Header from '@/components/layout/Header';
+import { HighBar } from '@/components/layout/HighBar';
+import { ModuleSidebar } from '@/components/layout/ModuleSidebar';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { VentesProvider } from '@/providers/VentesProvider';
 import { CoproProvider } from '@/providers/CoproContext';
@@ -25,9 +25,9 @@ export default function DashboardLayout({
         <AnnexeProvider>
           <VentesProvider>
             <div className="app-container">
-              <Sidebar aria-hidden="true" />
-              <div className="main-wrapper">
-                <Header />
+              <HighBar />
+              <div className="app-body">
+                <ModuleSidebar />
                 <main className="main-content">
                   <Suspense fallback={<LoadingFallback />}>
                     {children}

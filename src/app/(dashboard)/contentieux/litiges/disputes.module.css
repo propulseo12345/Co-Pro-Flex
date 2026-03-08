@@ -1,0 +1,187 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.statIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--warning-light);
+    color: var(--warning);
+    border-radius: 8px;
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.statValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.litigesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.litigeCard {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.litigeCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.litigeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.litigeTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.litigeBadges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.priorityHigh,
+.priorityMedium,
+.priorityLow {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.priorityHigh {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+.priorityMedium {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.priorityLow {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.litigeMeta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.litigeType {
+    padding: 4px 12px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.litigeDate {}
+
+.litigeDescription {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.litigeParties {
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.partiesLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.partiesList {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.partie {
+    padding: 4px 12px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.litigeActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .litigesGrid {
+        grid-template-columns: 1fr;
+    }
+}

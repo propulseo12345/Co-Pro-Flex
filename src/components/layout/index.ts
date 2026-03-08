@@ -1,3 +1,3 @@
-export { Header } from './Header';
-export { Sidebar } from './Sidebar';
+export { HighBar } from './HighBar';
+export { ModuleSidebar } from './ModuleSidebar';
 export { PageWrapper } from './PageWrapper';

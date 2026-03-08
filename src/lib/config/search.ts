@@ -292,13 +292,20 @@ export const searchableRoutes: SearchableRoute[] = [
         category: 'Social'
     },
 
-    // Juridique
+    // Contentieux
     {
         title: 'Litiges',
         description: 'Gestion des litiges',
-        path: '/legal/disputes',
+        path: '/contentieux/litiges',
         keywords: ['litige', 'litiges', 'conflit', 'juridique', 'contentieux'],
-        category: 'Juridique'
+        category: 'Contentieux'
+    },
+    {
+        title: 'Impayés',
+        description: 'Suivi et recouvrement des impayés',
+        path: '/contentieux/impayes',
+        keywords: ['impayé', 'impayés', 'retard', 'dette', 'contentieux'],
+        category: 'Contentieux'
     },
 
     // Communication
@@ -319,15 +326,6 @@ export const searchableRoutes: SearchableRoute[] = [
         category: 'Ventes'
     },
 
-
-    // Analytics
-    {
-        title: 'Analytics',
-        description: 'Analyses et statistiques',
-        path: '/analytics',
-        keywords: ['analytics', 'analyse', 'statistique', 'rapport', 'dashboard'],
-        category: 'Analytics'
-    },
 
     // Paramètres
     {
