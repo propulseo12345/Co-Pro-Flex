@@ -87,7 +87,7 @@ export default function ComptabilitePage() {
         </div>
       )}
 
-      <FinanceAnnexeStats />
+      <FinanceAnnexeStats periodId={page.selectedPeriodId} />
       <ComptaInfoBanner
         periodName={page.openPeriod.name}
         onRefresh={page.handleRefresh}
