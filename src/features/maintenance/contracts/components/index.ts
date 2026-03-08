@@ -5,3 +5,4 @@ export { ContractsPageHeader } from './ContractsPageHeader';
 export { ContractsListSection } from './ContractsListSection';
 export { ContractsModals } from './ContractsModals';
 export { ContractsPageSections } from './ContractsPageSections';
+export { ContractsAssurancesSection } from './ContractsAssurancesSection';

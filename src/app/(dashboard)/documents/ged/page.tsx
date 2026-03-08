@@ -11,6 +11,7 @@ import {
   Header, Checklist, VersioningAlerts, SearchBar, AdvancedFilters, ModeSwitch,
   DropZone, Breadcrumb, Toolbar, ActiveFilters, FolderGrid, SearchResults,
   DocumentGrid, DocumentList, Pagination, EmptyState, LinkModal,
+  TechnicalDocumentsSection,
 } from '@/components/features/documents/ged/components';
 import type { SearchSuggestion } from '@/components/features/documents/ged/domain/types';
 import styles from './ged.module.css';
@@ -182,6 +183,8 @@ export default function GEDPage() {
           <EmptyState isSearch={navigationMode === 'search'} />
         )}
       </div>
+
+      <TechnicalDocumentsSection />
 
       {showLinkModal && selectedDocForLink && (
         <LinkModal document={selectedDocForLink} detectedEntityType={detectedEntityType} extractedData={extractedData} onClose={handleCloseLinkModal} onCreateLink={handleCreateLink} />

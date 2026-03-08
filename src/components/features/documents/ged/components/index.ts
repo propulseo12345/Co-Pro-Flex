@@ -15,3 +15,4 @@ export { DocumentList } from './DocumentList';
 export { Pagination } from './Pagination';
 export { EmptyState } from './EmptyState';
 export { LinkModal } from './LinkModal';
+export { TechnicalDocumentsSection } from './TechnicalDocumentsSection';

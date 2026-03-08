@@ -6,8 +6,10 @@ import {
   ContractsListSection,
   ContractsModals,
   ContractsPageSections,
+  ContractsAssurancesSection,
 } from '@/features/maintenance/contracts/components';
 import { useContractsPage } from '@/features/maintenance/contracts/hooks';
+import { MOCK_ASSURANCES_COPROPRIETE } from '@/data/mock';
 
 export default function ContractsPage() {
   const {
@@ -100,6 +102,14 @@ export default function ContractsPage() {
         onModifier={setContratToEdit}
         onResilier={setContratToResiliate}
         onTelecharger={handleTelecharger}
+      />
+
+      <ContractsAssurancesSection
+        assurances={MOCK_ASSURANCES_COPROPRIETE}
+        onSelectAssurance={(assurance) => {
+          // Future: open detail modal
+          console.info('[Assurance]', assurance.nom);
+        }}
       />
 
       <ContractsModals
