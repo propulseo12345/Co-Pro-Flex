@@ -1,5 +1,6 @@
 'use client';
 
+import { Calendar, Lock, CircleDot } from 'lucide-react';
 import { useComptabilitePage } from '@/features/finance/comptabilite';
 import {
   ComptaHeader,
@@ -55,6 +56,36 @@ export default function ComptabilitePage() {
         onExportPDF={page.exportToPDF}
         onExportExcel={page.exportToExcel}
       />
+
+      {/* Sélecteur d'exercice */}
+      {page.allPeriods.length > 1 && (
+        <div className={styles.periodSelector}>
+          <Calendar size={16} />
+          <span className={styles.periodSelectorLabel}>Exercice :</span>
+          <select
+            className={styles.periodSelectorSelect}
+            value={page.selectedPeriodId || ''}
+            onChange={(e) => page.setSelectedPeriodId(e.target.value)}
+          >
+            {page.allPeriods.map((period) => (
+              <option key={period.id} value={period.id}>
+                {period.name} ({period.start_date.slice(0, 4)})
+              </option>
+            ))}
+          </select>
+          <span
+            className={`${styles.periodStatusBadge} ${
+              page.openPeriod.status === 'open' ? styles.periodStatusOpen : styles.periodStatusClosed
+            }`}
+          >
+            {page.openPeriod.status === 'open' ? (
+              <><CircleDot size={12} /> En cours</>
+            ) : (
+              <><Lock size={12} /> Clôturé</>
+            )}
+          </span>
+        </div>
+      )}
 
       <FinanceAnnexeStats />
       <ComptaInfoBanner

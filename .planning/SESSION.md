@@ -1,29 +1,27 @@
-# Session State — 2026-03-08 17:30
+# Session State — 2026-03-08 19:30
 
 ## Branch
 main
 
 ## Completed This Session
-- fix(emission): "Émettre l'appel" navigue vers page copropriétaires + persiste statut issued en DB
-- fix(api): table `call_for_funds` (singulier), updateCallStatus + émet tous siblings du trimestre
-- feat(campaigns): compteur = nb trimestres, badge "1/4 envoyé", section "Exercices clos" repliable
-- refactor(recouvrement): alerte compactée en bandeau horizontal
-- db: vue v_call_campaigns enrichie (total_trimesters, trimesters_issued)
+- db: plan comptable complet décret 2005-240 (62 comptes ajoutés, 18 corrigés, 4 désactivés → ~80/copro)
+- refactor: plan-comptable.ts réécrit conforme décret (supprimé sous-comptes inventés)
+- feat: sélecteur d'exercice (dropdown) sur page comptabilité avec badge statut
+- fix: useGeneralLedger filtre par periodId (était ignoré → écritures 2025 sur page 2027)
+- feat: allAccountsWithBalances dans hook (tous comptes + 0€ si pas d'écritures)
+- doc: .planning/comptabilite-spec.md (plan comptable + 5 annexes + 20 écritures + cycle annuel)
 
 ## Next Task
-Comptabilité — refactoring complet:
-1. Filtrer grand livre par periodId (useGeneralLedger ne filtre pas → écritures 2025 sur page 2027)
-2. Ajouter sélecteur d'exercice (dropdown) sur page comptabilité
-3. Onglet "Livre comptable" : tous comptes table `accounts` avec lignes 0€ même sans écritures
-4. Onglet "Comptabilité" : aucune ligne si pas d'écritures
-5. Exercices démarrent à zéro (pas de report à-nouveaux)
-6. Nettoyer doublons périodes DB (2× Exercice 2025, 2× Exercice 2026)
+Sprint comptabilité suite :
+1. Onglet "Livre comptable" : brancher allAccountsWithBalances dans ComptaTabContent (tous comptes avec 0€)
+2. Onglet "Comptabilité" (grand livre) : aucune ligne si pas d'écritures réelles
+3. Exercices à zéro : confirmer soldeOuverture=0 (pas de report à-nouveaux)
+4. Préparer structure catégorisation : types/interfaces flux mouvements bancaires → comptes
 
 ## Blockers
-- Doublons périodes en DB à nettoyer avant de brancher le sélecteur
+None
 
 ## Key Context
-- Table = `call_for_funds` (singulier) — Supabase project: iyfesbjnkpynmwlsmxnp
-- RPC mark_ag_action_activated = simple UPDATE (APPROVE_ACCOUNTS pas implémenté)
-- Plan comptable dans table `accounts` (classes 1-7, décret 2005-240)
-- Dark-first: --surface/--bg-secondary, jamais de fallbacks clairs
+- Comptes obsolètes 605/606/608/609 marqués is_active=false (FK budget_lines)
+- allAccountsWithBalances exposé dans hook mais pas encore branché dans le composant tab
+- Pas de doublons périodes (vérifié: 2024-2027 copro1, 2025-2026 copro2)

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useCopro } from '@/providers/CoproContext';
-import { useGeneralLedger, useTrialBalance, useActivePeriod } from '@/hooks/modules/useFinanceData';
+import { useGeneralLedger, useTrialBalance, useActivePeriod, useAccountingPeriods, useAccounts } from '@/hooks/modules/useFinanceData';
 import * as financeApi from '@/lib/finance/api';
 import {
   TabCompta,
@@ -24,21 +24,43 @@ export function useComptabilitePage() {
   const [lastClosedPeriodId, setLastClosedPeriodId] = useState<string | null>(null);
   const [lastClosedYear, setLastClosedYear] = useState<number | null>(null);
 
-  // Supabase hooks
-  const { data: openPeriod, isLoading: periodLoading, refresh: refreshOpenPeriod } = useActivePeriod();
+  // Period selection: load all periods + auto-select active
+  const { data: allPeriods, isLoading: periodsListLoading } = useAccountingPeriods();
+  const { data: activePeriod, isLoading: activePeriodLoading } = useActivePeriod();
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
+
+  // Auto-select active period on first load
+  useEffect(() => {
+    if (activePeriod && !selectedPeriodId) {
+      setSelectedPeriodId(activePeriod.id);
+    }
+  }, [activePeriod, selectedPeriodId]);
+
+  // Derive the selected period object
+  const openPeriod = useMemo(() => {
+    if (!allPeriods || !selectedPeriodId) return activePeriod;
+    return allPeriods.find(p => p.id === selectedPeriodId) || activePeriod;
+  }, [allPeriods, selectedPeriodId, activePeriod]);
+
+  const periodLoading = periodsListLoading || activePeriodLoading;
   const isReadOnly = openPeriod?.status === 'closed';
+
+  // All accounts for "Livre comptable" tab (complete chart)
+  const { data: allAccounts } = useAccounts();
+
+  // Supabase hooks — now filtered by selected period
   const {
     data: ledgerEntries,
     isLoading: ledgerLoading,
     error: ledgerError,
     refresh: refreshLedger,
-  } = useGeneralLedger({ status: 'posted' });
+  } = useGeneralLedger({ periodId: selectedPeriodId || undefined, status: 'posted' });
   const {
     data: trialBalanceData,
     isLoading: balanceLoading,
     error: balanceError,
     refresh: refreshBalance,
-  } = useTrialBalance(openPeriod?.id || null);
+  } = useTrialBalance(selectedPeriodId || null);
 
   // Combined loading/error state
   const isLoading = periodLoading || ledgerLoading || balanceLoading;
@@ -47,6 +69,31 @@ export function useComptabilitePage() {
     refreshLedger();
     refreshBalance();
   }, [refreshLedger, refreshBalance]);
+
+  // Build complete chart of accounts with 0-balances for "Livre comptable" tab
+  const allAccountsWithBalances = useMemo(() => {
+    if (!allAccounts) return [];
+    // Create a map of account balances from ledger entries
+    const balanceMap = new Map<string, { debit: number; credit: number }>();
+    if (ledgerEntries) {
+      for (const entry of ledgerEntries) {
+        const current = balanceMap.get(entry.account_code) || { debit: 0, credit: 0 };
+        if (entry.direction === 'debit') {
+          current.debit += Number(entry.amount);
+        } else {
+          current.credit += Number(entry.amount);
+        }
+        balanceMap.set(entry.account_code, current);
+      }
+    }
+    return allAccounts.map(account => ({
+      code: account.code,
+      name: account.name,
+      accountType: account.account_type,
+      debit: balanceMap.get(account.code)?.debit ?? 0,
+      credit: balanceMap.get(account.code)?.credit ?? 0,
+    }));
+  }, [allAccounts, ledgerEntries]);
 
   // Transform Supabase data to local format
   const operations = useMemo(() => {
@@ -164,7 +211,7 @@ export function useComptabilitePage() {
 
     setLastClosedPeriodId(openPeriod.id);
     setLastClosedYear(anneeCloture);
-    await Promise.all([refreshOpenPeriod(), refreshLedger(), refreshBalance()]);
+    await Promise.all([refreshLedger(), refreshBalance()]);
 
     setShowClotureModal(false);
     setIsClosingPeriod(false);
@@ -175,7 +222,6 @@ export function useComptabilitePage() {
     etatCloture.mouvementsNonCategorises,
     openPeriod,
     currentCoproId,
-    refreshOpenPeriod,
     refreshLedger,
     refreshBalance,
   ]);
@@ -196,9 +242,13 @@ export function useComptabilitePage() {
     // Period
     openPeriod,
     isReadOnly,
+    allPeriods: allPeriods || [],
+    selectedPeriodId,
+    setSelectedPeriodId,
 
     // Data
     operations,
+    allAccountsWithBalances,
     filteredOperations,
     lignesBalance,
     etatCloture,
