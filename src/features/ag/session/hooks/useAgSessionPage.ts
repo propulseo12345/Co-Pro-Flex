@@ -449,10 +449,22 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     router.push(`/ag/${agId}/feuille-presence`);
   }, [router, agId]);
 
-  const goToPV = useCallback(() => {
-    saveSession();
+  const goToPV = useCallback(async () => {
+    // Si la résolution courante n'est pas encore validée, valider le vote d'abord
+    const currentRes = resolutionsHook.currentResolution;
+    if (currentRes && !resolutionsHook.sessionState.completedResolutions.includes(currentRes.id)) {
+      // Marquer pendingNext pour que la modale affiche le bouton "Confirmer"
+      modalsHook.setPendingNextResolution(true);
+      votingHook.handleValidateVote(
+        modalsHook.openPasserelleModal,
+        modalsHook.openResultModal
+      );
+      return;
+    }
+    await saveSession();
+    await finishAgSession(agId);
     router.push(`/ag/${agId}/pv`);
-  }, [router, agId, saveSession]);
+  }, [router, agId, saveSession, resolutionsHook, votingHook, modalsHook]);
 
   const handleFinishSession = useCallback(async () => {
     if (!confirm('Terminer l\'AG et passer au procès-verbal ?')) return;
@@ -593,8 +605,20 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       }
     }
 
+    // Si c'est la dernière résolution, terminer la session au lieu de passer à la suivante
+    const isLast = resolutionsHook.sessionState.currentResolutionIndex >= resolutionsHook.resolutions.length - 1;
+    if (isLast) {
+      modalsHook.setShowResultModal(false);
+      modalsHook.setPendingNextResolution(false);
+      saveSession();
+      finishAgSession(agId).then(() => {
+        router.push(`/ag/${agId}/pv`);
+      });
+      return;
+    }
+
     modalsHook.confirmNextFromModal(resolutionsHook.handleNextResolution);
-  }, [agId, modalsHook, resolutionsHook, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, persistResolutionResult]);
+  }, [agId, modalsHook, resolutionsHook, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, persistResolutionResult, saveSession, router]);
 
   const handleDesignationConfirmAjout = useCallback(() => {
     resolutionsHook.insertResolutionAfterCurrent();

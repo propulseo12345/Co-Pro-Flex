@@ -1,25 +1,26 @@
 /* Statistiques temps reel */
 
 .liveStats {
-    margin-bottom: var(--space-2xl);
-    padding: var(--space-xl);
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--surface) 100%);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
 }
 
 .liveStats h3 {
-    font-size: var(--text-lg);
+    font-size: var(--text-sm);
     font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: var(--space-md);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
 }
 
 .statsBar {
     display: flex;
-    height: 40px;
-    border-radius: var(--radius-md);
+    height: 24px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-xs);
+    font-size: var(--text-xs);
 }
 
 .statsBarPour {
@@ -54,15 +55,15 @@
 
 .statsDetails {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-md);
+    grid-template-columns: repeat(4, auto);
+    gap: var(--space-sm) var(--space-md);
 }
 
 .statDetail {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    font-size: var(--text-sm);
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
     color: var(--text-secondary);
 }
 

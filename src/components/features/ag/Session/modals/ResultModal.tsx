@@ -10,6 +10,7 @@ interface ResultModalProps {
   stats: VoteStats;
   result: MajorityResult;
   pendingNextResolution: boolean;
+  isLastResolution?: boolean;
   onClose: () => void;
   onConfirmNext: () => void;
 }
@@ -19,6 +20,7 @@ export function ResultModal({
   stats,
   result,
   pendingNextResolution,
+  isLastResolution = false,
   onClose,
   onConfirmNext
 }: ResultModalProps) {
@@ -80,7 +82,7 @@ export function ResultModal({
           </button>
           {pendingNextResolution && (
             <button onClick={onConfirmNext} className="btn btn-primary">
-              Confirmer et passer à la suivante
+              {isLastResolution ? 'Confirmer et terminer la session' : 'Confirmer et passer à la suivante'}
               <ArrowRight size={16} aria-hidden="true" />
             </button>
           )}

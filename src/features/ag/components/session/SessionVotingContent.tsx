@@ -205,6 +205,8 @@ export function SessionVotingContent({
         </div>
       </div>
 
+      {!isCurrentResolutionInfo && stats && <SessionStats stats={stats} />}
+
       <SessionNavigation
         isFirstResolution={currentResolutionIndex === 0}
         isLastResolution={isLastResolution}
@@ -251,7 +253,6 @@ export function SessionVotingContent({
         </div>
       ) : (
         <>
-          {stats && <SessionStats stats={stats} />}
           <SessionVotingTable
             coproprietaires={coproprietaires}
             resolutionId={currentResolution.id}

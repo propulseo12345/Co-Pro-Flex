@@ -184,6 +184,7 @@ export default function SessionPage() {
           stats={session.stats}
           result={checkMajority(session.currentResolution, session.stats, session.votes, { totalTantiemes: session.totalTantiemes, totalCoproprietaires: session.coproprietaires.length })}
           pendingNextResolution={session.pendingNextResolution}
+          isLastResolution={session.sessionState.currentResolutionIndex >= session.resolutions.length - 1}
           onClose={session.closeResultModal}
           onConfirmNext={session.confirmNextFromModal}
         />

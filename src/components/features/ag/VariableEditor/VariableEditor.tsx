@@ -381,16 +381,14 @@ export default function VariableEditor({
 
             // ===== Durée en mois =====
             case 'duree_mois':
-                // Vérifier si c'est une durée de mandat (3-36 mois)
                 const isMandatDuree = variableName.includes('mandat');
-                const minMois = isMandatDuree ? 3 : 1;
                 const maxMois = isMandatDuree ? 36 : undefined;
                 return (
                     <div className={styles.dureeInputWrapper}>
                         <input
                             ref={inputRef}
                             type="number"
-                            min={minMois}
+                            min={1}
                             max={maxMois}
                             step="1"
                             value={variableValue}
@@ -398,8 +396,6 @@ export default function VariableEditor({
                                 const val = parseInt(e.target.value, 10);
                                 if (isMandatDuree && val > 36) {
                                     onChange('36');
-                                } else if (val < minMois && e.target.value !== '') {
-                                    onChange(minMois.toString());
                                 } else {
                                     onChange(e.target.value);
                                 }
@@ -412,7 +408,7 @@ export default function VariableEditor({
                         <span className={styles.dureeSuffix}>mois</span>
                         {isMandatDuree && (
                             <span id="duree-mandat-hint" className={styles.dureeHint}>
-                                (min. 3 mois, max. 36 mois)
+                                (max. 36 mois)
                             </span>
                         )}
                     </div>

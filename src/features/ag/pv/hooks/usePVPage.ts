@@ -301,6 +301,12 @@ export function usePVPage({ agId }: UsePVPageProps) {
         ]);
       }
 
+      // Restore isSigned from AG status
+      const signedStatuses = ['pv_signed', 'pv_sent', 'finalized'];
+      if (signedStatuses.includes(data.agData.status)) {
+        setIsSigned(true);
+      }
+
       logger.info('PV: Data loaded successfully', { agId, duration, resolutionsCount: data.resolutions?.length });
 
     } catch (error) {
