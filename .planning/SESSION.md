@@ -1,27 +1,29 @@
-# Session State — 2026-03-08 22:30
+# Session State — 2026-03-08 23:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- feat: Navigation V1 redesign (HighBar 8 modules + ModuleSidebar contextuelle)
-- feat: Routes Contentieux (impayés + litiges) + search config
-- feat: Thème global V1 (primary bleu #2563eb, bg #0f1117, ~300 hex→var() dans 53 CSS AG)
-- fix: FinanceAnnexeStats suit le filtre exercice (periodId prop)
-- feat: Preview logbook header 3 variantes (condensé, barre, pills)
+- Migration assurances → page Contrats (ContractsAssurancesSection, cartes avec alertes échéance)
+- Migration documents techniques → GED (TechnicalDocumentsSection, 4 catégories accordéon, badges expiration)
+- Conseil syndical: déjà en place (badges dans copropriétaires)
+- Preview logbook refonte: 3 variantes affichage (A=tableau, B=cartes, C=liste) + header ligne avec détails dépliables
+- User a choisi: variante A (tableau dense) + header ligne (A) avec bouton détails V1
 
 ## Next Task
-**REFONTE LOGBOOK HEADER** — Reprendre les 3 variantes preview (/preview/logbook-header), choisir et appliquer:
-- Le problème: 6 KPIs en ligne, texte tronqué, "11 Total interventions" pas compréhensible
-- Les catégories ne sont pas claires sans contexte
-- Appliquer la variante choisie dans LogbookHeader.tsx
-- Fichier: src/components/features/maintenance/Logbook/LogbookHeader.tsx
+**APPLIQUER REFONTE LOGBOOK** — Remplacer la page logbook actuelle par la nouvelle structure:
+- Header: ligne résumé + bouton "Voir détails" (3 blocs V1: copropriété, caractéristiques, équipements)
+- KPIs: 6 nouveaux (en cours, planifiées, travaux prévus, travaux votés, coût année, urgences)
+- 2 onglets: Interventions (variante A tableau dense) + Travaux prévisionnels
+- Supprimer: section contrats, assurances, documents techniques, contacts CS
+- Fichiers principaux: src/app/(dashboard)/maintenance/logbook/page.tsx, logbook.module.css, useLogbook.ts
 
 ## Blockers
-None
+TESTER les migrations avant refonte:
+- http://localhost:3000/maintenance/contracts → vérifier section Assurances
+- http://localhost:3000/documents/ged → vérifier section Documents techniques
 
 ## Key Context
-- Branche v2 (3 commits), main intacte
-- globals.css a un linter qui reset les vars — ré-appliquer primary bleu + bg #0f1117 si besoin
-- Navigation config: src/lib/config/navigation.ts (8 modules)
-- Preview live: /preview/logbook-header (3 variantes A/B/C)
+- Preview live: /preview/logbook-page (3 variantes testables)
+- Migrations faites avec mock data (pas Supabase)
+- Le user veut qu'on lui rappelle de tester les migrations à la reprise
