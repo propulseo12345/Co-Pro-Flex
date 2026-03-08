@@ -108,7 +108,7 @@
 
 .themeName {
     font-weight: 600;
-    color: #93C5FD;
+    color: var(--badge-info-text);
     font-size: var(--text-base);
 }
 

@@ -16,7 +16,7 @@
 
 /* --- NEXT AG CARD (legacy full-size) --- */
 .nextAgCard {
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  background: linear-gradient(135deg, var(--blue-700) 0%, var(--blue-700) 100%);
   color: white;
   border-radius: 12px;
   padding: 2rem;
@@ -29,13 +29,13 @@
   border-radius: 10px;
   padding: 1.25rem 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  background: linear-gradient(135deg, var(--blue-700) 0%, var(--blue-700) 100%);
 }
 .nextAgCardCompact .nextAgHeader { margin-bottom: 0.5rem; }
 .nextAgCardCompact .badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; }
 
-.deroulementCard { background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; }
-.sessionCard { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important; }
+.deroulementCard { background: linear-gradient(135deg, var(--green-700) 0%, var(--green-700) 100%) !important; }
+.sessionCard { background: linear-gradient(135deg, var(--amber-600) 0%, var(--amber-600) 100%) !important; }
 
 .nextAgHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .nextAgLabel { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; opacity: 0.9; font-weight: 600; }
@@ -66,9 +66,9 @@
 }
 .actionButton:hover { background-color: rgba(255, 255, 255, 0.3); transform: translateY(-1px); }
 .actionButton:active { transform: translateY(0); }
-.actionButtonPrimary { background-color: white !important; color: #1E40AF !important; font-weight: 700; border-color: white !important; }
-.sessionCard .actionButtonPrimary { color: #EA580C !important; }
-.deroulementCard .actionButtonPrimary { color: #047857 !important; }
+.actionButtonPrimary { background-color: white !important; color: var(--blue-700) !important; font-weight: 700; border-color: white !important; }
+.sessionCard .actionButtonPrimary { color: var(--amber-600) !important; }
+.deroulementCard .actionButtonPrimary { color: var(--green-700) !important; }
 .actionButtonPrimary:hover { opacity: 0.9; transform: translateY(-1px); }
 .actionButtonGhost {
   display: inline-flex;

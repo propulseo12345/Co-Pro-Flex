@@ -45,7 +45,7 @@
 .syntheseStatValue {
     font-size: var(--text-4xl);
     font-weight: 800;
-    color: #93C5FD;
+    color: var(--badge-info-text);
     line-height: 1;
 }
 
@@ -76,7 +76,7 @@
 .synthesePourcentage {
     font-size: var(--text-xl);
     font-weight: 700;
-    color: #6EE7B7;
+    color: var(--success-dark);
     background: rgba(52, 211, 153, 0.2);
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-md);
@@ -111,7 +111,7 @@
 
 .progressFill {
     height: 100%;
-    background: linear-gradient(90deg, #60a5fa 0%, #6EE7B7 100%);
+    background: linear-gradient(90deg, var(--secondary) 0%, var(--success-dark) 100%);
     border-radius: var(--radius-lg);
     transition: width 0.3s ease;
 }
@@ -159,7 +159,7 @@
 
 .seuilAtteint {
     background: rgba(52, 211, 153, 0.15);
-    border-color: #6EE7B7;
+    border-color: var(--success-dark);
 }
 
 .seuilNonAtteint {
@@ -209,7 +209,7 @@
 }
 
 .seuilAtteint .seuilValeur {
-    color: #6EE7B7;
+    color: var(--success-dark);
 }
 
 .seuilNonAtteint .seuilValeur {
@@ -222,7 +222,7 @@
     background: var(--warning-light);
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
-    color: var(--warning-dark, #92400e);
+    color: var(--warning-dark, var(--amber-600));
     font-size: var(--text-sm);
     font-weight: 500;
 }

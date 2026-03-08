@@ -59,7 +59,7 @@
 }
 
 .statAuto {
-    color: #93C5FD;
+    color: var(--badge-info-text);
 }
 
 .statManual {
@@ -67,11 +67,11 @@
 }
 
 .statMissing {
-    color: #FCD34D;
+    color: var(--warning-dark);
 }
 
 .statError {
-    color: #FCA5A5;
+    color: var(--badge-danger-text);
 }
 
 .collapseIcon {
@@ -174,7 +174,7 @@
 
 .badgeAuto {
     background: rgba(96, 165, 250, 0.2);
-    color: #93C5FD;
+    color: var(--badge-info-text);
 }
 
 .badgeManual {
@@ -184,12 +184,12 @@
 
 .badgeMissing {
     background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
+    color: var(--warning-dark);
 }
 
 .badgeError {
     background: rgba(239, 68, 68, 0.2);
-    color: #FCA5A5;
+    color: var(--badge-danger-text);
 }
 
 /* Variable value */
@@ -359,7 +359,7 @@
     background: rgba(239, 68, 68, 0.2);
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
-    color: #FCA5A5;
+    color: var(--badge-danger-text);
 }
 
 /* Warning message */
@@ -373,5 +373,5 @@
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
-    color: #FCD34D;
+    color: var(--warning-dark);
 }

@@ -76,7 +76,7 @@
 
 .presenceItemChecked {
     background: rgba(52, 211, 153, 0.15);
-    border-color: #6EE7B7;
+    border-color: var(--success-dark);
 }
 
 .presenceItemCorrespondance {
@@ -237,7 +237,7 @@
     background: rgba(251, 191, 36, 0.15);
     border: 1px solid var(--warning);
     border-radius: var(--radius-md);
-    color: #FCD34D;
+    color: var(--warning-dark);
     font-size: var(--text-sm);
     font-weight: 500;
     text-align: center;

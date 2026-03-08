@@ -51,7 +51,7 @@
     background: rgba(52, 211, 153, 0.2);
     border: 1px solid var(--success);
     border-radius: var(--radius-lg);
-    color: #6EE7B7;
+    color: var(--success-dark);
     margin-bottom: var(--space-xl);
 }
 
@@ -137,12 +137,12 @@
 
 .summaryCardSuccess {
     background: linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, var(--surface) 100%);
-    border-color: #6EE7B7;
+    border-color: var(--success-dark);
 }
 
 .summaryCardDanger {
     background: linear-gradient(135deg, rgba(248, 113, 113, 0.2) 0%, var(--surface) 100%);
-    border-color: #F87171;
+    border-color: var(--danger);
 }
 
 .summaryValue {
@@ -386,7 +386,7 @@
 /* Passerelle 25-1 Styles for PV */
 .badgePasserelle {
     background: rgba(255, 152, 0, 0.2);
-    color: #ff9800;
+    color: var(--amber-600);
     padding: var(--space-xs) var(--space-sm);
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
@@ -422,7 +422,7 @@
     margin-top: var(--space-lg);
     padding: var(--space-md);
     background: var(--surface-secondary);
-    border-left: 4px solid #ff9800;
+    border-left: 4px solid var(--amber-600);
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     color: var(--text-secondary);
@@ -539,7 +539,7 @@
     gap: 4px;
     padding: 4px 10px;
     background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
+    color: var(--success-dark);
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: 600;
@@ -744,7 +744,7 @@
     height: 600px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: #2a2a2a;
+    background: var(--background);
 }
 
 .closePdfButton {
@@ -846,12 +846,12 @@
 
 .compactResultBadgeSuccess {
     background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
+    color: var(--success-dark);
 }
 
 .compactResultBadgeDanger {
     background: rgba(248, 113, 113, 0.2);
-    color: #F87171;
+    color: var(--danger);
 }
 
 /* Dark mode pour PDF preview */
@@ -893,7 +893,7 @@
     border: 1px solid var(--success);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-md);
-    color: #6EE7B7;
+    color: var(--success-dark);
     font-size: var(--text-sm);
     font-weight: 500;
     animation: fadeInSlide 0.3s ease-out;
@@ -976,7 +976,7 @@
     gap: var(--space-xs);
     padding: var(--space-xs) var(--space-sm);
     background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
+    color: var(--success-dark);
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: 600;
@@ -1014,7 +1014,7 @@
     border: 1px solid var(--danger);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-lg);
-    color: #F87171;
+    color: var(--danger);
 }
 
 .pdfErrorBanner span {
@@ -1038,8 +1038,8 @@
 }
 
 .dismissErrorBtn:hover {
-    background: #F87171;
-    color: #1a1a2e;
+    background: var(--danger);
+    color: var(--background);
 }
 
 /* Dark mode pour erreur PDF */

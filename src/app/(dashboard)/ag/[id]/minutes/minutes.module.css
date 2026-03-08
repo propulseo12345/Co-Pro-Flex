@@ -64,8 +64,8 @@
 }
 
 .terminee {
-    background-color: #D1FAE5;
-    color: #065F46;
+    background-color: var(--badge-success-bg);
+    color: var(--green-700);
 }
 
 .sectionTitle {
@@ -84,7 +84,7 @@
     padding: 1.5rem;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background-color: #F9FAFB;
+    background-color: var(--text);
 }
 
 .resolutionHeader {
@@ -108,13 +108,13 @@
 }
 
 .adopted {
-    background-color: #D1FAE5;
-    color: #065F46;
+    background-color: var(--badge-success-bg);
+    color: var(--green-700);
 }
 
 .rejected {
-    background-color: #FEE2E2;
-    color: #991B1B;
+    background-color: var(--badge-danger-bg);
+    color: var(--red-700);
 }
 
 .resolutionTitle {
@@ -144,15 +144,15 @@
 }
 
 .voteIconPour {
-    color: #16A34A;
+    color: var(--green-700);
 }
 
 .voteIconContre {
-    color: #DC2626;
+    color: var(--red-700);
 }
 
 .voteIconAbs {
-    color: #6B7280;
+    color: var(--text-tertiary);
 }
 
 .emptyState {

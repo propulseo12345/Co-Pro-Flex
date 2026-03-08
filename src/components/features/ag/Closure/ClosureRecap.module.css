@@ -7,13 +7,13 @@
 .title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-main, #111827);
+    color: var(--text-main, var(--bg-secondary));
     margin: 0;
 }
 
 .subtitle {
     font-size: 0.875rem;
-    color: var(--text-secondary, #6b7280);
+    color: var(--text-secondary, var(--text-tertiary));
     margin: 0.25rem 0 0;
 }
 
@@ -29,7 +29,7 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 1rem;
-    border: 1px solid var(--border, #e5e7eb);
+    border: 1px solid var(--border, var(--border));
     border-radius: 8px;
     background-color: var(--bg-main, #fff);
 }
@@ -47,18 +47,18 @@
 }
 
 .statusComplete {
-    color: var(--success, #22c55e);
+    color: var(--success, var(--success));
 }
 
 .statusMissing {
-    color: var(--warning, #f59e0b);
+    color: var(--warning, var(--amber-600));
 }
 
 .resolutionTitle {
     flex: 1;
     font-size: 0.9375rem;
     font-weight: 500;
-    color: var(--text-main, #111827);
+    color: var(--text-main, var(--bg-secondary));
     margin: 0;
 }
 
@@ -69,8 +69,8 @@
     letter-spacing: 0.03em;
     padding: 0.125rem 0.5rem;
     border-radius: 4px;
-    background-color: var(--bg-secondary, #f3f4f6);
-    color: var(--text-secondary, #6b7280);
+    background-color: var(--bg-secondary, var(--bg-tertiary));
+    color: var(--text-secondary, var(--text-tertiary));
     white-space: nowrap;
 }
 
@@ -95,13 +95,13 @@
 .summaryValid {
     background-color: rgba(34, 197, 94, 0.1);
     border: 1px solid rgba(34, 197, 94, 0.3);
-    color: var(--success, #22c55e);
+    color: var(--success, var(--success));
 }
 
 .summaryInvalid {
     background-color: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.3);
-    color: var(--warning, #f59e0b);
+    color: var(--warning, var(--amber-600));
 }
 
 /* Close button */
@@ -116,8 +116,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.625rem 1.25rem;
-    background-color: var(--primary, #2563eb);
-    color: #fff;
+    background-color: var(--primary, var(--blue-700));
+    color: var(--text);
     border: none;
     border-radius: 6px;
     font-size: 0.9375rem;
@@ -127,7 +127,7 @@
 }
 
 .closeButton:hover:not(:disabled) {
-    background-color: var(--primary-700, #1d4ed8);
+    background-color: var(--primary-700, var(--blue-700));
 }
 
 .closeButton:disabled {
@@ -141,7 +141,7 @@
     align-items: center;
     justify-content: center;
     padding: 3rem;
-    color: var(--text-secondary, #6b7280);
+    color: var(--text-secondary, var(--text-tertiary));
     font-size: 0.875rem;
 }
 
@@ -154,7 +154,7 @@
     background-color: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 8px;
-    color: var(--error, #ef4444);
+    color: var(--error, var(--red-700));
     font-size: 0.875rem;
 }
 
@@ -162,6 +162,6 @@
 .emptyState {
     text-align: center;
     padding: 2rem;
-    color: var(--text-secondary, #6b7280);
+    color: var(--text-secondary, var(--text-tertiary));
     font-size: 0.9375rem;
 }

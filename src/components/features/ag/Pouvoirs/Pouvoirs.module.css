@@ -144,13 +144,13 @@
 
 .quorumProgressFill {
     height: 100%;
-    background: linear-gradient(90deg, #FCD34D 0%, #60A5FA 100%);
+    background: linear-gradient(90deg, var(--warning-dark) 0%, var(--secondary) 100%);
     border-radius: var(--radius-full);
     transition: width 0.3s ease;
 }
 
 .quorumProgressSuccess {
-    background: linear-gradient(90deg, #60A5FA 0%, #6EE7B7 100%);
+    background: linear-gradient(90deg, var(--secondary) 0%, var(--success-dark) 100%);
 }
 
 .quorumValues {

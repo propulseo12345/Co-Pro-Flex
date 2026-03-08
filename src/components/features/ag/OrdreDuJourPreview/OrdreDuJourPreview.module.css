@@ -191,11 +191,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    color: #6EE7B7;
+    color: var(--success-dark);
     font-size: var(--text-sm);
 }
 
 .completenessWarning {
-    color: #FCD34D;
+    color: var(--warning-dark);
     font-size: var(--text-sm);
 }

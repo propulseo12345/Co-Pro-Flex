@@ -176,11 +176,11 @@
 }
 
 .alertWarning .alertTitle {
-    color: var(--warning-dark, #b45309);
+    color: var(--warning-dark, var(--amber-600));
 }
 
 .alertWarning .alertAction {
-    color: var(--warning-dark, #b45309);
+    color: var(--warning-dark, var(--amber-600));
 }
 
 /* Error */
@@ -367,7 +367,7 @@
 
 .bannerWarning {
     background: var(--warning-light);
-    color: var(--warning-dark, #b45309);
+    color: var(--warning-dark, var(--amber-600));
 }
 
 .bannerWarning .bannerIcon {

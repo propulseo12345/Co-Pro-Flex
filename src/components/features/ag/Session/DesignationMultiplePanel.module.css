@@ -262,12 +262,12 @@
 
 .resultatBadge.adopte {
   background: rgba(52, 211, 153, 0.2);
-  color: #6EE7B7;
+  color: var(--success-dark);
 }
 
 .resultatBadge.rejete {
   background: rgba(248, 113, 113, 0.2);
-  color: #FCA5A5;
+  color: var(--badge-danger-text);
 }
 
 .designeInfo {
@@ -329,7 +329,7 @@
 
 .designeeNumero {
   font-weight: 600;
-  color: #6EE7B7;
+  color: var(--success-dark);
 }
 
 .designeeNom {

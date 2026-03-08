@@ -67,7 +67,7 @@
 }
 
 .presenceStatTotal .presenceStatValue {
-    color: #93C5FD;
+    color: var(--badge-info-text);
 }
 
 .quorumIndicator {
@@ -83,8 +83,8 @@
 
 .quorumOk {
     background: rgba(52, 211, 153, 0.15);
-    border: 1px solid #6EE7B7;
-    color: #6EE7B7;
+    border: 1px solid var(--success-dark);
+    color: var(--success-dark);
 }
 
 /* Note: quorumWarning est dans presence.module.css car partage avec startScreen */

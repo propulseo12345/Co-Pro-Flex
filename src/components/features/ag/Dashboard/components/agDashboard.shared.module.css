@@ -66,7 +66,7 @@
 
 .listIconDraft {
   background-color: rgba(245, 158, 11, 0.15);
-  color: var(--warning, #F59E0B);
+  color: var(--warning, var(--amber-600));
 }
 
 /* Content area */
@@ -174,7 +174,7 @@
   color: white;
 }
 
-.editBtn:hover:not(:disabled) { background: var(--success-dark, #16A34A); }
+.editBtn:hover:not(:disabled) { background: var(--success-dark, var(--green-700)); }
 .editBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .editBtnCancel {
@@ -230,10 +230,10 @@
 .badgeConvoked { background-color: var(--primary-light); color: var(--primary); }
 .badgeReady { background-color: rgba(255, 255, 255, 0.25); color: white; }
 .badgeClosed { background-color: var(--bg-secondary); color: var(--text-secondary); }
-.badgePvGenerated { background-color: rgba(139, 92, 246, 0.2); color: #a78bfa; }
-.badgePvSigned { background-color: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
-.badgePvSent { background-color: rgba(16, 185, 129, 0.2); color: #34d399; }
-.badgeFinalized { background-color: rgba(5, 150, 105, 0.2); color: #6ee7b7; }
+.badgePvGenerated { background-color: rgba(139, 92, 246, 0.2); color: var(--purple-500); }
+.badgePvSigned { background-color: rgba(20, 184, 166, 0.2); color: var(--success); }
+.badgePvSent { background-color: rgba(16, 185, 129, 0.2); color: var(--success); }
+.badgeFinalized { background-color: rgba(5, 150, 105, 0.2); color: var(--success-dark); }
 
 /* ---------- MODAL ---------- */
 .modalOverlay {
@@ -318,7 +318,7 @@
   border: none;
 }
 
-.modalBtnDanger:hover:not(:disabled) { background: var(--error-dark, #DC2626); }
+.modalBtnDanger:hover:not(:disabled) { background: var(--error-dark, var(--red-700)); }
 
 .modalBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 

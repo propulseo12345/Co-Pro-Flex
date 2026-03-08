@@ -282,7 +282,7 @@
   width: 100%;
   min-height: 500px;
   border: none;
-  background: #1a1a1a;
+  background: var(--background);
 }
 
 .previewFooter {

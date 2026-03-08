@@ -27,8 +27,8 @@
 
 .arrowBtn:hover:not(:disabled) {
   background: rgba(96, 165, 250, 0.2);
-  border-color: #93C5FD;
-  color: #93C5FD;
+  border-color: var(--badge-info-text);
+  color: var(--badge-info-text);
 }
 
 .arrowBtn:disabled {
@@ -112,16 +112,16 @@
 }
 
 .navItem.en_cours .statusDot {
-  background: #FCD34D;
+  background: var(--warning-dark);
   animation: pulse 1.5s infinite;
 }
 
 .navItem.vote .statusDot {
-  background: #6EE7B7;
+  background: var(--success-dark);
 }
 
 .navItem.adoptee .statusDot {
-  background: #6EE7B7;
+  background: var(--success-dark);
 }
 
 .navItem.adoptee {
@@ -129,7 +129,7 @@
 }
 
 .navItem.rejetee .statusDot {
-  background: #F87171;
+  background: var(--danger);
 }
 
 .navItem.rejetee {
@@ -137,7 +137,7 @@
 }
 
 .navItem.ajournee .statusDot {
-  background: #FBBF24;
+  background: var(--warning);
 }
 
 .navItem.ajournee {
@@ -145,7 +145,7 @@
 }
 
 .navItem.reporte .statusDot {
-  background: #F87171;
+  background: var(--danger);
 }
 
 /* Animation pulse pour résolution en cours */

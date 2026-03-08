@@ -3,9 +3,9 @@
  */
 
 .container {
-    background: var(--color-bg-card, #1f2937);
+    background: var(--color-bg-card, var(--bg-secondary));
     border-radius: var(--radius-lg, 12px);
-    border: 1px solid var(--color-border, #e5e7eb);
+    border: 1px solid var(--color-border, var(--border));
     padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
@@ -34,7 +34,7 @@
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--color-text, #f9fafb);
+    color: var(--color-text, var(--text));
 }
 
 .statusIcon {
@@ -54,51 +54,51 @@
     border: none;
     padding: 0.25rem;
     cursor: pointer;
-    color: var(--color-text-muted, #6b7280);
+    color: var(--color-text-muted, var(--text-tertiary));
     border-radius: 4px;
     transition: all 0.2s;
 }
 
 .closeButton:hover {
-    background: var(--color-bg-hover, #f3f4f6);
-    color: var(--color-text, #1f2937);
+    background: var(--color-bg-hover, var(--bg-tertiary));
+    color: var(--color-text, var(--bg-secondary));
 }
 
 /* Status classes */
 .statusQueued {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-warning, var(--amber-600));
 }
 
 .statusQueued.statusBadge {
     background: rgba(245, 158, 11, 0.1);
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-warning, var(--amber-600));
 }
 
 .statusRunning {
-    color: var(--color-primary, #2563eb);
+    color: var(--color-primary, var(--blue-700));
 }
 
 .statusRunning.statusBadge {
     background: rgba(37, 99, 235, 0.1);
-    color: var(--color-primary, #2563eb);
+    color: var(--color-primary, var(--blue-700));
 }
 
 .statusSucceeded {
-    color: var(--color-success, #22c55e);
+    color: var(--color-success, var(--success));
 }
 
 .statusSucceeded.statusBadge {
     background: rgba(34, 197, 94, 0.1);
-    color: var(--color-success, #22c55e);
+    color: var(--color-success, var(--success));
 }
 
 .statusFailed {
-    color: var(--color-error, #ef4444);
+    color: var(--color-error, var(--red-700));
 }
 
 .statusFailed.statusBadge {
     background: rgba(239, 68, 68, 0.1);
-    color: var(--color-error, #ef4444);
+    color: var(--color-error, var(--red-700));
 }
 
 /* Progress section */
@@ -115,26 +115,26 @@
 
 .progressStep {
     font-size: 0.875rem;
-    color: var(--color-text, #f9fafb);
+    color: var(--color-text, var(--text));
     font-weight: 500;
 }
 
 .progressPercent {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--color-primary, #2563eb);
+    color: var(--color-primary, var(--blue-700));
 }
 
 .progressBarContainer {
     height: 8px;
-    background: var(--color-bg-secondary, #f3f4f6);
+    background: var(--color-bg-secondary, var(--bg-tertiary));
     border-radius: 4px;
     overflow: hidden;
 }
 
 .progressBar {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-primary, #2563eb), var(--color-primary-600, #1d4ed8));
+    background: linear-gradient(90deg, var(--color-primary, var(--blue-700)), var(--color-primary-600, var(--blue-700)));
     border-radius: 4px;
     transition: width 0.3s ease;
 }
@@ -142,7 +142,7 @@
 .progressMessage {
     margin: 0.5rem 0 0;
     font-size: 0.8125rem;
-    color: var(--color-text-muted, #6b7280);
+    color: var(--color-text-muted, var(--text-tertiary));
 }
 
 /* Error section */
@@ -154,7 +154,7 @@
     border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: var(--radius-md, 8px);
     margin-bottom: 1.5rem;
-    color: var(--color-error, #ef4444);
+    color: var(--color-error, var(--red-700));
 }
 
 .errorContent {
@@ -185,7 +185,7 @@
 
 .successIcon {
     flex-shrink: 0;
-    color: var(--color-success, #22c55e);
+    color: var(--color-success, var(--success));
 }
 
 .successContent {
@@ -195,13 +195,13 @@
 .successContent strong {
     display: block;
     margin-bottom: 0.25rem;
-    color: var(--color-success, #22c55e);
+    color: var(--color-success, var(--success));
 }
 
 .successContent p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--color-text-muted, #6b7280);
+    color: var(--color-text-muted, var(--text-tertiary));
 }
 
 /* Document status */
@@ -210,19 +210,19 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: var(--color-bg-secondary, #111827);
+    background: var(--color-bg-secondary, var(--bg-secondary));
     border-radius: var(--radius-md, 8px);
     margin-bottom: 1.5rem;
     font-size: 0.875rem;
 }
 
 .documentStatusLabel {
-    color: var(--color-text-muted, #6b7280);
+    color: var(--color-text-muted, var(--text-tertiary));
 }
 
 .documentStatusValue {
     font-weight: 500;
-    color: var(--color-text, #f9fafb);
+    color: var(--color-text, var(--text));
 }
 
 /* Actions */
@@ -251,56 +251,56 @@
 }
 
 .retryButton {
-    background: var(--color-error, #ef4444);
+    background: var(--color-error, var(--red-700));
     color: white;
-    border-color: var(--color-error, #ef4444);
+    border-color: var(--color-error, var(--red-700));
 }
 
 .retryButton:hover:not(:disabled) {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: var(--red-700);
+    border-color: var(--red-700);
 }
 
 .previewButton {
     background: var(--color-bg-card, #fff);
-    color: var(--color-text, #1f2937);
-    border-color: var(--color-border, #d1d5db);
+    color: var(--color-text, var(--bg-secondary));
+    border-color: var(--color-border, var(--border));
 }
 
 .previewButton:hover:not(:disabled) {
-    background: var(--color-bg-hover, #f3f4f6);
+    background: var(--color-bg-hover, var(--bg-tertiary));
 }
 
 .downloadButton {
-    background: var(--color-primary, #2563eb);
+    background: var(--color-primary, var(--blue-700));
     color: white;
-    border-color: var(--color-primary, #2563eb);
+    border-color: var(--color-primary, var(--blue-700));
 }
 
 .downloadButton:hover:not(:disabled) {
-    background: var(--color-primary-600, #1d4ed8);
-    border-color: var(--color-primary-600, #1d4ed8);
+    background: var(--color-primary-600, var(--blue-700));
+    border-color: var(--color-primary-600, var(--blue-700));
 }
 
 .archiveButton {
-    background: var(--color-bg-secondary, #111827);
-    color: var(--color-text, #f9fafb);
-    border-color: var(--color-border, #374151);
+    background: var(--color-bg-secondary, var(--bg-secondary));
+    color: var(--color-text, var(--text));
+    border-color: var(--color-border, var(--bg-tertiary));
 }
 
 .archiveButton:hover:not(:disabled) {
-    background: var(--color-bg-hover, #1f2937);
+    background: var(--color-bg-hover, var(--bg-secondary));
 }
 
 .sendButton {
-    background: var(--color-success, #22c55e);
+    background: var(--color-success, var(--success));
     color: white;
-    border-color: var(--color-success, #22c55e);
+    border-color: var(--color-success, var(--success));
 }
 
 .sendButton:hover:not(:disabled) {
-    background: #16a34a;
-    border-color: #16a34a;
+    background: var(--green-700);
+    border-color: var(--green-700);
 }
 
 /* Spinning animation */
@@ -322,7 +322,7 @@
     margin-top: 1.5rem;
     border-radius: var(--radius-md, 8px);
     overflow: hidden;
-    border: 1px solid var(--color-border, #e5e7eb);
+    border: 1px solid var(--color-border, var(--border));
 }
 
 .pdfPreview {

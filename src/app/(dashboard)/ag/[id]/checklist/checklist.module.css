@@ -31,7 +31,7 @@
 .agInfo {
     display: flex;
     gap: 1.5rem;
-    background-color: #F3F4F6;
+    background-color: var(--bg-tertiary);
     padding: 0.75rem 1rem;
     border-radius: 8px;
 }
@@ -57,7 +57,7 @@
 
 .progressBar {
     height: 8px;
-    background-color: #F3F4F6;
+    background-color: var(--bg-tertiary);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -86,13 +86,13 @@
 }
 
 .taskItem:hover {
-    background-color: #F9FAFB;
+    background-color: var(--text);
     border-color: var(--primary);
 }
 
 .taskDone {
-    background-color: #F0FDF4;
-    border-color: #86EFAC;
+    background-color: var(--badge-success-bg);
+    border-color: var(--badge-success-text);
 }
 
 .checkbox {
@@ -102,7 +102,7 @@
 }
 
 .checkIcon {
-    color: #16A34A;
+    color: var(--green-700);
 }
 
 .taskContent {
@@ -119,7 +119,7 @@
 .taskDeadline {
     font-size: 0.875rem;
     color: var(--text-secondary);
-    background-color: #F3F4F6;
+    background-color: var(--bg-tertiary);
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
 }

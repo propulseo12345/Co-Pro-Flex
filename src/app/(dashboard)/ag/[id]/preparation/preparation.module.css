@@ -140,7 +140,7 @@
 }
 
 .coproButtonComplete {
-    border-color: #6EE7B7;
+    border-color: var(--success-dark);
 }
 
 .coproButtonInfo {
@@ -186,8 +186,8 @@
 }
 
 .coproButtonComplete .coproButtonCount {
-    background-color: #6EE7B7;
-    color: #6EE7B7;
+    background-color: var(--success-dark);
+    color: var(--success-dark);
 }
 
 .coproButtonCheck {
@@ -307,21 +307,21 @@
 }
 
 .globalVoteButtonPour:hover {
-    border-color: #6EE7B7;
-    background-color: #6EE7B7;
-    color: #6EE7B7;
+    border-color: var(--success-dark);
+    background-color: var(--success-dark);
+    color: var(--success-dark);
 }
 
 .globalVoteButtonContre:hover {
-    border-color: #F87171;
-    background-color: #F87171;
-    color: #F87171;
+    border-color: var(--danger);
+    background-color: var(--danger);
+    color: var(--danger);
 }
 
 .globalVoteButtonAbstention:hover {
-    border-color: #FCD34D;
-    background-color: #FCD34D;
-    color: #FCD34D;
+    border-color: var(--warning-dark);
+    background-color: var(--warning-dark);
+    color: var(--warning-dark);
 }
 
 /* Liste des résolutions */
@@ -350,7 +350,7 @@
 
 .resolutionVoteCardVoted {
     background: rgba(52, 211, 153, 0.15);
-    border-color: #6EE7B7;
+    border-color: var(--success-dark);
 }
 
 .resolutionVoteInfo {
@@ -376,8 +376,8 @@
 }
 
 .resolutionVoteCardVoted .resolutionNumber {
-    background-color: #1a1a2e;
-    color: #1a1a2e;
+    background-color: var(--background);
+    color: var(--background);
 }
 
 .resolutionContent {
@@ -423,9 +423,9 @@
 }
 
 .voteButtonPour:hover {
-    border-color: #6EE7B7;
-    background-color: #6EE7B7;
-    color: #6EE7B7;
+    border-color: var(--success-dark);
+    background-color: var(--success-dark);
+    color: var(--success-dark);
 }
 
 .voteButtonPour.voteButtonActive {
@@ -435,9 +435,9 @@
 }
 
 .voteButtonContre:hover {
-    border-color: #F87171;
-    background-color: #F87171;
-    color: #F87171;
+    border-color: var(--danger);
+    background-color: var(--danger);
+    color: var(--danger);
 }
 
 .voteButtonContre.voteButtonActive {
@@ -447,9 +447,9 @@
 }
 
 .voteButtonAbstention:hover {
-    border-color: #FCD34D;
-    background-color: #FCD34D;
-    color: #FCD34D;
+    border-color: var(--warning-dark);
+    background-color: var(--warning-dark);
+    color: var(--warning-dark);
 }
 
 .voteButtonAbstention.voteButtonActive {

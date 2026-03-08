@@ -24,7 +24,7 @@
 
 .progressFill {
     height: 100%;
-    background: linear-gradient(90deg, #60a5fa 0%, #6EE7B7 100%);
+    background: linear-gradient(90deg, var(--secondary) 0%, var(--success-dark) 100%);
     transition: width 0.3s ease;
 }
 
@@ -77,7 +77,7 @@
 .syntheseTotalValue {
     font-size: var(--text-2xl);
     font-weight: 700;
-    color: #93C5FD;
+    color: var(--badge-info-text);
 }
 
 .syntheseTotalLabel {
@@ -132,17 +132,17 @@
 /* Couleurs par type */
 .syntheseTypePresent .syntheseTypeIcon {
     background: rgba(52, 211, 153, 0.2);
-    color: #6EE7B7;
+    color: var(--success-dark);
 }
 
 .syntheseTypeRepresente .syntheseTypeIcon {
     background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
+    color: var(--warning-dark);
 }
 
 .syntheseTypeCorrespondance .syntheseTypeIcon {
     background: rgba(59, 130, 246, 0.2);
-    color: #93C5FD;
+    color: var(--badge-info-text);
 }
 
 .syntheseTypeAbsent .syntheseTypeIcon {
@@ -183,17 +183,17 @@
 
 .headerPresent {
     background: rgba(52, 211, 153, 0.15);
-    color: #6EE7B7;
+    color: var(--success-dark);
 }
 
 .headerRepresente {
     background: rgba(251, 191, 36, 0.15);
-    color: #FCD34D;
+    color: var(--warning-dark);
 }
 
 .headerCorrespondance {
     background: rgba(59, 130, 246, 0.15);
-    color: #93C5FD;
+    color: var(--badge-info-text);
 }
 
 .participantsGroupList {
@@ -228,7 +228,7 @@
 .neutraliseBadgeSmall {
     font-size: var(--text-xs);
     font-weight: 500;
-    color: #FCD34D;
+    color: var(--warning-dark);
     background: rgba(251, 191, 36, 0.15);
     padding: 1px 4px;
     border-radius: var(--radius-sm);

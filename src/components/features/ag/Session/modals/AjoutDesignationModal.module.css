@@ -50,7 +50,7 @@
   height: 64px;
   margin: 0 auto var(--space-md);
   background: rgba(96, 165, 250, 0.2);
-  color: #93C5FD;
+  color: var(--badge-info-text);
   border-radius: 50%;
 }
 
@@ -81,7 +81,7 @@
   background: rgba(251, 191, 36, 0.15);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: #FCD34D;
+  color: var(--warning-dark);
 }
 
 .actions {
@@ -146,7 +146,7 @@
   background: rgba(96, 165, 250, 0.15);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: #93C5FD;
+  color: var(--badge-info-text);
 }
 /* ===== Responsive ===== */
 

@@ -36,14 +36,14 @@
     gap: var(--space-md);
     padding: var(--space-lg);
     background: rgba(251, 191, 36, 0.15);
-    border: 1px solid #f59e0b;
+    border: 1px solid var(--amber-600);
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-2xl);
     position: relative;
 }
 
 .alertIcon {
-    color: #FCD34D;
+    color: var(--warning-dark);
     flex-shrink: 0;
     margin-top: 2px;
     stroke-width: 2;
@@ -56,7 +56,7 @@
 .alertContent strong {
     display: block;
     margin-bottom: var(--space-xs);
-    color: #374151;
+    color: var(--bg-tertiary);
     font-size: var(--text-base);
     font-weight: 700;
 }

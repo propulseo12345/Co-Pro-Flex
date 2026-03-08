@@ -48,12 +48,12 @@
 
 .headerIconSuccess {
   background: rgba(34, 197, 94, 0.15);
-  color: var(--success, #22c55e);
+  color: var(--success, var(--success));
 }
 
 .headerIconWarning {
   background: rgba(245, 158, 11, 0.15);
-  color: var(--warning, #f59e0b);
+  color: var(--warning, var(--amber-600));
 }
 
 .title {
@@ -92,8 +92,8 @@
   display: block;
 }
 
-.summaryNumberSuccess { color: var(--success, #22c55e); }
-.summaryNumberFailed { color: var(--error, #ef4444); }
+.summaryNumberSuccess { color: var(--success, var(--success)); }
+.summaryNumberFailed { color: var(--error, var(--red-700)); }
 
 .summaryLabel {
   font-size: 0.8125rem;
@@ -122,8 +122,8 @@
 }
 
 .actionIcon { flex-shrink: 0; }
-.actionIconSuccess { color: var(--success, #22c55e); }
-.actionIconFailed { color: var(--error, #ef4444); }
+.actionIconSuccess { color: var(--success, var(--success)); }
+.actionIconFailed { color: var(--error, var(--red-700)); }
 
 .actionContent { flex: 1; min-width: 0; }
 
@@ -134,7 +134,7 @@
 
 .actionError {
   font-size: 0.8125rem;
-  color: var(--error, #ef4444);
+  color: var(--error, var(--red-700));
   margin-top: 0.25rem;
 }
 

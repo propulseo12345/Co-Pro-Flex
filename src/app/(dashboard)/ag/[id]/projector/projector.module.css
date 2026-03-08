@@ -10,7 +10,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #0a0a0a;
+  background: var(--background);
   display: flex;
   flex-direction: column;
   padding: var(--space-2xl);
@@ -232,15 +232,15 @@
 }
 
 .voteBarPour {
-  background: linear-gradient(90deg, var(--success), #34D399);
+  background: linear-gradient(90deg, var(--success), var(--success));
 }
 
 .voteBarContre {
-  background: linear-gradient(90deg, var(--danger), #F87171);
+  background: linear-gradient(90deg, var(--danger), var(--danger));
 }
 
 .voteBarAbstention {
-  background: linear-gradient(90deg, var(--warning), #FBBF24);
+  background: linear-gradient(90deg, var(--warning), var(--warning));
 }
 
 /* Résultat du vote */

@@ -92,7 +92,7 @@
   border: 1px solid var(--warning);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  color: #FCD34D;
+  color: var(--warning-dark);
   animation: slideIn 0.2s ease-out;
 }
 
@@ -125,17 +125,17 @@
 
 .typeIndicator.gestionnaire {
   background: rgba(59, 130, 246, 0.2);
-  color: #93C5FD;
+  color: var(--badge-info-text);
 }
 
 .typeIndicator.coproprietaire {
   background: rgba(52, 211, 153, 0.2);
-  color: #6EE7B7;
+  color: var(--success-dark);
 }
 
 .typeIndicator.tiers {
   background: rgba(251, 191, 36, 0.2);
-  color: #FCD34D;
+  color: var(--warning-dark);
 }
 
 /* Compteur de disponibles */

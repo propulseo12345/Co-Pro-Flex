@@ -1,10 +1,10 @@
 :root {
-  /* Colors - Primary (dark mode - brighter for dark background) */
-  --primary: #34D399; /* Emerald-400 */
-  --primary-hover: #10B981; /* Emerald-500 */
-  --primary-light: rgba(52, 211, 153, 0.15); /* Emerald with transparency */
-  --primary-dark: #6EE7B7; /* Emerald-300 */
-  --primary-color: #818cf8; /* Indigo-400 for UI accents */
+  /* Colors - Primary (blue accent — nav V1) */
+  --primary: #2563eb; /* Blue-600 */
+  --primary-hover: #1d4ed8; /* Blue-700 */
+  --primary-light: rgba(37, 99, 235, 0.15); /* Blue with transparency */
+  --primary-dark: #3b82f6; /* Blue-500 */
+  --primary-color: #2563eb; /* Blue-600 for UI accents */
 
   /* Colors - Secondary */
   --secondary: #60A5FA; /* Blue-400 */
@@ -23,17 +23,17 @@
   --info: #60A5FA; /* Blue-400 */
   --info-light: rgba(96, 165, 250, 0.15);
 
-  /* Colors - Neutral (dark mode) */
-  --background: #0F1419; /* Very dark blue-gray */
-  --bg-secondary: #1A1F2E; /* Slightly lighter dark blue */
-  --bg-tertiary: #252B3B; /* Even lighter for contrast */
-  --surface: #1E293B; /* Slate-800 */
-  --surface-hover: #2D3748; /* Slate-700 */
+  /* Colors - Neutral (dark mode — nav V1) */
+  --background: #0f1117; /* Deep dark blue */
+  --bg-secondary: #131620; /* Sidebar bg */
+  --bg-tertiary: #1a1f2e; /* Elevated surfaces */
+  --surface: #1e2330; /* Cards */
+  --surface-hover: #252b3b; /* Card hover */
 
   /* Alias for module compatibility */
-  --card-bg: #1E293B; /* Same as surface */
-  --hover-bg: #2D3748; /* Same as surface-hover */
-  --bg: #0F1419;
+  --card-bg: #1e2330; /* Same as surface */
+  --hover-bg: #252b3b; /* Same as surface-hover */
+  --bg: #0f1117;
   --text: #F1F5F9;
   --surface-secondary: #1A1F2E;
   --background-hover: #2D3748;
