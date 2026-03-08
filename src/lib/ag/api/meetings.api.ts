@@ -149,7 +149,7 @@ export async function startAg(input: StartAgInput): Promise<{ success: boolean; 
 }
 
 /**
- * Terminer une AG (mettre en statut closed)
+ * Terminer une AG session → pv_generated (génère pending_actions)
  */
 export async function finishAgSession(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
@@ -162,6 +162,37 @@ export async function finishAgSession(agId: string): Promise<{ success: boolean;
 
   const result = data as { success: boolean; error?: string };
   return result;
+}
+
+/**
+ * Met à jour le statut d'une AG
+ */
+export async function updateAgStatus(agId: string, status: AgStatus): Promise<{ success: boolean; error?: string }> {
+  const supabase = createUntypedClient();
+
+  const updatePayload: Record<string, unknown> = {
+    status,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Ajouter les timestamps selon le statut
+  if (status === 'pv_signed') {
+    updatePayload.pv_generated_at = updatePayload.pv_generated_at || new Date().toISOString();
+  }
+  if (status === 'pv_sent') {
+    updatePayload.pv_sent_at = new Date().toISOString();
+  }
+
+  const { error } = await supabase
+    .from('ag_meetings')
+    .update(updatePayload)
+    .eq('id', agId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }
 
 /**

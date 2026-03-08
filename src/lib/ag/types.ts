@@ -8,7 +8,35 @@
 
 export type AgMeetingType = 'ordinary' | 'extraordinary' | 'special';
 
-export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'session_active' | 'closed' | 'pv_generated';
+export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'session_active' | 'closed' | 'pv_generated' | 'pv_signed' | 'pv_sent' | 'finalized';
+
+/** Statuts considérés comme "terminés" (AG passées) */
+export const AG_TERMINAL_STATUSES: AgStatus[] = ['pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'closed'];
+
+/** Configuration complète des statuts AG */
+export const AG_STATUS_CONFIG: Record<AgStatus, { label: string; color: string; order: number }> = {
+  draft: { label: 'En préparation', color: '#6B7280', order: 0 },
+  convoked: { label: 'Convoquée', color: '#3B82F6', order: 1 },
+  in_progress: { label: 'En cours', color: '#F59E0B', order: 2 },
+  session_active: { label: 'Session en cours', color: '#F97316', order: 3 },
+  closed: { label: 'Clôturée', color: '#8B5CF6', order: 4 },       // legacy
+  pv_generated: { label: 'PV généré', color: '#8B5CF6', order: 5 },
+  pv_signed: { label: 'PV signé', color: '#14B8A6', order: 6 },
+  pv_sent: { label: 'PV diffusé', color: '#10B981', order: 7 },
+  finalized: { label: 'Finalisée', color: '#059669', order: 8 },
+};
+
+/** Transitions autorisées entre statuts AG */
+export const AG_STATUS_TRANSITIONS: Partial<Record<AgStatus, AgStatus[]>> = {
+  draft: ['convoked'],
+  convoked: ['in_progress'],
+  in_progress: ['session_active'],
+  session_active: ['pv_generated'],
+  pv_generated: ['pv_signed'],
+  pv_signed: ['pv_sent'],
+  pv_sent: ['finalized'],
+  finalized: [],
+};
 
 export type ResolutionType = 'budget' | 'accounts' | 'works' | 'appointment' | 'contract' | 'rules' | 'other';
 
@@ -132,6 +160,8 @@ export interface AgOverview {
   meeting_date: string;
   location: string | null;
   status: AgStatus;
+  current_step: number | null;
+  max_step_reached: number | null;
   convocation_date: string | null;
   convocation_deadline: string | null;
   president_name: string | null;
@@ -358,6 +388,9 @@ export interface AgStats {
   inProgress: number;
   closed: number;
   pvGenerated: number;
+  pvSigned: number;
+  pvSent: number;
+  finalized: number;
   upcoming: number;
   past: number;
 }

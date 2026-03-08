@@ -15,7 +15,7 @@ function AgHistoryItem({ ag }: AgHistoryItemProps) {
   const typeLabel = getTypeLabel(ag.meeting_type);
   const participantsCount =
     (ag.present_count || 0) + (ag.proxy_count || 0) + (ag.correspondence_count || 0);
-  const hasPV = ag.status === 'pv_generated' || ag.status === 'closed';
+  const hasPV = ['pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'closed'].includes(ag.status);
 
   return (
     <div className={styles.historyItem}>

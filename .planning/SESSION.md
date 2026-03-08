@@ -1,26 +1,27 @@
-# Session State — 2026-03-08 01:15
+# Session State — 2026-03-08 10:40
 
 ## Branch
 main
 
 ## Completed This Session
-- fix: root cause opening_notes NULL — startAg() écrasait avec NULL (meetings.api.ts)
-- fix: RPC create_budget_from_ag — gestion multi-version + stockage code PosteBudget
-- feat: inferPosteCode() centralisé — mapping label→PosteBudget pour couleurs chart
-- fix: BudgetChart affiche allocation quand pas de dépenses
-- feat: getExercicesList inclut N+1 (2027 visible)
-- feat: étape 9 finalisation dans wizard AG (STEP_PATHS, prerequisites, guards)
-- fix: DB ag_status enum + colonnes pv_generated_at, pv_sent_at, markPvSent()
-- fix: markAgFinalized utilise statut enum 'finalized' + current_step=9
-- fix: PV handleFinish redirige vers /ag/:id/finalisation
+- feat: AG status workflow complet (draft→convoked→in_progress→session_active→pv_generated→pv_signed→pv_sent→finalized)
+- feat: DB enum ag_status + RPC finish_ag_session mis à jour (closed→pv_generated)
+- feat: AG_STATUS_CONFIG, AG_TERMINAL_STATUSES, AG_STATUS_TRANSITIONS dans lib/ag/types.ts
+- feat: updateAgStatus() API + badges CSS pour tous statuts
+- feat: PV signé reste sur page PV avec bannière signataires (plus de redirect auto)
+- feat: section "AG en cours" sur dashboard AG avec max_step_reached
+- fix: v_ag_overview recreée avec current_step + max_step_reached
+- fix: sidebar lien /ag → /ag/dashboard
+- fix: NextAgCard compact + adapté au statut (session_active=orange, labels cohérents)
+- fix: suppression sidebar AGQuickActions, full width
 
 ## Next Task
-Sprint 1 suite: tester E2E le flux complet AG→PV→Finalisation→Budget avec nouvelle AG
+BUG: session page (étape 7) ne restaure pas completedResolutions depuis is_approved DB — les résolutions votées apparaissent non-votées quand on revient. Investiguer useAgSessionPage.ts lignes 324-338 (chargement draft 'resolutions') et useSessionResolutions.ts
 
 ## Blockers
 None
 
 ## Key Context
+- 3 AG bloquées en session_active (365dcaa9, 64938a48, 46325fa3) — utiles pour tester
+- AG 365dcaa9: 5 résolutions avec is_approved+votes en DB, mais session page les montre à 0
 - Supabase project: iyfesbjnkpynmwlsmxnp | Copro test: 11111111-aaaa-bbbb-cccc-111111111111
-- RPC fixes appliqués directement en DB (create_budget_from_ag, v_budgets_overview avec version)
-- Vue v_budgets_overview recréée (DROP+CREATE) pour ajouter colonne version

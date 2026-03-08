@@ -31,8 +31,12 @@ export function getStatusBadge(status: AgStatus): { label: string; className: st
     case 'draft': return { label: 'En préparation', className: 'planifiee' };
     case 'convoked': return { label: 'Convoquée', className: 'convoquee' };
     case 'in_progress': return { label: 'En cours', className: 'ready' };
+    case 'session_active': return { label: 'Session en cours', className: 'ready' };
     case 'closed': return { label: 'Clôturée', className: 'closed' };
-    case 'pv_generated': return { label: 'PV généré', className: 'closed' };
+    case 'pv_generated': return { label: 'PV généré', className: 'pvGenerated' };
+    case 'pv_signed': return { label: 'PV signé', className: 'pvSigned' };
+    case 'pv_sent': return { label: 'PV diffusé', className: 'pvSent' };
+    case 'finalized': return { label: 'Finalisée', className: 'finalized' };
     default: return { label: status, className: '' };
   }
 }
@@ -55,7 +59,7 @@ export function getStepPath(step: number): string {
 
 export function useAgDashboardPage() {
   const { currentCoproId, isManager } = useCopro();
-  const { meetings, nextMeeting, pastMeetings, isLoading, error, refresh } = useAgMeetings();
+  const { meetings, nextMeeting, activeMeetings, pastMeetings, isLoading, error, refresh } = useAgMeetings();
   const { drafts: supabaseDrafts, deleteDraft, isLoading: draftsLoading } = useAgDrafts();
 
   const [activeTab, setActiveTab] = useState<'current' | 'archives'>('current');
@@ -85,7 +89,7 @@ export function useAgDashboardPage() {
             ag_pending_actions(status)
           `)
           .eq('copro_id', currentCoproId)
-          .in('status', ['closed', 'pv_generated'])
+          .in('status', ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'])
           .order('meeting_date', { ascending: false });
 
         if (closedMeetings) {
@@ -216,6 +220,7 @@ export function useAgDashboardPage() {
     isManager,
     meetings,
     nextMeeting,
+    activeMeetings,
     pastMeetings,
     isLoading,
     error,

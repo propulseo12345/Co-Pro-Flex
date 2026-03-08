@@ -355,7 +355,7 @@ export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
     if (step === 6) return state.stats.resolutions_count > 0;
     if (step === 7) return state.stats.resolutions_count > 0;
     if (step === 8) return state.stats.resolutions_count > 0 && isStepCompleted(7);
-    if (step === 9) return state.status === 'pv_generated' || state.status === 'finalized';
+    if (step === 9) return ['pv_generated', 'pv_signed', 'pv_sent', 'finalized'].includes(state.status);
 
     return prerequisites.every(prereq => isStepCompleted(prereq));
   }, [state, isStepCompleted]);

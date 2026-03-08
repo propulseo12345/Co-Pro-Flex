@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2 } from 'lucide-react';
-import { AGQuickActions, AGArchivesList, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
+import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2, Play, CheckCircle } from 'lucide-react';
+import { AGArchivesList, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
 import type { AgListItemAction } from '@/components/features/ag/Dashboard';
 import archiveStyles from '@/components/features/ag/Dashboard/AGArchivesList.module.css';
 import { AgDocumentQuickActions } from '@/components/features/ag';
+import { AgStatusBadge } from '@/components/features/ag/Dashboard/components/AgStatusBadge';
 import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
-import { useAgDashboardPage, NextAgCard, getTypeLabel, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
+import { useAgDashboardPage, NextAgCard, getTypeLabel, getStatusBadge, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
 import styles from './dashboard.module.css';
 import clsx from 'clsx';
 
@@ -16,6 +17,7 @@ export default function AGDashboardPage() {
     currentCoproId,
     isManager,
     nextMeeting,
+    activeMeetings,
     pastMeetings,
     isLoading,
     error,
@@ -60,7 +62,7 @@ export default function AGDashboardPage() {
   ];
 
   const buildHistoryActions = (ag: AgOverview): AgListItemAction[] => {
-    const hasPV = ag.status === 'pv_generated' || ag.status === 'closed';
+    const hasPV = ['pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'closed'].includes(ag.status);
     return [
       ...(hasPV ? [{ icon: <AgDocumentQuickActions agId={ag.id} agStatus={ag.status} compact />, title: '', href: undefined }] : []),
       { icon: <Eye size={16} />, label: 'PV', href: `/ag/${ag.id}/pv`, title: 'Voir le procès-verbal' },
@@ -91,7 +93,7 @@ export default function AGDashboardPage() {
             onClick={() => setActiveTab('current')}
           >
             AG en cours
-            <span className={archiveStyles.tabCount}>{(nextMeeting ? 1 : 0) + totalDraftsCount}</span>
+            <span className={archiveStyles.tabCount}>{(nextMeeting ? 1 : 0) + activeMeetings.length + totalDraftsCount}</span>
           </button>
           <button
             className={clsx(archiveStyles.tab, activeTab === 'archives' && archiveStyles.tabActive)}
@@ -122,6 +124,46 @@ export default function AGDashboardPage() {
                     <Plus size={16} style={{ marginRight: 8 }} aria-hidden="true" />Planifier une AG
                   </Link>
                 )}
+              </div>
+            )}
+
+            {activeMeetings.length > 0 && (
+              <div className="card">
+                <h3 className={styles.sectionTitle}>
+                  <Play size={20} style={{ marginRight: 8 }} aria-hidden="true" />
+                  AG en cours ({activeMeetings.length})
+                </h3>
+                <div className={styles.list}>
+                  {activeMeetings.map((ag) => {
+                    const typeLabel = getTypeLabel(ag.meeting_type);
+                    const statusInfo = getStatusBadge(ag.status);
+                    const participantsCount = (ag.present_count || 0) + (ag.proxy_count || 0) + (ag.correspondence_count || 0);
+                    const meta = [
+                      new Date(ag.meeting_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+                      ag.location,
+                      `${ag.resolutions_count || 0} résolution(s)`,
+                      participantsCount > 0 ? `${participantsCount} présence(s)` : null,
+                    ].filter(Boolean).join(' • ');
+
+                    const lastStep = ag.max_step_reached || ag.current_step || 1;
+                    const stepPath = getStepPath(lastStep);
+                    const actions: AgListItemAction[] = [
+                      { icon: <Play size={16} />, label: 'Reprendre', href: `/ag/${ag.id}/${stepPath}`, title: `Reprendre (étape ${lastStep})` },
+                      { icon: <ClipboardList size={16} />, label: 'PV', href: `/ag/${ag.id}/pv`, title: 'Procès-verbal' },
+                    ];
+
+                    return (
+                      <AgListItem
+                        key={ag.id}
+                        icon={<AgStatusBadge status={ag.status as 'session_active' | 'in_progress' | 'convoked'} />}
+                        title={`${ag.title || `AG ${typeLabel}`}`}
+                        meta={meta}
+                        actions={actions}
+                        variant="history"
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -191,10 +233,6 @@ export default function AGDashboardPage() {
               </div>
             </div>
             </>)}
-          </div>
-
-          <div className={styles.sideColumn}>
-            <div className="card"><AGQuickActions /></div>
           </div>
         </div>
       </DataState>

@@ -30,10 +30,18 @@ export function getStatusBadge(
       return { label: 'Convoquée', className: styles.convoquee };
     case 'in_progress':
       return { label: 'En cours', className: styles.ready };
+    case 'session_active':
+      return { label: 'Session en cours', className: styles.ready };
     case 'closed':
       return { label: 'Clôturée', className: styles.closed };
     case 'pv_generated':
-      return { label: 'PV généré', className: styles.closed };
+      return { label: 'PV généré', className: styles.pvGenerated || styles.closed };
+    case 'pv_signed':
+      return { label: 'PV signé', className: styles.pvSigned || styles.closed };
+    case 'pv_sent':
+      return { label: 'PV diffusé', className: styles.pvSent || styles.closed };
+    case 'finalized':
+      return { label: 'Finalisée', className: styles.finalized || styles.closed };
     default:
       return { label: status, className: '' };
   }

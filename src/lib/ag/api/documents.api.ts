@@ -145,7 +145,9 @@ export async function markPvSent(
   const { error } = await supabase
     .from('ag_meetings')
     .update({
+      status: 'pv_sent',
       pv_sent_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq('id', agId);
 

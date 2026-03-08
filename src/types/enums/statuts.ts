@@ -1,10 +1,16 @@
 /**
  * Statuts des Assemblées Générales
  */
+/** @deprecated Utiliser AgStatus de '@/lib/ag/types' à la place */
 export enum AGStatut {
   BROUILLON = 'BROUILLON',
   CONVOQUEE = 'CONVOQUEE',
   EN_COURS = 'EN_COURS',
+  SESSION_ACTIVE = 'SESSION_ACTIVE',
+  PV_GENERE = 'PV_GENERE',
+  PV_SIGNE = 'PV_SIGNE',
+  PV_DIFFUSE = 'PV_DIFFUSE',
+  FINALISEE = 'FINALISEE',
   TERMINEE = 'TERMINEE',
   ANNULEE = 'ANNULEE'
 }

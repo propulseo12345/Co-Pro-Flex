@@ -230,6 +230,10 @@
 .badgeConvoked { background-color: var(--primary-light); color: var(--primary); }
 .badgeReady { background-color: rgba(255, 255, 255, 0.25); color: white; }
 .badgeClosed { background-color: var(--bg-secondary); color: var(--text-secondary); }
+.badgePvGenerated { background-color: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+.badgePvSigned { background-color: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+.badgePvSent { background-color: rgba(16, 185, 129, 0.2); color: #34d399; }
+.badgeFinalized { background-color: rgba(5, 150, 105, 0.2); color: #6ee7b7; }
 
 /* ---------- MODAL ---------- */
 .modalOverlay {

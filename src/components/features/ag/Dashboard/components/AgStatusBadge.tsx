@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import styles from './agDashboard.shared.module.css';
 
-export type AgBadgeStatus = 'draft' | 'convoked' | 'in_progress' | 'closed' | 'pv_generated';
+export type AgBadgeStatus = 'draft' | 'convoked' | 'in_progress' | 'session_active' | 'closed' | 'pv_generated' | 'pv_signed' | 'pv_sent' | 'finalized';
 
 interface AgStatusBadgeProps {
   status: AgBadgeStatus;
@@ -16,8 +16,12 @@ const STATUS_CONFIG: Record<AgBadgeStatus, { label: string; className: string }>
   draft: { label: 'En préparation', className: styles.badgeDraft },
   convoked: { label: 'Convoquée', className: styles.badgeConvoked },
   in_progress: { label: 'En cours', className: styles.badgeReady },
+  session_active: { label: 'Session en cours', className: styles.badgeReady },
   closed: { label: 'Clôturée', className: styles.badgeClosed },
-  pv_generated: { label: 'PV généré', className: styles.badgeClosed },
+  pv_generated: { label: 'PV généré', className: styles.badgePvGenerated },
+  pv_signed: { label: 'PV signé', className: styles.badgePvSigned },
+  pv_sent: { label: 'PV diffusé', className: styles.badgePvSent },
+  finalized: { label: 'Finalisée', className: styles.badgeFinalized },
 };
 
 export function AgStatusBadge({ status, label, quorum }: AgStatusBadgeProps) {

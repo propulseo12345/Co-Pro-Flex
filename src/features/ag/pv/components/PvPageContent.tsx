@@ -138,7 +138,7 @@ export function PvPageContent({
 
       <Stepper currentStep={8} agId={agId} />
 
-      {isSigned && <SuccessBanner />}
+      {isSigned && <SuccessBanner signataires={signataires} />}
 
       <div className={styles.layout}>
         <div className={styles.mainContent}>

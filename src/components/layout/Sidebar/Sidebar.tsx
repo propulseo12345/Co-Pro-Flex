@@ -55,7 +55,7 @@ interface NavSection {
 
 const TOP_LEVEL_ITEMS: NavItem[] = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Assemblées Générales', href: '/ag', icon: Users },
+  { name: 'Assemblées Générales', href: '/ag/dashboard', icon: Users },
 ];
 
 const NAV_SECTIONS: NavSection[] = [

@@ -141,16 +141,24 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
   const nextMeeting = useMemo(() => {
     const now = new Date();
     const upcoming = meetings
-      .filter((m) => new Date(m.meeting_date) >= now && m.status !== 'closed' && m.status !== 'pv_generated')
+      .filter((m) => new Date(m.meeting_date) >= now && !['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'].includes(m.status))
       .sort((a, b) => new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime());
     return upcoming[0] || null;
+  }, [meetings]);
+
+  // AG actives (convoquées, en cours, session active — hors draft et terminées)
+  const activeMeetings = useMemo(() => {
+    const terminalStatuses = ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'];
+    return meetings
+      .filter((m) => m.status !== 'draft' && !terminalStatuses.includes(m.status))
+      .sort((a, b) => new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime());
   }, [meetings]);
 
   // AG passées (par date décroissante)
   const pastMeetings = useMemo(() => {
     const now = new Date();
     return meetings
-      .filter((m) => m.status === 'closed' || m.status === 'pv_generated' || (new Date(m.meeting_date) < now && m.status !== 'draft'))
+      .filter((m) => ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'].includes(m.status) || (new Date(m.meeting_date) < now && m.status !== 'draft'))
       .sort((a, b) => new Date(b.meeting_date).getTime() - new Date(a.meeting_date).getTime());
   }, [meetings]);
 
@@ -164,6 +172,9 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
       inProgress: meetings.filter((m) => m.status === 'in_progress' || m.status === 'session_active').length,
       closed: meetings.filter((m) => m.status === 'closed').length,
       pvGenerated: meetings.filter((m) => m.status === 'pv_generated').length,
+      pvSigned: meetings.filter((m) => m.status === 'pv_signed').length,
+      pvSent: meetings.filter((m) => m.status === 'pv_sent').length,
+      finalized: meetings.filter((m) => m.status === 'finalized').length,
       upcoming: meetings.filter((m) => new Date(m.meeting_date) >= now).length,
       past: meetings.filter((m) => new Date(m.meeting_date) < now).length,
     };
@@ -191,6 +202,7 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
     meetings,
     filteredMeetings,
     nextMeeting,
+    activeMeetings,
     pastMeetings,
     isLoading,
     error,
