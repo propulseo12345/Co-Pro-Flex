@@ -29,12 +29,16 @@ export function useComptabilitePage() {
   const { data: activePeriod, isLoading: activePeriodLoading } = useActivePeriod();
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
 
-  // Auto-select active period on first load
+  // Auto-select best period: most recent with entries, else most recent overall
   useEffect(() => {
-    if (activePeriod && !selectedPeriodId) {
+    if (selectedPeriodId) return;
+    if (allPeriods && allPeriods.length > 0) {
+      const withEntries = allPeriods.find(p => (p.entry_count ?? 0) > 0);
+      setSelectedPeriodId(withEntries?.id ?? allPeriods[0].id);
+    } else if (activePeriod) {
       setSelectedPeriodId(activePeriod.id);
     }
-  }, [activePeriod, selectedPeriodId]);
+  }, [activePeriod, allPeriods, selectedPeriodId]);
 
   // Derive the selected period object
   const openPeriod = useMemo(() => {
@@ -43,7 +47,7 @@ export function useComptabilitePage() {
   }, [allPeriods, selectedPeriodId, activePeriod]);
 
   const periodLoading = periodsListLoading || activePeriodLoading;
-  const isReadOnly = openPeriod?.status === 'closed';
+  const isReadOnly = openPeriod?.status !== 'open';
 
   // All accounts for "Livre comptable" tab (complete chart)
   const { data: allAccounts } = useAccounts();
@@ -125,19 +129,30 @@ export function useComptabilitePage() {
   const [selectedOperation, setSelectedOperation] = useState<OperationComptable | null>(null);
   const [selectedDepense, setSelectedDepense] = useState<Depense | null>(null);
 
-  // Data not available from DB yet - use empty defaults
+  // Derive approval status from period
   const etatCloture: EtatCloture = useMemo(
-    () => ({
-      annee: openPeriod
-        ? new Date(openPeriod.start_date).getFullYear()
-        : (lastClosedYear ?? new Date().getFullYear()),
-      estCloturee:
-        openPeriod?.status === 'closed' ||
-        openPeriod?.id === lastClosedPeriodId ||
-        (!openPeriod && lastClosedYear !== null),
-      mouvementsNonCategorises: 0,
-      alertes: [],
-    }),
+    () => {
+      const periodStatus = openPeriod?.status || 'open';
+      const isClosed = periodStatus === 'closed' || periodStatus === 'approved' || periodStatus === 'rejected'
+        || openPeriod?.id === lastClosedPeriodId
+        || (!openPeriod && lastClosedYear !== null);
+
+      // Map period status to approval status
+      let approvalStatus: 'open' | 'closed' | 'approved' | 'rejected' = 'open';
+      if (periodStatus === 'approved') approvalStatus = 'approved';
+      else if (periodStatus === 'rejected') approvalStatus = 'rejected';
+      else if (isClosed) approvalStatus = 'closed';
+
+      return {
+        annee: openPeriod
+          ? new Date(openPeriod.start_date).getFullYear()
+          : (lastClosedYear ?? new Date().getFullYear()),
+        estCloturee: isClosed,
+        approvalStatus,
+        mouvementsNonCategorises: 0,
+        alertes: [],
+      };
+    },
     [openPeriod, lastClosedPeriodId, lastClosedYear]
   );
 

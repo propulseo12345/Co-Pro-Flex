@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useMemo, useCallback, useSyncExternalStore } from 'react';
+import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation } from '@/types';
 import { MOCK_PRESTATAIRES_SYNDIC, MOCK_PRESTATAIRES_COPRO, MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
 import { getUniquePrestataires, formatMontant } from '@/components/features/maintenance/Contracts/utils';
 import type { ExportFormat, ToastData } from '@/components/features/maintenance/Contracts/types';
+import { useCopro } from '@/providers/CoproContext';
 import {
     getAllContrats,
     getContratSyndic,
+    loadSyndicContract,
     addContrat,
     updateContrat,
     updateContratSyndic,
@@ -18,6 +20,15 @@ import {
 const ALL_PRESTATAIRES = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO];
 
 export function useContracts() {
+    const { currentCoproId } = useCopro();
+
+    // Load syndic contract from Supabase on mount / copro change
+    useEffect(() => {
+        if (currentCoproId) {
+            loadSyndicContract(currentCoproId);
+        }
+    }, [currentCoproId]);
+
     // Utiliser useSyncExternalStore pour synchroniser avec le service partagé
     const contrats = useSyncExternalStore(
         subscribeToContracts,

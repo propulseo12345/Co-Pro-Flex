@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Scale, Wallet, FileSpreadsheet, ClipboardList, HardHat, Users } from 'lucide-react';
+import { FileText, BookOpen, Scale, Wallet, FileSpreadsheet, ClipboardList, HardHat, Users } from 'lucide-react';
 import { TabCompta } from './types';
 import styles from './Comptabilite.module.css';
 
@@ -11,6 +11,7 @@ interface ComptaTabsProps {
 
 const TABS_CONFIG: { id: TabCompta; label: string; icon: React.ReactNode }[] = [
   { id: 'grand-livre', label: 'Grand Livre', icon: <FileText size={18} aria-hidden="true" /> },
+  { id: 'livre-comptable', label: 'Livre comptable', icon: <BookOpen size={18} aria-hidden="true" /> },
   { id: 'balance', label: 'Balance', icon: <Scale size={18} aria-hidden="true" /> },
   { id: 'compte-gestion', label: 'Compte de gestion', icon: <Wallet size={18} aria-hidden="true" /> },
   { id: 'annexe-1', label: 'Annexe 1', icon: <FileSpreadsheet size={16} aria-hidden="true" /> },

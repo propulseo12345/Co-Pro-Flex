@@ -174,6 +174,93 @@ export async function generateCombinedCallsFromAg(
   return data as { success: boolean; error?: string; calls_created?: number; lines_created?: number };
 }
 
+export async function appointSyndicFromAg(
+  coproId: string,
+  agId: string,
+  nomSyndic: string,
+  dureeMandatMois: number,
+  honorairesAnnuelsTtc: number,
+  agDate: string
+): Promise<{ success: boolean; error?: string; contract_id?: string }> {
+  const supabase = createUntypedClient();
+
+  // 1. Find or create provider by name
+  const { data: existingProviders } = await supabase
+    .from('providers')
+    .select('id')
+    .eq('copro_id', coproId)
+    .ilike('name', nomSyndic)
+    .limit(1);
+
+  let providerId: string;
+
+  if (existingProviders && existingProviders.length > 0) {
+    providerId = existingProviders[0].id;
+  } else {
+    const { data: newProvider, error: pErr } = await supabase
+      .from('providers')
+      .insert({
+        copro_id: coproId,
+        name: nomSyndic,
+        category: 'syndic',
+        is_active: true,
+      })
+      .select('id')
+      .single();
+
+    if (pErr || !newProvider) {
+      return { success: false, error: pErr?.message || 'Impossible de créer le prestataire' };
+    }
+    providerId = newProvider.id;
+  }
+
+  // 2. Terminate existing active syndic contracts
+  const now = new Date().toISOString();
+  await supabase
+    .from('contracts')
+    .update({
+      status: 'terminated',
+      terminated_at: now,
+      termination_reason: `Remplacement suite AG du ${agDate}`,
+      updated_at: now,
+    })
+    .eq('copro_id', coproId)
+    .eq('contract_type', 'syndic')
+    .eq('status', 'active');
+
+  // 3. Create new syndic contract
+  const startDate = new Date(agDate);
+  const endDate = new Date(startDate);
+  endDate.setMonth(endDate.getMonth() + dureeMandatMois);
+
+  const { data: newContract, error: cErr } = await supabase
+    .from('contracts')
+    .insert({
+      copro_id: coproId,
+      provider_id: providerId,
+      contract_type: 'syndic',
+      title: `Contrat de syndic - ${nomSyndic}`,
+      start_date: startDate.toISOString().split('T')[0],
+      end_date: endDate.toISOString().split('T')[0],
+      renewal_date: endDate.toISOString().split('T')[0],
+      annual_amount: honorairesAnnuelsTtc,
+      billing_frequency: 'quarterly',
+      tacit_renewal: false,
+      auto_generate_orders: false,
+      is_regulatory: true,
+      status: 'active',
+      notes: `Nommé en AG du ${agDate}. Durée : ${dureeMandatMois} mois. Honoraires : ${honorairesAnnuelsTtc}€ TTC/an.`,
+    })
+    .select('id')
+    .single();
+
+  if (cErr || !newContract) {
+    return { success: false, error: cErr?.message || 'Impossible de créer le contrat syndic' };
+  }
+
+  return { success: true, contract_id: newContract.id };
+}
+
 export async function markActionActivated(
   agId: string,
   actionType: string,

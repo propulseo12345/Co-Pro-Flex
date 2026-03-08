@@ -370,6 +370,7 @@ export const MOCK_HISTORIQUE: HistoriqueModification[] = [
 export const MOCK_ETAT_CLOTURE: EtatCloture = {
   annee: 2024,
   estCloturee: false,
+  approvalStatus: 'open',
   mouvementsNonCategorises: 2,
   alertes: ['2 mouvements bancaires non catégorisés', '1 facture en attente de validation comptable']
 };

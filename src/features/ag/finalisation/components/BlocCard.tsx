@@ -5,6 +5,13 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import styles from './BlocCard.module.css';
 
+interface DualActions {
+  onApprove: () => void;
+  onReject: () => void;
+  approveLabel?: string;
+  rejectLabel?: string;
+}
+
 interface BlocCardProps {
   title: string;
   actionType: string;
@@ -14,6 +21,7 @@ interface BlocCardProps {
   onConfirm?: () => void;
   confirmLabel?: string;
   confirmDisabled?: boolean;
+  dualActions?: DualActions;
 }
 
 export function BlocCard({
@@ -24,6 +32,7 @@ export function BlocCard({
   onConfirm,
   confirmLabel = 'Confirmer',
   confirmDisabled = false,
+  dualActions,
 }: BlocCardProps) {
   const [collapsed, setCollapsed] = useState(status === 'activated');
 
@@ -56,7 +65,28 @@ export function BlocCard({
 
           <div className={styles.content}>{children}</div>
 
-          {status !== 'activated' && onConfirm && (
+          {status !== 'activated' && dualActions && (
+            <div className={styles.footerDual}>
+              <button
+                className={styles.rejectBtn}
+                onClick={dualActions.onReject}
+                disabled={status === 'loading'}
+                type="button"
+              >
+                {status === 'loading' ? 'En cours…' : dualActions.rejectLabel || 'Refuser'}
+              </button>
+              <button
+                className={styles.approveBtn}
+                onClick={dualActions.onApprove}
+                disabled={status === 'loading'}
+                type="button"
+              >
+                {status === 'loading' ? 'En cours…' : dualActions.approveLabel || 'Approuver'}
+              </button>
+            </div>
+          )}
+
+          {status !== 'activated' && !dualActions && onConfirm && (
             <div className={styles.footer}>
               <button
                 className={styles.confirmBtn}

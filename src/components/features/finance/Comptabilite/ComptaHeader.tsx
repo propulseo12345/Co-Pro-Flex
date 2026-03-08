@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Download, History, Lock } from 'lucide-react';
+import { Calendar, Download, History, Lock, CheckCircle, XCircle } from 'lucide-react';
 import { EtatCloture } from './types';
 import styles from './Comptabilite.module.css';
 
@@ -20,6 +20,41 @@ function formatDateFr(dateStr?: string): string {
   return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+function getClotureButtonConfig(etatCloture: EtatCloture) {
+  const { annee, approvalStatus } = etatCloture;
+
+  switch (approvalStatus) {
+    case 'approved':
+      return {
+        label: `Comptes approuvés ${annee}`,
+        icon: <CheckCircle size={18} aria-hidden="true" />,
+        className: styles.clotureButtonApproved,
+        disabled: true,
+      };
+    case 'rejected':
+      return {
+        label: `Comptes refusés ${annee}`,
+        icon: <XCircle size={18} aria-hidden="true" />,
+        className: styles.clotureButtonRejected,
+        disabled: true,
+      };
+    case 'closed':
+      return {
+        label: `Comptes clôturés ${annee}`,
+        icon: <Lock size={18} aria-hidden="true" />,
+        className: styles.clotureButtonClosed,
+        disabled: true,
+      };
+    default:
+      return {
+        label: `Clôture ${annee}`,
+        icon: <Lock size={18} aria-hidden="true" />,
+        className: etatCloture.mouvementsNonCategorises > 0 ? styles.clotureButtonWarning : '',
+        disabled: false,
+      };
+  }
+}
+
 export function ComptaHeader({
   etatCloture,
   startDate,
@@ -29,6 +64,8 @@ export function ComptaHeader({
   onExportPDF,
   onExportExcel
 }: ComptaHeaderProps) {
+  const btnConfig = getClotureButtonConfig(etatCloture);
+
   return (
     <div className={styles.header}>
       <div>
@@ -55,13 +92,13 @@ export function ComptaHeader({
           Export Excel
         </button>
         <button
-          className={`${styles.clotureButton} ${etatCloture.mouvementsNonCategorises > 0 ? styles.clotureButtonWarning : ''} ${etatCloture.estCloturee ? styles.clotureButtonClosed : ''}`}
+          className={`${styles.clotureButton} ${btnConfig.className}`}
           onClick={onShowCloture}
-          disabled={etatCloture.estCloturee}
+          disabled={btnConfig.disabled}
         >
-          <Lock size={18} aria-hidden="true" />
-          {etatCloture.estCloturee ? `Comptes clôturés ${etatCloture.annee}` : `Clôture ${etatCloture.annee}`}
-          {etatCloture.mouvementsNonCategorises > 0 && (
+          {btnConfig.icon}
+          {btnConfig.label}
+          {etatCloture.mouvementsNonCategorises > 0 && etatCloture.approvalStatus === 'open' && (
             <span className={styles.alertBadge}>{etatCloture.mouvementsNonCategorises}</span>
           )}
         </button>

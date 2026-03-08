@@ -881,6 +881,24 @@
     background: var(--success);
 }
 
+.clotureButtonApproved {
+    background: #16a34a;
+    cursor: default;
+}
+
+.clotureButtonApproved:hover {
+    background: #16a34a;
+}
+
+.clotureButtonRejected {
+    background: var(--color-error);
+    cursor: default;
+}
+
+.clotureButtonRejected:hover {
+    background: var(--color-error);
+}
+
 .clotureButton:disabled {
     opacity: 1;
 }
@@ -2141,4 +2159,13 @@
         flex: 1;
         justify-content: center;
     }
+}
+
+/* Livre comptable - comptes sans mouvement */
+.rowMuted {
+    opacity: 0.5;
+}
+
+.textMuted {
+    color: var(--text-tertiary);
 }

@@ -135,10 +135,15 @@ CoProFlex - Gestion de copropriété
     };
 
     const stats = useMemo(() => {
-        const actifs = contrats.filter(c => c.statut === 'ACTIF').length;
-        const aRenouveler = contrats.filter(c => c.statut === 'A_RENOUVELER').length;
+        // Include syndic in counts
+        const syndicActif = contratSyndic?.statut === 'ACTIF' ? 1 : 0;
+        const syndicARenouveler = contratSyndic?.statut === 'A_RENOUVELER' ? 1 : 0;
+        const syndicResilie = contratSyndic?.statut === 'RESILIE' ? 1 : 0;
+
+        const actifs = contrats.filter(c => c.statut === 'ACTIF').length + syndicActif;
+        const aRenouveler = contrats.filter(c => c.statut === 'A_RENOUVELER').length + syndicARenouveler;
         const expires = contrats.filter(c => c.statut === 'EXPIRE').length;
-        const resilies = contrats.filter(c => c.statut === 'RESILIE').length;
+        const resilies = contrats.filter(c => c.statut === 'RESILIE').length + syndicResilie;
 
         // Liste des contrats actifs et à renouveler (pour le drill-down)
         const contratsInclus = contrats.filter(c => c.statut === 'ACTIF' || c.statut === 'A_RENOUVELER');

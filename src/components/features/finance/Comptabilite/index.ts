@@ -13,6 +13,7 @@ export {
 export { ComptaTabContent } from './ComptaTabContent';
 export { GrandLivreTable } from './GrandLivreTable';
 export { BalanceTable } from './BalanceTable';
+export { LivreComptableTable } from './LivreComptableTable';
 export { BalanceCoproTable } from './BalanceCoproTable';
 export { DepensesTable } from './DepensesTable';
 export { Annexe1Table, Annexe1DetailCoprosTable, Annexe2Table, Annexe3Table, Annexe4Table, Annexe5Table } from './AnnexeTables';

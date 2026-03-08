@@ -128,6 +128,7 @@ export default function ComptabilitePage() {
         operations={page.operations}
         filteredOperations={page.filteredOperations}
         lignesBalance={page.lignesBalance}
+        allAccountsWithBalances={page.allAccountsWithBalances}
         annee={page.etatCloture.annee}
         onViewOperationDetail={page.handleViewOperationDetail}
         coproId={page.currentCoproId}

@@ -2,16 +2,18 @@
 
 import { GrandLivreTable } from './GrandLivreTable';
 import { BalanceTable } from './BalanceTable';
+import { LivreComptableTable } from './LivreComptableTable';
 import { Annexe1Table, Annexe1DetailCoprosTable, Annexe2Table, Annexe3Table, Annexe4Table, Annexe5Table } from './AnnexeTables';
 import { ComptaEmptyDataState, ComptaAnnexeNotConnected } from './ComptaEmptyStates';
 import { useAnnexeData } from '@/hooks/modules/useAnnexeData';
-import type { TabCompta, OperationComptable, LigneBalance } from './types';
+import type { TabCompta, OperationComptable, LigneBalance, AccountWithBalance } from './types';
 
 interface ComptaTabContentProps {
   activeTab: TabCompta;
   operations: OperationComptable[];
   filteredOperations: OperationComptable[];
   lignesBalance: LigneBalance[];
+  allAccountsWithBalances: AccountWithBalance[];
   annee: number;
   onViewOperationDetail: (operation: OperationComptable) => void;
   coproId: string | null;
@@ -31,6 +33,7 @@ export function ComptaTabContent({
   operations,
   filteredOperations,
   lignesBalance,
+  allAccountsWithBalances,
   annee,
   onViewOperationDetail,
   coproId,
@@ -72,6 +75,18 @@ export function ComptaTabContent({
       );
     }
     return <GrandLivreTable operations={filteredOperations} onViewDetail={onViewOperationDetail} />;
+  }
+
+  if (activeTab === 'livre-comptable') {
+    if (allAccountsWithBalances.length === 0) {
+      return (
+        <ComptaEmptyDataState
+          title="Aucun compte"
+          message="Le plan comptable n'est pas encore chargé."
+        />
+      );
+    }
+    return <LivreComptableTable accounts={allAccountsWithBalances} annee={annee} />;
   }
 
   if (activeTab === 'balance') {

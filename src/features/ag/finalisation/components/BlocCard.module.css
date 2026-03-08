@@ -57,6 +57,12 @@
 
 .footer { display: flex; justify-content: flex-end; }
 
+.footerDual {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+}
+
 .confirmBtn {
   padding: var(--spacing-2) var(--spacing-6);
   background: var(--color-primary-600);
@@ -69,6 +75,32 @@
 }
 .confirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 .confirmBtn:hover:not(:disabled) { opacity: 0.9; }
+
+.approveBtn {
+  padding: var(--spacing-2) var(--spacing-6);
+  background: var(--color-success);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+.approveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.approveBtn:hover:not(:disabled) { opacity: 0.9; }
+
+.rejectBtn {
+  padding: var(--spacing-2) var(--spacing-6);
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+.rejectBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.rejectBtn:hover:not(:disabled) { background: rgba(239,68,68,0.08); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 

@@ -147,7 +147,8 @@ export interface AccountingPeriod {
   name: string;
   start_date: string;
   end_date: string;
-  status: 'open' | 'locked' | 'closed';
+  status: 'open' | 'locked' | 'closed' | 'approved' | 'rejected';
+  entry_count?: number;
 }
 
 // ============================================================================
@@ -646,7 +647,7 @@ export async function listAccountingPeriods(coproId: string): Promise<ApiResult<
 
   const { data, error } = await supabase
     .from('accounting_periods')
-    .select('id, copro_id, name, start_date, end_date, status')
+    .select('id, copro_id, name, start_date, end_date, status, ledger_entries(count)')
     .eq('copro_id', coproId)
     .order('start_date', { ascending: false });
 
@@ -654,7 +655,21 @@ export async function listAccountingPeriods(coproId: string): Promise<ApiResult<
     return { data: null, error: error.message };
   }
 
-  return { data: data as AccountingPeriod[], error: null };
+  // Flatten the nested count from Supabase join
+  const periods: AccountingPeriod[] = (data || []).map((row: Record<string, unknown>) => {
+    const entries = row.ledger_entries as Array<{ count: number }> | undefined;
+    return {
+      id: row.id as string,
+      copro_id: row.copro_id as string,
+      name: row.name as string,
+      start_date: row.start_date as string,
+      end_date: row.end_date as string,
+      status: row.status as AccountingPeriod['status'],
+      entry_count: entries?.[0]?.count ?? 0,
+    };
+  });
+
+  return { data: periods, error: null };
 }
 
 export async function getOpenPeriod(coproId: string): Promise<ApiResult<AccountingPeriod | null>> {
@@ -723,6 +738,75 @@ export async function closePeriod(periodId: string): Promise<ApiResult<boolean>>
 
   if (data !== true) {
     return { data: false, error: null };
+  }
+
+  return { data: true, error: null };
+}
+
+export async function findPeriodByDates(coproId: string, startDate: string, endDate: string): Promise<ApiResult<AccountingPeriod | null>> {
+  const supabase = getSupabaseClient();
+
+  // Normalize dates to YYYY-MM-DD
+  const normalizeDate = (d: string) => {
+    if (d.includes('/')) {
+      const parts = d.split('/');
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return d;
+  };
+
+  const { data, error } = await supabase
+    .from('accounting_periods')
+    .select('id, copro_id, name, start_date, end_date, status')
+    .eq('copro_id', coproId)
+    .eq('start_date', normalizeDate(startDate))
+    .eq('end_date', normalizeDate(endDate))
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as AccountingPeriod | null, error: null };
+}
+
+export async function approvePeriod(periodId: string, notes?: string): Promise<ApiResult<boolean>> {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase
+    .from('accounting_periods')
+    .update({
+      status: 'approved',
+      approved_at: new Date().toISOString(),
+      approval_notes: notes || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', periodId)
+    .eq('status', 'closed');
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: true, error: null };
+}
+
+export async function rejectPeriod(periodId: string, notes?: string): Promise<ApiResult<boolean>> {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase
+    .from('accounting_periods')
+    .update({
+      status: 'rejected',
+      approved_at: new Date().toISOString(),
+      approval_notes: notes || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', periodId)
+    .eq('status', 'closed');
+
+  if (error) {
+    return { data: null, error: error.message };
   }
 
   return { data: true, error: null };

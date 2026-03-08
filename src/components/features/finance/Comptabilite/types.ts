@@ -1,4 +1,12 @@
-export type TabCompta = 'grand-livre' | 'balance' | 'compte-gestion' | 'annexe-1' | 'annexe-2' | 'annexe-3' | 'annexe-4' | 'annexe-5';
+export type TabCompta = 'grand-livre' | 'livre-comptable' | 'balance' | 'compte-gestion' | 'annexe-1' | 'annexe-2' | 'annexe-3' | 'annexe-4' | 'annexe-5';
+
+export interface AccountWithBalance {
+  code: string;
+  name: string;
+  accountType: string;
+  debit: number;
+  credit: number;
+}
 export type TypeOperation = 'DEBIT' | 'CREDIT';
 export type TypeDepense = 'eau' | 'electricite' | 'entretien' | 'assurance' | 'travaux' | 'menage' | 'ascenseur' | 'divers';
 
@@ -63,9 +71,12 @@ export interface MouvementNonCategorise {
   type: 'ENTREE' | 'SORTIE';
 }
 
+export type ApprovalStatus = 'open' | 'closed' | 'approved' | 'rejected';
+
 export interface EtatCloture {
   annee: number;
   estCloturee: boolean;
+  approvalStatus: ApprovalStatus;
   dateValidation?: string;
   validePar?: string;
   mouvementsNonCategorises: number;

@@ -3,11 +3,17 @@
 /**
  * Service de gestion des contrats
  * Centralise l'état des contrats pour synchroniser liste et détail
- *
- * NEUTRALIZED: Mock data removed - will be replaced by Supabase queries
  */
 
-import { ContratDetaille, ContratSyndic } from '@/types';
+import { ContratDetaille, ContratSyndic, StatutContratSyndic } from '@/types';
+import { createClient } from '@supabase/supabase-js';
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 // Seuils pour la mise à jour automatique des statuts
 const SEUIL_A_RENOUVELER = 60; // Passe à "À renouveler" à J-60
@@ -159,8 +165,59 @@ export function deleteContrat(id: string): void {
 }
 
 /**
- * Récupérer le contrat syndic
- * NEUTRALIZED: Returns null when no data - will be replaced by Supabase
+ * Load syndic contract from Supabase for a given copro
+ */
+export async function loadSyndicContract(coproId: string): Promise<void> {
+    const supabase = getSupabase();
+
+    const { data, error } = await supabase
+        .from('contracts')
+        .select('id, contract_number, title, start_date, end_date, annual_amount, status, tacit_renewal, notice_months, notes, provider_id, providers(name, email, phone, address, city)')
+        .eq('copro_id', coproId)
+        .eq('contract_type', 'syndic')
+        .in('status', ['active', 'terminated'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (error || !data) {
+        contratSyndicState = null;
+        notifyListeners();
+        return;
+    }
+
+    const rawProvider = data.providers as unknown;
+    const provider = Array.isArray(rawProvider) ? rawProvider[0] as { name: string; email: string | null; phone: string | null; address: string | null; city: string | null } | undefined : rawProvider as { name: string; email: string | null; phone: string | null; address: string | null; city: string | null } | null;
+
+    // Map DB status to frontend status
+    let statut: StatutContratSyndic = 'ACTIF';
+    if (data.status === 'terminated') {
+        statut = 'RESILIE';
+    } else {
+        const joursRestants = getJoursAvantEcheance(data.end_date);
+        if (joursRestants <= SEUIL_A_RENOUVELER) statut = 'A_RENOUVELER';
+    }
+
+    contratSyndicState = {
+        id: data.id,
+        nomSyndic: provider?.name || 'Syndic',
+        numeroContrat: data.contract_number || '',
+        dateDebut: data.start_date,
+        dateFin: data.end_date,
+        montantAnnuel: parseFloat(data.annual_amount) || 0,
+        statut,
+        description: data.notes || undefined,
+        taciteReconduction: data.tacit_renewal,
+        delaiResiliation: data.notice_months ? data.notice_months * 30 : undefined,
+        telephone: provider?.phone || undefined,
+        email: provider?.email || undefined,
+        adresse: provider?.address ? `${provider.address}${provider.city ? ', ' + provider.city : ''}` : undefined,
+    };
+    notifyListeners();
+}
+
+/**
+ * Récupérer le contrat syndic (depuis le cache mémoire)
  */
 export function getContratSyndic(): ContratSyndic | null {
     if (contratSyndicState === null) {
