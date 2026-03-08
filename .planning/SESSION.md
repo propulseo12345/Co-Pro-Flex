@@ -1,33 +1,27 @@
-# Session State — 2026-03-08 20:15
+# Session State — 2026-03-08 22:30
 
 ## Branch
-main
+v2
 
 ## Completed This Session
-- feat: BlocConseilSyndical — sélection copropriétaires + rôles (président/membre) dans finalisation AG
-- fix: RPC elect_council_from_ag enrichie (désactive anciens membres, insère nouveaux dans council_members)
-- fix: pré-remplissage membres CS depuis variables AG (draft global fallback + match par nom)
-- fix: session AG stocke elected_copro_id dans variables résolution ELECT_COUNCIL
-- fix: contrainte current_step élargie 1-9 (étape finalisation)
-- fix: resolution status synchro (approved/rejected) lors du vote en session AG
-- fix: données existantes corrigées (14/14 résolutions approved)
-- feat: page preview 5 variantes navigation (/preview/navigation)
+- feat: Navigation V1 redesign (HighBar 8 modules + ModuleSidebar contextuelle)
+- feat: Routes Contentieux (impayés + litiges) + search config
+- feat: Thème global V1 (primary bleu #2563eb, bg #0f1117, ~300 hex→var() dans 53 CSS AG)
+- fix: FinanceAnnexeStats suit le filtre exercice (periodId prop)
+- feat: Preview logbook header 3 variantes (condensé, barre, pills)
 
 ## Next Task
-**REDESIGN NAVIGATION V1** — Appliquer la Variante 1 (High bar modules + Sidebar contextuelle) :
-1. Réorganiser les modules : Dashboard, AG, Copropriété, Finance, Maintenance, Documents
-2. High bar avec onglets modules + fond sombre (#151821)
-3. Sidebar contextuelle (sous-pages du module actif uniquement)
-4. Direction artistique : fond #0f1117, sidebar #131620, accents bleu #2563eb
-5. Fusionner : Ventes→Documents (État daté), Copropriétaires+Tantièmes+Impayés→Copropriété
-6. Supprimer sections redondantes : Annexes comptables (déjà en compta), Analytics, Juridique, Communication
+**REFONTE LOGBOOK HEADER** — Reprendre les 3 variantes preview (/preview/logbook-header), choisir et appliquer:
+- Le problème: 6 KPIs en ligne, texte tronqué, "11 Total interventions" pas compréhensible
+- Les catégories ne sont pas claires sans contexte
+- Appliquer la variante choisie dans LogbookHeader.tsx
+- Fichier: src/components/features/maintenance/Logbook/LogbookHeader.tsx
 
 ## Blockers
 None
 
 ## Key Context
-- Preview live: /preview/navigation (V1 choisie par l'utilisateur)
-- La V1 = High bar avec 6 modules + sidebar contextuelle par module
-- Direction artistique sombre : #0f1117 fond, #151821 high bar, #131620 sidebar, #2563eb accent
-- Sidebar actuelle : src/components/layout/Sidebar/Sidebar.tsx (260px, resizable, 9 sections collapsibles)
-- Layout dashboard : src/app/(dashboard)/layout.tsx
+- Branche v2 (3 commits), main intacte
+- globals.css a un linter qui reset les vars — ré-appliquer primary bleu + bg #0f1117 si besoin
+- Navigation config: src/lib/config/navigation.ts (8 modules)
+- Preview live: /preview/logbook-header (3 variantes A/B/C)
