@@ -393,7 +393,8 @@ export function getExerciceActuel(): number {
  */
 export function getExercicesList(count: number = 3): string[] {
   const current = getExerciceActuel();
-  return Array.from({ length: count }, (_, i) => (current - i).toString());
+  // Include next year (N+1) since budgets are voted at AG year N for year N+1
+  return Array.from({ length: count + 1 }, (_, i) => (current + 1 - i).toString());
 }
 
 /**

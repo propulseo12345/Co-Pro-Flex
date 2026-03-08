@@ -107,7 +107,7 @@ interface UseAgWizardStateReturn {
   navigateToCurrentStep: () => void;
 }
 
-// Mapping étape -> path (8 étapes)
+// Mapping étape -> path (9 étapes)
 const STEP_PATHS: Record<number, string> = {
   1: 'edit',
   2: 'agenda',
@@ -117,6 +117,7 @@ const STEP_PATHS: Record<number, string> = {
   6: 'feuille-presence',
   7: 'session',
   8: 'pv',
+  9: 'finalisation',
 };
 
 // Prérequis par étape (quelles étapes doivent être complétées avant)
@@ -129,6 +130,7 @@ const STEP_PREREQUISITES: Record<number, number[]> = {
   6: [4], // Nécessite envoi fait (peut skip votes par correspondance)
   7: [6], // Nécessite feuille de présence validée
   8: [7], // Nécessite session terminée
+  9: [8], // Nécessite PV généré
 };
 
 export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
@@ -254,7 +256,7 @@ export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
    * Navigue vers une étape
    */
   const goToStep = useCallback(async (step: number) => {
-    if (!agId || step < 1 || step > 8) return;
+    if (!agId || step < 1 || step > 9) return;
 
     await saveState(step);
   }, [agId, saveState]);
@@ -353,6 +355,7 @@ export function useAgWizardState(agId: string | null): UseAgWizardStateReturn {
     if (step === 6) return state.stats.resolutions_count > 0;
     if (step === 7) return state.stats.resolutions_count > 0;
     if (step === 8) return state.stats.resolutions_count > 0 && isStepCompleted(7);
+    if (step === 9) return state.status === 'pv_generated' || state.status === 'finalized';
 
     return prerequisites.every(prereq => isStepCompleted(prereq));
   }, [state, isStepCompleted]);

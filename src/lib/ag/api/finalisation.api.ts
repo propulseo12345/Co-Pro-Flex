@@ -4,6 +4,7 @@ export interface BlocPoste {
   label: string;
   amount: number;
   sort_order: number;
+  code?: string;
   account_id?: string;
   repartition_key_id?: string;
 }
@@ -92,11 +93,13 @@ export async function markActionActivated(
 
 export async function markAgFinalized(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
-  // La session est déjà close (finish_ag_session appelé au moment de l'envoi du PV)
-  // On met juste à jour le statut en 'finalized'
   const { error } = await supabase
     .from('ag_meetings')
-    .update({ status: 'finalized' })
+    .update({
+      status: 'finalized',
+      current_step: 9,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', agId);
 
   if (error) return { success: false, error: error.message };

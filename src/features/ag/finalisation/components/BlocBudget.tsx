@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { createBudgetFromAg, type BlocPoste, type PendingAction } from '@/lib/ag/api/finalisation.api';
 import { useAccountsAndKeys } from '@/features/ag/new/hooks/useAccountsAndKeys';
 import { POSTES_DEPENSES, POSTE_ACCOUNT_MAPPING } from '@/features/ag/new/domain/constants';
+import { inferPosteCode } from '@/components/features/finance/Budget/types';
 import styles from './BlocBudget.module.css';
 
 function parseFrenchAmount(val: string | undefined): number {
@@ -55,13 +56,17 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
 
           if (metadata.budgetPostes && Array.isArray(metadata.budgetPostes) && metadata.budgetPostes.length > 0) {
             const loadedPostes: BlocPoste[] = metadata.budgetPostes.map(
-              (p: { poste?: string; montant?: number; accountId?: string; repartitionKeyId?: string }, idx: number) => ({
-                label: p.poste || `Poste ${idx + 1}`,
-                amount: p.montant || 0,
-                sort_order: idx,
-                account_id: p.accountId || undefined,
-                repartition_key_id: p.repartitionKeyId || undefined,
-              })
+              (p: { poste?: string; montant?: number; accountId?: string; repartitionKeyId?: string }, idx: number) => {
+                const label = p.poste || `Poste ${idx + 1}`;
+                return {
+                  label,
+                  amount: p.montant || 0,
+                  sort_order: idx,
+                  code: inferPosteCode(label),
+                  account_id: p.accountId || undefined,
+                  repartition_key_id: p.repartitionKeyId || undefined,
+                };
+              }
             );
             setPostes(loadedPostes);
             setPostesLoaded(true);
@@ -122,6 +127,7 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
       label,
       amount,
       sort_order: prev.length,
+      code: inferPosteCode(label),
       ...accountData,
     }]);
     setSelectedPoste('');

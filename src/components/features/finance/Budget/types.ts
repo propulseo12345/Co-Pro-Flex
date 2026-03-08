@@ -87,6 +87,24 @@ export interface PosteBudgetData {
   consomme: number;
 }
 
+/** Infer PosteBudget code from a label (case-insensitive, partial match) */
+export function inferPosteCode(label: string): PosteBudget {
+  const l = label.toLowerCase().trim();
+  if (l.includes('eau'))         return 'eau';
+  if (l.includes('électricité') || l.includes('electricit') || l.includes('éclairage')) return 'electricite';
+  if (l.includes('assurance'))   return 'assurance';
+  if (l.includes('ménage') || l.includes('menage') || l.includes('nettoyage') || l.includes('gardiennage')) return 'menage';
+  if (l.includes('ascenseur'))   return 'ascenseur';
+  if (l.includes('espaces verts') || l.includes('entretien')) return 'espaces_verts';
+  if (l.includes('plomberie'))   return 'plomberie';
+  if (l.includes('chauffage'))   return 'chauffage';
+  if (l.includes('toiture'))     return 'toiture';
+  if (l.includes('parking'))     return 'parking';
+  if (l.includes('sécurité') || l.includes('securite') || l.includes('télésurveillance')) return 'securite';
+  if (l.includes('parties communes')) return 'parties_communes';
+  return 'divers';
+}
+
 export interface Prestataire {
   id: string;
   nom: string;

@@ -27,19 +27,22 @@ export function BudgetChart({
   onPosteClick,
 }: BudgetChartProps) {
   // Construire les données pour le graphique interactif
+  // Si aucune dépense, montrer l'allocation prévue (budgetVote)
+  const hasConsommation = totalConsomme > 0;
   const donneesRepartition: DonneesRepartition[] = useMemo(() => {
+    const totalRef = hasConsommation ? totalConsomme : budgetAnnuelVote;
     return postesBudget
-      .filter((p) => p.consomme > 0)
+      .filter((p) => hasConsommation ? p.consomme > 0 : p.budgetVote > 0)
       .map((p) => ({
         posteId: p.poste,
         poste: p.label,
-        montant: p.consomme,
-        pourcentage: totalConsomme > 0 ? (p.consomme / totalConsomme) * 100 : 0,
+        montant: hasConsommation ? p.consomme : p.budgetVote,
+        pourcentage: totalRef > 0 ? ((hasConsommation ? p.consomme : p.budgetVote) / totalRef) * 100 : 0,
         couleur: POSTE_COLORS[p.poste],
         nombreDepenses: 0,
       }))
       .sort((a, b) => b.montant - a.montant);
-  }, [postesBudget, totalConsomme]);
+  }, [postesBudget, totalConsomme, budgetAnnuelVote, hasConsommation]);
 
   // Informations du poste actif pour le badge
   const posteActifData = useMemo(() => {
@@ -89,7 +92,8 @@ export function BudgetChart({
           <div className={styles.stackedBarContainer}>
             <div className={styles.stackedBar}>
               {postesBudget.map((poste) => {
-                const width = (poste.consomme / budgetAnnuelVote) * 100;
+                const val = hasConsommation ? poste.consomme : poste.budgetVote;
+                const width = budgetAnnuelVote > 0 ? (val / budgetAnnuelVote) * 100 : 0;
                 return (
                   <div
                     key={poste.poste}
@@ -98,7 +102,7 @@ export function BudgetChart({
                       width: `${width}%`,
                       backgroundColor: POSTE_COLORS[poste.poste],
                     }}
-                    title={`${poste.label}: ${poste.consomme.toLocaleString()} € (${width.toFixed(1)}%)`}
+                    title={`${poste.label}: ${val.toLocaleString()} € (${width.toFixed(1)}%)`}
                     onClick={() => onPosteClick?.(poste)}
                     role="button"
                     tabIndex={0}
@@ -112,15 +116,17 @@ export function BudgetChart({
                   />
                 );
               })}
-              <div
-                className={styles.stackedBarSegment}
-                style={{
-                  width: `${(budgetRestant / budgetAnnuelVote) * 100}%`,
-                  backgroundColor: 'var(--bg-secondary)',
-                  cursor: 'default',
-                }}
-                title={`Restant: ${budgetRestant.toLocaleString()} €`}
-              />
+              {hasConsommation && (
+                <div
+                  className={styles.stackedBarSegment}
+                  style={{
+                    width: `${(budgetRestant / budgetAnnuelVote) * 100}%`,
+                    backgroundColor: 'var(--bg-secondary)',
+                    cursor: 'default',
+                  }}
+                  title={`Restant: ${budgetRestant.toLocaleString()} €`}
+                />
+              )}
             </div>
             <div className={styles.stackedBarLabels}>
               <span>0 €</span>
@@ -130,44 +136,50 @@ export function BudgetChart({
           </div>
 
           <div className={styles.chartLegend}>
-            {postesBudget.map((poste) => (
-              <div
-                key={poste.poste}
-                className={styles.legendItem}
-                onClick={() => onPosteClick?.(poste)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onPosteClick?.(poste);
-                  }
-                }}
-                aria-label={`Voir le détail du poste ${poste.label}`}
-                style={{ cursor: onPosteClick ? 'pointer' : 'default' }}
-              >
+            {postesBudget.map((poste) => {
+              const val = hasConsommation ? poste.consomme : poste.budgetVote;
+              const totalRef = hasConsommation ? totalConsomme : budgetAnnuelVote;
+              return (
+                <div
+                  key={poste.poste}
+                  className={styles.legendItem}
+                  onClick={() => onPosteClick?.(poste)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onPosteClick?.(poste);
+                    }
+                  }}
+                  aria-label={`Voir le détail du poste ${poste.label}`}
+                  style={{ cursor: onPosteClick ? 'pointer' : 'default' }}
+                >
+                  <span
+                    className={styles.legendColor}
+                    style={{ backgroundColor: POSTE_COLORS[poste.poste] }}
+                  />
+                  <span className={styles.legendLabel}>{poste.label}</span>
+                  <span className={styles.legendValue}>{val.toLocaleString()} €</span>
+                  <span className={styles.legendPercent}>
+                    ({totalRef > 0 ? ((val / totalRef) * 100).toFixed(0) : 0}%)
+                  </span>
+                </div>
+              );
+            })}
+            {hasConsommation && (
+              <div className={styles.legendItem}>
                 <span
                   className={styles.legendColor}
-                  style={{ backgroundColor: POSTE_COLORS[poste.poste] }}
+                  style={{ backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--border)' }}
                 />
-                <span className={styles.legendLabel}>{poste.label}</span>
-                <span className={styles.legendValue}>{poste.consomme.toLocaleString()} €</span>
+                <span className={styles.legendLabel}>Disponible</span>
+                <span className={styles.legendValue}>{budgetRestant.toLocaleString()} €</span>
                 <span className={styles.legendPercent}>
-                  ({((poste.consomme / totalConsomme) * 100).toFixed(0)}%)
+                  ({budgetAnnuelVote > 0 ? ((budgetRestant / budgetAnnuelVote) * 100).toFixed(0) : 0}%)
                 </span>
               </div>
-            ))}
-            <div className={styles.legendItem}>
-              <span
-                className={styles.legendColor}
-                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--border)' }}
-              />
-              <span className={styles.legendLabel}>Disponible</span>
-              <span className={styles.legendValue}>{budgetRestant.toLocaleString()} €</span>
-              <span className={styles.legendPercent}>
-                ({((budgetRestant / budgetAnnuelVote) * 100).toFixed(0)}%)
-              </span>
-            </div>
+            )}
           </div>
         </>
       )}

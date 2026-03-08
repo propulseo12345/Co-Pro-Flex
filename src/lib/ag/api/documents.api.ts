@@ -123,6 +123,29 @@ export async function markPvGenerated(
     .update({
       status: 'pv_generated' as AgStatus,
       pv_document_id: documentId,
+      pv_generated_at: new Date().toISOString(),
+    })
+    .eq('id', agId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Marque le PV comme envoyé aux copropriétaires
+ */
+export async function markPvSent(
+  agId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createUntypedClient();
+
+  const { error } = await supabase
+    .from('ag_meetings')
+    .update({
+      pv_sent_at: new Date().toISOString(),
     })
     .eq('id', agId);
 

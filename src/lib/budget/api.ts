@@ -35,6 +35,7 @@ export interface BudgetOverview {
   period_id: string;
   budget_type: BudgetType;
   status: DbBudgetStatus;
+  version: number;
   name: string;
   notes: string | null;
   created_at: string;

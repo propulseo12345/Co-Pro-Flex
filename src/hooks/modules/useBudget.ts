@@ -26,6 +26,7 @@ import {
   getProgressColor,
   getProgressPercentage,
   POSTE_LABELS,
+  inferPosteCode,
 } from '@/components/features/finance/Budget/types';
 import type { PosteEditorData } from '@/components/features/finance/Budget/PosteEditor';
 import { BudgetStatut, DepenseStatut } from '@/types/enums/statuts';
@@ -82,7 +83,7 @@ function mapBudgetToFrontend(budget: BudgetOverview): BudgetWithStatus {
 }
 
 function mapLineToPosteData(line: BudgetLineOverview): PosteBudgetData {
-  const code = (line.code || 'divers') as PosteBudget;
+  const code = (line.code as PosteBudget) || inferPosteCode(line.label || '');
   return {
     poste: code,
     label: line.label || POSTE_LABELS[code] || code,
@@ -254,9 +255,11 @@ export function useBudget() {
     return rawBudgets.map(mapBudgetToFrontend);
   }, [rawBudgets]);
 
-  // Current fonctionnement budget for selected year
+  // Current fonctionnement budget for selected year (latest version if multiple)
   const budgetFonctionnementAnnee = useMemo(() => {
-    return rawBudgets.find(b => b.budget_type === 'current' && b.period_year === selectedYear);
+    return rawBudgets
+      .filter(b => b.budget_type === 'current' && b.period_year === selectedYear)
+      .sort((a, b) => (b.version ?? 1) - (a.version ?? 1))[0] ?? undefined;
   }, [rawBudgets, selectedYear]);
 
   const budgetAnnuelVote = budgetFonctionnementAnnee?.total_planned
@@ -566,9 +569,11 @@ export function useBudget() {
     await mutations.rejectExpense(depenseId, comment);
   }, [mutations]);
 
-  // Auto-load budget lines for fonctionnement budget on initial load
+  // Auto-load budget lines for fonctionnement budget on initial load (latest version)
   useEffect(() => {
-    const fonctionnementBudget = rawBudgets.find(b => b.budget_type === 'current');
+    const fonctionnementBudget = rawBudgets
+      .filter(b => b.budget_type === 'current')
+      .sort((a, b) => (b.version ?? 1) - (a.version ?? 1))[0];
     if (fonctionnementBudget && !isLoading) {
       // Load lines and expenses for the default tab (fonctionnement)
       loadBudgetLines(fonctionnementBudget.id);

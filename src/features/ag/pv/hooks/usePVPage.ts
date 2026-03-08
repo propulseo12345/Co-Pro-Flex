@@ -709,7 +709,8 @@ export function usePVPage({ agId }: UsePVPageProps) {
   // Navigation handlers
   const handleFinish = async () => {
     await saveDraft(agId, 'milestones', { completed: true }, 'ag-completed-' + agId);
-    router.push('/ag/dashboard');
+    // Navigate to step 9 (finalisation) instead of dashboard
+    router.push(`/ag/${agId}/finalisation`);
   };
 
   const handleGoBack = () => {

@@ -126,13 +126,18 @@ export async function closeAg(input: CloseAgInput): Promise<CloseAgResponse> {
 export async function startAg(input: StartAgInput): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
 
+  // Build update — never overwrite opening_notes unless explicitly provided
+  const updatePayload: Record<string, unknown> = {
+    status: 'session_active' as AgStatus,
+    session_started_at: new Date().toISOString(),
+  };
+  if (input.opening_notes !== undefined) {
+    updatePayload.opening_notes = input.opening_notes;
+  }
+
   const { error } = await supabase
     .from('ag_meetings')
-    .update({
-      status: 'session_active' as AgStatus,
-      session_started_at: new Date().toISOString(),
-      opening_notes: input.opening_notes || null,
-    })
+    .update(updatePayload)
     .eq('id', input.ag_id)
     .eq('copro_id', input.copro_id);
 
