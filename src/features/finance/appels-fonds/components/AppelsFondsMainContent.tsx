@@ -6,7 +6,7 @@ import { AppelsFondsStats } from '@/components/features/finance/AppelsFonds/Appe
 import { AppelsFondsGroupedTable } from '@/components/features/finance/AppelsFonds/AppelsFondsGroupedTable';
 import { CampaignsList } from '@/components/features/finance/AppelsFonds/CampaignsList';
 import { RecouvrementAlert } from '@/components/features/finance/AppelsFonds/RecouvrementAlert';
-import type { AppelFonds, GroupedAppelFonds, AppelsFondsStats as StatsType, AlerteDelai } from '@/components/features/finance/AppelsFonds/types';
+import type { AppelFonds, GroupedAppelFonds, AppelsFondsStats as StatsType } from '@/components/features/finance/AppelsFonds/types';
 import type { CallCampaign } from '@/lib/finance/api';
 import styles from './AppelsFondsMainContent.module.css';
 
@@ -18,15 +18,7 @@ interface AppelsFondsMainContentProps {
   onSelectCampaign: (periodId: string | null) => void;
   stats: StatsType;
   onNewAppel: () => void;
-  onGestionClick: (appel: AppelFonds) => void;
-  onMontantClick: (appel: AppelFonds) => void;
-  onViewAppel: (appel: AppelFonds) => void;
-  onEditAppel: (appel: AppelFonds) => void;
-  onDeleteAppel: (appel: AppelFonds) => void;
   onEmettreAppel: (appel: AppelFonds) => void;
-  onVoirRelances: (appel: AppelFonds) => void;
-  onExportAvis: (appel: AppelFonds) => void;
-  onAlerteAction: (alerte: AlerteDelai) => void;
 }
 
 export function AppelsFondsMainContent({
@@ -37,14 +29,7 @@ export function AppelsFondsMainContent({
   onSelectCampaign,
   stats,
   onNewAppel,
-  onGestionClick,
-  onMontantClick,
-  onViewAppel,
-  onEditAppel,
-  onDeleteAppel,
   onEmettreAppel,
-  onVoirRelances,
-  onExportAvis,
 }: AppelsFondsMainContentProps) {
   const selectedCampaign = campaigns.find(c => c.period_id === selectedCampaignId);
 
@@ -88,14 +73,7 @@ export function AppelsFondsMainContent({
 
           <AppelsFondsGroupedTable
             groups={groupedAppels}
-            onGestionClick={onGestionClick}
-            onMontantClick={onMontantClick}
-            onViewAppel={onViewAppel}
-            onEditAppel={onEditAppel}
-            onDeleteAppel={onDeleteAppel}
             onEmettreAppel={onEmettreAppel}
-            onVoirRelances={onVoirRelances}
-            onExportAvis={onExportAvis}
           />
         </>
       )}

@@ -2,67 +2,72 @@
 
 import { useState, useCallback } from 'react';
 import { useAppelsFonds } from '@/hooks/modules/useAppelsFonds';
+import * as financeApi from '@/lib/finance/api';
 import type { AppelFonds } from '@/components/features/finance/AppelsFonds/types';
-import type { AppelFondsEmission } from '@/lib/services/emission-appel.service';
+import type { AppelFondsEmission, LigneAppelEmission } from '@/lib/services/emission-appel.service';
 import { AppelFondsStatut } from '@/types/enums/statuts';
 
-/**
- * Convertit un AppelFonds du module vers AppelFondsEmission pour le service
- */
-function convertToEmissionAppel(appel: AppelFonds): AppelFondsEmission {
-  return {
-    id: appel.id,
-    numero: parseInt(appel.id, 10) || 1,
-    montant: appel.montantTotal,
-    montantEncaisse: appel.montantEncaisse || 0,
-    date: appel.dateEmission || new Date().toISOString().split('T')[0],
-    dateEcheance: appel.dateExigibilite,
-    description: appel.description,
-    statut: appel.statut === 'A_GENERER' ? AppelFondsStatut.EN_ATTENTE : appel.statut,
-    budgetId: appel.budgetTravauxId,
-    lignes: [],
-  };
-}
-
 export function useAppelsFondsPage() {
-  // Local state for emission modal
   const [showEmissionModal, setShowEmissionModal] = useState(false);
   const [appelAEmettre, setAppelAEmettre] = useState<AppelFonds | null>(null);
+  const [appelEmissionConverted, setAppelEmissionConverted] = useState<AppelFondsEmission | null>(null);
 
   const appelsFonds = useAppelsFonds();
 
-  // Handler to open emission modal
-  const handleEmettreAppel = useCallback((appel: AppelFonds) => {
+  // Handler to open emission modal — loads lines from Supabase first
+  const handleEmettreAppel = useCallback(async (appel: AppelFonds) => {
     setAppelAEmettre(appel);
+
+    // Load call lines from Supabase
+    const result = await financeApi.getCallLines(appel.id);
+    const lines = result.data || [];
+
+    const lignes: LigneAppelEmission[] = lines.map(line => ({
+      id: line.id,
+      coproprietaireId: line.lot_id,
+      coproprietaireNom: line.owner_name || 'Propriétaire inconnu',
+      lots: [line.lot_ref],
+      quotePart: 0, // Not available in view
+      montantAppele: Number(line.amount_due),
+      montantPaye: Number(line.amount_paid),
+    }));
+
+    setAppelEmissionConverted({
+      id: appel.id,
+      numero: parseInt(appel.id, 10) || 1,
+      montant: appel.montantTotal,
+      montantEncaisse: appel.montantEncaisse || 0,
+      date: appel.dateEmission || new Date().toISOString().split('T')[0],
+      dateEcheance: appel.dateExigibilite,
+      description: appel.description,
+      statut: appel.statut === 'A_GENERER' ? AppelFondsStatut.EN_ATTENTE : appel.statut,
+      budgetId: appel.budgetTravauxId,
+      lignes,
+    });
+
     setShowEmissionModal(true);
   }, []);
 
-  // Handler for emission success
   const handleEmissionSuccess = useCallback(async (_result: { nouveauStatut: string }) => {
     await appelsFonds.refreshCalls();
     setShowEmissionModal(false);
     setAppelAEmettre(null);
+    setAppelEmissionConverted(null);
   }, [appelsFonds]);
 
-  // Handler to close emission modal
   const handleCloseEmissionModal = useCallback(() => {
     setShowEmissionModal(false);
     setAppelAEmettre(null);
+    setAppelEmissionConverted(null);
   }, []);
 
-  // Convert appel for emission modal
-  const appelEmissionConverted = appelAEmettre ? convertToEmissionAppel(appelAEmettre) : null;
-
   return {
-    // From useAppelsFonds
     ...appelsFonds,
 
-    // Emission modal state
     showEmissionModal,
     appelAEmettre,
     appelEmissionConverted,
 
-    // Emission handlers
     handleEmettreAppel,
     handleEmissionSuccess,
     handleCloseEmissionModal,

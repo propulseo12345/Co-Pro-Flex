@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { FileText, ChevronDown, ChevronRight, Eye, Edit, Trash2, Send, Download, Mail, Users } from 'lucide-react';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { FileText, Send, Users, ArrowRight } from 'lucide-react';
 import { StatutAppelBadge } from './StatutAppelBadge';
 import { formatCurrency, formatDate, peutEmettreAppelFonds } from './utils';
 import type { GroupedAppelFonds, AppelFonds } from './types';
@@ -9,34 +10,79 @@ import styles from './AppelsFondsGroupedTable.module.css';
 
 interface AppelsFondsGroupedTableProps {
   groups: GroupedAppelFonds[];
-  onGestionClick: (appel: AppelFonds) => void;
-  onMontantClick: (appel: AppelFonds) => void;
-  onViewAppel: (appel: AppelFonds) => void;
-  onEditAppel: (appel: AppelFonds) => void;
-  onDeleteAppel: (appel: AppelFonds) => void;
   onEmettreAppel?: (appel: AppelFonds) => void;
-  onVoirRelances?: (appel: AppelFonds) => void;
-  onExportAvis?: (appel: AppelFonds) => void;
 }
+
+interface TrimesterRow {
+  periode: string;
+  appels: AppelFonds[];
+  montantTotal: number;
+  montantEncaisse: number;
+  dateEmission: string | undefined;
+  dateLimiteReglement: string;
+  statutGlobal: string;
+  /** First appel ID for navigation */
+  firstAppelId: string;
+}
+
+/** Pick the "worst" status across multiple calls */
+function worstStatus(appels: AppelFonds[]): string {
+  const statuts = appels.map(a => (a.statut || '').toString().toUpperCase());
+  if (statuts.some(s => s === 'A_GENERER' || s === 'EN_PREPARATION' || s === 'draft')) return 'A_GENERER';
+  if (statuts.some(s => s === 'EMIS' || s === 'ENVOYE' || s === 'issued')) return 'EMIS';
+  if (statuts.some(s => s === 'PARTIELLEMENT_PAYE' || s === 'partially_paid')) return 'PARTIELLEMENT_PAYE';
+  if (statuts.every(s => s === 'SOLDE' || s === 'PAYE' || s === 'paid')) return 'SOLDE';
+  if (statuts.some(s => s === 'ANNULE' || s === 'cancelled')) return 'ANNULE';
+  return appels[0]?.statut || 'A_GENERER';
+}
+
+/** Check if ALL calls in trimester can be emitted */
+function canEmitTrimester(appels: AppelFonds[]): boolean {
+  return appels.every(a => peutEmettreAppelFonds(a.statut));
+}
+
+function getContextualLabel(statut: string): { label: string; icon: 'send' | 'users' | 'arrow' } {
+  const s = statut.toUpperCase();
+  if (s === 'A_GENERER' || s === 'EN_PREPARATION' || s === 'draft') return { label: 'Générer', icon: 'send' };
+  if (s === 'EMIS' || s === 'ENVOYE' || s === 'issued') return { label: 'Gérer envois', icon: 'users' };
+  if (s === 'PARTIELLEMENT_PAYE' || s === 'partially_paid') return { label: 'Suivi', icon: 'users' };
+  return { label: 'Voir', icon: 'arrow' };
+}
+
+const ICON_MAP = { send: Send, users: Users, arrow: ArrowRight } as const;
 
 export function AppelsFondsGroupedTable({
   groups,
-  onGestionClick,
-  onMontantClick,
-  onViewAppel,
-  onEditAppel,
-  onDeleteAppel,
   onEmettreAppel,
-  onVoirRelances,
-  onExportAvis,
 }: AppelsFondsGroupedTableProps) {
-  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const router = useRouter();
 
-  const toggleExpand = useCallback((keyId: string) => {
-    setExpandedKey(prev => prev === keyId ? null : keyId);
-  }, []);
+  // Regroup by trimester period (T1, T2...) instead of by key
+  const trimesterRows = useMemo<TrimesterRow[]>(() => {
+    const allAppels = groups.flatMap(g => g.trimestres);
+    const map = new Map<string, AppelFonds[]>();
 
-  if (groups.length === 0) {
+    allAppels.forEach(appel => {
+      const key = appel.periode; // "T1 2027", "T2 2027", etc.
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(appel);
+    });
+
+    return Array.from(map.entries())
+      .map(([periode, appels]) => ({
+        periode,
+        appels,
+        montantTotal: appels.reduce((sum, a) => sum + a.montantTotal, 0),
+        montantEncaisse: appels.reduce((sum, a) => sum + (a.montantEncaisse || 0), 0),
+        dateEmission: appels[0].dateEmission,
+        dateLimiteReglement: appels[0].dateLimiteReglement,
+        statutGlobal: worstStatus(appels),
+        firstAppelId: appels[0].id,
+      }))
+      .sort((a, b) => a.periode.localeCompare(b.periode));
+  }, [groups]);
+
+  if (trimesterRows.length === 0) {
     return (
       <div className={styles.emptyState}>
         <FileText size={48} />
@@ -47,123 +93,75 @@ export function AppelsFondsGroupedTable({
 
   return (
     <div className={styles.container}>
-      {groups.map(group => {
-        const isExpanded = expandedKey === group.keyId;
-        const tauxRecouvrement = group.montantAnnuel > 0
-          ? Math.round((group.montantEncaisse / group.montantAnnuel) * 100)
-          : 0;
+      <div className={styles.tableCard}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Période</th>
+              <th>Émission</th>
+              <th>Échéance</th>
+              <th>Statut</th>
+              <th className={styles.textRight}>Montant</th>
+              <th className={styles.textRight}>Encaissé</th>
+              <th className={styles.textCenter}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {trimesterRows.map(row => {
+              const ctx = getContextualLabel(row.statutGlobal);
+              const IconComponent = ICON_MAP[ctx.icon];
+              const canEmit = canEmitTrimester(row.appels);
 
-        return (
-          <div key={group.keyId} className={`${styles.group} ${isExpanded ? styles.groupExpanded : ''}`}>
-            {/* Group header — clickable */}
-            <button className={styles.groupHeader} onClick={() => toggleExpand(group.keyId)} type="button">
-              <div className={styles.groupLeft}>
-                <span className={styles.chevron}>
-                  {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                </span>
-                <div className={styles.groupInfo}>
-                  <span className={styles.groupName}>{group.keyName}</span>
-                  <span className={styles.groupPeriode}>{group.periode}</span>
-                </div>
-              </div>
-              <div className={styles.groupRight}>
-                <div className={styles.groupMeta}>
-                  <span className={styles.groupTrimestres}>
-                    {group.nbTrimestres} {group.nbTrimestres > 1 ? 'appels' : 'appel'}
-                  </span>
-                  <StatutAppelBadge statut={group.statutGlobal} size="sm" />
-                </div>
-                <div className={styles.groupAmounts}>
-                  <span className={styles.groupTotal}>{formatCurrency(group.montantAnnuel)}</span>
-                  {group.montantEncaisse > 0 && (
-                    <span className={styles.groupRecouvrement}>
-                      {tauxRecouvrement}% encaissé
+              return (
+                <tr
+                  key={row.periode}
+                  className={styles.clickableRow}
+                  onClick={() => router.push(`/finance/appels-fonds/${row.firstAppelId}`)}
+                >
+                  <td className={styles.periodeCell}>{row.periode}</td>
+                  <td className={styles.dateCell}>
+                    {row.dateEmission ? formatDate(row.dateEmission) : '-'}
+                  </td>
+                  <td className={styles.dateCell}>{formatDate(row.dateLimiteReglement)}</td>
+                  <td>
+                    <StatutAppelBadge statut={row.statutGlobal} size="sm" />
+                  </td>
+                  <td className={styles.textRight}>
+                    <span className={styles.montantValue}>
+                      {formatCurrency(row.montantTotal)}
                     </span>
-                  )}
-                </div>
-              </div>
-            </button>
-
-            {/* Expanded: trimester rows */}
-            {isExpanded && (
-              <div className={styles.trimestres}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Période</th>
-                      <th>Émission</th>
-                      <th>Échéance</th>
-                      <th>Statut</th>
-                      <th className={styles.textRight}>Montant</th>
-                      <th className={styles.textRight}>Encaissé</th>
-                      <th className={styles.textCenter}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.trimestres.map(appel => (
-                      <tr key={appel.id}>
-                        <td className={styles.periodeCell}>{appel.periode}</td>
-                        <td className={styles.dateCell}>
-                          {appel.dateEmission ? formatDate(appel.dateEmission) : '-'}
-                        </td>
-                        <td className={styles.dateCell}>{formatDate(appel.dateLimiteReglement)}</td>
-                        <td>
-                          <StatutAppelBadge statut={appel.statut} size="sm" />
-                        </td>
-                        <td className={styles.textRight}>
-                          <button
-                            className={styles.montantButton}
-                            onClick={() => onMontantClick(appel)}
-                            title="Voir la répartition"
-                          >
-                            {formatCurrency(appel.montantTotal)}
-                          </button>
-                        </td>
-                        <td className={styles.textRight}>
-                          <span className={appel.montantEncaisse && appel.montantEncaisse > 0 ? styles.encaisse : styles.zero}>
-                            {formatCurrency(appel.montantEncaisse || 0)}
-                          </span>
-                        </td>
-                        <td>
-                          <div className={styles.actions}>
-                            {peutEmettreAppelFonds(appel.statut) && onEmettreAppel && (
-                              <button className={`${styles.actionBtn} ${styles.emitBtn}`} title="Émettre" onClick={() => onEmettreAppel(appel)}>
-                                <Send size={15} />
-                              </button>
-                            )}
-                            <button className={styles.actionBtn} title="Suivi envois" onClick={() => onGestionClick(appel)}>
-                              <Users size={15} />
-                            </button>
-                            {onExportAvis && (
-                              <button className={styles.actionBtn} title="Exporter" onClick={() => onExportAvis(appel)}>
-                                <Download size={15} />
-                              </button>
-                            )}
-                            {onVoirRelances && (
-                              <button className={styles.actionBtn} title="Relances" onClick={() => onVoirRelances(appel)}>
-                                <Mail size={15} />
-                              </button>
-                            )}
-                            <button className={styles.actionBtn} title="Voir" onClick={() => onViewAppel(appel)}>
-                              <Eye size={15} />
-                            </button>
-                            <button className={styles.actionBtn} title="Modifier" onClick={() => onEditAppel(appel)}>
-                              <Edit size={15} />
-                            </button>
-                            <button className={styles.actionBtn} title="Supprimer" onClick={() => onDeleteAppel(appel)}>
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        );
-      })}
+                  </td>
+                  <td className={styles.textRight}>
+                    <span className={row.montantEncaisse > 0 ? styles.encaisse : styles.zero}>
+                      {formatCurrency(row.montantEncaisse)}
+                    </span>
+                  </td>
+                  <td className={styles.textCenter}>
+                    {canEmit && onEmettreAppel ? (
+                      <button
+                        className={`${styles.contextBtn} ${styles.emitBtn}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Emit first appel — TODO: emit all at once
+                          onEmettreAppel(row.appels[0]);
+                        }}
+                      >
+                        <Send size={14} />
+                        <span>Générer</span>
+                      </button>
+                    ) : (
+                      <span className={styles.contextLink}>
+                        <IconComponent size={14} />
+                        <span>{ctx.label}</span>
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

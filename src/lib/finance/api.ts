@@ -235,6 +235,61 @@ export async function listCalls(coproId: string): Promise<ApiResult<CallForFunds
   return { data: data as CallForFundsOverview[], error: null };
 }
 
+export async function getCallById(callId: string): Promise<ApiResult<CallForFundsOverview>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('v_calls_overview')
+    .select('*')
+    .eq('id', callId)
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as CallForFundsOverview, error: null };
+}
+
+/** Load all calls for a given period + trimester (all keys combined) */
+export async function getCallsForTrimester(
+  coproId: string,
+  periodId: string,
+  trimester: number
+): Promise<ApiResult<CallForFundsOverview[]>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('v_calls_overview')
+    .select('*')
+    .eq('copro_id', coproId)
+    .eq('period_id', periodId)
+    .eq('trimester', trimester);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as CallForFundsOverview[], error: null };
+}
+
+/** Load combined call lines for multiple call IDs */
+export async function getCombinedCallLines(callIds: string[]): Promise<ApiResult<CallLineDetailed[]>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('v_call_lines_detailed')
+    .select('*')
+    .in('call_id', callIds)
+    .order('lot_ref');
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as CallLineDetailed[], error: null };
+}
+
 export async function getCallLines(callId: string): Promise<ApiResult<CallLineDetailed[]>> {
   const supabase = getSupabaseClient();
 

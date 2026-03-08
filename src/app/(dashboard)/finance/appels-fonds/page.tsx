@@ -17,15 +17,7 @@ export default function AppelsFondsPage() {
         onSelectCampaign={page.setSelectedCampaignId}
         stats={page.stats}
         onNewAppel={() => page.setShowNewAppelModal(true)}
-        onGestionClick={page.handleGestionClick}
-        onMontantClick={page.handleMontantClick}
-        onViewAppel={page.handleViewAppel}
-        onEditAppel={page.handleEditAppel}
-        onDeleteAppel={page.handleDeleteAppel}
         onEmettreAppel={page.handleEmettreAppel}
-        onVoirRelances={page.handleVoirRelances}
-        onExportAvis={page.handleVoirExportAvis}
-        onAlerteAction={page.handleAlerteAction}
       />
 
       <AppelsFondsModals

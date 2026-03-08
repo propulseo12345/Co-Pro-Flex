@@ -5,7 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,14 +14,15 @@
 }
 
 .modal {
-  background: var(--bg-dark);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 560px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -31,7 +32,7 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
 }
 
 .headerIcon {
@@ -68,7 +69,7 @@
 }
 
 .closeBtn:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   color: var(--text-main);
 }
 
@@ -81,7 +82,8 @@
 
 /* Récapitulatif */
 .recap {
-  background: var(--bg-darker);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   margin-bottom: var(--space-lg);
@@ -120,7 +122,7 @@
   font-size: var(--text-sm);
   color: var(--text-secondary);
   padding-top: var(--space-md);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border);
 }
 
 /* Options */
@@ -157,7 +159,7 @@
   margin: 0 0 var(--space-md) 0;
   padding-left: calc(18px + var(--space-sm) + 16px + var(--space-sm));
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .commentaire {
@@ -174,11 +176,13 @@
 .commentaire textarea {
   width: 100%;
   padding: var(--space-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   resize: vertical;
   min-height: 60px;
+  background: var(--bg-secondary);
+  color: var(--text-main);
 }
 
 .commentaire textarea:focus {
@@ -193,7 +197,7 @@
   align-items: flex-start;
   gap: var(--space-sm);
   padding: var(--space-md);
-  background: rgba(245, 158, 11, 0.1);
+  background: var(--warning-light);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   color: var(--warning-dark);
@@ -251,12 +255,12 @@
 }
 
 .errorIcon {
-  color: var(--error);
+  color: var(--danger);
 }
 
 .validationError h3 {
   margin: 0;
-  color: var(--error);
+  color: var(--danger);
 }
 
 .validationError ul {
@@ -290,7 +294,7 @@
   width: 100%;
   max-width: 300px;
   height: 4px;
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   border-radius: 2px;
   margin: var(--space-md) auto;
   overflow: hidden;
@@ -310,7 +314,7 @@
 
 .progressionHint {
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-top: var(--space-md);
 }
 
@@ -350,19 +354,19 @@
 
 .erreursList {
   text-align: left;
-  background: var(--error-light);
+  background: var(--danger-light);
   padding: var(--space-md);
   border-radius: var(--radius-md);
   margin: var(--space-md) 0;
 }
 
 .erreursList li {
-  color: var(--error);
+  color: var(--danger);
   margin-bottom: var(--space-xs);
 }
 
 .errorMessage {
-  color: var(--error);
+  color: var(--danger);
   font-size: var(--text-sm);
 }
 
@@ -372,7 +376,7 @@
   justify-content: flex-end;
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-lg);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border);
   background: var(--bg-secondary);
 }
 
@@ -393,16 +397,16 @@
 
 .cancelBtn {
   background: transparent;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   color: var(--text-main);
 }
 
 .cancelBtn:hover {
-  background: var(--bg-main);
+  background: var(--bg-tertiary);
 }
 
 .validateBtn {
-  background: var(--bg-main);
+  background: var(--bg-tertiary);
   border: 1px solid var(--primary);
   color: var(--primary);
 }
@@ -414,11 +418,11 @@
 .emitBtn {
   background: var(--primary);
   border: 1px solid var(--primary);
-  color: white;
+  color: var(--background);
 }
 
 .emitBtn:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
 }
 
 .emitBtn:disabled {
@@ -429,9 +433,9 @@
 .closeResultBtn {
   background: var(--primary);
   border: 1px solid var(--primary);
-  color: white;
+  color: var(--background);
 }
 
 .closeResultBtn:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
 }
