@@ -6,6 +6,7 @@ import { useFinalisationPage } from '@/features/ag/finalisation/hooks/useFinalis
 import { BlocBudget } from '@/features/ag/finalisation/components/BlocBudget';
 import { BlocALUR } from '@/features/ag/finalisation/components/BlocALUR';
 import { BlocSimple } from '@/features/ag/finalisation/components/BlocSimple';
+import { BlocConseilSyndical } from '@/features/ag/finalisation/components/BlocConseilSyndical';
 import { BlocAppelsFonds } from '@/features/ag/finalisation/components/BlocAppelsFonds';
 import styles from './finalisation.module.css';
 
@@ -16,7 +17,7 @@ const HIDDEN_ACTION_TYPES = ['SCHEDULE_ALUR_PAYMENTS']; // fusionné dans BlocAp
 const SIMPLE_ACTION_TYPES = [
   'CREATE_WORK_BUDGET',
   'CREATE_EXCEPTIONAL_CALL', 'APPROVE_ACCOUNTS', 'GRANT_QUITUS', 'APPOINT_SYNDIC',
-  'DESIGNATE_BUREAU', 'MANAGE_CONTRACT', 'ELECT_COUNCIL',
+  'DESIGNATE_BUREAU', 'MANAGE_CONTRACT',
 ];
 
 export default function FinalisationPage() {
@@ -74,6 +75,7 @@ export default function FinalisationPage() {
   const alurAction = actions.find(a => ALUR_ACTION_TYPES.includes(a.action_type));
   const scheduleAlurAction = actions.find(a => a.action_type === 'SCHEDULE_ALUR_PAYMENTS');
   const appelsAction = actions.find(a => APPELS_ACTION_TYPES.includes(a.action_type));
+  const councilAction = actions.find(a => a.action_type === 'ELECT_COUNCIL');
   const simpleActions = actions.filter(a =>
     SIMPLE_ACTION_TYPES.includes(a.action_type) && !HIDDEN_ACTION_TYPES.includes(a.action_type)
   );
@@ -110,6 +112,14 @@ export default function FinalisationPage() {
             agId={agId}
             action={appelsAction}
             alurAction={alurAction}
+            onActivated={refreshAction}
+          />
+        )}
+
+        {councilAction && (
+          <BlocConseilSyndical
+            agId={agId}
+            action={councilAction}
             onActivated={refreshAction}
           />
         )}

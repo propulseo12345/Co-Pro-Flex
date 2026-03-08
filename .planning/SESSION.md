@@ -1,27 +1,33 @@
-# Session State — 2026-03-08 19:30
+# Session State — 2026-03-08 20:15
 
 ## Branch
 main
 
 ## Completed This Session
-- db: plan comptable complet décret 2005-240 (62 comptes ajoutés, 18 corrigés, 4 désactivés → ~80/copro)
-- refactor: plan-comptable.ts réécrit conforme décret (supprimé sous-comptes inventés)
-- feat: sélecteur d'exercice (dropdown) sur page comptabilité avec badge statut
-- fix: useGeneralLedger filtre par periodId (était ignoré → écritures 2025 sur page 2027)
-- feat: allAccountsWithBalances dans hook (tous comptes + 0€ si pas d'écritures)
-- doc: .planning/comptabilite-spec.md (plan comptable + 5 annexes + 20 écritures + cycle annuel)
+- feat: BlocConseilSyndical — sélection copropriétaires + rôles (président/membre) dans finalisation AG
+- fix: RPC elect_council_from_ag enrichie (désactive anciens membres, insère nouveaux dans council_members)
+- fix: pré-remplissage membres CS depuis variables AG (draft global fallback + match par nom)
+- fix: session AG stocke elected_copro_id dans variables résolution ELECT_COUNCIL
+- fix: contrainte current_step élargie 1-9 (étape finalisation)
+- fix: resolution status synchro (approved/rejected) lors du vote en session AG
+- fix: données existantes corrigées (14/14 résolutions approved)
+- feat: page preview 5 variantes navigation (/preview/navigation)
 
 ## Next Task
-Sprint comptabilité suite :
-1. Onglet "Livre comptable" : brancher allAccountsWithBalances dans ComptaTabContent (tous comptes avec 0€)
-2. Onglet "Comptabilité" (grand livre) : aucune ligne si pas d'écritures réelles
-3. Exercices à zéro : confirmer soldeOuverture=0 (pas de report à-nouveaux)
-4. Préparer structure catégorisation : types/interfaces flux mouvements bancaires → comptes
+**REDESIGN NAVIGATION V1** — Appliquer la Variante 1 (High bar modules + Sidebar contextuelle) :
+1. Réorganiser les modules : Dashboard, AG, Copropriété, Finance, Maintenance, Documents
+2. High bar avec onglets modules + fond sombre (#151821)
+3. Sidebar contextuelle (sous-pages du module actif uniquement)
+4. Direction artistique : fond #0f1117, sidebar #131620, accents bleu #2563eb
+5. Fusionner : Ventes→Documents (État daté), Copropriétaires+Tantièmes+Impayés→Copropriété
+6. Supprimer sections redondantes : Annexes comptables (déjà en compta), Analytics, Juridique, Communication
 
 ## Blockers
 None
 
 ## Key Context
-- Comptes obsolètes 605/606/608/609 marqués is_active=false (FK budget_lines)
-- allAccountsWithBalances exposé dans hook mais pas encore branché dans le composant tab
-- Pas de doublons périodes (vérifié: 2024-2027 copro1, 2025-2026 copro2)
+- Preview live: /preview/navigation (V1 choisie par l'utilisateur)
+- La V1 = High bar avec 6 modules + sidebar contextuelle par module
+- Direction artistique sombre : #0f1117 fond, #151821 high bar, #131620 sidebar, #2563eb accent
+- Sidebar actuelle : src/components/layout/Sidebar/Sidebar.tsx (260px, resizable, 9 sections collapsibles)
+- Layout dashboard : src/app/(dashboard)/layout.tsx

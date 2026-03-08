@@ -1,0 +1,205 @@
+.resolutionTitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-3);
+}
+
+/* Selected members list */
+.selectedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.selectedItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.selectedInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.iconPresident { color: #f59e0b; }
+.iconMember    { color: var(--color-primary-600); }
+
+.selectedName {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+.roleSelect {
+  font-size: var(--font-size-sm);
+  padding: 2px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.removeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+}
+
+.emptyText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-3);
+}
+
+/* Add section with dropdown */
+.addSection {
+  position: relative;
+}
+
+.addToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s;
+}
+.addToggle:hover {
+  border-color: var(--color-primary-600);
+  color: var(--color-primary-600);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+.dropdown {
+  margin-top: var(--spacing-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+.searchInput::placeholder { color: var(--color-text-muted); }
+.searchInput:focus { outline: none; }
+
+.coproList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.coproItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.coproItem:last-child { border-bottom: none; }
+.coproItem:hover { background: var(--color-surface-2); }
+
+.coproItemInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-success);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.coproName {
+  font-weight: 500;
+}
+
+.currentRole {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.loadingText,
+.emptyDropdown {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--spacing-3);
+  text-align: center;
+}
+
+/* Activated state */
+.activatedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.activatedItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.roleBadge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+}
+
+/* Dark mode */
+[data-theme="dark"] .coproItem:hover { background: rgba(255, 255, 255, 0.05); }
+[data-theme="dark"] .selectedItem    { background: rgba(255, 255, 255, 0.05); }

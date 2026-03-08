@@ -527,7 +527,10 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     // Only persist if resolution ID is a real UUID (not a duplicated one)
     if (!current.id.includes('_dup_')) {
       try {
-        await updateResolution(current.id, { is_approved: result.adopted });
+        await updateResolution(current.id, {
+          is_approved: result.adopted,
+          status: result.adopted ? 'approved' : 'rejected',
+        });
       } catch (err) {
         console.error('[persistResolutionResult] is_approved update failed:', err);
       }
@@ -719,6 +722,14 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       editing.value = displayName;
     }
 
+    // Store copro_id for ELECT_COUNCIL resolutions (noms variable uses copro_id|name format)
+    if (currentRes?.action_type === 'ELECT_COUNCIL' && editing.name === 'noms' && editing.value.includes('|')) {
+      const [coproId, displayName] = editing.value.split('|');
+      // Store copro_id in resolution variable for finalisation
+      resolutionsHook.updateResolutionVariable(currentRes.id, 'elected_copro_id', coproId);
+      editing.value = displayName;
+    }
+
     // Update the resolution's own variables (per-resolution)
     if (currentRes) {
       resolutionsHook.updateResolutionVariable(currentRes.id, editing.name, editing.value);
@@ -769,6 +780,10 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       const currentRes = resolutionsHook.currentResolution;
       if (currentRes) {
         resolutionsHook.updateResolutionVariable(currentRes.id, variableName, copro.nom);
+        // Store copro_id for ELECT_COUNCIL resolutions (used in finalisation)
+        if (currentRes.action_type === 'ELECT_COUNCIL' && variableName === 'noms') {
+          resolutionsHook.updateResolutionVariable(currentRes.id, 'elected_copro_id', coproId);
+        }
       }
     }
     variablesHook.handlePrefillFromCopro(variableName, coproId);
