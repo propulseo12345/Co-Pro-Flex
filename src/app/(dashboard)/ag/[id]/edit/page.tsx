@@ -173,6 +173,7 @@ export default function EditAGPage() {
               accounts={page.accounts}
               repartitionKeys={page.repartitionKeys}
               error={page.errors.budgetMontant}
+              readOnly={page.isBudgetReadOnly}
               onToggle={(v) => page.handleChange('budget', v)}
               onExerciceChange={(v) => page.handleChange('budgetExercice', v)}
               onImportPrecedent={page.handleImportBudgetPrecedent}

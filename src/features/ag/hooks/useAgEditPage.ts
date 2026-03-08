@@ -86,6 +86,59 @@ function extractDateFromISO(isoString: string | null): string {
   }
 }
 
+/**
+ * Extrait l'heure (HH:mm) depuis un datetime ISO, en heure locale
+ */
+function extractTimeFromISO(isoString: string | null): string {
+  if (!isoString) return '';
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    // Ne retourne que si c'est une vraie heure (pas 00:00 par défaut)
+    if (h === '00' && m === '00') return '';
+    return `${h}:${m}`;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Parse une chaîne location en composants d'adresse (fallback quand opening_notes est null)
+ * Format attendu: "nomLieu, rue, codePostal ville" ou "rue, codePostal ville"
+ */
+function parseLocationToAdresse(location: string | null): AdresseAG {
+  const empty: AdresseAG = { nomLieu: '', rue: '', codePostal: '', ville: '' };
+  if (!location) return empty;
+
+  const parts = location.split(',').map(p => p.trim());
+  if (parts.length === 0) return empty;
+
+  // Chercher la partie qui contient un code postal (5 chiffres)
+  const cpRegex = /(\d{5})\s+(.+)/;
+  let codePostal = '';
+  let ville = '';
+  let cpPartIndex = -1;
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const match = parts[i].match(cpRegex);
+    if (match) {
+      codePostal = match[1];
+      ville = match[2];
+      cpPartIndex = i;
+      break;
+    }
+  }
+
+  // Les parties avant le code postal
+  const beforeParts = cpPartIndex > 0 ? parts.slice(0, cpPartIndex) : parts.slice(0, -1);
+  const rue = beforeParts.length > 0 ? beforeParts[beforeParts.length - 1] : '';
+  const nomLieu = beforeParts.length > 1 ? beforeParts.slice(0, -1).join(', ') : '';
+
+  return { nomLieu, rue, codePostal, ville };
+}
+
 function combineDateAndTime(date: string, heure: string): string {
   if (!date) return '';
   if (!heure) return `${date}T00:00:00`;
@@ -95,6 +148,9 @@ function combineDateAndTime(date: string, heure: string): string {
 interface UseAgEditPageParams {
   agId: string;
 }
+
+// Statuts à partir desquels le budget est en lecture seule (convocation envoyée ou plus)
+const READONLY_BUDGET_STATUSES = ['convoked', 'in_progress', 'session_active', 'closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'];
 
 export function useAgEditPage({ agId }: UseAgEditPageParams) {
   const router = useRouter();
@@ -125,6 +181,11 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [agStatus, setAgStatus] = useState<string>('draft');
+  // ID de la résolution budget pour la mise à jour des postes
+  const budgetResolutionIdRef = useRef<string | null>(null);
+
+  const isBudgetReadOnly = READONLY_BUDGET_STATUSES.includes(agStatus);
 
   useEffect(() => {
     const loadData = async () => {
@@ -142,6 +203,7 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
 
           if (!error && meeting) {
             const m = meeting as AgMeeting;
+            setAgStatus(m.status || 'draft');
             const metadata = deserializeMetadata(m.opening_notes);
 
             // Essayer aussi de charger depuis ag_session_drafts
@@ -155,17 +217,75 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
               // Ignore, use metadata from opening_notes
             }
 
+            // Fallback: extraire heure depuis meeting_date si pas dans metadata
+            const heure = sessionMetadata.heure || extractTimeFromISO(m.meeting_date);
+            // Fallback: parser location en composants si pas dans metadata
+            const adresse = sessionMetadata.adresse?.rue
+              ? sessionMetadata.adresse
+              : parseLocationToAdresse(m.location);
+
+            // Budget: toujours charger depuis ag_resolutions.variables (source de vérité)
+            let budgetEnabled = sessionMetadata.budget || false;
+            let budgetMontant = sessionMetadata.budgetMontant || '';
+            let budgetExercice = sessionMetadata.budgetExercice || (new Date().getFullYear() + 1 + '');
+            let budgetPostes = sessionMetadata.budgetPostes || [];
+
+            // Charger les postes depuis la résolution budget (source de vérité)
+            try {
+              const { data: budgetRes } = await supabase
+                .from('ag_resolutions')
+                .select('id, variables')
+                .eq('ag_id', agId)
+                .ilike('title', '%approbation du budget prévisionnel%')
+                .limit(1)
+                .single();
+
+              if (budgetRes) {
+                budgetResolutionIdRef.current = budgetRes.id;
+                budgetEnabled = true;
+                const vars = typeof budgetRes.variables === 'string'
+                  ? JSON.parse(budgetRes.variables)
+                  : budgetRes.variables;
+
+                // Postes détaillés depuis la résolution (priorité sur opening_notes)
+                if (vars?.budget_postes && Array.isArray(vars.budget_postes) && vars.budget_postes.length > 0) {
+                  budgetPostes = vars.budget_postes;
+                  budgetMontant = vars.budget_postes.reduce(
+                    (sum: number, p: { montant: number }) => sum + p.montant, 0
+                  ).toString();
+                } else if (budgetPostes.length === 0 && vars?.montant) {
+                  // Pas de postes détaillés, fallback sur le montant total
+                  const montantStr = vars.montant.replace(/\s/g, '').replace(',', '.');
+                  const montantNum = parseFloat(montantStr);
+                  budgetMontant = montantStr;
+                  if (!isNaN(montantNum) && montantNum > 0) {
+                    budgetPostes = [{
+                      id: 'recovered-budget',
+                      poste: 'Budget prévisionnel (récupéré)',
+                      montant: montantNum,
+                    }];
+                  }
+                }
+                if (vars?.date_debut) {
+                  const yearMatch = vars.date_debut.match(/(\d{4})/);
+                  if (yearMatch) budgetExercice = yearMatch[1];
+                }
+              }
+            } catch {
+              // Pas de résolution budget
+            }
+
             const loadedData: AGFormData = {
               type: TYPE_MAPPING_FROM_DB[m.meeting_type] || 'ORDINAIRE',
               date: extractDateFromISO(m.meeting_date),
-              heure: sessionMetadata.heure || '',
+              heure,
               lieu: m.location || '',
-              adresse: sessionMetadata.adresse || { nomLieu: '', rue: '', codePostal: '', ville: '' },
+              adresse,
               adresseComplete: m.location || '',
-              budget: sessionMetadata.budget || false,
-              budgetMontant: sessionMetadata.budgetMontant || '',
-              budgetExercice: sessionMetadata.budgetExercice || (new Date().getFullYear() + 1 + ''),
-              budgetPostes: sessionMetadata.budgetPostes || [],
+              budget: budgetEnabled,
+              budgetMontant,
+              budgetExercice,
+              budgetPostes,
             };
 
             setFormData(loadedData);
@@ -454,6 +574,38 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
 
         if (error) throw new Error(error.message);
 
+        // Synchroniser budget_postes dans ag_resolutions.variables
+        if (formData.budget && formData.budgetPostes.length > 0 && budgetResolutionIdRef.current) {
+          try {
+            // Lire les variables existantes
+            const { data: resData } = await supabase
+              .from('ag_resolutions')
+              .select('variables')
+              .eq('id', budgetResolutionIdRef.current)
+              .single();
+
+            if (resData) {
+              const existingVars = typeof resData.variables === 'string'
+                ? JSON.parse(resData.variables)
+                : (resData.variables || {});
+
+              const total = formData.budgetPostes.reduce((sum, p) => sum + p.montant, 0);
+              const updatedVars = {
+                ...existingVars,
+                budget_postes: formData.budgetPostes,
+                montant: total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }),
+              };
+
+              await supabase
+                .from('ag_resolutions')
+                .update({ variables: updatedVars })
+                .eq('id', budgetResolutionIdRef.current);
+            }
+          } catch (err) {
+            console.warn('[useAgEditPage] Failed to sync budget_postes to resolution:', err);
+          }
+        }
+
         // Sauvegarder aussi dans ag_session_drafts pour backup
         await saveDraft(agId, 'session', formData, `ag-session-${agId}`);
       } else {
@@ -491,6 +643,7 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
     autocompleteRef,
     budgetTotal,
     isLoading,
+    isBudgetReadOnly,
     accounts,
     repartitionKeys,
     POSTES_DEPENSES,

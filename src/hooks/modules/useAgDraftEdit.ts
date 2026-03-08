@@ -145,6 +145,55 @@ function extractDateFromISO(isoString: string | null): string {
 }
 
 /**
+ * Extrait l'heure (HH:mm) depuis un datetime ISO, en heure locale
+ */
+function extractTimeFromISO(isoString: string | null): string {
+  if (!isoString) return '';
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    if (h === '00' && m === '00') return '';
+    return `${h}:${m}`;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Parse une chaîne location en composants d'adresse (fallback quand opening_notes est null)
+ */
+function parseLocationToAdresse(location: string | null): AdresseAG {
+  const empty: AdresseAG = { nomLieu: '', rue: '', codePostal: '', ville: '' };
+  if (!location) return empty;
+
+  const parts = location.split(',').map(p => p.trim());
+  if (parts.length === 0) return empty;
+
+  const cpRegex = /(\d{5})\s+(.+)/;
+  let codePostal = '';
+  let ville = '';
+  let cpPartIndex = -1;
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const match = parts[i].match(cpRegex);
+    if (match) {
+      codePostal = match[1];
+      ville = match[2];
+      cpPartIndex = i;
+      break;
+    }
+  }
+
+  const beforeParts = cpPartIndex > 0 ? parts.slice(0, cpPartIndex) : parts.slice(0, -1);
+  const rue = beforeParts.length > 0 ? beforeParts[beforeParts.length - 1] : '';
+  const nomLieu = beforeParts.length > 1 ? beforeParts.slice(0, -1).join(', ') : '';
+
+  return { nomLieu, rue, codePostal, ville };
+}
+
+/**
  * Combine date et heure en datetime ISO
  */
 function combineDateAndTime(date: string, heure: string): string {
@@ -198,26 +247,74 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
       const m = meeting as AgMeeting;
       const metadata = deserializeMetadata(m.opening_notes);
 
-      // Reconstituer les données du formulaire
+      // Reconstituer les données du formulaire avec fallbacks
+      const heure = metadata.heure || extractTimeFromISO(m.meeting_date);
+      const adresse = metadata.adresse?.rue
+        ? metadata.adresse
+        : parseLocationToAdresse(m.location);
+
+      // Budget: toujours charger depuis ag_resolutions.variables (source de vérité)
+      let budgetEnabled = metadata.budget || false;
+      let budgetMontant = metadata.budgetMontant || '';
+      let budgetExercice = metadata.budgetExercice || (new Date().getFullYear() + 1 + '');
+      let budgetPostes = metadata.budgetPostes || [];
+
+      // Charger les postes depuis la résolution budget
+      try {
+        const { data: budgetRes } = await supabase
+          .from('ag_resolutions')
+          .select('id, variables')
+          .eq('ag_id', draftId)
+          .ilike('title', '%approbation du budget prévisionnel%')
+          .limit(1)
+          .single();
+
+        if (budgetRes) {
+          budgetEnabled = true;
+          const vars = typeof budgetRes.variables === 'string'
+            ? JSON.parse(budgetRes.variables)
+            : budgetRes.variables;
+
+          if (vars?.budget_postes && Array.isArray(vars.budget_postes) && vars.budget_postes.length > 0) {
+            budgetPostes = vars.budget_postes;
+            budgetMontant = vars.budget_postes.reduce(
+              (sum: number, p: { montant: number }) => sum + p.montant, 0
+            ).toString();
+          } else if (budgetPostes.length === 0 && vars?.montant) {
+            const montantStr = vars.montant.replace(/\s/g, '').replace(',', '.');
+            const montantNum = parseFloat(montantStr);
+            budgetMontant = montantStr;
+            if (!isNaN(montantNum) && montantNum > 0) {
+              budgetPostes = [{
+                id: 'recovered-budget',
+                poste: 'Budget prévisionnel (récupéré)',
+                montant: montantNum,
+              }];
+            }
+          }
+          if (vars?.date_debut) {
+            const yearMatch = vars.date_debut.match(/(\d{4})/);
+            if (yearMatch) budgetExercice = yearMatch[1];
+          }
+        }
+      } catch {
+        // Pas de résolution budget
+      }
+
       const loadedData: AGFormData = {
         type: TYPE_MAPPING_FROM_DB[m.meeting_type] || 'ORDINAIRE',
         format: metadata.format || AGFormat.PRESENTIEL,
         date: extractDateFromISO(m.meeting_date),
-        heure: metadata.heure || '',
+        heure,
         lieu: m.location || '',
-        adresse: metadata.adresse || {
-          nomLieu: '',
-          rue: '',
-          codePostal: '',
-          ville: '',
-        },
+        adresse,
         adresseComplete: m.location || '',
         visioUrl: metadata.visioUrl || '',
         visioProvider: metadata.visioProvider,
-        budget: metadata.budget || false,
-        budgetMontant: metadata.budgetMontant || '',
-        budgetExercice: metadata.budgetExercice || (new Date().getFullYear() + 1 + ''),
-        budgetPostes: metadata.budgetPostes || [],
+        budget: budgetEnabled,
+        budgetMontant,
+        budgetExercice,
+        budgetPostes,
       };
 
       setFormData(loadedData);

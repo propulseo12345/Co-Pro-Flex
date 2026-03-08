@@ -17,6 +17,20 @@ A chaque milestone ou toutes les ~10 interactions, afficher la barre de progress
 
 ---
 
+## 📋 FORMAT DE RETOUR (OBLIGATOIRE)
+
+À chaque fix ou modification, structurer le retour ainsi :
+
+### 🔴 Problème constaté
+Description claire du bug ou comportement inattendu observé.
+
+### 🟢 Solution apportée
+- Fichier(s) modifié(s) avec chemin
+- Ce qui a été changé et pourquoi
+- Impact / comportement attendu après fix
+
+---
+
 ## 🎯 PROJET
 
 **CoProFlex** est une plateforme SaaS de gestion de copropriété pour le marché français.

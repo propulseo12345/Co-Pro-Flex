@@ -19,6 +19,7 @@ interface BudgetSectionProps {
   accounts?: Array<{ id: string; code: string; name: string }>;
   repartitionKeys?: Array<{ id: string; name: string }>;
   error?: string;
+  readOnly?: boolean;
   onToggle: (enabled: boolean) => void;
   onExerciceChange: (value: string) => void;
   onImportPrecedent: () => void;
@@ -48,6 +49,7 @@ export function BudgetSection({
   accounts = [],
   repartitionKeys = [],
   error,
+  readOnly = false,
   onToggle,
   onExerciceChange,
   onImportPrecedent,
@@ -64,14 +66,16 @@ export function BudgetSection({
   return (
     <div className={styles.checkboxCard}>
       <label className={styles.checkboxLabel}>
-        <input type="checkbox" checked={enabled} onChange={(e) => onToggle(e.target.checked)} />
+        <input type="checkbox" checked={enabled} onChange={(e) => onToggle(e.target.checked)} disabled={readOnly} />
         <div className={styles.checkboxContent}>
           <div className={styles.checkboxTitle}>
             <DollarSign size={20} aria-hidden="true" />
             Inclure la préparation du budget prévisionnel
           </div>
           <div className={styles.checkboxDescription}>
-            Cette AG comprendra le vote du budget pour l'exercice à venir
+            {readOnly
+              ? 'Budget validé — modification impossible après envoi de la convocation'
+              : 'Cette AG comprendra le vote du budget pour l\'exercice à venir'}
           </div>
         </div>
       </label>
@@ -87,67 +91,72 @@ export function BudgetSection({
               placeholder="Ex: 2026"
               value={exercice}
               onChange={(e) => onExerciceChange(e.target.value)}
+              disabled={readOnly}
             />
           </div>
 
           <div className={styles.budgetSection}>
             <div className={styles.budgetSectionHeader}>
               <h3 className={styles.budgetSectionTitle}>Détail du budget par postes</h3>
-              <button
-                type="button"
-                onClick={onImportPrecedent}
-                className={styles.importBudgetBtn}
-                title="Récupérer le budget de l'exercice précédent"
-              >
-                <RotateCcw size={16} aria-hidden="true" />
-                Importer budget {budgetPrecedent.exercice}
-              </button>
-            </div>
-
-            <div className={styles.addPosteForm}>
-              <div className={styles.addPosteInputs}>
-                {!showCustomPoste ? (
-                  <select
-                    value={newPoste.poste || ''}
-                    onChange={(e) => onPosteSelect(e.target.value)}
-                    className={styles.select}
-                  >
-                    <option value="">Sélectionner un poste...</option>
-                    {postesDepenses.map(poste => (
-                      <option key={poste} value={poste}>{poste}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    placeholder="Nom du poste personnalisé..."
-                    value={newPoste.poste}
-                    onChange={(e) => onNewPosteChange({ ...newPoste, poste: e.target.value })}
-                    className={styles.input}
-                    onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddPoste(); } }}
-                  />
-                )}
-                <input
-                  type="number"
-                  placeholder="Montant (€)"
-                  value={newPoste.montant}
-                  onChange={(e) => onNewPosteChange({ ...newPoste, montant: e.target.value })}
-                  className={styles.input}
-                  min="0"
-                  step="0.01"
-                  onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddPoste(); } }}
-                />
+              {!readOnly && (
                 <button
                   type="button"
-                  onClick={onAddPoste}
-                  className="btn btn-primary"
-                  disabled={!newPoste.poste.trim() || !newPoste.montant}
+                  onClick={onImportPrecedent}
+                  className={styles.importBudgetBtn}
+                  title="Récupérer le budget de l'exercice précédent"
                 >
-                  <Plus size={16} aria-hidden="true" />
-                  Ajouter
+                  <RotateCcw size={16} aria-hidden="true" />
+                  Importer budget {budgetPrecedent.exercice}
                 </button>
-              </div>
+              )}
             </div>
+
+            {!readOnly && (
+              <div className={styles.addPosteForm}>
+                <div className={styles.addPosteInputs}>
+                  {!showCustomPoste ? (
+                    <select
+                      value={newPoste.poste || ''}
+                      onChange={(e) => onPosteSelect(e.target.value)}
+                      className={styles.select}
+                    >
+                      <option value="">Sélectionner un poste...</option>
+                      {postesDepenses.map(poste => (
+                        <option key={poste} value={poste}>{poste}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="Nom du poste personnalisé..."
+                      value={newPoste.poste}
+                      onChange={(e) => onNewPosteChange({ ...newPoste, poste: e.target.value })}
+                      className={styles.input}
+                      onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddPoste(); } }}
+                    />
+                  )}
+                  <input
+                    type="number"
+                    placeholder="Montant (€)"
+                    value={newPoste.montant}
+                    onChange={(e) => onNewPosteChange({ ...newPoste, montant: e.target.value })}
+                    className={styles.input}
+                    min="0"
+                    step="0.01"
+                    onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddPoste(); } }}
+                  />
+                  <button
+                    type="button"
+                    onClick={onAddPoste}
+                    className="btn btn-primary"
+                    disabled={!newPoste.poste.trim() || !newPoste.montant}
+                  >
+                    <Plus size={16} aria-hidden="true" />
+                    Ajouter
+                  </button>
+                </div>
+              </div>
+            )}
 
             {postes.length > 0 ? (
               <div className={styles.postesList}>
@@ -156,7 +165,7 @@ export function BudgetSection({
                   <span>Compte</span>
                   <span>Clé</span>
                   <span>Montant</span>
-                  <span>Actions</span>
+                  {!readOnly && <span>Actions</span>}
                 </div>
                 {postes.map((poste) => (
                   <div key={poste.id} className={`${styles.posteItem} ${editingPosteId === poste.id ? styles.posteItemEditing : ''}`}>
@@ -207,14 +216,16 @@ export function BudgetSection({
                         <span className={styles.posteMontant}>
                           {poste.montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 })}
                         </span>
-                        <div className={styles.posteActions}>
-                          <button type="button" onClick={() => onEditPoste(poste)} className={styles.editPosteBtn} aria-label="Modifier" title="Modifier">
-                            <Pencil size={16} aria-hidden="true" />
-                          </button>
-                          <button type="button" onClick={() => onRemovePoste(poste.id)} className={styles.removePosteBtn} aria-label="Supprimer" title="Supprimer">
-                            <Trash2 size={16} aria-hidden="true" />
-                          </button>
-                        </div>
+                        {!readOnly && (
+                          <div className={styles.posteActions}>
+                            <button type="button" onClick={() => onEditPoste(poste)} className={styles.editPosteBtn} aria-label="Modifier" title="Modifier">
+                              <Pencil size={16} aria-hidden="true" />
+                            </button>
+                            <button type="button" onClick={() => onRemovePoste(poste.id)} className={styles.removePosteBtn} aria-label="Supprimer" title="Supprimer">
+                              <Trash2 size={16} aria-hidden="true" />
+                            </button>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
