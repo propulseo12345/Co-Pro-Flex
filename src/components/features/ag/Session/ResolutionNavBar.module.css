@@ -120,6 +120,30 @@
   background: #6EE7B7;
 }
 
+.navItem.adoptee .statusDot {
+  background: #6EE7B7;
+}
+
+.navItem.adoptee {
+  border-color: rgba(110, 231, 183, 0.4);
+}
+
+.navItem.rejetee .statusDot {
+  background: #F87171;
+}
+
+.navItem.rejetee {
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.navItem.ajournee .statusDot {
+  background: #FBBF24;
+}
+
+.navItem.ajournee {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
 .navItem.reporte .statusDot {
   background: #F87171;
 }

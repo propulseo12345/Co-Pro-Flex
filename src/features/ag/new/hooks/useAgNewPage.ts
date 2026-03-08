@@ -16,6 +16,7 @@ import { useCopro } from '@/providers/CoproContext';
 import { useGoogleMapsAutocomplete } from './useGoogleMapsAutocomplete';
 import { useBudgetPostes } from './useBudgetPostes';
 import { useBudgetImport } from './useBudgetImport';
+import { useAccountsAndKeys } from './useAccountsAndKeys';
 import type { AdresseAG, BudgetPoste, AGFormData } from '../domain/types';
 
 export function useAgNewPage() {
@@ -87,6 +88,9 @@ export function useAgNewPage() {
     availableYears,
   } = useBudgetImport();
 
+  // Accounts and repartition keys
+  const { repartitionKeys } = useAccountsAndKeys();
+
   // Budget posts manager with Supabase import
   const budgetPostesManager = useBudgetPostes({
     budgetPostes: formData.budgetPostes,
@@ -94,6 +98,14 @@ export function useAgNewPage() {
     importBudgetFn: importBudget,
     exercice: parseInt(formData.budgetExercice) || new Date().getFullYear(),
   });
+
+  // Handler for updating repartition key on a budget poste
+  const handleUpdatePosteKey = useCallback((posteId: string, keyId: string, keyName: string) => {
+    const updated = formData.budgetPostes.map(p =>
+      p.id === posteId ? { ...p, repartitionKeyId: keyId || undefined, repartitionKeyName: keyName || undefined } : p
+    );
+    updateField('budgetPostes', updated);
+  }, [formData.budgetPostes, updateField]);
 
   // Handler for generic field change
   const handleChange = useCallback(<K extends keyof AGFormData>(field: K, value: AGFormData[K]) => {
@@ -266,6 +278,8 @@ export function useAgNewPage() {
     isBudgetImporting,
     budgetImportError,
     availableBudgetYears: availableYears,
+    repartitionKeys,
+    handleUpdatePosteKey,
 
     // Google Maps
     addressSearchValue: searchValue,

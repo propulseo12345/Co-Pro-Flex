@@ -9,12 +9,14 @@ export interface UseSessionModalsReturn {
   pendingNextResolution: boolean;
   showPasserelleModal: boolean;
   showAjoutDesignationModal: boolean;
+  showBudgetEditModal: boolean;
   designationCategorie: DesignationCategorie | null;
   designationNombreActuel: number;
   setShowResultModal: React.Dispatch<React.SetStateAction<boolean>>;
   setPendingNextResolution: React.Dispatch<React.SetStateAction<boolean>>;
   setShowPasserelleModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowAjoutDesignationModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowBudgetEditModal: React.Dispatch<React.SetStateAction<boolean>>;
   setDesignationCategorie: React.Dispatch<React.SetStateAction<DesignationCategorie | null>>;
   setDesignationNombreActuel: React.Dispatch<React.SetStateAction<number>>;
   closeResultModal: () => void;
@@ -28,6 +30,7 @@ export function useSessionModals(): UseSessionModalsReturn {
   const [pendingNextResolution, setPendingNextResolution] = useState(false);
   const [showPasserelleModal, setShowPasserelleModal] = useState(false);
   const [showAjoutDesignationModal, setShowAjoutDesignationModal] = useState(false);
+  const [showBudgetEditModal, setShowBudgetEditModal] = useState(false);
   const [designationCategorie, setDesignationCategorie] = useState<DesignationCategorie | null>(null);
   const [designationNombreActuel, setDesignationNombreActuel] = useState(0);
 
@@ -55,12 +58,14 @@ export function useSessionModals(): UseSessionModalsReturn {
     pendingNextResolution,
     showPasserelleModal,
     showAjoutDesignationModal,
+    showBudgetEditModal,
     designationCategorie,
     designationNombreActuel,
     setShowResultModal,
     setPendingNextResolution,
     setShowPasserelleModal,
     setShowAjoutDesignationModal,
+    setShowBudgetEditModal,
     setDesignationCategorie,
     setDesignationNombreActuel,
     closeResultModal,

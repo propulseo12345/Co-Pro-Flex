@@ -75,6 +75,7 @@ export interface UseAgSessionPageReturn {
   missingVariables: string[];
   showPrefillDropdown: string | null;
   showAjoutDesignationModal: boolean;
+  showBudgetEditModal: boolean;
   designationCategorie: 'scrutateur' | 'conseil_syndical' | null;
   designationNombreActuel: number;
   showProjectorModal: boolean;
@@ -143,6 +144,10 @@ export interface UseAgSessionPageReturn {
   // Designation handlers
   handleDesignationConfirmAjout: () => void;
   handleDesignationRefuserAjout: () => void;
+
+  // Budget edit handlers
+  handleSaveBudgetPostes: (postes: Array<{ id: string; poste: string; montant: number; accountId?: string; accountCode?: string; accountName?: string; repartitionKeyId?: string; repartitionKeyName?: string }>, total: number) => void;
+  closeBudgetEditModal: () => void;
 
   // Modal handlers
   closeResultModal: () => void;

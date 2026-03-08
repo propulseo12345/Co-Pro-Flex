@@ -5,6 +5,11 @@ import type { BudgetPoste, EditingPosteState } from '../domain/types';
 import { POSTES_DEPENSES } from '../domain/constants';
 import styles from '../../../../app/(dashboard)/ag/new/new-ag.module.css';
 
+interface RepartitionKeyOption {
+  id: string;
+  name: string;
+}
+
 interface BudgetSectionProps {
   budget: boolean;
   budgetExercice: string;
@@ -17,6 +22,7 @@ interface BudgetSectionProps {
   isImporting?: boolean;
   importError?: string | null;
   availableBudgetYears: number[];
+  repartitionKeys?: RepartitionKeyOption[];
   onBudgetChange: (value: boolean) => void;
   onExerciceChange: (value: string) => void;
   onNewPosteChange: (value: { poste: string; montant: string }) => void;
@@ -29,6 +35,7 @@ interface BudgetSectionProps {
   onEditKeyDown: (e: React.KeyboardEvent) => void;
   onImportBudget: (params: { source: 'current_priority'; budgetId?: null }) => void;
   onUpdateEditingData: (field: 'poste' | 'montant', value: string) => void;
+  onUpdatePosteKey?: (posteId: string, keyId: string, keyName: string) => void;
 }
 
 export function BudgetSection({
@@ -55,6 +62,8 @@ export function BudgetSection({
   onEditKeyDown,
   onImportBudget,
   onUpdateEditingData,
+  repartitionKeys = [],
+  onUpdatePosteKey,
 }: BudgetSectionProps) {
   const handleImportClick = () => {
     onImportBudget({
@@ -189,6 +198,7 @@ export function BudgetSection({
                   <div className={styles.postesHeader}>
                     <span>Poste</span>
                     <span>Montant</span>
+                    {repartitionKeys.length > 0 && <span>Clé de répartition</span>}
                     <span>Actions</span>
                   </div>
                   {budgetPostes.map((poste) => (
@@ -258,6 +268,22 @@ export function BudgetSection({
                               minimumFractionDigits: 2,
                             })}
                           </span>
+                          {repartitionKeys.length > 0 && (
+                            <select
+                              className={styles.select}
+                              value={poste.repartitionKeyId || ''}
+                              onChange={(e) => {
+                                const key = repartitionKeys.find(k => k.id === e.target.value);
+                                onUpdatePosteKey?.(poste.id, e.target.value, key?.name || '');
+                              }}
+                              style={{ fontSize: 'var(--text-xs)', padding: '4px 8px' }}
+                            >
+                              <option value="">— Aucune —</option>
+                              {repartitionKeys.map(k => (
+                                <option key={k.id} value={k.id}>{k.name}</option>
+                              ))}
+                            </select>
+                          )}
                           <div className={styles.posteActions}>
                             <button
                               type="button"

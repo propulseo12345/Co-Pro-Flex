@@ -83,6 +83,8 @@ interface AgNewFormContentProps {
   onToggleCalendrier: () => void;
   onBudgetChange: (value: boolean) => void;
   onExerciceChange: (value: string) => void;
+  repartitionKeys?: Array<{ id: string; name: string }>;
+  onUpdatePosteKey?: (posteId: string, keyId: string, keyName: string) => void;
 }
 
 export function AgNewFormContent({
@@ -115,6 +117,8 @@ export function AgNewFormContent({
   onToggleCalendrier,
   onBudgetChange,
   onExerciceChange,
+  repartitionKeys,
+  onUpdatePosteKey,
 }: AgNewFormContentProps) {
   return (
     <div className={styles.formContent}>
@@ -201,6 +205,8 @@ export function AgNewFormContent({
         onEditKeyDown={budgetPostesManager.handleEditKeyDown}
         onImportBudget={budgetPostesManager.handleImportBudgetPrecedent}
         onUpdateEditingData={budgetPostesManager.updateEditingData}
+        repartitionKeys={repartitionKeys}
+        onUpdatePosteKey={onUpdatePosteKey}
       />
 
       <InfoBox type={formData.type} />

@@ -49,11 +49,24 @@ function getDefaultVariables(variableNames: string[], exerciceYear: number): Rec
   return suggestions;
 }
 
+export interface BudgetPosteData {
+  id: string;
+  poste: string;
+  montant: number;
+  accountId?: string;
+  accountCode?: string;
+  accountName?: string;
+  repartitionKeyId?: string;
+  repartitionKeyName?: string;
+}
+
 export interface CreateStandardResolutionsInput {
   agId: string;
   coproId: string;
   typeAG: TypeAG;
   exerciceYear?: number;
+  /** Postes budgétaires saisis à l'étape 1, sauvés dans variables.budget_postes de la résolution budget */
+  budgetPostes?: BudgetPosteData[];
 }
 
 export interface CreateStandardResolutionsResult {
@@ -73,7 +86,7 @@ export interface CreateStandardResolutionsResult {
 export async function createStandardResolutions(
   input: CreateStandardResolutionsInput
 ): Promise<CreateStandardResolutionsResult> {
-  const { agId, coproId, typeAG, exerciceYear = new Date().getFullYear() + 1 } = input;
+  const { agId, coproId, typeAG, exerciceYear = new Date().getFullYear() + 1, budgetPostes } = input;
 
   // Récupérer les templates obligatoires pour ce type d'AG
   const templatesObligatoires = getResolutionsObligatoires(typeAG);
@@ -99,7 +112,14 @@ export async function createStandardResolutions(
 
     // Extraire et pré-remplir les variables
     const variableNames = extractVariableNames(template.texte);
-    const variables = getDefaultVariables(variableNames, exerciceYear);
+    const variables: Record<string, unknown> = getDefaultVariables(variableNames, exerciceYear);
+
+    // Injecter les postes budgétaires dans la résolution d'approbation du budget
+    if (template.action_type === 'CREATE_BUDGET' && budgetPostes && budgetPostes.length > 0) {
+      variables.budget_postes = budgetPostes;
+      const total = budgetPostes.reduce((sum, p) => sum + p.montant, 0);
+      variables.montant = total.toLocaleString('fr-FR', { minimumFractionDigits: 2 });
+    }
 
     try {
       const result: AddResolutionResponse = await addResolution({
@@ -109,7 +129,7 @@ export async function createStandardResolutions(
         description: template.texte,
         majority_type: toDbMajorityType(template.majorite),
         resolution_number: i + 1,
-        variables: variables,
+        variables: variables as Record<string, string>,
       });
 
       if (result.success) {

@@ -37,9 +37,31 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
   const [postes, setPostes] = useState<BlocPoste[]>([]);
   const [postesLoaded, setPostesLoaded] = useState(false);
 
-  // Charger les postes detailles depuis opening_notes
+  // Charger les postes détaillés depuis variables.budget_postes (priorité) puis opening_notes (fallback)
   useEffect(() => {
-    async function loadOpeningNotes() {
+    async function loadPostes() {
+      // 1. Priorité: postes depuis ag_resolutions.variables.budget_postes
+      const budgetPostesFromVars = vars['budget_postes'];
+      if (budgetPostesFromVars && Array.isArray(budgetPostesFromVars) && budgetPostesFromVars.length > 0) {
+        const loadedPostes: BlocPoste[] = budgetPostesFromVars.map(
+          (p: { poste?: string; montant?: number; accountId?: string; repartitionKeyId?: string }, idx: number) => {
+            const label = p.poste || `Poste ${idx + 1}`;
+            return {
+              label,
+              amount: p.montant || 0,
+              sort_order: idx,
+              code: inferPosteCode(label),
+              account_id: p.accountId || undefined,
+              repartition_key_id: p.repartitionKeyId || undefined,
+            };
+          }
+        );
+        setPostes(loadedPostes);
+        setPostesLoaded(true);
+        return;
+      }
+
+      // 2. Fallback: opening_notes (ancien mécanisme)
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const supabase = createClient() as any;
@@ -76,11 +98,11 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
       } catch (err) {
         console.error('[BlocBudget] Error loading opening_notes:', err);
       }
-      // Fallback: pas de postes detailles, liste vide (le syndic les ajoutera ici)
+      // Fallback: pas de postes détaillés, liste vide (le syndic les ajoutera ici)
       setPostesLoaded(true);
     }
-    loadOpeningNotes();
-  }, [agId]);
+    loadPostes();
+  }, [agId, vars]);
 
   const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(
     action.status as 'pending' | 'activated' | 'failed'

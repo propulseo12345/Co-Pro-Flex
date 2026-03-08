@@ -4,12 +4,12 @@ import { useCallback, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './ResolutionNavBar.module.css';
 
-type ResolutionStatut = 'a_voter' | 'en_cours' | 'vote' | 'reporte';
+type ResolutionStatut = 'a_voter' | 'en_cours' | 'adoptee' | 'rejetee' | 'ajournee' | 'vote';
 
 interface Resolution {
   id: string;
   titre: string;
-  statut?: ResolutionStatut;
+  resultat?: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE';
 }
 
 interface ResolutionNavBarProps {
@@ -101,6 +101,13 @@ export function ResolutionNavBar({
   }, [currentIndex, resolutions.length, onNavigate, disabled]);
 
   const getResolutionStatus = (resolution: Resolution, index: number): ResolutionStatut => {
+    // Résolution avec résultat (votée) — couleur selon le résultat
+    if (resolution.resultat) {
+      if (resolution.resultat === 'ADOPTEE') return 'adoptee';
+      if (resolution.resultat === 'REJETEE') return 'rejetee';
+      if (resolution.resultat === 'AJOURNEE') return 'ajournee';
+    }
+    // Fallback: completed sans resultat (ex: résolution d'information)
     if (completedResolutions.includes(resolution.id)) {
       return 'vote';
     }

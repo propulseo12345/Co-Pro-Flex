@@ -17,6 +17,8 @@ import {
 } from '@/components/features/ag/Session';
 import { FinancingVariableModal } from '@/components/features/ag/Session/modals/FinancingVariableModal';
 import { FondsALURModal } from '@/components/features/ag/Session/modals/FondsALURModal';
+import { BudgetEditModal } from '@/components/features/ag/Session/modals/BudgetEditModal';
+import type { BudgetPosteItem } from '@/components/features/ag/Session/modals/BudgetEditModal';
 import { checkMajority } from '@/components/features/ag/Session/utils';
 import { useAgSessionPage } from '@/features/ag/hooks/useAgSessionPage';
 import { updateAgCurrentStep } from '@/lib/ag/api';
@@ -239,6 +241,19 @@ export default function SessionPage() {
           }
           nombreActuel={session.designationNombreActuel}
           nombreMinimum={1}
+        />
+      )}
+
+      {session.showBudgetEditModal && session.currentResolution && (
+        <BudgetEditModal
+          postes={(() => {
+            const raw = session.currentResolution.variables?.budget_postes;
+            if (!raw) return [];
+            const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            return Array.isArray(parsed) ? parsed as BudgetPosteItem[] : [];
+          })()}
+          onClose={session.closeBudgetEditModal}
+          onSave={session.handleSaveBudgetPostes}
         />
       )}
 

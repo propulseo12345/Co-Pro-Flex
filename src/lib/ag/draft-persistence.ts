@@ -22,7 +22,8 @@ export type AgDraftType =
   | 'milestones'
   | 'signataires'
   | 'envoi'
-  | 'resolutions_results';
+  | 'resolutions_results'
+  | 'resolutions_passerelles';
 
 // Type for RPC calls - base types that exist in Supabase generated types
 // New types ('envoi', 'milestones') should use dedicated RPCs or untyped client

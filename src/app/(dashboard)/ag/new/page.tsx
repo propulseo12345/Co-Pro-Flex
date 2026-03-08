@@ -42,6 +42,8 @@ export default function NewAGPage() {
     isBudgetImporting,
     budgetImportError,
     availableBudgetYears,
+    repartitionKeys,
+    handleUpdatePosteKey,
 
     // Google Maps
     addressSearchValue,
@@ -109,6 +111,8 @@ export default function NewAGPage() {
           onToggleCalendrier={toggleCalendrierJalons}
           onBudgetChange={(value: boolean) => handleChange('budget', value)}
           onExerciceChange={(value: string) => handleChange('budgetExercice', value)}
+          repartitionKeys={repartitionKeys}
+          onUpdatePosteKey={handleUpdatePosteKey}
         />
 
         <Footer onCancel={handleBack} />

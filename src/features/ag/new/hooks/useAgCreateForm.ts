@@ -263,6 +263,18 @@ export function useAgCreateForm() {
           coproId: currentCoproId,
           typeAG,
           exerciceYear,
+          budgetPostes: formData.budget && formData.budgetPostes.length > 0
+            ? formData.budgetPostes.map(p => ({
+                id: p.id,
+                poste: p.poste,
+                montant: p.montant,
+                accountId: p.accountId,
+                accountCode: p.accountCode,
+                accountName: p.accountName,
+                repartitionKeyId: p.repartitionKeyId,
+                repartitionKeyName: p.repartitionKeyName,
+              }))
+            : undefined,
         });
 
         console.log('[useAgCreateForm] Résolutions créées:', resolutionsResult.resolutionsCreated);

@@ -13,7 +13,7 @@ import { checkMajority } from '@/components/features/ag/Session/utils';
 import { updateResolution } from '@/lib/ag/api/resolutions.api';
 import { cancelAgSession, finishAgSession } from '@/lib/ag/api';
 import { castVote as castVoteApi } from '@/lib/ag/api/votes.api';
-import type { UseAgSessionPageParams, UseAgSessionPageReturn, SessionDraftData, VoteData, VoteSource } from '../types';
+import type { UseAgSessionPageParams, UseAgSessionPageReturn, SessionDraftData, VoteData, VoteSource, Resolution } from '../types';
 import { toDbVote } from '../services/sessionHelpers';
 
 import { useSessionParticipants } from './useSessionParticipants';
@@ -253,6 +253,16 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
           }
         }
 
+        // Restore passerelle data from draft
+        const passerelleDraft = await loadDraft<Record<string, Record<string, unknown>>>(agId, 'resolutions_passerelles');
+        if (passerelleDraft.data) {
+          for (const [resId, passerelleData] of Object.entries(passerelleDraft.data)) {
+            resolutionsHook.setResolutions(prev => prev.map(r =>
+              r.id === resId ? { ...r, passerelle: passerelleData as unknown as Resolution['passerelle'] } : r
+            ));
+          }
+        }
+
         // Restore vote results (resultat) from draft
         const resResultsDraft = await loadDraft<Record<string, 'ADOPTEE' | 'REJETEE' | 'AJOURNEE'>>(agId, 'resolutions_results');
         if (resResultsDraft.data) {
@@ -329,13 +339,34 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
 
       // Merge: session draft has started/presences, resolutions draft has activeIndex/completedResolutions
       const sessionData = sessionDraft.data;
-      const resData = resolutionsDraft.data;
+      // Guard: resolutions draft must be an object with activeIndex, not an array (legacy corruption)
+      const resData = resolutionsDraft.data && !Array.isArray(resolutionsDraft.data) ? resolutionsDraft.data : null;
 
-      if (sessionData || resData) {
+      // Fallback: derive completedResolutions from DB is_approved if drafts don't have them
+      let completedFromDraft = resData?.completedResolutions ?? sessionData?.completedResolutions ?? [];
+      if (completedFromDraft.length === 0 && dbResolutions.length > 0) {
+        // Resolutions with is_approved set (voted) — maintain DB order
+        const votedIds = dbResolutions
+          .filter(r => r.is_approved !== null && r.is_approved !== undefined)
+          .map(r => r.id);
+        completedFromDraft = votedIds;
+      }
+
+      // Derive currentResolutionIndex: first resolution not yet completed
+      let activeIndex = resData?.activeIndex ?? sessionData?.currentResolutionIndex ?? 0;
+      if (completedFromDraft.length > 0 && activeIndex === 0) {
+        const completedSet = new Set(completedFromDraft);
+        const firstIncomplete = dbResolutions.findIndex(r => !completedSet.has(r.id));
+        if (firstIncomplete >= 0) {
+          activeIndex = firstIncomplete;
+        }
+      }
+
+      if (sessionData || resData || completedFromDraft.length > 0) {
         resolutionsHook.setSessionState({
-          started: sessionData?.started || false,
-          currentResolutionIndex: resData?.activeIndex ?? sessionData?.currentResolutionIndex ?? 0,
-          completedResolutions: resData?.completedResolutions ?? sessionData?.completedResolutions ?? [],
+          started: sessionData?.started || isSessionActive || false,
+          currentResolutionIndex: activeIndex,
+          completedResolutions: completedFromDraft,
         });
 
         if (sessionData?.isSecondVote) votingHook.setIsSecondVote(sessionData.isSecondVote);
@@ -621,10 +652,8 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       return;
     }
     if (variableName === 'montant' && isBudgetApproval) {
-      // Pré-remplir avec budgetPrevisionnel si disponible
-      const initialVal = budgetPrevisionnel > 0 ? budgetPrevisionnel.toString() : (currentRes?.variables?.montant || variablesHook.allVariables['montant'] || '');
-      variablesHook.setEditingVariable({ name: variableName, value: initialVal });
-      variablesHook.setShowVariableModal(true);
+      // Ouvrir le modal d'édition budget avec tableau des postes
+      modalsHook.setShowBudgetEditModal(true);
       return;
     }
     const resValue = currentRes?.variables?.[variableName];
@@ -675,6 +704,41 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     variablesHook.handleSaveVariable();
   }, [variablesHook, resolutionsHook.currentResolution, resolutionsHook.updateResolutionVariable, agId]);
 
+  // Budget edit modal: save postes + update montant
+  const handleSaveBudgetPostes = useCallback((postes: Array<{ id: string; poste: string; montant: number; accountId?: string; accountCode?: string; accountName?: string; repartitionKeyId?: string; repartitionKeyName?: string }>, total: number) => {
+    const currentRes = resolutionsHook.currentResolution;
+    if (!currentRes) return;
+
+    // Save postes array in resolution variables
+    resolutionsHook.setResolutions(prev => prev.map(r =>
+      r.id === currentRes.id
+        ? { ...r, variables: { ...r.variables, budget_postes: JSON.stringify(postes), montant: total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) } }
+        : r
+    ));
+
+    // Also update via the global variable system
+    variablesHook.setVariableValues(prev => ({
+      ...prev,
+      montant: total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }),
+    }));
+
+    // Persist to Supabase via resolution update
+    if (useSupabase && currentRes.id) {
+      import('@/lib/ag/api/resolutions.api').then(({ updateResolution }) => {
+        updateResolution(currentRes.id, {
+          variables: {
+            ...currentRes.variables,
+            budget_postes: postes,
+            montant: total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }),
+          },
+        }).catch(err => console.error('[handleSaveBudgetPostes] Error:', err));
+      });
+    }
+
+    modalsHook.setShowBudgetEditModal(false);
+    saveSession();
+  }, [resolutionsHook, variablesHook, modalsHook, useSupabase, saveSession]);
+
   const handlePrefillFromCopro = useCallback((variableName: string, coproId: string) => {
     const copro = coproprietaires.find(c => c.id === coproId);
     if (copro) {
@@ -720,6 +784,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     missingVariables: variablesHook.missingVariables,
     showPrefillDropdown: variablesHook.showPrefillDropdown,
     showAjoutDesignationModal: modalsHook.showAjoutDesignationModal,
+    showBudgetEditModal: modalsHook.showBudgetEditModal,
     designationCategorie: modalsHook.designationCategorie,
     designationNombreActuel: modalsHook.designationNombreActuel,
     showProjectorModal: projectorHook.showProjectorModal,
@@ -783,6 +848,10 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     // Designation handlers
     handleDesignationConfirmAjout,
     handleDesignationRefuserAjout,
+
+    // Budget edit handlers
+    handleSaveBudgetPostes,
+    closeBudgetEditModal: () => modalsHook.setShowBudgetEditModal(false),
 
     // Modal handlers
     closeResultModal: handleCloseResultModal,

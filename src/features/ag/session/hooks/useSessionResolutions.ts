@@ -123,11 +123,16 @@ export function useSessionResolutions({
       r.id === resolutionId ? { ...r, passerelle: passerelleData, resultat } : r
     ));
 
-    // Save resolutions state to drafts (for passerelle tracking)
-    const updatedResolutions = resolutions.map(r =>
-      r.id === resolutionId ? { ...r, passerelle: passerelleData, resultat } : r
-    );
-    saveDraft(agId, 'resolutions', updatedResolutions);
+    // Save passerelle data to a separate draft key (not 'resolutions' which stores activeIndex/completedResolutions)
+    const updatedPasserelles: Record<string, PasserelleMajorite> = {};
+    for (const r of resolutions) {
+      if (r.id === resolutionId) {
+        updatedPasserelles[r.id] = passerelleData;
+      } else if (r.passerelle) {
+        updatedPasserelles[r.id] = r.passerelle;
+      }
+    }
+    saveDraft(agId, 'resolutions_passerelles', updatedPasserelles);
   }, [resolutions, agId]);
 
   const updateResolutionResultat = useCallback((resolutionId: string, resultat: 'ADOPTEE' | 'REJETEE' | 'AJOURNEE') => {
