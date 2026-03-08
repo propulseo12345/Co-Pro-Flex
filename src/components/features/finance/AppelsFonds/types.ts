@@ -11,6 +11,7 @@ export type TypeAppel = 'fonctionnement' | 'travaux';
 
 export interface AppelFonds {
   id: string;
+  periodId?: string;
   dateExigibilite: string;
   dateEmission?: string;
   dateLimiteReglement: string;
@@ -78,6 +79,18 @@ export interface CoproprietaireAppel {
   adresse?: string;
   paiement?: PaiementDetail;
   recommande?: RecommandeDetail;
+}
+
+export interface GroupedAppelFonds {
+  keyId: string;
+  keyName: string;
+  montantAnnuel: number;
+  montantEncaisse: number;
+  nbTrimestres: number;
+  statutGlobal: StatutAppel | string;
+  type: TypeAppel;
+  periode: string;
+  trimestres: AppelFonds[];
 }
 
 export interface AppelsFondsStats {

@@ -1,30 +1,26 @@
-# Session State — 2026-03-08 15:10
+# Session State — 2026-03-08 16:12
 
 ## Branch
 main
 
 ## Completed This Session
-- fix: durée mandat syndic min 3→1 mois (VariableEditor.tsx)
-- fix: résultats temps réel déplacés en haut + compactés (SessionVotingContent + stats.module.css)
-- fix: header résolution compacté (session.module.css)
-- fix: "Terminer la session" valide le dernier vote + redirige vers PV (goToPV + confirmNextFromModal)
-- fix: isSigned restauré depuis ag_meetings.status au chargement PV (usePVPage.ts)
-- fix: goToPV appelle finishAgSession → crée ag_pending_actions
-- feat: RPC create_alur_fund_from_ag réelle (crée budget alur + budget_line + compte 105)
-- cleanup: supprimé toutes AG de test en DB
+- feat: RPC generate_combined_calls_from_ag (budget+ALUR combinés, répartition par clé/lot, arrondi dernier lot)
+- feat: BlocAppelsFonds composant (remplace BlocSimple pour SCHEDULE_BUDGET_PAYMENTS + SCHEDULE_ALUR_PAYMENTS)
+- feat: API loadCallPreviewData + generateCombinedCallsFromAg
+- fix: affichage explicite budget vs ALUR dans BlocAppelsFonds
+- feat: vue groupée AppelsFondsGroupedTable (clés → trimestres accordéon)
+- feat: CampaignsList niveau 1 (liste campagnes d'appels par exercice)
+- feat: v_call_campaigns SQL view + API listCallCampaigns + useCallCampaigns hook
+- feat: navigation 3 niveaux: campagnes → clés → trimestres
 
 ## Next Task
-Sprint 3 — Appels de fonds combinés par clé de répartition. Design approuvé:
-- Nouvelle RPC `generate_combined_calls_from_ag` : combine budget current + alur, répartit par clé (repartition_key_lines.weight)
-- 1 call_for_funds par trimestre, montant lot = somme(postes_clé/nb_appels × weight_lot/total_weight_clé)
-- Nouveau composant BlocAppelsFonds (remplace BlocSimple pour SCHEDULE_BUDGET_PAYMENTS + SCHEDULE_ALUR_PAYMENTS)
-- Les appels apparaissent dans /finance/appels-fonds (déjà branché sur Supabase via useCalls)
+- Redesign trimestres table: simplifier les actions (trop de boutons), garder seulement l'essentiel
+- Sprint 4: ordonnancement & polish
 
 ## Blockers
 None
 
 ## Key Context
-- Table liaison clés→lots: `repartition_key_lines` (key_id, lot_id, weight)
-- 3 clés actives: Charges générales (1029), Eau froide (796.5), Ascenseur (971)
-- AG test: 24d3a499, budget_id: b76ac17f, alur_id: 3b84066f
-- budget_lines ont copro_id obligatoire (bug corrigé S2)
+- Supabase project: iyfesbjnkpynmwlsmxnp (pas yxnwmkfanmijfhattmhc)
+- Trigger trg_validate_call_total a bug double-comptage en mode DEFERRED → contourné avec DISABLE/ENABLE dans RPC
+- AG test: 24d3a499-f5a9-4535-b8bf-7adb3b8d967f, copro: 11111111-aaaa-bbbb-cccc-111111111111

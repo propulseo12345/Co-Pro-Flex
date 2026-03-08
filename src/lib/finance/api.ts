@@ -192,6 +192,33 @@ async function invokeEdgeFunction<T>(
 // CALLS FOR FUNDS (APPELS DE FONDS)
 // ============================================================================
 
+export interface CallCampaign {
+  copro_id: string;
+  period_id: string;
+  period_name: string;
+  period_start: string;
+  period_end: string;
+  ag_id: string | null;
+  ag_meeting_date: string | null;
+  ag_title: string | null;
+  total_calls: number;
+  total_keys: number;
+  total_amount: number;
+  total_paid: number;
+  global_status: 'draft' | 'issued' | 'partially_paid' | 'paid' | 'cancelled';
+}
+
+export async function listCallCampaigns(coproId: string): Promise<ApiResult<CallCampaign[]>> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('v_call_campaigns')
+    .select('*')
+    .eq('copro_id', coproId)
+    .order('period_start', { ascending: false });
+  if (error) return { data: null, error: error.message };
+  return { data: data as CallCampaign[], error: null };
+}
+
 export async function listCalls(coproId: string): Promise<ApiResult<CallForFundsOverview[]>> {
   const supabase = getSupabaseClient();
 

@@ -1,23 +1,22 @@
 'use client';
 
+import { ArrowLeft } from 'lucide-react';
 import { AppelsFondsHeader } from '@/components/features/finance/AppelsFonds/AppelsFondsHeader';
 import { AppelsFondsStats } from '@/components/features/finance/AppelsFonds/AppelsFondsStats';
-import { AppelsFondsFilters } from '@/components/features/finance/AppelsFonds/AppelsFondsFilters';
-import { AppelsFondsTable } from '@/components/features/finance/AppelsFonds/AppelsFondsTable';
+import { AppelsFondsGroupedTable } from '@/components/features/finance/AppelsFonds/AppelsFondsGroupedTable';
+import { CampaignsList } from '@/components/features/finance/AppelsFonds/CampaignsList';
 import { RecouvrementAlert } from '@/components/features/finance/AppelsFonds/RecouvrementAlert';
-import { AppelsFondsAlerts } from '@/components/features/finance/AppelsFonds/AppelsFondsAlerts';
-import type { AppelFonds, AppelsFondsStats as StatsType, StatutAppel, TypeAppel, AlerteDelai } from '@/components/features/finance/AppelsFonds/types';
+import type { AppelFonds, GroupedAppelFonds, AppelsFondsStats as StatsType, AlerteDelai } from '@/components/features/finance/AppelsFonds/types';
+import type { CallCampaign } from '@/lib/finance/api';
+import styles from './AppelsFondsMainContent.module.css';
 
 interface AppelsFondsMainContentProps {
   appels: AppelFonds[];
-  filteredAppels: AppelFonds[];
+  groupedAppels: GroupedAppelFonds[];
+  campaigns: CallCampaign[];
+  selectedCampaignId: string | null;
+  onSelectCampaign: (periodId: string | null) => void;
   stats: StatsType;
-  searchTerm: string;
-  statutFilter: 'TOUS' | StatutAppel;
-  typeFilter: 'TOUS' | TypeAppel;
-  onSearchChange: (value: string) => void;
-  onStatutChange: (value: 'TOUS' | StatutAppel) => void;
-  onTypeChange: (value: 'TOUS' | TypeAppel) => void;
   onNewAppel: () => void;
   onGestionClick: (appel: AppelFonds) => void;
   onMontantClick: (appel: AppelFonds) => void;
@@ -32,14 +31,11 @@ interface AppelsFondsMainContentProps {
 
 export function AppelsFondsMainContent({
   appels,
-  filteredAppels,
+  groupedAppels,
+  campaigns,
+  selectedCampaignId,
+  onSelectCampaign,
   stats,
-  searchTerm,
-  statutFilter,
-  typeFilter,
-  onSearchChange,
-  onStatutChange,
-  onTypeChange,
   onNewAppel,
   onGestionClick,
   onMontantClick,
@@ -49,8 +45,9 @@ export function AppelsFondsMainContent({
   onEmettreAppel,
   onVoirRelances,
   onExportAvis,
-  onAlerteAction,
 }: AppelsFondsMainContentProps) {
+  const selectedCampaign = campaigns.find(c => c.period_id === selectedCampaignId);
+
   return (
     <>
       <AppelsFondsHeader onNewAppel={onNewAppel} />
@@ -62,32 +59,46 @@ export function AppelsFondsMainContent({
         montantRestant={stats.montantTotal - stats.montantEncaisse}
       />
 
-      <AppelsFondsAlerts
-        appels={appels}
-        onActionClick={onAlerteAction}
-        maxAlertes={3}
-      />
+      {/* Navigation: campaigns list → grouped table */}
+      {!selectedCampaignId ? (
+        <CampaignsList
+          campaigns={campaigns}
+          onSelect={(periodId) => onSelectCampaign(periodId)}
+        />
+      ) : (
+        <>
+          <div className={styles.backRow}>
+            <button
+              className={styles.backButton}
+              onClick={() => onSelectCampaign(null)}
+              type="button"
+            >
+              <ArrowLeft size={16} />
+              Retour aux appels de fonds
+            </button>
+            {selectedCampaign && (
+              <span className={styles.campaignTitle}>
+                {selectedCampaign.ag_meeting_date
+                  ? `Budget AG du ${new Date(selectedCampaign.ag_meeting_date).toLocaleDateString('fr-FR')}`
+                  : selectedCampaign.period_name
+                }
+              </span>
+            )}
+          </div>
 
-      <AppelsFondsFilters
-        searchTerm={searchTerm}
-        onSearchChange={onSearchChange}
-        statutFilter={statutFilter}
-        onStatutChange={onStatutChange}
-        typeFilter={typeFilter}
-        onTypeChange={onTypeChange}
-      />
-
-      <AppelsFondsTable
-        appels={filteredAppels}
-        onGestionClick={onGestionClick}
-        onMontantClick={onMontantClick}
-        onViewAppel={onViewAppel}
-        onEditAppel={onEditAppel}
-        onDeleteAppel={onDeleteAppel}
-        onEmettreAppel={onEmettreAppel}
-        onVoirRelances={onVoirRelances}
-        onExportAvis={onExportAvis}
-      />
+          <AppelsFondsGroupedTable
+            groups={groupedAppels}
+            onGestionClick={onGestionClick}
+            onMontantClick={onMontantClick}
+            onViewAppel={onViewAppel}
+            onEditAppel={onEditAppel}
+            onDeleteAppel={onDeleteAppel}
+            onEmettreAppel={onEmettreAppel}
+            onVoirRelances={onVoirRelances}
+            onExportAvis={onExportAvis}
+          />
+        </>
+      )}
     </>
   );
 }

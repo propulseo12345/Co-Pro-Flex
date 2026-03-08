@@ -1,0 +1,249 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md, 0.75rem);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md, 0.75rem);
+  padding: var(--space-3xl, 3rem) var(--space-xl, 1.5rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ---- Group card ---- */
+.group {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-lg, 8px);
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.group:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.groupExpanded {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary, #2563eb);
+}
+
+/* ---- Group header ---- */
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-lg, 1rem) var(--space-xl, 1.25rem);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  gap: var(--space-lg, 1rem);
+}
+
+.groupHeader:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.02));
+}
+
+.groupLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md, 0.75rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.chevron {
+  color: var(--text-secondary, #6b7280);
+  flex-shrink: 0;
+  display: flex;
+}
+
+.groupInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.groupName {
+  font-size: var(--text-base, 1rem);
+  font-weight: 600;
+  color: var(--text-main, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.groupPeriode {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+.groupRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl, 1.5rem);
+  flex-shrink: 0;
+}
+
+.groupMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+}
+
+.groupTrimestres {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-secondary, #6b7280);
+  background: var(--surface-alt, #f3f4f6);
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 9999px);
+  white-space: nowrap;
+}
+
+.groupAmounts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 120px;
+}
+
+.groupTotal {
+  font-size: var(--text-base, 1rem);
+  font-weight: 700;
+  color: var(--text-main, #111827);
+}
+
+.groupRecouvrement {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--success, #22c55e);
+  font-weight: 500;
+}
+
+/* ---- Trimester table ---- */
+.trimestres {
+  border-top: 1px solid var(--border, #e5e7eb);
+  padding: 0 var(--space-md, 0.75rem) var(--space-md, 0.75rem);
+  background: var(--surface-alt, #f9fafb);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm, 0.875rem);
+}
+
+.table th {
+  text-align: left;
+  padding: var(--space-sm, 0.5rem) var(--space-md, 0.75rem);
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  font-size: var(--text-xs, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table td {
+  padding: var(--space-sm, 0.5rem) var(--space-md, 0.75rem);
+  border-bottom: 1px solid var(--border-light, rgba(0, 0, 0, 0.04));
+  color: var(--text-main, #111827);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.02));
+}
+
+.textRight { text-align: right; }
+.textCenter { text-align: center; }
+
+.periodeCell {
+  font-weight: 600;
+}
+
+.dateCell {
+  white-space: nowrap;
+}
+
+.montantButton {
+  background: none;
+  border: none;
+  color: var(--primary, #2563eb);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+}
+
+.montantButton:hover {
+  text-decoration: underline;
+}
+
+.encaisse { color: var(--success, #22c55e); font-weight: 500; }
+.zero     { color: var(--text-secondary, #6b7280); }
+
+/* ---- Actions ---- */
+.actions {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.06));
+  color: var(--text-main, #111827);
+}
+
+.emitBtn {
+  color: var(--primary, #2563eb);
+}
+
+.emitBtn:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-dark, #1d4ed8);
+}
+
+/* ---- Dark mode ---- */
+[data-theme="dark"] .group {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .groupExpanded {
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .trimestres {
+  background: var(--surface-alt, rgba(255, 255, 255, 0.03));
+}
+
+[data-theme="dark"] .groupTrimestres {
+  background: var(--surface-alt, rgba(255, 255, 255, 0.08));
+}

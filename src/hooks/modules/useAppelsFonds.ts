@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { jsPDF } from 'jspdf';
 import type {
   AppelFonds,
+  GroupedAppelFonds,
   CoproprietaireAppel,
   StatutAppel,
   TypeAppel,
@@ -25,13 +26,14 @@ import {
 } from '@/components/features/finance/AppelsFonds/utils';
 import {
   useCalls,
+  useCallCampaigns,
   useCallLines,
   useCreateCall,
   useRecordPayment,
   useOpenPeriod,
   useRepartitionKeys,
 } from '@/hooks/modules/useFinanceData';
-import type { CallForFundsOverview, CallLineDetailed } from '@/lib/finance/api';
+import type { CallForFundsOverview, CallLineDetailed, CallCampaign } from '@/lib/finance/api';
 
 // ============================================================================
 // MAPPERS: Supabase → UI Types
@@ -61,6 +63,7 @@ function mapCallToAppelFonds(call: CallForFundsOverview): AppelFonds {
 
   return {
     id: call.id,
+    periodId: call.period_id,
     dateExigibilite: call.due_date,
     dateEmission: call.issue_date,
     dateLimiteReglement: call.due_date,
@@ -112,6 +115,7 @@ export function useAppelsFonds() {
   // Supabase Data Hooks
   // ============================================================================
   const { data: callsData, isLoading: isLoadingCalls, refresh: refreshCalls } = useCalls();
+  const { data: campaignsData, isLoading: isLoadingCampaigns, refresh: refreshCampaigns } = useCallCampaigns();
   const { data: openPeriod } = useOpenPeriod();
   const { data: repartitionKeys } = useRepartitionKeys();
   const createCallMutation = useCreateCall();
@@ -121,7 +125,13 @@ export function useAppelsFonds() {
   // État principal - Now derived from Supabase data
   // ============================================================================
   const [selectedAppelId, setSelectedAppelId] = useState<string | null>(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [sendingInProgress, setSendingInProgress] = useState(false);
+
+  // Campaigns list
+  const campaigns = useMemo<CallCampaign[]>(() => {
+    return campaignsData || [];
+  }, [campaignsData]);
 
   // Load call lines when an appel is selected
   const { data: callLinesData, isLoading: isLoadingLines, refresh: refreshLines } = useCallLines(selectedAppelId);
@@ -131,6 +141,51 @@ export function useAppelsFonds() {
     if (!callsData) return [];
     return callsData.map(mapCallToAppelFonds);
   }, [callsData]);
+
+  // Filter appels by selected campaign
+  const campaignAppels = useMemo<AppelFonds[]>(() => {
+    if (!selectedCampaignId) return appels;
+    return appels.filter(a => a.periodId === selectedCampaignId);
+  }, [appels, selectedCampaignId]);
+
+  // Group appels by repartition key (filtered by campaign)
+  const groupedAppels = useMemo<GroupedAppelFonds[]>(() => {
+    const groups = new Map<string, GroupedAppelFonds>();
+    for (const appel of campaignAppels) {
+      const keyId = appel.cleRepartitionId || appel.id;
+      const existing = groups.get(keyId);
+      if (existing) {
+        existing.montantAnnuel += appel.montantTotal;
+        existing.montantEncaisse += appel.montantEncaisse || 0;
+        existing.nbTrimestres += 1;
+        existing.trimestres.push(appel);
+        // Global status: worst status wins
+        if (appel.statut === 'A_GENERER' || appel.statut === 'EN_PREPARATION') {
+          existing.statutGlobal = appel.statut;
+        }
+      } else {
+        // Extract key name from label: "Appel T1 - Charges générales" → "Charges générales"
+        const keyName = appel.description.replace(/^Appel [TS]\d+ - /, '').replace(/^Appel annuel - /, '');
+        const year = appel.dateEmission ? new Date(appel.dateEmission).getFullYear() : '';
+        groups.set(keyId, {
+          keyId,
+          keyName: keyName || appel.description,
+          montantAnnuel: appel.montantTotal,
+          montantEncaisse: appel.montantEncaisse || 0,
+          nbTrimestres: 1,
+          statutGlobal: appel.statut,
+          type: appel.type,
+          periode: year ? `Exercice ${year}` : appel.periode,
+          trimestres: [appel],
+        });
+      }
+    }
+    // Sort trimestres within each group
+    for (const group of groups.values()) {
+      group.trimestres.sort((a, b) => (a.dateEmission || '').localeCompare(b.dateEmission || ''));
+    }
+    return Array.from(groups.values());
+  }, [campaignAppels]);
 
   // Find selected appel from mapped data
   const selectedAppel = useMemo<AppelFonds | null>(() => {
@@ -667,8 +722,16 @@ export function useAppelsFonds() {
   const isLoading = isLoadingCalls || isLoadingLines;
 
   return {
+    // Campaigns
+    campaigns,
+    selectedCampaignId,
+    setSelectedCampaignId,
+    isLoadingCampaigns,
+    refreshCampaigns,
+
     // État - from Supabase
     appels,
+    groupedAppels,
     setAppels: refreshCalls, // No-op setter, use refreshCalls instead
     filteredAppels,
     selectedAppel,

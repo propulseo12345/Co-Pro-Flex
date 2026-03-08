@@ -6,12 +6,15 @@ import { useFinalisationPage } from '@/features/ag/finalisation/hooks/useFinalis
 import { BlocBudget } from '@/features/ag/finalisation/components/BlocBudget';
 import { BlocALUR } from '@/features/ag/finalisation/components/BlocALUR';
 import { BlocSimple } from '@/features/ag/finalisation/components/BlocSimple';
+import { BlocAppelsFonds } from '@/features/ag/finalisation/components/BlocAppelsFonds';
 import styles from './finalisation.module.css';
 
 const BUDGET_ACTION_TYPES = ['CREATE_BUDGET'];
 const ALUR_ACTION_TYPES = ['CREATE_ALUR_FUND'];
+const APPELS_ACTION_TYPES = ['SCHEDULE_BUDGET_PAYMENTS'];
+const HIDDEN_ACTION_TYPES = ['SCHEDULE_ALUR_PAYMENTS']; // fusionné dans BlocAppelsFonds
 const SIMPLE_ACTION_TYPES = [
-  'SCHEDULE_BUDGET_PAYMENTS', 'SCHEDULE_ALUR_PAYMENTS', 'CREATE_WORK_BUDGET',
+  'CREATE_WORK_BUDGET',
   'CREATE_EXCEPTIONAL_CALL', 'APPROVE_ACCOUNTS', 'GRANT_QUITUS', 'APPOINT_SYNDIC',
   'DESIGNATE_BUREAU', 'MANAGE_CONTRACT', 'ELECT_COUNCIL',
 ];
@@ -70,7 +73,10 @@ export default function FinalisationPage() {
   const budgetAction = actions.find(a => BUDGET_ACTION_TYPES.includes(a.action_type));
   const alurAction = actions.find(a => ALUR_ACTION_TYPES.includes(a.action_type));
   const scheduleAlurAction = actions.find(a => a.action_type === 'SCHEDULE_ALUR_PAYMENTS');
-  const simpleActions = actions.filter(a => SIMPLE_ACTION_TYPES.includes(a.action_type));
+  const appelsAction = actions.find(a => APPELS_ACTION_TYPES.includes(a.action_type));
+  const simpleActions = actions.filter(a =>
+    SIMPLE_ACTION_TYPES.includes(a.action_type) && !HIDDEN_ACTION_TYPES.includes(a.action_type)
+  );
 
   return (
     <div className={styles.container}>
@@ -95,6 +101,15 @@ export default function FinalisationPage() {
             agId={agId}
             action={alurAction}
             scheduleAction={scheduleAlurAction}
+            onActivated={refreshAction}
+          />
+        )}
+
+        {appelsAction && (
+          <BlocAppelsFonds
+            agId={agId}
+            action={appelsAction}
+            alurAction={alurAction}
             onActivated={refreshAction}
           />
         )}

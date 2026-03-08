@@ -11,14 +11,11 @@ export default function AppelsFondsPage() {
     <div className={styles.container}>
       <AppelsFondsMainContent
         appels={page.appels}
-        filteredAppels={page.filteredAppels}
+        groupedAppels={page.groupedAppels}
+        campaigns={page.campaigns}
+        selectedCampaignId={page.selectedCampaignId}
+        onSelectCampaign={page.setSelectedCampaignId}
         stats={page.stats}
-        searchTerm={page.searchTerm}
-        statutFilter={page.statutFilter}
-        typeFilter={page.typeFilter}
-        onSearchChange={page.setSearchTerm}
-        onStatutChange={page.setStatutFilter}
-        onTypeChange={page.setTypeFilter}
         onNewAppel={() => page.setShowNewAppelModal(true)}
         onGestionClick={page.handleGestionClick}
         onMontantClick={page.handleMontantClick}

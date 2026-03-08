@@ -61,6 +61,10 @@ export function useCalls() {
   return useFinanceQuery(financeApi.listCalls);
 }
 
+export function useCallCampaigns() {
+  return useFinanceQuery(financeApi.listCallCampaigns);
+}
+
 export function useCallLines(callId: string | null) {
   const [data, setData] = useState<financeApi.CallLineDetailed[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
