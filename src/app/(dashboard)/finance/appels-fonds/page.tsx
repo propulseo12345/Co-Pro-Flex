@@ -62,7 +62,6 @@ export default function AppelsFondsPage() {
         showEmissionModal={page.showEmissionModal}
         appelEmissionConverted={page.appelEmissionConverted}
         onCloseEmission={page.handleCloseEmissionModal}
-        onEmissionSuccess={page.handleEmissionSuccess}
         showRelancesModal={page.showRelancesModal}
         onCloseRelances={page.handleCloseRelancesModal}
         onNouvelleRelance={page.handleNouvelleRelance}

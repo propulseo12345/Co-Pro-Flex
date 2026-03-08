@@ -220,21 +220,29 @@ export default function CallDetailPage() {
 
   const handleEnvoyerUn = useCallback(async (lotId: string) => {
     setSendingInProgress(true);
-    // TODO: Implement via Supabase Edge Function
-    setTimeout(() => {
-      setSentLots(prev => new Set(prev).add(lotId));
-      setSendingInProgress(false);
-    }, 1000);
+    // TODO: Implement individual send via Supabase Edge Function
+    setSentLots(prev => new Set(prev).add(lotId));
+    setSendingInProgress(false);
   }, []);
 
   const handleEnvoyerTous = useCallback(async () => {
     setSendingInProgress(true);
-    // TODO: Implement via Supabase Edge Function
-    setTimeout(() => {
-      setSentLots(new Set(combinedCopros.map(c => c.lotId)));
-      setSendingInProgress(false);
-    }, 2000);
-  }, [combinedCopros]);
+
+    // Update all sibling calls to 'issued' in DB
+    const updatePromises = calls
+      .filter(c => c.status === 'draft')
+      .map(c => financeApi.updateCallStatus(c.id, 'issued'));
+
+    await Promise.all(updatePromises);
+
+    // Mark all lots as sent
+    setSentLots(new Set(combinedCopros.map(c => c.lotId)));
+
+    // Reload data to get updated statuses
+    await loadData();
+
+    setSendingInProgress(false);
+  }, [calls, combinedCopros, loadData]);
 
   const handleSelectAllMode = useCallback((mode: ModeEnvoi) => {
     setModeEnvois(prev => {

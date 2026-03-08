@@ -203,6 +203,8 @@ export interface CallCampaign {
   ag_title: string | null;
   total_calls: number;
   total_keys: number;
+  total_trimesters: number;
+  trimesters_issued: number;
   total_amount: number;
   total_paid: number;
   global_status: 'draft' | 'issued' | 'partially_paid' | 'paid' | 'cancelled';
@@ -375,6 +377,33 @@ export interface RecordPaymentPayload {
 
 export async function recordPayment(payload: RecordPaymentPayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; allocations: Array<{ call_line_id: string; amount_allocated: number }> }>> {
   return invokeEdgeFunction('record_payment', payload);
+}
+
+// ============================================================================
+// UPDATE CALL STATUS
+// ============================================================================
+
+export async function updateCallStatus(
+  callId: string,
+  status: 'draft' | 'issued' | 'partially_paid' | 'paid' | 'cancelled'
+): Promise<ApiResult<{ success: boolean }>> {
+  const supabase = getSupabaseClient();
+
+  const updates: Record<string, unknown> = { status };
+  if (status === 'issued') {
+    updates.issued_at = new Date().toISOString();
+  }
+
+  const { error } = await supabase
+    .from('call_for_funds')
+    .update(updates)
+    .eq('id', callId);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: { success: true }, error: null };
 }
 
 // ============================================================================

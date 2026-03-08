@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useId, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   X,
   Send,
@@ -15,35 +16,30 @@ import {
   Euro,
 } from 'lucide-react';
 import { useEmissionAppel } from '@/hooks/useEmissionAppel';
-import { AppelFondsEmission, ResultatEmissionAppel } from '@/lib/services/emission-appel.service';
+import * as financeApi from '@/lib/finance/api';
+import type { AppelFondsEmission } from '@/lib/services/emission-appel.service';
 import styles from './EmissionAppelModal.module.css';
 
 interface EmissionAppelModalProps {
   isOpen: boolean;
   onClose: () => void;
   appel: AppelFondsEmission;
-  onEmissionSuccess: (result: ResultatEmissionAppel) => void;
 }
 
-type EtapeEmission = 'options' | 'validation' | 'progression' | 'resultat';
+type EtapeEmission = 'options' | 'validation';
 
 export function EmissionAppelModal({
   isOpen,
   onClose,
   appel,
-  onEmissionSuccess,
 }: EmissionAppelModalProps) {
   const titleId = useId();
+  const router = useRouter();
 
   const {
     isValidating,
-    isEmitting,
     validationResult,
-    emissionResult,
-    error,
-    progression,
     validerPourEmission,
-    emettreAppel,
     resetState,
     getRecapitulatif,
   } = useEmissionAppel();
@@ -85,18 +81,36 @@ export function EmissionAppelModal({
     await validerPourEmission(appel);
   }, [appel, validerPourEmission]);
 
-  // Lancer l'émission
-  const handleEmettre = useCallback(async () => {
-    setEtape('progression');
+  // Émettre l'appel (statut → issued) puis naviguer vers la page copropriétaires
+  const handleNavigateToDetail = useCallback(async () => {
+    // Load the call to get period_id + trimester, then update ALL sibling calls
+    const callResult = await financeApi.getCallById(appel.id);
+    if (callResult.data) {
+      const mainCall = callResult.data;
+      let callIds = [mainCall.id];
 
-    const result = await emettreAppel(appel, options);
+      // Load siblings (same period + trimester = all keys)
+      if (mainCall.trimester != null) {
+        const siblingsResult = await financeApi.getCallsForTrimester(
+          mainCall.copro_id,
+          mainCall.period_id,
+          mainCall.trimester
+        );
+        if (siblingsResult.data && siblingsResult.data.length > 0) {
+          callIds = siblingsResult.data.map(c => c.id);
+        }
+      }
 
-    setEtape('resultat');
-
-    if (result.success) {
-      onEmissionSuccess(result);
+      // Update all to 'issued'
+      await Promise.all(
+        callIds.map(id => financeApi.updateCallStatus(id, 'issued'))
+      );
     }
-  }, [appel, options, emettreAppel, onEmissionSuccess]);
+
+    resetState();
+    onClose();
+    router.push(`/finance/appels-fonds/${appel.id}`);
+  }, [appel.id, resetState, onClose, router]);
 
   // Fermer et réinitialiser
   const handleClose = useCallback(() => {
@@ -125,7 +139,7 @@ export function EmissionAppelModal({
           <div className={styles.headerIcon}>
             <Send size={24} aria-hidden="true" />
           </div>
-          <h2 id={titleId}>Émettre l'appel de fonds</h2>
+          <h2 id={titleId}>Émettre l&apos;appel de fonds</h2>
           <button
             type="button"
             className={styles.closeBtn}
@@ -167,7 +181,7 @@ export function EmissionAppelModal({
 
               {/* Options d'émission */}
               <div className={styles.optionsSection}>
-                <h3>Options d'émission</h3>
+                <h3>Options d&apos;émission</h3>
 
                 <label className={styles.checkboxLabel}>
                   <input
@@ -211,7 +225,7 @@ export function EmissionAppelModal({
                   <span>Envoyer par email aux copropriétaires</span>
                 </label>
                 <p className={styles.optionHint}>
-                  Envoie automatiquement l'appel de fonds par email
+                  Envoie automatiquement l&apos;appel de fonds par email
                 </p>
 
                 <div className={styles.commentaire}>
@@ -232,7 +246,7 @@ export function EmissionAppelModal({
               <div className={styles.warning}>
                 <AlertCircle size={16} aria-hidden="true" />
                 <span>
-                  Cette action va faire passer l'appel en statut "Émis". Les modifications
+                  Cette action va faire passer l&apos;appel en statut &quot;Émis&quot;. Les modifications
                   seront limitées après cette opération.
                 </span>
               </div>
@@ -252,7 +266,7 @@ export function EmissionAppelModal({
                   <div className={styles.validationSuccess}>
                     <CheckCircle size={48} className={styles.successIcon} aria-hidden="true" />
                     <h3>Validation réussie</h3>
-                    <p>L'appel de fonds peut être émis.</p>
+                    <p>L&apos;appel de fonds peut être émis.</p>
                   </div>
                 ) : (
                   <div className={styles.validationError}>
@@ -266,57 +280,6 @@ export function EmissionAppelModal({
                   </div>
                 )
               ) : null}
-            </div>
-          )}
-
-          {/* ÉTAPE 3 : Progression */}
-          {etape === 'progression' && (
-            <div className={styles.progressionSection}>
-              <Loader2 size={48} className={styles.spinner} aria-hidden="true" />
-              <h3>Émission en cours</h3>
-              <p className={styles.progressionText}>{progression}</p>
-              <div className={styles.progressBar}>
-                <div className={styles.progressBarFill} />
-              </div>
-              <p className={styles.progressionHint}>
-                Veuillez patienter, ne fermez pas cette fenêtre...
-              </p>
-            </div>
-          )}
-
-          {/* ÉTAPE 4 : Résultat */}
-          {etape === 'resultat' && (
-            <div className={styles.resultatSection}>
-              {emissionResult?.success ? (
-                <>
-                  <CheckCircle size={64} className={styles.successIcon} aria-hidden="true" />
-                  <h3>Appel émis avec succès !</h3>
-                  <div className={styles.resultatStats}>
-                    <div className={styles.resultatStat}>
-                      <span className={styles.statValue}>{emissionResult.ecrituresCreees}</span>
-                      <span className={styles.statLabel}>écritures créées</span>
-                    </div>
-                    <div className={styles.resultatStat}>
-                      <span className={styles.statValue}>{emissionResult.documentsGeneres}</span>
-                      <span className={styles.statLabel}>documents générés</span>
-                    </div>
-                  </div>
-                  <p>L'appel de fonds n°{appel.numero} est maintenant en statut "Émis".</p>
-                </>
-              ) : (
-                <>
-                  <AlertCircle size={64} className={styles.errorIcon} aria-hidden="true" />
-                  <h3>Erreur lors de l'émission</h3>
-                  {emissionResult?.erreurs && (
-                    <ul className={styles.erreursList}>
-                      {emissionResult.erreurs.map((err, i) => (
-                        <li key={i}>{err}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {error && <p className={styles.errorMessage}>{error.message}</p>}
-                </>
-              )}
             </div>
           )}
         </div>
@@ -346,11 +309,10 @@ export function EmissionAppelModal({
               <button
                 type="button"
                 className={styles.emitBtn}
-                onClick={handleEmettre}
-                disabled={isEmitting}
+                onClick={handleNavigateToDetail}
               >
                 <Send size={16} aria-hidden="true" />
-                Émettre l'appel
+                Émettre l&apos;appel
               </button>
             </>
           )}
@@ -362,12 +324,6 @@ export function EmissionAppelModal({
               onClick={() => setEtape('options')}
             >
               Retour aux options
-            </button>
-          )}
-
-          {etape === 'resultat' && (
-            <button type="button" className={styles.closeResultBtn} onClick={handleClose}>
-              {emissionResult?.success ? 'Fermer' : 'Retour'}
             </button>
           )}
         </footer>

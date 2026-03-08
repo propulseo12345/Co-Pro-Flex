@@ -81,7 +81,6 @@ interface AppelsFondsModalsProps {
   showEmissionModal: boolean;
   appelEmissionConverted: AppelFondsEmission | null;
   onCloseEmission: () => void;
-  onEmissionSuccess: (result: { nouveauStatut: string }) => void;
 
   // Relances Modal
   showRelancesModal: boolean;
@@ -135,7 +134,6 @@ export function AppelsFondsModals({
   showEmissionModal,
   appelEmissionConverted,
   onCloseEmission,
-  onEmissionSuccess,
   showRelancesModal,
   onCloseRelances,
   onNouvelleRelance,
@@ -223,7 +221,6 @@ export function AppelsFondsModals({
           isOpen={showEmissionModal}
           appel={appelEmissionConverted}
           onClose={onCloseEmission}
-          onEmissionSuccess={onEmissionSuccess}
         />
       )}
 

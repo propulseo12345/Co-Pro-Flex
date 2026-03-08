@@ -242,12 +242,12 @@ export function useAppelsFonds() {
 
   // Calcul des statistiques
   const stats = useMemo<AppelsFondsStats>(() => {
-    const totalAppels = appels.length;
+    const totalAppels = campaigns.length;
     const montantTotal = appels.reduce((sum, a) => sum + a.montantTotal, 0);
     const montantEncaisse = appels.reduce((sum, a) => sum + (a.montantEncaisse || 0), 0);
     const tauxRecouvrement = montantTotal > 0 ? (montantEncaisse / montantTotal) * 100 : 0;
     return { totalAppels, montantTotal, montantEncaisse, tauxRecouvrement };
-  }, [appels]);
+  }, [appels, campaigns]);
 
   // Calcul des alertes de délais
   const alertes = useMemo<AlerteDelai[]>(() => {

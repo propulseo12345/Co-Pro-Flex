@@ -16,6 +16,8 @@ interface StatutAppelBadgeProps {
   statut: AppelFondsStatut | string;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  /** Override the default label text */
+  label?: string;
 }
 
 type IconComponent = typeof Clock;
@@ -52,6 +54,7 @@ export function StatutAppelBadge({
   statut,
   size = 'md',
   showLabel = true,
+  label: labelOverride,
 }: StatutAppelBadgeProps) {
   // Récupérer la config depuis les métadonnées unifiées si disponible
   const config = STATUTS_APPEL_FONDS[statut as AppelFondsStatut];
@@ -59,8 +62,8 @@ export function StatutAppelBadge({
   // Icône (utilise le mapping local ou les métadonnées)
   const Icone = ICONES[statut] || Clock;
 
-  // Label (utilise le mapping local ou les métadonnées)
-  const label = config?.labelCourt || LABELS[statut] || statut;
+  // Label (utilise l'override, le mapping local ou les métadonnées)
+  const label = labelOverride || config?.labelCourt || LABELS[statut] || statut;
 
   // Description pour le tooltip
   const description = config?.description || '';
