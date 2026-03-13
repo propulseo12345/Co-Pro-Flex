@@ -31,10 +31,11 @@ export function AssuranceModal({ assurance, onClose }: AssuranceModalProps) {
 
     const handleDownloadDoc = (doc: DocumentAssurance) => {
         // Génération d'un vrai PDF au lieu d'un fichier texte
-        generateAssuranceDocumentPDF({
+        const pdfDoc = generateAssuranceDocumentPDF({
             document: doc,
             assurance: assurance,
         });
+        pdfDoc.save(`${doc.nom.replace(/\s+/g, '_')}.pdf`);
     };
 
     return (

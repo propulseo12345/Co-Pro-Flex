@@ -209,7 +209,8 @@ export function DocumentsTab({
                                                     className={styles.documentActionBtn}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        generateDocumentTechniquePDF({ document: doc });
+                                                        const pdfDoc = generateDocumentTechniquePDF({ document: doc });
+                                                        pdfDoc.save(`${doc.nom.replace(/\s+/g, '_')}.pdf`);
                                                     }}
                                                     title="Télécharger en PDF"
                                                 >

@@ -212,7 +212,7 @@ export function AssuranceDocumentsSection({
     onDeleteDocument
 }: DocumentsSectionProps) {
     const handleDownloadDocument = (doc: DocumentAssurance) => {
-        generateAssuranceDocumentPDF({
+        const pdfDoc = generateAssuranceDocumentPDF({
             document: doc,
             assurance: {
                 id: 'temp-id',
@@ -228,6 +228,7 @@ export function AssuranceDocumentsSection({
                 garanties: formData.garanties,
             },
         });
+        pdfDoc.save(`${doc.nom.replace(/\s+/g, '_')}.pdf`);
     };
 
     return (

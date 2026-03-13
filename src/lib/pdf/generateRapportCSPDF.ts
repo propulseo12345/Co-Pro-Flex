@@ -16,11 +16,6 @@ interface GenerateRapportCSPDFParams {
   adresseCopropriete?: string;
 }
 
-interface GeneratedPDF {
-  blob: Blob;
-  filename: string;
-}
-
 /**
  * Utilitaire pour supprimer les balises HTML
  */

@@ -70,7 +70,10 @@ export function DocumentModal({ document, onClose }: DocumentModalProps) {
                 <div className={styles.modalFooter}>
                     <button
                         className="btn btn-secondary"
-                        onClick={() => generateDocumentTechniquePDF({ document })}
+                        onClick={() => {
+                            const doc = generateDocumentTechniquePDF({ document });
+                            doc.save(`${document.nom.replace(/\s+/g, '_')}.pdf`);
+                        }}
                     >
                         <Download size={16} aria-hidden="true" /> Télécharger en PDF
                     </button>
