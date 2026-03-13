@@ -1,6 +1,6 @@
 export * from './types';
 export * from './utils';
-export { LogbookHeader } from './LogbookHeader';
+export { LogbookHeader, LogbookPageHeader, LogbookKpiBar } from './LogbookHeader';
 export { LogbookInfoSection } from './LogbookInfoSection';
 export { LogbookContactsSection } from './LogbookContactsSection';
 export { LogbookAssurances } from './LogbookAssurances';

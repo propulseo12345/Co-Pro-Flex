@@ -9,8 +9,6 @@ export type {
     TabsState,
     InterventionsTabHandlers,
     InterventionsTabState,
-    DocumentsTabHandlers,
-    DocumentsTabState,
     ModalsState,
     ModalsHandlers,
     ToastState,

@@ -98,17 +98,18 @@ export type InterventionStatut = 'PLANIFIEE' | 'EN_COURS' | 'TERMINEE';
 export type InterventionCategorie = 'COURANTE' | 'TRAVAUX_IMPORTANTS';
 export type InterventionType = 'ENTRETIEN' | 'REPARATION' | 'INSPECTION';
 export type ExportFormat = 'PDF_COMPLET' | 'PDF_ACQUEREURS' | 'EXCEL';
-export type ActiveTab = 'interventions' | 'travaux' | 'documents';
+export type ActiveTab = 'interventions' | 'travaux';
 export type InterventionView = 'all' | 'courantes' | 'travaux';
 
 /** Filtre actif sur les tuiles KPI */
 export type FiltreKpi =
-    | 'tous'              // Total interventions (reset)
     | 'en_cours'          // Interventions en cours
-    | 'travaux_prevus'    // Planifiées / issues du PPT
-    | 'documents_valides' // Documents valides
-    | 'assurances'        // Assurances actives
-    | 'contrats';         // Contrats actifs
+    | 'planifiees'        // Interventions planifiées
+    | 'travaux_prevus'    // Travaux prévisionnels
+    | 'travaux_votes'     // Travaux votés en AG
+    | 'cout_annee'        // Coût total année
+    | 'urgences'          // Interventions urgentes
+    | null;               // Aucun filtre actif
 
 /** Résultat de création d'une intervention */
 export interface ResultatCreationIntervention {
@@ -192,13 +193,12 @@ export interface DocumentStats {
 
 // KPIs
 export interface LogbookKpis {
-    contratsActifs: number;
-    contratsARenouveler: number;
-    interventionsEnCours: number;
+    enCours: number;
+    planifiees: number;
     travauxPrevus: number;
-    documentsValides: number;
-    assurancesActives: number;
-    totalInterventions: number;
+    travauxVotes: number;
+    coutAnnee: number;
+    urgences: number;
 }
 
 // Catégories de documents

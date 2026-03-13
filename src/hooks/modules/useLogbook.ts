@@ -50,13 +50,13 @@ const CATEGORIES_DOCS: Record<string, string[]> = {
 };
 
 // Labels des filtres KPI pour l'affichage
-const LABELS_FILTRES_KPI: Record<FiltreKpi, string> = {
-    tous: 'Toutes les interventions',
+const LABELS_FILTRES_KPI: Record<Exclude<FiltreKpi, null>, string> = {
     en_cours: 'En cours',
+    planifiees: 'Planifiées',
     travaux_prevus: 'Travaux prévus',
-    documents_valides: 'Documents valides',
-    assurances: 'Assurances',
-    contrats: 'Contrats',
+    travaux_votes: 'Travaux votés',
+    cout_annee: 'Coût année',
+    urgences: 'Urgences',
 };
 
 export function useLogbook() {
@@ -82,7 +82,7 @@ export function useLogbook() {
     // États onglets et vues
     const [activeTab, setActiveTab] = useState<ActiveTab>('interventions');
     const [interventionView, setInterventionView] = useState<InterventionView>('all');
-    const [filtreKpiActif, setFiltreKpiActif] = useState<FiltreKpi>('tous');
+    const [filtreKpiActif, setFiltreKpiActif] = useState<FiltreKpi>(null);
 
     // État du toast de création
     const [toastCreation, setToastCreation] = useState<Omit<ToastCreationProps, 'onClose' | 'onVoirIntervention' | 'onAfficherTout'> | null>(null);
@@ -270,16 +270,19 @@ export function useLogbook() {
         return { total, expired, expiring, valid };
     }, []);
 
-    // KPIs - utilise les contrats synchronisés
+    // KPIs — 6 tuiles du nouveau header
     const kpis = useMemo<LogbookKpis>(() => ({
-        contratsActifs: contrats.filter(c => c.statut === 'ACTIF').length,
-        contratsARenouveler: contrats.filter(c => c.statut === 'A_RENOUVELER' || isEcheanceProche(c.dateFin)).length,
-        interventionsEnCours: interventions.filter(i => i.statut === 'EN_COURS').length,
-        travauxPrevus: MOCK_TRAVAUX_PREVISIONNELS.filter(t => t.statut === 'PREVU' || t.statut === 'VOTE').length,
-        documentsValides: MOCK_DOCUMENTS_TECHNIQUES.filter(d => !d.dateValidite || new Date(d.dateValidite) > new Date()).length,
-        assurancesActives: MOCK_ASSURANCES_COPROPRIETE.filter(a => isGarantieEnCours(a.dateFin)).length,
-        totalInterventions: interventions.length,
-    }), [contrats, interventions]);
+        enCours: interventions.filter(i => i.statut === 'EN_COURS').length,
+        planifiees: interventions.filter(i => i.statut === 'PLANIFIEE').length,
+        travauxPrevus: MOCK_TRAVAUX_PREVISIONNELS.length,
+        travauxVotes: MOCK_TRAVAUX_PREVISIONNELS.filter(t => t.statut === 'VOTE').length,
+        coutAnnee: interventions
+            .filter(i => new Date(i.date).getFullYear() === new Date().getFullYear())
+            .reduce((sum, i) => sum + (i.cout || 0), 0),
+        urgences: interventions.filter(i =>
+            (i.statut as string) === 'URGENTE' || (i.statut as string) === 'URGENT'
+        ).length,
+    }), [interventions]);
 
     // Handlers
     const handleSaveInfo = useCallback(() => {
@@ -308,13 +311,15 @@ export function useLogbook() {
         switch (filtre) {
             case 'en_cours':
                 return intervention.statut === 'EN_COURS';
-            case 'travaux_prevus':
+            case 'planifiees':
                 return intervention.statut === 'PLANIFIEE';
-            case 'documents_valides':
-            case 'assurances':
-            case 'contrats':
-                return false; // Ces filtres ne concernent pas les interventions
-            case 'tous':
+            case 'urgences':
+                return (intervention.statut as string) === 'URGENTE' || (intervention.statut as string) === 'URGENT';
+            case 'travaux_prevus':
+            case 'travaux_votes':
+            case 'cout_annee':
+                return false; // Ces filtres ne concernent pas directement les interventions
+            case null:
             default:
                 return true;
         }
@@ -383,7 +388,7 @@ export function useLogbook() {
         // Déterminer le message du toast
         let labelFiltre: string | undefined;
         if (!estVisible) {
-            if (!visibleKpi && filtreKpiActif !== 'tous') {
+            if (!visibleKpi && filtreKpiActif !== null) {
                 labelFiltre = LABELS_FILTRES_KPI[filtreKpiActif];
             } else if (!visibleListe) {
                 labelFiltre = 'Filtres de liste actifs';
@@ -424,7 +429,7 @@ export function useLogbook() {
     /** Affiche l'intervention créée en réinitialisant les filtres */
     const voirInterventionCreee = useCallback(() => {
         // Réinitialiser les filtres pour voir l'intervention
-        setFiltreKpiActif('tous');
+        setFiltreKpiActif(null);
         setStatutFilter('TOUS');
         setCategorieFilter('TOUS');
         setEquipementFilter('TOUS');
@@ -516,9 +521,9 @@ export function useLogbook() {
     }, [editingIntervention, newInterventionForm]);
 
     const handleFiltreKpiChange = useCallback((filtre: FiltreKpi) => {
-        // Si on clique sur le même filtre, on reset
-        if (filtre === filtreKpiActif && filtre !== 'tous') {
-            setFiltreKpiActif('tous');
+        // Si on clique sur le même filtre, on désactive
+        if (filtre === filtreKpiActif) {
+            setFiltreKpiActif(null);
             setStatutFilter('TOUS');
             setActiveTab('interventions');
             return;
@@ -527,23 +532,27 @@ export function useLogbook() {
         setFiltreKpiActif(filtre);
 
         switch (filtre) {
-            case 'contrats':
-                window.location.href = '/maintenance/contracts';
-                break;
             case 'en_cours':
                 setActiveTab('interventions');
                 setStatutFilter('EN_COURS');
                 break;
+            case 'planifiees':
+                setActiveTab('interventions');
+                setStatutFilter('PLANIFIEE');
+                break;
+            case 'urgences':
+                setActiveTab('interventions');
+                setStatutFilter('URGENTE');
+                break;
             case 'travaux_prevus':
+            case 'travaux_votes':
                 setActiveTab('travaux');
                 break;
-            case 'assurances':
-                document.getElementById('assurances-section')?.scrollIntoView({ behavior: 'smooth' });
+            case 'cout_annee':
+                setActiveTab('interventions');
+                setStatutFilter('TOUS');
                 break;
-            case 'documents_valides':
-                setActiveTab('documents');
-                break;
-            case 'tous':
+            default:
                 setActiveTab('interventions');
                 setStatutFilter('TOUS');
                 break;

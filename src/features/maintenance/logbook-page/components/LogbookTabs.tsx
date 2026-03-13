@@ -1,7 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { Wrench, TrendingUp, Shield } from 'lucide-react';
+import { Wrench, TrendingUp } from 'lucide-react';
 import type { ActiveTab } from '@/components/features/maintenance/Logbook/types';
 import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
@@ -10,7 +10,6 @@ export interface LogbookTabsProps {
     onTabChange: (tab: ActiveTab) => void;
     interventionsCount: number;
     travauxCount: number;
-    documentsCount: number;
 }
 
 export function LogbookTabs({
@@ -18,7 +17,6 @@ export function LogbookTabs({
     onTabChange,
     interventionsCount,
     travauxCount,
-    documentsCount,
 }: LogbookTabsProps) {
     return (
         <div className={styles.tabs}>
@@ -26,19 +24,17 @@ export function LogbookTabs({
                 className={clsx(styles.tab, activeTab === 'interventions' && styles.activeTab)}
                 onClick={() => onTabChange('interventions')}
             >
-                <Wrench size={18} aria-hidden="true" /> Interventions ({interventionsCount})
+                <Wrench size={15} aria-hidden="true" />
+                Interventions
+                <span className={styles.tabCount}>{interventionsCount}</span>
             </button>
             <button
                 className={clsx(styles.tab, activeTab === 'travaux' && styles.activeTab)}
                 onClick={() => onTabChange('travaux')}
             >
-                <TrendingUp size={18} aria-hidden="true" /> Travaux previsionnels ({travauxCount})
-            </button>
-            <button
-                className={clsx(styles.tab, activeTab === 'documents' && styles.activeTab)}
-                onClick={() => onTabChange('documents')}
-            >
-                <Shield size={18} aria-hidden="true" /> Documents techniques ({documentsCount})
+                <TrendingUp size={15} aria-hidden="true" />
+                Travaux prévisionnels
+                <span className={styles.tabCount}>{travauxCount}</span>
             </button>
         </div>
     );

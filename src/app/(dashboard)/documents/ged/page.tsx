@@ -1,82 +1,177 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
-import { FileText, ArrowLeft, Database, WifiOff } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import {
+  FileText, Folder, FolderOpen, Search, Upload, Download, Plus,
+  ChevronDown, ChevronRight, Eye, Lock, Star, Clock, Image, File,
+  Link, Trash2, Shield, HardDrive,
+} from 'lucide-react';
+import clsx from 'clsx';
 import DocumentViewerModal from '@/components/ui/DocumentViewerModal/DocumentViewerModal';
 import { AccessRightsManager } from '@/components/features/documents/AccessRightsManager';
 import { NiveauConfidentialite } from '@/types/enums';
 import { useGedPageSupabase, useDocumentSearch } from '@/components/features/documents/ged/hooks';
 import { LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
-import {
-  Header, Checklist, VersioningAlerts, SearchBar, AdvancedFilters, ModeSwitch,
-  DropZone, Breadcrumb, Toolbar, ActiveFilters, FolderGrid, SearchResults,
-  DocumentGrid, DocumentList, Pagination, EmptyState, LinkModal,
-  TechnicalDocumentsSection,
-} from '@/components/features/documents/ged/components';
-import type { SearchSuggestion } from '@/components/features/documents/ged/domain/types';
+import { LinkModal } from '@/components/features/documents/ged/components';
+import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/components/features/documents/ged/domain/constants';
+import type { DocumentWithFolder, GEDFolder } from '@/components/features/documents/ged/domain/types';
 import styles from './ged.module.css';
 
+type SidebarTab = 'dossiers' | 'recents' | 'favoris';
+
+function DocIcon({ type, size = 14 }: { type: string; size?: number }) {
+  const Icon = type === 'PDF' ? FileText : type === 'IMAGE' ? Image : File;
+  const color = type === 'PDF' ? '#EF4444' : type === 'IMAGE' ? '#84CC16' : '#6B7280';
+  return <Icon size={size} style={{ color }} />;
+}
+
+function getCatColor(cat: string): string {
+  return CATEGORY_COLORS[cat] || CATEGORY_COLORS[cat.toLowerCase()] || '#6B7280';
+}
+
+function getCatLabel(cat: string): string {
+  return CATEGORY_LABELS[cat] || CATEGORY_LABELS[cat.toLowerCase()] || cat;
+}
+
+function getRelativeDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days === 0) return "aujourd'hui";
+  if (days === 1) return 'hier';
+  if (days < 7) return `il y a ${days}j`;
+  if (days < 30) return `il y a ${Math.floor(days / 7)}sem`;
+  if (days < 365) return `il y a ${Math.floor(days / 30)}mois`;
+  return `il y a ${Math.floor(days / 365)}an${Math.floor(days / 365) > 1 ? 's' : ''}`;
+}
+
 export default function GEDPage() {
+  const hook = useGedPageSupabase();
   const {
-    viewMode, setViewMode, sortField, setSortField, sortOrder, setSortOrder,
-    currentPage, setCurrentPage, isDragOver, showChecklist, setShowChecklist,
-    navigationMode, setNavigationMode, currentFolderId,
+    documents, folders, rootFolders, stats,
+    isLoading, error,
     showLinkModal, selectedDocForLink, detectedEntityType, extractedData,
-    previewDocument, showVersioningAlerts, setShowVersioningAlerts, documentsNeedingAttention,
-    showAccessRightsModal, selectedDocForAccess, canManageAccess,
-    documents, folders, currentFolder, breadcrumb, subFolders, rootFolders, stats,
-    isLoading, error, isConnected,
-    getFilteredDocuments, getPaginatedDocuments, getTotalPages, navigateToFolder, handleModeChange,
-    handleDragOver, handleDragLeave, handleDrop, handleFilesSelected, handleOpenLinkModal, handleCloseLinkModal, handleCreateLink,
-    handlePreviewDocument, handleClosePreview, handleOpenAccessRights, handleCloseAccessRights,
-  } = useGedPageSupabase();
+    previewDocument, showAccessRightsModal, selectedDocForAccess, canManageAccess,
+    handleOpenLinkModal, handleCloseLinkModal, handleCreateLink,
+    handlePreviewDocument, handleClosePreview,
+    handleOpenAccessRights, handleCloseAccessRights,
+    handleFilesSelected,
+  } = hook;
 
-  const {
-    searchQuery, setSearchQuery, showSearchDropdown, setShowSearchDropdown,
-    showAdvancedFilters, setShowAdvancedFilters, filters, setFilters,
-    searchHistory, setIsSearchFocused, searchSuggestions, activeFilters,
-    saveToHistory, removeFromHistory, handleClearFilters, handleCategoryFilter, handleFileTypeFilter,
-    updateDateFrom, updateDateTo, updateSizeMin, updateSizeMax,
-  } = useDocumentSearch({ documents, folders });
+  const searchHook = useDocumentSearch({ documents, folders });
+  const { searchQuery, setSearchQuery, filters } = searchHook;
 
-  const filteredDocuments = useMemo(() => getFilteredDocuments(searchQuery, filters), [getFilteredDocuments, searchQuery, filters]);
-  const paginatedDocuments = useMemo(() => getPaginatedDocuments(filteredDocuments), [getPaginatedDocuments, filteredDocuments]);
-  const totalPages = getTotalPages(filteredDocuments.length);
+  const filteredDocuments = useMemo(
+    () => hook.getFilteredDocuments(searchQuery, filters),
+    [hook.getFilteredDocuments, searchQuery, filters]
+  );
 
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-    if (query.length >= 2) { setNavigationMode('search'); setSortField('pertinence'); }
-  }, [setSearchQuery, setCurrentPage, setNavigationMode, setSortField]);
+  // Local state
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('dossiers');
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [sidebarSearch, setSidebarSearch] = useState('');
 
-  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) { saveToHistory(searchQuery.trim()); setShowSearchDropdown(false); }
-  }, [searchQuery, saveToHistory, setShowSearchDropdown]);
+  // Selected document
+  const selectedDoc = useMemo(() => {
+    if (selectedDocId) return documents.find(d => d.id === selectedDocId) || null;
+    return documents[0] || null;
+  }, [selectedDocId, documents]);
 
-  const handleClearSearch = useCallback(() => {
-    setSearchQuery('');
-    if (navigationMode === 'search') { setNavigationMode('folders'); setSortField('dateAjout'); }
-  }, [setSearchQuery, navigationMode, setNavigationMode, setSortField]);
+  // Build folder→children map for recursive lookup
+  const childFolderIds = useMemo(() => {
+    const map = new Map<string, string[]>();
+    folders.forEach(f => {
+      if (!map.has(f.id)) map.set(f.id, []);
+      if (f.parentId) {
+        if (!map.has(f.parentId)) map.set(f.parentId, []);
+        map.get(f.parentId)!.push(f.id);
+      }
+    });
+    return map;
+  }, [folders]);
 
-  const handleSuggestionClick = useCallback((suggestion: SearchSuggestion) => {
-    if (suggestion.type === 'category') { setFilters((prev) => ({ ...prev, categories: [suggestion.value] })); setNavigationMode('search'); }
-    else if (suggestion.type === 'folder') { navigateToFolder(suggestion.value); }
-    else { setSearchQuery(suggestion.label); saveToHistory(suggestion.label); }
-    setShowSearchDropdown(false);
-  }, [setFilters, setNavigationMode, navigateToFolder, setSearchQuery, saveToHistory, setShowSearchDropdown]);
+  // Get all descendant folder IDs (recursive)
+  const getAllDescendantIds = useCallback((folderId: string): string[] => {
+    const children = childFolderIds.get(folderId) || [];
+    const all = [...children];
+    children.forEach(cid => all.push(...getAllDescendantIds(cid)));
+    return all;
+  }, [childFolderIds]);
 
-  const handleHistoryClick = useCallback((query: string) => {
-    setSearchQuery(query); setNavigationMode('search'); setSortField('pertinence'); setShowSearchDropdown(false); setCurrentPage(1);
-  }, [setSearchQuery, setNavigationMode, setSortField, setShowSearchDropdown, setCurrentPage]);
+  // Docs by folder (including docs in sub-folders)
+  const docsByFolder = useMemo(() => {
+    const map = new Map<string, DocumentWithFolder[]>();
+    // Direct mapping
+    const directMap = new Map<string, DocumentWithFolder[]>();
+    documents.forEach(d => {
+      const fid = d.dossierId || '__root__';
+      if (!directMap.has(fid)) directMap.set(fid, []);
+      directMap.get(fid)!.push(d);
+    });
+    // For each root folder, include docs from all descendants
+    folders.forEach(f => {
+      const descendantIds = [f.id, ...getAllDescendantIds(f.id)];
+      const allDocs: DocumentWithFolder[] = [];
+      descendantIds.forEach(did => {
+        const docs = directMap.get(did);
+        if (docs) allDocs.push(...docs);
+      });
+      map.set(f.id, allDocs);
+    });
+    map.set('__root__', directMap.get('__root__') || []);
+    return map;
+  }, [documents, folders, getAllDescendantIds]);
 
-  const isSearchMode = navigationMode === 'search' && searchQuery;
-  const showDocuments = navigationMode === 'all' || navigationMode === 'search' || (navigationMode === 'folders' && currentFolderId);
+  // Display folders (filtered, non-empty first, then empty)
+  const displayFolders = useMemo(() => {
+    const all = rootFolders.length > 0 ? rootFolders : folders;
+    const filtered = sidebarSearch
+      ? all.filter(f => f.nom.toLowerCase().includes(sidebarSearch.toLowerCase()))
+      : all;
+    // Sort: non-empty first
+    return [...filtered].sort((a, b) => {
+      const aCount = (docsByFolder.get(a.id) || []).length;
+      const bCount = (docsByFolder.get(b.id) || []).length;
+      if (aCount > 0 && bCount === 0) return -1;
+      if (aCount === 0 && bCount > 0) return 1;
+      return a.nom.localeCompare(b.nom);
+    });
+  }, [rootFolders, folders, sidebarSearch, docsByFolder]);
+
+  // Root docs (not in any folder)
+  const rootDocs = useMemo(() => docsByFolder.get('__root__') || [], [docsByFolder]);
+
+  // Recent docs (sorted by date desc)
+  const recentDocs = useMemo(() =>
+    [...documents].sort((a, b) => new Date(b.dateAjout).getTime() - new Date(a.dateAjout).getTime()).slice(0, 10),
+    [documents]
+  );
+
+  // Mock favorites (starred docs) — first 3 for now
+  const favoriteDocs = useMemo(() => documents.slice(0, 3), [documents]);
+
+  const toggleFolder = useCallback((id: string) => {
+    setExpandedFolders(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  // KPIs
+  const kpis = [
+    { label: 'Documents', value: documents.length, color: '#2563eb', icon: FileText },
+    { label: 'Dossiers', value: displayFolders.filter(f => (docsByFolder.get(f.id) || []).length > 0).length, color: '#10B981', icon: Folder },
+    { label: 'Actifs', value: stats?.active_count ?? '—', color: '#F59E0B', icon: Shield },
+    { label: 'Stockage', value: stats?.total_size_bytes ? `${(stats.total_size_bytes / (1024 * 1024)).toFixed(1)} Mo` : '—', color: '#A78BFA', icon: HardDrive },
+  ];
 
   if (isLoading) {
     return (
       <div className="container">
-        <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} stats={null} rootFolderCount={0} />
+        <div className={styles.pageHeader}><h1 className={styles.pageTitle}>Mes documents</h1></div>
         <LoadingState message="Chargement des documents..." />
       </div>
     );
@@ -85,107 +180,271 @@ export default function GEDPage() {
   if (error) {
     return (
       <div className="container">
-        <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} stats={null} rootFolderCount={0} />
+        <div className={styles.pageHeader}><h1 className={styles.pageTitle}>Mes documents</h1></div>
         <ErrorState message={error} />
       </div>
     );
   }
 
+  const catColor = selectedDoc ? getCatColor(selectedDoc.categorie) : '#6B7280';
+  const catLabel = selectedDoc ? getCatLabel(selectedDoc.categorie) : '';
+
   return (
     <div className="container">
-      <Header showChecklist={showChecklist} onChecklistToggle={() => setShowChecklist(!showChecklist)} stats={stats} rootFolderCount={rootFolders.length} />
-
-      {isConnected ? (
-        <div className={styles.connectionBadge} data-connected="true">
-          <Database size={14} /> Connecté à Supabase
+      {/* Page Header */}
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Mes documents</h1>
+        <div className={styles.pageActions}>
+          <button className={styles.btnSecondary}><Download size={15} /> Exporter</button>
+          <label className={styles.btnPrimary} style={{ cursor: 'pointer' }}>
+            <Upload size={15} /> Importer
+            <input type="file" multiple hidden onChange={e => {
+              if (e.target.files) handleFilesSelected(e.target.files);
+            }} />
+          </label>
         </div>
-      ) : (
-        <div className={styles.connectionBadge} data-connected="false">
-          <WifiOff size={14} /> Mode démonstration (données fictives)
+      </div>
+
+      {/* KPI Bar */}
+      <div className={styles.kpiBar}>
+        {kpis.map(k => {
+          const Icon = k.icon;
+          return (
+            <div key={k.label} className={styles.kpiCard}>
+              <div className={styles.kpiIcon} style={{ background: k.color + '15', color: k.color }}><Icon size={16} /></div>
+              <div className={styles.kpiContent}>
+                <span className={styles.kpiValue}>{k.value}</span>
+                <span className={styles.kpiLabel}>{k.label}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Search global */}
+      <div className={styles.searchSection}>
+        <div className={styles.searchRow}>
+          <div className={styles.searchInputWrap}>
+            <Search size={16} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Rechercher un document..."
+              className={styles.searchField}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
-      )}
-      {showChecklist && <Checklist />}
+      </div>
 
-      {showVersioningAlerts && (documentsNeedingAttention.obsolete.length > 0 || documentsNeedingAttention.overdue.length > 0) && (
-        <VersioningAlerts
-          obsoleteCount={documentsNeedingAttention.obsolete.length}
-          overdueCount={documentsNeedingAttention.overdue.length}
-          onClose={() => setShowVersioningAlerts(false)}
-          onViewObsolete={() => { setFilters((prev) => ({ ...prev, categories: ['REGLEMENT'] })); setNavigationMode('search'); }}
-          onViewOverdue={() => { setFilters((prev) => ({ ...prev, categories: ['REGLEMENT', 'CONTRAT'] })); setNavigationMode('search'); }}
-        />
-      )}
+      {/* Split View */}
+      <div className={styles.splitView}>
+        {/* Sidebar */}
+        <div className={styles.sidebar}>
+          {/* Tabs */}
+          <div className={styles.sidebarTabs}>
+            {([
+              { id: 'dossiers' as const, label: 'Dossiers', icon: Folder },
+              { id: 'recents' as const, label: 'Récents', icon: Clock },
+              { id: 'favoris' as const, label: 'Favoris', icon: Star },
+            ]).map(t => {
+              const TIcon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  className={clsx(styles.sidebarTabBtn, sidebarTab === t.id && styles.sidebarTabBtnActive)}
+                  onClick={() => setSidebarTab(t.id)}
+                >
+                  <TIcon size={13} /> {t.label}
+                </button>
+              );
+            })}
+          </div>
 
-      <SearchBar
-        searchQuery={searchQuery} showDropdown={showSearchDropdown} searchHistory={searchHistory}
-        suggestions={searchSuggestions} hasActiveFilters={activeFilters} showAdvancedFilters={showAdvancedFilters}
-        onSearchChange={handleSearch} onSearchSubmit={handleSearchSubmit} onClearSearch={handleClearSearch}
-        onToggleFilters={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        onFocus={() => { setIsSearchFocused(true); setShowSearchDropdown(true); }}
-        onBlur={() => setIsSearchFocused(false)} onHistoryClick={handleHistoryClick}
-        onRemoveFromHistory={removeFromHistory} onSuggestionClick={handleSuggestionClick}
-        onDropdownClose={() => setShowSearchDropdown(false)}
-      />
+          {/* Mini search */}
+          {sidebarTab === 'dossiers' && (
+            <div className={styles.sidebarSearchWrap}>
+              <Search size={13} className={styles.sidebarSearchIconSm} />
+              <input
+                type="text"
+                placeholder="Filtrer dossiers..."
+                className={styles.sidebarSearchInput}
+                value={sidebarSearch}
+                onChange={e => setSidebarSearch(e.target.value)}
+              />
+            </div>
+          )}
 
-      {showAdvancedFilters && (
-        <AdvancedFilters filters={filters} hasActiveFilters={activeFilters} onCategoryFilter={handleCategoryFilter}
-          onFileTypeFilter={handleFileTypeFilter} onDateFromChange={updateDateFrom} onDateToChange={updateDateTo}
-          onSizeMinChange={updateSizeMin} onSizeMaxChange={updateSizeMax} onClearFilters={handleClearFilters} />
-      )}
+          {/* Content */}
+          <div className={styles.sidebarContent}>
+            {/* Dossiers tab */}
+            {sidebarTab === 'dossiers' && displayFolders.map(f => {
+              const isExpanded = expandedFolders.has(f.id);
+              const folderDocs = docsByFolder.get(f.id) || [];
+              const color = f.color || '#2563eb';
+              return (
+                <div key={f.id}>
+                  <button
+                    className={clsx(styles.sidebarFolderRow, isExpanded && styles.sidebarFolderRowOpen)}
+                    onClick={() => toggleFolder(f.id)}
+                  >
+                    <div className={styles.sidebarFolderIconBox} style={{ background: color + '12', color }}>
+                      {isExpanded ? <FolderOpen size={16} /> : <Folder size={16} />}
+                    </div>
+                    <div className={styles.sidebarFolderInfo}>
+                      <span className={styles.sidebarFolderName}>{f.nom}</span>
+                      <span className={styles.sidebarFolderMeta}>{folderDocs.length} document{folderDocs.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    {isExpanded ? <ChevronDown size={13} className={styles.sidebarChev} /> : <ChevronRight size={13} className={styles.sidebarChev} />}
+                  </button>
+                  {isExpanded && folderDocs.map(doc => (
+                    <button
+                      key={doc.id}
+                      className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
+                      onClick={() => setSelectedDocId(doc.id)}
+                    >
+                      <DocIcon type={doc.type} size={13} />
+                      <span className={styles.sidebarDocName}>{doc.nom}</span>
+                      <span className={styles.sidebarDocSize}>{doc.taille}</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
 
-      {isSearchMode ? (
-        <SearchResults count={filteredDocuments.length} query={searchQuery} onClear={handleClearSearch} />
-      ) : (
-        <>
-          <ModeSwitch navigationMode={navigationMode} onModeChange={handleModeChange} />
-          <DropZone isDragOver={isDragOver} currentFolder={currentFolder ?? null} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} onFilesSelected={handleFilesSelected} />
-        </>
-      )}
+            {/* Root docs (no folder) */}
+            {sidebarTab === 'dossiers' && rootDocs.length > 0 && (
+              <div>
+                <div className={styles.sidebarDivider} />
+                <div style={{ padding: '0.375rem 0.75rem', fontSize: '0.625rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>
+                  Sans dossier ({rootDocs.length})
+                </div>
+                {rootDocs.map(doc => (
+                  <button
+                    key={doc.id}
+                    className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
+                    onClick={() => setSelectedDocId(doc.id)}
+                  >
+                    <DocIcon type={doc.type} size={13} />
+                    <span className={styles.sidebarDocName}>{doc.nom}</span>
+                    <span className={styles.sidebarDocSize}>{doc.taille}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
-      <div className="card">
-        {navigationMode === 'folders' && <Breadcrumb currentFolderId={currentFolderId} breadcrumb={breadcrumb} onNavigate={navigateToFolder} />}
-
-        <Toolbar sortField={sortField} sortOrder={sortOrder} viewMode={viewMode} hasSearchQuery={!!searchQuery}
-          onSortFieldChange={(field) => { setSortField(field); if (field !== 'pertinence') setSortOrder('desc'); }}
-          onSortOrderToggle={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))} onViewModeChange={setViewMode} />
-
-        <ActiveFilters filters={filters} onCategoryRemove={handleCategoryFilter}
-          onDateFromClear={() => setFilters((prev) => ({ ...prev, dateFrom: '' }))}
-          onDateToClear={() => setFilters((prev) => ({ ...prev, dateTo: '' }))} onClearAll={handleClearFilters} />
-
-        {navigationMode === 'folders' && subFolders.length > 0 && (
-          <FolderGrid folders={subFolders} title={`Dossiers (${subFolders.length})`} onFolderClick={navigateToFolder} />
-        )}
-        {navigationMode === 'folders' && !currentFolderId && (
-          <FolderGrid folders={rootFolders} title="Arborescence documentaire" icon="tree" onFolderClick={navigateToFolder} />
-        )}
-
-        {showDocuments && (
-          <>
-            {navigationMode === 'folders' && currentFolderId && (
-              <button className={styles.backButton} onClick={() => navigateToFolder(currentFolder?.parentId || null)}>
-                <ArrowLeft size={16} aria-hidden="true" /> Retour
+            {/* Récents tab */}
+            {sidebarTab === 'recents' && recentDocs.map(doc => (
+              <button
+                key={doc.id}
+                className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
+                onClick={() => setSelectedDocId(doc.id)}
+              >
+                <span className={styles.catDot} style={{ background: getCatColor(doc.categorie) }} />
+                <DocIcon type={doc.type} size={13} />
+                <span className={styles.sidebarDocName}>{doc.nom}</span>
+                <span className={styles.sidebarRelDate}>{getRelativeDate(doc.dateAjout)}</span>
               </button>
-            )}
-            {navigationMode !== 'search' && filteredDocuments.length > 0 && (
-              <div className={styles.sectionTitle}><FileText size={18} aria-hidden="true" /> Documents ({filteredDocuments.length})</div>
-            )}
-            {paginatedDocuments.length > 0 && (viewMode === 'grid' ? (
-              <DocumentGrid documents={paginatedDocuments} canManageAccess={canManageAccess} onPreview={handlePreviewDocument} onLink={handleOpenLinkModal} onAccessRights={handleOpenAccessRights} />
-            ) : (
-              <DocumentList documents={paginatedDocuments} canManageAccess={canManageAccess} onPreview={handlePreviewDocument} onLink={handleOpenLinkModal} onAccessRights={handleOpenAccessRights} />
             ))}
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          </>
-        )}
 
-        {filteredDocuments.length === 0 && (navigationMode === 'search' || navigationMode === 'all' || (navigationMode === 'folders' && currentFolderId && subFolders.length === 0)) && (
-          <EmptyState isSearch={navigationMode === 'search'} />
+            {/* Favoris tab */}
+            {sidebarTab === 'favoris' && favoriteDocs.map(doc => (
+              <button
+                key={doc.id}
+                className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
+                onClick={() => setSelectedDocId(doc.id)}
+              >
+                <Star size={12} fill="#FBBF24" color="#FBBF24" />
+                <span className={styles.catDot} style={{ background: getCatColor(doc.categorie) }} />
+                <span className={styles.sidebarDocName}>{doc.nom}</span>
+              </button>
+            ))}
+
+            {/* Empty states */}
+            {sidebarTab === 'dossiers' && displayFolders.length === 0 && (
+              <div className={styles.sidebarEmpty}>Aucun dossier</div>
+            )}
+            {sidebarTab === 'recents' && recentDocs.length === 0 && (
+              <div className={styles.sidebarEmpty}>Aucun document récent</div>
+            )}
+            {sidebarTab === 'favoris' && favoriteDocs.length === 0 && (
+              <div className={styles.sidebarEmpty}>Aucun favori</div>
+            )}
+          </div>
+        </div>
+
+        {/* Detail panel */}
+        {selectedDoc ? (
+          <div className={styles.detailPanel}>
+            <div className={styles.detailHeader}>
+              <div className={styles.detailIconLg} style={{ background: catColor + '12', color: catColor }}>
+                <DocIcon type={selectedDoc.type} size={28} />
+              </div>
+              <div>
+                <h3 className={styles.detailName}>
+                  {selectedDoc.confidentialite && selectedDoc.confidentialite !== 'public' && <Lock size={14} className={styles.lockIcon} />}
+                  {selectedDoc.nom}
+                </h3>
+                <span className={styles.detailFolder}><Folder size={12} /> {folders.find(f => f.id === selectedDoc.dossierId)?.nom || 'Racine'}</span>
+              </div>
+            </div>
+
+            <div className={styles.detailBadges}>
+              <span className={styles.catBadge} style={{ color: catColor, background: catColor + '15' }}>{catLabel}</span>
+              {selectedDoc.confidentialite && selectedDoc.confidentialite !== 'public' && (
+                <span className={styles.confidBadge}><Lock size={10} /> Confidentiel</span>
+              )}
+              {(selectedDoc.tags || []).map(t => <span key={t} className={styles.tagBadge}>{t}</span>)}
+            </div>
+
+            <div className={styles.detailStatsRow}>
+              <div className={styles.detailStatCard}>
+                <span className={styles.detailStatValue}>{new Date(selectedDoc.dateAjout).toLocaleDateString('fr-FR')}</span>
+                <span className={styles.detailStatLabel}>Date d&apos;ajout</span>
+              </div>
+              <div className={styles.detailStatCard}>
+                <span className={styles.detailStatValue}>{selectedDoc.taille}</span>
+                <span className={styles.detailStatLabel}>Taille</span>
+              </div>
+              <div className={styles.detailStatCard}>
+                <span className={styles.detailStatValue}>{selectedDoc.type}</span>
+                <span className={styles.detailStatLabel}>Format</span>
+              </div>
+            </div>
+
+            <div className={styles.previewZone}>
+              <div className={styles.previewPlaceholder}>
+                <DocIcon type={selectedDoc.type} size={40} />
+                <span>Aperçu du document</span>
+              </div>
+            </div>
+
+            <div className={styles.detailActions}>
+              <button className={styles.btnPrimary} onClick={() => handlePreviewDocument(selectedDoc)}>
+                <Eye size={14} /> Ouvrir
+              </button>
+              <button className={styles.btnSecondary}><Download size={14} /> Télécharger</button>
+              <button className={styles.btnSecondary} onClick={() => handleOpenLinkModal(selectedDoc)}>
+                <Link size={14} /> Lier
+              </button>
+              {canManageAccess && (
+                <button className={styles.btnSecondary} onClick={() => handleOpenAccessRights(selectedDoc)}>
+                  <Shield size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className={styles.detailPanel}>
+            <div className={styles.emptyDetail}>
+              <FileText size={40} />
+              <p>Sélectionnez un document</p>
+            </div>
+          </div>
         )}
       </div>
 
-      <TechnicalDocumentsSection />
-
+      {/* Modals */}
       {showLinkModal && selectedDocForLink && (
         <LinkModal document={selectedDocForLink} detectedEntityType={detectedEntityType} extractedData={extractedData} onClose={handleCloseLinkModal} onCreateLink={handleCreateLink} />
       )}
@@ -197,7 +456,7 @@ export default function GEDPage() {
         />
       )}
       {showAccessRightsModal && selectedDocForAccess && (
-        <AccessRightsManager documentId={selectedDocForAccess.id} documentName={selectedDocForAccess.nom} currentConfidentiality={selectedDocForAccess.confidentialite || NiveauConfidentialite.PUBLIC} onClose={handleCloseAccessRights} />
+        <AccessRightsManager documentId={selectedDocForAccess.id} documentName={selectedDocForAccess.nom} currentConfidentiality={selectedDocForAccess.confidentialite as NiveauConfidentialite || NiveauConfidentialite.PUBLIC} onClose={handleCloseAccessRights} />
       )}
     </div>
   );

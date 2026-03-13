@@ -4,174 +4,134 @@ import {
     Download,
     Plus,
     FileText,
-    Briefcase,
-    TrendingUp,
     Activity,
-    ShieldCheck,
-    FileCheck,
-    ClipboardList
+    Clock,
+    TrendingUp,
+    CheckCircle2,
+    Euro,
+    AlertTriangle,
 } from 'lucide-react';
-import type { LogbookHeaderProps, FiltreKpi } from './types';
+import type { LogbookHeaderProps, FiltreKpi, LogbookKpis } from './types';
 import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
 /** Configuration des tuiles KPI */
 const TUILES_CONFIG: Array<{
     id: FiltreKpi;
     label: string;
-    kpiKey: keyof LogbookHeaderProps['kpis'];
+    kpiKey: keyof LogbookKpis;
     icon: React.ElementType;
-    couleur: { bg: string; color: string };
-    title: string;
+    color: string;
+    alert?: boolean;
+    format?: 'currency';
 }> = [
-    {
-        id: 'contrats',
-        label: 'Contrats actifs',
-        kpiKey: 'contratsActifs',
-        icon: Briefcase,
-        couleur: { bg: 'var(--primary-light)', color: 'var(--primary)' },
-        title: 'Filtrer les contrats actifs',
-    },
-    {
-        id: 'en_cours',
-        label: 'En cours',
-        kpiKey: 'interventionsEnCours',
-        icon: Activity,
-        couleur: { bg: 'var(--warning-light)', color: 'var(--warning)' },
-        title: 'Filtrer les interventions en cours',
-    },
-    {
-        id: 'travaux_prevus',
-        label: 'Travaux prévus',
-        kpiKey: 'travauxPrevus',
-        icon: TrendingUp,
-        couleur: { bg: 'var(--info-light)', color: 'var(--info)' },
-        title: 'Filtrer les travaux prévisionnels',
-    },
-    {
-        id: 'assurances',
-        label: 'Assurances',
-        kpiKey: 'assurancesActives',
-        icon: ShieldCheck,
-        couleur: { bg: 'var(--success-light)', color: 'var(--success)' },
-        title: 'Filtrer les assurances actives',
-    },
-    {
-        id: 'documents_valides',
-        label: 'Documents valides',
-        kpiKey: 'documentsValides',
-        icon: FileCheck,
-        couleur: { bg: 'var(--secondary-light)', color: 'var(--secondary)' },
-        title: 'Filtrer les documents valides',
-    },
-    {
-        id: 'tous',
-        label: 'Total interventions',
-        kpiKey: 'totalInterventions',
-        icon: ClipboardList,
-        couleur: { bg: '#f3e8ff', color: '#9333ea' },
-        title: 'Afficher toutes les interventions',
-    },
+    { id: 'en_cours', label: 'En cours', kpiKey: 'enCours', icon: Activity, color: '#FBBF24' },
+    { id: 'planifiees', label: 'Planifiées', kpiKey: 'planifiees', icon: Clock, color: '#60A5FA' },
+    { id: 'travaux_prevus', label: 'Travaux prévus', kpiKey: 'travauxPrevus', icon: TrendingUp, color: '#A78BFA' },
+    { id: 'travaux_votes', label: 'Travaux votés', kpiKey: 'travauxVotes', icon: CheckCircle2, color: '#34D399' },
+    { id: 'cout_annee', label: 'Coût année', kpiKey: 'coutAnnee', icon: Euro, color: '#2563eb', format: 'currency' },
+    { id: 'urgences', label: 'Urgences', kpiKey: 'urgences', icon: AlertTriangle, color: '#EF4444', alert: true },
 ];
 
-export function LogbookHeader({
-    formData,
-    kpis,
+/** Titre + boutons d'action (1ère ligne) */
+export function LogbookPageHeader({
     showExportMenu,
-    filtreActif,
     onToggleExportMenu,
     onExport,
     onNewIntervention,
-    onFiltreChange,
-}: LogbookHeaderProps) {
+}: Pick<LogbookHeaderProps, 'showExportMenu' | 'onToggleExportMenu' | 'onExport' | 'onNewIntervention'>) {
     return (
         <div className={styles.pageHeader}>
-            <div className={styles.headerContent}>
-                <div className={styles.headerMain}>
-                    <div className={styles.titleRow}>
-                        <h1 className={styles.title}>Carnet d&apos;entretien</h1>
-                        <span className={styles.headerBadge}>Obligatoire</span>
-                    </div>
-                    <p className={styles.subtitle}>
-                        {formData.nom} - {formData.adresse}, {formData.codePostal} {formData.ville}
-                    </p>
-                </div>
-                <div className={styles.headerActions}>
-                    <div className={styles.exportDropdown}>
-                        <button
-                            className={styles.exportBtn}
-                            onClick={onToggleExportMenu}
-                        >
-                            <Download size={16} aria-hidden="true" /> Exporter
-                        </button>
-                        {showExportMenu && (
-                            <div className={styles.exportMenu}>
-                                <button onClick={() => onExport('PDF_COMPLET')}>
-                                    <FileText size={16} aria-hidden="true" /> PDF Complet
-                                </button>
-                                <button onClick={() => onExport('EXCEL')}>
-                                    <FileText size={16} aria-hidden="true" /> Excel (interventions)
-                                </button>
-                                <button onClick={() => onExport('PDF_ACQUEREURS')}>
-                                    <FileText size={16} aria-hidden="true" /> PDF Acquéreurs
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                    <button
-                        className={styles.primaryBtn}
-                        onClick={onNewIntervention}
-                    >
-                        <Plus size={16} aria-hidden="true" /> Nouvelle intervention
+            <h1 className={styles.pageTitle}>Carnet d&apos;entretien</h1>
+            <div className={styles.pageActions}>
+                <div className={styles.exportDropdown}>
+                    <button className={styles.btnSecondary} onClick={onToggleExportMenu}>
+                        <Download size={15} aria-hidden="true" /> Exporter
                     </button>
+                    {showExportMenu && (
+                        <div className={styles.exportMenu}>
+                            <button onClick={() => onExport('PDF_COMPLET')}>
+                                <FileText size={16} aria-hidden="true" /> PDF Complet
+                            </button>
+                            <button onClick={() => onExport('EXCEL')}>
+                                <FileText size={16} aria-hidden="true" /> Excel (interventions)
+                            </button>
+                            <button onClick={() => onExport('PDF_ACQUEREURS')}>
+                                <FileText size={16} aria-hidden="true" /> PDF Acquéreurs
+                            </button>
+                        </div>
+                    )}
                 </div>
-            </div>
-
-            {/* Tuiles KPI interactives */}
-            <div className={styles.kpiGrid} role="group" aria-label="Filtres du carnet">
-                {TUILES_CONFIG.map((tuile) => {
-                    const estActif = filtreActif === tuile.id;
-                    const Icon = tuile.icon;
-                    const valeur = kpis[tuile.kpiKey];
-
-                    return (
-                        <button
-                            key={tuile.id}
-                            type="button"
-                            className={`${styles.kpiCardClickable} ${estActif ? styles.kpiCardActive : ''}`}
-                            onClick={() => onFiltreChange(tuile.id)}
-                            title={tuile.title}
-                            aria-pressed={estActif}
-                            aria-label={`${tuile.label} : ${valeur} éléments`}
-                        >
-                            {/* Indicateur actif */}
-                            {estActif && (
-                                <span
-                                    className={styles.kpiActiveIndicator}
-                                    style={{ backgroundColor: tuile.couleur.color }}
-                                />
-                            )}
-
-                            <div
-                                className={styles.kpiIcon}
-                                style={{ background: tuile.couleur.bg, color: tuile.couleur.color }}
-                            >
-                                <Icon size={20} aria-hidden="true" />
-                            </div>
-                            <div className={styles.kpiContent}>
-                                <span className={styles.kpiValue}>{valeur}</span>
-                                <span className={styles.kpiLabel}>{tuile.label}</span>
-                            </div>
-
-                            {/* Badge alerte pour contrats à renouveler */}
-                            {tuile.id === 'contrats' && kpis.contratsARenouveler > 0 && (
-                                <span className={styles.kpiAlert}>
-                                    {kpis.contratsARenouveler} à renouveler
-                                </span>
-                            )}
-                        </button>
-                    );
-                })}
+                <button className={styles.btnPrimary} onClick={onNewIntervention}>
+                    <Plus size={15} aria-hidden="true" /> Nouvelle intervention
+                </button>
             </div>
         </div>
+    );
+}
+
+/** Barre de 6 KPIs (ligne séparée) */
+export function LogbookKpiBar({
+    kpis,
+    filtreActif,
+    onFiltreChange,
+}: Pick<LogbookHeaderProps, 'kpis' | 'filtreActif' | 'onFiltreChange'>) {
+    return (
+        <div className={styles.kpiGrid} role="group" aria-label="Filtres du carnet">
+            {TUILES_CONFIG.map((tuile) => {
+                const estActif = filtreActif === tuile.id;
+                const Icon = tuile.icon;
+                const rawValue = kpis[tuile.kpiKey];
+                const displayValue = tuile.format === 'currency'
+                    ? `${rawValue.toLocaleString('fr-FR')} €`
+                    : rawValue;
+                const hasAlert = tuile.alert && rawValue > 0;
+
+                return (
+                    <button
+                        key={tuile.id}
+                        type="button"
+                        className={`${styles.kpiCardClickable} ${estActif ? styles.kpiCardActive : ''} ${hasAlert ? styles.kpiCardAlert : ''}`}
+                        onClick={() => onFiltreChange(tuile.id)}
+                        title={tuile.label}
+                        aria-pressed={estActif}
+                        aria-label={`${tuile.label} : ${displayValue}`}
+                        style={estActif ? { borderColor: tuile.color } : undefined}
+                    >
+                        <div
+                            className={styles.kpiIcon}
+                            style={{ background: tuile.color + '15', color: tuile.color }}
+                        >
+                            <Icon size={18} aria-hidden="true" />
+                        </div>
+                        <div className={styles.kpiContent}>
+                            <span className={styles.kpiValue}>{displayValue}</span>
+                            <span className={styles.kpiLabel}>{tuile.label}</span>
+                        </div>
+                        {hasAlert && (
+                            <span className={styles.kpiPulse} style={{ background: tuile.color }} />
+                        )}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+/** Legacy export — rend les deux sections */
+export function LogbookHeader(props: LogbookHeaderProps) {
+    return (
+        <>
+            <LogbookPageHeader
+                showExportMenu={props.showExportMenu}
+                onToggleExportMenu={props.onToggleExportMenu}
+                onExport={props.onExport}
+                onNewIntervention={props.onNewIntervention}
+            />
+            <LogbookKpiBar
+                kpis={props.kpis}
+                filtreActif={props.filtreActif}
+                onFiltreChange={props.onFiltreChange}
+            />
+        </>
     );
 }

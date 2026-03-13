@@ -1,11 +1,11 @@
 'use client';
 
 import {
-    LogbookHeader,
+    LogbookPageHeader,
+    LogbookKpiBar,
     LogbookInfoSection,
     InterventionsTab,
     TravauxTab,
-    DocumentsTab,
 } from '@/components/features/maintenance/Logbook';
 import {
     useLogbookPage,
@@ -22,7 +22,6 @@ export default function LogbookPage() {
         infoSection,
         tabs,
         interventionsTab,
-        documentsTab,
         modals,
         modalsHandlers,
         toast,
@@ -32,17 +31,15 @@ export default function LogbookPage() {
         <div className="container">
             <LogbookBreadcrumb config={breadcrumb} />
 
-            <LogbookHeader
-                formData={header.formData}
-                kpis={header.kpis}
+            {/* Titre + Actions */}
+            <LogbookPageHeader
                 showExportMenu={header.showExportMenu}
-                filtreActif={header.filtreActif}
                 onToggleExportMenu={header.handlers.onToggleExportMenu}
                 onExport={header.handlers.onExport}
                 onNewIntervention={header.handlers.onNewIntervention}
-                onFiltreChange={header.handlers.onFiltreChange}
             />
 
+            {/* Info copropriété collapsible */}
             <LogbookInfoSection
                 formData={infoSection.formData}
                 coproprieteInfo={infoSection.coproprieteInfo}
@@ -56,14 +53,22 @@ export default function LogbookPage() {
                 onSelectEquipement={infoSection.handlers.onSelectEquipement}
             />
 
+            {/* KPI Bar — 6 tuiles */}
+            <LogbookKpiBar
+                kpis={header.kpis}
+                filtreActif={header.filtreActif}
+                onFiltreChange={header.handlers.onFiltreChange}
+            />
+
+            {/* Tabs underline */}
             <LogbookTabs
                 activeTab={tabs.activeTab}
                 onTabChange={tabs.setActiveTab}
                 interventionsCount={tabs.filteredInterventions.length}
                 travauxCount={tabs.travaux.length}
-                documentsCount={tabs.documents.length}
             />
 
+            {/* Contenu onglet actif */}
             {tabs.activeTab === 'interventions' && (
                 <InterventionsTab
                     interventions={interventionsTab.interventions}
@@ -91,22 +96,6 @@ export default function LogbookPage() {
             )}
 
             {tabs.activeTab === 'travaux' && <TravauxTab travaux={tabs.travaux} />}
-
-            {tabs.activeTab === 'documents' && (
-                <DocumentsTab
-                    documents={documentsTab.documents}
-                    filteredDocuments={documentsTab.filteredDocuments}
-                    documentsByCategory={documentsTab.documentsByCategory}
-                    documentStats={documentsTab.documentStats}
-                    searchDocuments={documentsTab.searchDocuments}
-                    categorieDocFilter={documentsTab.categorieDocFilter}
-                    expandedCategories={documentsTab.expandedCategories}
-                    onSearchChange={documentsTab.handlers.onSearchChange}
-                    onCategorieFilterChange={documentsTab.handlers.onCategorieFilterChange}
-                    onToggleCategory={documentsTab.handlers.onToggleCategory}
-                    onSelectDocument={documentsTab.handlers.onSelectDocument}
-                />
-            )}
 
             <LogbookModals modals={modals} handlers={modalsHandlers} />
 

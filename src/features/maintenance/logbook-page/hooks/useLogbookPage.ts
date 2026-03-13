@@ -9,9 +9,7 @@ import type {
     InterventionView,
     ExportFormat,
     StatsCategorie,
-    DocumentStats,
     LogbookKpis,
-    DocumentsByCategory,
     FiltreKpi,
     ToastCreationProps,
 } from '@/components/features/maintenance/Logbook/types';
@@ -64,7 +62,6 @@ export interface TabsState {
     setActiveTab: (tab: ActiveTab) => void;
     filteredInterventions: Intervention[];
     travaux: TravauxPrevisionnel[];
-    documents: DocumentTechnique[];
 }
 
 export interface InterventionsTabHandlers {
@@ -95,23 +92,6 @@ export interface InterventionsTabState {
     handlers: InterventionsTabHandlers;
 }
 
-export interface DocumentsTabHandlers {
-    onSearchChange: (value: string) => void;
-    onCategorieFilterChange: (value: string) => void;
-    onToggleCategory: (category: string) => void;
-    onSelectDocument: (doc: DocumentTechnique) => void;
-}
-
-export interface DocumentsTabState {
-    documents: DocumentTechnique[];
-    filteredDocuments: DocumentTechnique[];
-    documentsByCategory: DocumentsByCategory;
-    documentStats: DocumentStats;
-    searchDocuments: string;
-    categorieDocFilter: string;
-    expandedCategories: string[];
-    handlers: DocumentsTabHandlers;
-}
 
 export interface ModalsState {
     selectedEquipement: string | null;
@@ -174,9 +154,6 @@ export interface UseLogbookPageReturn {
 
     // Interventions tab
     interventionsTab: InterventionsTabState;
-
-    // Documents tab
-    documentsTab: DocumentsTabState;
 
     // Modals
     modals: ModalsState;
@@ -242,7 +219,6 @@ export function useLogbookPage(): UseLogbookPageReturn {
         setActiveTab: logbook.setActiveTab,
         filteredInterventions: logbook.filteredInterventions,
         travaux: logbook.travaux,
-        documents: logbook.documents,
     };
 
     const interventionsTab: InterventionsTabState = {
@@ -268,22 +244,6 @@ export function useLogbookPage(): UseLogbookPageReturn {
             onEquipementFilterChange: logbook.setEquipementFilter,
             onAnneeFilterChange: logbook.setAnneeFilter,
             onEditIntervention: logbook.handleEditIntervention,
-        },
-    };
-
-    const documentsTab: DocumentsTabState = {
-        documents: logbook.documents,
-        filteredDocuments: logbook.filteredDocuments,
-        documentsByCategory: logbook.documentsByCategory,
-        documentStats: logbook.documentStats,
-        searchDocuments: logbook.searchDocuments,
-        categorieDocFilter: logbook.categorieDocFilter,
-        expandedCategories: logbook.expandedCategories,
-        handlers: {
-            onSearchChange: logbook.setSearchDocuments,
-            onCategorieFilterChange: logbook.setCategorieDocFilter,
-            onToggleCategory: logbook.toggleCategory,
-            onSelectDocument: logbook.setSelectedDocument,
         },
     };
 
@@ -326,7 +286,6 @@ export function useLogbookPage(): UseLogbookPageReturn {
         contratsSection,
         tabs,
         interventionsTab,
-        documentsTab,
         modals,
         modalsHandlers,
         toast,

@@ -21,65 +21,74 @@
     color: var(--primary);
 }
 
-/* Page Header */
+/* Page Header — flat row (titre + actions) */
 .pageHeader {
-    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-secondary) 100%);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--border);
-}
-
-.headerContent {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.headerMain {
-    flex: 1;
-    min-width: 280px;
+.pageTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
 }
 
-.titleRow {
+.pageActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btnSecondary {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-}
-
-.title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: 0;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: transparent;
     color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
 }
 
-.headerBadge {
-    padding: 0.25rem 0.75rem;
+.btnSecondary:hover {
+    background: var(--surface-hover);
+}
+
+.btnPrimary {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
     background: var(--primary);
     color: white;
-    border-radius: 1rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
 }
 
-.subtitle {
-    color: var(--text-secondary);
-    margin: 0;
-    font-size: 0.9375rem;
+.btnPrimary:hover {
+    background: var(--primary-hover);
 }
 
-.headerActions {
-    display: flex;
-    gap: 0.75rem;
-    flex-shrink: 0;
-}
+/* Legacy — compat with old header structure */
+.headerContent { display: none; }
+.headerMain { display: none; }
+.titleRow { display: none; }
+.title { display: none; }
+.headerBadge { display: none; }
+.subtitle { display: none; }
+.headerActions { display: none; }
 
 .exportBtn {
     display: flex;
@@ -183,32 +192,40 @@
 /* KPI Grid */
 .kpiGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+    .kpiGrid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+    .kpiGrid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .kpiCard {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    background: var(--card-bg);
-    border-radius: 0.75rem;
-    border: 1px solid var(--border);
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    background: var(--surface);
+    border-radius: 0.625rem;
+    border: 1.5px solid var(--border-light);
     position: relative;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .kpiCard:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: var(--border);
+    background: var(--surface-hover);
 }
 
 .kpiIcon {
-    width: 40px;
-    height: 40px;
-    border-radius: 0.625rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,35 +235,23 @@
 .kpiContent {
     display: flex;
     flex-direction: column;
+    gap: 1px;
     min-width: 0;
 }
 
 .kpiValue {
-    font-size: 1.375rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1;
 }
 
 .kpiLabel {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.kpiAlert {
-    position: absolute;
-    top: -0.375rem;
-    right: -0.375rem;
-    padding: 0.125rem 0.5rem;
-    background: var(--warning);
-    color: white;
-    border-radius: 1rem;
-    font-size: 0.625rem;
-    font-weight: 600;
-    white-space: nowrap;
 }
 
 /* Sections */
@@ -834,44 +839,56 @@
 }
 
 /* Tabs */
+/* Tabs — underline style */
 .tabs {
     display: flex;
-    gap: 0.375rem;
-    margin-bottom: 1.5rem;
-    padding: 0.375rem;
-    background: var(--bg-secondary);
-    border-radius: 0.75rem;
-    width: fit-content;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 0;
 }
 
 .tab {
-    padding: 0.75rem 1.25rem;
-    background: transparent;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
+    gap: 0.4375rem;
+    padding: 0.625rem 1.125rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text-tertiary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: -1px;
 }
 
 .tab:hover {
     color: var(--text-primary);
-    background: var(--hover-bg);
 }
 
 .activeTab {
-    background: var(--card-bg);
     color: var(--primary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-bottom-color: var(--primary);
 }
 
 .activeTab svg {
     color: var(--primary);
+}
+
+.tabCount {
+    font-size: 0.6875rem;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: var(--border-light);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.activeTab .tabCount {
+    background: var(--primary-light);
+    color: var(--secondary);
 }
 
 /* Sub-tabs pour Interventions */
@@ -3122,81 +3139,265 @@
 /* ================================================
    KPI Cards Cliquables
    ================================================ */
+/* KPI Cards — preview style */
 .kpiCardClickable {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    background: var(--card-bg);
-    border-radius: 0.75rem;
-    border: 1px solid var(--border);
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    background: var(--surface);
+    border-radius: 0.625rem;
+    border: 1.5px solid var(--border-light);
     position: relative;
     transition: all 0.2s;
     cursor: pointer;
 }
 
 .kpiCardClickable:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.kpiCardClickable::after {
-    content: '';
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    border-right: 2px solid var(--text-secondary);
-    border-bottom: 2px solid var(--text-secondary);
-    transform: translateY(-50%) rotate(-45deg);
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.kpiCardClickable:hover::after {
-    opacity: 1;
+    border-color: var(--border);
+    background: var(--surface-hover);
 }
 
 /* État actif des tuiles KPI */
 .kpiCardActive {
-    border-width: 2px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-}
-
-.kpiCardActive::after {
-    display: none;
+    background: var(--surface-hover);
+    border-width: 1.5px;
 }
 
 .kpiActiveIndicator {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px var(--card-bg);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 2px var(--card-bg);
-    }
-    50% {
-        box-shadow: 0 0 0 4px var(--card-bg), 0 0 0 6px rgba(0, 0, 0, 0.1);
-    }
-    100% {
-        box-shadow: 0 0 0 2px var(--card-bg);
-    }
+    display: none;
 }
 
 .kpiCardClickable:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.kpiCardAlert {
+    position: relative;
+}
+
+.kpiPulse {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    animation: kpiPulseAnim 2s ease-in-out infinite;
+}
+
+@keyframes kpiPulseAnim {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ================================================
+   V2 — Interventions Tableau Dense
+   ================================================ */
+.v2SearchSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+}
+
+.v2SearchRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.v2SearchInput {
+    flex: 1;
+    position: relative;
+}
+
+.v2SearchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+}
+
+.v2SearchField {
+    width: 100%;
+    padding: 9px 12px 9px 36px;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-light);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.v2SearchField::placeholder {
+    color: var(--text-tertiary);
+}
+
+.v2SearchField:focus {
+    border-color: var(--primary);
+}
+
+.v2FilterChips {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.v2Chip {
+    display: flex;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.3125rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    appearance: none;
+}
+
+.v2Chip:hover {
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+.v2ResultsSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.v2ResultsBadges {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.v2ResultBadge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Table dense */
+.v2TableWrap {
+    background: var(--surface);
+    border-radius: 0.625rem;
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.v2Table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.v2Th {
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+}
+
+.v2ThRight {
+    text-align: right;
+}
+
+.v2ThActions {
+    width: 40px;
+    padding: 0.625rem 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+}
+
+.v2Tr {
+    transition: background 0.1s;
+}
+
+.v2Tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.v2Tr:not(:last-child) .v2Td {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.v2Td {
+    padding: 0.625rem 0.875rem;
+    vertical-align: middle;
+}
+
+.v2TdRight {
+    text-align: right;
+}
+
+.v2TdActions {
+    padding: 0.625rem 0.5rem;
+    vertical-align: middle;
+}
+
+.v2TableTitre {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.v2TableStatut {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.25rem;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.v2TableMeta {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.v2TableCout {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.v2TableActionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 0.375rem;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.v2TableActionBtn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.v2EmptyState {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
 }
 
 /* ================================================
