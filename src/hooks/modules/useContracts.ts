@@ -10,6 +10,7 @@ import {
     getAllContrats,
     getContratSyndic,
     loadSyndicContract,
+    loadContracts,
     addContrat,
     updateContrat,
     updateContratSyndic,
@@ -22,10 +23,11 @@ const ALL_PRESTATAIRES = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPR
 export function useContracts() {
     const { currentCoproId } = useCopro();
 
-    // Load syndic contract from Supabase on mount / copro change
+    // Load contracts from Supabase on mount / copro change
     useEffect(() => {
         if (currentCoproId) {
             loadSyndicContract(currentCoproId);
+            loadContracts(currentCoproId);
         }
     }, [currentCoproId]);
 

@@ -3,8 +3,6 @@
 import {
     LogbookHeader,
     LogbookInfoSection,
-    LogbookAssurances,
-    LogbookContrats,
     InterventionsTab,
     TravauxTab,
     DocumentsTab,
@@ -22,8 +20,6 @@ export default function LogbookPage() {
         breadcrumb,
         header,
         infoSection,
-        assurancesSection,
-        contratsSection,
         tabs,
         interventionsTab,
         documentsTab,
@@ -59,13 +55,6 @@ export default function LogbookPage() {
                 onSaveInfo={infoSection.handlers.onSaveInfo}
                 onSelectEquipement={infoSection.handlers.onSelectEquipement}
             />
-
-            <LogbookAssurances
-                assurances={assurancesSection.assurances}
-                onSelectAssurance={assurancesSection.onSelectAssurance}
-            />
-
-            <LogbookContrats contrats={contratsSection.contrats} />
 
             <LogbookTabs
                 activeTab={tabs.activeTab}

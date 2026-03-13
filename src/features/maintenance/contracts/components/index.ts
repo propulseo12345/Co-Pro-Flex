@@ -6,3 +6,7 @@ export { ContractsListSection } from './ContractsListSection';
 export { ContractsModals } from './ContractsModals';
 export { ContractsPageSections } from './ContractsPageSections';
 export { ContractsAssurancesSection } from './ContractsAssurancesSection';
+export { ContractsKpiBar } from './ContractsKpiBar';
+export { ContractsSyndicBanner } from './ContractsSyndicBanner';
+export { ContractsCostBar } from './ContractsCostBar';
+export { default as ContractsTimelineSection } from './ContractsTimelineSection';

@@ -175,7 +175,18 @@ export function useLogbook() {
             const matchesAnnee = anneeFilter === 'TOUS' || new Date(intervention.date).getFullYear().toString() === anneeFilter;
 
             return matchesSearch && matchesCategorie && matchesStatut && matchesPrestataire && matchesEquipement && matchesAnnee;
-        }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        }).sort((a, b) => {
+            const statutPriority: Record<string, number> = {
+                URGENTE: 0, URGENT: 0,
+                EN_COURS: 1,
+                PLANIFIEE: 2, PLANIFIE: 2,
+                TERMINEE: 3, TERMINE: 3,
+            };
+            const pa = statutPriority[a.statut] ?? 4;
+            const pb = statutPriority[b.statut] ?? 4;
+            if (pa !== pb) return pa - pb;
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
     }, [interventions, searchTerm, categorieFilter, statutFilter, prestataireFilter, equipementFilter, anneeFilter]);
 
     const interventionsCourantes = useMemo(() =>

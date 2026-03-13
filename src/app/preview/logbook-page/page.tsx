@@ -5,7 +5,7 @@ import {
   Activity, TrendingUp, CheckCircle2, AlertTriangle, Euro,
   Clock, Search, ChevronDown, ChevronUp, Plus, Download,
   Wrench, MoreVertical, Building2, MapPin, Layers,
-  Calendar, User, Filter, Settings,
+  Calendar, User, Filter, Settings, Phone, Mail, Shield,
 } from 'lucide-react';
 import styles from './preview.module.css';
 
@@ -78,6 +78,17 @@ const STATUT_CONFIG: Record<StatutIntervention, { label: string; color: string; 
   URGENT: { label: 'Urgent', color: '#EF4444', icon: AlertTriangle },
 };
 
+const STATUT_PRIORITY: Record<StatutIntervention, number> = {
+  URGENT: 0,
+  EN_COURS: 1,
+  PLANIFIE: 2,
+  TERMINE: 3,
+};
+
+const SORTED_INTERVENTIONS = [...MOCK_INTERVENTIONS].sort(
+  (a, b) => STATUT_PRIORITY[a.statut] - STATUT_PRIORITY[b.statut]
+);
+
 const PRIORITE_CONFIG: Record<string, { label: string; color: string }> = {
   urgence: { label: 'Urgent', color: '#EF4444' },
   planifie: { label: 'Planifié', color: '#60A5FA' },
@@ -149,40 +160,25 @@ function HeaderLine() {
       </div>
       {open && (
         <div className={styles.headerLineBody}>
-          <div className={styles.headerLineGrid}>
-            {/* COPROPRIÉTÉ */}
+          <div className={styles.headerLineGrid3}>
+            {/* COPROPRIÉTÉ + CARACTÉRISTIQUES fusionnés */}
             <div className={styles.infoBlock}>
               <div className={styles.infoBlockHeader}>
                 <span className={styles.infoBlockAccent} />
                 <span className={styles.infoBlockTitle}>Copropriété</span>
               </div>
-              <div className={styles.infoBlockContent}>
-                <h4 className={styles.infoBlockName}>Résidence Les Jardins</h4>
-                <p className={styles.infoBlockText}>25 avenue Victor Hugo</p>
-                <p className={styles.infoBlockText}>69003 Lyon</p>
-              </div>
-            </div>
-
-            {/* CARACTÉRISTIQUES */}
-            <div className={styles.infoBlock}>
-              <div className={styles.infoBlockHeader}>
-                <span className={styles.infoBlockAccent} />
-                <span className={styles.infoBlockTitle}>Caractéristiques</span>
-              </div>
-              <div className={styles.infoBlockContent}>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoRowLabel}>Année de construction:</span>
-                  <span className={styles.infoRowValue}>1992</span>
+              <div className={styles.infoCompact}>
+                <div className={styles.infoCompactRow}>
+                  <span className={styles.infoCompactLabel}>Adresse</span>
+                  <span className={styles.infoCompactValue}>25 av. Victor Hugo, 69003 Lyon</span>
                 </div>
-                <div className={styles.infoRowSep} />
-                <div className={styles.infoRow}>
-                  <span className={styles.infoRowLabel}>Nombre de bâtiments:</span>
-                  <span className={styles.infoRowValue}>2</span>
+                <div className={styles.infoCompactRow}>
+                  <span className={styles.infoCompactLabel}>Construction</span>
+                  <span className={styles.infoCompactValue}>1992</span>
                 </div>
-                <div className={styles.infoRowSep} />
-                <div className={styles.infoRow}>
-                  <span className={styles.infoRowLabel}>Nombre de lots:</span>
-                  <span className={styles.infoRowValue}>28</span>
+                <div className={styles.infoCompactRow}>
+                  <span className={styles.infoCompactLabel}>Bâtiments / Lots</span>
+                  <span className={styles.infoCompactValue}>2 bâtiments — 28 lots</span>
                 </div>
               </div>
             </div>
@@ -193,22 +189,61 @@ function HeaderLine() {
                 <span className={styles.infoBlockAccent} />
                 <span className={styles.infoBlockTitle}>Équipements principaux</span>
               </div>
-              <p className={styles.infoBlockHint}>Cliquez pour voir les contrats et interventions</p>
-              <div className={styles.equipList}>
+              <div className={styles.equipGrid}>
                 {[
-                  'Ascenseur (1 unité)',
-                  'Chaudière collective gaz',
-                  'VMC collective',
-                  'Toiture terrasse accessible',
-                  'Espaces verts (450m²)',
-                  'Portail automatique',
-                  'Interphone collectif',
+                  { name: 'Ascenseur', detail: '1 unité', color: '#5b8def' },
+                  { name: 'Chaudière', detail: 'Gaz collective', color: '#e5a63e' },
+                  { name: 'VMC', detail: 'Collective', color: '#3ecf8e' },
+                  { name: 'Toiture', detail: 'Terrasse accessible', color: '#9b8afb' },
+                  { name: 'Espaces verts', detail: '450 m²', color: '#3ecf8e' },
+                  { name: 'Portail', detail: 'Automatique', color: '#5b8def' },
+                  { name: 'Interphone', detail: 'Collectif', color: '#7b8498' },
                 ].map(eq => (
-                  <button key={eq} className={styles.equipItem}>
-                    <Settings size={14} className={styles.equipIcon} />
-                    <span>{eq}</span>
+                  <button key={eq.name} className={styles.equipChip}>
+                    <span className={styles.equipChipDot} style={{ background: eq.color }} />
+                    <span className={styles.equipChipName}>{eq.name}</span>
+                    <span className={styles.equipChipDetail}>{eq.detail}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+            {/* CONTACTS CLÉS */}
+            <div className={styles.infoBlock}>
+              <div className={styles.infoBlockHeader}>
+                <span className={styles.infoBlockAccent} />
+                <span className={styles.infoBlockTitle}>Contacts clés</span>
+              </div>
+              <div className={styles.contactList}>
+                {[
+                  { role: 'Syndic', name: 'Foncia — M. Dupont', tel: '04 72 00 11 22', email: 'dupont@foncia.fr', color: '#5b8def', icon: Building2 },
+                  { role: 'Gardien', name: 'M. Garcia', tel: '06 12 34 56 78', email: undefined, color: '#3ecf8e', icon: User },
+                  { role: 'Président CS', name: 'Mme Leroy', tel: '06 98 76 54 32', email: 'leroy@email.fr', color: '#9b8afb', icon: Shield },
+                  { role: 'Urgence Gaz', name: 'GrDF', tel: '0 800 47 33 33', email: undefined, color: '#e35d6a', icon: AlertTriangle },
+                  { role: 'Assurance', name: 'AXA — Sinistres', tel: '01 55 92 26 26', email: undefined, color: '#e5a63e', icon: Shield },
+                ].map(c => {
+                  const I = c.icon;
+                  return (
+                    <div key={c.role} className={styles.contactItem}>
+                      <div className={styles.contactItemIcon} style={{ background: c.color + '12', color: c.color }}>
+                        <I size={12} />
+                      </div>
+                      <div className={styles.contactItemInfo}>
+                        <div className={styles.contactItemRole}>{c.role}</div>
+                        <div className={styles.contactItemName}>{c.name}</div>
+                      </div>
+                      <div className={styles.contactItemActions}>
+                        <a href={`tel:${c.tel.replace(/\s/g, '')}`} className={styles.contactActionBtn} title={c.tel}>
+                          <Phone size={11} />
+                        </a>
+                        {c.email && (
+                          <a href={`mailto:${c.email}`} className={styles.contactActionBtn} title={c.email}>
+                            <Mail size={11} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -388,7 +423,7 @@ function InterventionsTableau() {
           </tr>
         </thead>
         <tbody>
-          {MOCK_INTERVENTIONS.map(i => {
+          {SORTED_INTERVENTIONS.map(i => {
             const s = STATUT_CONFIG[i.statut];
             return (
               <tr key={i.id} className={styles.tr}>
@@ -424,7 +459,7 @@ function InterventionsTableau() {
 function InterventionsCartes() {
   return (
     <div className={styles.cardsGrid}>
-      {MOCK_INTERVENTIONS.map(i => {
+      {SORTED_INTERVENTIONS.map(i => {
         const s = STATUT_CONFIG[i.statut];
         return (
           <div key={i.id} className={styles.card} style={{ borderLeftColor: s.color }}>
@@ -456,7 +491,7 @@ function InterventionsCartes() {
 function InterventionsListe() {
   return (
     <div className={styles.listWrap}>
-      {MOCK_INTERVENTIONS.map(i => {
+      {SORTED_INTERVENTIONS.map(i => {
         const s = STATUT_CONFIG[i.statut];
         const Icon = s.icon;
         return (

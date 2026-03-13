@@ -1444,3 +1444,472 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* ========================================
+   V2 — REFINED UTILITARIAN
+   ======================================== */
+
+/* KPI Row */
+.v2KpiRow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+}
+
+.v2Kpi {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+}
+
+.v2Kpi:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.v2KpiDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.v2KpiData {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.v2KpiNum {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.3px;
+    line-height: 1;
+}
+
+.v2KpiLabel {
+    font-size: 0.65rem;
+    color: var(--text-tertiary, #4a5267);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 500;
+}
+
+.v2KpiAlert {
+    border-color: rgba(227, 93, 106, 0.25);
+}
+
+.v2KpiAlert .v2KpiDot {
+    box-shadow: 0 0 0 3px rgba(227, 93, 106, 0.15);
+}
+
+/* Syndic Strip */
+.v2Syndic {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6875rem 1rem;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid #5b8def;
+    margin-bottom: 0.875rem;
+}
+
+.v2SyndicAvatar {
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 0.5rem;
+    background: rgba(91, 141, 239, 0.1);
+    color: #5b8def;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.v2SyndicBody {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.v2SyndicName {
+    font-size: 0.84375rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.v2SyndicMeta {
+    display: flex;
+    gap: 0.875rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.v2SyndicMeta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.v2SyndicBadgeActif {
+    font-size: 0.65625rem;
+    font-weight: 600;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.25rem;
+    background: rgba(62, 207, 142, 0.1);
+    color: #3ecf8e;
+    letter-spacing: 0.2px;
+}
+
+.v2SyndicBadgeWarning {
+    font-size: 0.65625rem;
+    font-weight: 600;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.25rem;
+    background: rgba(229, 166, 62, 0.12);
+    color: #e5a63e;
+    letter-spacing: 0.2px;
+}
+
+.v2SyndicBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.625rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.71875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.v2SyndicBtn:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+    color: var(--text-main);
+}
+
+/* Cost Strip */
+.v2CostStrip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+}
+
+.v2CostCell {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.v2CostIcon {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.v2CostData {
+    display: flex;
+    flex-direction: column;
+}
+
+.v2CostLabel {
+    font-size: 0.65625rem;
+    color: var(--text-tertiary, #4a5267);
+    font-weight: 500;
+}
+
+.v2CostAmount {
+    font-size: 0.84375rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.3px;
+}
+
+/* List Panel */
+.v2ListPanel {
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.v2ListHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 0.75rem;
+}
+
+.v2ListTitle {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.v2ListCount {
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: var(--bg-secondary, rgba(255, 255, 255, 0.06));
+    color: var(--text-tertiary, #4a5267);
+}
+
+.v2Filters {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.v2SearchBox {
+    position: relative;
+    max-width: 12.5rem;
+}
+
+.v2SearchBox svg {
+    position: absolute;
+    left: 0.5625rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary, #4a5267);
+}
+
+.v2SearchBox input {
+    width: 100%;
+    padding: 0.375rem 0.625rem 0.375rem 1.875rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-main, #0c0e14);
+    color: var(--text-main);
+    font-size: 0.75rem;
+    font-family: inherit;
+    transition: border-color 0.15s;
+}
+
+.v2SearchBox input::placeholder {
+    color: var(--text-tertiary, #4a5267);
+}
+
+.v2SearchBox input:focus {
+    outline: none;
+    border-color: #5b8def;
+}
+
+.v2FilterChip {
+    padding: 0.3125rem 0.625rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-main, #0c0e14);
+    color: var(--text-secondary);
+    font-size: 0.71875rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    appearance: none;
+}
+
+.v2FilterChip:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* List Body */
+.v2ListBody {
+    display: flex;
+    flex-direction: column;
+}
+
+.v2SectionLabel {
+    padding: 0.5rem 1rem 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-tertiary, #4a5267);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: var(--surface);
+}
+
+/* Contract Rows */
+.v2Row {
+    display: grid;
+    grid-template-columns: 3px 1fr auto auto auto auto;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.v2Row:last-child {
+    border-bottom: none;
+}
+
+.v2Row:hover {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.v2RowExpired {
+    composes: v2Row;
+    background: rgba(227, 93, 106, 0.03);
+}
+
+.v2RowExpired:hover {
+    background: rgba(227, 93, 106, 0.06);
+}
+
+.v2RowIndicator {
+    width: 3px;
+    align-self: stretch;
+    border-radius: 0 2px 2px 0;
+}
+
+.v2RowMain {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.6875rem 0.875rem;
+    min-width: 0;
+}
+
+.v2RowTitle {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--text-main);
+}
+
+.v2RowSub {
+    font-size: 0.71875rem;
+    color: var(--text-tertiary, #4a5267);
+}
+
+.v2RowBadge {
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.65625rem;
+    font-weight: 600;
+    letter-spacing: 0.15px;
+    white-space: nowrap;
+}
+
+.v2RowDate {
+    padding: 0 0.875rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 5.625rem;
+}
+
+.v2RowAmount {
+    padding: 0 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 6.25rem;
+    letter-spacing: -0.2px;
+    color: var(--text-main);
+}
+
+.v2RowAmountZero {
+    composes: v2RowAmount;
+    color: var(--text-tertiary, #4a5267);
+    font-weight: 400;
+}
+
+.v2RowActions {
+    padding: 0 0.5rem 0 0;
+    flex-shrink: 0;
+}
+
+/* Regulatory Badge */
+.v2ReglBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.59375rem;
+    font-weight: 600;
+    background: rgba(155, 138, 251, 0.1);
+    color: #9b8afb;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+}
+
+/* Tacite Indicator */
+.v2Tacite {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--text-tertiary, #4a5267);
+    font-size: 0.6875rem;
+}
+
+/* Responsive V2 */
+@media (max-width: 768px) {
+    .v2KpiRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .v2CostStrip {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .v2Syndic {
+        flex-wrap: wrap;
+    }
+
+    .v2SyndicBody {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .v2ListHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .v2Row {
+        grid-template-columns: 3px 1fr auto;
+    }
+
+    .v2RowDate {
+        display: none;
+    }
+
+    .v2RowActions {
+        display: none;
+    }
+}

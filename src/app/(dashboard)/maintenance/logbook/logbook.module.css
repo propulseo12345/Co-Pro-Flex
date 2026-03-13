@@ -3439,3 +3439,289 @@
 .modalActions .btn {
     min-width: 100px;
 }
+
+/* ========================================
+   V2 — INFO SECTION COMPACT
+   ======================================== */
+
+.v2InfoSection {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+/* Bar résumé */
+.v2InfoBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.v2InfoBarLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.v2InfoBarIcon {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.v2InfoBarName {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.v2InfoBarSep {
+    color: var(--text-tertiary);
+}
+
+.v2InfoBarDetail {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.v2InfoBarActions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.v2InfoBarToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.v2InfoBarToggle:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+    color: var(--text-main);
+}
+
+/* Body dépliable */
+.v2InfoBody {
+    padding: 0 0.75rem 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.v2InfoGrid3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.625rem;
+    padding-top: 0.625rem;
+}
+
+.v2InfoBlock {
+    background: var(--bg-secondary, rgba(0, 0, 0, 0.15));
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+}
+
+.v2InfoBlockHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.v2InfoBlockAccent {
+    width: 3px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--primary);
+}
+
+.v2InfoBlockTitle {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Copro compact rows */
+.v2InfoCompact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.v2InfoCompactRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.1875rem 0;
+}
+
+.v2InfoCompactLabel {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+}
+
+.v2InfoCompactValue {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+/* Equipements chips */
+.v2EquipGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3125rem;
+}
+
+.v2EquipChip {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    padding: 0.4375rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-main);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.12s;
+    text-align: left;
+    font-family: inherit;
+}
+
+.v2EquipChip:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.v2EquipDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.v2EquipName {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Contacts compact */
+.v2ContactList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3125rem;
+}
+
+.v2ContactItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    transition: all 0.12s;
+}
+
+.v2ContactItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.v2ContactIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.3125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.v2ContactInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.v2ContactRole {
+    font-size: 0.5625rem;
+    color: var(--text-tertiary, #4a5267);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.v2ContactName {
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    color: var(--text-main);
+}
+
+.v2ContactActions {
+    display: flex;
+    gap: 0.1875rem;
+    flex-shrink: 0;
+}
+
+.v2ContactBtn {
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 0.25rem;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary, #475569);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+    text-decoration: none;
+}
+
+.v2ContactBtn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}
+
+/* Responsive V2 info */
+@media (max-width: 900px) {
+    .v2InfoGrid3 {
+        grid-template-columns: 1fr;
+    }
+
+    .v2InfoBarLeft {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .v2EquipGrid,
+    .v2ContactList {
+        grid-template-columns: 1fr;
+    }
+}

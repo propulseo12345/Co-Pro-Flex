@@ -212,41 +212,73 @@
 
 /* Header line — panneau détails */
 .headerLineBody {
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .headerLineGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  padding-top: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.headerLineGrid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+/* Compact info rows (copro fusionné) */
+.infoCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoCompactRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.infoCompactLabel {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.infoCompactValue {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
 }
 
 /* Info blocks (V1 style) */
 .infoBlock {
   background: #111420;
   border-radius: 10px;
-  padding: 18px;
+  padding: 12px 14px;
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .infoBlockHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .infoBlockAccent {
   width: 3px;
-  height: 16px;
+  height: 12px;
   border-radius: 2px;
   background: #2563eb;
 }
 
 .infoBlockTitle {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   color: #2563eb;
   text-transform: uppercase;
@@ -260,17 +292,17 @@
 }
 
 .infoBlockName {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #f1f5f9;
-  margin: 0 0 6px 0;
+  margin: 0 0 2px 0;
 }
 
 .infoBlockText {
-  font-size: 14px;
+  font-size: 12px;
   color: #94a3b8;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .infoBlockHint {
@@ -285,16 +317,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 .infoRowLabel {
-  font-size: 13px;
+  font-size: 11.5px;
   color: #8892a4;
 }
 
 .infoRowValue {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: #f1f5f9;
 }
@@ -318,29 +350,141 @@
   gap: 6px;
 }
 
-.equipItem {
+.equipGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.equipChip {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: left;
+  font-family: inherit;
+}
+
+.equipChip:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.equipChipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.equipChipName {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.equipChipDetail {
+  font-size: 10.5px;
+  color: #4a5267;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ============ CONTACTS BLOCK ============ */
+.contactList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 6px 8px;
   border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.12s;
+  cursor: default;
+}
+
+.contactItem:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.contactItemIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contactItemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.contactItemRole {
+  font-size: 9px;
+  color: #4a5267;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.contactItemName {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.contactItemActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.contactActionBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
   border: none;
   background: transparent;
-  color: #e2e8f0;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: left;
-}
-
-.equipItem:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: #60A5FA;
-}
-
-.equipIcon {
   color: #475569;
-  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+
+.contactActionBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+}
+
+.contactActionBtnUrgence {
+  composes: contactActionBtn;
+}
+
+.contactActionBtnUrgence:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
 }
 
 /* ============ HEADER — RÉTRACTABLE (C) ============ */

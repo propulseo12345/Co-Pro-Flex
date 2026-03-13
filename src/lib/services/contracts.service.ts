@@ -165,6 +165,67 @@ export function deleteContrat(id: string): void {
 }
 
 /**
+ * Load all non-syndic contracts from Supabase for a given copro
+ */
+export async function loadContracts(coproId: string): Promise<void> {
+    const supabase = getSupabase();
+
+    const { data, error } = await supabase
+        .from('contracts')
+        .select('id, contract_number, contract_type, title, description, start_date, end_date, annual_amount, status, tacit_renewal, notice_months, is_regulatory, provider_id, notes, providers(name)')
+        .eq('copro_id', coproId)
+        .neq('contract_type', 'syndic')
+        .order('created_at', { ascending: false });
+
+    if (error || !data) {
+        contratsState = [];
+        notifyListeners();
+        return;
+    }
+
+    // Map DB → TypeContrat (uppercase)
+    const typeMap: Record<string, string> = {
+        ascenseur: 'ASCENSEUR', chauffage: 'CHAUFFAGE', nettoyage: 'MENAGE',
+        menage: 'MENAGE', espaces_verts: 'ESPACES_VERTS', securite: 'AUTRE',
+        assurance: 'ASSURANCE', eau: 'EAU', electricite: 'ELECTRICITE',
+        toiture: 'TOITURE', facade: 'FACADE', interphone: 'INTERPHONE',
+        portail: 'PORTAIL', juridique: 'JURIDIQUE', maintenance: 'AUTRE', autre: 'AUTRE',
+    };
+
+    // Map DB status → StatutContratLegacy
+    const statusMap: Record<string, string> = {
+        draft: 'BROUILLON', active: 'ACTIF', to_renew: 'A_RENOUVELER',
+        expired: 'EXPIRE', terminated: 'RESILIE', archived: 'ARCHIVE',
+    };
+
+    contratsState = data.map((row) => {
+        const rawProvider = row.providers as unknown;
+        const provider = Array.isArray(rawProvider) ? rawProvider[0] as { name: string } | undefined : rawProvider as { name: string } | null;
+
+        return {
+            id: row.id,
+            nom: row.title,
+            prestataireId: row.provider_id,
+            fournisseur: provider?.name || '',
+            type: (typeMap[row.contract_type] || 'AUTRE') as import('@/types').TypeContrat,
+            statut: (statusMap[row.status] || 'ACTIF') as ContratDetaille['statut'],
+            dateDebut: row.start_date,
+            dateFin: row.end_date,
+            coutAnnuel: parseFloat(row.annual_amount) || 0,
+            description: row.description || '',
+            numeroContrat: row.contract_number || undefined,
+            taciteReconduction: row.tacit_renewal,
+            delaiResiliation: row.notice_months ? row.notice_months * 30 : undefined,
+            estReglementaire: row.is_regulatory,
+            interventionIds: [],
+            pieceJointes: [],
+        } as import('@/types').ContratDetaille;
+    });
+
+    notifyListeners();
+}
+
+/**
  * Load syndic contract from Supabase for a given copro
  */
 export async function loadSyndicContract(coproId: string): Promise<void> {
