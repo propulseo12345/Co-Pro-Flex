@@ -3,7 +3,6 @@
 import { use, Suspense } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { Toast } from '../../../../../features/maintenance/shared/components';
 import {
     AddInterventionModal,
     EditProviderModal,
@@ -22,8 +21,6 @@ import styles from './provider-detail.module.css';
 function ProviderDetailContent({ id }: { id: string }) {
     const {
         prestataire,
-        toast,
-        hideToast,
         showAddIntervention,
         setShowAddIntervention,
         showEditModal,
@@ -56,10 +53,6 @@ function ProviderDetailContent({ id }: { id: string }) {
 
     return (
         <div className="container">
-            {toast && (
-                <Toast message={toast.message} type={toast.type} onClose={hideToast} />
-            )}
-
             <Link href={backLink} className={styles.backLink}>
                 <ArrowLeft size={16} aria-hidden="true" /> Retour aux prestataires
             </Link>

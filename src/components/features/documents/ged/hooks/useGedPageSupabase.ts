@@ -510,6 +510,90 @@ export function useGedPageSupabase() {
   }, []);
 
   // ============================================================================
+  // FOLDER CRUD
+  // ============================================================================
+
+  const refreshData = useCallback(async () => {
+    if (!currentCoproId) return;
+    try {
+      const [docsData, foldersData, statsData] = await Promise.all([
+        documentsApi.getDocuments(currentCoproId),
+        documentsApi.getFolders(currentCoproId),
+        documentsApi.getDocumentStats(currentCoproId),
+      ]);
+      setDocuments(docsData);
+      setFolders(foldersData);
+      setStats(statsData);
+    } catch (err) {
+      console.error('Error refreshing GED data:', err);
+    }
+  }, [currentCoproId]);
+
+  const handleCreateFolder = useCallback(async (name: string, parentId?: string | null) => {
+    if (!currentCoproId || !name.trim()) return;
+    try {
+      const maxOrder = normalizedFolders
+        .filter(f => f.parentId === (parentId || null))
+        .reduce((max, f) => Math.max(max, f.ordre), 0);
+
+      await documentsApi.createFolder({
+        copro_id: currentCoproId,
+        name: name.trim(),
+        parent_id: parentId || null,
+        icon: 'Folder',
+        color: '#2563eb',
+        sort_order: maxOrder + 1,
+        is_system: false,
+      });
+      await refreshData();
+    } catch (err) {
+      console.error('Error creating folder:', err);
+      throw err;
+    }
+  }, [currentCoproId, normalizedFolders, refreshData]);
+
+  const handleRenameFolder = useCallback(async (folderId: string, newName: string) => {
+    if (!newName.trim()) return;
+    try {
+      await documentsApi.updateFolder(folderId, { name: newName.trim() });
+      await refreshData();
+    } catch (err) {
+      console.error('Error renaming folder:', err);
+      throw err;
+    }
+  }, [refreshData]);
+
+  const handleDeleteFolder = useCallback(async (folderId: string) => {
+    try {
+      await documentsApi.deleteFolder(folderId);
+      await refreshData();
+    } catch (err) {
+      console.error('Error deleting folder:', err);
+      throw err;
+    }
+  }, [refreshData]);
+
+  const handleDeleteDocument = useCallback(async (docId: string) => {
+    try {
+      await documentsApi.deleteDocument(docId);
+      await refreshData();
+    } catch (err) {
+      console.error('Error deleting document:', err);
+      throw err;
+    }
+  }, [refreshData]);
+
+  const handleMoveDocument = useCallback(async (docId: string, targetFolderId: string | null) => {
+    try {
+      await documentsApi.updateDocument(docId, { folder_id: targetFolderId || undefined });
+      await refreshData();
+    } catch (err) {
+      console.error('Error moving document:', err);
+      throw err;
+    }
+  }, [refreshData]);
+
+  // ============================================================================
   // ACCESS RIGHTS
   // ============================================================================
 
@@ -594,5 +678,13 @@ export function useGedPageSupabase() {
     handleClosePreview,
     handleOpenAccessRights,
     handleCloseAccessRights,
+
+    // CRUD
+    handleCreateFolder,
+    handleRenameFolder,
+    handleDeleteFolder,
+    handleDeleteDocument,
+    handleMoveDocument,
+    refreshData,
   };
 }

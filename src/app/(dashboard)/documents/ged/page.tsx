@@ -4,15 +4,18 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   FileText, Folder, FolderOpen, Search, Upload, Download, Plus,
   ChevronDown, ChevronRight, Eye, Lock, Star, Clock, Image, File,
-  Link, Trash2, Shield, HardDrive,
+  Link, Trash2, Shield, HardDrive, Edit3, FolderPlus, MoreVertical, X,
 } from 'lucide-react';
 import clsx from 'clsx';
 import DocumentViewerModal from '@/components/ui/DocumentViewerModal/DocumentViewerModal';
 import { AccessRightsManager } from '@/components/features/documents/AccessRightsManager';
 import { NiveauConfidentialite } from '@/types/enums';
 import { useGedPageSupabase, useDocumentSearch } from '@/components/features/documents/ged/hooks';
+import * as documentsApi from '@/lib/documents/api';
+import { useCopro } from '@/providers/CoproContext';
 import { LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
 import { LinkModal } from '@/components/features/documents/ged/components';
+import { UploadDocumentModal } from '@/components/features/documents/ged/components/UploadDocumentModal';
 import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/components/features/documents/ged/domain/constants';
 import type { DocumentWithFolder, GEDFolder } from '@/components/features/documents/ged/domain/types';
 import styles from './ged.module.css';
@@ -57,7 +60,11 @@ export default function GEDPage() {
     handlePreviewDocument, handleClosePreview,
     handleOpenAccessRights, handleCloseAccessRights,
     handleFilesSelected,
+    handleCreateFolder, handleRenameFolder, handleDeleteFolder, handleDeleteDocument,
+    refreshData,
   } = hook;
+
+  const { currentCoproId } = useCopro();
 
   const searchHook = useDocumentSearch({ documents, folders });
   const { searchQuery, setSearchQuery, filters } = searchHook;
@@ -72,6 +79,17 @@ export default function GEDPage() {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [sidebarSearch, setSidebarSearch] = useState('');
+
+  // CRUD modals
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [createFolderParentId, setCreateFolderParentId] = useState<string | null>(null);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
+  const [renameFolderValue, setRenameFolderValue] = useState('');
+  const [folderMenuId, setFolderMenuId] = useState<string | null>(null);
+  const [confirmDeleteFolder, setConfirmDeleteFolder] = useState<string | null>(null);
+  const [confirmDeleteDoc, setConfirmDeleteDoc] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   // Selected document
   const selectedDoc = useMemo(() => {
@@ -163,7 +181,7 @@ export default function GEDPage() {
   // KPIs
   const kpis = [
     { label: 'Documents', value: documents.length, color: '#2563eb', icon: FileText },
-    { label: 'Dossiers', value: displayFolders.filter(f => (docsByFolder.get(f.id) || []).length > 0).length, color: '#10B981', icon: Folder },
+    { label: 'Dossiers', value: rootFolders.length, color: '#10B981', icon: Folder },
     { label: 'Actifs', value: stats?.active_count ?? '—', color: '#F59E0B', icon: Shield },
     { label: 'Stockage', value: stats?.total_size_bytes ? `${(stats.total_size_bytes / (1024 * 1024)).toFixed(1)} Mo` : '—', color: '#A78BFA', icon: HardDrive },
   ];
@@ -195,13 +213,13 @@ export default function GEDPage() {
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Mes documents</h1>
         <div className={styles.pageActions}>
+          <button className={styles.btnSecondary} onClick={() => { setCreateFolderParentId(null); setNewFolderName(''); setShowCreateFolderModal(true); }}>
+            <FolderPlus size={15} /> Nouveau dossier
+          </button>
           <button className={styles.btnSecondary}><Download size={15} /> Exporter</button>
-          <label className={styles.btnPrimary} style={{ cursor: 'pointer' }}>
+          <button className={styles.btnPrimary} onClick={() => setShowUploadModal(true)}>
             <Upload size={15} /> Importer
-            <input type="file" multiple hidden onChange={e => {
-              if (e.target.files) handleFilesSelected(e.target.files);
-            }} />
-          </label>
+          </button>
         </div>
       </div>
 
@@ -282,31 +300,82 @@ export default function GEDPage() {
               const isExpanded = expandedFolders.has(f.id);
               const folderDocs = docsByFolder.get(f.id) || [];
               const color = f.color || '#2563eb';
+              const isMenuOpen = folderMenuId === f.id;
               return (
                 <div key={f.id}>
-                  <button
-                    className={clsx(styles.sidebarFolderRow, isExpanded && styles.sidebarFolderRowOpen)}
-                    onClick={() => toggleFolder(f.id)}
-                  >
-                    <div className={styles.sidebarFolderIconBox} style={{ background: color + '12', color }}>
-                      {isExpanded ? <FolderOpen size={16} /> : <Folder size={16} />}
-                    </div>
-                    <div className={styles.sidebarFolderInfo}>
-                      <span className={styles.sidebarFolderName}>{f.nom}</span>
-                      <span className={styles.sidebarFolderMeta}>{folderDocs.length} document{folderDocs.length !== 1 ? 's' : ''}</span>
-                    </div>
-                    {isExpanded ? <ChevronDown size={13} className={styles.sidebarChev} /> : <ChevronRight size={13} className={styles.sidebarChev} />}
-                  </button>
-                  {isExpanded && folderDocs.map(doc => (
+                  <div className={styles.sidebarFolderRowWrap}>
                     <button
-                      key={doc.id}
-                      className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
-                      onClick={() => setSelectedDocId(doc.id)}
+                      className={clsx(styles.sidebarFolderRow, isExpanded && styles.sidebarFolderRowOpen)}
+                      onClick={() => toggleFolder(f.id)}
                     >
-                      <DocIcon type={doc.type} size={13} />
-                      <span className={styles.sidebarDocName}>{doc.nom}</span>
-                      <span className={styles.sidebarDocSize}>{doc.taille}</span>
+                      <div className={styles.sidebarFolderIconBox} style={{ background: color + '12', color }}>
+                        {isExpanded ? <FolderOpen size={16} /> : <Folder size={16} />}
+                      </div>
+                      <div className={styles.sidebarFolderInfo}>
+                        {renamingFolderId === f.id ? (
+                          <input
+                            className={styles.renameInput}
+                            value={renameFolderValue}
+                            onChange={e => setRenameFolderValue(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                handleRenameFolder(f.id, renameFolderValue);
+                                setRenamingFolderId(null);
+                              }
+                              if (e.key === 'Escape') setRenamingFolderId(null);
+                            }}
+                            onBlur={() => {
+                              if (renameFolderValue.trim()) handleRenameFolder(f.id, renameFolderValue);
+                              setRenamingFolderId(null);
+                            }}
+                            onClick={e => e.stopPropagation()}
+                            autoFocus
+                          />
+                        ) : (
+                          <span className={styles.sidebarFolderName}>{f.nom}</span>
+                        )}
+                        <span className={styles.sidebarFolderMeta}>{folderDocs.length} document{folderDocs.length !== 1 ? 's' : ''}</span>
+                      </div>
+                      {isExpanded ? <ChevronDown size={13} className={styles.sidebarChev} /> : <ChevronRight size={13} className={styles.sidebarChev} />}
                     </button>
+                    <button
+                      className={styles.folderMenuBtn}
+                      onClick={e => { e.stopPropagation(); setFolderMenuId(isMenuOpen ? null : f.id); }}
+                    >
+                      <MoreVertical size={14} />
+                    </button>
+                    {isMenuOpen && (
+                      <div className={styles.folderMenu}>
+                        <button onClick={() => { setRenamingFolderId(f.id); setRenameFolderValue(f.nom); setFolderMenuId(null); }}>
+                          <Edit3 size={12} /> Renommer
+                        </button>
+                        <button onClick={() => { setCreateFolderParentId(f.id); setNewFolderName(''); setShowCreateFolderModal(true); setFolderMenuId(null); }}>
+                          <FolderPlus size={12} /> Sous-dossier
+                        </button>
+                        <button className={styles.folderMenuDanger} onClick={() => { setConfirmDeleteFolder(f.id); setFolderMenuId(null); }}>
+                          <Trash2 size={12} /> Supprimer
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {isExpanded && folderDocs.map(doc => (
+                    <div key={doc.id} className={styles.sidebarDocRowWrap}>
+                      <button
+                        className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
+                        onClick={() => setSelectedDocId(doc.id)}
+                      >
+                        <DocIcon type={doc.type} size={13} />
+                        <span className={styles.sidebarDocName}>{doc.nom}</span>
+                        <span className={styles.sidebarDocSize}>{doc.taille}</span>
+                      </button>
+                      <button
+                        className={styles.docDeleteBtn}
+                        onClick={e => { e.stopPropagation(); setConfirmDeleteDoc(doc.id); }}
+                        title="Supprimer"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   ))}
                 </div>
               );
@@ -457,6 +526,123 @@ export default function GEDPage() {
       )}
       {showAccessRightsModal && selectedDocForAccess && (
         <AccessRightsManager documentId={selectedDocForAccess.id} documentName={selectedDocForAccess.nom} currentConfidentiality={selectedDocForAccess.confidentialite as NiveauConfidentialite || NiveauConfidentialite.PUBLIC} onClose={handleCloseAccessRights} />
+      )}
+
+      {/* Upload Document Modal */}
+      {showUploadModal && currentCoproId && (
+        <UploadDocumentModal
+          folders={folders}
+          onUpload={async (file, opts) => {
+            await documentsApi.uploadDocument(file, currentCoproId, opts.category, {
+              folderId: opts.folderId,
+              title: opts.title,
+              description: opts.description,
+              tags: opts.tags,
+              confidentiality: opts.confidentiality,
+            });
+            await refreshData();
+          }}
+          onCreateFolder={handleCreateFolder}
+          onClose={() => setShowUploadModal(false)}
+        />
+      )}
+
+      {/* Create Folder Modal */}
+      {showCreateFolderModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                <FolderPlus size={18} />
+                {createFolderParentId ? 'Nouveau sous-dossier' : 'Nouveau dossier'}
+              </h3>
+              <button className={styles.modalClose} onClick={() => setShowCreateFolderModal(false)}><X size={16} /></button>
+            </div>
+            <div className={styles.modalBody}>
+              <input
+                className={styles.modalInput}
+                placeholder="Nom du dossier..."
+                value={newFolderName}
+                onChange={e => setNewFolderName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && newFolderName.trim()) {
+                    handleCreateFolder(newFolderName, createFolderParentId);
+                    setShowCreateFolderModal(false);
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.btnSecondary} onClick={() => setShowCreateFolderModal(false)}>Annuler</button>
+              <button
+                className={styles.btnPrimary}
+                disabled={!newFolderName.trim()}
+                onClick={() => { handleCreateFolder(newFolderName, createFolderParentId); setShowCreateFolderModal(false); }}
+              >
+                Créer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Delete Folder */}
+      {confirmDeleteFolder && (
+        <div className={styles.modalOverlay} onClick={() => setConfirmDeleteFolder(null)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}><Trash2 size={18} color="#EF4444" /> Supprimer le dossier</h3>
+              <button className={styles.modalClose} onClick={() => setConfirmDeleteFolder(null)}><X size={16} /></button>
+            </div>
+            <div className={styles.modalBody}>
+              <p className={styles.modalText}>
+                Supprimer le dossier <strong>{folders.find(f => f.id === confirmDeleteFolder)?.nom}</strong> ?
+                Les documents qu&apos;il contient ne seront pas supprimés mais déplacés à la racine.
+              </p>
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.btnSecondary} onClick={() => setConfirmDeleteFolder(null)}>Annuler</button>
+              <button
+                className={styles.btnDanger}
+                onClick={() => { handleDeleteFolder(confirmDeleteFolder); setConfirmDeleteFolder(null); }}
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Delete Document */}
+      {confirmDeleteDoc && (
+        <div className={styles.modalOverlay} onClick={() => setConfirmDeleteDoc(null)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}><Trash2 size={18} color="#EF4444" /> Supprimer le document</h3>
+              <button className={styles.modalClose} onClick={() => setConfirmDeleteDoc(null)}><X size={16} /></button>
+            </div>
+            <div className={styles.modalBody}>
+              <p className={styles.modalText}>
+                Supprimer définitivement <strong>{documents.find(d => d.id === confirmDeleteDoc)?.nom}</strong> ?
+                Cette action est irréversible.
+              </p>
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.btnSecondary} onClick={() => setConfirmDeleteDoc(null)}>Annuler</button>
+              <button
+                className={styles.btnDanger}
+                onClick={() => {
+                  handleDeleteDocument(confirmDeleteDoc);
+                  if (selectedDocId === confirmDeleteDoc) setSelectedDocId(null);
+                  setConfirmDeleteDoc(null);
+                }}
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

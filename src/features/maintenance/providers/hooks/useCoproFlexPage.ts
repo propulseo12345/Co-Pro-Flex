@@ -4,11 +4,11 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { MOCK_PRESTATAIRES_COPROFLEX, MOCK_AVIS_COPROFLEX } from '@/data/mock';
 import { Prestataire, DomaineActivite } from '@/types';
-import { useToast } from '../../shared/hooks/useToast';
+import { useToast } from '@/providers/ToastProvider';
 
 export function useCoproFlexPage() {
     const router = useRouter();
-    const { toast, showToast, hideToast } = useToast();
+    const { showToast } = useToast();
 
     const [prestataires] = useState<Prestataire[]>(MOCK_PRESTATAIRES_COPROFLEX);
     const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +58,7 @@ export function useCoproFlexPage() {
     const handleDevisSubmit = () => {
         setShowDevisModal(false);
         setSelectedIds([]);
-        showToast('Demande de devis envoyée avec succès !', 'success');
+        showToast({ type: 'success', message: 'Demande de devis envoyée avec succès !' });
     };
 
     const getAvisForPrestataire = (prestataireId: string) => {
@@ -69,8 +69,6 @@ export function useCoproFlexPage() {
     const goToDetail = (id: string) => router.push(`/maintenance/providers/${id}`);
 
     return {
-        toast,
-        hideToast,
         searchTerm,
         setSearchTerm,
         codePostalFilter,

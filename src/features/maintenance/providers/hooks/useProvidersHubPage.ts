@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProviders } from '@/hooks/modules/useMaintenanceData';
-import { useToast } from '../../shared/hooks/useToast';
+import { useToast } from '@/providers/ToastProvider';
 import type { ProviderOverview, ProviderInsert, ProviderCategory, ProviderDomain } from '@/types/supabase';
 
 // Domain labels for display - must match ProviderDomain enum
@@ -69,7 +69,7 @@ function adaptToLegacyFormat(provider: ProviderOverview) {
 
 export function useProvidersHubPage() {
   const router = useRouter();
-  const { toast, showToast, hideToast } = useToast();
+  const { showToast } = useToast();
 
   // Supabase data hook
   const {
@@ -183,7 +183,7 @@ export function useProvidersHubPage() {
     link.click();
     URL.revokeObjectURL(url);
 
-    showToast('Export généré avec succès', 'success');
+    showToast({ type: 'success', message: 'Export généré avec succès' });
   }, [allPrestataires, showToast]);
 
   const handleAddPrestataire = useCallback(async (prestataireData: {
@@ -207,11 +207,11 @@ export function useProvidersHubPage() {
       };
 
       await createProvider(providerInsert);
-      showToast(`Prestataire "${prestataireData.nom}" ajouté avec succès`, 'success');
+      showToast({ type: 'success', message: `Prestataire "${prestataireData.nom}" ajouté avec succès` });
       setIsAddModalOpen(false);
     } catch (err) {
       console.error('Error creating provider:', err);
-      showToast('Erreur lors de l\'ajout du prestataire', 'error');
+      showToast({ type: 'error', message: 'Erreur lors de l\'ajout du prestataire' });
     }
   }, [createProvider, showToast]);
 
@@ -229,10 +229,6 @@ export function useProvidersHubPage() {
     // Modal
     isAddModalOpen,
     setIsAddModalOpen,
-
-    // Toast
-    toast,
-    hideToast,
 
     // Stats
     statsCopro,

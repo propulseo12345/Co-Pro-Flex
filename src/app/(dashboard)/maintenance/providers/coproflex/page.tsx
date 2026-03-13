@@ -3,15 +3,12 @@
 import { Search, ArrowLeft, Star, Users, MapPin, CheckCircle, X, Send, Globe, Shield, Scale } from 'lucide-react';
 import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
 import { DomaineActivite } from '@/types';
-import { Toast } from '../../../../../features/maintenance/shared/components';
 import { DevisModal, CompareModal, CoproFlexProviderCard } from '../../../../../features/maintenance/providers/components';
 import { useCoproFlexPage } from '../../../../../features/maintenance/providers/hooks';
 import styles from './coproflex.module.css';
 
 export default function ProvidersCoproFlexPage() {
     const {
-        toast,
-        hideToast,
         searchTerm,
         setSearchTerm,
         codePostalFilter,
@@ -40,8 +37,6 @@ export default function ProvidersCoproFlexPage() {
 
     return (
         <div className={styles.container}>
-            {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
-
             {showDevisModal && selectedPrestataires.length > 0 && (
                 <DevisModal
                     prestataires={selectedPrestataires}

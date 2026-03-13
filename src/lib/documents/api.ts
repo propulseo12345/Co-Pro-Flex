@@ -428,12 +428,15 @@ export async function uploadDocument(
     description?: string;
     tags?: string[];
     confidentiality?: DocumentConfidentiality;
+    sourceModule?: DocumentSource;
+    documentDate?: string;
+    year?: number;
   }
 ): Promise<Document> {
   const supabase = createUntypedClient();
 
   // Générer le chemin (sans préfixe 'ged/' car le bucket s'appelle déjà 'ged')
-  const year = new Date().getFullYear();
+  const year = options?.year || new Date().getFullYear();
   const timestamp = Date.now();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = `${coproId}/${category}/${year}/${timestamp}_${safeName}`;
@@ -458,8 +461,8 @@ export async function uploadDocument(
     tags: options?.tags,
     folder_id: options?.folderId,
     confidentiality: options?.confidentiality || 'public',
-    source_module: 'manual',
-    document_date: new Date().toISOString().split('T')[0],
+    source_module: options?.sourceModule || 'manual',
+    document_date: options?.documentDate || new Date().toISOString().split('T')[0],
     year,
   });
 

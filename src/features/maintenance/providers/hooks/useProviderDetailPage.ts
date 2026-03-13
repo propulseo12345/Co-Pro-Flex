@@ -12,7 +12,7 @@ import {
 } from '@/data/mock';
 import { Prestataire, InterventionDetaille } from '@/types';
 import { getInterventionsCountByPrestataire, getDerniereInterventionByPrestataire } from '@/lib/services/interventions.service';
-import { useToast } from '../../shared/hooks/useToast';
+import { useToast } from '@/providers/ToastProvider';
 
 function enrichirPrestataire(p: Prestataire): Prestataire {
     const countMap = getInterventionsCountByPrestataire();
@@ -27,7 +27,7 @@ function enrichirPrestataire(p: Prestataire): Prestataire {
 export function useProviderDetailPage(id: string) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { toast, showToast, hideToast } = useToast();
+    const { showToast } = useToast();
 
     const [showAddIntervention, setShowAddIntervention] = useState(false);
     const [showEditModal, setShowEditModal] = useState(searchParams.get('edit') === 'true');
@@ -70,25 +70,23 @@ export function useProviderDetailPage(id: string) {
     const handleDelete = () => {
         if (!prestataire) return;
         if (confirm(`Êtes-vous sûr de vouloir supprimer le prestataire "${prestataire.nom}" ?`)) {
-            showToast(`Prestataire "${prestataire.nom}" supprimé`, 'success');
+            showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
             setTimeout(() => router.push('/maintenance/providers'), 1500);
         }
     };
 
     const handleAddIntervention = (data: Partial<InterventionDetaille>) => {
         setInterventions(prev => [data as InterventionDetaille, ...prev]);
-        showToast('Intervention ajoutée avec succès', 'success');
+        showToast({ type: 'success', message: 'Intervention ajoutée avec succès' });
     };
 
     const handleEditSave = (data: Partial<Prestataire>) => {
         setPrestataire(prev => prev ? { ...prev, ...data } : prev);
-        showToast('Prestataire mis à jour avec succès', 'success');
+        showToast({ type: 'success', message: 'Prestataire mis à jour avec succès' });
     };
 
     return {
         prestataire,
-        toast,
-        hideToast,
         showAddIntervention,
         setShowAddIntervention,
         showEditModal,

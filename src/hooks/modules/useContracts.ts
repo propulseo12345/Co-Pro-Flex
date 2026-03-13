@@ -4,8 +4,9 @@ import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 
 import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation } from '@/types';
 import { MOCK_PRESTATAIRES_SYNDIC, MOCK_PRESTATAIRES_COPRO, MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
 import { getUniquePrestataires, formatMontant } from '@/components/features/maintenance/Contracts/utils';
-import type { ExportFormat, ToastData } from '@/components/features/maintenance/Contracts/types';
+import type { ExportFormat } from '@/components/features/maintenance/Contracts/types';
 import { useCopro } from '@/providers/CoproContext';
+import { useToast } from '@/providers/ToastProvider';
 import {
     getAllContrats,
     getContratSyndic,
@@ -22,6 +23,7 @@ const ALL_PRESTATAIRES = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPR
 
 export function useContracts() {
     const { currentCoproId } = useCopro();
+    const { showToast } = useToast();
 
     // Load contracts from Supabase on mount / copro change
     useEffect(() => {
@@ -57,9 +59,6 @@ export function useContracts() {
     const [contratToResiliate, setContratToResiliate] = useState<ContratDetaille | null>(null);
     const [contratToEdit, setContratToEdit] = useState<ContratDetaille | null>(null);
 
-    // État du toast
-    const [toast, setToast] = useState<ToastData | null>(null);
-
     // Prestataires uniques pour le filtre
     const uniquePrestataires = useMemo(() => getUniquePrestataires(contrats), [contrats]);
 
@@ -80,16 +79,10 @@ export function useContracts() {
         });
     }, [contrats, searchTerm, statutFilter, categorieFilter, typeFilter, prestataireFilter]);
 
-    // Fonction pour afficher un toast
-    const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
-        setToast({ message, type });
-        setTimeout(() => setToast(null), 4000);
-    }, []);
-
     // Ajouter un contrat
     const handleAddContrat = useCallback((newContrat: ContratDetaille) => {
         addContrat(newContrat);
-        showToast(`Contrat "${newContrat.nom}" créé avec succès`, 'success');
+        showToast({ type: 'success', message: `Contrat "${newContrat.nom}" créé avec succès` });
     }, [showToast]);
 
     // Modifier un contrat

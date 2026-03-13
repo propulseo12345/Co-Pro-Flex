@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { MOCK_PRESTATAIRES_SYNDIC, MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
 import { Prestataire, DomaineActivite } from '@/types';
 import { getInterventionsCountByPrestataire, getDerniereInterventionByPrestataire } from '@/lib/services/interventions.service';
-import { Plus, Search, Phone, Mail, ArrowLeft, Eye, Edit2, Trash2, Users, X, Check, FileText } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ArrowLeft, Eye, Edit2, Trash2, Users } from 'lucide-react';
+import { useToast } from '@/providers/ToastProvider';
 import styles from '../providers-list.module.css';
 import clsx from 'clsx';
 
@@ -22,21 +23,9 @@ function enrichirPrestatairesAvecInterventions(prestataires: Prestataire[]): Pre
     }));
 }
 
-// Toast notification
-function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error' | 'info'; onClose: () => void }) {
-    return (
-        <div className={clsx(styles.toast, styles[`toast${type.charAt(0).toUpperCase() + type.slice(1)}`])}>
-            {type === 'success' && <Check size={18} aria-hidden="true" />}
-            {type === 'error' && <X size={18} aria-hidden="true" />}
-            {type === 'info' && <FileText size={18} aria-hidden="true" />}
-            <span>{message}</span>
-            <button onClick={onClose} aria-label="Fermer"><X size={14} aria-hidden="true" /></button>
-        </div>
-    );
-}
-
 export default function ProvidersSyndicPage() {
     const router = useRouter();
+    const { showToast } = useToast();
     // Enrichir les prestataires avec les données d'interventions du carnet d'entretien
     const [prestataires, setPrestataires] = useState<Prestataire[]>(() =>
         enrichirPrestatairesAvecInterventions(MOCK_PRESTATAIRES_SYNDIC)
@@ -44,12 +33,6 @@ export default function ProvidersSyndicPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [domaineFilter, setDomaineFilter] = useState<DomaineActivite | 'TOUS'>('TOUS');
     const [sortBy, setSortBy] = useState<'nom' | 'interventions' | 'date'>('nom');
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-
-    const showToast = (message: string, type: 'success' | 'error' | 'info') => {
-        setToast({ message, type });
-        setTimeout(() => setToast(null), 4000);
-    };
 
     const filteredAndSortedPrestataires = useMemo(() => {
         return prestataires
@@ -74,15 +57,12 @@ export default function ProvidersSyndicPage() {
     const handleDelete = (prestataire: Prestataire) => {
         if (confirm(`Supprimer le prestataire "${prestataire.nom}" ?`)) {
             setPrestataires(prev => prev.filter(p => p.id !== prestataire.id));
-            showToast(`Prestataire "${prestataire.nom}" supprimé`, 'success');
+            showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
         }
     };
 
     return (
         <div className="container">
-            {/* Toast */}
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
             {/* En-tête */}
             <div className={styles.header}>
                 <div className={styles.headerLeft}>

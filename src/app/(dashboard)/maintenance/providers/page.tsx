@@ -6,7 +6,6 @@ import {
     Building2, Globe, Wrench, Shield, ExternalLink, Briefcase,
 } from 'lucide-react';
 import clsx from 'clsx';
-import { Toast } from '@/features/maintenance/shared/components';
 import { AddProviderModal } from '@/features/maintenance/providers/components';
 import { useProvidersHubPage } from '@/features/maintenance/providers/hooks';
 import styles from './providers.module.css';
@@ -45,7 +44,6 @@ export default function ProvidersHubPage() {
     const {
         searchTerm, setSearchTerm,
         isAddModalOpen, setIsAddModalOpen,
-        toast, hideToast,
         prestairesCopro, prestairesSyndic, prestairesCoproFlex,
         handleExport, handleAddPrestataire, handleGoToPrestataire,
     } = useProvidersHubPage();
@@ -119,8 +117,6 @@ export default function ProvidersHubPage() {
 
     return (
         <div className="container">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
-
             {/* Page Header */}
             <div className={styles.pageHeader}>
                 <h1 className={styles.pageTitle}>Prestataires</h1>
