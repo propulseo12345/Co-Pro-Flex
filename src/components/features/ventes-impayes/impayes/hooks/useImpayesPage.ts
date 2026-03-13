@@ -123,7 +123,12 @@ export function useImpayesPage() {
     (type: string) => {
       if (!selectedImpaye) return;
 
-      generateRelancePDF({
+      const typeLabel: Record<string, string> = {
+        relance_amiable_1: 'relance_1',
+        relance_amiable_2: 'relance_2',
+        mise_en_demeure: 'mise_en_demeure',
+      };
+      const doc = generateRelancePDF({
         type: type as HistoriqueItem['type'],
         coproprietaire: selectedImpaye.coproprietaire,
         lot: selectedImpaye.lot,
@@ -133,6 +138,8 @@ export function useImpayesPage() {
         dateEcheance: selectedImpaye.dateEcheance,
         dateRelancePrecedente: selectedImpaye.historique.find((h) => h.type === 'relance_amiable_1')?.date,
       });
+      const fileName = `${typeLabel[type] || 'relance'}_${selectedImpaye.coproprietaire.nom.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
     },
     [selectedImpaye]
   );
@@ -357,7 +364,8 @@ export function useImpayesPage() {
 
       try {
         if (format === 'pdf') {
-          generateImpayesExportPDF(impayesForExport);
+          const doc = generateImpayesExportPDF(impayesForExport);
+          doc.save(`impayes_export_${new Date().toISOString().split('T')[0]}.pdf`);
         } else {
           generateImpayesExportCSV(impayesForExport);
         }

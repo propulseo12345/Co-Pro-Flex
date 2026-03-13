@@ -35,7 +35,7 @@ export function generateRapportCSPDF({
   rapport,
   nomCopropriete = 'Copropriété',
   adresseCopropriete = '',
-}: GenerateRapportCSPDFParams): GeneratedPDF {
+}: GenerateRapportCSPDFParams): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -303,43 +303,22 @@ export function generateRapportCSPDF({
   // GÉNÉRATION DU FICHIER
   // ============================================
 
-  const annee = rapport.periodeFin.getFullYear();
-  const filename = `Rapport_CS_${annee}.pdf`;
-
-  return {
-    blob: doc.output('blob'),
-    filename,
-  };
+  return doc;
 }
 
 /**
  * Génère et télécharge le PDF du rapport
  */
 export function downloadRapportCSPDF(params: GenerateRapportCSPDFParams): void {
-  const { blob, filename } = generateRapportCSPDF(params);
-
-  // Créer un lien de téléchargement
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const doc = generateRapportCSPDF(params);
+  const annee = params.rapport.periodeFin.getFullYear();
+  doc.save(`Rapport_CS_${annee}.pdf`);
 }
 
 /**
  * Génère le PDF pour l'annexe de convocation
  * Format simplifié pour intégration dans la convocation
  */
-export function generateRapportCSAnnexePDF(params: GenerateRapportCSPDFParams): GeneratedPDF {
-  // Utilise le même générateur mais avec un nom de fichier différent
-  const { blob } = generateRapportCSPDF(params);
-  const annee = params.rapport.periodeFin.getFullYear();
-
-  return {
-    blob,
-    filename: `Annexe_Rapport_CS_${annee}.pdf`,
-  };
+export function generateRapportCSAnnexePDF(params: GenerateRapportCSPDFParams): jsPDF {
+  return generateRapportCSPDF(params);
 }

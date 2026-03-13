@@ -211,7 +211,7 @@ function generateRelancePDFContent(doc: jsPDF, params: RelanceParams): void {
 }
 
 // Générer et télécharger le PDF
-export function generateRelancePDF(params: RelanceParams): void {
+export function generateRelancePDF(params: RelanceParams): jsPDF {
   const doc = new jsPDF();
   generateRelancePDFContent(doc, params);
 
@@ -221,8 +221,7 @@ export function generateRelancePDF(params: RelanceParams): void {
     mise_en_demeure: 'mise_en_demeure',
   };
 
-  const fileName = `${typeLabel[params.type as keyof typeof typeLabel] || 'relance'}_${params.coproprietaire.nom.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  return doc;
 }
 
 // Générer et retourner l'URL blob pour prévisualisation
@@ -321,7 +320,7 @@ Copro Manager`;
 }
 
 // Export des impayés en PDF
-export function generateImpayesExportPDF(impayes: ImpayeComplet[]): void {
+export function generateImpayesExportPDF(impayes: ImpayeComplet[]): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -428,7 +427,7 @@ export function generateImpayesExportPDF(impayes: ImpayeComplet[]): void {
     doc.text('Copro Manager - Document confidentiel', margin, pageHeight - 10);
   }
 
-  doc.save(`impayes_export_${new Date().toISOString().split('T')[0]}.pdf`);
+  return doc;
 }
 
 // Export CSV des impayés

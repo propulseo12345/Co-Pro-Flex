@@ -25,8 +25,10 @@ export function VenteDocuments({ documents, vente, onSignDocument }: VenteDocume
     setZoom(100);
   };
 
-  const handleDownload = (doc: VenteDocument) => {
-    generateVenteDocumentPDF({ vente, document: doc });
+  const handleDownload = (venteDoc: VenteDocument) => {
+    const pdfDoc = generateVenteDocumentPDF({ vente, document: venteDoc });
+    const fileName = `${venteDoc.type}_${vente.lotId.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+    pdfDoc.save(fileName);
   };
 
   const closePreview = () => {

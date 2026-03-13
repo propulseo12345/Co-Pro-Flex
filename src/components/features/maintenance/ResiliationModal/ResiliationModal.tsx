@@ -139,7 +139,7 @@ ${SYNDIC_INFO.email} – ${SYNDIC_INFO.telephone}`;
 
     const handleDownloadPDF = () => {
         const copropriete = MOCK_INFORMATIONS_COPROPRIETE;
-        generateResiliationPDF({
+        const doc = generateResiliationPDF({
             contrat,
             dateEffet: dateResiliation,
             courrierTexte,
@@ -151,6 +151,9 @@ ${SYNDIC_INFO.email} – ${SYNDIC_INFO.telephone}`;
                 ville: copropriete.ville
             }
         });
+        const numeroContratSafe = (contrat.numeroContrat || contrat.id).replace(/[^a-zA-Z0-9]/g, '_');
+        const dateStr = new Date().toISOString().split('T')[0];
+        doc.save(`resiliation_RAR_${numeroContratSafe}_${dateStr}.pdf`);
         setPdfGenerated(true);
         setModeEnvoi('RECOMMANDE_POSTAL');
     };

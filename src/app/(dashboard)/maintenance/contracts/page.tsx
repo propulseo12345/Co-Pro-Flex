@@ -1,6 +1,5 @@
 'use client';
 
-import { Toast } from '@/components/features/maintenance/Contracts';
 import { PlannedOrdersSection } from '@/components/features/maintenance/Contracts';
 import {
   ContractsPageHeader,
@@ -20,8 +19,6 @@ export default function ContractsPage() {
     contratSyndic,
     prestataires,
     uniquePrestataires,
-    toast,
-
     // Filters
     searchTerm,
     setSearchTerm,
@@ -47,7 +44,6 @@ export default function ContractsPage() {
     setContratExpireDecision,
 
     // Actions
-    setToast,
     handleAddContrat,
     handleSaveContrat,
     handleTelecharger,
@@ -64,14 +60,6 @@ export default function ContractsPage() {
 
   return (
     <div className="container">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-
       <ContractsPageHeader
         onExport={handleExport}
         onAddContract={() => setIsAddModalOpen(true)}

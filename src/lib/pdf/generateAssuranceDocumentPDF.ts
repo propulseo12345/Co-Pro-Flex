@@ -23,7 +23,7 @@ export function generateAssuranceDocumentPDF({
   document,
   assurance,
   coproprieteNom = 'Copropriété',
-}: GenerateAssuranceDocumentPDFParams): void {
+}: GenerateAssuranceDocumentPDFParams): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -162,9 +162,7 @@ export function generateAssuranceDocumentPDF({
     align: 'center',
   });
 
-  // Téléchargement
-  const fileName = `${document.nom.replace(/\s+/g, '_')}.pdf`;
-  doc.save(fileName);
+  return doc;
 }
 
 /**
@@ -173,7 +171,7 @@ export function generateAssuranceDocumentPDF({
 export function generateAttestationAssurancePDF(
   assurance: ContratAssurance,
   coproprieteNom?: string
-): void {
+): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -256,8 +254,7 @@ export function generateAttestationAssurancePDF(
   addText('Pour l\'assureur,', pageWidth - margin, footerY, { fontSize: 10, align: 'right' });
   addText('Signature', pageWidth - margin, footerY + 10, { fontSize: 10, fontStyle: 'italic', align: 'right' });
 
-  // Téléchargement
-  doc.save(`Attestation_${assurance.nom.replace(/\s+/g, '_')}.pdf`);
+  return doc;
 }
 
 // Helpers

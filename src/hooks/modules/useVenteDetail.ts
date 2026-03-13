@@ -260,12 +260,14 @@ export function useVenteDetail({ venteId }: UseVenteDetailOptions) {
 
   // Actions PDF
   const handleExportPDF = useCallback(() => {
-    generateVentePDF({
+    const doc = generateVentePDF({
       vente,
       documents,
       historique,
       linkedOrdresService
     });
+    const fileName = `vente_${vente.lotId.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
     showToast('Fiche PDF générée avec succès', 'success');
   }, [vente, documents, historique, linkedOrdresService, showToast]);
 

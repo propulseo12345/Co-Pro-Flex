@@ -43,7 +43,7 @@ const getWorkflowLabel = (etape: string): string => {
 export function generateVentesExportPDF(
   ventes: Vente[],
   options: ExportOptions = { includeDetails: true, includeHistorique: true, onlyEnCours: false }
-): void {
+): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -179,9 +179,7 @@ export function generateVentesExportPDF(
     doc.text('Copro Manager - Document confidentiel', margin, pageHeight - 10);
   }
 
-  // Sauvegarder
-  const fileName = `ventes_export_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  return doc;
 }
 
 // Fonction pour générer un export Excel (CSV)

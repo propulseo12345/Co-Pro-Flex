@@ -26,7 +26,7 @@ const TYPE_DOCUMENT_LABELS: Record<string, string> = {
 export function generateDocumentTechniquePDF({
   document,
   coproprieteNom = 'Copropriété',
-}: GenerateDocumentTechniquePDFParams): void {
+}: GenerateDocumentTechniquePDFParams): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -176,9 +176,7 @@ export function generateDocumentTechniquePDF({
     align: 'center',
   });
 
-  // Téléchargement
-  const fileName = `${document.nom.replace(/\s+/g, '_')}.pdf`;
-  doc.save(fileName);
+  return doc;
 }
 
 // Helper

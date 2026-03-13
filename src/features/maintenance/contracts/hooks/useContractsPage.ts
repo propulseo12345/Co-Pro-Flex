@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useContracts } from '@/hooks/modules/useContracts';
+import { useToast } from '@/providers/ToastProvider';
 import { ContratDetaille } from '@/types';
 import { getJoursDepuisExpiration } from '@/components/features/maintenance/Contracts';
 import {
@@ -18,6 +19,7 @@ export interface ContratExpireDecision {
 export function useContractsPage() {
   const router = useRouter();
   const contracts = useContracts();
+  const { showToast } = useToast();
 
   const [contratExpireDecision, setContratExpireDecision] = useState<ContratExpireDecision | null>(null);
 
@@ -35,7 +37,7 @@ export function useContractsPage() {
   const handleRenouvelerContrat = useCallback((contrat: ContratDetaille, nouvelleDateFin: string) => {
     const result = renouvelerContrat(contrat.id, nouvelleDateFin);
     if (result) {
-      contracts.setToast({
+      showToast({
         type: 'success',
         message: `Contrat "${contrat.nom}" renouvele jusqu'au ${new Date(nouvelleDateFin).toLocaleDateString('fr-FR')}`
       });
@@ -46,7 +48,7 @@ export function useContractsPage() {
   const handleResilierContratExpire = useCallback((contrat: ContratDetaille, raison: string, archiver: boolean) => {
     const result = resilierContrat(contrat.id, raison, archiver);
     if (result) {
-      contracts.setToast({
+      showToast({
         type: 'success',
         message: `Contrat "${contrat.nom}" resilie${archiver ? ' et archive' : ''}`
       });
@@ -67,7 +69,7 @@ export function useContractsPage() {
       id: `os-gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
     localStorage.setItem('custom_ordres_service', JSON.stringify([...existingOS, newOS]));
-    contracts.setToast({
+    showToast({
       type: 'success',
       message: `Ordre de service genere : ${(newOS as { titre?: string }).titre || 'Sans titre'}`
     });

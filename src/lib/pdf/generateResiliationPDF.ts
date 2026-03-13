@@ -33,7 +33,7 @@ export function generateResiliationPDF({
   syndicInfo,
   copropriete,
   adressePrestataire = '[Adresse du prestataire]'
-}: GenerateResiliationPDFParams): void {
+}: GenerateResiliationPDFParams): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -197,9 +197,5 @@ export function generateResiliationPDF({
     doc.text('Document généré par CoProFlex - Courrier recommandé avec accusé de réception', margin, pageHeight - 10);
   }
 
-  // === SAUVEGARDE ===
-  const numeroContratSafe = (contrat.numeroContrat || contrat.id).replace(/[^a-zA-Z0-9]/g, '_');
-  const dateStr = new Date().toISOString().split('T')[0];
-  const fileName = `resiliation_RAR_${numeroContratSafe}_${dateStr}.pdf`;
-  doc.save(fileName);
+  return doc;
 }

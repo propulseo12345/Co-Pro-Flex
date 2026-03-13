@@ -15,7 +15,7 @@ export function generateVentePDF({
   documents,
   historique,
   linkedOrdresService
-}: GeneratePDFParams): void {
+}: GeneratePDFParams): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -251,7 +251,5 @@ export function generateVentePDF({
     doc.text('Copro Manager - Document confidentiel', margin, doc.internal.pageSize.getHeight() - 10);
   }
 
-  // Sauvegarder
-  const fileName = `vente_${vente.lotId.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  return doc;
 }

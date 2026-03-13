@@ -88,7 +88,7 @@ export function useContracts() {
     // Modifier un contrat
     const handleSaveContrat = useCallback((updatedContrat: ContratDetaille) => {
         updateContrat(updatedContrat);
-        showToast(`Contrat "${updatedContrat.nom}" modifié avec succès`, 'success');
+        showToast({ type: 'success', message: `Contrat "${updatedContrat.nom}" modifié avec succès` });
     }, [showToast]);
 
     // Résilier un contrat
@@ -106,12 +106,12 @@ export function useContracts() {
                     : template.statutEnvoi === 'ENVOYE'
                     ? 'envoyé'
                     : '';
-                showToast(
-                    `Contrat "${contratToResiliate.nom}" résilié avec succès. ${modeLabel} ${statutLabel}.`,
-                    'success'
-                );
+                showToast({
+                    type: 'success',
+                    message: `Contrat "${contratToResiliate.nom}" résilié avec succès. ${modeLabel} ${statutLabel}.`,
+                });
             } else {
-                showToast(`Contrat "${contratToResiliate.nom}" résilié avec succès`, 'success');
+                showToast({ type: 'success', message: `Contrat "${contratToResiliate.nom}" résilié avec succès` });
             }
             setContratToResiliate(null);
         }
@@ -119,7 +119,7 @@ export function useContracts() {
 
     // Télécharger un PDF - génère un fichier texte récapitulatif du contrat
     const handleTelecharger = useCallback((contrat: ContratDetaille) => {
-        showToast(`Génération du document ${contrat.fichierPDF || 'contrat.pdf'}...`, 'info');
+        showToast({ type: 'info', message: `Génération du document ${contrat.fichierPDF || 'contrat.pdf'}...` });
 
         // Générer un contenu textuel du contrat (simulation de PDF)
         const content = `
@@ -187,30 +187,30 @@ CoProFlex - Gestion de copropriété
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        showToast('Document téléchargé avec succès', 'success');
+        showToast({ type: 'success', message: 'Document téléchargé avec succès' });
     }, [showToast]);
 
     // Télécharger PDF syndic
     const handleDownloadSyndicPDF = useCallback(() => {
         if (!contratSyndic) {
-            showToast('Aucun contrat syndic configuré', 'error');
+            showToast({ type: 'error', message: 'Aucun contrat syndic configuré' });
             return;
         }
-        showToast(`Téléchargement de ${contratSyndic.fichierPDF || 'contrat_syndic.pdf'}...`, 'info');
+        showToast({ type: 'info', message: `Téléchargement de ${contratSyndic.fichierPDF || 'contrat_syndic.pdf'}...` });
         setTimeout(() => {
-            showToast('Fichier téléchargé avec succès', 'success');
+            showToast({ type: 'success', message: 'Fichier téléchargé avec succès' });
         }, 1500);
     }, [contratSyndic, showToast]);
 
     // Modifier le contrat syndic
     const handleSaveSyndic = useCallback((updated: ContratSyndic) => {
         updateContratSyndic(updated);
-        showToast('Contrat du syndic modifié avec succès', 'success');
+        showToast({ type: 'success', message: 'Contrat du syndic modifié avec succès' });
     }, [showToast]);
 
     // Action syndic (préparer renouvellement)
     const handleSyndicAction = useCallback(() => {
-        showToast('Préparation du renouvellement du contrat syndic lancée', 'info');
+        showToast({ type: 'info', message: 'Préparation du renouvellement du contrat syndic lancée' });
         setIsEditSyndicModalOpen(true);
     }, [showToast]);
 
@@ -235,7 +235,7 @@ CoProFlex - Gestion de copropriété
             a.download = `contrats_${new Date().toISOString().split('T')[0]}.txt`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast('Export PDF généré avec succès', 'success');
+            showToast({ type: 'success', message: 'Export PDF généré avec succès' });
         } else if (format === 'EXCEL') {
             const headers = 'Statut;Libellé;Prestataire;Type;Échéance;Coût annuel\n';
             const rows = data.map(c => `${c.statut};${c.libelle};${c.prestataire};${c.type};${c.echeance};${c.coutAnnuel}`).join('\n');
@@ -246,7 +246,7 @@ CoProFlex - Gestion de copropriété
             a.download = `contrats_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast('Export Excel généré avec succès', 'success');
+            showToast({ type: 'success', message: 'Export Excel généré avec succès' });
         } else if (format === 'ACQUEREURS') {
             const activeContracts = data.filter(c => c.statut === 'ACTIF');
             const content = `LISTE DES CONTRATS EN COURS\n\nDocument destiné aux acquéreurs\n\n` +
@@ -258,7 +258,7 @@ CoProFlex - Gestion de copropriété
             a.download = `contrats_acquereurs_${new Date().toISOString().split('T')[0]}.txt`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast('Export Acquéreurs généré avec succès', 'success');
+            showToast({ type: 'success', message: 'Export Acquéreurs généré avec succès' });
         }
     }, [filteredContrats, showToast]);
 
@@ -269,7 +269,6 @@ CoProFlex - Gestion de copropriété
         contratSyndic,
         prestataires: ALL_PRESTATAIRES,
         uniquePrestataires,
-        toast,
 
         // Filtres
         searchTerm,
@@ -295,7 +294,6 @@ CoProFlex - Gestion de copropriété
 
         // Actions
         showToast,
-        setToast,
         handleAddContrat,
         handleSaveContrat,
         handleConfirmResiliation,

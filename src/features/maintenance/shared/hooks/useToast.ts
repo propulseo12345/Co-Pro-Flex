@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use `useToast` from `@/providers/ToastProvider` instead.
+ * This local hook is kept for backward compatibility but should not be used in new code.
+ */
 'use client';
 
 import { useState, useCallback } from 'react';

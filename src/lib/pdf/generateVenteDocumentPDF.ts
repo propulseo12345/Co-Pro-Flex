@@ -428,7 +428,7 @@ function generateGenericDocument(doc: jsPDF, vente: Vente, document: VenteDocume
 }
 
 // Fonction principale d'export
-export function generateVenteDocumentPDF({ vente, document }: DocumentGeneratorParams): void {
+export function generateVenteDocumentPDF({ vente, document }: DocumentGeneratorParams): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -462,9 +462,7 @@ export function generateVenteDocumentPDF({ vente, document }: DocumentGeneratorP
     doc.text('Copro Manager - Document confidentiel', 20, doc.internal.pageSize.getHeight() - 10);
   }
 
-  // Sauvegarder
-  const fileName = `${document.type}_${vente.lotId.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  return doc;
 }
 
 // Fonction pour prévisualiser le document (retourne un blob URL)
