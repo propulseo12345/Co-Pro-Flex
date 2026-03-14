@@ -126,13 +126,50 @@
   border-bottom: none;
 }
 
-.rowDanger {
+/* Gradation par niveau de relance */
+.rowLevel0 {
   composes: row;
-  background: rgba(248, 113, 113, 0.06);
 }
 
-.rowDanger:hover {
-  background: rgba(248, 113, 113, 0.1);
+.rowLevel1 {
+  composes: row;
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.rowLevel1:hover {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.rowLevel2 {
+  composes: row;
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.rowLevel2:hover {
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.rowLevel3 {
+  composes: row;
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.rowLevel3:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.rowPaid {
+  composes: row;
+  background: rgba(52, 211, 153, 0.04);
+}
+
+.rowPaid:hover {
+  background: rgba(52, 211, 153, 0.08);
+}
+
+/* Legacy alias */
+.rowDanger {
+  composes: rowLevel3;
 }
 
 .linkAction {

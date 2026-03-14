@@ -1,22 +1,49 @@
 'use client';
 
 import type { CallLineDetailed } from '@/lib/finance/api';
+import type { EnrichedCallLine, ReminderLevel } from '../hooks/useAppelsFondsDetail';
 import { StatusBadge } from './StatusBadge';
 import type { BadgeVariant } from './StatusBadge';
 import { formatEuros } from '../utils';
 import styles from '../styles/CoproTable.module.css';
 
 interface CoproTableProps {
-  lines: CallLineDetailed[];
+  lines: (CallLineDetailed | EnrichedCallLine)[];
   onRemind: (lineId: string) => void;
   onRelance?: (line: CallLineDetailed) => void;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {
-  paid: { label: 'Paye', variant: 'green' },
-  partial: { label: 'Partiel', variant: 'amber' },
-  unpaid: { label: 'Impaye', variant: 'red' },
-};
+function getReminderLevel(line: CallLineDetailed | EnrichedCallLine): ReminderLevel {
+  return 'reminderLevel' in line ? line.reminderLevel : 0;
+}
+
+function getRowClass(status: string, level: ReminderLevel): string {
+  if (status === 'paid') return styles.rowPaid;
+  switch (level) {
+    case 3: return styles.rowLevel3;
+    case 2: return styles.rowLevel2;
+    case 1: return styles.rowLevel1;
+    default: return styles.rowLevel0;
+  }
+}
+
+function getStatusConfig(status: string, level: ReminderLevel): { label: string; variant: BadgeVariant } {
+  if (status === 'paid') return { label: 'Paye', variant: 'green' };
+  if (status === 'partial') return { label: 'Partiel', variant: 'amber' };
+  // Impaye — gradation selon le niveau de relance
+  switch (level) {
+    case 3: return { label: 'Mise en demeure', variant: 'red' };
+    case 2: return { label: 'Relance 2', variant: 'amber' }; // orange via amber
+    case 1: return { label: 'Relance 1', variant: 'neutral' }; // yellow-ish via neutral
+    default: return { label: 'Impaye', variant: 'red' };
+  }
+}
+
+function getNameClass(status: string, level: ReminderLevel): string {
+  if (status === 'paid') return styles.tdBold;
+  if (level >= 3) return styles.tdBoldDanger;
+  return styles.tdBold;
+}
 
 function getPaidClass(status: string): string {
   if (status === 'paid') return styles.tdRightPaid;
@@ -41,10 +68,10 @@ export function CoproTable({ lines, onRemind, onRelance }: CoproTableProps) {
         </thead>
         <tbody>
           {lines.map((line) => {
-            const isUnpaid = line.status === 'unpaid';
-            const config = STATUS_CONFIG[line.status] ?? STATUS_CONFIG.unpaid;
-            const rowClass = isUnpaid ? styles.rowDanger : styles.row;
-            const nameClass = isUnpaid ? styles.tdBoldDanger : styles.tdBold;
+            const level = getReminderLevel(line);
+            const config = getStatusConfig(line.status, level);
+            const rowClass = getRowClass(line.status, level);
+            const nameClass = getNameClass(line.status, level);
 
             return (
               <tr key={line.id} className={rowClass}>
@@ -69,7 +96,7 @@ export function CoproTable({ lines, onRemind, onRelance }: CoproTableProps) {
                     <span className={styles.noAction}>&mdash;</span>
                   ) : (
                     <button
-                      className={isUnpaid ? styles.linkActionDanger : styles.linkAction}
+                      className={level >= 3 ? styles.linkActionDanger : styles.linkAction}
                       onClick={() => {
                         onRelance?.(line);
                         onRemind(line.id);
