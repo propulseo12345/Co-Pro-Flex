@@ -1,73 +1,109 @@
 'use client';
 
 import { useAppelsFondsPage } from '@/features/finance/appels-fonds/hooks';
-import { AppelsFondsMainContent, AppelsFondsModals } from '@/features/finance/appels-fonds/components';
+import {
+  AppelsFondsHeader,
+  AppelsFondsTabs,
+  TabVueGlobale,
+  TabBudgetCourant,
+  TabTravaux,
+} from '@/features/finance/appels-fonds/components';
+import { formatEuros } from '@/features/finance/appels-fonds/utils';
 import styles from './appels-fonds.module.css';
 
 export default function AppelsFondsPage() {
-  const page = useAppelsFondsPage();
+  const {
+    trimesterCards,
+    travauxProjects,
+    globalStats,
+    courantStats,
+    travauxStats,
+    activeTab,
+    setActiveTab,
+    impayesCount,
+    periods,
+    selectedPeriod,
+    navigatePeriod,
+    canGoPrev,
+    canGoNext,
+    isLoading,
+  } = useAppelsFondsPage();
+
+  // ── Loading state ──
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <p>Chargement des appels de fonds...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Empty state: no periods ──
+  if (periods.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <p>Aucun exercice comptable. Veuillez en creer un depuis les parametres finance.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Period label & meta ──
+  const periodLabel = selectedPeriod?.name ?? 'Exercice';
+  const periodMeta = selectedPeriod
+    ? `${new Date(selectedPeriod.start_date).toLocaleDateString('fr-FR')} — ${new Date(selectedPeriod.end_date).toLocaleDateString('fr-FR')}`
+    : '';
 
   return (
     <div className={styles.container}>
-      <AppelsFondsMainContent
-        appels={page.appels}
-        groupedAppels={page.groupedAppels}
-        campaigns={page.campaigns}
-        selectedCampaignId={page.selectedCampaignId}
-        onSelectCampaign={page.setSelectedCampaignId}
-        stats={page.stats}
-        onNewAppel={() => page.setShowNewAppelModal(true)}
-        onEmettreAppel={page.handleEmettreAppel}
+      <AppelsFondsHeader
+        periodLabel={periodLabel}
+        periodMeta={periodMeta}
+        onPrev={() => navigatePeriod('prev')}
+        onNext={() => navigatePeriod('next')}
+        canGoPrev={canGoPrev}
+        canGoNext={canGoNext}
+        onGenerate={() => {/* TODO: Task 16-17 */}}
+        onExport={() => {/* TODO: Task 16-17 */}}
       />
 
-      <AppelsFondsModals
-        showGestionModal={page.showGestionModal}
-        selectedAppel={page.selectedAppel}
-        coproprietaires={page.coproprietaires}
-        filteredCoproprietaires={page.filteredCoproprietaires}
-        sendingInProgress={page.sendingInProgress}
-        searchCopro={page.searchCopro}
-        paiementFilter={page.paiementFilterModal}
-        recommandeFilter={page.recommandeFilterModal}
-        onCloseGestion={() => page.setShowGestionModal(false)}
-        onSearchCoproChange={page.setSearchCopro}
-        onPaiementFilterChange={page.setPaiementFilterModal}
-        onRecommandeFilterChange={page.setRecommandeFilterModal}
-        onModeEnvoiChange={page.handleModeEnvoiChange}
-        onEnvoyerAppel={page.handleEnvoyerAppel}
-        onEnvoyerTous={page.handleEnvoyerTous}
-        onEnregistrerPaiement={page.handleEnregistrerPaiement}
-        onVoirHistoriquePaiements={page.handleVoirHistoriquePaiements}
-        showMontantModal={page.showMontantModal}
-        onCloseMontant={() => page.setShowMontantModal(false)}
-        onExportPDF={page.exportToPDF}
-        onExportExcel={page.exportToExcel}
-        showDetailModal={page.showDetailModal}
-        onCloseDetail={() => page.setShowDetailModal(false)}
-        showNewAppelModal={page.showNewAppelModal}
-        newAppelForm={page.newAppelForm}
-        onFormChange={page.setNewAppelForm}
-        onNewAppelSubmit={page.handleNewAppelSubmit}
-        onNewAppelCancel={page.handleNewAppelCancel}
-        showEditModal={page.showEditModal}
-        onUpdateAppel={page.handleUpdateAppel}
-        onCloseEdit={page.handleCloseEditModal}
-        showPaiementModal={page.showPaiementModal}
-        selectedCoproprietaire={page.selectedCoproprietaire}
-        onClosePaiement={page.handleClosePaiementModal}
-        onSubmitPaiement={page.handleSubmitPaiement}
-        showHistoriqueModal={page.showHistoriqueModal}
-        paiements={page.selectedCoproprietaire ? page.getPaiementsForCoproprietaire(page.selectedCoproprietaire.id) : []}
-        onCloseHistorique={page.handleCloseHistoriqueModal}
-        showEmissionModal={page.showEmissionModal}
-        appelEmissionConverted={page.appelEmissionConverted}
-        onCloseEmission={page.handleCloseEmissionModal}
-        showRelancesModal={page.showRelancesModal}
-        onCloseRelances={page.handleCloseRelancesModal}
-        onNouvelleRelance={page.handleNouvelleRelance}
-        showExportAvisModal={page.showExportAvisModal}
-        onCloseExportAvis={page.handleCloseExportAvisModal}
+      <AppelsFondsTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        globalAmount={formatEuros(globalStats.totalCalled)}
+        globalRate={globalStats.recoveryRate}
+        courantAmount={formatEuros(courantStats.totalCalled)}
+        courantRate={courantStats.recoveryRate}
+        travauxAmount={formatEuros(travauxStats.totalCalled)}
+        travauxRate={travauxStats.recoveryRate}
       />
+
+      {activeTab === 'all' && (
+        <TabVueGlobale
+          globalStats={globalStats}
+          courantStats={courantStats}
+          travauxStats={travauxStats}
+          impayesCount={impayesCount}
+        />
+      )}
+
+      {activeTab === 'courant' && (
+        <TabBudgetCourant
+          stats={courantStats}
+          trimesterCards={trimesterCards}
+          impayesCount={impayesCount}
+        />
+      )}
+
+      {activeTab === 'travaux' && (
+        <TabTravaux
+          stats={travauxStats}
+          projects={travauxProjects}
+        />
+      )}
     </div>
   );
 }
