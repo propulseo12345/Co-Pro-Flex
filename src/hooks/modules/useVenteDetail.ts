@@ -19,6 +19,8 @@ import {
 import { getWorkflowStepLabel } from '@/components/features/ventes/VenteDetail/utils';
 import { generateVentePDF } from '@/lib/pdf/generateVentePDF';
 import { useVentesContext } from '@/providers/VentesProvider';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import type { VenteEtapeWorkflow } from '@/types/models/vente';
 
 interface UseVenteDetailOptions {
@@ -38,6 +40,7 @@ const mapStatutToGlobal = (statut: Vente['statut']): 'EN_COURS' | 'TERMINEE' | '
 export function useVenteDetail({ venteId }: UseVenteDetailOptions) {
   // Hook global pour synchronisation
   const globalContext = useVentesContext();
+  const { currentCoproId } = useCopro();
 
   // État principal
   const [vente, setVente] = useState<Vente>(() => {
@@ -268,8 +271,23 @@ export function useVenteDetail({ venteId }: UseVenteDetailOptions) {
     });
     const fileName = `vente_${vente.lotId.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
+
+    // Fire-and-forget: archive dans la GED
+    if (currentCoproId) {
+      const blob = doc.output('blob');
+      autoFileToGED({
+        blob,
+        fileName,
+        coproId: currentCoproId,
+        category: 'etat_date',
+        sourceModule: 'legal',
+        subFolderName: `Ventes ${new Date().getFullYear()}`,
+        year: new Date().getFullYear(),
+      });
+    }
+
     showToast('Fiche PDF générée avec succès', 'success');
-  }, [vente, documents, historique, linkedOrdresService, showToast]);
+  }, [vente, documents, historique, linkedOrdresService, showToast, currentCoproId]);
 
   // Interface pour les données d'envoi au notaire
   interface EnvoiNotaireData {

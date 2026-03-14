@@ -162,7 +162,7 @@ export function useGedPageSupabase() {
   // DATA LOADING
   // ============================================================================
 
-  useEffect(() => {
+  const loadData = useCallback(async (showLoader = true) => {
     if (!currentCoproId) {
       setDocuments([]);
       setFolders([]);
@@ -171,36 +171,48 @@ export function useGedPageSupabase() {
       return;
     }
 
-    const loadData = async () => {
-      setIsLoading(true);
-      setError(null);
+    if (showLoader) setIsLoading(true);
+    setError(null);
 
-      try {
-        const [docsData, foldersData, statsData] = await Promise.all([
-          documentsApi.getDocuments(currentCoproId),
-          documentsApi.getFolders(currentCoproId),
-          documentsApi.getDocumentStats(currentCoproId),
-        ]);
+    try {
+      const [docsData, foldersData, statsData] = await Promise.all([
+        documentsApi.getDocuments(currentCoproId),
+        documentsApi.getFolders(currentCoproId),
+        documentsApi.getDocumentStats(currentCoproId),
+      ]);
 
-        setDocuments(docsData);
-        setFolders(foldersData);
-        setStats(statsData);
-      } catch (err) {
-        console.error('Error loading GED data:', err);
-        // Extract more details from Supabase error
-        const errorMessage = err instanceof Error
-          ? err.message
-          : typeof err === 'object' && err !== null
-            ? JSON.stringify(err)
-            : 'Erreur de chargement';
-        setError(`Erreur: ${errorMessage}. Vérifiez que vous êtes connecté et membre de cette copropriété.`);
-      } finally {
-        setIsLoading(false);
+      setDocuments(docsData);
+      setFolders(foldersData);
+      setStats(statsData);
+    } catch (err) {
+      console.error('Error loading GED data:', err);
+      const errorMessage = err instanceof Error
+        ? err.message
+        : typeof err === 'object' && err !== null
+          ? JSON.stringify(err)
+          : 'Erreur de chargement';
+      setError(`Erreur: ${errorMessage}. Vérifiez que vous êtes connecté et membre de cette copropriété.`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCoproId]);
+
+  // Initial load
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Refresh silencieusement quand l'utilisateur revient sur l'onglet
+  // (capte les docs auto-filés depuis d'autres modules)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && currentCoproId) {
+        loadData(false);
       }
     };
-
-    loadData();
-  }, [currentCoproId]);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [loadData, currentCoproId]);
 
   // ============================================================================
   // NORMALIZED DATA
@@ -513,21 +525,7 @@ export function useGedPageSupabase() {
   // FOLDER CRUD
   // ============================================================================
 
-  const refreshData = useCallback(async () => {
-    if (!currentCoproId) return;
-    try {
-      const [docsData, foldersData, statsData] = await Promise.all([
-        documentsApi.getDocuments(currentCoproId),
-        documentsApi.getFolders(currentCoproId),
-        documentsApi.getDocumentStats(currentCoproId),
-      ]);
-      setDocuments(docsData);
-      setFolders(foldersData);
-      setStats(statsData);
-    } catch (err) {
-      console.error('Error refreshing GED data:', err);
-    }
-  }, [currentCoproId]);
+  const refreshData = useCallback(() => loadData(false), [loadData]);
 
   const handleCreateFolder = useCallback(async (name: string, parentId?: string | null) => {
     if (!currentCoproId || !name.trim()) return;

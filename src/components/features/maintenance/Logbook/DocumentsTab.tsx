@@ -24,6 +24,8 @@ import clsx from 'clsx';
 import type { DocumentsTabProps, DocumentCategory } from './types';
 import { getCategorieDocLabel, getTypeDocLabel, isDocumentExpired, isDocumentExpiringSoon } from './utils';
 import { generateDocumentTechniquePDF } from '@/lib/pdf/generateDocumentTechniquePDF';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import type { DocumentTechnique } from '@/types';
 import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
@@ -39,6 +41,7 @@ export function DocumentsTab({
     onToggleCategory,
     onSelectDocument
 }: DocumentsTabProps) {
+    const { currentCoproId } = useCopro();
     const [showAddModal, setShowAddModal] = useState(false);
     const categories: DocumentCategory[] = ['DTA', 'DIAGNOSTICS', 'CONTROLES', 'GARANTIES', 'AUTRES'];
 
@@ -210,7 +213,20 @@ export function DocumentsTab({
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         const pdfDoc = generateDocumentTechniquePDF({ document: doc });
-                                                        pdfDoc.save(`${doc.nom.replace(/\s+/g, '_')}.pdf`);
+                                                        const fileName = `${doc.nom.replace(/\s+/g, '_')}.pdf`;
+                                                        pdfDoc.save(fileName);
+
+                                                        if (currentCoproId) {
+                                                            const blob = pdfDoc.output('blob');
+                                                            autoFileToGED({
+                                                                blob,
+                                                                fileName,
+                                                                coproId: currentCoproId,
+                                                                category: 'diagnostic',
+                                                                sourceModule: 'maintenance',
+                                                                year: new Date().getFullYear(),
+                                                            });
+                                                        }
                                                     }}
                                                     title="Télécharger en PDF"
                                                 >

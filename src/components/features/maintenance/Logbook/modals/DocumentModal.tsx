@@ -10,9 +10,12 @@ import clsx from 'clsx';
 import type { DocumentModalProps } from '../types';
 import { getTypeDocLabel, isDocumentExpired, isDocumentExpiringSoon } from '../utils';
 import { generateDocumentTechniquePDF } from '@/lib/pdf/generateDocumentTechniquePDF';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
 export function DocumentModal({ document, onClose }: DocumentModalProps) {
+    const { currentCoproId } = useCopro();
     const expired = isDocumentExpired(document.dateValidite);
     const expiring = isDocumentExpiringSoon(document.dateValidite);
 
@@ -72,7 +75,20 @@ export function DocumentModal({ document, onClose }: DocumentModalProps) {
                         className="btn btn-secondary"
                         onClick={() => {
                             const doc = generateDocumentTechniquePDF({ document });
-                            doc.save(`${document.nom.replace(/\s+/g, '_')}.pdf`);
+                            const fileName = `${document.nom.replace(/\s+/g, '_')}.pdf`;
+                            doc.save(fileName);
+
+                            if (currentCoproId) {
+                                const blob = doc.output('blob');
+                                autoFileToGED({
+                                    blob,
+                                    fileName,
+                                    coproId: currentCoproId,
+                                    category: 'diagnostic',
+                                    sourceModule: 'maintenance',
+                                    year: new Date().getFullYear(),
+                                });
+                            }
                         }}
                     >
                         <Download size={16} aria-hidden="true" /> Télécharger en PDF

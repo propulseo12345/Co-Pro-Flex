@@ -22,6 +22,7 @@ import type { AGData, Resolution } from '@/hooks/modules/useConvocationData';
 import { logger } from '@/lib/utils/logger';
 import { withTimeoutSafe, DEFAULT_TIMEOUTS } from '@/lib/utils/timeout';
 import { loadDraft, saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 
 // Types pour le versioning
 export interface ConvocationVersion {
@@ -72,6 +73,7 @@ export interface ConvocationPreviewState {
 
 interface UseConvocationPreviewOptions {
   agId: string;
+  coproId?: string | null;
   agData: AGData | null;
   resolutions: Resolution[];
   annexes?: string[];
@@ -143,6 +145,7 @@ function hashData(data: unknown): string {
  */
 export function useConvocationPreview({
   agId,
+  coproId,
   agData,
   resolutions,
   annexes = [],
@@ -323,20 +326,38 @@ export function useConvocationPreview({
     if (!agData) return;
 
     try {
-      downloadConvocationPDF(
-        {
-          agData,
-          resolutions,
-          copropriete,
-          syndic,
-          annexes,
-          annexesStructured,
-          accountingData,
-          uploadedDocPages,
-          version: state.currentVersion,
-        },
-        filename
-      );
+      const params: ConvocationPDFParams = {
+        agData,
+        resolutions,
+        copropriete,
+        syndic,
+        annexes,
+        annexesStructured,
+        accountingData,
+        uploadedDocPages,
+        version: state.currentVersion,
+      };
+
+      downloadConvocationPDF(params, filename);
+
+      // Fire-and-forget: archive dans la GED (use cached blob if available)
+      if (coproId) {
+        const blob = state.pdfBlob || generateConvocationPDF(params).blob;
+        if (blob) {
+          const finalName = filename || `Convocation_AG_${agId}.pdf`;
+          autoFileToGED({
+            blob,
+            fileName: finalName,
+            coproId,
+            category: 'convocation',
+            sourceModule: 'ag',
+            entityId: agId,
+            entityType: 'ag_meeting',
+            linkType: 'main',
+            year: new Date().getFullYear(),
+          });
+        }
+      }
 
       logger.info('PDF téléchargé', { agId, step: 'convocation', action: 'downloadPDF' });
     } catch (error) {
@@ -347,7 +368,7 @@ export function useConvocationPreview({
         errorCode: 'ERR-PDF-DOWNLOAD',
       });
     }
-  }, [agData, resolutions, copropriete, syndic, annexes, annexesStructured, accountingData, uploadedDocPages, state.currentVersion, agId]);
+  }, [agData, resolutions, copropriete, syndic, annexes, annexesStructured, accountingData, uploadedDocPages, state.currentVersion, state.pdfBlob, agId, coproId]);
 
   /**
    * Change le mode de prévisualisation

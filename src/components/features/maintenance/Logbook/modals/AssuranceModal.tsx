@@ -18,9 +18,12 @@ import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 import { ASSURANCE_DOC_LABELS } from '@/components/features/maintenance/Contracts/types';
 import { DocumentAssurance } from '@/types';
 import { generateAssuranceDocumentPDF } from '@/lib/pdf/generateAssuranceDocumentPDF';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 
 export function AssuranceModal({ assurance, onClose }: AssuranceModalProps) {
     const router = useRouter();
+    const { currentCoproId } = useCopro();
     const expired = !isGarantieEnCours(assurance.dateFin);
     const expiring = isEcheanceProche(assurance.dateFin);
     const documents = assurance.documents || [];
@@ -30,12 +33,25 @@ export function AssuranceModal({ assurance, onClose }: AssuranceModalProps) {
     };
 
     const handleDownloadDoc = (doc: DocumentAssurance) => {
-        // Génération d'un vrai PDF au lieu d'un fichier texte
         const pdfDoc = generateAssuranceDocumentPDF({
             document: doc,
             assurance: assurance,
         });
-        pdfDoc.save(`${doc.nom.replace(/\s+/g, '_')}.pdf`);
+        const fileName = `${doc.nom.replace(/\s+/g, '_')}.pdf`;
+        pdfDoc.save(fileName);
+
+        if (currentCoproId) {
+            const blob = pdfDoc.output('blob');
+            autoFileToGED({
+                blob,
+                fileName,
+                coproId: currentCoproId,
+                category: 'assurance',
+                sourceModule: 'maintenance',
+                subFolderName: 'Assurances',
+                year: new Date().getFullYear(),
+            });
+        }
     };
 
     return (

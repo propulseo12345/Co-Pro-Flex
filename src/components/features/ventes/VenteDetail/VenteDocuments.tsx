@@ -5,6 +5,8 @@ import { FileText, Upload, Clock, CheckCircle2, Edit2, Download, Eye, X, ZoomIn,
 import type { VenteDocument, Vente } from './types';
 import { getStatutStyle, formatDate } from './utils';
 import { generateVenteDocumentPDF, previewVenteDocumentPDF } from '@/lib/pdf/generateVenteDocumentPDF';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import styles from './VenteDetail.module.css';
 
 interface VenteDocumentsProps {
@@ -14,6 +16,7 @@ interface VenteDocumentsProps {
 }
 
 export function VenteDocuments({ documents, vente, onSignDocument }: VenteDocumentsProps) {
+  const { currentCoproId } = useCopro();
   const [previewDoc, setPreviewDoc] = useState<VenteDocument | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100);
@@ -29,6 +32,20 @@ export function VenteDocuments({ documents, vente, onSignDocument }: VenteDocume
     const pdfDoc = generateVenteDocumentPDF({ vente, document: venteDoc });
     const fileName = `${venteDoc.type}_${vente.lotId.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
     pdfDoc.save(fileName);
+
+    // Fire-and-forget: archive dans la GED
+    if (currentCoproId) {
+      const blob = pdfDoc.output('blob');
+      autoFileToGED({
+        blob,
+        fileName,
+        coproId: currentCoproId,
+        category: 'etat_date',
+        sourceModule: 'legal',
+        subFolderName: `Ventes ${new Date().getFullYear()}`,
+        year: new Date().getFullYear(),
+      });
+    }
   };
 
   const closePreview = () => {

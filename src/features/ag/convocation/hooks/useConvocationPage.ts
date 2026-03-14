@@ -173,6 +173,7 @@ export function useConvocationPage(): UseConvocationPageResult {
   // Hook de prévisualisation PDF - utilise les données DB
   const preview = useConvocationPreview({
     agId,
+    coproId: copropriete?.id ?? null,
     agData,
     resolutions,
     annexes: annexesHook.annexeNames,

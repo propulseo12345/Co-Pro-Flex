@@ -19,8 +19,12 @@ import {
   filterImpayes,
   getEligibleImpayesForType,
 } from '../domain/utils';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 
 export function useImpayesPage() {
+  const { currentCoproId } = useCopro();
+
   // Main data
   const [impayes, setImpayes] = useState<Impaye[]>(MOCK_IMPAYES);
   const [selectedStatut, setSelectedStatut] = useState<string>('tous');
@@ -140,8 +144,22 @@ export function useImpayesPage() {
       });
       const fileName = `${typeLabel[type] || 'relance'}_${selectedImpaye.coproprietaire.nom.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
+
+      // Fire-and-forget: archive dans la GED
+      if (currentCoproId) {
+        const blob = doc.output('blob');
+        autoFileToGED({
+          blob,
+          fileName,
+          coproId: currentCoproId,
+          category: 'courrier',
+          sourceModule: 'finance',
+          subFolderName: `Relances ${new Date().getFullYear()}`,
+          year: new Date().getFullYear(),
+        });
+      }
     },
-    [selectedImpaye]
+    [selectedImpaye, currentCoproId]
   );
 
   const closePreview = useCallback(() => {
@@ -365,7 +383,22 @@ export function useImpayesPage() {
       try {
         if (format === 'pdf') {
           const doc = generateImpayesExportPDF(impayesForExport);
-          doc.save(`impayes_export_${new Date().toISOString().split('T')[0]}.pdf`);
+          const exportFileName = `impayes_export_${new Date().toISOString().split('T')[0]}.pdf`;
+          doc.save(exportFileName);
+
+          // Fire-and-forget: archive dans la GED
+          if (currentCoproId) {
+            const blob = doc.output('blob');
+            autoFileToGED({
+              blob,
+              fileName: exportFileName,
+              coproId: currentCoproId,
+              category: 'releve_charges',
+              sourceModule: 'finance',
+              subFolderName: `Exports ${new Date().getFullYear()}`,
+              year: new Date().getFullYear(),
+            });
+          }
         } else {
           generateImpayesExportCSV(impayesForExport);
         }
@@ -382,7 +415,7 @@ export function useImpayesPage() {
         setExportLoading(false);
       }
     },
-    [filteredImpayes]
+    [filteredImpayes, currentCoproId]
   );
 
   // Filter change handler

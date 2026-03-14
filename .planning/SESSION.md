@@ -1,26 +1,23 @@
-# Session State — 2026-03-14 00:30
+# Session State — 2026-03-14 11:45
 
 ## Branch
 v2
 
 ## Completed This Session
-- GED CRUD: dossiers (créer/renommer/supprimer) + supprimer docs + KPI fix
-- GED Upload Modal: UploadDocumentModal + FolderTreeSelect + detect-category
-- Auto-file service: autoFileToGED avec folder resolution par category_default
-- Toast system: ToastProvider dashboard-level + migration 11 fichiers useToast
-- PDF refactoring: 8 générateurs retournent jsPDF (+ call sites mis à jour)
-- API update: uploadDocument accepte sourceModule/documentDate/year
-- DB: category_default peuplé sur dossiers système + storage RLS anon
-- Spec + plan: docs/superpowers/specs/2026-03-14-ged-upload-autofile-design.md
-- Audit complet: 8 chantiers restants identifiés avec scores
+- autoFileToGED: branchement sur 10 call sites PDF (PV, convocation, relance, vente, résiliation, docs techniques, assurances)
+- GED refresh: visibilitychange listener pour rafraîchir silencieusement quand l'utilisateur revient sur l'onglet
+- Fix checkboxes envoi: supprimé re-fetch post-save qui écrasait l'état optimiste + debounce 500ms
+- Fix budget import: champ Exercice changé en input number libre (plus de select limité)
+- Spec envoi convocations: docs/superpowers/specs/2026-03-14-convocation-dispatch-design.md
+- Plan envoi convocations: docs/superpowers/plans/2026-03-14-convocation-dispatch.md (7 chunks, 10 tasks)
 
 ## Next Task
-**GED finitions** : brancher autoFileToGED() dans chaque call site PDF (fire-and-forget après doc.save), puis sidebar arborescente (sous-dossiers 2 niveaux)
+Exécuter le plan d'implémentation: Chunk 1 Task 1 — migration Supabase (table ag_envoi_tracking + RPCs + bundle RPC)
 
 ## Blockers
 None
 
 ## Key Context
-- Spec validé: docs/superpowers/specs/2026-03-14-ged-upload-autofile-design.md
-- generateConvocationPDF retourne déjà ConvocationPDFResult (pas besoin refacto)
-- Priorités post-GED: Email/Notifs (#1), Settings persistence (#2), Communication RT (#3)
+- Schema DB: coproprietaires a first_name/last_name/address_line1/address_line2/city/postal_code (pas prenom/nom/adresse)
+- Lots via junction table lot_owners (pas owner_id direct sur lots)
+- useDeliveryConfig déprécié au profit de useAgEnvoiPage pour cette feature

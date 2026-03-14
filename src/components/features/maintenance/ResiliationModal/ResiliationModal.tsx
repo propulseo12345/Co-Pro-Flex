@@ -8,6 +8,8 @@ import clsx from 'clsx';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { generateResiliationPDF } from '@/lib/pdf/generateResiliationPDF';
 import { recommandeService, isRecommandeElectroniqueConfigured } from '@/services/recommande';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import styles from './ResiliationModal.module.css';
 
 interface ResiliationModalProps {
@@ -27,6 +29,7 @@ const SYNDIC_INFO = {
 };
 
 export default function ResiliationModal({ contrat, onClose, onConfirm }: ResiliationModalProps) {
+    const { currentCoproId } = useCopro();
     const [step, setStep] = useState(1); // 1: Form, 2: Preview, 3: Mode d'envoi
     const [dateResiliation, setDateResiliation] = useState('');
     const [courrierTexte, setCourrierTexte] = useState('');
@@ -153,7 +156,23 @@ ${SYNDIC_INFO.email} – ${SYNDIC_INFO.telephone}`;
         });
         const numeroContratSafe = (contrat.numeroContrat || contrat.id).replace(/[^a-zA-Z0-9]/g, '_');
         const dateStr = new Date().toISOString().split('T')[0];
-        doc.save(`resiliation_RAR_${numeroContratSafe}_${dateStr}.pdf`);
+        const fileName = `resiliation_RAR_${numeroContratSafe}_${dateStr}.pdf`;
+        doc.save(fileName);
+
+        // Fire-and-forget: archive dans la GED
+        if (currentCoproId) {
+            const blob = doc.output('blob');
+            autoFileToGED({
+                blob,
+                fileName,
+                coproId: currentCoproId,
+                category: 'contrat',
+                sourceModule: 'maintenance',
+                subFolderName: `Résiliations ${new Date().getFullYear()}`,
+                year: new Date().getFullYear(),
+            });
+        }
+
         setPdfGenerated(true);
         setModeEnvoi('RECOMMANDE_POSTAL');
     };

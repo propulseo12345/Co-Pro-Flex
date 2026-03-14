@@ -94,24 +94,16 @@ export function BudgetSection({
               <label htmlFor="budgetExercice" className={styles.label}>
                 Exercice
               </label>
-              <select
+              <input
                 id="budgetExercice"
-                className={styles.select}
+                type="number"
+                className={styles.input}
                 value={budgetExercice}
                 onChange={(e) => onExerciceChange(e.target.value)}
-              >
-                {budgetExercice && !availableBudgetYears.includes(Number.parseInt(budgetExercice, 10)) && (
-                  <option value={budgetExercice}>{budgetExercice}</option>
-                )}
-                {availableBudgetYears.length === 0 && (
-                  <option value={budgetExercice || ''}>{budgetExercice || 'Aucun exercice disponible'}</option>
-                )}
-                {availableBudgetYears.map((year) => (
-                  <option key={year} value={String(year)}>
-                    {year}
-                  </option>
-                ))}
-              </select>
+                min="2020"
+                max="2040"
+                placeholder="Ex: 2026"
+              />
             </div>
 
             <div className={styles.budgetSection}>

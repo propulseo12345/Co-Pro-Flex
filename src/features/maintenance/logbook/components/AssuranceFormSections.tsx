@@ -4,6 +4,8 @@ import { AssuranceFormData, SOUS_TYPES_ASSURANCE, TYPE_DOCUMENTS } from '../hook
 import { SousTypeAssuranceLiteral, DocumentAssurance } from '@/types/models/maintenance';
 import { FormulaireGarantiesAssurance } from '@/components/features/maintenance/Logbook';
 import { generateAssuranceDocumentPDF } from '@/lib/pdf/generateAssuranceDocumentPDF';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import { FileText, Download, Plus, X, Trash2 } from 'lucide-react';
 import styles from './AssuranceFormSections.module.css';
 
@@ -211,6 +213,8 @@ export function AssuranceDocumentsSection({
     onAddDocument,
     onDeleteDocument
 }: DocumentsSectionProps) {
+    const { currentCoproId } = useCopro();
+
     const handleDownloadDocument = (doc: DocumentAssurance) => {
         const pdfDoc = generateAssuranceDocumentPDF({
             document: doc,
@@ -228,7 +232,21 @@ export function AssuranceDocumentsSection({
                 garanties: formData.garanties,
             },
         });
-        pdfDoc.save(`${doc.nom.replace(/\s+/g, '_')}.pdf`);
+        const fileName = `${doc.nom.replace(/\s+/g, '_')}.pdf`;
+        pdfDoc.save(fileName);
+
+        if (currentCoproId) {
+            const blob = pdfDoc.output('blob');
+            autoFileToGED({
+                blob,
+                fileName,
+                coproId: currentCoproId,
+                category: 'assurance',
+                sourceModule: 'maintenance',
+                subFolderName: 'Assurances',
+                year: new Date().getFullYear(),
+            });
+        }
     };
 
     return (

@@ -15,6 +15,8 @@ import { saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import { logger } from '@/lib/utils/logger';
 import { updateAgCurrentStep } from '@/lib/ag/api';
 import { updateAgStatus } from '@/lib/ag/api/meetings.api';
+import { useCopro } from '@/providers/CoproContext';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 
 interface UsePVPageProps {
   agId: string;
@@ -78,6 +80,7 @@ interface PVBundleResponse {
 
 export function usePVPage({ agId }: UsePVPageProps) {
   const router = useRouter();
+  const { currentCoproId } = useCopro();
 
   // Data state
   const [agData, setAgData] = useState<AGData | null>(null);
@@ -362,7 +365,24 @@ export function usePVPage({ agId }: UsePVPageProps) {
       const doc = generatePDFDocument(agData, resolutions, votes, presences, signataires, replaceVariables);
       if (doc) {
         const dateStr = new Date().toISOString().split('T')[0];
-        doc.save(`PV_AG_${agId}_${dateStr}.pdf`);
+        const fileName = `PV_AG_${agId}_${dateStr}.pdf`;
+        doc.save(fileName);
+
+        // Fire-and-forget: archive dans la GED
+        if (currentCoproId) {
+          const blob = doc.output('blob');
+          autoFileToGED({
+            blob,
+            fileName,
+            coproId: currentCoproId,
+            category: 'pv_ag',
+            sourceModule: 'ag',
+            entityId: agId,
+            entityType: 'ag_meeting',
+            linkType: 'main',
+            year: new Date().getFullYear(),
+          });
+        }
       } else {
         setPdfError('Erreur lors de la génération du PDF.');
       }
@@ -371,7 +391,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
     } finally {
       setIsGeneratingPdf(false);
     }
-  }, [agData, agId, resolutions, votes, presences, signataires, replaceVariables]);
+  }, [agData, agId, resolutions, votes, presences, signataires, replaceVariables, currentCoproId]);
 
   const handlePreviewPDF = useCallback(async () => {
     if (!agData) {

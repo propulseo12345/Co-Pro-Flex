@@ -337,21 +337,10 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
         return false;
       }
 
-      // RE-FETCH: Hydrater l'UI depuis la DB (pas d'état optimiste)
-      if (savedData && Array.isArray(savedData)) {
-        // Reconstruire avec les IDs des copros actuels
-        const savedMap = new Map<string, SendingMethod[]>();
-        (savedData as SendingChoice[]).forEach(c => {
-          savedMap.set(c.coproprietaireId, c.methods || []);
-        });
+      // État optimiste : l'UI fait foi, la DB suit
+      // Pas de re-fetch pour éviter de reset le state pendant l'interaction
 
-        setSendingChoices(prev => prev.map(choice => ({
-          ...choice,
-          methods: savedMap.get(choice.coproprietaireId) || choice.methods
-        })));
-      }
-
-      logger.debug('Choix envoi sauvegardés et re-fetchés', {
+      logger.debug('Choix envoi sauvegardés', {
         agId,
         step: 'envoi',
         action: 'saveChoices',
@@ -371,13 +360,21 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
     }
   }, [agId]);
 
-  // Persistance immédiate quand les choix changent
+  // Persistance debounced quand les choix changent (évite rafales sur "Tout cocher")
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (isInitialLoadRef.current || status !== 'ready' || sendingChoices.length === 0) {
       return;
     }
 
-    saveChoicesToDB(sendingChoices);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveChoicesToDB(sendingChoices);
+    }, 500);
+
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
   }, [sendingChoices, status, saveChoicesToDB]);
 
   // ========================================
