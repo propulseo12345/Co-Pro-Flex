@@ -72,45 +72,27 @@
 
 /* ── Period Bar ── */
 .periodBar {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.periodSelector {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  width: 100%;
   padding: 12px 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-}
-
-.periodNav {
-  display: flex;
-  gap: 4px;
-}
-
-.periodNavBtn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
   cursor: pointer;
   transition: all 150ms;
-  font-size: 14px;
   font-family: inherit;
+  text-align: left;
 }
 
-.periodNavBtn:hover:not(:disabled) {
-  color: var(--text-main);
+.periodSelector:hover {
   border-color: rgba(148, 163, 184, 0.3);
-}
-
-.periodNavBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .periodLabel {
@@ -122,12 +104,78 @@
 .periodMeta {
   font-size: 13px;
   color: var(--text-tertiary);
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
-.periodMetaValue {
-  color: var(--text-secondary);
-  font-weight: 500;
+.chevron {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  transition: transform 200ms;
+}
+
+.chevronOpen {
+  margin-left: auto;
+  color: var(--text-main);
+  transition: transform 200ms;
+  transform: rotate(180deg);
+}
+
+.periodDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.4);
+  z-index: 50;
+  overflow: hidden;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.periodOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  cursor: pointer;
+  transition: background 150ms;
+  font-family: inherit;
+  text-align: left;
+}
+
+.periodOption:last-child {
+  border-bottom: none;
+}
+
+.periodOption:hover {
+  background: var(--bg-tertiary);
+}
+
+.periodOptionActive {
+  background: var(--primary-light);
+}
+
+.periodOptionActive:hover {
+  background: var(--primary-light);
+}
+
+.periodOptionName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.periodOptionDates {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-left: auto;
 }
 
 /* ── Tabs Bar ── */

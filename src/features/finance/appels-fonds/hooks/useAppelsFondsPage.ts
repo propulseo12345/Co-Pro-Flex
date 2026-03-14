@@ -25,6 +25,7 @@ export interface UseAppelsFondsPageReturn {
   periods: AccountingPeriod[];
   selectedPeriod: AccountingPeriod | null;
   navigatePeriod: (direction: 'prev' | 'next') => void;
+  selectPeriod: (periodId: string) => void;
   canGoPrev: boolean;
   canGoNext: boolean;
   isLoading: boolean;
@@ -74,6 +75,11 @@ export function useAppelsFondsPage(): UseAppelsFondsPageReturn {
     } else if (direction === 'next' && canGoNext) {
       setSelectedPeriodIndex(i => i - 1);
     }
+  };
+
+  const selectPeriod = (periodId: string) => {
+    const idx = periods.findIndex(p => p.id === periodId);
+    if (idx >= 0) setSelectedPeriodIndex(idx);
   };
 
   // ── Load budgets for selected period year ──
@@ -173,6 +179,7 @@ export function useAppelsFondsPage(): UseAppelsFondsPageReturn {
     periods,
     selectedPeriod,
     navigatePeriod,
+    selectPeriod,
     canGoPrev,
     canGoNext,
     isLoading,

@@ -23,9 +23,7 @@ export default function AppelsFondsPage() {
     impayesCount,
     periods,
     selectedPeriod,
-    navigatePeriod,
-    canGoPrev,
-    canGoNext,
+    selectPeriod,
     isLoading,
   } = useAppelsFondsPage();
 
@@ -51,23 +49,14 @@ export default function AppelsFondsPage() {
     );
   }
 
-  // ── Period label & meta ──
-  const periodLabel = selectedPeriod?.name ?? 'Exercice';
-  const periodMeta = selectedPeriod
-    ? `${new Date(selectedPeriod.start_date).toLocaleDateString('fr-FR')} — ${new Date(selectedPeriod.end_date).toLocaleDateString('fr-FR')}`
-    : '';
-
   return (
     <div className={styles.container}>
       <AppelsFondsHeader
-        periodLabel={periodLabel}
-        periodMeta={periodMeta}
-        onPrev={() => navigatePeriod('prev')}
-        onNext={() => navigatePeriod('next')}
-        canGoPrev={canGoPrev}
-        canGoNext={canGoNext}
-        onGenerate={() => {/* TODO: Task 16-17 */}}
-        onExport={() => {/* TODO: Task 16-17 */}}
+        periods={periods}
+        selectedPeriod={selectedPeriod}
+        onSelectPeriod={selectPeriod}
+        onGenerate={() => {/* TODO */}}
+        onExport={() => {/* TODO */}}
       />
 
       <AppelsFondsTabs
