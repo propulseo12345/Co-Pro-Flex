@@ -1,12 +1,13 @@
 'use client';
 
+import React from 'react';
 import styles from '../styles/StatsGrid.module.css';
 import clsx from 'clsx';
 
 export type StatColor = 'blue' | 'green' | 'red' | 'amber' | 'purple';
 
 export interface StatItem {
-  icon: string;
+  icon: React.ReactNode;
   iconColor: StatColor;
   label: string;
   value: string;

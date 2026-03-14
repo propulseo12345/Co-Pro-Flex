@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Wallet, Check, Clock, Users } from 'lucide-react';
 import { useAppelsFondsDetail } from '@/features/finance/appels-fonds/hooks/useAppelsFondsDetail';
 import { DetailHeader } from '@/features/finance/appels-fonds/components/DetailHeader';
 import { StatsGrid } from '@/features/finance/appels-fonds/components/StatsGrid';
@@ -45,27 +45,27 @@ export default function CallDetailPage() {
 
   const statItems: StatItem[] = [
     {
-      icon: '\uD83D\uDCB0',
+      icon: <Wallet size={18} />,
       iconColor: 'blue',
       label: 'Appele',
       value: formatEuros(stats.called),
     },
     {
-      icon: '\u2713',
+      icon: <Check size={18} />,
       iconColor: 'green',
       label: 'Encaisse',
       value: formatEuros(stats.paid),
       valueColor: 'green',
     },
     {
-      icon: '\u23F3',
+      icon: <Clock size={18} />,
       iconColor: 'red',
       label: 'Restant',
       value: formatEuros(stats.remaining),
       valueColor: 'red',
     },
     {
-      icon: '\uD83D\uDC65',
+      icon: <Users size={18} />,
       iconColor: 'amber',
       label: 'Coproprietaires',
       value: String(stats.paidCount),

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { FileText, BarChart3, Send } from 'lucide-react';
 import type { TravauxProject } from '../types';
 import { formatEuros } from '../utils';
 import { EcheanceCard } from './EcheanceCard';
@@ -60,19 +61,19 @@ export function TravauxCard({ project, onEmit }: TravauxCardProps) {
       </div>
 
       <div className={styles.travauxActions}>
-        <button className={styles.actionBtn}>📄 Avis PDF</button>
+        <button className={styles.actionBtn}><FileText size={14} /> Avis PDF</button>
         {currentCall && (
           <button
             className={styles.actionBtnPrimary}
             onClick={() => router.push(`/finance/appels-fonds/${currentCall.id}`)}
           >
-            📊 Détail
+            <BarChart3 size={14} /> Détail
           </button>
         )}
         {unpaidCount > 0 && (
           <button className={styles.actionBtn}>Relancer ({unpaidCount})</button>
         )}
-        <button className={styles.actionBtn}>📨 Envoyer</button>
+        <button className={styles.actionBtn}><Send size={14} /> Envoyer</button>
       </div>
     </div>
   );

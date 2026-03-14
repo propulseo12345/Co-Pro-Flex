@@ -1,5 +1,6 @@
 'use client';
 
+import { Download, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from '../styles/AppelsFondsPage.module.css';
 
 interface AppelsFondsHeaderProps {
@@ -34,10 +35,10 @@ export function AppelsFondsHeader({
         </div>
         <div className={styles.headerActions}>
           <button className={styles.btnSecondary} onClick={onExport}>
-            📊 Export
+            <Download size={14} /> Export
           </button>
           <button className={styles.btnPrimary} onClick={onGenerate}>
-            + Générer les appels
+            <Plus size={14} /> Générer les appels
           </button>
         </div>
       </div>
@@ -49,14 +50,14 @@ export function AppelsFondsHeader({
             onClick={onPrev}
             disabled={!canGoPrev}
           >
-            ◀
+            <ChevronLeft size={14} />
           </button>
           <button
             className={styles.periodNavBtn}
             onClick={onNext}
             disabled={!canGoNext}
           >
-            ▶
+            <ChevronRight size={14} />
           </button>
         </div>
         <span className={styles.periodLabel}>{periodLabel}</span>

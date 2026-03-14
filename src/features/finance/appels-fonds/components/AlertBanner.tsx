@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
 import styles from '../styles/StatsGrid.module.css';
 
 interface AlertBannerProps {
@@ -14,7 +15,7 @@ export function AlertBanner({ count, message, actionLabel, onAction }: AlertBann
 
   return (
     <div className={styles.alertBanner}>
-      <span className={styles.alertIcon}>⚠</span>
+      <span className={styles.alertIcon}><AlertTriangle size={16} /></span>
       <div className={styles.alertText}>
         <span className={styles.alertStrong}>{count} copropriétaire{count > 1 ? 's' : ''} en impayé</span>
         {' '}{message}

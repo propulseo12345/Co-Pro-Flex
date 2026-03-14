@@ -1,6 +1,8 @@
 'use client';
 
+import React from 'react';
 import clsx from 'clsx';
+import { BarChart3, FileText, Wrench } from 'lucide-react';
 import type { AppelTab } from '../types';
 import { StatusBadge } from './StatusBadge';
 import styles from '../styles/AppelsFondsPage.module.css';
@@ -18,7 +20,7 @@ interface AppelsFondsTabsProps {
 
 interface TabDef {
   id: AppelTab;
-  icon: string;
+  icon: React.ReactNode;
   iconClass: string;
   label: string;
   amount: string;
@@ -39,7 +41,7 @@ export function AppelsFondsTabs({
   const tabs: TabDef[] = [
     {
       id: 'all',
-      icon: '📊',
+      icon: <BarChart3 size={14} />,
       iconClass: styles.tabIconNeutral,
       label: 'Vue globale',
       amount: globalAmount,
@@ -48,7 +50,7 @@ export function AppelsFondsTabs({
     },
     {
       id: 'courant',
-      icon: '📋',
+      icon: <FileText size={14} />,
       iconClass: styles.tabIconBlue,
       label: 'Budget courant',
       amount: courantAmount,
@@ -57,7 +59,7 @@ export function AppelsFondsTabs({
     },
     {
       id: 'travaux',
-      icon: '🔧',
+      icon: <Wrench size={14} />,
       iconClass: styles.tabIconPurple,
       label: 'Travaux',
       amount: travauxAmount,

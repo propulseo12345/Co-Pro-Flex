@@ -1,5 +1,6 @@
 'use client';
 
+import { Wallet, Check, Clock, TrendingUp, FileText, Wrench } from 'lucide-react';
 import type { AppelStats, TravauxStats } from '../types';
 import { formatEuros } from '../utils';
 import { StatsGrid } from './StatsGrid';
@@ -25,27 +26,27 @@ export function TabVueGlobale({
 }: TabVueGlobaleProps) {
   const globalItems: StatItem[] = [
     {
-      icon: '💰',
+      icon: <Wallet size={18} />,
       iconColor: 'blue',
       label: 'Total appelé',
       value: formatEuros(globalStats.totalCalled),
     },
     {
-      icon: '✓',
+      icon: <Check size={18} />,
       iconColor: 'green',
       label: 'Encaissé',
       value: formatEuros(globalStats.totalPaid),
       valueColor: 'green',
     },
     {
-      icon: '⏳',
+      icon: <Clock size={18} />,
       iconColor: 'red',
       label: 'Restant dû',
       value: formatEuros(globalStats.totalUnpaid),
       valueColor: 'red',
     },
     {
-      icon: '📈',
+      icon: <TrendingUp size={18} />,
       iconColor: 'amber',
       label: 'Recouvrement',
       value: `${globalStats.recoveryRate} %`,
@@ -65,7 +66,7 @@ export function TabVueGlobale({
 
       <div className={styles.sectionTitleRow}>
         <div className={`${styles.sectionIconSm} ${styles.sectionIconSmBlue}`}>
-          📋
+          <FileText size={16} />
         </div>
         <div className={styles.sectionTitleText}>Budget courant</div>
         <div className={styles.sectionMeta}>
@@ -81,7 +82,7 @@ export function TabVueGlobale({
 
       <div className={styles.sectionTitleRowSpaced}>
         <div className={`${styles.sectionIconSm} ${styles.sectionIconSmPurple}`}>
-          🔧
+          <Wrench size={16} />
         </div>
         <div className={styles.sectionTitleText}>Travaux</div>
         <div className={styles.sectionMeta}>

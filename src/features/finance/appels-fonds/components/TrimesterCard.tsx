@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
+import { FileText, BarChart3 } from 'lucide-react';
 import type { TrimesterCard as TrimesterCardType } from '../types';
 import { formatEuros } from '../utils';
 import { StatusBadge } from './StatusBadge';
@@ -82,10 +83,10 @@ export function TrimesterCard({ card, onEmit }: TrimesterCardProps) {
         ) : (
           <>
             <button className={styles.actionBtn} onClick={e => e.stopPropagation()}>
-              📄 Avis
+              <FileText size={14} /> Avis
             </button>
             <button className={styles.actionBtnPrimary} onClick={e => { e.stopPropagation(); handleDetail(); }}>
-              📊 Détail
+              <BarChart3 size={14} /> Détail
             </button>
             {unpaidCount > 0 && (
               <button className={styles.actionBtn} onClick={e => e.stopPropagation()}>

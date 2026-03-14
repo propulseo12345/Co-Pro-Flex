@@ -1,5 +1,6 @@
 'use client';
 
+import { Wallet, Check, Clock, TrendingUp } from 'lucide-react';
 import type { AppelStats, TrimesterCard as TrimesterCardType } from '../types';
 import { formatEuros } from '../utils';
 import { StatsGrid } from './StatsGrid';
@@ -26,27 +27,27 @@ export function TabBudgetCourant({
 }: TabBudgetCourantProps) {
   const statItems: StatItem[] = [
     {
-      icon: '💰',
+      icon: <Wallet size={18} />,
       iconColor: 'blue',
       label: 'Total appelé',
       value: formatEuros(stats.totalCalled),
     },
     {
-      icon: '✓',
+      icon: <Check size={18} />,
       iconColor: 'green',
       label: 'Encaissé',
       value: formatEuros(stats.totalPaid),
       valueColor: 'green',
     },
     {
-      icon: '⏳',
+      icon: <Clock size={18} />,
       iconColor: 'red',
       label: 'Restant dû',
       value: formatEuros(stats.totalUnpaid),
       valueColor: 'red',
     },
     {
-      icon: '📈',
+      icon: <TrendingUp size={18} />,
       iconColor: 'amber',
       label: 'Recouvrement',
       value: `${stats.recoveryRate} %`,
