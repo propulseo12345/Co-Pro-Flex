@@ -6,6 +6,7 @@ import { updateAgCurrentStep } from '@/lib/ag/api';
 import { ArrowLeft, ArrowRight, Info, AlertCircle, Loader2, X } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
 import { useAgEnvoiPage, SENDING_METHODS } from '@/features/ag/hooks/useAgEnvoiPage';
+import { SendProgressModal } from '@/features/ag/components/envoi/SendProgressModal';
 import styles from './envoi.module.css';
 
 export default function EnvoiPage() {
@@ -203,6 +204,13 @@ export default function EnvoiPage() {
           Envoyer la convocation
         </button>
       </div>
+
+      <SendProgressModal
+        progress={page.progress}
+        onCancel={page.handleCancelSend}
+        onDownloadZip={page.handleDownloadZip}
+        onContinue={page.handleCloseProgress}
+      />
     </div>
   );
 }

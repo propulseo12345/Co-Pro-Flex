@@ -37,6 +37,7 @@ export interface ConvocationPDFParams {
   accountingData?: AnnexeAccountingData | null;
   uploadedDocPages?: import('./pdf-document-renderer').RenderedPage[];
   version?: number;
+  destinataire?: import('@/features/ag/types/envoi-dispatch').ConvocationDestinataire;
 }
 
 export interface ConvocationAnnexePDF {
@@ -142,6 +143,83 @@ function checkPage(doc: jsPDF, y: number, need: number): number {
 }
 
 // ════════════════════════════════════════════════════════════
+// PAGE DE GARDE PERSONNALISEE
+// ════════════════════════════════════════════════════════════
+
+function renderCoverPage(
+  doc: jsPDF,
+  params: {
+    destinataire: import('@/features/ag/types/envoi-dispatch').ConvocationDestinataire;
+    syndic: { nom: string; adresse: string };
+    ag: { type: string; date: string; heure: string; lieu: string };
+  }
+) {
+  const { destinataire, syndic, ag } = params;
+  let y = MARGIN;
+
+  // En-tete syndic (expediteur)
+  txt(doc, syndic.nom, MARGIN, y, { s: 'bold', sz: 11, c: NAVY });
+  y += 5;
+  txt(doc, syndic.adresse, MARGIN, y, { sz: 9, c: TEXT_SEC });
+  y += 12;
+
+  // Date
+  const dateFormatted = new Date().toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+  txt(doc, `Le ${dateFormatted}`, PW - MARGIN, y, { sz: 10, c: TEXT, a: 'right' });
+  y += 18;
+
+  // Bloc destinataire (encadre)
+  const boxX = PW - MARGIN - 85;
+  const boxY = y;
+  doc.setDrawColor(...NAVY_MID);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(boxX, boxY, 85, 35, 2, 2);
+
+  txt(doc, destinataire.nom, boxX + 4, boxY + 6, { s: 'bold', sz: 10, c: NAVY });
+  txt(doc, destinataire.adresse, boxX + 4, boxY + 12, { sz: 9, c: TEXT });
+  if (destinataire.complement) {
+    txt(doc, destinataire.complement, boxX + 4, boxY + 17, { sz: 9, c: TEXT });
+  }
+  txt(doc, `${destinataire.codePostal} ${destinataire.ville}`, boxX + 4, boxY + 22, { sz: 9, c: TEXT });
+  txt(doc, `Lot ${destinataire.lot} — ${destinataire.tantiemes}/${destinataire.totalTantiemes} tantiemes`, boxX + 4, boxY + 28, { sz: 8, c: TEXT_SEC });
+  y = boxY + 45;
+
+  // Objet
+  const typeLabel = ag.type === 'ORDINAIRE' ? 'Ordinaire' :
+    ag.type === 'EXTRAORDINAIRE' ? 'Extraordinaire' : 'Mixte';
+  txt(doc, `Objet : Convocation a l'Assemblee Generale ${typeLabel}`, MARGIN, y, {
+    f: 'times', s: 'bold', sz: 12, c: NAVY
+  });
+  y += 6;
+  txt(doc, `du ${ag.date} a ${ag.heure} — ${ag.lieu}`, MARGIN, y, {
+    f: 'times', sz: 10, c: TEXT
+  });
+  y += 14;
+
+  // Formule d'introduction
+  txt(doc, 'Madame, Monsieur,', MARGIN, y, { sz: 10, c: TEXT });
+  y += 7;
+  const introText = 'Nous avons l\'honneur de vous convoquer a l\'Assemblee Generale ' +
+    `${typeLabel.toLowerCase()} de la copropriete. Vous trouverez ci-apres l'ordre du jour ` +
+    'et les resolutions soumises au vote.';
+  const introLines = doc.splitTextToSize(introText, CW);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...TEXT);
+  doc.text(introLines, MARGIN, y);
+  y += introLines.length * 5 + 8;
+
+  // Mode d'envoi
+  txt(doc, `Mode d'envoi : ${destinataire.sendingMethod}`, MARGIN, y, { sz: 8, c: TEXT_MUTED });
+
+  // Separateur avant le corps
+  y += 8;
+  hr(doc, y, GOLD_MUTED, 0.5);
+}
+
+// ════════════════════════════════════════════════════════════
 // MAIN GENERATOR
 // ════════════════════════════════════════════════════════════
 
@@ -156,9 +234,26 @@ export function generateConvocationPDF(params: ConvocationPDFParams): Convocatio
     accountingData,
     uploadedDocPages,
     version = 1,
+    destinataire,
   } = params;
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // Si destinataire fourni, ajouter la page de garde en premiere page
+  if (destinataire) {
+    renderCoverPage(doc, {
+      destinataire,
+      syndic,
+      ag: {
+        type: agData.type || 'ORDINAIRE',
+        date: new Date(agData.date).toLocaleDateString('fr-FR'),
+        heure: agData.heure || '',
+        lieu: agData.lieu || '',
+      },
+    });
+    doc.addPage();
+  }
+
   let y = MARGIN;
 
   const typeLabel =

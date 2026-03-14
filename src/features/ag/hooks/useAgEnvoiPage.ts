@@ -24,7 +24,20 @@ import { createClient } from '@/lib/supabase/client';
 import { isValidUUID } from '@/lib/ag/draft-persistence';
 import { updateAgCurrentStep } from '@/lib/ag/api';
 import { logger } from '@/lib/utils/logger';
+import { generateConvocationPDF } from '@/lib/pdf/generateConvocationPDF';
+import {
+  dispatchConvocation,
+  generatePostalZip,
+  saveEnvoiTracking,
+  SENDING_METHOD_LABELS,
+} from '@/lib/services/convocation-dispatch.service';
 import type { SendingMethod, SendingChoice } from '../types';
+import type {
+  SendProgress,
+  DispatchResult,
+  PostalEntry,
+  ConvocationBundle,
+} from '../types/envoi-dispatch';
 
 // Helper: Create untyped client for RPC calls not yet in generated types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,6 +128,18 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
   const [sendingChoices, setSendingChoices] = useState<SendingChoice[]>([]);
   const [isSent, setIsSent] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Progression envoi
+  const [progress, setProgress] = useState<SendProgress>({
+    isActive: false,
+    current: 0,
+    total: 0,
+    currentName: '',
+    currentStep: 'loading',
+    results: [],
+    cancelled: false,
+  });
+  const abortRef = useRef<AbortController | null>(null);
 
   // Ref pour éviter les saves pendant le chargement initial
   const isInitialLoadRef = useRef(true);
@@ -443,7 +468,20 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
   }, [sendingChoices]);
 
   // ========================================
-  // ENVOI (MARQUER COMME ENVOYÉ)
+  // CHARGEMENT BUNDLE CONVOCATION
+  // ========================================
+
+  const loadConvocationBundle = useCallback(async (): Promise<ConvocationBundle | null> => {
+    const supabase = createUntypedClient();
+    const { data, error: rpcError } = await supabase.rpc('rpc_get_ag_convocation_bundle', {
+      p_ag_id: agId,
+    });
+    if (rpcError || !data) return null;
+    return data as unknown as ConvocationBundle;
+  }, [agId]);
+
+  // ========================================
+  // ENVOI AVEC PIPELINE COMPLET
   // ========================================
 
   const handleSend = useCallback(async () => {
@@ -453,68 +491,195 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
       return;
     }
 
-    setIsSaving(true);
-    try {
-      const supabase = createUntypedClient();
+    // Init progression
+    const totalOps = sendingChoices.reduce((sum, c) => sum + c.methods.length, 0);
+    setProgress({
+      isActive: true,
+      current: 0,
+      total: totalOps,
+      currentName: 'Chargement des données...',
+      currentStep: 'loading',
+      results: [],
+      cancelled: false,
+    });
+    abortRef.current = new AbortController();
 
+    try {
       // 1. Sauvegarder les choix finaux
-      const choicesSaved = await saveChoicesToDB(sendingChoices);
-      if (!choicesSaved) {
-        throw new Error('Échec de la sauvegarde des choix');
+      await saveChoicesToDB(sendingChoices);
+
+      // 2. Charger le bundle AG
+      const bundle = await loadConvocationBundle();
+      if (!bundle) {
+        throw new Error('Impossible de charger les données de l\'AG');
       }
 
-      // 2. Marquer comme envoyé via RPC milestone (merge sûr)
-      const { data: newMilestones, error: milestoneError } = await supabase
-        .rpc('save_ag_milestone', {
+      const allResults: DispatchResult[] = [];
+      const postalEntries: PostalEntry[] = [];
+      let opIndex = 0;
+
+      // 3. Boucle séquentielle
+      for (const choice of sendingChoices) {
+        if (abortRef.current.signal.aborted) break;
+
+        const coproData = bundle.coproprietaires.find(c => c.id === choice.coproprietaireId);
+        if (!coproData) continue;
+
+        for (const method of choice.methods) {
+          if (abortRef.current.signal.aborted) break;
+          opIndex++;
+
+          const methodLabel = SENDING_METHOD_LABELS[method] || method;
+          setProgress(prev => ({
+            ...prev,
+            current: opIndex,
+            currentName: `${coproData.nom} — ${methodLabel}`,
+            currentStep: 'generating',
+          }));
+
+          // a. Générer le PDF personnalisé
+          const agDateFormatted = new Date(bundle.agData.meeting_date).toLocaleDateString('fr-FR');
+          const agDateISO = bundle.agData.meeting_date.split('T')[0];
+
+          const pdfResult = generateConvocationPDF({
+            agData: {
+              type: (bundle.agData.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE') as 'ORDINAIRE' | 'EXTRAORDINAIRE' | 'URGENTE',
+              date: bundle.agData.meeting_date,
+              heure: '',
+              lieu: bundle.agData.location || '',
+              adresse: bundle.syndic.adresse || '',
+              budget: false,
+              budgetMontant: '',
+              budgetExercice: '',
+            },
+            resolutions: bundle.resolutions.map(r => ({
+              id: r.id,
+              numero: r.resolution_number,
+              titre: r.title,
+              texte: r.description,
+              majorite: r.majority_type,
+              variables: r.variables as Record<string, string>,
+            })),
+            copropriete: { nom: bundle.syndic.nom, adresse: bundle.syndic.adresse },
+            syndic: {
+              nom: bundle.syndic.nom,
+              adresse: `${bundle.syndic.adresse}, ${bundle.syndic.code_postal} ${bundle.syndic.ville}`,
+            },
+            destinataire: {
+              nom: coproData.nom || '',
+              adresse: coproData.address_line1 || '',
+              complement: coproData.address_line2 || undefined,
+              codePostal: coproData.postal_code || '',
+              ville: coproData.city || '',
+              lot: coproData.lot_id || '',
+              tantiemes: coproData.tantiemes || 0,
+              totalTantiemes: bundle.totalTantiemes,
+              sendingMethod: methodLabel,
+            },
+          });
+
+          const blob = pdfResult.blob;
+          const safeName = (coproData.nom || 'copro').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+          const fileName = `Convocation_AG_${agDateISO}_${safeName}.pdf`;
+
+          // b. Dispatcher
+          setProgress(prev => ({ ...prev, currentStep: 'dispatching' }));
+
+          const { result, postalEntry } = await dispatchConvocation({
+            blob,
+            fileName,
+            copro: {
+              id: coproData.id,
+              nom: coproData.nom || '',
+              email: coproData.email || undefined,
+              adresse: coproData.address_line1 || undefined,
+              codePostal: coproData.postal_code || undefined,
+              ville: coproData.city || undefined,
+            },
+            method,
+            agId,
+            coproId: bundle.agData.copro_id,
+            agDate: agDateISO,
+          });
+
+          allResults.push(result);
+          if (postalEntry) {
+            postalEntries.push(postalEntry);
+          }
+
+          setProgress(prev => ({
+            ...prev,
+            results: [...prev.results, result],
+          }));
+        }
+      }
+
+      // 4. Bulk insert tracking
+      await saveEnvoiTracking(agId, allResults);
+
+      // 5. ZIP si canaux postaux
+      let zipUrl: string | undefined;
+      if (postalEntries.length > 0) {
+        const zipBlob = await generatePostalZip(postalEntries);
+        zipUrl = URL.createObjectURL(zipBlob);
+      }
+
+      // 6. Marquer milestone si pas annulé
+      if (!abortRef.current.signal.aborted) {
+        const supabase = createUntypedClient();
+        await supabase.rpc('save_ag_milestone', {
           p_ag_id: agId,
           p_milestone_key: 'sent',
           p_milestone_value: {
             value: true,
-            sentAt: new Date().toISOString()
-          }
+            sentAt: new Date().toISOString(),
+            totalSent: allResults.filter(r => r.status === 'sent').length,
+            totalQueued: allResults.filter(r => r.status === 'queued').length,
+            totalErrors: allResults.filter(r => r.status === 'error').length,
+          },
         });
-
-      if (milestoneError) {
-        throw new Error(milestoneError.message);
-      }
-
-      // RE-FETCH: Vérifier que le milestone est bien en DB
-      const { data: verifyMilestones } = await supabase
-        .rpc('get_ag_milestones', { p_ag_id: agId });
-
-      const verifyM = verifyMilestones as EnvoiMilestones | null;
-      const verifyValue = verifyM?.sent;
-      const isVerified = verifyValue === true || (typeof verifyValue === 'object' && verifyValue?.value === true);
-
-      if (isVerified) {
         setIsSent(true);
-        logger.info('Convocations marquées comme envoyées (vérifié en DB)', {
-          agId,
-          step: 'envoi',
-          action: 'handleSend',
-          milestones: newMilestones,
-        });
-        // Advance to step 5 in DB (marks step 4 as completed in stepper)
         await updateAgCurrentStep(agId, 5);
-        alert('Convocations envoyées avec succès !');
-        // Navigate to next step (votes par correspondance)
-        router.push(`/ag/${agId}/votes-correspondance`);
-      } else {
-        throw new Error('Le milestone n\'a pas été correctement sauvegardé');
       }
+
+      setProgress(prev => ({
+        ...prev,
+        isActive: true,
+        currentStep: abortRef.current?.signal.aborted ? 'cancelled' : 'done',
+        cancelled: abortRef.current?.signal.aborted || false,
+        zipUrl,
+      }));
 
     } catch (err) {
-      logger.error('Erreur lors de l\'envoi des convocations', {
-        agId,
-        step: 'envoi',
-        action: 'handleSend',
-        error: err instanceof Error ? err.message : 'Unknown',
-      });
+      setProgress(prev => ({
+        ...prev,
+        currentStep: 'done',
+        currentName: err instanceof Error ? err.message : 'Erreur',
+      }));
       alert('Erreur lors de l\'envoi. Veuillez réessayer.');
-    } finally {
-      setIsSaving(false);
     }
-  }, [sendingChoices, agId, saveChoicesToDB, router]);
+  }, [sendingChoices, agId, saveChoicesToDB, loadConvocationBundle]);
+
+  const handleCancelSend = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
+
+  const handleDownloadZip = useCallback(() => {
+    if (progress.zipUrl) {
+      const a = document.createElement('a');
+      a.href = progress.zipUrl;
+      a.download = `convocations_courriers_${agId}.zip`;
+      a.click();
+    }
+  }, [progress.zipUrl, agId]);
+
+  const handleCloseProgress = useCallback(() => {
+    if (progress.zipUrl) URL.revokeObjectURL(progress.zipUrl);
+    setProgress(prev => ({ ...prev, isActive: false }));
+    if (!progress.cancelled) {
+      router.push(`/ag/${agId}/votes-correspondance`);
+    }
+  }, [progress.zipUrl, progress.cancelled, agId, router]);
 
   // ========================================
   // MISE À JOUR DE L'ÉTAPE COURANTE EN DB
@@ -589,5 +754,11 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
     handleContinue,
     goBack,
     reload: loadData,
+
+    // Progression
+    progress,
+    handleCancelSend,
+    handleDownloadZip,
+    handleCloseProgress,
   };
 }
