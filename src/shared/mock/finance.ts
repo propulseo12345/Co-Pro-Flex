@@ -8,7 +8,6 @@ import type { ID } from '@/types/common';
 import {
   BudgetStatut,
   ExerciceStatut,
-  AppelFondsStatut,
   LigneAppelStatut,
   ModePaiement,
   LotType,
@@ -128,7 +127,7 @@ export interface MockAppelFonds {
   dateEcheance: string;
   montantTotal: number;
   mode: EcheancierMode;
-  statut: AppelFondsStatut;
+  statut: string;
   lignes: MockLigneAppel[];
 }
 
@@ -664,7 +663,7 @@ export const MOCK_APPELS_FONDS: MockAppelFonds[] = [
     dateEcheance: date(2024, 1, 31),
     montantTotal: 20625,
     mode: EcheancierMode.TRIMESTRIEL,
-    statut: AppelFondsStatut.SOLDE,
+    statut: 'SOLDE',
     lignes: generateLignesAppel('appel-2024-q1', 20625, LigneAppelStatut.SOLDE, 1),
   },
   {
@@ -678,7 +677,7 @@ export const MOCK_APPELS_FONDS: MockAppelFonds[] = [
     dateEcheance: date(2024, 4, 30),
     montantTotal: 20625,
     mode: EcheancierMode.TRIMESTRIEL,
-    statut: AppelFondsStatut.SOLDE,
+    statut: 'SOLDE',
     lignes: generateLignesAppel('appel-2024-q2', 20625, LigneAppelStatut.SOLDE, 1),
   },
   {
@@ -692,7 +691,7 @@ export const MOCK_APPELS_FONDS: MockAppelFonds[] = [
     dateEcheance: date(2024, 7, 31),
     montantTotal: 20625,
     mode: EcheancierMode.TRIMESTRIEL,
-    statut: AppelFondsStatut.SOLDE,
+    statut: 'SOLDE',
     lignes: generateLignesAppel('appel-2024-q3', 20625, LigneAppelStatut.SOLDE, 1),
   },
   {
@@ -706,7 +705,7 @@ export const MOCK_APPELS_FONDS: MockAppelFonds[] = [
     dateEcheance: date(2024, 10, 31),
     montantTotal: 20625,
     mode: EcheancierMode.TRIMESTRIEL,
-    statut: AppelFondsStatut.SOLDE,
+    statut: 'SOLDE',
     lignes: generateLignesAppel('appel-2024-q4', 20625, LigneAppelStatut.SOLDE, 1),
   },
   // 2025 Q1 - Paid
@@ -721,7 +720,7 @@ export const MOCK_APPELS_FONDS: MockAppelFonds[] = [
     dateEcheance: date(2025, 1, 31),
     montantTotal: 21875,
     mode: EcheancierMode.TRIMESTRIEL,
-    statut: AppelFondsStatut.SOLDE,
+    statut: 'SOLDE',
     lignes: generateLignesAppel('appel-2025-q1', 21875, LigneAppelStatut.SOLDE, 1),
   },
   // 2025 Travaux - Appel 1 partially paid
@@ -736,7 +735,7 @@ export const MOCK_APPELS_FONDS: MockAppelFonds[] = [
     dateEcheance: date(2025, 2, 15),
     montantTotal: 15000,
     mode: EcheancierMode.PERSONNALISE,
-    statut: AppelFondsStatut.PARTIELLEMENT_PAYE,
+    statut: 'PARTIELLEMENT_PAYE',
     lignes: generateLignesAppel('appel-2025-trav-1', 15000, LigneAppelStatut.A_PAYER, 0.7),
   },
 ];
