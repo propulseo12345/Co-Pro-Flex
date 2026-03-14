@@ -1,0 +1,266 @@
+/* ── TrimesterCard ── */
+.trimCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.trimCard:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(148, 163, 184, 0.3);
+  transform: translateY(-1px);
+}
+
+.trimCardActive {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
+}
+
+.trimCardDraft {
+  border-style: dashed;
+  opacity: 0.65;
+}
+
+.trimCardDraft:hover { opacity: 0.85; }
+
+.trimHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.trimTitle { font-size: 15px; font-weight: 600; }
+
+.trimMeta {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+
+.trimMetaActive { color: var(--primary); font-weight: 600; }
+
+.trimProgress {
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.trimProgressFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 400ms ease;
+  width: var(--progress-width, 0%);
+}
+
+.trimProgressGreen { background: var(--success); }
+.trimProgressAmber { background: var(--warning); }
+
+.trimKeys {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.trimKeyTag {
+  padding: 3px 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.trimActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+  font-family: inherit;
+}
+
+.actionBtn:hover {
+  color: var(--text-main);
+  border-color: rgba(148, 163, 184, 0.3);
+  background: var(--surface-hover, #252b3b);
+}
+
+.actionBtnPrimary {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+  font-family: inherit;
+}
+
+.actionBtnPrimary:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ── TravauxCard ── */
+.travauxCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid #A78BFA;
+}
+
+.travauxCard:hover { box-shadow: var(--shadow-md); }
+
+.travauxHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.travauxTitle { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+
+.travauxOrigin { font-size: 12px; color: var(--text-tertiary); }
+.travauxOriginLink { color: var(--primary); text-decoration: none; cursor: pointer; }
+
+.travauxAmount { text-align: right; }
+.travauxTotal { font-size: 18px; font-weight: 700; }
+.travauxSub { font-size: 12px; color: var(--text-tertiary); }
+
+.travauxProgress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.travauxProgressBar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.travauxProgressFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: #A78BFA;
+  width: var(--progress-width, 0%);
+}
+
+.travauxPct {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #A78BFA;
+  min-width: 40px;
+  text-align: right;
+}
+
+.echeancierLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.echeancierGrid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.travauxActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* ── EcheanceCard ── */
+.echeance {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.echeance:hover {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: var(--surface-hover, #252b3b);
+}
+
+.echeancePaid {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.echeanceCurrent {
+  border-color: #A78BFA;
+  background: rgba(167, 139, 250, 0.06);
+}
+
+.echeanceUpcoming {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.echeanceLabel { font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
+.echeanceDate { color: var(--text-tertiary); font-size: 11px; }
+.echeanceAmount { font-weight: 600; margin-top: 4px; }
+.echeanceAmountGreen { color: var(--success); }
+.echeanceAmountPurple { color: #A78BFA; }
+.echeanceAmountMuted { color: var(--text-tertiary); }
+
+/* ── Grids ── */
+.trimesterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.travauxGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 768px) {
+  .trimesterGrid { grid-template-columns: 1fr; }
+}
