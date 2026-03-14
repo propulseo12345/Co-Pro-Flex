@@ -29,7 +29,7 @@ export function TrimesterCard({ card, onEmit }: TrimesterCardProps) {
     if (firstCallId) router.push(`/finance/appels-fonds/${firstCallId}`);
   };
 
-  const unpaidCount = card.calls.reduce((sum, c) => sum + c.lines_unpaid_count, 0);
+  const hasUnpaid = card.calls.some(c => c.lines_unpaid_count > 0);
   const progressColor = card.recoveryRate >= 75 ? 'green' : 'amber';
 
   return (
@@ -88,9 +88,9 @@ export function TrimesterCard({ card, onEmit }: TrimesterCardProps) {
             <button className={styles.actionBtnPrimary} onClick={e => { e.stopPropagation(); handleDetail(); }}>
               <BarChart3 size={14} /> Détail
             </button>
-            {unpaidCount > 0 && (
+            {hasUnpaid && (
               <button className={styles.actionBtn} onClick={e => e.stopPropagation()}>
-                Relancer ({unpaidCount})
+                Relancer
               </button>
             )}
           </>

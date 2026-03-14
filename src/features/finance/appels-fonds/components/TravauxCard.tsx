@@ -18,7 +18,7 @@ export function TravauxCard({ project, onEmit }: TravauxCardProps) {
   const currentCall = project.calls.find(
     c => c.status === 'issued' || c.status === 'partially_paid'
   );
-  const unpaidCount = project.calls.reduce((sum, c) => sum + c.lines_unpaid_count, 0);
+  const hasUnpaid = project.calls.some(c => c.lines_unpaid_count > 0);
 
   return (
     <div className={styles.travauxCard}>
@@ -70,8 +70,8 @@ export function TravauxCard({ project, onEmit }: TravauxCardProps) {
             <BarChart3 size={14} /> Détail
           </button>
         )}
-        {unpaidCount > 0 && (
-          <button className={styles.actionBtn}>Relancer ({unpaidCount})</button>
+        {hasUnpaid && (
+          <button className={styles.actionBtn}>Relancer</button>
         )}
         <button className={styles.actionBtn}><Send size={14} /> Envoyer</button>
       </div>
