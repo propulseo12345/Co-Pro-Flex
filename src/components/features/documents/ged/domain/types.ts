@@ -36,6 +36,7 @@ export interface DocumentWithFolder {
   coproprieteId?: string;
   url?: string;
   annee?: number;
+  isStarred?: boolean;
 }
 
 // ============================================================================

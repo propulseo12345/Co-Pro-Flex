@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   FileText, Folder, FolderOpen, Search, Upload, Download, Plus,
   ChevronDown, ChevronRight, Eye, Lock, Star, Clock, Image, File,
@@ -12,6 +12,7 @@ import { AccessRightsManager } from '@/components/features/documents/AccessRight
 import { NiveauConfidentialite } from '@/types/enums';
 import { useGedPageSupabase, useDocumentSearch } from '@/components/features/documents/ged/hooks';
 import * as documentsApi from '@/lib/documents/api';
+import { getDocumentUrl } from '@/lib/documents/api';
 import { useCopro } from '@/providers/CoproContext';
 import { LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
 import { LinkModal } from '@/components/features/documents/ged/components';
@@ -49,6 +50,102 @@ function getRelativeDate(dateStr: string): string {
   return `il y a ${Math.floor(days / 365)}an${Math.floor(days / 365) > 1 ? 's' : ''}`;
 }
 
+// Recursive sub-folder tree component (supports N levels)
+function SubFolderTree({
+  parentId,
+  depth,
+  folders,
+  childFolderIds,
+  docsByFolder,
+  expandedFolders,
+  toggleFolder,
+  selectedDocId,
+  setSelectedDocId,
+  setConfirmDeleteDoc,
+}: {
+  parentId: string;
+  depth: number;
+  folders: GEDFolder[];
+  childFolderIds: Map<string, string[]>;
+  docsByFolder: Map<string, DocumentWithFolder[]>;
+  expandedFolders: Set<string>;
+  toggleFolder: (id: string) => void;
+  selectedDocId: string | null;
+  setSelectedDocId: (id: string) => void;
+  setConfirmDeleteDoc: (id: string | null) => void;
+}) {
+  const children = childFolderIds.get(parentId) || [];
+  if (children.length === 0) return null;
+
+  return (
+    <>
+      {children.map(subId => {
+        const sub = folders.find(sf => sf.id === subId);
+        if (!sub) return null;
+        const subExpanded = expandedFolders.has(sub.id);
+        const subDocs = docsByFolder.get(sub.id) || [];
+        const directDocs = subDocs.filter(d => d.dossierId === sub.id);
+        const subColor = sub.color || '#6366f1';
+        const hasChildren = (childFolderIds.get(sub.id) || []).length > 0;
+        return (
+          <div key={sub.id} style={{ paddingLeft: '1rem' }}>
+            <button
+              className={clsx(styles.sidebarFolderRow, subExpanded && styles.sidebarFolderRowOpen)}
+              onClick={() => toggleFolder(sub.id)}
+            >
+              <div className={styles.sidebarFolderIconBox} style={{ background: subColor + '12', color: subColor }}>
+                {subExpanded ? <FolderOpen size={14} /> : <Folder size={14} />}
+              </div>
+              <div className={styles.sidebarFolderInfo}>
+                <span className={styles.sidebarFolderName}>{sub.nom}</span>
+                <span className={styles.sidebarFolderMeta}>{subDocs.length} document{subDocs.length !== 1 ? 's' : ''}</span>
+              </div>
+              {(hasChildren || directDocs.length > 0) && (
+                subExpanded ? <ChevronDown size={13} className={styles.sidebarChev} /> : <ChevronRight size={13} className={styles.sidebarChev} />
+              )}
+            </button>
+            {subExpanded && (
+              <>
+                <SubFolderTree
+                  parentId={sub.id}
+                  depth={depth + 1}
+                  folders={folders}
+                  childFolderIds={childFolderIds}
+                  docsByFolder={docsByFolder}
+                  expandedFolders={expandedFolders}
+                  toggleFolder={toggleFolder}
+                  selectedDocId={selectedDocId}
+                  setSelectedDocId={setSelectedDocId}
+                  setConfirmDeleteDoc={setConfirmDeleteDoc}
+                />
+                {directDocs.map(doc => (
+                  <div key={doc.id} className={styles.sidebarDocRowWrap} style={{ paddingLeft: '0.5rem' }}>
+                    <button
+                      className={clsx(styles.sidebarDocRow, doc.id === selectedDocId && styles.sidebarDocRowActive)}
+                      onClick={() => setSelectedDocId(doc.id)}
+                    >
+                      <DocIcon type={doc.type} size={13} />
+                      <span className={styles.sidebarDocName}>{doc.nom}</span>
+                      <span className={styles.sidebarDocSize}>{doc.taille}</span>
+                    </button>
+                    <button
+                      className={styles.docDeleteBtn}
+                      onClick={e => { e.stopPropagation(); setConfirmDeleteDoc(doc.id); }}
+                      title="Supprimer"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 export default function GEDPage() {
   const hook = useGedPageSupabase();
   const {
@@ -61,6 +158,7 @@ export default function GEDPage() {
     handleOpenAccessRights, handleCloseAccessRights,
     handleFilesSelected,
     handleCreateFolder, handleRenameFolder, handleDeleteFolder, handleDeleteDocument,
+    toggleStarDocument,
     refreshData,
   } = hook;
 
@@ -78,6 +176,7 @@ export default function GEDPage() {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('dossiers');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [sidebarSearch, setSidebarSearch] = useState('');
 
   // CRUD modals
@@ -96,6 +195,17 @@ export default function GEDPage() {
     if (selectedDocId) return documents.find(d => d.id === selectedDocId) || null;
     return documents[0] || null;
   }, [selectedDocId, documents]);
+
+  // Load preview URL for selected document
+  useEffect(() => {
+    setPreviewUrl(null);
+    if (!selectedDoc?.url) return;
+    let cancelled = false;
+    getDocumentUrl(selectedDoc.url).then(url => {
+      if (!cancelled) setPreviewUrl(url);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedDoc?.id, selectedDoc?.url]);
 
   // Build folder→children map for recursive lookup
   const childFolderIds = useMemo(() => {
@@ -167,8 +277,7 @@ export default function GEDPage() {
     [documents]
   );
 
-  // Mock favorites (starred docs) — first 3 for now
-  const favoriteDocs = useMemo(() => documents.slice(0, 3), [documents]);
+  const favoriteDocs = useMemo(() => documents.filter(d => d.isStarred), [documents]);
 
   const toggleFolder = useCallback((id: string) => {
     setExpandedFolders(prev => {
@@ -358,25 +467,41 @@ export default function GEDPage() {
                       </div>
                     )}
                   </div>
-                  {isExpanded && folderDocs.map(doc => (
-                    <div key={doc.id} className={styles.sidebarDocRowWrap}>
-                      <button
-                        className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
-                        onClick={() => setSelectedDocId(doc.id)}
-                      >
-                        <DocIcon type={doc.type} size={13} />
-                        <span className={styles.sidebarDocName}>{doc.nom}</span>
-                        <span className={styles.sidebarDocSize}>{doc.taille}</span>
-                      </button>
-                      <button
-                        className={styles.docDeleteBtn}
-                        onClick={e => { e.stopPropagation(); setConfirmDeleteDoc(doc.id); }}
-                        title="Supprimer"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))}
+                  {isExpanded && (
+                    <>
+                      <SubFolderTree
+                        parentId={f.id}
+                        depth={1}
+                        folders={folders}
+                        childFolderIds={childFolderIds}
+                        docsByFolder={docsByFolder}
+                        expandedFolders={expandedFolders}
+                        toggleFolder={toggleFolder}
+                        selectedDocId={selectedDoc?.id || null}
+                        setSelectedDocId={setSelectedDocId}
+                        setConfirmDeleteDoc={setConfirmDeleteDoc}
+                      />
+                      {folderDocs.filter(doc => doc.dossierId === f.id).map(doc => (
+                        <div key={doc.id} className={styles.sidebarDocRowWrap}>
+                          <button
+                            className={clsx(styles.sidebarDocRow, doc.id === (selectedDoc?.id) && styles.sidebarDocRowActive)}
+                            onClick={() => setSelectedDocId(doc.id)}
+                          >
+                            <DocIcon type={doc.type} size={13} />
+                            <span className={styles.sidebarDocName}>{doc.nom}</span>
+                            <span className={styles.sidebarDocSize}>{doc.taille}</span>
+                          </button>
+                          <button
+                            className={styles.docDeleteBtn}
+                            onClick={e => { e.stopPropagation(); setConfirmDeleteDoc(doc.id); }}
+                            title="Supprimer"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               );
             })}
@@ -482,19 +607,56 @@ export default function GEDPage() {
             </div>
 
             <div className={styles.previewZone}>
-              <div className={styles.previewPlaceholder}>
-                <DocIcon type={selectedDoc.type} size={40} />
-                <span>Aperçu du document</span>
-              </div>
+              {previewUrl && selectedDoc.type === 'PDF' ? (
+                <iframe
+                  src={previewUrl}
+                  style={{ width: '100%', height: '100%', border: 'none', borderRadius: 'var(--radius-md)' }}
+                  title={`Aperçu de ${selectedDoc.nom}`}
+                />
+              ) : previewUrl && selectedDoc.type === 'IMAGE' ? (
+                <img
+                  src={previewUrl}
+                  alt={selectedDoc.nom}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 'var(--radius-md)' }}
+                />
+              ) : (
+                <div className={styles.previewPlaceholder}>
+                  <DocIcon type={selectedDoc.type} size={40} />
+                  <span>{previewUrl === null && selectedDoc.url ? 'Chargement...' : 'Aperçu non disponible'}</span>
+                </div>
+              )}
             </div>
 
             <div className={styles.detailActions}>
               <button className={styles.btnPrimary} onClick={() => handlePreviewDocument(selectedDoc)}>
                 <Eye size={14} /> Ouvrir
               </button>
-              <button className={styles.btnSecondary}><Download size={14} /> Télécharger</button>
+              <button
+                className={styles.btnSecondary}
+                onClick={async () => {
+                  if (!selectedDoc.url) return;
+                  try {
+                    const blob = await documentsApi.downloadDocument(selectedDoc.url);
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = selectedDoc.nom;
+                    a.click();
+                    URL.revokeObjectURL(blobUrl);
+                  } catch {
+                    alert('Erreur lors du téléchargement.');
+                  }
+                }}
+              ><Download size={14} /> Télécharger</button>
               <button className={styles.btnSecondary} onClick={() => handleOpenLinkModal(selectedDoc)}>
                 <Link size={14} /> Lier
+              </button>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => toggleStarDocument(selectedDoc.id)}
+                title={selectedDoc.isStarred ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              >
+                <Star size={14} style={selectedDoc.isStarred ? { fill: '#F59E0B', color: '#F59E0B' } : undefined} />
               </button>
               {canManageAccess && (
                 <button className={styles.btnSecondary} onClick={() => handleOpenAccessRights(selectedDoc)}>

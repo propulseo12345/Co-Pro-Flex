@@ -354,6 +354,7 @@ export function useConvocationPreview({
             entityId: agId,
             entityType: 'ag_meeting',
             linkType: 'main',
+            subFolderName: `Convocations AG ${new Date().getFullYear()}`,
             year: new Date().getFullYear(),
           });
         }

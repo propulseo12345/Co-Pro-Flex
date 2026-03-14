@@ -79,23 +79,21 @@ async function resolveRootFolder(
   return null;
 }
 
-async function resolveOrCreateSubFolder(
+async function resolveOrCreateSingleFolder(
   coproId: string,
   parentId: string,
-  subFolderName: string
+  folderName: string
 ): Promise<string> {
-  // Check if sub-folder already exists
   const folders = await documentsApi.getFolders(coproId);
   const existing = folders.find(
-    f => f.parent_id === parentId && f.name === subFolderName
+    f => f.parent_id === parentId && f.name === folderName
   );
   if (existing) return existing.id;
 
-  // Create it
   try {
     const created = await documentsApi.createFolder({
       copro_id: coproId,
-      name: subFolderName,
+      name: folderName,
       parent_id: parentId,
       icon: 'FolderOpen',
       color: '#6366f1',
@@ -104,14 +102,26 @@ async function resolveOrCreateSubFolder(
     });
     return created.id;
   } catch {
-    // Race condition: folder may have been created concurrently
     const retryFolders = await documentsApi.getFolders(coproId);
     const retry = retryFolders.find(
-      f => f.parent_id === parentId && f.name === subFolderName
+      f => f.parent_id === parentId && f.name === folderName
     );
     if (retry) return retry.id;
-    throw new Error(`Failed to create sub-folder "${subFolderName}"`);
+    throw new Error(`Failed to create sub-folder "${folderName}"`);
   }
+}
+
+async function resolveOrCreateSubFolder(
+  coproId: string,
+  parentId: string,
+  subFolderPath: string
+): Promise<string> {
+  const segments = subFolderPath.split('/').filter(Boolean);
+  let currentParentId = parentId;
+  for (const segment of segments) {
+    currentParentId = await resolveOrCreateSingleFolder(coproId, currentParentId, segment);
+  }
+  return currentParentId;
 }
 
 // ============================================================================

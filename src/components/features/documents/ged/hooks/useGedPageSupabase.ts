@@ -45,6 +45,7 @@ function normalizeDocument(doc: Document): DocumentWithFolder {
     coproprieteId: doc.copro_id,
     url: doc.file_path,
     annee: doc.year || new Date(doc.created_at).getFullYear(),
+    isStarred: (doc as unknown as Record<string, unknown>).is_starred === true,
   };
 }
 
@@ -591,6 +592,24 @@ export function useGedPageSupabase() {
     }
   }, [refreshData]);
 
+  const toggleStarDocument = useCallback(async (docId: string) => {
+    const doc = normalizedDocuments.find(d => d.id === docId);
+    if (!doc) return;
+    const newValue = !doc.isStarred;
+    // Optimistic update
+    setDocuments(prev => prev.map(d =>
+      d.id === docId ? { ...d, is_starred: newValue } : d
+    ));
+    try {
+      await documentsApi.updateDocument(docId, { is_starred: newValue } as Record<string, unknown>);
+    } catch {
+      // Rollback
+      setDocuments(prev => prev.map(d =>
+        d.id === docId ? { ...d, is_starred: !newValue } : d
+      ));
+    }
+  }, [normalizedDocuments]);
+
   // ============================================================================
   // ACCESS RIGHTS
   // ============================================================================
@@ -683,6 +702,7 @@ export function useGedPageSupabase() {
     handleDeleteFolder,
     handleDeleteDocument,
     handleMoveDocument,
+    toggleStarDocument,
     refreshData,
   };
 }

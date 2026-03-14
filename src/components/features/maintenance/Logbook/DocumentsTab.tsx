@@ -224,6 +224,7 @@ export function DocumentsTab({
                                                                 coproId: currentCoproId,
                                                                 category: 'diagnostic',
                                                                 sourceModule: 'maintenance',
+                                                                subFolderName: `Diagnostics ${new Date().getFullYear()}`,
                                                                 year: new Date().getFullYear(),
                                                             });
                                                         }

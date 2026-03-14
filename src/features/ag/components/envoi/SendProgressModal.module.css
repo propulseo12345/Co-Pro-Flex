@@ -9,13 +9,14 @@
 }
 
 .modal {
-  background: var(--bg-card);
+  background: var(--bg-card, #1e293b);
+  border: 1px solid var(--border, #334155);
   border-radius: var(--radius-lg);
   width: min(560px, 90vw);
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .header {

@@ -380,6 +380,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
             entityId: agId,
             entityType: 'ag_meeting',
             linkType: 'main',
+            subFolderName: `PV AG ${new Date().getFullYear()}`,
             year: new Date().getFullYear(),
           });
         }
