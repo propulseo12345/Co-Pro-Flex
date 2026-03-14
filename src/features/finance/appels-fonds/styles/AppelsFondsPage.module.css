@@ -1,0 +1,268 @@
+/* ══════════════════════════════════════════ */
+/*  AppelsFondsPage — Header, Tabs, Sections */
+/* ══════════════════════════════════════════ */
+
+/* ── Page Header ── */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.headerTitle {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+}
+
+.headerSubtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 200ms;
+  border: none;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btnPrimary {
+  composes: btn;
+  background: var(--primary);
+  color: white;
+}
+
+.btnPrimary:hover {
+  background: var(--primary-hover, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btnSecondary {
+  composes: btn;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+
+.btnSecondary:hover {
+  background: var(--bg-tertiary);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+/* ── Period Bar ── */
+.periodBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.periodNav {
+  display: flex;
+  gap: 4px;
+}
+
+.periodNavBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 150ms;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.periodNavBtn:hover:not(:disabled) {
+  color: var(--text-main);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.periodNavBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.periodLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.periodMeta {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-left: 8px;
+}
+
+.periodMetaValue {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ── Tabs Bar ── */
+.tabsBar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 200ms;
+  border: none;
+  background: none;
+  font-family: inherit;
+  position: relative;
+}
+
+.tab:hover {
+  color: var(--text-main);
+  background: var(--bg-tertiary);
+}
+
+.tabActive {
+  color: var(--text-main);
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-sm);
+}
+
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+}
+
+.tabActiveBlue::after { background: var(--primary); }
+.tabActivePurple::after { background: #A78BFA; }
+.tabActiveAll::after { background: var(--text-secondary); }
+
+.tabIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tabIconBlue { background: var(--primary-light); }
+.tabIconPurple { background: rgba(167, 139, 250, 0.15); }
+.tabIconNeutral { background: rgba(148, 163, 184, 0.15); }
+
+.tabLabel { font-weight: 600; }
+
+.tabAmount {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ── Section Title Row ── */
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sectionIconSm {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sectionIconSmBlue { background: var(--primary-light); }
+.sectionIconSmPurple { background: rgba(167, 139, 250, 0.15); }
+
+.sectionTitleText {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-main);
+}
+
+.sectionMeta {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+
+.sectionTitleRowSpaced {
+  composes: sectionTitleRow;
+  margin-top: 24px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .periodBar {
+    flex-wrap: wrap;
+  }
+
+  .tabsBar {
+    flex-direction: column;
+  }
+
+  .tab {
+    justify-content: flex-start;
+  }
+}
