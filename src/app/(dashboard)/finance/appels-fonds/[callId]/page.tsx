@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2, Wallet, Check, Clock, Users } from 'lucide-react';
 import { useAppelsFondsDetail } from '@/features/finance/appels-fonds/hooks/useAppelsFondsDetail';
 import { DetailHeader } from '@/features/finance/appels-fonds/components/DetailHeader';
 import { StatsGrid } from '@/features/finance/appels-fonds/components/StatsGrid';
 import { CoproTable } from '@/features/finance/appels-fonds/components/CoproTable';
+import { RelanceModal } from '@/features/finance/appels-fonds/components/RelanceModal';
 import { formatEuros } from '@/features/finance/appels-fonds/utils';
+import type { CallLineDetailed } from '@/lib/finance/api';
 import type { StatItem } from '@/features/finance/appels-fonds/components/StatsGrid';
 import styles from '@/features/finance/appels-fonds/styles/DetailPage.module.css';
 
@@ -16,6 +19,7 @@ export default function CallDetailPage() {
   const callId = params.callId as string;
 
   const { call, lines, stats, isLoading } = useAppelsFondsDetail(callId);
+  const [relanceLine, setRelanceLine] = useState<CallLineDetailed | null>(null);
 
   if (isLoading) {
     return (
@@ -91,7 +95,16 @@ export default function CallDetailPage() {
         callStatus={call.status}
       />
       <StatsGrid items={statItems} />
-      <CoproTable lines={lines} onRemind={handleRemind} />
+      <CoproTable lines={lines} onRemind={handleRemind} onRelance={(line) => setRelanceLine(line)} />
+      {relanceLine && call && (
+        <RelanceModal
+          line={relanceLine}
+          call={call}
+          coproName="Copropriete"
+          syndicName="Le Syndic"
+          onClose={() => setRelanceLine(null)}
+        />
+      )}
     </div>
   );
 }

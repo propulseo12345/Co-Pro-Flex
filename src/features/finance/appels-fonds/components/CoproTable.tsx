@@ -9,6 +9,7 @@ import styles from '../styles/CoproTable.module.css';
 interface CoproTableProps {
   lines: CallLineDetailed[];
   onRemind: (lineId: string) => void;
+  onRelance?: (line: CallLineDetailed) => void;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {
@@ -23,7 +24,7 @@ function getPaidClass(status: string): string {
   return styles.tdRightUnpaid;
 }
 
-export function CoproTable({ lines, onRemind }: CoproTableProps) {
+export function CoproTable({ lines, onRemind, onRelance }: CoproTableProps) {
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table}>
@@ -69,7 +70,10 @@ export function CoproTable({ lines, onRemind }: CoproTableProps) {
                   ) : (
                     <button
                       className={isUnpaid ? styles.linkActionDanger : styles.linkAction}
-                      onClick={() => onRemind(line.id)}
+                      onClick={() => {
+                        onRelance?.(line);
+                        onRemind(line.id);
+                      }}
                     >
                       Relancer
                     </button>
