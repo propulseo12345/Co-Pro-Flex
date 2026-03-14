@@ -53,6 +53,9 @@ export interface CallLineDetailed {
   amount_remaining: number;
   status: 'unpaid' | 'partial' | 'paid';
   owner_name: string | null;
+  repartition_key_id: string;
+  lot_weight: number;
+  key_total_weight: number;
 }
 
 export interface UnpaidByLot {
