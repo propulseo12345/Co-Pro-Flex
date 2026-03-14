@@ -55,7 +55,7 @@ export function AppelsFondsHeader({
           <button className={styles.btnSecondary} onClick={onExport}>
             <Download size={14} /> Export
           </button>
-          <button className={styles.btnPrimary} onClick={onGenerate}>
+          <button className={styles.btnPrimary} onClick={onGenerate} disabled={!selectedPeriod}>
             <Plus size={14} /> Générer les appels
           </button>
         </div>

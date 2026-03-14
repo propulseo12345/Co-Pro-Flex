@@ -5,3 +5,4 @@ export { TabBudgetCourant } from './TabBudgetCourant';
 export { TabTravaux } from './TabTravaux';
 export { DetailHeader } from './DetailHeader';
 export { CoproTable } from './CoproTable';
+export { CreateCallWizard } from './CreateCallWizard';

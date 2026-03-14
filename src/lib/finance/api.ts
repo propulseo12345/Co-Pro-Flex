@@ -322,6 +322,7 @@ export interface CreateCallPayload {
   due_date: string;
   total_amount: number;
   budget_id?: string;
+  description?: string;
 }
 
 export async function createCall(payload: CreateCallPayload): Promise<ApiResult<{ call_id: string; ledger_tx_id: string }>> {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAppelsFondsPage } from '@/features/finance/appels-fonds/hooks';
 import {
   AppelsFondsHeader,
@@ -7,11 +8,14 @@ import {
   TabVueGlobale,
   TabBudgetCourant,
   TabTravaux,
+  CreateCallWizard,
 } from '@/features/finance/appels-fonds/components';
 import { formatEuros } from '@/features/finance/appels-fonds/utils';
 import styles from './appels-fonds.module.css';
 
 export default function AppelsFondsPage() {
+  const [wizardOpen, setWizardOpen] = useState(false);
+
   const {
     trimesterCards,
     travauxProjects,
@@ -55,7 +59,7 @@ export default function AppelsFondsPage() {
         periods={periods}
         selectedPeriod={selectedPeriod}
         onSelectPeriod={selectPeriod}
-        onGenerate={() => {/* TODO */}}
+        onGenerate={() => setWizardOpen(true)}
         onExport={() => {/* TODO */}}
       />
 
@@ -93,6 +97,14 @@ export default function AppelsFondsPage() {
           projects={travauxProjects}
         />
       )}
+
+      <CreateCallWizard
+        isOpen={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        selectedPeriod={selectedPeriod}
+        onSuccess={() => {/* invalidation handled by useCreateCall */}}
+        budgets={[]}
+      />
     </div>
   );
 }

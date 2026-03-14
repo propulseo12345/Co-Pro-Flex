@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoProFlex — Appels de fonds (Preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+/* ═══════════════════════════════════════════ */
+/*  CSS Variables (from globals.css)           */
+/* ═══════════════════════════════════════════ */
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: rgba(37, 99, 235, 0.15);
+  --primary-dark: #3b82f6;
+  --secondary: #60A5FA;
+  --danger: #F87171;
+  --danger-light: rgba(248, 113, 113, 0.15);
+  --warning: #FBBF24;
+  --warning-light: rgba(251, 191, 36, 0.15);
+  --success: #34D399;
+  --success-light: rgba(52, 211, 153, 0.15);
+  --background: #0f1117;
+  --bg-secondary: #131620;
+  --bg-tertiary: #1a1f2e;
+  --surface: #1e2330;
+  --surface-hover: #252b3b;
+  --text-main: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --border: rgba(148, 163, 184, 0.2);
+  --border-light: rgba(148, 163, 184, 0.1);
+  --highbar-height: 48px;
+  --highbar-bg: #151821;
+  --sidebar-nav-width: 220px;
+  --sidebar-nav-bg: #131620;
+  --nav-accent: #2563eb;
+  --nav-text: #e2e8f0;
+  --nav-text-muted: #8892a4;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════ */
+/*  HighBar                                    */
+/* ═══════════════════════════════════════════ */
+.highbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--highbar-height);
+  background-color: var(--highbar-bg);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 4px;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.highbar-logo {
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.highbar-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.highbar-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--nav-text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+.highbar-tab:hover {
+  color: var(--nav-text);
+  background: rgba(255,255,255,0.06);
+}
+.highbar-tab.active {
+  color: #fff;
+  background: rgba(37,99,235,0.15);
+}
+.highbar-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 8px; right: 8px;
+  height: 2px;
+  background: var(--nav-accent);
+  border-radius: 2px 2px 0 0;
+}
+.highbar-search {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.highbar-search input {
+  width: 100%;
+  padding: 6px 10px 6px 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.06);
+  font-size: 13px;
+  color: var(--nav-text);
+  outline: none;
+  font-family: inherit;
+}
+.highbar-search input::placeholder { color: var(--nav-text-muted); }
+.highbar-search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--nav-text-muted);
+  pointer-events: none;
+}
+.highbar-actions { display: flex; align-items: center; gap: 8px; }
+.highbar-btn-connexion {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px; font-weight: 600;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ═══════════════════════════════════════════ */
+/*  ModuleSidebar                              */
+/* ═══════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-nav-width);
+  background: var(--sidebar-nav-bg);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--highbar-height));
+  position: fixed;
+  top: var(--highbar-height);
+  left: 0;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  z-index: 90;
+}
+.sidebar-title {
+  padding: 16px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--nav-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--nav-text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  border-left: 2px solid transparent;
+}
+.sidebar-item:hover {
+  color: var(--nav-text);
+  background: rgba(255,255,255,0.04);
+}
+.sidebar-item.active {
+  color: var(--nav-accent);
+  background: rgba(37,99,235,0.1);
+  border-left-color: var(--nav-accent);
+}
+
+/* ═══════════════════════════════════════════ */
+/*  Page Content Area                          */
+/* ═══════════════════════════════════════════ */
+.page-content {
+  margin-left: var(--sidebar-nav-width);
+  margin-top: var(--highbar-height);
+  padding: 1.5rem;
+  max-width: 1400px;
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+.page-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.page-header p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 200ms;
+  border: none;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+.btn-secondary:hover {
+  background: var(--bg-tertiary);
+  border-color: rgba(148,163,184,0.3);
+}
+
+/* ── Period Bar ── */
+.period-bar {
+  position: relative;
+  margin-bottom: 24px;
+}
+.period-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+}
+.period-selector:hover { border-color: rgba(148,163,184,0.3); }
+.period-label { font-size: 16px; font-weight: 600; }
+.period-meta { font-size: 13px; color: var(--text-tertiary); margin-left: 4px; }
+.period-chevron { margin-left: auto; color: var(--text-tertiary); }
+
+/* ── Tabs ── */
+.tabs-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 200ms;
+  border: none;
+  background: none;
+  font-family: inherit;
+  position: relative;
+}
+.tab-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-tertiary);
+}
+.tab-btn.active {
+  color: var(--text-main);
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-sm);
+}
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 20%; right: 20%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+}
+.tab-btn.active.tab-blue::after { background: var(--primary); }
+.tab-btn.active.tab-purple::after { background: #A78BFA; }
+.tab-btn.active.tab-neutral::after { background: var(--text-secondary); }
+.tab-icon {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tab-icon-blue { background: var(--primary-light); }
+.tab-icon-purple { background: rgba(167,139,250,0.15); }
+.tab-icon-neutral { background: rgba(148,163,184,0.15); }
+.tab-label { font-weight: 600; }
+.tab-amount { font-size: 12px; color: var(--text-tertiary); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-green { background: rgba(52,211,153,0.2); color: var(--success); }
+.badge-amber { background: rgba(251,191,36,0.2); color: var(--warning); }
+.badge-red { background: rgba(248,113,113,0.2); color: var(--danger); }
+.badge-neutral { background: rgba(148,163,184,0.2); color: var(--text-tertiary); }
+.badge-purple { background: rgba(167,139,250,0.15); color: #A78BFA; }
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 200ms;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon-blue { background: var(--primary-light); color: var(--secondary); }
+.stat-icon-green { background: rgba(52,211,153,0.2); color: var(--success); }
+.stat-icon-red { background: rgba(248,113,113,0.2); color: var(--danger); }
+.stat-icon-amber { background: rgba(251,191,36,0.2); color: var(--warning); }
+.stat-icon-purple { background: rgba(167,139,250,0.15); color: #A78BFA; }
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.stat-value-green { color: var(--success); }
+.stat-value-red { color: var(--danger); }
+
+/* ── Progress Bar ── */
+.progress-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+  font-size: var(--text-sm);
+}
+.progress-label { color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
+.progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 500ms ease;
+}
+.progress-fill-green { background: var(--success); }
+.progress-fill-purple { background: #A78BFA; }
+.progress-value { font-weight: 600; white-space: nowrap; }
+
+/* ── Alert Banner ── */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-lg);
+  background: rgba(248,113,113,0.2);
+  border: 1px solid rgba(248,113,113,0.3);
+  color: var(--danger);
+}
+.alert-text { flex: 1; }
+.alert-strong { font-weight: 600; }
+.alert-action {
+  margin-left: auto;
+  padding: 4px 12px;
+  background: rgba(248,113,113,0.15);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.alert-action:hover { background: rgba(248,113,113,0.25); }
+
+/* ── Section Title Row ── */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.section-title-row.spaced { margin-top: 24px; }
+.section-icon-sm {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.section-icon-blue { background: var(--primary-light); color: var(--secondary); }
+.section-icon-purple { background: rgba(167,139,250,0.15); color: #A78BFA; }
+.section-title-text { font-size: 16px; font-weight: 700; letter-spacing: -0.015em; }
+.section-meta { font-size: 13px; color: var(--text-tertiary); margin-left: auto; }
+
+/* ── Trimester Cards Grid ── */
+.trim-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+.trim-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 200ms;
+  box-shadow: var(--shadow-sm);
+}
+.trim-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(148,163,184,0.3);
+  transform: translateY(-1px);
+}
+.trim-card.active {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(37,99,235,0.02) 100%);
+}
+.trim-card.draft {
+  border-style: dashed;
+  opacity: 0.65;
+}
+.trim-card.draft:hover { opacity: 0.85; }
+.trim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.trim-title { font-size: 15px; font-weight: 600; }
+.trim-meta { font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 10px; }
+.trim-meta-active { color: var(--primary); font-weight: 600; }
+.trim-progress {
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.trim-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 400ms ease;
+}
+.trim-progress-green { background: var(--success); }
+.trim-progress-amber { background: var(--warning); }
+.trim-keys { display: flex; gap: 6px; flex-wrap: wrap; }
+.trim-key-tag {
+  padding: 3px 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.trim-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148,163,184,0.1);
+}
+.action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 150ms;
+}
+.action-btn:hover {
+  color: var(--text-main);
+  border-color: rgba(148,163,184,0.3);
+  background: var(--surface-hover);
+}
+.action-btn-primary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 150ms;
+}
+.action-btn-primary:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ── Travaux Card ── */
+.travaux-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid #A78BFA;
+  transition: box-shadow 200ms;
+}
+.travaux-card:hover { box-shadow: var(--shadow-md); }
+.travaux-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.travaux-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.travaux-origin { font-size: 12px; color: var(--text-tertiary); }
+.travaux-origin-link { color: var(--primary); cursor: pointer; }
+.travaux-amount { text-align: right; }
+.travaux-total { font-size: 18px; font-weight: 700; }
+.travaux-sub { font-size: 12px; color: var(--text-tertiary); }
+.travaux-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.travaux-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.travaux-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: #A78BFA;
+}
+.travaux-pct {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #A78BFA;
+  min-width: 40px;
+  text-align: right;
+}
+.echeancier-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.echeancier-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.echeance {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 150ms;
+}
+.echeance:hover {
+  border-color: rgba(148,163,184,0.3);
+  background: var(--surface-hover);
+}
+.echeance.paid {
+  border-color: rgba(52,211,153,0.3);
+  background: rgba(52,211,153,0.06);
+}
+.echeance.current {
+  border-color: #A78BFA;
+  background: rgba(167,139,250,0.06);
+}
+.echeance.upcoming {
+  opacity: 0.6;
+  border-style: dashed;
+}
+.echeance-label { font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
+.echeance-date { color: var(--text-tertiary); font-size: 11px; }
+.echeance-amount { font-weight: 600; margin-top: 4px; }
+.echeance-amount-green { color: var(--success); }
+.echeance-amount-purple { color: #A78BFA; }
+.echeance-amount-muted { color: var(--text-tertiary); }
+.travaux-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148,163,184,0.1);
+}
+.travaux-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+/* ── Tab Panels ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Sidebar footer ── */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; color: var(--text-main);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ -->
+<!--  HighBar                           -->
+<!-- ═══════════════════════════════════ -->
+<header class="highbar">
+  <span class="highbar-logo">CoProFlex</span>
+  <nav class="highbar-tabs">
+    <button class="highbar-tab"><i data-lucide="layout-grid" style="width:14px;height:14px"></i> <span>Dashboard</span></button>
+    <button class="highbar-tab"><i data-lucide="users" style="width:14px;height:14px"></i> <span>AG</span></button>
+    <button class="highbar-tab"><i data-lucide="building" style="width:14px;height:14px"></i> <span>Copropriete</span></button>
+    <button class="highbar-tab active"><i data-lucide="dollar-sign" style="width:14px;height:14px"></i> <span>Finance</span></button>
+    <button class="highbar-tab"><i data-lucide="wrench" style="width:14px;height:14px"></i> <span>Maintenance</span></button>
+    <button class="highbar-tab"><i data-lucide="folder" style="width:14px;height:14px"></i> <span>Documents</span></button>
+    <button class="highbar-tab"><i data-lucide="message-square" style="width:14px;height:14px"></i> <span>Communication</span></button>
+    <button class="highbar-tab"><i data-lucide="scale" style="width:14px;height:14px"></i> <span>Contentieux</span></button>
+  </nav>
+  <div class="highbar-search">
+    <i data-lucide="search" style="width:14px;height:14px" class="highbar-search-icon"></i>
+    <input type="text" placeholder="Rechercher...">
+  </div>
+  <div class="highbar-actions">
+    <button class="highbar-btn-connexion"><i data-lucide="log-in" style="width:14px;height:14px"></i> Connexion</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════ -->
+<!--  Module Sidebar                    -->
+<!-- ═══════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-title">FINANCE</div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-item"><i data-lucide="table" style="width:16px;height:16px"></i> Comptabilité</div>
+    <div class="sidebar-item"><i data-lucide="file-text" style="width:16px;height:16px"></i> Budgets</div>
+    <div class="sidebar-item"><i data-lucide="receipt" style="width:16px;height:16px"></i> Factures</div>
+    <div class="sidebar-item active"><i data-lucide="circle-dollar-sign" style="width:16px;height:16px"></i> Appels de fonds</div>
+    <div class="sidebar-item"><i data-lucide="arrow-left-right" style="width:16px;height:16px"></i> Mouvements bancaires</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-avatar">N</div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════ -->
+<!--  Page Content                      -->
+<!-- ═══════════════════════════════════ -->
+<main class="page-content">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Appels de fonds</h1>
+      <p>Budget courant et travaux — suivi par exercice</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary"><i data-lucide="download" style="width:14px;height:14px"></i> Export</button>
+      <button class="btn btn-primary"><i data-lucide="plus" style="width:14px;height:14px"></i> Générer les appels</button>
+    </div>
+  </div>
+
+  <!-- Period Selector -->
+  <div class="period-bar">
+    <button class="period-selector">
+      <i data-lucide="calendar" style="width:16px;height:16px;color:var(--text-secondary)"></i>
+      <span class="period-label">Exercice 2026</span>
+      <span class="period-meta">01/01/2026 — 31/12/2026</span>
+      <i data-lucide="chevron-down" style="width:14px;height:14px" class="period-chevron"></i>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn tab-neutral" onclick="switchTab('all', this)">
+      <div class="tab-icon tab-icon-neutral"><i data-lucide="bar-chart-3" style="width:14px;height:14px;color:var(--text-secondary)"></i></div>
+      <div>
+        <div class="tab-label">Vue globale</div>
+        <div class="tab-amount">45 200 €</div>
+      </div>
+      <span class="badge badge-green">72 %</span>
+    </button>
+    <button class="tab-btn active tab-blue" onclick="switchTab('courant', this)">
+      <div class="tab-icon tab-icon-blue"><i data-lucide="file-text" style="width:14px;height:14px;color:var(--secondary)"></i></div>
+      <div>
+        <div class="tab-label">Budget courant</div>
+        <div class="tab-amount">30 200 €</div>
+      </div>
+      <span class="badge badge-green">78 %</span>
+    </button>
+    <button class="tab-btn tab-purple" onclick="switchTab('travaux', this)">
+      <div class="tab-icon tab-icon-purple"><i data-lucide="wrench" style="width:14px;height:14px;color:#A78BFA"></i></div>
+      <div>
+        <div class="tab-label">Travaux</div>
+        <div class="tab-amount">15 000 €</div>
+      </div>
+      <span class="badge badge-amber">58 %</span>
+    </button>
+  </div>
+
+  <!-- ═══ TAB: Vue Globale ═══ -->
+  <div class="tab-panel" id="panel-all">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue"><i data-lucide="wallet" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Total appelé</div>
+          <div class="stat-value">45 200 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green"><i data-lucide="check" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Encaissé</div>
+          <div class="stat-value stat-value-green">32 544 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-red"><i data-lucide="clock" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Restant dû</div>
+          <div class="stat-value stat-value-red">12 656 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-amber"><i data-lucide="trending-up" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Encaissement</div>
+          <div class="stat-value">72 %</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-banner">
+      <i data-lucide="alert-triangle" style="width:16px;height:16px"></i>
+      <div class="alert-text">
+        <span class="alert-strong">3 copropriétaires en impayé</span> sur budget courant + travaux — Relance J+30 recommandée
+      </div>
+      <button class="alert-action">Voir les impayés</button>
+    </div>
+
+    <div class="section-title-row">
+      <div class="section-icon-sm section-icon-blue"><i data-lucide="file-text" style="width:16px;height:16px"></i></div>
+      <div class="section-title-text">Budget courant</div>
+      <div class="section-meta">30 200 € · 78 % encaissé</div>
+    </div>
+    <div class="progress-compact">
+      <span class="progress-label">Encaissement</span>
+      <div class="progress-track">
+        <div class="progress-fill progress-fill-green" style="width: 78%"></div>
+      </div>
+      <span class="progress-value">23 556 € / 30 200 €</span>
+    </div>
+
+    <div class="section-title-row spaced">
+      <div class="section-icon-sm section-icon-purple"><i data-lucide="wrench" style="width:16px;height:16px"></i></div>
+      <div class="section-title-text">Travaux</div>
+      <div class="section-meta">15 000 € · 58 % encaissé · 1 chantier</div>
+    </div>
+    <div class="progress-compact">
+      <span class="progress-label">Encaissement</span>
+      <div class="progress-track">
+        <div class="progress-fill progress-fill-purple" style="width: 58%"></div>
+      </div>
+      <span class="progress-value">8 700 € / 15 000 €</span>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: Budget Courant ═══ -->
+  <div class="tab-panel active" id="panel-courant">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue"><i data-lucide="wallet" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Total appelé</div>
+          <div class="stat-value">30 200 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green"><i data-lucide="check" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Encaissé</div>
+          <div class="stat-value stat-value-green">23 556 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-red"><i data-lucide="clock" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Restant dû</div>
+          <div class="stat-value stat-value-red">6 644 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-amber"><i data-lucide="trending-up" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Encaissement</div>
+          <div class="stat-value">78 %</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-compact">
+      <span class="progress-label">Progression exercice</span>
+      <div class="progress-track">
+        <div class="progress-fill progress-fill-green" style="width: 78%"></div>
+      </div>
+      <span class="progress-value">23 556 € / 30 200 €</span>
+    </div>
+
+    <div class="alert-banner">
+      <i data-lucide="alert-triangle" style="width:16px;height:16px"></i>
+      <div class="alert-text">
+        <span class="alert-strong">2 copropriétaires en impayé</span> sur T1 + T2 — Relance J+30 recommandée
+      </div>
+      <button class="alert-action">Voir les impayés</button>
+    </div>
+
+    <!-- Trimester Cards -->
+    <div class="trim-grid">
+      <!-- T1 — Paid -->
+      <div class="trim-card">
+        <div class="trim-header">
+          <span class="trim-title">T1 — Janvier à Mars</span>
+          <span class="badge badge-green">100 %</span>
+        </div>
+        <div class="trim-meta">3 clés · 7 550 € · Émis le 02/01/2026</div>
+        <div class="trim-progress">
+          <div class="trim-progress-fill trim-progress-green" style="width: 100%"></div>
+        </div>
+        <div class="trim-keys">
+          <span class="trim-key-tag">Charges générales — 5 150 €</span>
+          <span class="trim-key-tag">Eau froide — 1 200 €</span>
+          <span class="trim-key-tag">Ascenseur — 1 200 €</span>
+        </div>
+        <div class="trim-actions">
+          <button class="action-btn"><i data-lucide="file-text" style="width:14px;height:14px"></i> Avis</button>
+          <button class="action-btn-primary"><i data-lucide="bar-chart-3" style="width:14px;height:14px"></i> Détail</button>
+        </div>
+      </div>
+
+      <!-- T2 — Active / In progress -->
+      <div class="trim-card active">
+        <div class="trim-header">
+          <span class="trim-title">T2 — Avril à Juin</span>
+          <span class="badge badge-amber">56 %</span>
+        </div>
+        <div class="trim-meta">3 clés · 7 550 € · <strong class="trim-meta-active">En cours</strong></div>
+        <div class="trim-progress">
+          <div class="trim-progress-fill trim-progress-amber" style="width: 56%"></div>
+        </div>
+        <div class="trim-keys">
+          <span class="trim-key-tag">Charges générales — 5 150 €</span>
+          <span class="trim-key-tag">Eau froide — 1 200 €</span>
+          <span class="trim-key-tag">Ascenseur — 1 200 €</span>
+        </div>
+        <div class="trim-actions">
+          <button class="action-btn"><i data-lucide="file-text" style="width:14px;height:14px"></i> Avis</button>
+          <button class="action-btn-primary"><i data-lucide="bar-chart-3" style="width:14px;height:14px"></i> Détail</button>
+          <button class="action-btn">Relancer</button>
+        </div>
+      </div>
+
+      <!-- T3 — Active / Issued -->
+      <div class="trim-card">
+        <div class="trim-header">
+          <span class="trim-title">T3 — Juillet à Septembre</span>
+          <span class="badge badge-green">78 %</span>
+        </div>
+        <div class="trim-meta">3 clés · 7 550 € · Émis le 01/07/2026</div>
+        <div class="trim-progress">
+          <div class="trim-progress-fill trim-progress-green" style="width: 78%"></div>
+        </div>
+        <div class="trim-keys">
+          <span class="trim-key-tag">Charges générales — 5 150 €</span>
+          <span class="trim-key-tag">Eau froide — 1 200 €</span>
+          <span class="trim-key-tag">Ascenseur — 1 200 €</span>
+        </div>
+        <div class="trim-actions">
+          <button class="action-btn"><i data-lucide="file-text" style="width:14px;height:14px"></i> Avis</button>
+          <button class="action-btn-primary"><i data-lucide="bar-chart-3" style="width:14px;height:14px"></i> Détail</button>
+        </div>
+      </div>
+
+      <!-- T4 — Draft -->
+      <div class="trim-card draft">
+        <div class="trim-header">
+          <span class="trim-title">T4 — Octobre à Décembre</span>
+          <span class="badge badge-neutral">Brouillon</span>
+        </div>
+        <div class="trim-meta">3 clés · 7 550 €</div>
+        <div class="trim-progress">
+          <div class="trim-progress-fill trim-progress-amber" style="width: 0%"></div>
+        </div>
+        <div class="trim-keys">
+          <span class="trim-key-tag">Charges générales — 5 150 €</span>
+          <span class="trim-key-tag">Eau froide — 1 200 €</span>
+          <span class="trim-key-tag">Ascenseur — 1 200 €</span>
+        </div>
+        <div class="trim-actions">
+          <button class="action-btn-primary">Émettre</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: Travaux ═══ -->
+  <div class="tab-panel" id="panel-travaux">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-purple"><i data-lucide="wallet" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Total voté</div>
+          <div class="stat-value">15 000 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green"><i data-lucide="check" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Encaissé</div>
+          <div class="stat-value stat-value-green">8 700 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-red"><i data-lucide="clock" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Restant dû</div>
+          <div class="stat-value stat-value-red">6 300 €</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-amber"><i data-lucide="wrench" style="width:18px;height:18px"></i></div>
+        <div>
+          <div class="stat-label">Chantiers</div>
+          <div class="stat-value">1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-compact">
+      <span class="progress-label">Encaissement travaux</span>
+      <div class="progress-track">
+        <div class="progress-fill progress-fill-purple" style="width: 58%"></div>
+      </div>
+      <span class="progress-value">8 700 € / 15 000 €</span>
+    </div>
+
+    <div class="travaux-grid">
+      <div class="travaux-card">
+        <div class="travaux-header">
+          <div>
+            <div class="travaux-title">Ravalement façade nord</div>
+            <div class="travaux-origin">
+              AG du 15/03/2026 · Ravalement façade nord — Art. 25 · <span class="travaux-origin-link">Art. 25</span> · Clé : Charges générales
+            </div>
+          </div>
+          <div class="travaux-amount">
+            <div class="travaux-total">15 000 €</div>
+            <div class="travaux-sub">Encaissé : 8 700 €</div>
+          </div>
+        </div>
+
+        <div class="travaux-progress">
+          <div class="travaux-progress-bar">
+            <div class="travaux-progress-fill" style="width: 58%"></div>
+          </div>
+          <span class="travaux-pct">58 %</span>
+        </div>
+
+        <div class="echeancier-label">Échéancier — 3 appels</div>
+        <div class="echeancier-grid">
+          <div class="echeance paid">
+            <div class="echeance-label">Appel 1/3</div>
+            <div class="echeance-date">Échéance : 01/04/2026</div>
+            <div class="echeance-amount echeance-amount-green">5 000 €</div>
+            <span class="badge badge-green">Soldé</span>
+          </div>
+          <div class="echeance current">
+            <div class="echeance-label">Appel 2/3</div>
+            <div class="echeance-date">Échéance : 01/07/2026</div>
+            <div class="echeance-amount echeance-amount-purple">5 000 €</div>
+            <span class="badge badge-purple">En cours — 74 %</span>
+          </div>
+          <div class="echeance upcoming">
+            <div class="echeance-label">Appel 3/3</div>
+            <div class="echeance-date">Échéance : 01/10/2026</div>
+            <div class="echeance-amount echeance-amount-muted">5 000 €</div>
+            <span class="badge badge-neutral">À émettre</span>
+          </div>
+        </div>
+
+        <div class="travaux-actions">
+          <button class="action-btn"><i data-lucide="file-text" style="width:14px;height:14px"></i> Avis PDF</button>
+          <button class="action-btn-primary"><i data-lucide="bar-chart-3" style="width:14px;height:14px"></i> Détail</button>
+          <button class="action-btn">Relancer</button>
+          <button class="action-btn"><i data-lucide="send" style="width:14px;height:14px"></i> Envoyer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Tab switching
+  function switchTab(tabId, btn) {
+    // Deactivate all tabs
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+    // Activate clicked tab
+    btn.classList.add('active');
+    document.getElementById('panel-' + tabId).classList.add('active');
+  }
+</script>
+</body>
+</html>

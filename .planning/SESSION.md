@@ -1,25 +1,23 @@
-# Session State — 2026-03-14 18:00
+# Session State — 2026-03-14 19:45
 
 ## Branch
 v2
 
 ## Completed This Session
-- Refonte complete module appels de fonds (15 composants, 3 hooks, 5 CSS modules, 2 pages)
-- Migration DB: tantiemes dans v_call_lines_detailed + call_id/call_line_id/content dans payment_reminders
-- Systeme de relances 3 phases (modale stepper vertical + apercu editable + envoi)
-- Gradation visuelle tableau (0 relance=defaut, 1=jaune, 2=orange, 3=rouge, paye=vert)
-- Remplacement emojis par Lucide icons, "Recouvrement" renomme "Encaissement"
-- Period selector dropdown (remplace fleches prev/next)
-- Nettoyage legacy: 60 fichiers supprimes (-12 673 lignes)
+- Design spec: wizard appel de fonds ponctuel (4 étapes, modale, 2 cas d'usage)
+- Implementation plan: 6 chunks, 10 tâches
+- Chunk 1-6: migration DB, hook, modal shell+CSS, 4 step components, wiring page
+- Build Next.js OK, 0 erreurs TS wizard
 
 ## Next Task
-Retravailler l'UI/UX de la page appels de fonds en s'inspirant de la HighBar et Sidebar existantes — lire leurs CSS, faire une preview HTML, puis appliquer
+Test visuel du wizard: lancer `npm run dev`, ouvrir /finance/appels-fonds, cliquer "Générer les appels", vérifier les 4 étapes. Appliquer migration DB si pas fait. Passer budgets[] réels au wizard.
 
 ## Blockers
-None
+- Migration `20260314_call_for_funds_add_description.sql` pas encore appliquée en DB
+- `budgets` prop est `[]` (vide) — il faut exposer les budgets depuis useAppelsFondsPage
 
 ## Key Context
-- budget_type DB: 'current' / 'works' / 'alur' (pas 'previsionnel')
-- payment_reminders n'a pas de colonne 'channel' (elle est sur payment_reminder_rules)
-- useCreateCall.mutate accepte Omit<CreateCallPayload, 'copro_id'>
-- Bouton "Generer les appels" = stub vide, feature non implementee
+- RepartitionKeyWithTotals utilise `key_id` (pas `id`) comme identifiant
+- listRepartitionKeys de @/lib/lots/api.ts (pas finance/api.ts) pour avoir total_weight+lots_count
+- Spec: docs/superpowers/specs/2026-03-14-wizard-appel-fonds-ponctuel-design.md
+- Plan: docs/superpowers/plans/2026-03-14-wizard-appel-fonds-ponctuel.md
