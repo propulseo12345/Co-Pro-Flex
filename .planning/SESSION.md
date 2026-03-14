@@ -1,23 +1,24 @@
-# Session State — 2026-03-14 11:45
+# Session State — 2026-03-14 13:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- autoFileToGED: branchement sur 10 call sites PDF (PV, convocation, relance, vente, résiliation, docs techniques, assurances)
-- GED refresh: visibilitychange listener pour rafraîchir silencieusement quand l'utilisateur revient sur l'onglet
-- Fix checkboxes envoi: supprimé re-fetch post-save qui écrasait l'état optimiste + debounce 500ms
-- Fix budget import: champ Exercice changé en input number libre (plus de select limité)
-- Spec envoi convocations: docs/superpowers/specs/2026-03-14-convocation-dispatch-design.md
-- Plan envoi convocations: docs/superpowers/plans/2026-03-14-convocation-dispatch.md (7 chunks, 10 tasks)
+- Pipeline envoi convocations: migration DB + types + page de garde PDF + dispatch multi-canal + modale progression + Edge Function email + JSZip
+- GED: sous-dossiers multi-niveaux (subFolderName avec '/'), composant SubFolderTree récursif
+- GED: favoris (colonne is_starred + toggle optimiste + onglet réel)
+- GED: preview inline (iframe PDF / img) + téléchargement blob (sans quitter la page)
+- GED: fix catégorie upload (category_default du dossier, plus de mapping par icône)
+- GED: UI cleanup (suppression KPI bar, stats dans sidebar, réduction taille header)
+- Convention sous-dossiers GED documentée (spec)
 
 ## Next Task
-Exécuter le plan d'implémentation: Chunk 1 Task 1 — migration Supabase (table ag_envoi_tracking + RPCs + bundle RPC)
+Retravail module Appels de fonds — générateur PDF + archivage GED + refonte UI
 
 ## Blockers
 None
 
 ## Key Context
-- Schema DB: coproprietaires a first_name/last_name/address_line1/address_line2/city/postal_code (pas prenom/nom/adresse)
-- Lots via junction table lot_owners (pas owner_id direct sur lots)
-- useDeliveryConfig déprécié au profit de useAgEnvoiPage pour cette feature
+- Appels de fonds: table call_for_funds existe, émission fonctionne, mais PAS de générateur PDF (stub dans emission-appel.service.ts)
+- Convention sous-dossiers: Appels de fonds {exercice}/T{n} - {mois} {année}
+- autoFileToGED supporte maintenant des chemins multi-niveaux via '/'
