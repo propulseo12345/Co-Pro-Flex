@@ -1205,7 +1205,6 @@ export async function createManualReminder(
       days_overdue: payload.days_overdue,
       recipient_email: payload.recipient_email,
       recipient_name: payload.recipient_name,
-      channel: payload.channel,
       content: payload.content,
       status: 'sent',
       sent_at: new Date().toISOString(),
