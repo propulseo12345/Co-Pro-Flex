@@ -1,0 +1,332 @@
+<h2>Appels de fonds — Organisation des pages</h2>
+<p class="subtitle">Comparez les deux approches de navigation pour le module</p>
+
+<div class="split">
+  <!-- OPTION B -->
+  <div style="flex:1">
+    <div class="option" data-choice="b" onclick="toggleSelect(this)" style="margin-bottom:16px;border:2px solid var(--border);border-radius:12px;padding:16px;">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Listing + Page Détail</h3>
+        <p>2 niveaux : liste des appels → détail par appel</p>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">B1 — /appels-fonds (Listing)</div>
+      <div class="mockup-body" style="padding:0;">
+        <!-- KPI Bar -->
+        <div style="display:flex;gap:1px;background:#e5e7eb;">
+          <div style="flex:1;background:var(--bg);padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Total appelé</div>
+            <div style="font-size:20px;font-weight:700;color:var(--text);">156 400 €</div>
+          </div>
+          <div style="flex:1;background:var(--bg);padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Encaissé</div>
+            <div style="font-size:20px;font-weight:700;color:#22c55e;">98 200 €</div>
+          </div>
+          <div style="flex:1;background:var(--bg);padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Restant dû</div>
+            <div style="font-size:20px;font-weight:700;color:#ef4444;">58 200 €</div>
+          </div>
+          <div style="flex:1;background:var(--bg);padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Taux recouvrement</div>
+            <div style="font-size:20px;font-weight:700;color:var(--text);">62,8%</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div style="padding:12px 16px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border);">
+          <div style="padding:4px 12px;background:var(--accent);color:white;border-radius:6px;font-size:12px;font-weight:600;">2025-2026</div>
+          <div style="padding:4px 12px;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-muted);">Toutes clés</div>
+          <div style="padding:4px 12px;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-muted);">Tous statuts</div>
+          <div style="flex:1;"></div>
+          <button class="mock-button" style="font-size:12px;">+ Nouvel appel</button>
+        </div>
+
+        <!-- Table -->
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:var(--bg-alt);">
+              <th style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:500;">Appel</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:500;">Clé</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text-muted);font-weight:500;">Montant</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--text-muted);font-weight:500;">Recouvrement</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--text-muted);font-weight:500;">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background=''">
+              <td style="padding:10px 12px;"><strong>T1 2026 — Jan-Mars</strong><br><span style="color:var(--text-muted);font-size:11px;">Échéance: 01/01/2026</span></td>
+              <td style="padding:10px 12px;color:var(--text-muted);">Charges générales</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:600;">39 100 €</td>
+              <td style="padding:10px 12px;text-align:center;">
+                <div style="background:#e5e7eb;border-radius:99px;height:6px;width:80px;display:inline-block;"><div style="background:#22c55e;border-radius:99px;height:6px;width:90%;"></div></div>
+                <span style="margin-left:4px;font-size:11px;">90%</span>
+              </td>
+              <td style="padding:10px 12px;text-align:center;"><span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;">Partiellement payé</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background=''">
+              <td style="padding:10px 12px;"><strong>T2 2026 — Avr-Juin</strong><br><span style="color:var(--text-muted);font-size:11px;">Échéance: 01/04/2026</span></td>
+              <td style="padding:10px 12px;color:var(--text-muted);">Charges générales</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:600;">39 100 €</td>
+              <td style="padding:10px 12px;text-align:center;">
+                <div style="background:#e5e7eb;border-radius:99px;height:6px;width:80px;display:inline-block;"><div style="background:#f59e0b;border-radius:99px;height:6px;width:45%;"></div></div>
+                <span style="margin-left:4px;font-size:11px;">45%</span>
+              </td>
+              <td style="padding:10px 12px;text-align:center;"><span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;">Émis</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background=''">
+              <td style="padding:10px 12px;"><strong>T3 2026 — Jul-Sep</strong><br><span style="color:var(--text-muted);font-size:11px;">Échéance: 01/07/2026</span></td>
+              <td style="padding:10px 12px;color:var(--text-muted);">Charges générales</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:600;">39 100 €</td>
+              <td style="padding:10px 12px;text-align:center;">
+                <div style="background:#e5e7eb;border-radius:99px;height:6px;width:80px;display:inline-block;"><div style="background:transparent;border-radius:99px;height:6px;width:0%;"></div></div>
+                <span style="margin-left:4px;font-size:11px;">0%</span>
+              </td>
+              <td style="padding:10px 12px;text-align:center;"><span style="background:var(--bg-alt);color:var(--text-muted);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;">Brouillon</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);cursor:pointer;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background=''">
+              <td style="padding:10px 12px;"><strong>T1 2026 — Jan-Mars</strong><br><span style="color:var(--text-muted);font-size:11px;">Échéance: 01/01/2026</span></td>
+              <td style="padding:10px 12px;color:var(--text-muted);">Ascenseur</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:600;">12 300 €</td>
+              <td style="padding:10px 12px;text-align:center;">
+                <div style="background:#e5e7eb;border-radius:99px;height:6px;width:80px;display:inline-block;"><div style="background:#22c55e;border-radius:99px;height:6px;width:100%;"></div></div>
+                <span style="margin-left:4px;font-size:11px;">100%</span>
+              </td>
+              <td style="padding:10px 12px;text-align:center;"><span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;">Soldé</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mockup" style="margin-top:16px;">
+      <div class="mockup-header">B2 — /appels-fonds/[callId] (Détail)</div>
+      <div class="mockup-body" style="padding:0;">
+        <!-- Header -->
+        <div style="padding:16px;border-bottom:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <span style="color:var(--text-muted);font-size:12px;">← Retour aux appels</span>
+              <h3 style="margin:4px 0 0;">T2 2026 — Charges générales</h3>
+              <span style="color:var(--text-muted);font-size:12px;">Échéance: 01/04/2026 · Émis le 15/03/2026</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="mock-button" style="font-size:12px;background:var(--bg-alt);color:var(--text);border:1px solid var(--border);">📄 PDF</button>
+              <button class="mock-button" style="font-size:12px;background:var(--bg-alt);color:var(--text);border:1px solid var(--border);">📨 Envoyer</button>
+              <button class="mock-button" style="font-size:12px;">+ Paiement</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini KPIs -->
+        <div style="display:flex;gap:1px;background:#e5e7eb;">
+          <div style="flex:1;background:var(--bg);padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--text-muted);">APPELÉ</div>
+            <div style="font-size:16px;font-weight:700;">39 100 €</div>
+          </div>
+          <div style="flex:1;background:var(--bg);padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--text-muted);">ENCAISSÉ</div>
+            <div style="font-size:16px;font-weight:700;color:#22c55e;">17 595 €</div>
+          </div>
+          <div style="flex:1;background:var(--bg);padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--text-muted);">RESTANT</div>
+            <div style="font-size:16px;font-weight:700;color:#ef4444;">21 505 €</div>
+          </div>
+          <div style="flex:1;background:var(--bg);padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--text-muted);">COPROS</div>
+            <div style="font-size:16px;font-weight:700;">8/18</div>
+            <div style="font-size:10px;color:#22c55e;">payés</div>
+          </div>
+        </div>
+
+        <!-- Lines table -->
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:var(--bg-alt);">
+              <th style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:500;">Copropriétaire</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:500;">Lot</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text-muted);font-weight:500;">Tantièmes</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text-muted);font-weight:500;">Dû</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text-muted);font-weight:500;">Payé</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--text-muted);font-weight:500;">Statut</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--text-muted);font-weight:500;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 12px;font-weight:500;">M. Dupont</td>
+              <td style="padding:8px 12px;color:var(--text-muted);">Apt 3B</td>
+              <td style="padding:8px 12px;text-align:right;">85/1000</td>
+              <td style="padding:8px 12px;text-align:right;">3 323 €</td>
+              <td style="padding:8px 12px;text-align:right;color:#22c55e;">3 323 €</td>
+              <td style="padding:8px 12px;text-align:center;"><span style="background:#dcfce7;color:#166534;padding:2px 6px;border-radius:99px;font-size:11px;">Payé</span></td>
+              <td style="padding:8px 12px;text-align:center;color:var(--text-muted);">—</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 12px;font-weight:500;">Mme Martin</td>
+              <td style="padding:8px 12px;color:var(--text-muted);">Apt 1A</td>
+              <td style="padding:8px 12px;text-align:right;">120/1000</td>
+              <td style="padding:8px 12px;text-align:right;">4 692 €</td>
+              <td style="padding:8px 12px;text-align:right;color:#f59e0b;">2 000 €</td>
+              <td style="padding:8px 12px;text-align:center;"><span style="background:#fef9c3;color:#854d0e;padding:2px 6px;border-radius:99px;font-size:11px;">Partiel</span></td>
+              <td style="padding:8px 12px;text-align:center;"><a style="color:var(--accent);font-size:11px;cursor:pointer;">Relancer</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);background:#fef2f2;">
+              <td style="padding:8px 12px;font-weight:500;color:#ef4444;">M. Bernard</td>
+              <td style="padding:8px 12px;color:var(--text-muted);">Apt 5C</td>
+              <td style="padding:8px 12px;text-align:right;">65/1000</td>
+              <td style="padding:8px 12px;text-align:right;">2 542 €</td>
+              <td style="padding:8px 12px;text-align:right;color:#ef4444;">0 €</td>
+              <td style="padding:8px 12px;text-align:center;"><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:99px;font-size:11px;">Impayé</span></td>
+              <td style="padding:8px 12px;text-align:center;"><a style="color:#ef4444;font-size:11px;cursor:pointer;">Relancer</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div style="flex:1">
+    <div class="option" data-choice="c" onclick="toggleSelect(this)" style="margin-bottom:16px;border:2px solid var(--border);border-radius:12px;padding:16px;">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Dashboard Campagne + Détail</h3>
+        <p>Vue exercice avec tous les trimestres → détail par appel</p>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">C1 — /appels-fonds (Dashboard Campagne)</div>
+      <div class="mockup-body" style="padding:0;">
+        <!-- Period selector -->
+        <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <h3 style="margin:0;font-size:16px;">Exercice 2025-2026</h3>
+            <span style="color:var(--text-muted);font-size:12px;">|</span>
+            <span style="color:var(--text-muted);font-size:12px;">Budget voté: 156 400 €</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <div style="padding:4px 10px;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-muted);cursor:pointer;">◀ 2024-2025</div>
+            <button class="mock-button" style="font-size:12px;">+ Générer appels</button>
+          </div>
+        </div>
+
+        <!-- Global progress -->
+        <div style="padding:16px;border-bottom:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:12px;color:var(--text-muted);">Progression globale</span>
+            <span style="font-size:12px;font-weight:600;">98 200 € / 156 400 € (62,8%)</span>
+          </div>
+          <div style="background:#e5e7eb;border-radius:99px;height:10px;">
+            <div style="background:linear-gradient(90deg, #22c55e 0%, #22c55e 62.8%, #e5e7eb 62.8%);border-radius:99px;height:10px;width:100%;"></div>
+          </div>
+        </div>
+
+        <!-- Trimester cards -->
+        <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <!-- T1 -->
+          <div style="border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:14px;">T1 — Jan-Mars</span>
+              <span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-size:11px;">90%</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">2 clés · 51 400 €</div>
+            <div style="background:#e5e7eb;border-radius:99px;height:4px;margin-bottom:8px;">
+              <div style="background:#22c55e;border-radius:99px;height:4px;width:90%;"></div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+              <span style="background:var(--bg-alt);padding:2px 6px;border-radius:4px;font-size:10px;color:var(--text-muted);">Charges gén. 39 100 €</span>
+              <span style="background:var(--bg-alt);padding:2px 6px;border-radius:4px;font-size:10px;color:var(--text-muted);">Ascenseur 12 300 €</span>
+            </div>
+          </div>
+
+          <!-- T2 -->
+          <div style="border:2px solid var(--accent);border-radius:8px;padding:12px;cursor:pointer;background:color-mix(in srgb, var(--accent) 5%, var(--bg));">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:14px;">T2 — Avr-Juin</span>
+              <span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:99px;font-size:11px;">45%</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">1 clé · 39 100 € · <strong style="color:var(--accent);">En cours</strong></div>
+            <div style="background:#e5e7eb;border-radius:99px;height:4px;margin-bottom:8px;">
+              <div style="background:#f59e0b;border-radius:99px;height:4px;width:45%;"></div>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <span style="background:var(--bg-alt);padding:2px 6px;border-radius:4px;font-size:10px;color:var(--text-muted);">Charges gén. 39 100 €</span>
+            </div>
+          </div>
+
+          <!-- T3 -->
+          <div style="border:1px dashed var(--border);border-radius:8px;padding:12px;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:14px;">T3 — Jul-Sep</span>
+              <span style="background:var(--bg-alt);color:var(--text-muted);padding:2px 8px;border-radius:99px;font-size:11px;">Brouillon</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">1 clé · 39 100 €</div>
+            <div style="background:#e5e7eb;border-radius:99px;height:4px;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:4px;">
+              <span style="background:var(--bg-alt);padding:2px 6px;border-radius:4px;font-size:10px;color:var(--text-muted);">Charges gén. 39 100 €</span>
+            </div>
+          </div>
+
+          <!-- T4 -->
+          <div style="border:1px dashed var(--border);border-radius:8px;padding:12px;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:14px;">T4 — Oct-Déc</span>
+              <span style="background:var(--bg-alt);color:var(--text-muted);padding:2px 8px;border-radius:99px;font-size:11px;">Brouillon</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">1 clé · 39 100 €</div>
+            <div style="background:#e5e7eb;border-radius:99px;height:4px;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:4px;">
+              <span style="background:var(--bg-alt);padding:2px 6px;border-radius:4px;font-size:10px;color:var(--text-muted);">Charges gén. 39 100 €</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Impayés alert -->
+        <div style="margin:0 16px 16px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">⚠️</span>
+          <div style="font-size:12px;color:#991b1b;">
+            <strong>3 copropriétaires en impayé</strong> sur T1+T2 — Relance J+30 recommandée pour M. Bernard
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup" style="margin-top:16px;">
+      <div class="mockup-header">C2 — /appels-fonds/[callId] (même que B2)</div>
+      <div class="mockup-body" style="padding:16px;text-align:center;color:var(--text-muted);">
+        <p>La page détail est identique à l'option B</p>
+        <p style="font-size:12px;">Mêmes fonctionnalités : liste copros, paiements, relances, envoi, PDF</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:16px;background:var(--bg-alt);border-radius:8px;">
+  <h3 style="margin:0 0 8px;">Comparaison rapide</h3>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:6px 0;font-weight:600;">Navigation</td>
+      <td style="padding:6px;"><strong>B:</strong> Liste plate → détail</td>
+      <td style="padding:6px;"><strong>C:</strong> Dashboard exercice → détail</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:6px 0;font-weight:600;">Vue d'ensemble</td>
+      <td style="padding:6px;">KPIs en haut, tout dans le tableau</td>
+      <td style="padding:6px;">Cartes trimestre, progression visuelle</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:6px 0;font-weight:600;">Complexité</td>
+      <td style="padding:6px;">Simple, classique</td>
+      <td style="padding:6px;">Plus riche, plus contextualisé</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;font-weight:600;">Cas d'usage fort</td>
+      <td style="padding:6px;">Syndic qui gère appel par appel</td>
+      <td style="padding:6px;">Syndic qui pilote par exercice</td>
+    </tr>
+  </table>
+</div>

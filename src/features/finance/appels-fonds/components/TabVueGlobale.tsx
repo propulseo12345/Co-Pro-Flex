@@ -48,7 +48,7 @@ export function TabVueGlobale({
     {
       icon: <TrendingUp size={18} />,
       iconColor: 'amber',
-      label: 'Recouvrement',
+      label: 'Encaissement',
       value: `${globalStats.recoveryRate} %`,
     },
   ];
@@ -74,7 +74,7 @@ export function TabVueGlobale({
         </div>
       </div>
       <ProgressBar
-        label="Recouvrement"
+        label="Encaissement"
         value={`${formatEuros(courantStats.totalPaid)} / ${formatEuros(courantStats.totalCalled)}`}
         percentage={courantStats.recoveryRate}
         color="green"
@@ -90,7 +90,7 @@ export function TabVueGlobale({
         </div>
       </div>
       <ProgressBar
-        label="Recouvrement"
+        label="Encaissement"
         value={`${formatEuros(travauxStats.totalPaid)} / ${formatEuros(travauxStats.totalCalled)}`}
         percentage={travauxStats.recoveryRate}
         color="purple"

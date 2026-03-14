@@ -50,7 +50,7 @@ export function TabTravaux({ stats, projects, onEmit }: TabTravauxProps) {
       <StatsGrid items={statItems} />
 
       <ProgressBar
-        label="Recouvrement travaux"
+        label="Encaissement travaux"
         value={`${formatEuros(stats.totalPaid)} / ${formatEuros(stats.totalCalled)}`}
         percentage={stats.recoveryRate}
         color="purple"

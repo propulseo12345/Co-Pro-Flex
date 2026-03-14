@@ -49,7 +49,7 @@ export function TabBudgetCourant({
     {
       icon: <TrendingUp size={18} />,
       iconColor: 'amber',
-      label: 'Recouvrement',
+      label: 'Encaissement',
       value: `${stats.recoveryRate} %`,
     },
   ];
