@@ -5,3 +5,5 @@ export { AppelsFondsTabs } from './AppelsFondsTabs';
 export { TabVueGlobale } from './TabVueGlobale';
 export { TabBudgetCourant } from './TabBudgetCourant';
 export { TabTravaux } from './TabTravaux';
+export { DetailHeader } from './DetailHeader';
+export { CoproTable } from './CoproTable';

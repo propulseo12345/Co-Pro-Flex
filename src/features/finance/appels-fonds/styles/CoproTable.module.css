@@ -1,0 +1,176 @@
+/* ══════════════════════════════════════════ */
+/*  CoproTable — Copropriétaires table       */
+/* ══════════════════════════════════════════ */
+
+.tableContainer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thead {
+  background: var(--bg-secondary);
+}
+
+.th {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+
+.thRight {
+  composes: th;
+  text-align: right;
+}
+
+.thCenter {
+  composes: th;
+  text-align: center;
+}
+
+.td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.tdRight {
+  composes: td;
+  text-align: right;
+}
+
+.tdCenter {
+  composes: td;
+  text-align: center;
+}
+
+.tdMuted {
+  composes: td;
+  color: var(--text-secondary);
+}
+
+.tdBold {
+  composes: td;
+  font-weight: 600;
+}
+
+.tdBoldDanger {
+  composes: td;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.tdRightBold {
+  composes: td;
+  text-align: right;
+  font-weight: 600;
+}
+
+.tdRightPaid {
+  composes: td;
+  text-align: right;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.tdRightPartial {
+  composes: td;
+  text-align: right;
+  font-weight: 600;
+  color: var(--warning);
+}
+
+.tdRightUnpaid {
+  composes: td;
+  text-align: right;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.tdRightMuted {
+  composes: td;
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+.row {
+  transition: background 150ms;
+}
+
+.row:hover {
+  background: var(--bg-secondary);
+}
+
+.row:last-child .td,
+.row:last-child .tdRight,
+.row:last-child .tdCenter,
+.row:last-child .tdMuted,
+.row:last-child .tdBold,
+.row:last-child .tdBoldDanger,
+.row:last-child .tdRightBold,
+.row:last-child .tdRightPaid,
+.row:last-child .tdRightPartial,
+.row:last-child .tdRightUnpaid,
+.row:last-child .tdRightMuted {
+  border-bottom: none;
+}
+
+.rowDanger {
+  composes: row;
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.rowDanger:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.linkAction {
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 150ms;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.linkAction:hover {
+  color: var(--secondary, #60A5FA);
+}
+
+.linkActionDanger {
+  composes: linkAction;
+  color: var(--danger);
+}
+
+.linkActionDanger:hover {
+  color: #fca5a5;
+}
+
+.noAction {
+  color: var(--text-tertiary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .tableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 700px;
+  }
+}
