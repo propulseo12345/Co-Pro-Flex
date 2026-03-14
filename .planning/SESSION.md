@@ -1,27 +1,26 @@
-# Session State — 2026-03-13 23:45
+# Session State — 2026-03-14 00:30
 
 ## Branch
 v2
 
 ## Completed This Session
-- Logbook refonte: header plat + 6 KPIs + tabs underline + tableau dense interventions (variante A preview appliquée)
-- Prestataires refonte: split view C (liste + détail) + onglet "Tous" + 4 KPIs + tabs catégories
-- Ordres de service refonte: split view C (liste + workflow bar + détail) + actions contextuelles par statut
-- GED refonte: split view C2 (sidebar onglets Dossiers/Récents/Favoris + détail/aperçu) + comptage récursif docs
-- 4 pages preview créées: logbook, providers, service-orders, ged (3 variantes chacune)
+- GED CRUD: dossiers (créer/renommer/supprimer) + supprimer docs + KPI fix
+- GED Upload Modal: UploadDocumentModal + FolderTreeSelect + detect-category
+- Auto-file service: autoFileToGED avec folder resolution par category_default
+- Toast system: ToastProvider dashboard-level + migration 11 fichiers useToast
+- PDF refactoring: 8 générateurs retournent jsPDF (+ call sites mis à jour)
+- API update: uploadDocument accepte sourceModule/documentDate/year
+- DB: category_default peuplé sur dossiers système + storage RLS anon
+- Spec + plan: docs/superpowers/specs/2026-03-14-ged-upload-autofile-design.md
+- Audit complet: 8 chantiers restants identifiés avec scores
 
 ## Next Task
-**GED — CRUD dossiers/documents + KPIs cohérents** :
-- Créer dossiers de base copro (AG, Contrats, Diagnostics, Factures, Règlements, Assurances, Travaux, Courrier, Photos, Plans)
-- Ajouter actions CRUD: créer dossier, renommer, supprimer, créer sous-dossier, ajouter document
-- KPIs doivent refléter exactement le contenu sidebar (total docs = somme docs dans dossiers + sans dossier)
-- Fichiers: src/app/(dashboard)/documents/ged/page.tsx + ged.module.css + potentiellement migration Supabase
+**GED finitions** : brancher autoFileToGED() dans chaque call site PDF (fire-and-forget après doc.save), puis sidebar arborescente (sous-dossiers 2 niveaux)
 
 ## Blockers
 None
 
 ## Key Context
-- DA unifiée: header plat, KPI bar, split view, dark theme CSS vars
-- Supabase hook: useGedPageSupabase (documents, folders, stats depuis API)
-- docsByFolder utilise lookup récursif (parent→children) pour comptage
-- User veut que gestionnaires puissent modifier/ajouter/supprimer dossiers
+- Spec validé: docs/superpowers/specs/2026-03-14-ged-upload-autofile-design.md
+- generateConvocationPDF retourne déjà ConvocationPDFResult (pas besoin refacto)
+- Priorités post-GED: Email/Notifs (#1), Settings persistence (#2), Communication RT (#3)
