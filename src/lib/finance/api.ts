@@ -1169,6 +1169,55 @@ export async function updatePaymentReminderRule(
 }
 
 // ============================================================================
+// MANUAL REMINDERS (RELANCES MANUELLES)
+// ============================================================================
+
+export interface CreateManualReminderPayload {
+  copro_id: string;
+  lot_id: string;
+  call_id: string;
+  call_line_id: string;
+  delay_level: number;
+  unpaid_amount: number;
+  oldest_due_date: string;
+  days_overdue: number;
+  recipient_email: string | null;
+  recipient_name: string | null;
+  channel: string;
+  content: string;
+}
+
+export async function createManualReminder(
+  payload: CreateManualReminderPayload
+): Promise<ApiResult<{ reminder_id: string }>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('payment_reminders')
+    .insert({
+      copro_id: payload.copro_id,
+      lot_id: payload.lot_id,
+      call_id: payload.call_id,
+      call_line_id: payload.call_line_id,
+      delay_level: payload.delay_level,
+      unpaid_amount: payload.unpaid_amount,
+      oldest_due_date: payload.oldest_due_date,
+      days_overdue: payload.days_overdue,
+      recipient_email: payload.recipient_email,
+      recipient_name: payload.recipient_name,
+      channel: payload.channel,
+      content: payload.content,
+      status: 'sent',
+      sent_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+
+  if (error) return { data: null, error: error.message };
+  return { data: { reminder_id: data.id }, error: null };
+}
+
+// ============================================================================
 // REMINDER SETTINGS (PAUSE)
 // ============================================================================
 
