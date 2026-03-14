@@ -287,13 +287,6 @@ export default function GEDPage() {
     });
   }, []);
 
-  // KPIs
-  const kpis = [
-    { label: 'Documents', value: documents.length, color: '#2563eb', icon: FileText },
-    { label: 'Dossiers', value: rootFolders.length, color: '#10B981', icon: Folder },
-    { label: 'Actifs', value: stats?.active_count ?? '—', color: '#F59E0B', icon: Shield },
-    { label: 'Stockage', value: stats?.total_size_bytes ? `${(stats.total_size_bytes / (1024 * 1024)).toFixed(1)} Mo` : '—', color: '#A78BFA', icon: HardDrive },
-  ];
 
   if (isLoading) {
     return (
@@ -325,27 +318,10 @@ export default function GEDPage() {
           <button className={styles.btnSecondary} onClick={() => { setCreateFolderParentId(null); setNewFolderName(''); setShowCreateFolderModal(true); }}>
             <FolderPlus size={15} /> Nouveau dossier
           </button>
-          <button className={styles.btnSecondary}><Download size={15} /> Exporter</button>
           <button className={styles.btnPrimary} onClick={() => setShowUploadModal(true)}>
-            <Upload size={15} /> Importer
+            <Upload size={15} /> Ajouter un document
           </button>
         </div>
-      </div>
-
-      {/* KPI Bar */}
-      <div className={styles.kpiBar}>
-        {kpis.map(k => {
-          const Icon = k.icon;
-          return (
-            <div key={k.label} className={styles.kpiCard}>
-              <div className={styles.kpiIcon} style={{ background: k.color + '15', color: k.color }}><Icon size={16} /></div>
-              <div className={styles.kpiContent}>
-                <span className={styles.kpiValue}>{k.value}</span>
-                <span className={styles.kpiLabel}>{k.label}</span>
-              </div>
-            </div>
-          );
-        })}
       </div>
 
       {/* Search global */}
@@ -386,6 +362,12 @@ export default function GEDPage() {
                 </button>
               );
             })}
+          </div>
+
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: 'var(--space-md)', padding: '0.5rem 0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            <span><FileText size={12} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '4px' }} />{documents.length} documents</span>
+            <span><Folder size={12} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '4px' }} />{rootFolders.length} dossiers</span>
           </div>
 
           {/* Mini search */}
@@ -572,7 +554,7 @@ export default function GEDPage() {
           <div className={styles.detailPanel}>
             <div className={styles.detailHeader}>
               <div className={styles.detailIconLg} style={{ background: catColor + '12', color: catColor }}>
-                <DocIcon type={selectedDoc.type} size={28} />
+                <DocIcon type={selectedDoc.type} size={18} />
               </div>
               <div>
                 <h3 className={styles.detailName}>

@@ -60,6 +60,7 @@ function normalizeFolder(folder: DocumentFolder): GEDFolder {
     description: folder.description,
     documentCount: folder.document_count,
     subfolderCount: folder.subfolder_count,
+    categoryDefault: (folder as unknown as Record<string, unknown>).category_default as string | undefined,
   };
 }
 
@@ -408,10 +409,7 @@ export function useGedPageSupabase() {
 
       try {
         for (const file of files) {
-          // Determine category based on folder
-          const category: DocumentCategory = currentFolder?.icon === 'Users' ? 'pv_ag' :
-            currentFolder?.icon === 'Receipt' ? 'facture' :
-            currentFolder?.icon === 'FileSignature' ? 'contrat' : 'autre';
+          const category: DocumentCategory = (currentFolder?.categoryDefault as DocumentCategory) || 'autre';
 
           await documentsApi.uploadDocument(file, currentCoproId, category, {
             folderId: currentFolderId || undefined,
@@ -440,10 +438,7 @@ export function useGedPageSupabase() {
 
       try {
         for (const file of files) {
-          // Determine category based on folder
-          const category: DocumentCategory = currentFolder?.icon === 'Users' ? 'pv_ag' :
-            currentFolder?.icon === 'Receipt' ? 'facture' :
-            currentFolder?.icon === 'FileSignature' ? 'contrat' : 'autre';
+          const category: DocumentCategory = (currentFolder?.categoryDefault as DocumentCategory) || 'autre';
 
           await documentsApi.uploadDocument(file, currentCoproId, category, {
             folderId: currentFolderId || undefined,

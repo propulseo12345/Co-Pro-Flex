@@ -232,12 +232,12 @@
   padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;
 }
 
-.detailHeader { display: flex; align-items: center; gap: 0.875rem; }
+.detailHeader { display: flex; align-items: center; gap: 0.625rem; }
 .detailIconLg {
-  width: 56px; height: 56px; border-radius: 0.875rem;
+  width: 36px; height: 36px; border-radius: 0.5rem;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.detailName { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.375rem; }
+.detailName { font-size: 0.875rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.375rem; }
 .detailFolder { font-size: 0.75rem; color: var(--text-tertiary); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.125rem; }
 .lockIcon { color: #EF4444; flex-shrink: 0; }
 
@@ -246,14 +246,14 @@
 .confidBadge { display: inline-flex; align-items: center; gap: 3px; font-size: 0.625rem; padding: 2px 7px; border-radius: 4px; background: rgba(239,68,68,0.12); color: #F87171; }
 .tagBadge { font-size: 0.625rem; padding: 1px 6px; border-radius: 3px; background: var(--border-light); color: var(--text-secondary); }
 
-.detailStatsRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.625rem; }
+.detailStatsRow { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .detailStatCard {
-  padding: 0.75rem; border-radius: 0.5rem; background: var(--bg-secondary);
+  padding: 0.3rem 0.625rem; border-radius: 0.375rem; background: var(--bg-secondary);
   border: 1px solid var(--border-light);
-  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+  display: flex; align-items: center; gap: 0.375rem;
 }
-.detailStatValue { font-size: 0.875rem; font-weight: 700; color: var(--text-primary); }
-.detailStatLabel { font-size: 0.6875rem; color: var(--text-tertiary); }
+.detailStatValue { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
+.detailStatLabel { font-size: 0.625rem; color: var(--text-tertiary); }
 
 /* Preview zone */
 .previewZone {

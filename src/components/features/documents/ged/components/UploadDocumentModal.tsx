@@ -80,9 +80,19 @@ export function UploadDocumentModal({
   const folderCategoryDefault = useMemo(() => {
     if (!folderId) return null;
     const folder = folders.find(f => f.id === folderId);
-    // category_default is not in GEDFolder type but comes from API
-    return (folder as GEDFolder & { categoryDefault?: string })?.categoryDefault || null;
+    return folder?.categoryDefault || null;
   }, [folderId, folders]);
+
+  // Auto-set category when folder changes
+  const handleFolderChange = useCallback((newFolderId: string | null) => {
+    setFolderId(newFolderId);
+    if (newFolderId) {
+      const folder = folders.find(f => f.id === newFolderId);
+      if (folder?.categoryDefault) {
+        setCategory(folder.categoryDefault as DocumentCategory);
+      }
+    }
+  }, [folders]);
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
     const entries: FileEntry[] = Array.from(newFiles).map(file => {
@@ -143,7 +153,7 @@ export function UploadDocumentModal({
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.header}>
-          <h3 className={styles.title}><Upload size={18} /> Importer un document</h3>
+          <h3 className={styles.title}><Upload size={18} /> Ajouter un document</h3>
           <button className={styles.closeBtn} onClick={onClose}><X size={16} /></button>
         </div>
 
@@ -202,7 +212,7 @@ export function UploadDocumentModal({
             <FolderTreeSelect
               folders={folders}
               value={folderId}
-              onChange={setFolderId}
+              onChange={handleFolderChange}
               onCreateFolder={onCreateFolder}
             />
           </div>
@@ -269,7 +279,7 @@ export function UploadDocumentModal({
             onClick={handleUpload}
             disabled={validCount === 0 || isUploading}
           >
-            {isUploading ? 'Import en cours...' : `Importer ${validCount > 1 ? `(${validCount})` : ''}`}
+            {isUploading ? 'Ajout en cours...' : `Ajouter ${validCount > 1 ? `(${validCount})` : ''}`}
           </button>
         </div>
       </div>

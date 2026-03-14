@@ -15,6 +15,7 @@ export interface GEDFolder {
   description?: string;
   documentCount?: number;
   subfolderCount?: number;
+  categoryDefault?: string;
 }
 
 // ============================================================================
