@@ -3,6 +3,7 @@ export { ComptaViewSwitcher } from './ComptaViewSwitcher';
 export { ComptaTopBar } from './ComptaTopBar';
 export { ComptaTabs } from './ComptaTabs';
 export { ComptaSidebar } from './ComptaSidebar';
+export { ComptaNavBar } from './ComptaNavBar';
 export { ComptaStats } from './ComptaStats';
 export { ComptaKpiStrip } from './ComptaKpiStrip';
 export { ComptaFilters } from './ComptaFilters';

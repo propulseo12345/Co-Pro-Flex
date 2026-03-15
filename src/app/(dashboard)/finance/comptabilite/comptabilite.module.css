@@ -1,20 +1,15 @@
-/* Split layout: sidebar + main */
-.layout {
-  display: flex;
-  height: calc(100vh - var(--highbar-height, 48px));
-  overflow: hidden;
-}
-
-.main {
-  flex: 1;
-  overflow-y: auto;
+/* Full-width layout (no sidebar) */
+.page {
   display: flex;
   flex-direction: column;
+  height: calc(100vh - var(--highbar-height, 48px));
+  overflow: hidden;
 }
 
 .content {
   padding: var(--space-lg) var(--space-xl);
   flex: 1;
+  overflow-y: auto;
 }
 
 /* Period selector (compact, inline) */
@@ -38,14 +33,8 @@
   border-color: var(--primary);
 }
 
-/* Responsive: collapse sidebar on small screens */
-@media (max-width: 1024px) {
-  .layout {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .main {
-    overflow-y: visible;
+@media (max-width: 768px) {
+  .content {
+    padding: var(--space-md);
   }
 }

@@ -2,8 +2,8 @@
 
 import { useComptabilitePage } from '@/features/finance/comptabilite';
 import {
-  ComptaSidebar,
   ComptaTopBar,
+  ComptaNavBar,
   ComptaKpiStrip,
   ComptaViewSwitcher,
   ComptaLoadingState,
@@ -30,101 +30,88 @@ export default function ComptabilitePage() {
 
   if (!page.openPeriod) {
     return (
-      <div className={styles.layout}>
-        <ComptaSidebar
+      <div className={styles.page}>
+        <ComptaTopBar
           activeTab={page.activeTab}
-          onTabChange={page.setActiveTab}
+          onExportPDF={page.exportToPDF}
+          onExportExcel={page.exportToExcel}
         />
-        <div className={styles.main}>
-          <ComptaTopBar
-            activeTab={page.activeTab}
-            onExportPDF={page.exportToPDF}
-            onExportExcel={page.exportToExcel}
-          />
-          <div className={styles.content}>
-            <ComptaNoPeriodState />
-          </div>
+        <ComptaNavBar activeTab={page.activeTab} onTabChange={page.setActiveTab} />
+        <div className={styles.content}>
+          <ComptaNoPeriodState />
         </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.layout}>
-      <ComptaSidebar
+    <div className={styles.page}>
+      <ComptaTopBar
         activeTab={page.activeTab}
-        onTabChange={page.setActiveTab}
+        periodStart={page.openPeriod.start_date}
+        periodEnd={page.openPeriod.end_date}
+        periodStatus={page.openPeriod.status}
+        onExportPDF={page.exportToPDF}
+        onExportExcel={page.exportToExcel}
         onShowCloture={() => page.setShowClotureModal(true)}
-        onShowHistorique={() => page.setShowHistoriqueModal(true)}
         isReadOnly={page.isReadOnly}
       />
 
-      <div className={styles.main}>
-        <ComptaTopBar
-          activeTab={page.activeTab}
-          periodStart={page.openPeriod.start_date}
-          periodEnd={page.openPeriod.end_date}
-          periodStatus={page.openPeriod.status}
-          onExportPDF={page.exportToPDF}
-          onExportExcel={page.exportToExcel}
-          onShowCloture={() => page.setShowClotureModal(true)}
-          isReadOnly={page.isReadOnly}
+      <ComptaNavBar activeTab={page.activeTab} onTabChange={page.setActiveTab} />
+
+      <div className={styles.content}>
+        {page.allPeriods.length > 1 && (
+          <div className={styles.periodSelector}>
+            <select
+              className={styles.periodSelect}
+              value={page.selectedPeriodId || ''}
+              onChange={(e) => page.setSelectedPeriodId(e.target.value)}
+            >
+              {page.allPeriods.map((period) => (
+                <option key={period.id} value={period.id}>
+                  {period.name} ({period.start_date.slice(0, 4)})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <FinanceAnnexeStats periodId={page.selectedPeriodId} />
+
+        <ComptaKpiStrip
+          totalDebit={page.totalDebit}
+          totalCredit={page.totalCredit}
+          ecrituresCount={page.filteredOperations.length}
+          isBalanced={page.isBalanced}
         />
 
-        <div className={styles.content}>
-          {page.allPeriods.length > 1 && (
-            <div className={styles.periodSelector}>
-              <select
-                className={styles.periodSelect}
-                value={page.selectedPeriodId || ''}
-                onChange={(e) => page.setSelectedPeriodId(e.target.value)}
-              >
-                {page.allPeriods.map((period) => (
-                  <option key={period.id} value={period.id}>
-                    {period.name} ({period.start_date.slice(0, 4)})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <FinanceAnnexeStats periodId={page.selectedPeriodId} />
-
-          <ComptaKpiStrip
-            totalDebit={page.totalDebit}
-            totalCredit={page.totalCredit}
-            ecrituresCount={page.filteredOperations.length}
-            isBalanced={page.isBalanced}
-          />
-
-          {page.activeTab === 'grand-livre' && (
-            <ComptaViewSwitcher
-              viewMode={page.viewMode}
-              onViewModeChange={page.setViewMode}
-              searchTerm={page.searchTerm}
-              onSearchChange={page.setSearchTerm}
-              compteFilter={page.compteFilter}
-              onCompteFilterChange={page.setCompteFilter}
-              comptesUniques={page.comptesUniques}
-              dateFilter={page.dateDebut}
-              onDateFilterChange={page.setDateDebut}
-            />
-          )}
-
-          <ComptaTabContent
-            activeTab={page.activeTab}
+        {page.activeTab === 'grand-livre' && (
+          <ComptaViewSwitcher
             viewMode={page.viewMode}
-            operations={page.operations}
-            filteredOperations={page.filteredOperations}
-            lignesBalance={page.lignesBalance}
-            allAccountsWithBalances={page.allAccountsWithBalances}
-            annee={page.etatCloture.annee}
-            onViewOperationDetail={page.handleViewOperationDetail}
-            coproId={page.currentCoproId}
-            periodId={page.openPeriod?.id ?? null}
-            coproName={page.openPeriod?.name}
+            onViewModeChange={page.setViewMode}
+            searchTerm={page.searchTerm}
+            onSearchChange={page.setSearchTerm}
+            compteFilter={page.compteFilter}
+            onCompteFilterChange={page.setCompteFilter}
+            comptesUniques={page.comptesUniques}
+            dateFilter={page.dateDebut}
+            onDateFilterChange={page.setDateDebut}
           />
-        </div>
+        )}
+
+        <ComptaTabContent
+          activeTab={page.activeTab}
+          viewMode={page.viewMode}
+          operations={page.operations}
+          filteredOperations={page.filteredOperations}
+          lignesBalance={page.lignesBalance}
+          allAccountsWithBalances={page.allAccountsWithBalances}
+          annee={page.etatCloture.annee}
+          onViewOperationDetail={page.handleViewOperationDetail}
+          coproId={page.currentCoproId}
+          periodId={page.openPeriod?.id ?? null}
+          coproName={page.openPeriod?.name}
+        />
       </div>
 
       <DetailModal
