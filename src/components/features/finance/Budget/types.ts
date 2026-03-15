@@ -59,6 +59,12 @@ export interface DepenseBudget {
   montant: number;
   poste: PosteBudget;
   compteCharge: string;
+  fournisseur?: string;
+  statut?: string;
+  pieceJointe?: string;
+  montantHT?: number;
+  tauxTVA?: number;
+  montantTVA?: number;
 }
 
 /**

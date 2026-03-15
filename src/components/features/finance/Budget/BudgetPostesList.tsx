@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, User, CreditCard, Receipt } from 'lucide-react';
 import type { PosteBudgetData, PosteBudget, DepenseBudget } from './types';
 import { POSTE_COLORS } from './types';
 import styles from './BudgetPostesList.module.css';
@@ -12,11 +12,17 @@ interface BudgetPostesListProps {
   onSelectPoste?: (poste: PosteBudget) => void;
 }
 
-export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }: BudgetPostesListProps) {
+export function BudgetPostesList({ postesBudget, depenses = [] }: BudgetPostesListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [expandedDepenseId, setExpandedDepenseId] = useState<string | null>(null);
 
   const handleToggle = (index: number) => {
     setExpandedIndex((prev) => (prev === index ? null : index));
+    setExpandedDepenseId(null);
+  };
+
+  const handleDepenseToggle = (depId: string) => {
+    setExpandedDepenseId((prev) => (prev === depId ? null : depId));
   };
 
   return (
@@ -69,7 +75,6 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }:
 
             {isExpanded && (
               <div className={styles.expandedPanel}>
-                {/* Summary stats */}
                 <div className={styles.panelStats}>
                   <div className={styles.panelStat}>
                     <span className={styles.panelStatLabel}>Budget voté</span>
@@ -87,29 +92,90 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }:
                   </div>
                 </div>
 
-                {/* Progress bar full width */}
                 <div className={styles.panelProgress}>
                   <div className={styles.panelProgressFill} style={{ width: `${Math.min(pct, 100)}%`, background: color }} />
                 </div>
 
-                {/* Transactions list */}
                 {posteDepenses.length > 0 ? (
                   <div className={styles.transactions}>
                     <div className={styles.transactionsTitle}>Transactions ({posteDepenses.length})</div>
-                    {posteDepenses.map((dep) => (
-                      <div key={dep.id} className={styles.transactionRow}>
-                        <div className={styles.transactionInfo}>
-                          <span className={styles.transactionLabel}>{dep.libelle}</span>
-                          <span className={styles.transactionMeta}>
-                            {new Date(dep.date).toLocaleDateString('fr-FR')}
-                            {dep.compteCharge && <> · Compte: {dep.compteCharge}</>}
-                          </span>
+                    {posteDepenses.map((dep) => {
+                      const isDepExpanded = expandedDepenseId === dep.id;
+                      return (
+                        <div key={dep.id} className={styles.transactionItem}>
+                          <div
+                            className={styles.transactionRow}
+                            onClick={(e) => { e.stopPropagation(); handleDepenseToggle(dep.id); }}
+                          >
+                            <div className={styles.transactionLeft}>
+                              <ChevronRight
+                                size={12}
+                                className={`${styles.depChevron} ${isDepExpanded ? styles.depChevronOpen : ''}`}
+                              />
+                              <div className={styles.transactionInfo}>
+                                <span className={styles.transactionLabel}>{dep.libelle}</span>
+                                <span className={styles.transactionMeta}>
+                                  {new Date(dep.date).toLocaleDateString('fr-FR')}
+                                  {dep.fournisseur && <> · {dep.fournisseur}</>}
+                                </span>
+                              </div>
+                            </div>
+                            <span className={styles.transactionAmount}>
+                              -{dep.montant.toLocaleString('fr-FR')} €
+                            </span>
+                          </div>
+
+                          {isDepExpanded && (
+                            <div className={styles.depDetail}>
+                              <div className={styles.depDetailGrid}>
+                                {dep.fournisseur && (
+                                  <div className={styles.depDetailItem}>
+                                    <User size={13} />
+                                    <span className={styles.depDetailLabel}>Fournisseur</span>
+                                    <span className={styles.depDetailValue}>{dep.fournisseur}</span>
+                                  </div>
+                                )}
+                                {dep.compteCharge && (
+                                  <div className={styles.depDetailItem}>
+                                    <CreditCard size={13} />
+                                    <span className={styles.depDetailLabel}>Compte</span>
+                                    <span className={styles.depDetailValue}>{dep.compteCharge}</span>
+                                  </div>
+                                )}
+                                {dep.montantHT !== undefined && (
+                                  <div className={styles.depDetailItem}>
+                                    <Receipt size={13} />
+                                    <span className={styles.depDetailLabel}>Montant HT</span>
+                                    <span className={styles.depDetailValue}>{dep.montantHT.toLocaleString('fr-FR')} €</span>
+                                  </div>
+                                )}
+                                {dep.tauxTVA !== undefined && (
+                                  <div className={styles.depDetailItem}>
+                                    <Receipt size={13} />
+                                    <span className={styles.depDetailLabel}>TVA ({dep.tauxTVA}%)</span>
+                                    <span className={styles.depDetailValue}>{(dep.montantTVA ?? 0).toLocaleString('fr-FR')} €</span>
+                                  </div>
+                                )}
+                                {dep.statut && (
+                                  <div className={styles.depDetailItem}>
+                                    <FileText size={13} />
+                                    <span className={styles.depDetailLabel}>Statut</span>
+                                    <span className={styles.depDetailValue}>{dep.statut}</span>
+                                  </div>
+                                )}
+                                {dep.pieceJointe && (
+                                  <div className={styles.depDetailItem}>
+                                    <FileText size={13} />
+                                    <span className={styles.depDetailLabel}>Pièce jointe</span>
+                                    <span className={styles.depDetailValue}>{dep.pieceJointe}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <span className={styles.transactionAmount}>
-                          -{dep.montant.toLocaleString('fr-FR')} €
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className={styles.noTransactions}>Aucune transaction pour ce poste</div>

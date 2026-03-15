@@ -198,6 +198,11 @@
   margin-bottom: 4px;
 }
 
+.transactionItem {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 .transactionRow {
   display: flex;
   align-items: center;
@@ -207,10 +212,27 @@
   border: 1px solid rgba(148, 163, 184, 0.06);
   border-radius: 8px;
   transition: all 150ms;
+  cursor: pointer;
 }
 
 .transactionRow:hover {
-  border-color: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+.transactionLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.depChevron {
+  color: #475569;
+  transition: transform 200ms;
+  flex-shrink: 0;
+}
+
+.depChevronOpen {
+  transform: rotate(90deg);
 }
 
 .transactionInfo {
@@ -236,6 +258,38 @@
   font-weight: 700;
   color: #f87171;
   flex-shrink: 0;
+}
+
+/* ── Depense detail expand ── */
+.depDetail {
+  padding: 12px 14px 12px 34px;
+  background: rgba(148, 163, 184, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.depDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.depDetailItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.depDetailLabel {
+  color: #64748b;
+}
+
+.depDetailValue {
+  color: #e2e8f0;
+  font-weight: 500;
 }
 
 .noTransactions {

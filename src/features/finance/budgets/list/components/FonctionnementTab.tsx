@@ -77,7 +77,13 @@ export function FonctionnementTab({
           date: d.date,
           montant: d.montant,
           poste: d.poste,
-          compteCharge: d.compteCharge || '',
+          compteCharge: d.compteCharge || d.compteId || '',
+          fournisseur: d.fournisseur || '',
+          statut: d.statut || '',
+          pieceJointe: d.pieceJointe || d.pieceJointeDetails?.fichierNom || '',
+          montantHT: d.montantHT,
+          tauxTVA: d.tauxTVA,
+          montantTVA: d.montantTVA,
         }))}
       />
 
