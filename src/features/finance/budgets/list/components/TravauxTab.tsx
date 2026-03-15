@@ -2,7 +2,6 @@
 
 import { Plus } from 'lucide-react';
 import { TravauxOverview, TravauxCard } from '@/components/features/finance/Budget';
-import styles from '@/app/(dashboard)/finance/budgets/budgets.module.css';
 
 interface TravauxTabProps {
   budgetsTravaux: any[];
@@ -18,18 +17,17 @@ export function TravauxTab({
   onCreateBudget,
 }: TravauxTabProps) {
   return (
-    <div className={styles.content}>
+    <div>
       <TravauxOverview budgetsTravaux={budgetsTravaux} />
 
-      <div className={styles.travauxHeader}>
-        <h2 className={styles.sectionTitle}>Projets de travaux</h2>
-        <button className="btn btn-primary" onClick={onCreateBudget}>
-          <Plus size={16} aria-hidden="true" />
-          Nouveau budget travaux
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Projets de travaux</h2>
+        <button style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: '#3b82f6', color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }} onClick={onCreateBudget}>
+          <Plus size={14} /> Nouveau budget travaux
         </button>
       </div>
 
-      <div className={styles.travauxGrid}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {budgetsTravaux.map((travaux) => (
           <TravauxCard
             key={travaux.id}

@@ -2,7 +2,7 @@
 
 import { FileText, TrendingDown, TrendingUp, Calendar } from 'lucide-react';
 import { BudgetTravaux } from './types';
-import styles from './Budget.module.css';
+import styles from './TravauxOverview.module.css';
 
 interface TravauxOverviewProps {
   budgetsTravaux: BudgetTravaux[];
@@ -11,48 +11,28 @@ interface TravauxOverviewProps {
 export function TravauxOverview({ budgetsTravaux }: TravauxOverviewProps) {
   const totalVote = budgetsTravaux.reduce((sum, t) => sum + t.budgetVote, 0);
   const totalConsomme = budgetsTravaux.reduce((sum, t) => sum + t.consomme, 0);
-  const totalDisponible = budgetsTravaux.reduce((sum, t) => sum + (t.budgetVote - t.consomme), 0);
+  const totalDisponible = totalVote - totalConsomme;
   const projetsEnCours = budgetsTravaux.filter((t) => t.statut === 'EN_COURS').length;
 
   return (
-    <div className={styles.travauxOverview}>
-      <div className={styles.travauxOverviewCard}>
-        <div className={styles.travauxOverviewIcon} style={{ background: 'var(--primary-light)' }}>
-          <FileText size={24} color="var(--primary)" aria-hidden="true" />
-        </div>
-        <div className={styles.travauxOverviewContent}>
-          <span className={styles.travauxOverviewLabel}>Total budgets votés</span>
-          <span className={styles.travauxOverviewValue}>{totalVote.toLocaleString()} €</span>
-        </div>
+    <div className={styles.strip}>
+      <div className={styles.card}>
+        <div className={styles.label}>Total budgets votés</div>
+        <div className={`${styles.value} ${styles.blue}`}>{totalVote.toLocaleString('fr-FR')} €</div>
+        <div className={styles.sub}>{budgetsTravaux.length} projets</div>
       </div>
-      <div className={styles.travauxOverviewCard}>
-        <div className={styles.travauxOverviewIcon} style={{ background: 'var(--warning-light)' }}>
-          <TrendingDown size={24} color="var(--warning)" aria-hidden="true" />
-        </div>
-        <div className={styles.travauxOverviewContent}>
-          <span className={styles.travauxOverviewLabel}>Total consommé</span>
-          <span className={styles.travauxOverviewValue}>{totalConsomme.toLocaleString()} €</span>
-        </div>
+      <div className={styles.card}>
+        <div className={styles.label}>Total consommé</div>
+        <div className={`${styles.value} ${styles.orange}`}>{totalConsomme.toLocaleString('fr-FR')} €</div>
+        <div className={styles.progress}><div className={styles.progressFill} style={{ width: `${totalVote > 0 ? (totalConsomme / totalVote) * 100 : 0}%`, background: '#f59e0b' }} /></div>
       </div>
-      <div className={styles.travauxOverviewCard}>
-        <div className={styles.travauxOverviewIcon} style={{ background: 'var(--success-light)' }}>
-          <TrendingUp size={24} color="var(--success)" aria-hidden="true" />
-        </div>
-        <div className={styles.travauxOverviewContent}>
-          <span className={styles.travauxOverviewLabel}>Total disponible</span>
-          <span className={styles.travauxOverviewValue}>{totalDisponible.toLocaleString()} €</span>
-        </div>
+      <div className={styles.card}>
+        <div className={styles.label}>Total disponible</div>
+        <div className={`${styles.value} ${styles.green}`}>{totalDisponible.toLocaleString('fr-FR')} €</div>
       </div>
-      <div className={styles.travauxOverviewCard}>
-        <div className={styles.travauxOverviewIcon} style={{ background: 'var(--info-light)' }}>
-          <Calendar size={24} color="var(--info)" aria-hidden="true" />
-        </div>
-        <div className={styles.travauxOverviewContent}>
-          <span className={styles.travauxOverviewLabel}>Projets en cours</span>
-          <span className={styles.travauxOverviewValue}>
-            {projetsEnCours} / {budgetsTravaux.length}
-          </span>
-        </div>
+      <div className={styles.card}>
+        <div className={styles.label}>Projets en cours</div>
+        <div className={`${styles.value} ${styles.blue}`}>{projetsEnCours} / {budgetsTravaux.length}</div>
       </div>
     </div>
   );
