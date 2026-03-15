@@ -478,6 +478,34 @@ export function useBudget() {
     });
 
     if (id) {
+      // Create a budget line with the total amount
+      if (form.montantTotal > 0) {
+        // Get default account and repartition key
+        const supabase = createUntypedClient();
+        const accountCode = budgetType === 'works' ? '672' : '701';
+        const { data: acc } = await supabase
+          .from('accounts')
+          .select('id')
+          .eq('copro_id', currentCoproId)
+          .eq('code', accountCode)
+          .single();
+        const { data: repKey } = await supabase
+          .from('repartition_keys')
+          .select('id')
+          .eq('copro_id', currentCoproId)
+          .eq('name', 'Charges générales')
+          .single();
+
+        if (acc && repKey) {
+          await mutations.createLine({
+            budget_id: id,
+            account_id: acc.id,
+            repartition_key_id: repKey.id,
+            label: form.nom || `Budget ${form.type} ${form.annee}`,
+            amount: form.montantTotal,
+          });
+        }
+      }
       setShowCreateBudgetModal(false);
       return true;
     }
