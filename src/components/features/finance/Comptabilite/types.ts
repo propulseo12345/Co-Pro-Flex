@@ -249,3 +249,5 @@ export interface AnnexeKpis {
   travaux_en_cours: number;
   nb_travaux_ouverts: number;
 }
+
+export type GrandLivreViewMode = 'par-compte' | 'chronologique' | 'par-journal';

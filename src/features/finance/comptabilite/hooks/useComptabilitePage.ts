@@ -6,6 +6,7 @@ import { useGeneralLedger, useTrialBalance, useActivePeriod, useAccountingPeriod
 import * as financeApi from '@/lib/finance/api';
 import {
   TabCompta,
+  GrandLivreViewMode,
   OperationComptable,
   Depense,
   EtatCloture,
@@ -112,6 +113,7 @@ export function useComptabilitePage() {
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabCompta>('grand-livre');
+  const [viewMode, setViewMode] = useState<GrandLivreViewMode>('par-compte');
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -273,6 +275,8 @@ export function useComptabilitePage() {
     // Tabs
     activeTab,
     setActiveTab,
+    viewMode,
+    setViewMode,
 
     // Filters
     searchTerm,
