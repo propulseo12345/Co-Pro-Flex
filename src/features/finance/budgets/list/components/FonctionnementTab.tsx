@@ -1,12 +1,10 @@
 'use client';
 
 import {
-  BudgetAlerts,
   BudgetOverviewHero,
   BudgetProjectionCard,
   BudgetPostesList,
   BudgetDepensesTable,
-  BudgetsList,
 } from '@/components/features/finance/Budget';
 import type { PosteBudget } from '@/components/features/finance/Budget/types';
 
@@ -51,20 +49,6 @@ export function FonctionnementTab({
 }: FonctionnementTabProps) {
   return (
     <div>
-      <BudgetsList
-        budgets={budgets}
-        selectedYear={selectedYear}
-        filterType="fonctionnement"
-        onEdit={onEditBudget}
-        onLinkToAG={onLinkToAG}
-        onTransform={onTransformBudget}
-        onDelete={onDeleteBudget}
-        onSelect={onSelectBudget}
-        onCreateBudget={onCreateBudget}
-      />
-
-      <BudgetAlerts postesEnAlerte={postesEnAlerte} />
-
       <BudgetOverviewHero
         budgetAnnuelVote={budgetAnnuelVote}
         totalConsomme={totals.totalConsomme}
