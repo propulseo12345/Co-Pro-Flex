@@ -9,6 +9,8 @@ export { BudgetNavBar } from './BudgetNavBar';
 export { MOCK_POSTES_BUDGET } from './mock-data';
 
 // Components
+export { BudgetProjectionCard } from './BudgetProjectionCard';
+export { BudgetPostesList } from './BudgetPostesList';
 export { BudgetHeader } from './BudgetHeader';
 export { BudgetAlerts } from './BudgetAlerts';
 export { BudgetSummaryCards } from './BudgetSummaryCards';
