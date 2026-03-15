@@ -1,0 +1,236 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Category (top level) ── */
+.category {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 150ms;
+}
+
+.categoryHeader:hover {
+  background: var(--bg-tertiary);
+}
+
+.categoryIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.categoryBlue .categoryIcon,
+.categoryBlue.categoryIcon {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.categoryPurple .categoryIcon,
+.categoryPurple.categoryIcon {
+  background: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
+}
+
+.categoryLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.categoryAmount {
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+  margin-right: 8px;
+}
+
+.categoryBody {
+  border-top: 1px solid var(--border);
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Group (sub level) ── */
+.group {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 150ms;
+}
+
+.groupHeader:hover {
+  background: var(--bg-tertiary);
+}
+
+.groupIcon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.groupLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.groupCount {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.groupAmount {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-right: 8px;
+}
+
+.groupBody {
+  padding: 0 4px 8px;
+  overflow-x: auto;
+}
+
+/* ── Chevron ── */
+.chevron {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  transition: transform 200ms;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* ── Table ── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.table td {
+  padding: 8px 12px;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.thRight {
+  text-align: right;
+}
+
+.labelCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.labelIcon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.metaCell {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.amountCell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.amountCellGreen {
+  composes: amountCell;
+  color: var(--success);
+}
+
+.amountCellRed {
+  composes: amountCell;
+  color: var(--error);
+}
+
+/* ── Empty ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    display: none;
+  }
+
+  .categoryAmount,
+  .groupAmount {
+    display: none;
+  }
+}

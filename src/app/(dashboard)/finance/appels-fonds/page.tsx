@@ -17,6 +17,7 @@ export default function AppelsFondsPage() {
   const [wizardOpen, setWizardOpen] = useState(false);
 
   const {
+    calls,
     trimesterCards,
     travauxProjects,
     globalStats,
@@ -29,6 +30,9 @@ export default function AppelsFondsPage() {
     selectedPeriod,
     selectPeriod,
     isLoading,
+    wizardBudgets,
+    refreshCalls,
+    groupedCalls,
   } = useAppelsFondsPage();
 
   // ── Loading state ──
@@ -75,12 +79,7 @@ export default function AppelsFondsPage() {
       />
 
       {activeTab === 'all' && (
-        <TabVueGlobale
-          globalStats={globalStats}
-          courantStats={courantStats}
-          travauxStats={travauxStats}
-          impayesCount={impayesCount}
-        />
+        <TabVueGlobale groupedCalls={groupedCalls} />
       )}
 
       {activeTab === 'courant' && (
@@ -102,8 +101,8 @@ export default function AppelsFondsPage() {
         isOpen={wizardOpen}
         onClose={() => setWizardOpen(false)}
         selectedPeriod={selectedPeriod}
-        onSuccess={() => {/* invalidation handled by useCreateCall */}}
-        budgets={[]}
+        onSuccess={() => { refreshCalls(); }}
+        budgets={wizardBudgets}
       />
     </div>
   );

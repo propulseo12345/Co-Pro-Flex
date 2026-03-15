@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 — Qonto Dashboard (KPI + Cards + Drill-down)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; padding: 32px; }
+
+  .badge-version { position: fixed; top: 12px; right: 12px; padding: 6px 16px; background: #a78bfa; color: white; font-size: 12px; font-weight: 700; border-radius: 20px; z-index: 100; }
+
+  /* ── Header ── */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .header-left h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+  .header-meta { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .period-select { padding: 6px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.12); border-radius: 8px; color: #e2e8f0; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .status-live { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4ade80; font-weight: 500; }
+  .status-live .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .header-actions { display: flex; gap: 8px; }
+  .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid rgba(148,163,184,0.15); background: #1a1d2e; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+  .btn:hover { color: #e2e8f0; border-color: rgba(148,163,184,0.3); }
+  .btn-danger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
+
+  /* ── KPI Row ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 28px; }
+  .kpi { padding: 20px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.06); border-radius: 14px; position: relative; overflow: hidden; }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .kpi.green::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
+  .kpi.red::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+  .kpi.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+  .kpi.amber::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .kpi-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .kpi-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .kpi.blue .kpi-icon { background: rgba(59,130,246,0.12); }
+  .kpi.green .kpi-icon { background: rgba(34,197,94,0.12); }
+  .kpi.red .kpi-icon { background: rgba(239,68,68,0.12); }
+  .kpi.purple .kpi-icon { background: rgba(139,92,246,0.12); }
+  .kpi.amber .kpi-icon { background: rgba(245,158,11,0.12); }
+  .kpi-change { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+  .kpi-change.up { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .kpi-change.neutral { background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .kpi-val { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .kpi-label { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  /* ── Section grid ── */
+  .sections { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .section-card { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.06); border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 200ms; }
+  .section-card:hover { border-color: rgba(148,163,184,0.15); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
+  .section-header-left { display: flex; align-items: center; gap: 12px; }
+  .section-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .section-icon.blue { background: rgba(59,130,246,0.1); }
+  .section-icon.green { background: rgba(34,197,94,0.1); }
+  .section-icon.purple { background: rgba(139,92,246,0.1); }
+  .section-icon.amber { background: rgba(245,158,11,0.1); }
+  .section-title { font-size: 15px; font-weight: 600; }
+  .section-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .section-arrow { color: #475569; font-size: 18px; }
+  .section-body { border-top: 1px solid rgba(148,163,184,0.06); }
+  .section-row { display: flex; justify-content: space-between; padding: 10px 20px; font-size: 13px; }
+  .section-row:not(:last-child) { border-bottom: 1px solid rgba(148,163,184,0.04); }
+  .section-row-label { color: #94a3b8; }
+  .section-row-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .section-row-value.green { color: #4ade80; }
+  .section-row-value.red { color: #f87171; }
+
+  /* ── Recent activity ── */
+  .activity { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.06); border-radius: 14px; overflow: hidden; }
+  .activity-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; }
+  .activity-title { font-size: 16px; font-weight: 600; }
+  .activity-link { font-size: 13px; color: #3b82f6; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 20px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; background: rgba(148,163,184,0.03); border-bottom: 1px solid rgba(148,163,184,0.06); }
+  td { padding: 12px 20px; border-bottom: 1px solid rgba(148,163,184,0.04); }
+  tr:hover td { background: rgba(148,163,184,0.02); }
+  .mono { font-variant-numeric: tabular-nums; font-family: 'SF Mono', monospace; font-size: 12px; }
+  .debit { color: #f87171; }
+  .credit { color: #4ade80; }
+  .right { text-align: right; }
+  .account-tag { padding: 2px 8px; background: rgba(59,130,246,0.08); border-radius: 4px; font-size: 11px; color: #60a5fa; font-weight: 500; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .status-dot.green { background: #22c55e; }
+  .status-dot.gray { background: #475569; }
+</style>
+</head>
+<body>
+  <div class="badge-version">VERSION 2 — Qonto Dashboard</div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Comptabilité</h1>
+      <div class="header-meta">
+        <select class="period-select">
+          <option>Exercice 2027 (01/01 — 31/12)</option>
+          <option>Exercice 2026</option>
+        </select>
+        <div class="status-live"><span class="dot"></span> En cours</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn">📥 PDF</button>
+      <button class="btn">📊 Excel</button>
+      <button class="btn">📜 Historique</button>
+      <button class="btn btn-danger">🔒 Clôturer</button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-top">
+        <div class="kpi-icon">🏦</div>
+        <span class="kpi-change neutral">= 0 %</span>
+      </div>
+      <div class="kpi-val">0,00 €</div>
+      <div class="kpi-label">Trésorerie</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-top">
+        <div class="kpi-icon">📈</div>
+        <span class="kpi-change up">+100%</span>
+      </div>
+      <div class="kpi-val">29 108 €</div>
+      <div class="kpi-label">Créances copros</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-top">
+        <div class="kpi-icon">⚠️</div>
+        <span class="kpi-change neutral">—</span>
+      </div>
+      <div class="kpi-val">0,00 €</div>
+      <div class="kpi-label">Dettes fournisseurs</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-top">
+        <div class="kpi-icon">🔐</div>
+        <span class="kpi-change neutral">—</span>
+      </div>
+      <div class="kpi-val">0,00 €</div>
+      <div class="kpi-label">Provisions</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-top">
+        <div class="kpi-icon">⚖️</div>
+      </div>
+      <div class="kpi-val" style="color:#4ade80">Équilibrée</div>
+      <div class="kpi-label">Balance générale</div>
+    </div>
+  </div>
+
+  <!-- Section cards -->
+  <div class="sections">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon blue">📊</div>
+          <div>
+            <div class="section-title">Grand Livre</div>
+            <div class="section-sub">26 écritures · 2 comptes actifs</div>
+          </div>
+        </div>
+        <div class="section-arrow">→</div>
+      </div>
+      <div class="section-body">
+        <div class="section-row">
+          <span class="section-row-label">Total Débit</span>
+          <span class="section-row-value red">29 108,00 €</span>
+        </div>
+        <div class="section-row">
+          <span class="section-row-label">Total Crédit</span>
+          <span class="section-row-value green">29 108,00 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon green">⚖️</div>
+          <div>
+            <div class="section-title">Balance générale</div>
+            <div class="section-sub">2 comptes · Équilibrée</div>
+          </div>
+        </div>
+        <div class="section-arrow">→</div>
+      </div>
+      <div class="section-body">
+        <div class="section-row">
+          <span class="section-row-label">Mouvements Débit</span>
+          <span class="section-row-value">29 108,00 €</span>
+        </div>
+        <div class="section-row">
+          <span class="section-row-label">Mouvements Crédit</span>
+          <span class="section-row-value">29 108,00 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon purple">📋</div>
+          <div>
+            <div class="section-title">Livre comptable</div>
+            <div class="section-sub">Plan comptable · 2 comptes utilisés</div>
+          </div>
+        </div>
+        <div class="section-arrow">→</div>
+      </div>
+      <div class="section-body">
+        <div class="section-row">
+          <span class="section-row-label">Classe 4 — Tiers</span>
+          <span class="section-row-value">1 compte</span>
+        </div>
+        <div class="section-row">
+          <span class="section-row-label">Classe 7 — Produits</span>
+          <span class="section-row-value">1 compte</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon amber">📑</div>
+          <div>
+            <div class="section-title">Annexes réglementaires</div>
+            <div class="section-sub">5 annexes · Décret du 14/03/2005</div>
+          </div>
+        </div>
+        <div class="section-arrow">→</div>
+      </div>
+      <div class="section-body">
+        <div class="section-row">
+          <span class="section-row-label">État financier (Annexe 1)</span>
+          <span class="section-row-value" style="color:#4ade80">Prêt</span>
+        </div>
+        <div class="section-row">
+          <span class="section-row-label">Compte de gestion (Annexe 2)</span>
+          <span class="section-row-value" style="color:#4ade80">Prêt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="activity">
+    <div class="activity-header">
+      <div class="activity-title">Dernières écritures</div>
+      <div class="activity-link">Voir le Grand Livre →</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30px"></th>
+          <th>Date</th>
+          <th>Compte</th>
+          <th>Libellé</th>
+          <th class="right">Débit</th>
+          <th class="right">Crédit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="status-dot green"></span></td>
+          <td class="mono">15/03/2026</td>
+          <td><span class="account-tag">450</span></td>
+          <td>Appel de fonds: Test</td>
+          <td class="right mono debit">2 333,00</td>
+          <td class="right mono">—</td>
+        </tr>
+        <tr>
+          <td><span class="status-dot green"></span></td>
+          <td class="mono">15/03/2026</td>
+          <td><span class="account-tag">701</span></td>
+          <td>Appel de fonds: Test</td>
+          <td class="right mono">—</td>
+          <td class="right mono credit">2 333,00</td>
+        </tr>
+        <tr>
+          <td><span class="status-dot green"></span></td>
+          <td class="mono">01/04/2027</td>
+          <td><span class="account-tag">450</span></td>
+          <td>Appel T2 - Charges générales</td>
+          <td class="right mono debit">3 994,00</td>
+          <td class="right mono">—</td>
+        </tr>
+        <tr>
+          <td><span class="status-dot green"></span></td>
+          <td class="mono">01/04/2027</td>
+          <td><span class="account-tag">701</span></td>
+          <td>Appel T2 - Charges générales</td>
+          <td class="right mono">—</td>
+          <td class="right mono credit">3 994,00</td>
+        </tr>
+        <tr>
+          <td><span class="status-dot gray"></span></td>
+          <td class="mono">01/07/2027</td>
+          <td><span class="account-tag">450</span></td>
+          <td>Appel T3 - Charges générales</td>
+          <td class="right mono debit">3 994,00</td>
+          <td class="right mono">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

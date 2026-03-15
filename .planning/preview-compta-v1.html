@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V1 — Pennylane Style (Sidebar + Multi-vues)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  .layout { display: flex; height: 100vh; }
+
+  /* ── Sidebar comptable ── */
+  .sidebar { width: 220px; background: #161822; border-right: 1px solid rgba(148,163,184,0.1); padding: 20px 0; flex-shrink: 0; }
+  .sidebar-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; padding: 0 16px; margin-bottom: 12px; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 14px; color: #94a3b8; cursor: pointer; transition: all 150ms; border-left: 3px solid transparent; }
+  .sidebar-item:hover { color: #e2e8f0; background: rgba(148,163,184,0.06); }
+  .sidebar-item.active { color: #3b82f6; background: rgba(59,130,246,0.08); border-left-color: #3b82f6; font-weight: 600; }
+  .sidebar-item .icon { width: 18px; text-align: center; font-size: 13px; }
+  .sidebar-divider { height: 1px; background: rgba(148,163,184,0.1); margin: 16px 0; }
+  .sidebar-section { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; padding: 0 16px; margin: 8px 0; }
+
+  /* ── Main ── */
+  .main { flex: 1; overflow-y: auto; }
+
+  /* ── Top bar ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid rgba(148,163,184,0.1); background: #161822; position: sticky; top: 0; z-index: 10; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .period-pill { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; font-size: 13px; font-weight: 500; color: #60a5fa; cursor: pointer; }
+  .period-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.15); background: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .btn-icon:hover { background: rgba(148,163,184,0.08); color: #e2e8f0; }
+  .btn-primary { padding: 8px 16px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Content ── */
+  .content { padding: 24px 32px; }
+
+  /* ── KPI strip ── */
+  .kpi-strip { display: flex; gap: 12px; margin-bottom: 24px; }
+  .kpi-card { flex: 1; padding: 16px 20px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; }
+  .kpi-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi-value.green { color: #22c55e; }
+  .kpi-value.red { color: #ef4444; }
+  .kpi-value.blue { color: #3b82f6; }
+  .kpi-trend { font-size: 11px; color: #22c55e; margin-top: 4px; }
+
+  /* ── View mode switcher ── */
+  .view-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .view-modes { display: flex; gap: 2px; padding: 3px; background: #1a1d2e; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08); }
+  .view-mode { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #64748b; cursor: pointer; border: none; background: none; }
+  .view-mode.active { background: #3b82f6; color: white; }
+  .filters { display: flex; gap: 8px; }
+  .filter-input { padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.12); background: #1a1d2e; color: #e2e8f0; font-size: 13px; width: 220px; }
+  .filter-select { padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.12); background: #1a1d2e; color: #94a3b8; font-size: 13px; }
+
+  /* ── Table ── */
+  .table-wrap { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; background: rgba(148,163,184,0.04); border-bottom: 1px solid rgba(148,163,184,0.08); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(148,163,184,0.04); }
+  tr:hover td { background: rgba(148,163,184,0.03); }
+  th.right, td.right { text-align: right; }
+  .mono { font-variant-numeric: tabular-nums; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+  .debit { color: #f87171; }
+  .credit { color: #4ade80; }
+  .account-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; background: rgba(59,130,246,0.1); border-radius: 4px; font-size: 12px; font-weight: 500; color: #60a5fa; }
+  .link-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; }
+  .status-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .status-posted { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .status-draft { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+  /* ── Footer totals ── */
+  .table-footer { display: flex; justify-content: flex-end; gap: 32px; padding: 14px 16px; background: rgba(148,163,184,0.04); border-top: 1px solid rgba(148,163,184,0.08); font-size: 13px; font-weight: 600; }
+  .footer-label { color: #64748b; }
+  .equilibre { display: flex; align-items: center; gap: 6px; color: #22c55e; font-size: 12px; font-weight: 600; }
+
+  .badge-version { position: fixed; top: 12px; right: 12px; padding: 6px 16px; background: #3b82f6; color: white; font-size: 12px; font-weight: 700; border-radius: 20px; z-index: 100; }
+</style>
+</head>
+<body>
+  <div class="badge-version">VERSION 1 — Pennylane Style</div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-title">Comptabilité</div>
+      <div class="sidebar-item active"><span class="icon">📊</span> Grand Livre</div>
+      <div class="sidebar-item"><span class="icon">📋</span> Livre comptable</div>
+      <div class="sidebar-item"><span class="icon">⚖️</span> Balance</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">Documents légaux</div>
+      <div class="sidebar-item"><span class="icon">📄</span> Compte de gestion</div>
+      <div class="sidebar-item"><span class="icon">1</span> Annexe 1 — État financier</div>
+      <div class="sidebar-item"><span class="icon">2</span> Annexe 2 — Gestion</div>
+      <div class="sidebar-item"><span class="icon">3</span> Annexe 3 — Clés</div>
+      <div class="sidebar-item"><span class="icon">4</span> Annexe 4 — Travaux</div>
+      <div class="sidebar-item"><span class="icon">5</span> Annexe 5 — Non clôturés</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-item"><span class="icon">🔒</span> Clôture exercice</div>
+      <div class="sidebar-item"><span class="icon">📜</span> Historique</div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-title">Grand Livre</div>
+          <div class="period-pill">
+            <span class="dot"></span>
+            Exercice 2027 — 01/01 au 31/12
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-icon" title="Export PDF">📥</button>
+          <button class="btn-icon" title="Export Excel">📊</button>
+          <button class="btn-icon" title="Copier">📋</button>
+          <button class="btn-primary">🔒 Clôturer 2027</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- KPI strip -->
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Débit</div>
+            <div class="kpi-value red">29 108,00 €</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Crédit</div>
+            <div class="kpi-value green">29 108,00 €</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Écritures</div>
+            <div class="kpi-value blue">26</div>
+            <div class="kpi-trend">✓ Toutes comptabilisées</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">État balance</div>
+            <div class="kpi-value green">Équilibrée</div>
+          </div>
+        </div>
+
+        <!-- View modes + filters -->
+        <div class="view-bar">
+          <div class="view-modes">
+            <button class="view-mode active">Par compte</button>
+            <button class="view-mode">Chronologique</button>
+            <button class="view-mode">Par journal</button>
+          </div>
+          <div class="filters">
+            <input class="filter-input" placeholder="🔍 Rechercher libellé, compte..." />
+            <select class="filter-select">
+              <option>Tous les comptes</option>
+              <option>Classe 4 — Tiers</option>
+              <option>Classe 7 — Produits</option>
+            </select>
+            <select class="filter-select">
+              <option>Toutes les dates</option>
+              <option>T1 (Jan-Mar)</option>
+              <option>T2 (Avr-Jun)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px">Date</th>
+                <th style="width:80px">N° Pièce</th>
+                <th>Compte</th>
+                <th>Libellé</th>
+                <th class="right" style="width:110px">Débit</th>
+                <th class="right" style="width:110px">Crédit</th>
+                <th class="right" style="width:110px">Solde</th>
+                <th style="width:70px">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Group header -->
+              <tr style="background:rgba(59,130,246,0.04);">
+                <td colspan="8" style="font-weight:700;color:#60a5fa;font-size:13px;padding:10px 16px;">
+                  Compte 450 — Copropriétaires
+                </td>
+              </tr>
+              <tr>
+                <td class="mono">15/03/2026</td>
+                <td class="mono">AF-001</td>
+                <td><span class="account-badge">450</span></td>
+                <td>Appel de fonds: Test</td>
+                <td class="right mono debit">2 333,00</td>
+                <td class="right mono">—</td>
+                <td class="right mono" style="font-weight:600">2 333,00</td>
+                <td><span class="status-badge status-posted">Posté</span></td>
+              </tr>
+              <tr>
+                <td class="mono">01/04/2027</td>
+                <td class="mono">AF-002</td>
+                <td><span class="account-badge">450</span></td>
+                <td>Appel T2 - Charges générales</td>
+                <td class="right mono debit">3 994,00</td>
+                <td class="right mono">—</td>
+                <td class="right mono" style="font-weight:600">6 327,00</td>
+                <td><span class="status-badge status-posted">Posté</span></td>
+              </tr>
+              <tr>
+                <td class="mono">01/04/2027</td>
+                <td class="mono">AF-003</td>
+                <td><span class="account-badge">450</span></td>
+                <td>Appel T2 - Eau froide</td>
+                <td class="right mono debit">2 000,00</td>
+                <td class="right mono">—</td>
+                <td class="right mono" style="font-weight:600">8 327,00</td>
+                <td><span class="status-badge status-posted">Posté</span></td>
+              </tr>
+              <tr>
+                <td class="mono">01/04/2027</td>
+                <td class="mono">AF-004</td>
+                <td><span class="account-badge">450</span></td>
+                <td>Appel T2 - Ascenseur</td>
+                <td class="right mono debit">700,00</td>
+                <td class="right mono">—</td>
+                <td class="right mono" style="font-weight:600">9 027,00</td>
+                <td><span class="status-badge status-posted">Posté</span></td>
+              </tr>
+
+              <!-- Group header 2 -->
+              <tr style="background:rgba(59,130,246,0.04);">
+                <td colspan="8" style="font-weight:700;color:#60a5fa;font-size:13px;padding:10px 16px;">
+                  Compte 701 — Produits sur charges
+                </td>
+              </tr>
+              <tr>
+                <td class="mono">15/03/2026</td>
+                <td class="mono">AF-001</td>
+                <td><span class="account-badge">701</span></td>
+                <td>Appel de fonds: Test</td>
+                <td class="right mono">—</td>
+                <td class="right mono credit">2 333,00</td>
+                <td class="right mono" style="font-weight:600">2 333,00</td>
+                <td><span class="status-badge status-posted">Posté</span></td>
+              </tr>
+              <tr>
+                <td class="mono">01/04/2027</td>
+                <td class="mono">AF-002</td>
+                <td><span class="account-badge">701</span></td>
+                <td>Appel T2 - Charges générales</td>
+                <td class="right mono">—</td>
+                <td class="right mono credit">3 994,00</td>
+                <td class="right mono" style="font-weight:600">6 327,00</td>
+                <td><span class="status-badge status-posted">Posté</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-footer">
+            <div><span class="footer-label">Total Débit :</span> <span class="mono debit" style="margin-left:8px">29 108,00 €</span></div>
+            <div><span class="footer-label">Total Crédit :</span> <span class="mono credit" style="margin-left:8px">29 108,00 €</span></div>
+            <div class="equilibre">✓ Balance équilibrée</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

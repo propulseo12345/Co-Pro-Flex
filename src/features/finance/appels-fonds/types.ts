@@ -40,6 +40,19 @@ export interface TravauxStats extends AppelStats {
   projectCount: number;
 }
 
+export interface CallGroup {
+  label: string;
+  calls: CallForFundsOverview[];
+  stats: AppelStats;
+}
+
+export interface CallCategory {
+  id: string;
+  label: string;
+  groups: CallGroup[];
+  stats: AppelStats;
+}
+
 export interface DetailStats {
   called: number;
   paid: number;

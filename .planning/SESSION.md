@@ -1,23 +1,23 @@
-# Session State — 2026-03-14 19:45
+# Session State — 2026-03-15 14:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- Design spec: wizard appel de fonds ponctuel (4 étapes, modale, 2 cas d'usage)
-- Implementation plan: 6 chunks, 10 tâches
-- Chunk 1-6: migration DB, hook, modal shell+CSS, 4 step components, wiring page
-- Build Next.js OK, 0 erreurs TS wizard
+- Blockers wizard appels de fonds: migration DB appliquée + budgets câblés
+- Edge Function generate_call_for_funds: remplacée par appel direct client (3 bugs corrigés)
+- Trigger validate_call_for_funds_total: corrigé (double-comptage AFTER trigger)
+- Vue globale appels de fonds: refonte accordéon (Budget Courant / Budget Travaux / sous-groupes par budget)
+- Onglet "Tous les appels" ajouté puis retiré, refresh après création câblé
+- Recherche UI comptabilité: 3 previews HTML créées, V1 Pennylane choisie
 
 ## Next Task
-Test visuel du wizard: lancer `npm run dev`, ouvrir /finance/appels-fonds, cliquer "Générer les appels", vérifier les 4 étapes. Appliquer migration DB si pas fait. Passer budgets[] réels au wizard.
+Implémenter la refonte comptabilité V1 (Pennylane Style): sidebar verticale dédiée + top bar sticky + multi-vues Grand Livre + filtres riches. Preview: .planning/preview-compta-v1.html
 
 ## Blockers
-- Migration `20260314_call_for_funds_add_description.sql` pas encore appliquée en DB
-- `budgets` prop est `[]` (vide) — il faut exposer les budgets depuis useAppelsFondsPage
+None
 
 ## Key Context
-- RepartitionKeyWithTotals utilise `key_id` (pas `id`) comme identifiant
-- listRepartitionKeys de @/lib/lots/api.ts (pas finance/api.ts) pour avoir total_weight+lots_count
-- Spec: docs/superpowers/specs/2026-03-14-wizard-appel-fonds-ponctuel-design.md
-- Plan: docs/superpowers/plans/2026-03-14-wizard-appel-fonds-ponctuel.md
+- createCall dans lib/finance/api.ts: appel direct Supabase (plus d'Edge Function), workflow draft→entries→post→call→lines
+- Trigger validate_call_for_funds_total: AFTER DEFERRED, juste SUM sans +NEW (corrigé en DB)
+- Constraint chk_posted_consistency: posted_at requis quand status='posted'

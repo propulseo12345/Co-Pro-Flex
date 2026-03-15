@@ -1,0 +1,94 @@
+.tableWrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
+}
+
+.table td {
+  padding: 12px 16px;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--bg-tertiary);
+}
+
+.thRight {
+  text-align: right;
+}
+
+.labelCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.labelIcon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.keyCell {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.amountCell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.amountCellGreen {
+  composes: amountCell;
+  color: var(--success);
+}
+
+.amountCellRed {
+  composes: amountCell;
+  color: var(--error);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .table th:nth-child(2),
+  .table td:nth-child(2),
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
+}

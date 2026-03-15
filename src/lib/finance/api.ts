@@ -326,7 +326,103 @@ export interface CreateCallPayload {
 }
 
 export async function createCall(payload: CreateCallPayload): Promise<ApiResult<{ call_id: string; ledger_tx_id: string }>> {
-  return invokeEdgeFunction('generate_call_for_funds', payload);
+  const supabase = getSupabaseClient();
+  const { copro_id, period_id, budget_id, repartition_key_id, label, trimester, issue_date, due_date, total_amount, description } = payload;
+
+  try {
+    // 1. Get lots with weights
+    const { data: lots, error: lotsErr } = await supabase
+      .from('repartition_key_lines')
+      .select('lot_id, weight')
+      .eq('key_id', repartition_key_id);
+    if (lotsErr) throw new Error(`Lots: ${lotsErr.message}`);
+    if (!lots || lots.length === 0) throw new Error('Aucun lot trouvé pour cette clé de répartition');
+
+    const totalWeight = lots.reduce((sum: number, l: { weight: number }) => sum + Number(l.weight), 0);
+
+    // 2. Get accounts 450 & 701
+    const { data: accounts, error: accErr } = await supabase
+      .from('accounts')
+      .select('id, code')
+      .eq('copro_id', copro_id)
+      .in('code', ['450', '701']);
+    if (accErr) throw new Error(`Comptes: ${accErr.message}`);
+
+    const acc450 = accounts?.find((a: { code: string }) => a.code === '450');
+    const acc701 = accounts?.find((a: { code: string }) => a.code === '701');
+    if (!acc450 || !acc701) throw new Error('Comptes 450 ou 701 manquants');
+
+    // 3. Create ledger transaction
+    const { data: ltx, error: ltxErr } = await supabase
+      .from('ledger_transactions')
+      .insert({
+        copro_id, period_id,
+        tx_date: issue_date,
+        label: `Appel de fonds: ${label}`,
+        source_type: 'call_for_funds',
+        status: 'draft',
+      })
+      .select('id')
+      .single();
+    if (ltxErr) throw new Error(`Transaction: ${ltxErr.message}`);
+
+    // 4. Create ledger entries
+    const { error: entErr } = await supabase
+      .from('ledger_entries')
+      .insert([
+        { copro_id, period_id, tx_id: ltx.id, account_id: acc450.id, direction: 'debit', amount: total_amount, entry_label: `Appel: ${label}` },
+        { copro_id, period_id, tx_id: ltx.id, account_id: acc701.id, direction: 'credit', amount: total_amount, entry_label: `Appel: ${label}` },
+      ]);
+    if (entErr) throw new Error(`Écritures: ${entErr.message}`);
+
+    // 5. Post the transaction
+    const { error: postErr } = await supabase
+      .from('ledger_transactions')
+      .update({ status: 'posted', posted_at: new Date().toISOString() })
+      .eq('id', ltx.id);
+    if (postErr) throw new Error(`Post transaction: ${postErr.message}`);
+
+    // 6. Create call_for_funds (was step 5)
+    const { data: call, error: callErr } = await supabase
+      .from('call_for_funds')
+      .insert({
+        copro_id, period_id,
+        budget_id: budget_id || null,
+        repartition_key_id, label,
+        trimester: trimester || null,
+        issue_date, due_date, total_amount,
+        status: 'issued',
+        ledger_tx_id: ltx.id,
+        issued_at: new Date().toISOString(),
+        description: description || null,
+      })
+      .select('id')
+      .single();
+    if (callErr) throw new Error(`Appel: ${callErr.message}`);
+
+    // 7. Create lines per lot (with rounding delta on last lot)
+    const lines = lots.map((l: { lot_id: string; weight: number }) => ({
+      copro_id,
+      call_id: call.id,
+      lot_id: l.lot_id,
+      amount_due: Math.round((total_amount * Number(l.weight) / totalWeight) * 100) / 100,
+    }));
+
+    const linesTotal = lines.reduce((sum: number, l: { amount_due: number }) => sum + l.amount_due, 0);
+    const delta = Math.round((total_amount - linesTotal) * 100) / 100;
+    if (lines.length > 0 && delta !== 0) {
+      lines[lines.length - 1].amount_due += delta;
+    }
+
+    const { error: linesErr } = await supabase
+      .from('call_for_funds_lines')
+      .insert(lines);
+    if (linesErr) throw new Error(`Lignes: ${linesErr.message}`);
+
+    return { data: { call_id: call.id, ledger_tx_id: ltx.id }, error: null };
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err.message : 'Erreur inconnue' };
+  }
 }
 
 // ============================================================================
