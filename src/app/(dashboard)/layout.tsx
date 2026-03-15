@@ -6,6 +6,8 @@ import { VentesProvider } from '@/providers/VentesProvider';
 import { CoproProvider } from '@/providers/CoproContext';
 import { AnnexeProvider } from '@/providers/AnnexeContext';
 import { ToastProvider } from '@/providers/ToastProvider';
+import { SidebarProvider } from '@/providers/SidebarContext';
+import { AppBody } from '@/components/layout/AppBody';
 
 function LoadingFallback() {
   return (
@@ -26,17 +28,19 @@ export default function DashboardLayout({
         <AnnexeProvider>
           <VentesProvider>
             <ToastProvider>
-              <div className="app-container">
-                <HighBar />
-                <div className="app-body">
-                  <ModuleSidebar />
-                  <main className="main-content">
-                    <Suspense fallback={<LoadingFallback />}>
-                      {children}
-                    </Suspense>
-                  </main>
+              <SidebarProvider>
+                <div className="app-container">
+                  <HighBar />
+                  <AppBody>
+                    <ModuleSidebar />
+                    <main className="main-content">
+                      <Suspense fallback={<LoadingFallback />}>
+                        {children}
+                      </Suspense>
+                    </main>
+                  </AppBody>
                 </div>
-              </div>
+              </SidebarProvider>
             </ToastProvider>
           </VentesProvider>
         </AnnexeProvider>
