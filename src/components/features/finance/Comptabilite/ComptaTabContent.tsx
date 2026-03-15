@@ -6,7 +6,7 @@ import { LivreComptableTable } from './LivreComptableTable';
 import { Annexe1Table, Annexe1DetailCoprosTable, Annexe2Table, Annexe3Table, Annexe4Table, Annexe5Table } from './AnnexeTables';
 import { ComptaEmptyDataState, ComptaAnnexeNotConnected } from './ComptaEmptyStates';
 import { useAnnexeData } from '@/hooks/modules/useAnnexeData';
-import type { TabCompta, OperationComptable, LigneBalance, AccountWithBalance } from './types';
+import type { TabCompta, OperationComptable, LigneBalance, AccountWithBalance, GrandLivreViewMode } from './types';
 
 interface ComptaTabContentProps {
   activeTab: TabCompta;
@@ -20,6 +20,7 @@ interface ComptaTabContentProps {
   periodId: string | null;
   coproName?: string;
   nextPeriodId?: string | null;
+  viewMode?: GrandLivreViewMode;
 }
 
 function AnnexeLoader({ isLoading, error, children }: { isLoading: boolean; error: string | null; children: React.ReactNode }) {
@@ -40,6 +41,7 @@ export function ComptaTabContent({
   periodId,
   coproName = 'Copropriété',
   nextPeriodId = null,
+  viewMode,
 }: ComptaTabContentProps) {
   const exerciceLabel = `${annee}`;
 
@@ -74,7 +76,7 @@ export function ComptaTabContent({
         />
       );
     }
-    return <GrandLivreTable operations={filteredOperations} onViewDetail={onViewOperationDetail} />;
+    return <GrandLivreTable operations={filteredOperations} onViewDetail={onViewOperationDetail} viewMode={viewMode} />;
   }
 
   if (activeTab === 'livre-comptable') {
