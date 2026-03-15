@@ -1,7 +1,7 @@
 'use client';
 
 import { FondsALUR, CoproprietaireALUR } from './types';
-import styles from './Budget.module.css';
+import styles from './ALURSummary.module.css';
 
 interface ALURSummaryProps {
   fondsALUR: FondsALUR;
@@ -9,35 +9,24 @@ interface ALURSummaryProps {
   budgetAnnuelVote: number;
 }
 
-export function ALURSummary({
-  fondsALUR,
-  coproprietairesALUR,
-  budgetAnnuelVote,
-}: ALURSummaryProps) {
-  const totalContributions = coproprietairesALUR.reduce(
-    (sum, c) => sum + c.totalContributions,
-    0
-  );
+export function ALURSummary({ fondsALUR, coproprietairesALUR, budgetAnnuelVote }: ALURSummaryProps) {
+  const totalContributions = coproprietairesALUR.reduce((sum, c) => sum + c.totalContributions, 0);
 
   return (
-    <div className={styles.alurSummary}>
-      <div className={`${styles.alurCard} card`}>
-        <h3 className={styles.alurCardTitle}>Solde actuel du fonds</h3>
-        <div className={styles.alurCardValue}>{fondsALUR.soldeActuel.toLocaleString()} €</div>
+    <div className={styles.strip}>
+      <div className={styles.card}>
+        <div className={styles.label}>Solde actuel du fonds</div>
+        <div className={`${styles.value} ${styles.blue}`}>{fondsALUR.soldeActuel.toLocaleString('fr-FR')} €</div>
       </div>
-      <div className={`${styles.alurCard} card`}>
-        <h3 className={styles.alurCardTitle}>Cotisation annuelle</h3>
-        <div className={styles.alurCardValue}>
-          {fondsALUR.cotisationAnnuelle.toLocaleString()} €
-        </div>
-        <p className={styles.alurCardSubtext}>
-          {fondsALUR.pourcentageBudget}% du budget de {budgetAnnuelVote.toLocaleString()} €
-        </p>
+      <div className={styles.card}>
+        <div className={styles.label}>Cotisation annuelle</div>
+        <div className={`${styles.value} ${styles.green}`}>{fondsALUR.cotisationAnnuelle.toLocaleString('fr-FR')} €</div>
+        <div className={styles.sub}>{fondsALUR.pourcentageBudget}% du budget de {budgetAnnuelVote.toLocaleString('fr-FR')} €</div>
       </div>
-      <div className={`${styles.alurCard} card`}>
-        <h3 className={styles.alurCardTitle}>Total cumulé (tous lots)</h3>
-        <div className={styles.alurCardValue}>{totalContributions.toLocaleString()} €</div>
-        <p className={styles.alurCardSubtext}>Depuis la création du fonds</p>
+      <div className={styles.card}>
+        <div className={styles.label}>Total cumulé (tous lots)</div>
+        <div className={`${styles.value} ${styles.orange}`}>{totalContributions.toLocaleString('fr-FR')} €</div>
+        <div className={styles.sub}>Depuis la création du fonds</div>
       </div>
     </div>
   );

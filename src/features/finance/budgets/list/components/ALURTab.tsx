@@ -5,7 +5,6 @@ import {
   ALURCoproTable,
   ALURTransfertHistory,
 } from '@/components/features/finance/Budget';
-import styles from '@/app/(dashboard)/finance/budgets/budgets.module.css';
 
 interface ALURTabProps {
   fondsALUR: any;
@@ -23,15 +22,13 @@ export function ALURTab({
   onSelectCoproprietaire,
 }: ALURTabProps) {
   return (
-    <div className={styles.content}>
+    <div>
       <ALURSummary
         fondsALUR={fondsALUR}
         coproprietairesALUR={coproprietairesALUR}
         budgetAnnuelVote={budgetAnnuelVote}
       />
-
       <ALURTransfertHistory fondsALUR={fondsALUR} onOpenTransferModal={onOpenTransferModal} />
-
       <ALURCoproTable
         coproprietairesALUR={coproprietairesALUR}
         onSelectCoproprietaire={onSelectCoproprietaire}

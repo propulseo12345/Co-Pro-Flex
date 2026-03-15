@@ -1,0 +1,106 @@
+.container {
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+.info {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 16px;
+}
+
+.historySection {
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.historyTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0 0 10px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 150ms;
+}
+
+.row:hover {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.rowDate {
+  font-size: 11px;
+  color: #64748b;
+  font-family: 'SF Mono', monospace;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.rowDesc {
+  flex: 1;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.rowAmount {
+  font-family: 'SF Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.empty {
+  font-size: 12px;
+  color: #475569;
+  text-align: center;
+  padding: 12px;
+}
+
+.btnPrimary {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 150ms;
+}
+
+.btnPrimary:hover {
+  background: #2563eb;
+}
