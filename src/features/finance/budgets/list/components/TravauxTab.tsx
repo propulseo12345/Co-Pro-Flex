@@ -60,6 +60,16 @@ export function TravauxTab({
               <span className={styles.sectionTitle} style={{ color }}>{label}</span>
               <span className={styles.sectionCount}>{items.length}</span>
             </div>
+            <div className={styles.tableHeader}>
+              <span></span>
+              <span>Projet</span>
+              <span></span>
+              <span className={styles.tableHeaderRight}>Voté</span>
+              <span className={styles.tableHeaderRight}>Appelé</span>
+              <span className={styles.tableHeaderRight}>Collecté</span>
+              <span>Progression</span>
+              <span className={styles.tableHeaderRight}>Appels</span>
+            </div>
             <div className={styles.sectionList}>
               {items.map((travaux: BudgetTravaux) => (
                 <TravauxCard

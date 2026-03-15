@@ -1,222 +1,153 @@
 .card {
-  padding: 16px 20px;
   background: #1a1d2e;
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 10px;
+  overflow: hidden;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
+/* ── Compact row ── */
+.row {
+  display: grid;
+  grid-template-columns: 18px 1fr 50px 100px 100px 100px 100px 70px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 150ms;
+  font-size: 12px;
+  color: #e2e8f0;
 }
 
-.titleRow {
+.row:hover {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.chevron {
+  color: #475569;
+  transition: transform 200ms;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.rowTitle {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSource {
+  font-size: 10px;
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.08);
+  padding: 1px 6px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.rowStat {
+  font-family: 'SF Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowProgress {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
 }
 
-.title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #e2e8f0;
-  margin: 0;
-}
-
-.sourceBadge {
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-size: 10px;
-  font-weight: 600;
-  background: rgba(148, 163, 184, 0.08);
-  color: #64748b;
-}
-
-.description {
-  font-size: 12px;
-  color: #94a3b8;
-  margin: 0 0 4px;
-}
-
-.date {
-  font-size: 11px;
-  color: #64748b;
-}
-
-.statusBadge {
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.statusActive {
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-}
-
-.statusDone {
-  background: rgba(34, 197, 94, 0.1);
-  color: #4ade80;
-}
-
-.statusPending {
+.miniBar {
+  flex: 1;
+  height: 4px;
   background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  border-radius: 2px;
+  overflow: hidden;
 }
 
-.statsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
+.miniFill {
+  height: 100%;
+  border-radius: 2px;
 }
 
-.stat {
+.rowAppels {
+  font-size: 11px;
+  color: #64748b;
+  text-align: right;
+}
+
+/* ── Expanded detail ── */
+.detail {
+  padding: 12px 16px 14px;
+  background: rgba(148, 163, 184, 0.02);
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.detailStats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.detailStat {
   display: flex;
   flex-direction: column;
   gap: 1px;
 }
 
-.statLabel {
-  font-size: 11px;
+.detailLabel {
+  font-size: 10px;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.statValue {
+.detailValue {
   font-size: 14px;
   font-weight: 700;
   color: #e2e8f0;
   font-variant-numeric: tabular-nums;
 }
 
-.progressSection {
-  margin-bottom: 12px;
-}
-
-.progressHeader {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #64748b;
-  margin-bottom: 6px;
-}
-
-.progressBar {
-  height: 5px;
-  background: rgba(148, 163, 184, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 300ms;
-}
-
-/* ── Suivi appels de fonds ── */
-.appels {
-  padding: 14px 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.06);
-  margin-bottom: 12px;
+/* ── Appels section ── */
+.appelsSection {
+  margin-bottom: 10px;
 }
 
 .appelsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .appelsTitle {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  color: #e2e8f0;
-}
-
-.appelsCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-  border-radius: 9px;
-  font-size: 10px;
-  font-weight: 700;
-  margin-left: 6px;
+  color: #94a3b8;
 }
 
 .appelsLink {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: 3px;
+  font-size: 10px;
   color: #60a5fa;
   text-decoration: none;
-}
-
-.appelsLink:hover {
-  color: #3b82f6;
-}
-
-.appelsLinkInline {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #60a5fa;
-  text-decoration: none;
-  margin-top: 6px;
-}
-
-.appelsLinkInline:hover {
-  color: #3b82f6;
-}
-
-/* Appels table */
-.appelsTable {
-  border: 1px solid rgba(148, 163, 184, 0.06);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.appelsTableHeader {
-  display: grid;
-  grid-template-columns: 1fr 100px 100px 90px;
-  gap: 12px;
-  padding: 8px 12px;
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #475569;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
 }
 
 .appelRow {
   display: grid;
-  grid-template-columns: 1fr 100px 100px 90px;
-  gap: 12px;
-  padding: 8px 12px;
-  font-size: 12px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.03);
+  grid-template-columns: 1fr 80px 80px 70px;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
   align-items: center;
-  transition: background 150ms;
-}
-
-.appelRow:last-child {
-  border-bottom: none;
+  border-radius: 4px;
 }
 
 .appelRow:hover {
@@ -224,115 +155,91 @@
 }
 
 .appelLabel {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  font-weight: 500;
   color: #e2e8f0;
-}
-
-.appelDate {
-  font-size: 10px;
-  color: #64748b;
-  font-family: 'SF Mono', monospace;
-}
-
-.right {
-  text-align: right;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .appelMontant {
+  text-align: right;
+  color: #e2e8f0;
   font-family: 'SF Mono', monospace;
   font-weight: 600;
-  color: #e2e8f0;
-  font-variant-numeric: tabular-nums;
 }
 
 .appelCollecte {
+  text-align: right;
+  color: #22c55e;
   font-family: 'SF Mono', monospace;
   font-weight: 600;
-  color: #22c55e;
-  font-variant-numeric: tabular-nums;
 }
 
 .appelStatut {
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 9px;
   font-weight: 600;
-}
-
-.appelPaye {
-  background: rgba(34, 197, 94, 0.1);
-  color: #4ade80;
-}
-
-.appelEnvoye {
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-}
-
-.appelAttente {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
-}
-
-.noAppels {
-  font-size: 12px;
-  color: #475569;
   text-align: center;
-  padding: 16px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
 }
 
-/* Actions */
-.actions {
+.appelPaye { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.appelEmis { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+.appelBrouillon { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+
+/* ── Actions ── */
+.detailActions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
-  padding-top: 12px;
+  padding-top: 8px;
   border-top: 1px solid rgba(148, 163, 184, 0.06);
 }
 
-.btnSecondary {
-  padding: 8px 14px;
-  border-radius: 8px;
+.btnSmall {
+  padding: 5px 12px;
+  border-radius: 6px;
   border: 1px solid rgba(148, 163, 184, 0.15);
   background: none;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
   transition: all 150ms;
 }
 
-.btnSecondary:hover {
+.btnSmall:hover {
   background: rgba(148, 163, 184, 0.08);
   color: #e2e8f0;
 }
 
-.btnPrimary {
-  padding: 8px 14px;
-  border-radius: 8px;
+.btnSmallPrimary {
+  padding: 5px 12px;
+  border-radius: 6px;
   border: none;
   background: #3b82f6;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 150ms;
+  gap: 4px;
   text-decoration: none;
+  transition: all 150ms;
 }
 
-.btnPrimary:hover {
+.btnSmallPrimary:hover {
   background: #2563eb;
+}
+
+@media (max-width: 900px) {
+  .row {
+    grid-template-columns: 18px 1fr 50px 80px 80px;
+    font-size: 11px;
+  }
+  .rowProgress, .rowAppels {
+    display: none;
+  }
 }

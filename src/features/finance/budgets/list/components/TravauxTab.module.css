@@ -76,7 +76,24 @@
 .sectionList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
+}
+
+/* Table header for section */
+.tableHeader {
+  display: grid;
+  grid-template-columns: 18px 1fr 50px 100px 100px 100px 100px 70px;
+  gap: 10px;
+  padding: 6px 16px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+}
+
+.tableHeaderRight {
+  text-align: right;
 }
 
 /* ── Empty state ── */
