@@ -141,6 +141,7 @@ export function useBudget() {
   const [selectedYear, setSelectedYear] = useState(getCurrentBusinessYear());
   const [coproprietairesALUR, setCoproprietairesALUR] = useState<CoproprietaireALUR[]>([]);
   const [travauxCalls, setTravauxCalls] = useState<financeApi.CallForFundsOverview[]>([]);
+  const [allWorksBudgets, setAllWorksBudgets] = useState<import('@/lib/budget/api').BudgetOverview[]>([]);
 
   const {
     budgets: rawBudgets,
@@ -221,6 +222,19 @@ export function useBudget() {
     }
   }, [currentCoproId]);
 
+  // Load ALL works budgets (no year filter — travaux span multiple years)
+  const loadAllWorksBudgets = useCallback(async () => {
+    if (!currentCoproId) return;
+    try {
+      const all = await import('@/lib/budget/api').then(m => m.listBudgets(currentCoproId));
+      setAllWorksBudgets(all.filter(b => b.budget_type === 'works'));
+    } catch {
+      setAllWorksBudgets([]);
+    }
+  }, [currentCoproId]);
+
+  useEffect(() => { loadAllWorksBudgets(); }, [loadAllWorksBudgets]);
+
   // Load calls linked to works budgets
   const loadTravauxCalls = useCallback(async () => {
     if (!currentCoproId) return;
@@ -293,10 +307,9 @@ export function useBudget() {
     return rawExpenses.map(mapExpenseToDepense);
   }, [rawExpenses]);
 
-  // Travaux budgets (from raw budgets of type 'works') enriched with real calls
+  // Travaux budgets (ALL years, not filtered) enriched with real calls
   const budgetsTravaux = useMemo((): BudgetTravaux[] => {
-    return rawBudgets
-      .filter(b => b.budget_type === 'works')
+    return allWorksBudgets
       .map(b => {
         const linkedCalls = travauxCalls.filter(c => c.budget_id === b.id);
         return {
@@ -325,7 +338,7 @@ export function useBudget() {
           })),
         };
       }) as BudgetTravaux[];
-  }, [rawBudgets, travauxCalls]);
+  }, [allWorksBudgets, travauxCalls]);
 
   // ALUR funds (from raw budgets of type 'alur')
   const fondsALUR = useMemo(() => {
