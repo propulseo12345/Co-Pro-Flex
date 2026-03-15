@@ -12,6 +12,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { getCurrentBusinessYear } from '@/lib/time/period';
 import { useBudgetData } from './useBudgetData';
 import { useBudgetMutations } from './useBudgetMutations';
+import * as financeApi from '@/lib/finance/api';
 import { useCopro } from '@/providers/CoproContext';
 import { createClient } from '@/lib/supabase/client';
 import type { BudgetOverview, BudgetLineOverview, ExpenseDetail, BudgetType } from '@/lib/budget/api';
@@ -139,6 +140,7 @@ export function useBudget() {
   // ============================================================================
   const [selectedYear, setSelectedYear] = useState(getCurrentBusinessYear());
   const [coproprietairesALUR, setCoproprietairesALUR] = useState<CoproprietaireALUR[]>([]);
+  const [travauxCalls, setTravauxCalls] = useState<financeApi.CallForFundsOverview[]>([]);
 
   const {
     budgets: rawBudgets,
@@ -219,6 +221,21 @@ export function useBudget() {
     }
   }, [currentCoproId]);
 
+  // Load calls linked to works budgets
+  const loadTravauxCalls = useCallback(async () => {
+    if (!currentCoproId) return;
+    try {
+      const result = await financeApi.listCalls(currentCoproId);
+      if (result.data) {
+        setTravauxCalls(result.data.filter(c => c.budget_id !== null));
+      }
+    } catch {
+      setTravauxCalls([]);
+    }
+  }, [currentCoproId]);
+
+  useEffect(() => { loadTravauxCalls(); }, [loadTravauxCalls]);
+
   // ============================================================================
   // UI State
   // ============================================================================
@@ -276,23 +293,39 @@ export function useBudget() {
     return rawExpenses.map(mapExpenseToDepense);
   }, [rawExpenses]);
 
-  // Travaux budgets (from raw budgets of type 'works')
+  // Travaux budgets (from raw budgets of type 'works') enriched with real calls
   const budgetsTravaux = useMemo((): BudgetTravaux[] => {
     return rawBudgets
       .filter(b => b.budget_type === 'works')
-      .map(b => ({
-        id: b.id,
-        titre: b.name,
-        description: b.notes || '',
-        budgetVote: Number(b.total_planned),
-        devisAssocie: 0,
-        consomme: Number(b.validated_spent),
-        statut: b.status === 'validated' ? 'EN_COURS' : 'A_VENIR',
-        dateVote: b.validated_at || b.created_at,
-        cleRepartitionId: '1',
-        appelsDeFonds: [],
-      })) as BudgetTravaux[];
-  }, [rawBudgets]);
+      .map(b => {
+        const linkedCalls = travauxCalls.filter(c => c.budget_id === b.id);
+        return {
+          id: b.id,
+          titre: b.name,
+          description: b.notes || '',
+          budgetVote: Number(b.total_planned),
+          devisAssocie: 0,
+          consomme: Number(b.validated_spent),
+          statut: b.status === 'validated' ? 'EN_COURS' as const : 'A_VENIR' as const,
+          dateVote: b.validated_at || b.created_at,
+          cleRepartitionId: '1',
+          sourceAG: (b as unknown as Record<string, unknown>).source_ag_id ? true : false,
+          appelsDeFonds: linkedCalls.map(c => ({
+            id: c.id,
+            numero: c.trimester ?? 0,
+            montant: Number(c.total_amount),
+            date: c.issue_date,
+            statut: c.status === 'paid' ? 'PAYE' as const
+              : c.status === 'issued' || c.status === 'partially_paid' ? 'ENVOYE' as const
+              : 'EN_ATTENTE' as const,
+            totalPaid: Number(c.total_paid),
+            totalUnpaid: Number(c.total_unpaid),
+            label: c.label,
+            callStatus: c.status,
+          })),
+        };
+      }) as BudgetTravaux[];
+  }, [rawBudgets, travauxCalls]);
 
   // ALUR funds (from raw budgets of type 'alur')
   const fondsALUR = useMemo(() => {

@@ -157,12 +157,16 @@ export interface EvenementHistorique {
 
 export interface AppelFonds {
   id: string;
-  numero: number;  // Numéro de l'appel (1, 2, 3...)
+  numero: number;
   montant: number;
   date: string;
   dateEcheance?: string;
   description?: string;
   statut: 'ENVOYE' | 'PAYE' | 'EN_ATTENTE';
+  totalPaid?: number;
+  totalUnpaid?: number;
+  label?: string;
+  callStatus?: string;
 }
 
 /**
