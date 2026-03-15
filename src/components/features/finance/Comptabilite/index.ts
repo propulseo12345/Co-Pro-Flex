@@ -1,4 +1,5 @@
 export { ComptaHeader } from './ComptaHeader';
+export { ComptaTopBar } from './ComptaTopBar';
 export { ComptaTabs } from './ComptaTabs';
 export { ComptaSidebar } from './ComptaSidebar';
 export { ComptaStats } from './ComptaStats';
