@@ -1,8 +1,8 @@
 .card {
-  padding: 20px 24px;
+  padding: 16px 20px;
   background: #1a1d2e;
   border: 1px solid rgba(148, 163, 184, 0.08);
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .header {
@@ -20,7 +20,7 @@
 }
 
 .title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #e2e8f0;
   margin: 0;
@@ -72,14 +72,14 @@
 .statsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .statLabel {
@@ -90,14 +90,14 @@
 }
 
 .statValue {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #e2e8f0;
   font-variant-numeric: tabular-nums;
 }
 
 .progressSection {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .progressHeader {
