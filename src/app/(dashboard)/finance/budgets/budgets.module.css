@@ -1,78 +1,31 @@
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: var(--space-xl);
+/* Full-width vertical layout */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--highbar-height, 48px));
+  overflow: hidden;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-2xl);
+.content {
+  padding: 24px 32px;
+  flex: 1;
+  overflow-y: auto;
 }
 
-.title {
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    color: var(--text-main);
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #94a3b8;
 }
 
-.headerActions {
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-}
-
-.yearSelect {
-    padding: var(--space-sm) var(--space-md);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    color: var(--text-main);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.yearSelect:hover {
-    border-color: var(--primary);
-}
-
-.yearSelect:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-.tabs {
-    display: flex;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-2xl);
-    border-bottom: 2px solid var(--border);
-}
-
-.tab {
-    padding: var(--space-md) var(--space-xl);
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: var(--text-secondary);
-    font-size: var(--text-md);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    margin-bottom: -2px;
-}
-
-.tab:hover {
-    color: var(--text-main);
-    background-color: var(--bg-secondary);
-}
-
-.tabActive {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-    font-weight: 600;
+.errorState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #f87171;
 }
 
 .summaryCards {

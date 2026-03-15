@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useBudget } from '@/hooks/modules/useBudget';
-import { BudgetHeader } from '@/components/features/finance/Budget';
+import { BudgetTopBar, BudgetNavBar } from '@/components/features/finance/Budget';
 import {
   FonctionnementTab,
   TravauxTab,
@@ -75,9 +75,18 @@ export default function BudgetsPage() {
 
   if (isLoading) {
     return (
-      <div className="container">
-        <div className={styles.loadingState}>
-          <p>Chargement des budgets...</p>
+      <div className={styles.page}>
+        <BudgetTopBar
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          onCreateBudget={() => setShowCreateBudgetModal(true)}
+          onExportPDF={() => {}}
+        />
+        <BudgetNavBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className={styles.content}>
+          <div className={styles.loadingState}>
+            <p>Chargement des budgets...</p>
+          </div>
         </div>
       </div>
     );
@@ -85,64 +94,75 @@ export default function BudgetsPage() {
 
   if (error) {
     return (
-      <div className="container">
-        <div className={styles.errorState}>
-          <p>Erreur: {error}</p>
+      <div className={styles.page}>
+        <BudgetTopBar
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          onCreateBudget={() => setShowCreateBudgetModal(true)}
+          onExportPDF={() => {}}
+        />
+        <BudgetNavBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className={styles.content}>
+          <div className={styles.errorState}>
+            <p>Erreur: {error}</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <BudgetHeader
+    <div className={styles.page}>
+      <BudgetTopBar
         selectedYear={selectedYear}
         onYearChange={setSelectedYear}
         onCreateBudget={() => setShowCreateBudgetModal(true)}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onExportPDF={() => alert('Export PDF en cours...')}
       />
+      <BudgetNavBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === 'fonctionnement' && (
-        <FonctionnementTab
-          budgets={budgets}
-          selectedYear={selectedYear}
-          budgetAnnuelVote={budgetAnnuelVote}
-          postesBudget={postesBudget}
-          totals={totals}
-          postesEnAlerte={postesEnAlerte}
-          posteActifChart={posteActifChart}
-          depensesFiltrees={depensesFiltrees}
-          onEditBudget={(budget) => router.push(`/finance/budgets/${budget.id}`)}
-          onLinkToAG={handleOpenLinkToAG}
-          onTransformBudget={handleOpenTransformModal}
-          onDeleteBudget={(budget) => handleDeleteBudget(budget.id)}
-          onSelectBudget={(budget) => router.push(`/finance/budgets/${budget.id}`)}
-          onCreateBudget={() => setShowCreateBudgetModal(true)}
-          onSelectPoste={setSelectedPoste}
-          onSelectDepense={setSelectedDepense}
-          onPosteChartSelect={handlePosteChartSelect}
-        />
-      )}
+      <div className={styles.content}>
+        {activeTab === 'fonctionnement' && (
+          <FonctionnementTab
+            budgets={budgets}
+            selectedYear={selectedYear}
+            budgetAnnuelVote={budgetAnnuelVote}
+            postesBudget={postesBudget}
+            totals={totals}
+            postesEnAlerte={postesEnAlerte}
+            posteActifChart={posteActifChart}
+            depensesFiltrees={depensesFiltrees}
+            onEditBudget={(budget) => router.push(`/finance/budgets/${budget.id}`)}
+            onLinkToAG={handleOpenLinkToAG}
+            onTransformBudget={handleOpenTransformModal}
+            onDeleteBudget={(budget) => handleDeleteBudget(budget.id)}
+            onSelectBudget={(budget) => router.push(`/finance/budgets/${budget.id}`)}
+            onCreateBudget={() => setShowCreateBudgetModal(true)}
+            onSelectPoste={setSelectedPoste}
+            onSelectDepense={setSelectedDepense}
+            onPosteChartSelect={handlePosteChartSelect}
+          />
+        )}
 
-      {activeTab === 'travaux' && (
-        <TravauxTab
-          budgetsTravaux={budgetsTravaux}
-          onOpenTravauxDetail={handleOpenTravauxDetail}
-          onOpenNewAppelFonds={handleOpenNewAppelFonds}
-          onCreateBudget={() => setShowCreateBudgetModal(true)}
-        />
-      )}
+        {activeTab === 'travaux' && (
+          <TravauxTab
+            budgetsTravaux={budgetsTravaux}
+            onOpenTravauxDetail={handleOpenTravauxDetail}
+            onOpenNewAppelFonds={handleOpenNewAppelFonds}
+            onCreateBudget={() => setShowCreateBudgetModal(true)}
+          />
+        )}
 
-      {activeTab === 'alur' && (
-        <ALURTab
-          fondsALUR={fondsALUR}
-          coproprietairesALUR={coproprietairesALUR}
-          budgetAnnuelVote={budgetAnnuelVote}
-          onOpenTransferModal={() => setShowTransferModal(true)}
-          onSelectCoproprietaire={setSelectedCoproprietaireALUR}
-        />
-      )}
+        {activeTab === 'alur' && (
+          <ALURTab
+            fondsALUR={fondsALUR}
+            coproprietairesALUR={coproprietairesALUR}
+            budgetAnnuelVote={budgetAnnuelVote}
+            onOpenTransferModal={() => setShowTransferModal(true)}
+            onSelectCoproprietaire={setSelectedCoproprietaireALUR}
+          />
+        )}
+      </div>
 
       <BudgetsModals
         selectedCoproprietaireALUR={selectedCoproprietaireALUR}
