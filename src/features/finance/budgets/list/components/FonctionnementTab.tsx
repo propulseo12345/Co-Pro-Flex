@@ -3,13 +3,12 @@
 import {
   BudgetAlerts,
   BudgetOverviewHero,
-  BudgetProjection,
-  BudgetPostesGrid,
+  BudgetProjectionCard,
+  BudgetPostesList,
   BudgetDepensesTable,
   BudgetsList,
 } from '@/components/features/finance/Budget';
 import type { PosteBudget } from '@/components/features/finance/Budget/types';
-import styles from '@/app/(dashboard)/finance/budgets/budgets.module.css';
 
 interface FonctionnementTabProps {
   budgets: any[];
@@ -51,7 +50,7 @@ export function FonctionnementTab({
   onPosteChartSelect,
 }: FonctionnementTabProps) {
   return (
-    <div className={styles.content}>
+    <div>
       <BudgetsList
         budgets={budgets}
         selectedYear={selectedYear}
@@ -75,7 +74,7 @@ export function FonctionnementTab({
         postesBudget={postesBudget}
       />
 
-      <BudgetProjection
+      <BudgetProjectionCard
         budgetAnnuelVote={budgetAnnuelVote}
         totalConsomme={totals.totalConsomme}
         projectedYearEnd={totals.projectedYearEnd}
@@ -83,12 +82,10 @@ export function FonctionnementTab({
         monthsElapsed={totals.monthsElapsed}
         monthsRemaining={totals.monthsRemaining}
         avgMonthlyConsumption={totals.avgMonthlyConsumption}
-        projectionMin={totals.projectionMin}
-        projectionMax={totals.projectionMax}
         fiabiliteNiveau={totals.fiabiliteNiveau}
       />
 
-      <BudgetPostesGrid postesBudget={postesBudget} onSelectPoste={onSelectPoste} />
+      <BudgetPostesList postesBudget={postesBudget} onSelectPoste={onSelectPoste} />
 
       <BudgetDepensesTable
         depenses={depensesFiltrees}
