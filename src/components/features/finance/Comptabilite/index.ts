@@ -1,5 +1,6 @@
 export { ComptaHeader } from './ComptaHeader';
 export { ComptaTabs } from './ComptaTabs';
+export { ComptaSidebar } from './ComptaSidebar';
 export { ComptaStats } from './ComptaStats';
 export { ComptaFilters } from './ComptaFilters';
 export { ComptaInfoBanner } from './ComptaInfoBanner';
