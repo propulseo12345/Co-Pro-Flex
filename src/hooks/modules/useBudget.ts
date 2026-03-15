@@ -265,7 +265,7 @@ export function useBudget() {
   const [viewingDocument, setViewingDocument] = useState<string | null>(null);
   const [showTravauxDetailModal, setShowTravauxDetailModal] = useState(false);
   const [selectedTravauxDetail, setSelectedTravauxDetail] = useState<BudgetTravaux | null>(null);
-  const [activeDetailTab, setActiveDetailTab] = useState<'historique' | 'etapes' | 'prestataires' | 'documents'>('historique');
+  const [activeDetailTab, setActiveDetailTab] = useState<'echeancier' | 'documents' | 'historique'>('echeancier');
   const [selectedCoproprietaireALUR, setSelectedCoproprietaireALUR] = useState<CoproprietaireALUR | null>(null);
   const [showCreateBudgetModal, setShowCreateBudgetModal] = useState(false);
   const [showTransformBudgetModal, setShowTransformBudgetModal] = useState(false);
@@ -444,7 +444,7 @@ export function useBudget() {
 
   const handleOpenTravauxDetail = useCallback((travaux: BudgetTravaux) => {
     setSelectedTravauxDetail(travaux);
-    setActiveDetailTab('historique');
+    setActiveDetailTab('echeancier');
     setShowTravauxDetailModal(true);
   }, []);
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/features/finance/Budget';
 import type { PosteBudget } from '@/components/features/finance/Budget/types';
 
-type DetailTab = 'historique' | 'etapes' | 'prestataires' | 'documents';
+type DetailTab = 'echeancier' | 'documents' | 'historique';
 
 interface BudgetsModalsProps {
   // ALUR Modal

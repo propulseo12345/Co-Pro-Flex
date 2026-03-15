@@ -1,0 +1,729 @@
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+/* ── Modal ── */
+.modal {
+  background: #161822;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.closeBtn:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 150ms;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #94a3b8;
+}
+
+.tabActive {
+  color: #e2e8f0;
+  border-bottom-color: #3b82f6;
+}
+
+.tabCount {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+}
+
+.tabActive .tabCount {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+/* ── Body ── */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0 0 6px 0;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* ── Timeline (Historique) ── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.timelineItem:last-child {
+  padding-bottom: 0;
+}
+
+/* vertical line */
+.timelineItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 36px;
+  bottom: 0;
+  width: 1px;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.timelineDot {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.timelineBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.timelineDate {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.timelineAmount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.timelineEventTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 2px 0;
+}
+
+.timelineDesc {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.timelineDocLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #60a5fa;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.timelineDocLink:hover {
+  color: #93bbfd;
+}
+
+/* ── Étapes ── */
+.etapesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.etapeCard {
+  padding: 16px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+}
+
+.etapeTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.etapeNum {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.etapeContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.etapeTitre {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 2px 0;
+}
+
+.etapeDesc {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Étape badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.badgeTermine {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.badgeEnCours {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.badgeEnRetard {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.badgeAFaire {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+.etapeMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.etapeMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.etapeMetaItem svg {
+  flex-shrink: 0;
+}
+
+.amountOk {
+  color: #4ade80;
+}
+
+.amountOver {
+  color: #f87171;
+}
+
+/* ── Prestataires ── */
+.prestaList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prestaCard {
+  padding: 16px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+}
+
+.prestaTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.prestaAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.prestaName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+.prestaMetier {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.prestaDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.prestaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.prestaRow svg {
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.prestaRow a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.prestaRow a:hover {
+  text-decoration: underline;
+}
+
+/* ── Documents ── */
+.docList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.docCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  transition: border-color 150ms;
+}
+
+.docCard:hover {
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+.docIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.docInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.docName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.docType {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.08);
+  color: #94a3b8;
+}
+
+.docDate {
+  font-size: 11px;
+  color: #475569;
+}
+
+.docSize {
+  font-size: 11px;
+  color: #475569;
+}
+
+.docActions {
+  display: flex;
+  gap: 4px;
+}
+
+.docBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms;
+}
+
+.docBtn:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.btnSecondary {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 150ms;
+  background: none;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.btnSecondary:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+/* ── Schedule table ── */
+.scheduleTable {
+  display: flex;
+  flex-direction: column;
+}
+
+.scheduleHeader {
+  display: grid;
+  grid-template-columns: 40px 1.5fr 0.7fr 1fr 0.8fr 0.8fr 60px;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.scheduleRow {
+  display: grid;
+  grid-template-columns: 40px 1.5fr 0.7fr 1fr 0.8fr 0.8fr 60px;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  align-items: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.rowRetention {
+  background: rgba(249, 115, 22, 0.04);
+}
+
+.phaseNum {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.scheduleLabel {
+  color: #e2e8f0;
+}
+
+.schedulePct {
+  color: #64748b;
+}
+
+.scheduleAmount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
+}
+
+.scheduleDate {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.summaryBar {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1a1d2e;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.summaryItem {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.summaryLabel {
+  color: #64748b;
+}
+
+.summaryValue {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.summaryValueSuccess {
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.progressTrack {
+  height: 6px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  border-radius: 3px;
+  transition: width 300ms;
+}
+
+.actionBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms;
+}
+
+.actionBtn:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .overlay {
+    padding: 12px;
+  }
+
+  .modal {
+    max-height: 95vh;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    padding: 0 16px;
+  }
+
+  .header,
+  .body,
+  .footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .prestaDetails {
+    grid-template-columns: 1fr;
+  }
+}
