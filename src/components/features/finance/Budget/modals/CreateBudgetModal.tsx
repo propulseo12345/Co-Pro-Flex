@@ -7,6 +7,9 @@ import { POSTES_BUDGET_PREDEFINIS, TYPES_TRAVAUX } from '@/lib/constants/budget-
 import type { PosteEditorData } from '../PosteEditor';
 import { NouveauBudgetForm, DevisDocument } from '../types';
 import { BudgetStatut } from '@/types/enums/statuts';
+import { PAYMENT_SCHEDULE_TEMPLATES } from '@/lib/constants/payment-schedule-templates';
+import type { PaymentScheduleTemplate } from '@/lib/constants/payment-schedule-templates';
+import { PaymentSchedulePreview } from '../PaymentSchedulePreview';
 import styles from './CreateBudgetModal.module.css';
 
 interface BudgetN1Data {
@@ -45,6 +48,9 @@ export function CreateBudgetModal({
   const [description, setDescription] = useState<string>('');
   const [devisDocuments, setDevisDocuments] = useState<DevisDocument[]>([]);
   const [currentDevisMontant, setCurrentDevisMontant] = useState<number>(0);
+  const [scheduleTemplate, setScheduleTemplate] = useState<PaymentScheduleTemplate>('classic');
+  const [withRetention, setWithRetention] = useState(false);
+  const [schedulePhases, setSchedulePhases] = useState<{ label: string; percentage: number; dueDate?: string }[]>([]);
 
   const hasN1Budget = !!budgetN1 && budgetN1.postes.length > 0;
 
@@ -110,6 +116,7 @@ export function CreateBudgetModal({
       montant: currentDevisMontant,
       dateAjout: new Date().toISOString().split('T')[0],
       taille: `${(file.size / 1024).toFixed(0)} KB`,
+      file,
     };
 
     setDevisDocuments(prev => [...prev, newDevis]);
@@ -138,10 +145,15 @@ export function CreateBudgetModal({
       statut: BudgetStatut.BROUILLON,
       lignesBudget: [],
       devisDocuments: devisDocuments.length > 0 ? devisDocuments : undefined,
+      paymentScheduleConfig: {
+        templateId: scheduleTemplate,
+        withRetention,
+        phases: schedulePhases,
+      },
     };
     onCreateBudget(form);
     onClose();
-  }, [budgetYear, budgetName, typeTravaux, description, montantTotal, devisDocuments, onCreateBudget, onClose]);
+  }, [budgetYear, budgetName, typeTravaux, description, montantTotal, devisDocuments, scheduleTemplate, withRetention, schedulePhases, onCreateBudget, onClose]);
 
   const handleBack = useCallback(() => {
     if (step === 'creation-mode') {
@@ -528,6 +540,55 @@ export function CreateBudgetModal({
                   <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', margin: 'var(--space-xs) 0 0 0' }}>
                     Formats acceptés : PDF, JPG, PNG
                   </p>
+                </div>
+
+                {/* Section Échéancier */}
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-lg)' }}>
+                  <h5 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, margin: '0 0 var(--space-md) 0' }}>
+                    Échéancier de paiement
+                  </h5>
+
+                  <div className={styles.configGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="schedule-template">
+                        Modèle d&apos;échéancier
+                      </label>
+                      <select
+                        id="schedule-template"
+                        className={styles.input}
+                        value={scheduleTemplate}
+                        onChange={(e) => setScheduleTemplate(e.target.value as PaymentScheduleTemplate)}
+                      >
+                        {PAYMENT_SCHEDULE_TEMPLATES.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.label} — {t.description}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'flex-end' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={withRetention}
+                          onChange={(e) => setWithRetention(e.target.checked)}
+                        />
+                        Retenue de garantie 5%
+                      </label>
+                    </div>
+                  </div>
+
+                  {montantTotal > 0 && (
+                    <div style={{ marginTop: 'var(--space-md)' }}>
+                      <PaymentSchedulePreview
+                        totalAmount={montantTotal}
+                        templateId={scheduleTemplate}
+                        withRetention={withRetention}
+                        onPhasesChange={setSchedulePhases}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
