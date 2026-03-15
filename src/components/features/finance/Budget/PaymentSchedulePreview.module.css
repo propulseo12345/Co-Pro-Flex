@@ -1,0 +1,220 @@
+/* ── PaymentSchedulePreview ── */
+/* Dark Qonto theme – compact table for travaux payment phases */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ── Table header ── */
+.header {
+  display: grid;
+  grid-template-columns: 40px 1.5fr 0.7fr 1fr 1fr;
+  gap: 0;
+  padding: 8px 12px;
+  background: rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.headerCell {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  padding: 0 4px;
+}
+
+/* ── Table rows ── */
+.row {
+  display: grid;
+  grid-template-columns: 40px 1.5fr 0.7fr 1fr 1fr;
+  gap: 0;
+  padding: 6px 12px;
+  align-items: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  transition: background 150ms;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:hover {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.retentionRow {
+  background: rgba(251, 146, 60, 0.08);
+}
+
+.retentionRow:hover {
+  background: rgba(251, 146, 60, 0.12);
+}
+
+/* ── Cells ── */
+.cell {
+  font-size: 12px;
+  color: #e2e8f0;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cellIndex {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.cellAmount {
+  font-size: 12px;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.retentionLabel {
+  color: #fb923c;
+  font-weight: 500;
+}
+
+.lockIcon {
+  color: #fb923c;
+  flex-shrink: 0;
+}
+
+/* ── Inline inputs ── */
+.inlineInput {
+  background: #161822;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 12px;
+  padding: 3px 6px;
+  width: 100%;
+  outline: none;
+  transition: border-color 150ms;
+}
+
+.inlineInput:focus {
+  border-color: #60a5fa;
+}
+
+.inlineInput::placeholder {
+  color: #475569;
+}
+
+.percentInput {
+  composes: inlineInput;
+  width: 60px;
+  text-align: right;
+}
+
+.dateInput {
+  composes: inlineInput;
+  width: 100%;
+  color-scheme: dark;
+}
+
+.readonlyPercent {
+  font-size: 12px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Delete button ── */
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #475569;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 150ms, background 150ms;
+}
+
+.deleteBtn:hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* ── Add phase button ── */
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px dashed rgba(148, 163, 184, 0.15);
+  border-radius: 6px;
+  color: #60a5fa;
+  font-size: 12px;
+  padding: 6px 12px;
+  margin: 8px 12px;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+}
+
+.addBtn:hover {
+  background: rgba(96, 165, 250, 0.06);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+/* ── Summary bar ── */
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(148, 163, 184, 0.04);
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  font-size: 12px;
+}
+
+.summaryLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e2e8f0;
+}
+
+.summaryLabel {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.summaryAmount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.validBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
+}
+
+.invalidBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+}
