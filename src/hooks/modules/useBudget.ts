@@ -468,33 +468,27 @@ export function useBudget() {
         return false;
       }
 
-      const supabase = createUntypedClient();
       const budgetType: BudgetType = form.type === 'fonctionnement' ? 'current' : 'works';
       const budgetName = form.nom || `Budget ${form.type} ${form.annee}`;
 
-      // 1. Create budget
-      const { data: budget, error: budgetErr } = await supabase
-        .from('budgets')
-        .insert({
-          copro_id: currentCoproId,
-          period_id: period.id,
-          budget_type: budgetType,
-          status: 'draft',
-          version: 1,
-          name: budgetName,
-          notes: form.description || null,
-        })
-        .select('id')
-        .single();
+      // 1. Create budget via proven mutations path
+      const id = await mutations.createBudget({
+        period_id: period.id,
+        budget_type: budgetType,
+        name: budgetName,
+        notes: form.description,
+      });
 
-      if (budgetErr || !budget) {
-        alert(`Erreur création budget: ${budgetErr?.message || 'inconnu'}`);
+      if (!id) {
+        alert('Erreur lors de la création du budget');
         return false;
       }
 
-      // 2. Create budget line with total amount
+      // 2. Create budget line with total amount if > 0
       if (form.montantTotal > 0) {
+        const supabase = createUntypedClient();
         const accountCode = budgetType === 'works' ? '672' : '701';
+
         const { data: acc } = await supabase
           .from('accounts')
           .select('id')
@@ -507,39 +501,29 @@ export function useBudget() {
           .select('id')
           .eq('copro_id', currentCoproId)
           .limit(1)
-          .single();
+          .maybeSingle();
 
-        if (!acc || !repKey) {
-          console.warn('[handleCreateBudget] Missing account or repartition key, budget created without line');
-        } else {
-          const { error: lineErr } = await supabase
-            .from('budget_lines')
-            .insert({
-              budget_id: budget.id,
-              copro_id: currentCoproId,
-              account_id: acc.id,
-              repartition_key_id: repKey.id,
-              label: budgetName,
-              amount: form.montantTotal,
-            });
-
-          if (lineErr) {
-            console.error('[handleCreateBudget] Line creation failed:', lineErr.message);
-          }
+        if (acc && repKey) {
+          await mutations.createLine({
+            budget_id: id,
+            account_id: acc.id,
+            repartition_key_id: repKey.id,
+            label: budgetName,
+            amount: form.montantTotal,
+          });
         }
       }
 
-      // 3. Refresh all data including works budgets
+      // 3. Refresh all data
       setShowCreateBudgetModal(false);
       await refresh();
       await loadAllWorks();
       return true;
     } catch (err) {
-      console.error('[handleCreateBudget] Error:', err);
       alert(`Erreur: ${err instanceof Error ? err.message : 'inconnu'}`);
       return false;
     }
-  }, [getAccountingPeriod, currentCoproId, refresh, loadAllWorks]);
+  }, [getAccountingPeriod, mutations, currentCoproId, refresh, loadAllWorks]);
 
   const handleUpdateBudget = useCallback(async (budgetId: string, updates: Partial<BudgetWithStatus>) => {
     const success = await mutations.updateBudget(budgetId, {
