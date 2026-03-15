@@ -7,7 +7,7 @@
 }
 
 .content {
-  padding: var(--space-lg) var(--space-xl);
+  padding: 24px 32px;
   flex: 1;
   overflow-y: auto;
 }
