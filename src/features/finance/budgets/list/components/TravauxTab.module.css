@@ -1,0 +1,92 @@
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.btnCreate {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 150ms;
+}
+
+.btnCreate:hover {
+  background: #2563eb;
+}
+
+/* ── Grouped sections ── */
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.sectionIcon {
+  display: flex;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sectionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: rgba(148, 163, 184, 0.08);
+  color: #94a3b8;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #475569;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}

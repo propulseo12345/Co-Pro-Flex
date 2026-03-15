@@ -141,6 +141,7 @@ export function useBudget() {
   const [selectedYear, setSelectedYear] = useState(getCurrentBusinessYear());
   const [coproprietairesALUR, setCoproprietairesALUR] = useState<CoproprietaireALUR[]>([]);
   const [travauxCalls, setTravauxCalls] = useState<financeApi.CallForFundsOverview[]>([]);
+  const [allWorksRaw, setAllWorksRaw] = useState<import('@/lib/budget/api').BudgetOverview[]>([]);
 
   const {
     budgets: rawBudgets,
@@ -221,6 +222,20 @@ export function useBudget() {
     }
   }, [currentCoproId]);
 
+  // Load ALL works budgets (all years — travaux live by status, not by year)
+  const loadAllWorks = useCallback(async () => {
+    if (!currentCoproId) return;
+    try {
+      const { listBudgets } = await import('@/lib/budget/api');
+      const all = await listBudgets(currentCoproId);
+      setAllWorksRaw(all.filter(b => b.budget_type === 'works'));
+    } catch {
+      setAllWorksRaw([]);
+    }
+  }, [currentCoproId]);
+
+  useEffect(() => { loadAllWorks(); }, [loadAllWorks]);
+
   // Load calls linked to works budgets
   const loadTravauxCalls = useCallback(async () => {
     if (!currentCoproId) return;
@@ -293,39 +308,41 @@ export function useBudget() {
     return rawExpenses.map(mapExpenseToDepense);
   }, [rawExpenses]);
 
-  // Travaux budgets (from raw budgets of type 'works') enriched with real calls
+  // Travaux budgets (ALL years, grouped by status) enriched with real calls
   const budgetsTravaux = useMemo((): BudgetTravaux[] => {
-    return rawBudgets
-      .filter(b => b.budget_type === 'works')
-      .map(b => {
-        const linkedCalls = travauxCalls.filter(c => c.budget_id === b.id);
-        return {
-          id: b.id,
-          titre: b.name,
-          description: b.notes || '',
-          budgetVote: Number(b.total_planned),
-          devisAssocie: 0,
-          consomme: Number(b.validated_spent),
-          statut: b.status === 'validated' ? 'EN_COURS' as const : 'A_VENIR' as const,
-          dateVote: b.validated_at || b.created_at,
-          cleRepartitionId: '1',
-          sourceAG: (b as unknown as Record<string, unknown>).source_ag_id ? true : false,
-          appelsDeFonds: linkedCalls.map(c => ({
-            id: c.id,
-            numero: c.trimester ?? 0,
-            montant: Number(c.total_amount),
-            date: c.issue_date,
-            statut: c.status === 'paid' ? 'PAYE' as const
-              : c.status === 'issued' || c.status === 'partially_paid' ? 'ENVOYE' as const
-              : 'EN_ATTENTE' as const,
-            totalPaid: Number(c.total_paid),
-            totalUnpaid: Number(c.total_unpaid),
-            label: c.label,
-            callStatus: c.status,
-          })),
-        };
-      }) as BudgetTravaux[];
-  }, [rawBudgets, travauxCalls]);
+    return allWorksRaw.map(b => {
+      const linkedCalls = travauxCalls.filter(c => c.budget_id === b.id);
+      // Map DB status to frontend: draft → A_VENIR, validated → EN_COURS, closed → TERMINE
+      const statut = b.status === 'closed' ? 'TERMINE' as const
+        : b.status === 'validated' ? 'EN_COURS' as const
+        : 'A_VENIR' as const;
+      return {
+        id: b.id,
+        titre: b.name,
+        description: b.notes || '',
+        budgetVote: Number(b.total_planned),
+        devisAssocie: 0,
+        consomme: Number(b.validated_spent),
+        statut,
+        dateVote: b.validated_at || b.created_at,
+        cleRepartitionId: '1',
+        sourceAG: (b as unknown as Record<string, unknown>).source_ag_id ? true : false,
+        appelsDeFonds: linkedCalls.map(c => ({
+          id: c.id,
+          numero: c.trimester ?? 0,
+          montant: Number(c.total_amount),
+          date: c.issue_date,
+          statut: c.status === 'paid' ? 'PAYE' as const
+            : c.status === 'issued' || c.status === 'partially_paid' ? 'ENVOYE' as const
+            : 'EN_ATTENTE' as const,
+          totalPaid: Number(c.total_paid),
+          totalUnpaid: Number(c.total_unpaid),
+          label: c.label,
+          callStatus: c.status,
+        })),
+      };
+    }) as BudgetTravaux[];
+  }, [allWorksRaw, travauxCalls]);
 
   // ALUR funds (from raw budgets of type 'alur')
   const fondsALUR = useMemo(() => {
