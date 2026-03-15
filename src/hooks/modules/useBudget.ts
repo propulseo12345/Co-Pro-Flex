@@ -13,6 +13,7 @@ import { getCurrentBusinessYear } from '@/lib/time/period';
 import { useBudgetData } from './useBudgetData';
 import { useBudgetMutations } from './useBudgetMutations';
 import * as financeApi from '@/lib/finance/api';
+import { uploadDocument } from '@/lib/documents/api';
 import { useCopro } from '@/providers/CoproContext';
 import { createClient } from '@/lib/supabase/client';
 import type { BudgetOverview, BudgetLineOverview, ExpenseDetail, BudgetType } from '@/lib/budget/api';
@@ -32,6 +33,8 @@ import {
 import type { PosteEditorData } from '@/components/features/finance/Budget/PosteEditor';
 import { BudgetStatut, DepenseStatut } from '@/types/enums/statuts';
 import type { DepenseEtendue } from '@/data/mock';
+import * as scheduleApi from '@/lib/budget/payment-schedules.api';
+import { computeAmounts, applyRetention, RETENTION_DURATION_MONTHS } from '@/lib/constants/payment-schedule-templates';
 
 // ============================================================================
 // Types
@@ -514,7 +517,81 @@ export function useBudget() {
         }
       }
 
-      // 3. Refresh all data
+      // 3. Upload devis documents to Supabase Storage + GED
+      if (form.devisDocuments && form.devisDocuments.length > 0) {
+        for (const devis of form.devisDocuments) {
+          if (!devis.file) continue;
+          try {
+            const doc = await uploadDocument(devis.file, currentCoproId, 'devis', {
+              sourceModule: 'finance',
+              title: devis.nom,
+              description: `Devis ${devis.montant.toLocaleString('fr-FR')} € — ${form.nom || 'Budget travaux'}`,
+              year: form.annee,
+              tags: ['budget-travaux', id],
+            });
+            // Link document to budget
+            if (doc && (doc as any).id) {
+              const supabase = createUntypedClient();
+              await supabase.from('documents').update({ budget_id: id }).eq('id', (doc as any).id);
+            }
+          } catch (uploadErr) {
+            // Non-bloquant : le budget est créé, on log l'erreur upload
+            console.warn('Erreur upload devis:', uploadErr);
+          }
+        }
+      }
+
+      // 4. Create payment schedule if configured
+      if (form.paymentScheduleConfig && form.paymentScheduleConfig.phases.length > 0) {
+        try {
+          let phasesConfig = form.paymentScheduleConfig.phases.map(p => ({
+            label: p.label,
+            percentage: p.percentage,
+          }));
+
+          if (form.paymentScheduleConfig.withRetention) {
+            phasesConfig = applyRetention(phasesConfig);
+          }
+
+          const amounts = computeAmounts(phasesConfig, form.montantTotal);
+
+          // Find last non-retention due date for retention release calculation
+          const lastDueDate = form.paymentScheduleConfig.phases
+            .filter(p => p.dueDate)
+            .map(p => p.dueDate!)
+            .sort()
+            .pop();
+
+          const inputs = phasesConfig.map((phase, i) => {
+            const isRetention = phase.label === 'Retenue de garantie';
+            let retentionReleaseDate: string | undefined;
+            if (isRetention && lastDueDate) {
+              const d = new Date(lastDueDate);
+              d.setMonth(d.getMonth() + RETENTION_DURATION_MONTHS);
+              retentionReleaseDate = d.toISOString().split('T')[0];
+            }
+            // Get due_date from original phases (not retention)
+            const originalPhase = form.paymentScheduleConfig!.phases[i];
+            return {
+              copro_id: currentCoproId,
+              budget_id: id,
+              phase_number: i + 1,
+              label: phase.label,
+              percentage: phase.percentage,
+              amount: amounts[i] ?? 0,
+              due_date: isRetention ? undefined : originalPhase?.dueDate,
+              is_retention: isRetention,
+              retention_release_date: retentionReleaseDate,
+            };
+          });
+
+          await scheduleApi.createPaymentPhases(inputs);
+        } catch (schedErr) {
+          console.warn('Erreur création échéancier:', schedErr);
+        }
+      }
+
+      // 5. Refresh all data
       setShowCreateBudgetModal(false);
       await refresh();
       await loadAllWorks();
