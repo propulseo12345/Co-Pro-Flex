@@ -32,8 +32,9 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }:
         const pct = poste.budgetVote > 0 ? (poste.consomme / poste.budgetVote) * 100 : 0;
         const rest = poste.budgetVote - poste.consomme;
         const color = POSTE_COLORS[poste.poste] || '#6B7280';
+        const isConsumed = pct >= 100 && rest >= 0;
+        const isOver = pct > 100 && rest < 0;
         const isAlert = pct >= 80 && pct < 100;
-        const isOver = pct >= 100;
         const isExpanded = expandedPoste === poste.poste;
         const posteDepenses = depenses.filter((d) => d.poste === poste.poste);
 
@@ -51,6 +52,7 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }:
                 <span className={styles.dot} style={{ background: color }} />
                 {poste.label}
                 {isAlert && <span className={styles.badgeWarning}>⚠ Alerte</span>}
+                {isConsumed && <span className={styles.badgeConsumed}>✓ Consommé</span>}
                 {isOver && <span className={styles.badgeDanger}>⚠ Dépassé</span>}
               </span>
               <span className={styles.rowAmount}>{poste.budgetVote.toLocaleString('fr-FR')} €</span>
@@ -60,7 +62,7 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }:
                 </span>
               </span>
               <span className={styles.rowPct} style={{ color }}>{pct.toFixed(1)}%</span>
-              <span className={styles.rowRest} style={{ color: isOver ? '#f87171' : '#64748b' }}>
+              <span className={styles.rowRest} style={{ color: isOver ? '#f87171' : isConsumed ? '#22c55e' : '#64748b' }}>
                 {isOver ? `-${Math.abs(rest).toLocaleString('fr-FR')}` : rest.toLocaleString('fr-FR')} €
               </span>
             </div>
