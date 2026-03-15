@@ -461,56 +461,85 @@ export function useBudget() {
   }, [budgets]);
 
   const handleCreateBudget = useCallback(async (form: NouveauBudgetForm): Promise<boolean> => {
-    // Get accounting period for the year
-    const period = await getAccountingPeriod(form.annee);
-    if (!period) {
-      console.error('No accounting period found for year:', form.annee);
-      return false;
-    }
+    try {
+      const period = await getAccountingPeriod(form.annee);
+      if (!period) {
+        alert(`Aucune période comptable trouvée pour l'année ${form.annee}`);
+        return false;
+      }
 
-    const budgetType: BudgetType = form.type === 'fonctionnement' ? 'current' : 'works';
+      const supabase = createUntypedClient();
+      const budgetType: BudgetType = form.type === 'fonctionnement' ? 'current' : 'works';
+      const budgetName = form.nom || `Budget ${form.type} ${form.annee}`;
 
-    const id = await mutations.createBudget({
-      period_id: period.id,
-      budget_type: budgetType,
-      name: form.nom || `Budget ${form.type} ${form.annee}`,
-      notes: form.description,
-    });
+      // 1. Create budget
+      const { data: budget, error: budgetErr } = await supabase
+        .from('budgets')
+        .insert({
+          copro_id: currentCoproId,
+          period_id: period.id,
+          budget_type: budgetType,
+          status: 'draft',
+          version: 1,
+          name: budgetName,
+          notes: form.description || null,
+        })
+        .select('id')
+        .single();
 
-    if (id) {
-      // Create a budget line with the total amount
+      if (budgetErr || !budget) {
+        alert(`Erreur création budget: ${budgetErr?.message || 'inconnu'}`);
+        return false;
+      }
+
+      // 2. Create budget line with total amount
       if (form.montantTotal > 0) {
-        // Get default account and repartition key
-        const supabase = createUntypedClient();
         const accountCode = budgetType === 'works' ? '672' : '701';
         const { data: acc } = await supabase
           .from('accounts')
           .select('id')
           .eq('copro_id', currentCoproId)
           .eq('code', accountCode)
-          .single();
+          .maybeSingle();
+
         const { data: repKey } = await supabase
           .from('repartition_keys')
           .select('id')
           .eq('copro_id', currentCoproId)
-          .eq('name', 'Charges générales')
+          .limit(1)
           .single();
 
-        if (acc && repKey) {
-          await mutations.createLine({
-            budget_id: id,
-            account_id: acc.id,
-            repartition_key_id: repKey.id,
-            label: form.nom || `Budget ${form.type} ${form.annee}`,
-            amount: form.montantTotal,
-          });
+        if (!acc || !repKey) {
+          console.warn('[handleCreateBudget] Missing account or repartition key, budget created without line');
+        } else {
+          const { error: lineErr } = await supabase
+            .from('budget_lines')
+            .insert({
+              budget_id: budget.id,
+              copro_id: currentCoproId,
+              account_id: acc.id,
+              repartition_key_id: repKey.id,
+              label: budgetName,
+              amount: form.montantTotal,
+            });
+
+          if (lineErr) {
+            console.error('[handleCreateBudget] Line creation failed:', lineErr.message);
+          }
         }
       }
+
+      // 3. Refresh all data including works budgets
       setShowCreateBudgetModal(false);
+      await refresh();
+      await loadAllWorks();
       return true;
+    } catch (err) {
+      console.error('[handleCreateBudget] Error:', err);
+      alert(`Erreur: ${err instanceof Error ? err.message : 'inconnu'}`);
+      return false;
     }
-    return false;
-  }, [getAccountingPeriod, mutations]);
+  }, [getAccountingPeriod, currentCoproId, refresh, loadAllWorks]);
 
   const handleUpdateBudget = useCallback(async (budgetId: string, updates: Partial<BudgetWithStatus>) => {
     const success = await mutations.updateBudget(budgetId, {
