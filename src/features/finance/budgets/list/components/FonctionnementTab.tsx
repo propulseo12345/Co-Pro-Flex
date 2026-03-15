@@ -69,7 +69,17 @@ export function FonctionnementTab({
         fiabiliteNiveau={totals.fiabiliteNiveau}
       />
 
-      <BudgetPostesList postesBudget={postesBudget} onSelectPoste={onSelectPoste} />
+      <BudgetPostesList
+        postesBudget={postesBudget}
+        depenses={depensesFiltrees.map((d: any) => ({
+          id: d.id,
+          libelle: d.libelle,
+          date: d.date,
+          montant: d.montant,
+          poste: d.poste,
+          compteCharge: d.compteCharge || '',
+        }))}
+      />
 
       <BudgetDepensesTable
         depenses={depensesFiltrees}

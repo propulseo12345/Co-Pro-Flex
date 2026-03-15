@@ -39,8 +39,9 @@
   background: rgba(148, 163, 184, 0.03);
 }
 
-.row:last-child {
-  border-bottom: none;
+.rowExpanded {
+  background: rgba(148, 163, 184, 0.04);
+  border-bottom-color: transparent;
 }
 
 .rowName {
@@ -50,6 +51,16 @@
   font-size: 13px;
   font-weight: 500;
   color: #e2e8f0;
+}
+
+.chevron {
+  transition: transform 200ms;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
 }
 
 .dot {
@@ -116,11 +127,124 @@
   text-align: right;
 }
 
+/* ── Expanded accordion panel ── */
+.expandedPanel {
+  padding: 16px 20px 20px;
+  background: rgba(148, 163, 184, 0.02);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.panelStats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.panelStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panelStatLabel {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.panelStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.panelProgress {
+  height: 6px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.panelProgressFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 300ms;
+}
+
+/* ── Transactions ── */
+.transactions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.transactionsTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.transactionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-radius: 8px;
+  transition: all 150ms;
+}
+
+.transactionRow:hover {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+.transactionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transactionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.transactionMeta {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.transactionAmount {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.noTransactions {
+  font-size: 12px;
+  color: #475569;
+  padding: 12px 0;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .header,
   .row {
     grid-template-columns: 1fr 80px 120px 60px 60px;
     gap: 8px;
     padding: 10px 12px;
+  }
+
+  .panelStats {
+    flex-wrap: wrap;
+    gap: 16px;
   }
 }
