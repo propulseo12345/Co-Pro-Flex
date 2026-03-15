@@ -1,13 +1,11 @@
 'use client';
 
-import { Calendar, Lock, CircleDot } from 'lucide-react';
 import { useComptabilitePage } from '@/features/finance/comptabilite';
 import {
-  ComptaHeader,
-  ComptaTabs,
+  ComptaSidebar,
+  ComptaTopBar,
   ComptaStats,
   ComptaFilters,
-  ComptaInfoBanner,
   ComptaLoadingState,
   ComptaErrorState,
   ComptaNoPeriodState,
@@ -32,109 +30,108 @@ export default function ComptabilitePage() {
 
   if (!page.openPeriod) {
     return (
-      <div className={styles.container}>
-        <ComptaHeader
-          etatCloture={page.etatCloture}
-          onShowHistorique={() => page.setShowHistoriqueModal(true)}
-          onShowCloture={() => page.setShowClotureModal(true)}
-          onExportPDF={page.exportToPDF}
-          onExportExcel={page.exportToExcel}
+      <div className={styles.layout}>
+        <ComptaSidebar
+          activeTab={page.activeTab}
+          onTabChange={page.setActiveTab}
         />
-        <ComptaNoPeriodState />
+        <div className={styles.main}>
+          <ComptaTopBar
+            activeTab={page.activeTab}
+            onExportPDF={page.exportToPDF}
+            onExportExcel={page.exportToExcel}
+          />
+          <div className={styles.content}>
+            <ComptaNoPeriodState />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <ComptaHeader
-        etatCloture={page.etatCloture}
-        startDate={page.openPeriod.start_date}
-        endDate={page.openPeriod.end_date}
-        onShowHistorique={() => page.setShowHistoriqueModal(true)}
+    <div className={styles.layout}>
+      <ComptaSidebar
+        activeTab={page.activeTab}
+        onTabChange={page.setActiveTab}
         onShowCloture={() => page.setShowClotureModal(true)}
-        onExportPDF={page.exportToPDF}
-        onExportExcel={page.exportToExcel}
-      />
-
-      {/* Sélecteur d'exercice */}
-      {page.allPeriods.length > 1 && (
-        <div className={styles.periodSelector}>
-          <Calendar size={16} />
-          <span className={styles.periodSelectorLabel}>Exercice :</span>
-          <select
-            className={styles.periodSelectorSelect}
-            value={page.selectedPeriodId || ''}
-            onChange={(e) => page.setSelectedPeriodId(e.target.value)}
-          >
-            {page.allPeriods.map((period) => (
-              <option key={period.id} value={period.id}>
-                {period.name} ({period.start_date.slice(0, 4)})
-              </option>
-            ))}
-          </select>
-          <span
-            className={`${styles.periodStatusBadge} ${
-              page.openPeriod.status === 'open' ? styles.periodStatusOpen : styles.periodStatusClosed
-            }`}
-          >
-            {page.openPeriod.status === 'open' ? (
-              <><CircleDot size={12} /> En cours</>
-            ) : (
-              <><Lock size={12} /> Clôturé</>
-            )}
-          </span>
-        </div>
-      )}
-
-      <FinanceAnnexeStats periodId={page.selectedPeriodId} />
-      <ComptaInfoBanner
-        periodName={page.openPeriod.name}
-        onRefresh={page.handleRefresh}
+        onShowHistorique={() => page.setShowHistoriqueModal(true)}
         isReadOnly={page.isReadOnly}
       />
-      <ComptaTabs activeTab={page.activeTab} onTabChange={page.setActiveTab} />
 
-      <ComptaStats
-        activeTab={page.activeTab}
-        totalDebit={page.totalDebit}
-        totalCredit={page.totalCredit}
-        totalDepenses={0}
-        totalBudgetPrevu={0}
-        isBalanced={page.isBalanced}
-        ecart={page.ecart}
-        balanceStats={page.balanceStats}
-      />
-
-      {(page.activeTab === 'grand-livre' || page.activeTab === 'compte-gestion') && (
-        <ComptaFilters
+      <div className={styles.main}>
+        <ComptaTopBar
           activeTab={page.activeTab}
-          searchTerm={page.searchTerm}
-          dateDebut={page.dateDebut}
-          dateFin={page.dateFin}
-          compteFilter={page.compteFilter}
-          typeDepenseFilter={page.typeDepenseFilter}
-          comptesUniques={page.comptesUniques}
-          onSearchChange={page.setSearchTerm}
-          onDateDebutChange={page.setDateDebut}
-          onDateFinChange={page.setDateFin}
-          onCompteFilterChange={page.setCompteFilter}
-          onTypeDepenseFilterChange={page.setTypeDepenseFilter}
+          periodStart={page.openPeriod.start_date}
+          periodEnd={page.openPeriod.end_date}
+          periodStatus={page.openPeriod.status}
+          onExportPDF={page.exportToPDF}
+          onExportExcel={page.exportToExcel}
+          onShowCloture={() => page.setShowClotureModal(true)}
+          isReadOnly={page.isReadOnly}
         />
-      )}
 
-      <ComptaTabContent
-        activeTab={page.activeTab}
-        operations={page.operations}
-        filteredOperations={page.filteredOperations}
-        lignesBalance={page.lignesBalance}
-        allAccountsWithBalances={page.allAccountsWithBalances}
-        annee={page.etatCloture.annee}
-        onViewOperationDetail={page.handleViewOperationDetail}
-        coproId={page.currentCoproId}
-        periodId={page.openPeriod?.id ?? null}
-        coproName={page.openPeriod?.name}
-      />
+        <div className={styles.content}>
+          {page.allPeriods.length > 1 && (
+            <div className={styles.periodSelector}>
+              <select
+                className={styles.periodSelect}
+                value={page.selectedPeriodId || ''}
+                onChange={(e) => page.setSelectedPeriodId(e.target.value)}
+              >
+                {page.allPeriods.map((period) => (
+                  <option key={period.id} value={period.id}>
+                    {period.name} ({period.start_date.slice(0, 4)})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <FinanceAnnexeStats periodId={page.selectedPeriodId} />
+
+          <ComptaStats
+            activeTab={page.activeTab}
+            totalDebit={page.totalDebit}
+            totalCredit={page.totalCredit}
+            totalDepenses={0}
+            totalBudgetPrevu={0}
+            isBalanced={page.isBalanced}
+            ecart={page.ecart}
+            balanceStats={page.balanceStats}
+          />
+
+          {(page.activeTab === 'grand-livre' || page.activeTab === 'compte-gestion') && (
+            <ComptaFilters
+              activeTab={page.activeTab}
+              searchTerm={page.searchTerm}
+              dateDebut={page.dateDebut}
+              dateFin={page.dateFin}
+              compteFilter={page.compteFilter}
+              typeDepenseFilter={page.typeDepenseFilter}
+              comptesUniques={page.comptesUniques}
+              onSearchChange={page.setSearchTerm}
+              onDateDebutChange={page.setDateDebut}
+              onDateFinChange={page.setDateFin}
+              onCompteFilterChange={page.setCompteFilter}
+              onTypeDepenseFilterChange={page.setTypeDepenseFilter}
+            />
+          )}
+
+          <ComptaTabContent
+            activeTab={page.activeTab}
+            operations={page.operations}
+            filteredOperations={page.filteredOperations}
+            lignesBalance={page.lignesBalance}
+            allAccountsWithBalances={page.allAccountsWithBalances}
+            annee={page.etatCloture.annee}
+            onViewOperationDetail={page.handleViewOperationDetail}
+            coproId={page.currentCoproId}
+            periodId={page.openPeriod?.id ?? null}
+            coproName={page.openPeriod?.name}
+          />
+        </div>
+      </div>
 
       <DetailModal
         isOpen={page.showDetailModal}
