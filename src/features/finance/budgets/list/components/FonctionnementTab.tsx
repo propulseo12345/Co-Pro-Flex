@@ -2,8 +2,7 @@
 
 import {
   BudgetAlerts,
-  BudgetSummaryCards,
-  BudgetChart,
+  BudgetOverviewHero,
   BudgetProjection,
   BudgetPostesGrid,
   BudgetDepensesTable,
@@ -67,34 +66,27 @@ export function FonctionnementTab({
 
       <BudgetAlerts postesEnAlerte={postesEnAlerte} />
 
-      <BudgetSummaryCards
+      <BudgetOverviewHero
         budgetAnnuelVote={budgetAnnuelVote}
         totalConsomme={totals.totalConsomme}
         budgetRestant={totals.budgetRestant}
+        postesEnAlerte={postesEnAlerte.length}
+        postesEnAlerteLabels={postesEnAlerte.map((p: any) => p.label).join(', ')}
+        postesBudget={postesBudget}
       />
 
-      <div className={styles.chartAndProjection}>
-        <BudgetChart
-          postesBudget={postesBudget}
-          budgetAnnuelVote={budgetAnnuelVote}
-          totalConsomme={totals.totalConsomme}
-          budgetRestant={totals.budgetRestant}
-          posteActif={posteActifChart}
-          onPosteSelect={onPosteChartSelect}
-        />
-        <BudgetProjection
-          budgetAnnuelVote={budgetAnnuelVote}
-          totalConsomme={totals.totalConsomme}
-          projectedYearEnd={totals.projectedYearEnd}
-          projectedDifference={totals.projectedDifference}
-          monthsElapsed={totals.monthsElapsed}
-          monthsRemaining={totals.monthsRemaining}
-          avgMonthlyConsumption={totals.avgMonthlyConsumption}
-          projectionMin={totals.projectionMin}
-          projectionMax={totals.projectionMax}
-          fiabiliteNiveau={totals.fiabiliteNiveau}
-        />
-      </div>
+      <BudgetProjection
+        budgetAnnuelVote={budgetAnnuelVote}
+        totalConsomme={totals.totalConsomme}
+        projectedYearEnd={totals.projectedYearEnd}
+        projectedDifference={totals.projectedDifference}
+        monthsElapsed={totals.monthsElapsed}
+        monthsRemaining={totals.monthsRemaining}
+        avgMonthlyConsumption={totals.avgMonthlyConsumption}
+        projectionMin={totals.projectionMin}
+        projectionMax={totals.projectionMax}
+        fiabiliteNiveau={totals.fiabiliteNiveau}
+      />
 
       <BudgetPostesGrid postesBudget={postesBudget} onSelectPoste={onSelectPoste} />
 

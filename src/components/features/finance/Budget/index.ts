@@ -13,6 +13,7 @@ export { BudgetHeader } from './BudgetHeader';
 export { BudgetAlerts } from './BudgetAlerts';
 export { BudgetSummaryCards } from './BudgetSummaryCards';
 export { BudgetChart } from './BudgetChart';
+export { BudgetOverviewHero } from './BudgetOverviewHero';
 export { BudgetProjection } from './BudgetProjection';
 export { BudgetPostesGrid } from './BudgetPostesGrid';
 export { BudgetDepensesTable } from './BudgetDepensesTable';
