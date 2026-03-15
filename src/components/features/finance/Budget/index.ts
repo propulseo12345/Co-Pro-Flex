@@ -1,6 +1,10 @@
 // Types
 export * from './types';
 
+// Top-level layout
+export { BudgetTopBar } from './BudgetTopBar';
+export { BudgetNavBar } from './BudgetNavBar';
+
 // Mock data
 export { MOCK_POSTES_BUDGET } from './mock-data';
 

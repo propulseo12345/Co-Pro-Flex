@@ -1,0 +1,45 @@
+.navbar {
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  background: #161822;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 150ms;
+  white-space: nowrap;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: #e2e8f0;
+}
+
+.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs {
+    min-width: max-content;
+  }
+}
