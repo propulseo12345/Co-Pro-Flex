@@ -204,6 +204,8 @@ export interface DevisDocument {
   prestataireId?: string;
   prestataireNom?: string;
   taille?: string;
+  /** Fichier original (pour upload Supabase Storage) */
+  file?: File;
 }
 
 export interface BudgetTravaux {
@@ -299,12 +301,47 @@ export interface NouveauBudgetForm {
   typeTravaux?: string;
   description?: string;
   devisDocuments?: DevisDocument[];
+  paymentScheduleConfig?: PaymentScheduleConfig;
 }
 
 export interface NouvelAppelFondsForm {
   montant: number;
   dateEcheance: string;
   description?: string;
+}
+
+// =============================================
+// Types pour l'échéancier de paiement prestataire
+// =============================================
+
+export type PaymentPhaseStatus = 'pending' | 'awaiting_invoice' | 'paid';
+
+export interface PaymentPhase {
+  id: string;
+  budgetId: string;
+  phaseNumber: number;
+  label: string;
+  percentage: number;
+  amount: number;
+  dueDate?: string;
+  status: PaymentPhaseStatus;
+  paidDate?: string;
+  invoiceRef?: string;
+  documentId?: string;
+  serviceOrderId?: string;
+  isRetention: boolean;
+  retentionReleaseDate?: string;
+  notes?: string;
+}
+
+export interface PaymentScheduleConfig {
+  templateId: string;
+  withRetention: boolean;
+  phases: {
+    label: string;
+    percentage: number;
+    dueDate?: string;
+  }[];
 }
 
 // Utilitaires
