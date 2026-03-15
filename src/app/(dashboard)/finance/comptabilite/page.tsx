@@ -5,7 +5,7 @@ import {
   ComptaSidebar,
   ComptaTopBar,
   ComptaKpiStrip,
-  ComptaFilters,
+  ComptaViewSwitcher,
   ComptaLoadingState,
   ComptaErrorState,
   ComptaNoPeriodState,
@@ -97,25 +97,23 @@ export default function ComptabilitePage() {
             isBalanced={page.isBalanced}
           />
 
-          {(page.activeTab === 'grand-livre' || page.activeTab === 'compte-gestion') && (
-            <ComptaFilters
-              activeTab={page.activeTab}
+          {page.activeTab === 'grand-livre' && (
+            <ComptaViewSwitcher
+              viewMode={page.viewMode}
+              onViewModeChange={page.setViewMode}
               searchTerm={page.searchTerm}
-              dateDebut={page.dateDebut}
-              dateFin={page.dateFin}
-              compteFilter={page.compteFilter}
-              typeDepenseFilter={page.typeDepenseFilter}
-              comptesUniques={page.comptesUniques}
               onSearchChange={page.setSearchTerm}
-              onDateDebutChange={page.setDateDebut}
-              onDateFinChange={page.setDateFin}
+              compteFilter={page.compteFilter}
               onCompteFilterChange={page.setCompteFilter}
-              onTypeDepenseFilterChange={page.setTypeDepenseFilter}
+              comptesUniques={page.comptesUniques}
+              dateFilter={page.dateDebut}
+              onDateFilterChange={page.setDateDebut}
             />
           )}
 
           <ComptaTabContent
             activeTab={page.activeTab}
+            viewMode={page.viewMode}
             operations={page.operations}
             filteredOperations={page.filteredOperations}
             lignesBalance={page.lignesBalance}
