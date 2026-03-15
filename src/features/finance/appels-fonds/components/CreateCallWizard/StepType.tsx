@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, FileText } from 'lucide-react';
+import { useMemo } from 'react';
+import { AlertTriangle, Hammer } from 'lucide-react';
 import clsx from 'clsx';
 import type { WizardState, CallType } from '../../hooks/useCreateCallWizard';
 import styles from './CreateCallWizard.module.css';
@@ -17,6 +18,22 @@ function formatEuros(n: number): string {
 }
 
 export function StepType({ state, budgets, setCallType, updateField }: StepTypeProps) {
+  // Filter budgets by selected type
+  const filteredBudgets = useMemo(() => {
+    if (state.callType === 'exceptional') {
+      return budgets.filter(b => b.budget_type === 'current');
+    }
+    if (state.callType === 'travaux') {
+      return budgets.filter(b => b.budget_type === 'works');
+    }
+    return [];
+  }, [budgets, state.callType]);
+
+  const budgetLabel = state.callType === 'travaux' ? 'Budget travaux rattaché' : 'Budget courant rattaché';
+  const emptyMessage = state.callType === 'travaux'
+    ? 'Aucun budget travaux trouvé. Créez-en un dans l\'onglet Budgets > Travaux.'
+    : 'Aucun budget courant pour cet exercice.';
+
   return (
     <>
       <div className={styles.fieldGroup}>
@@ -31,31 +48,29 @@ export function StepType({ state, budgets, setCallType, updateField }: StepTypeP
             </div>
             <div>
               <div className={styles.radioCardTitle}>Exceptionnel</div>
-              <div className={styles.radioCardDesc}>Dépense imprévue, hors budget voté</div>
+              <div className={styles.radioCardDesc}>Complément charges, dépense imprévue</div>
             </div>
           </button>
           <button
-            className={clsx(styles.radioCard, state.callType === 'complement' && styles.radioCardSelected)}
-            onClick={() => setCallType('complement')}
+            className={clsx(styles.radioCard, state.callType === 'travaux' && styles.radioCardSelected)}
+            onClick={() => setCallType('travaux')}
           >
             <div className={styles.radioCardIcon}>
-              <FileText size={18} />
+              <Hammer size={18} />
             </div>
             <div>
-              <div className={styles.radioCardTitle}>Complément budget</div>
-              <div className={styles.radioCardDesc}>Complément sur un budget existant</div>
+              <div className={styles.radioCardTitle}>Travaux</div>
+              <div className={styles.radioCardDesc}>Financement travaux votés en AG</div>
             </div>
           </button>
         </div>
       </div>
 
-      {state.callType === 'complement' && (
+      {state.callType && (
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Budget rattaché</label>
-          {budgets.length === 0 ? (
-            <div className={styles.infoBox}>
-              Aucun budget pour cet exercice. Choisissez « Exceptionnel » ou créez un budget.
-            </div>
+          <label className={styles.fieldLabel}>{budgetLabel}</label>
+          {filteredBudgets.length === 0 ? (
+            <div className={styles.infoBox}>{emptyMessage}</div>
           ) : (
             <select
               className={styles.fieldSelect}
@@ -63,9 +78,9 @@ export function StepType({ state, budgets, setCallType, updateField }: StepTypeP
               onChange={e => updateField('budgetId', e.target.value || null)}
             >
               <option value="">Sélectionner un budget...</option>
-              {budgets.map(b => (
+              {filteredBudgets.map(b => (
                 <option key={b.id} value={b.id}>
-                  {b.label} — {formatEuros(b.total_amount)} ({b.budget_type})
+                  {b.label} — {formatEuros(b.total_amount)}
                 </option>
               ))}
             </select>
@@ -79,7 +94,7 @@ export function StepType({ state, budgets, setCallType, updateField }: StepTypeP
           className={styles.fieldInput}
           type="text"
           maxLength={100}
-          placeholder="Ex: Réparation fuite toiture"
+          placeholder={state.callType === 'travaux' ? 'Ex: Appel travaux ravalement T1' : 'Ex: Réparation fuite toiture'}
           value={state.label}
           onChange={e => updateField('label', e.target.value)}
         />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCalls, useCallCampaigns, useAccountingPeriods, useUnpaid } from '@/hooks/modules/useFinanceData';
 import { useBudgetData } from '@/hooks/modules/useBudgetData';
 import type { CallForFundsOverview, AccountingPeriod, CallCampaign } from '@/lib/finance/api';
@@ -240,14 +240,35 @@ export function useAppelsFondsPage(): UseAppelsFondsPageReturn {
   }, [courantCalls, travauxCalls, budgets, courantStats, travauxStats]);
 
   // ── Budgets formatted for wizard ──
-  const wizardBudgets = useMemo(() => {
-    return budgets.map(b => ({
-      id: b.id,
-      label: b.name,
-      total_amount: b.total_planned,
-      budget_type: b.budget_type,
-    }));
+  // Load ALL works budgets (no year filter) for the wizard
+  const [allWorksBudgets, setAllWorksBudgets] = useState<typeof budgets>([]);
+  useEffect(() => {
+    if (!budgets) return;
+    import('@/lib/budget/api').then(async (api) => {
+      try {
+        const copro = budgets[0]?.copro_id;
+        if (!copro) return;
+        const all = await api.listBudgets(copro);
+        setAllWorksBudgets(all.filter(b => b.budget_type === 'works'));
+      } catch { /* ignore */ }
+    });
   }, [budgets]);
+
+  const wizardBudgets = useMemo(() => {
+    // Current budgets from period + ALL works budgets
+    const currentBudgets = budgets
+      .filter(b => b.budget_type === 'current')
+      .map(b => ({ id: b.id, label: b.name, total_amount: b.total_planned, budget_type: b.budget_type }));
+    const worksBudgets = allWorksBudgets
+      .map(b => ({ id: b.id, label: b.name, total_amount: b.total_planned, budget_type: b.budget_type }));
+    // Deduplicate
+    const seen = new Set<string>();
+    return [...currentBudgets, ...worksBudgets].filter(b => {
+      if (seen.has(b.id)) return false;
+      seen.add(b.id);
+      return true;
+    });
+  }, [budgets, allWorksBudgets]);
 
   return {
     calls: periodCalls,

@@ -10,7 +10,7 @@ import type { AccountingPeriod } from '@/lib/finance/api';
 // ── Types ──
 
 export type WizardStep = 1 | 2 | 3 | 4;
-export type CallType = 'exceptional' | 'complement';
+export type CallType = 'exceptional' | 'travaux';
 export type ScheduleMode = 'single' | 'multiple';
 export type InstallmentCount = 2 | 3 | 4;
 
@@ -191,7 +191,7 @@ export function useCreateCallWizard({ selectedPeriod, onSuccess, onClose }: UseC
     setState(prev => ({
       ...prev,
       callType: type,
-      budgetId: type === 'exceptional' ? null : prev.budgetId,
+      budgetId: null,
     }));
   }, []);
 
@@ -215,7 +215,7 @@ export function useCreateCallWizard({ selectedPeriod, onSuccess, onClose }: UseC
 
   const isStep1Valid = useMemo(() => {
     if (!state.callType) return false;
-    if (state.callType === 'complement' && !state.budgetId) return false;
+    if (!state.budgetId) return false;
     if (!state.label.trim()) return false;
     return true;
   }, [state.callType, state.budgetId, state.label]);
