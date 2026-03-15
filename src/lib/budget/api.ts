@@ -293,6 +293,19 @@ export interface CreateBudgetInput {
 export async function createBudget(input: CreateBudgetInput): Promise<string> {
   const supabase = createUntypedClient();
 
+  // Get next version for this (copro, period, type) combination
+  const { data: existing } = await supabase
+    .from('budgets')
+    .select('version')
+    .eq('copro_id', input.copro_id)
+    .eq('period_id', input.period_id)
+    .eq('budget_type', input.budget_type)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const nextVersion = (existing?.version ?? 0) + 1;
+
   const { data, error } = await supabase
     .from('budgets')
     .insert({
@@ -302,6 +315,7 @@ export async function createBudget(input: CreateBudgetInput): Promise<string> {
       name: input.name,
       notes: input.notes || null,
       status: 'draft',
+      version: nextVersion,
     })
     .select('id')
     .single();
