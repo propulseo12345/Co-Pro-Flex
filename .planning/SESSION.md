@@ -1,23 +1,26 @@
-# Session State — 2026-03-15 14:15
+# Session State — 2026-03-15 18:25
 
 ## Branch
 v2
 
 ## Completed This Session
-- Blockers wizard appels de fonds: migration DB appliquée + budgets câblés
-- Edge Function generate_call_for_funds: remplacée par appel direct client (3 bugs corrigés)
-- Trigger validate_call_for_funds_total: corrigé (double-comptage AFTER trigger)
-- Vue globale appels de fonds: refonte accordéon (Budget Courant / Budget Travaux / sous-groupes par budget)
-- Onglet "Tous les appels" ajouté puis retiré, refresh après création câblé
-- Recherche UI comptabilité: 3 previews HTML créées, V1 Pennylane choisie
+- Refonte comptabilité Pennylane: TopBar sticky, NavBar tabs, KPI strip, ViewSwitcher, GrandLivreTable groupé
+- Sidebar collapsible (toggle button, 220px → 52px)
+- Refonte budget Qonto: TopBar, NavBar, OverviewHero donut, ProjectionCard, PostesList accordéon
+- Budget travaux: groupement par statut (brouillon/en cours/finalisé), rows compactes expandables
+- Suivi appels de fonds travaux: données réelles Supabase via budget_id
+- Wizard appels de fonds: types Exceptionnel/Travaux avec dropdown budget filtré
+- Fix création budget: auto-increment version (contrainte UNIQUE), budget_line avec montant
+- Restyle modales (DepenseDetailModal dark theme)
 
 ## Next Task
-Implémenter la refonte comptabilité V1 (Pennylane Style): sidebar verticale dédiée + top bar sticky + multi-vues Grand Livre + filtres riches. Preview: .planning/preview-compta-v1.html
+Refonte modale détail travaux (TravauxDetailModal): restyle Qonto + empty states pour Historique/Étapes/Prestataires/Documents. Le PDF uploadé à la création du budget ne s'enregistre pas en DB (devis non persisté).
 
 ## Blockers
 None
 
 ## Key Context
-- createCall dans lib/finance/api.ts: appel direct Supabase (plus d'Edge Function), workflow draft→entries→post→call→lines
-- Trigger validate_call_for_funds_total: AFTER DEFERRED, juste SUM sans +NEW (corrigé en DB)
-- Constraint chk_posted_consistency: posted_at requis quand status='posted'
+- budgets table: UNIQUE(copro_id, period_id, budget_type, version) — createBudget auto-incrémente version
+- budget_lines: le montant total vient de SUM(amount) via v_budgets_overview, pas d'un champ sur budgets
+- Travaux budgets chargés tous exercices confondus (loadAllWorks séparé)
+- Les devis uploadés dans CreateBudgetModal ne sont pas persistés en DB (juste frontend)

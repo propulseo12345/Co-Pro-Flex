@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 — Linear/Notion Style (Clean + Radial Progress)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  /* ── Top bar ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid rgba(148,163,184,0.1); background: #161822; position: sticky; top: 0; z-index: 10; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .year-pill { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; font-size: 13px; font-weight: 500; color: #60a5fa; }
+  .year-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.15); background: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-primary { padding: 8px 16px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Nav ── */
+  .navbar { padding: 0 32px; border-bottom: 1px solid rgba(148,163,184,0.1); background: #161822; }
+  .nav-tabs { display: flex; gap: 2px; }
+  .nav-tab { padding: 10px 16px; font-size: 13px; font-weight: 500; color: #94a3b8; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; }
+  .nav-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+
+  .content { padding: 24px 32px; }
+
+  /* ── Hero card with radial progress ── */
+  .hero { display: flex; gap: 24px; margin-bottom: 24px; }
+  .hero-main { flex: 1; padding: 28px 32px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 16px; display: flex; align-items: center; gap: 32px; }
+
+  /* Radial progress */
+  .radial { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+  .radial svg { transform: rotate(-90deg); }
+  .radial-bg { fill: none; stroke: rgba(148,163,184,0.08); stroke-width: 10; }
+  .radial-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 600ms; }
+  .radial-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .radial-value { font-size: 28px; font-weight: 800; color: #e2e8f0; }
+  .radial-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .hero-info { flex: 1; }
+  .hero-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 4px; }
+  .hero-amount { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; margin-bottom: 16px; }
+
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .hero-stat { padding: 12px 16px; background: rgba(148,163,184,0.04); border-radius: 8px; }
+  .hero-stat-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
+  .hero-stat-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ── Alerts strip ── */
+  .alerts-strip { display: flex; gap: 12px; margin-bottom: 24px; }
+  .alert-card { flex: 1; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .alert-warning { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.15); color: #fbbf24; }
+  .alert-danger { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); color: #f87171; }
+  .alert-icon { font-size: 18px; }
+  .alert-text { flex: 1; }
+  .alert-text strong { display: block; font-size: 13px; }
+  .alert-text span { font-size: 11px; opacity: 0.7; }
+
+  /* ── Postes — stacked bars (unique V3 feature) ── */
+  .postes-section { margin-bottom: 24px; }
+  .section-title { font-size: 14px; font-weight: 600; color: #94a3b8; margin-bottom: 12px; }
+  .postes-stack { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 20px; }
+
+  /* Stacked horizontal bar */
+  .stacked-bar-container { margin-bottom: 20px; }
+  .stacked-bar { display: flex; height: 24px; border-radius: 6px; overflow: hidden; gap: 2px; }
+  .stacked-segment { transition: all 200ms; cursor: pointer; position: relative; }
+  .stacked-segment:hover { opacity: 0.8; }
+  .stacked-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #64748b; }
+
+  /* Postes detailed list */
+  .poste-item { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(148,163,184,0.04); cursor: pointer; transition: all 150ms; }
+  .poste-item:last-child { border-bottom: none; }
+  .poste-item:hover { background: rgba(148,163,184,0.02); margin: 0 -20px; padding: 12px 20px; border-radius: 8px; }
+  .poste-color { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+  .poste-info { flex: 1; }
+  .poste-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+  .poste-detail { font-size: 11px; color: #64748b; }
+  .poste-numbers { text-align: right; }
+  .poste-consumed { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .poste-budget { font-size: 11px; color: #64748b; }
+  .poste-bar-wrap { width: 120px; flex-shrink: 0; }
+  .poste-bar { height: 6px; background: rgba(148,163,184,0.08); border-radius: 3px; overflow: hidden; }
+  .poste-bar-fill { height: 100%; border-radius: 3px; }
+  .poste-pct { width: 50px; text-align: right; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
+  .badge-sm { padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; }
+  .badge-sm.warning { background: rgba(251,191,36,0.1); color: #fbbf24; }
+  .badge-sm.danger { background: rgba(239,68,68,0.1); color: #f87171; }
+
+  .badge-version { position: fixed; top: 12px; right: 12px; padding: 6px 16px; background: #22c55e; color: white; font-size: 12px; font-weight: 700; border-radius: 20px; z-index: 100; }
+</style>
+</head>
+<body>
+  <div class="badge-version">V3 — Linear/Notion Style</div>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Budgets</div>
+      <div class="year-pill"><span class="dot"></span>Exercice 2027</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon">📥</button>
+      <button class="btn-primary">+ Créer un budget</button>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="nav-tabs">
+      <button class="nav-tab active">Fonctionnement</button>
+      <button class="nav-tab">Travaux</button>
+      <button class="nav-tab">Fonds ALUR</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Hero with radial progress -->
+    <div class="hero">
+      <div class="hero-main">
+        <div class="radial">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="radial-bg" cx="70" cy="70" r="60" />
+            <circle class="radial-fill" cx="70" cy="70" r="60"
+              stroke="#3b82f6"
+              stroke-dasharray="377"
+              stroke-dashoffset="148" />
+          </svg>
+          <div class="radial-center">
+            <div class="radial-value">60,6%</div>
+            <div class="radial-label">consommé</div>
+          </div>
+        </div>
+        <div class="hero-info">
+          <div class="hero-title">Budget prévisionnel 2027</div>
+          <div class="hero-amount">48 000,00 €</div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-label">Consommé</div>
+              <div class="hero-stat-value" style="color:#f59e0b">29 108 €</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-label">Disponible</div>
+              <div class="hero-stat-value" style="color:#22c55e">18 892 €</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-label">Projection fin d'année</div>
+              <div class="hero-stat-value" style="color:#3b82f6">45 200 €</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-label">Moy. mensuelle</div>
+              <div class="hero-stat-value">3 237 €</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts strip -->
+    <div class="alerts-strip">
+      <div class="alert-card alert-warning">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-text">
+          <strong>Eau froide — 89,4%</strong>
+          <span>Reste 900 € sur 8 500 € votés</span>
+        </div>
+      </div>
+      <div class="alert-card alert-danger">
+        <span class="alert-icon">🚨</span>
+        <div class="alert-text">
+          <strong>Ascenseur — Dépassé +700 €</strong>
+          <span>5 200 € consommés sur 4 500 € votés</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Postes with stacked bar -->
+    <div class="postes-section">
+      <div class="section-title">Répartition par poste</div>
+      <div class="postes-stack">
+        <!-- Stacked bar -->
+        <div class="stacked-bar-container">
+          <div class="stacked-bar">
+            <div class="stacked-segment" style="flex:12400;background:#3b82f6" title="Charges générales"></div>
+            <div class="stacked-segment" style="flex:4200;background:#8b5cf6" title="Entretien"></div>
+            <div class="stacked-segment" style="flex:7600;background:#f59e0b" title="Eau froide"></div>
+            <div class="stacked-segment" style="flex:5200;background:#ef4444" title="Ascenseur"></div>
+            <div class="stacked-segment" style="flex:2100;background:#22c55e" title="Assurance"></div>
+            <div class="stacked-segment" style="flex:1800;background:#06b6d4" title="Ménage"></div>
+          </div>
+          <div class="stacked-labels">
+            <span>0 €</span>
+            <span>29 108 € consommés sur 48 000 € votés</span>
+            <span>48 000 €</span>
+          </div>
+        </div>
+
+        <!-- Detailed list -->
+        <div class="poste-item">
+          <div class="poste-color" style="background:#3b82f6"></div>
+          <div class="poste-info">
+            <div class="poste-name">Charges générales</div>
+            <div class="poste-detail">Gardiennage, espace vert, divers</div>
+          </div>
+          <div class="poste-numbers">
+            <div class="poste-consumed">12 400 €</div>
+            <div class="poste-budget">/ 20 000 €</div>
+          </div>
+          <div class="poste-bar-wrap"><div class="poste-bar"><div class="poste-bar-fill" style="width:62%;background:#3b82f6"></div></div></div>
+          <div class="poste-pct" style="color:#3b82f6">62,0%</div>
+        </div>
+
+        <div class="poste-item">
+          <div class="poste-color" style="background:#8b5cf6"></div>
+          <div class="poste-info">
+            <div class="poste-name">Entretien</div>
+            <div class="poste-detail">Parties communes, nettoyage</div>
+          </div>
+          <div class="poste-numbers">
+            <div class="poste-consumed">4 200 €</div>
+            <div class="poste-budget">/ 8 000 €</div>
+          </div>
+          <div class="poste-bar-wrap"><div class="poste-bar"><div class="poste-bar-fill" style="width:52.5%;background:#8b5cf6"></div></div></div>
+          <div class="poste-pct" style="color:#8b5cf6">52,5%</div>
+        </div>
+
+        <div class="poste-item">
+          <div class="poste-color" style="background:#f59e0b"></div>
+          <div class="poste-info">
+            <div class="poste-name">Eau froide <span class="badge-sm warning">⚠ Alerte</span></div>
+            <div class="poste-detail">Consommation et abonnement</div>
+          </div>
+          <div class="poste-numbers">
+            <div class="poste-consumed">7 600 €</div>
+            <div class="poste-budget">/ 8 500 €</div>
+          </div>
+          <div class="poste-bar-wrap"><div class="poste-bar"><div class="poste-bar-fill" style="width:89.4%;background:#f59e0b"></div></div></div>
+          <div class="poste-pct" style="color:#f59e0b">89,4%</div>
+        </div>
+
+        <div class="poste-item">
+          <div class="poste-color" style="background:#ef4444"></div>
+          <div class="poste-info">
+            <div class="poste-name">Ascenseur <span class="badge-sm danger">⚠ Dépassé</span></div>
+            <div class="poste-detail">Contrat maintenance Otis</div>
+          </div>
+          <div class="poste-numbers">
+            <div class="poste-consumed" style="color:#f87171">5 200 €</div>
+            <div class="poste-budget">/ 4 500 €</div>
+          </div>
+          <div class="poste-bar-wrap"><div class="poste-bar"><div class="poste-bar-fill" style="width:100%;background:#ef4444"></div></div></div>
+          <div class="poste-pct" style="color:#ef4444">115,6%</div>
+        </div>
+
+        <div class="poste-item">
+          <div class="poste-color" style="background:#22c55e"></div>
+          <div class="poste-info">
+            <div class="poste-name">Assurance</div>
+            <div class="poste-detail">Multirisque immeuble</div>
+          </div>
+          <div class="poste-numbers">
+            <div class="poste-consumed">2 100 €</div>
+            <div class="poste-budget">/ 4 000 €</div>
+          </div>
+          <div class="poste-bar-wrap"><div class="poste-bar"><div class="poste-bar-fill" style="width:52.5%;background:#22c55e"></div></div></div>
+          <div class="poste-pct" style="color:#22c55e">52,5%</div>
+        </div>
+
+        <div class="poste-item">
+          <div class="poste-color" style="background:#06b6d4"></div>
+          <div class="poste-info">
+            <div class="poste-name">Ménage</div>
+            <div class="poste-detail">Prestataire mensuel</div>
+          </div>
+          <div class="poste-numbers">
+            <div class="poste-consumed">1 800 €</div>
+            <div class="poste-budget">/ 3 000 €</div>
+          </div>
+          <div class="poste-bar-wrap"><div class="poste-bar"><div class="poste-bar-fill" style="width:60%;background:#06b6d4"></div></div></div>
+          <div class="poste-pct" style="color:#06b6d4">60,0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

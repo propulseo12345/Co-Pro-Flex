@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 — Qonto Style (Overview Focus + Donut Chart)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  /* ── Top bar (same as compta) ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid rgba(148,163,184,0.1); background: #161822; position: sticky; top: 0; z-index: 10; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .year-pill { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; font-size: 13px; font-weight: 500; color: #60a5fa; }
+  .year-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.15); background: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-primary { padding: 8px 16px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Nav ── */
+  .navbar { padding: 0 32px; border-bottom: 1px solid rgba(148,163,184,0.1); background: #161822; }
+  .nav-tabs { display: flex; gap: 2px; }
+  .nav-tab { padding: 10px 16px; font-size: 13px; font-weight: 500; color: #94a3b8; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; }
+  .nav-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+
+  .content { padding: 24px 32px; }
+
+  /* ── Overview Hero (main feature of V2) ── */
+  .overview-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .overview-left { padding: 24px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
+  .overview-right { padding: 24px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 32px; }
+
+  .overview-headline { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 8px; }
+  .overview-amount { font-size: 32px; font-weight: 800; color: #e2e8f0; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .overview-sub { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+  .overview-row { display: flex; gap: 24px; }
+  .overview-stat { flex: 1; }
+  .overview-stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .overview-stat-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .overview-stat-bar { height: 3px; background: rgba(148,163,184,0.1); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .overview-stat-bar-fill { height: 100%; border-radius: 2px; }
+
+  /* ── Donut chart mockup ── */
+  .donut-container { position: relative; width: 180px; height: 180px; }
+  .donut { width: 180px; height: 180px; border-radius: 50%; background: conic-gradient(
+    #3b82f6 0deg 130deg,
+    #8b5cf6 130deg 195deg,
+    #f59e0b 195deg 260deg,
+    #ef4444 260deg 305deg,
+    #22c55e 305deg 340deg,
+    #06b6d4 340deg 360deg
+  ); display: flex; align-items: center; justify-content: center; }
+  .donut-center { width: 120px; height: 120px; background: #1a1d2e; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .donut-center-value { font-size: 20px; font-weight: 800; color: #e2e8f0; }
+  .donut-center-label { font-size: 10px; color: #64748b; text-transform: uppercase; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-value { margin-left: auto; font-family: 'SF Mono', monospace; font-size: 11px; color: #e2e8f0; font-weight: 600; }
+
+  /* ── Timeline / Projection ── */
+  .projection-card { padding: 20px 24px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; margin-bottom: 24px; }
+  .projection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .projection-title { font-size: 14px; font-weight: 600; }
+  .projection-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .projection-badge.safe { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .projection-badge.risk { background: rgba(239,68,68,0.1); color: #f87171; }
+  .projection-timeline { display: flex; align-items: center; gap: 0; height: 40px; }
+  .timeline-segment { height: 8px; border-radius: 4px; position: relative; }
+  .timeline-segment:first-child { border-radius: 4px 0 0 4px; }
+  .timeline-segment:last-child { border-radius: 0 4px 4px 0; }
+  .timeline-label { position: absolute; bottom: -18px; font-size: 10px; color: #64748b; white-space: nowrap; }
+  .timeline-label-right { right: 0; }
+  .projection-stats { display: flex; gap: 32px; margin-top: 28px; }
+  .proj-stat { flex: 1; }
+  .proj-stat-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
+  .proj-stat-value { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ── Postes list (compact, not grid) ── */
+  .postes-list { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; overflow: hidden; }
+  .postes-list-header { padding: 12px 20px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; background: rgba(148,163,184,0.04); border-bottom: 1px solid rgba(148,163,184,0.08); display: grid; grid-template-columns: 1fr 120px 200px 80px 80px; gap: 16px; }
+  .poste-row { padding: 12px 20px; border-bottom: 1px solid rgba(148,163,184,0.04); display: grid; grid-template-columns: 1fr 120px 200px 80px 80px; gap: 16px; align-items: center; cursor: pointer; transition: all 150ms; }
+  .poste-row:hover { background: rgba(148,163,184,0.03); }
+  .poste-row-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .poste-row-amount { font-family: 'SF Mono', monospace; font-size: 12px; text-align: right; }
+  .poste-row-progress { display: flex; align-items: center; gap: 8px; }
+  .poste-mini-bar { flex: 1; height: 6px; background: rgba(148,163,184,0.1); border-radius: 3px; overflow: hidden; }
+  .poste-mini-fill { height: 100%; border-radius: 3px; }
+  .poste-row-pct { font-size: 12px; font-weight: 600; text-align: right; }
+  .poste-row-rest { font-size: 12px; color: #64748b; text-align: right; }
+
+  .badge-version { position: fixed; top: 12px; right: 12px; padding: 6px 16px; background: #8b5cf6; color: white; font-size: 12px; font-weight: 700; border-radius: 20px; z-index: 100; }
+</style>
+</head>
+<body>
+  <div class="badge-version">V2 — Qonto Style</div>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Budget de fonctionnement</div>
+      <div class="year-pill"><span class="dot"></span>Exercice 2027</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon">📥</button>
+      <button class="btn-primary">+ Créer un budget</button>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="nav-tabs">
+      <button class="nav-tab active">Fonctionnement</button>
+      <button class="nav-tab">Travaux</button>
+      <button class="nav-tab">Fonds ALUR</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Overview Hero -->
+    <div class="overview-hero">
+      <div class="overview-left">
+        <div class="overview-headline">Budget annuel voté</div>
+        <div class="overview-amount">48 000,00 €</div>
+        <div class="overview-sub">Approuvé en AG du 15 janvier 2027 — 12 postes</div>
+        <div class="overview-row">
+          <div class="overview-stat">
+            <div class="overview-stat-label">Consommé</div>
+            <div class="overview-stat-value" style="color:#f59e0b">29 108 €</div>
+            <div class="overview-stat-bar"><div class="overview-stat-bar-fill" style="width:60.6%;background:#f59e0b"></div></div>
+          </div>
+          <div class="overview-stat">
+            <div class="overview-stat-label">Disponible</div>
+            <div class="overview-stat-value" style="color:#22c55e">18 892 €</div>
+            <div class="overview-stat-bar"><div class="overview-stat-bar-fill" style="width:39.4%;background:#22c55e"></div></div>
+          </div>
+          <div class="overview-stat">
+            <div class="overview-stat-label">Postes en alerte</div>
+            <div class="overview-stat-value" style="color:#ef4444">2</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-right">
+        <div class="donut-container">
+          <div class="donut">
+            <div class="donut-center">
+              <div class="donut-center-value">60,6%</div>
+              <div class="donut-center-label">consommé</div>
+            </div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>Charges gén. <span class="legend-value">12 400 €</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>Entretien <span class="legend-value">4 200 €</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Eau froide <span class="legend-value">7 600 €</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Ascenseur <span class="legend-value">5 200 €</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span>Assurance <span class="legend-value">2 100 €</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#06b6d4"></span>Ménage <span class="legend-value">1 800 €</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projection -->
+    <div class="projection-card">
+      <div class="projection-header">
+        <span class="projection-title">Projection fin d'exercice</span>
+        <span class="projection-badge safe">✓ Dans le budget</span>
+      </div>
+      <div class="projection-timeline">
+        <div class="timeline-segment" style="width:60.6%;background:#3b82f6;position:relative">
+          <span class="timeline-label">Jan — Mar (actuel)</span>
+        </div>
+        <div class="timeline-segment" style="width:39.4%;background:rgba(59,130,246,0.2);position:relative">
+          <span class="timeline-label timeline-label-right">Avr — Déc (projection)</span>
+        </div>
+      </div>
+      <div class="projection-stats">
+        <div class="proj-stat">
+          <div class="proj-stat-label">Projection totale</div>
+          <div class="proj-stat-value" style="color:#3b82f6">45 200 €</div>
+        </div>
+        <div class="proj-stat">
+          <div class="proj-stat-label">Écart vs budget</div>
+          <div class="proj-stat-value" style="color:#22c55e">-2 800 €</div>
+        </div>
+        <div class="proj-stat">
+          <div class="proj-stat-label">Conso. mensuelle moy.</div>
+          <div class="proj-stat-value">3 237 € /mois</div>
+        </div>
+        <div class="proj-stat">
+          <div class="proj-stat-label">Fiabilité</div>
+          <div class="proj-stat-value" style="color:#22c55e">Haute (9 mois)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Postes list (table-like) -->
+    <div class="postes-list">
+      <div class="postes-list-header">
+        <span>Poste</span>
+        <span style="text-align:right">Budget voté</span>
+        <span>Consommation</span>
+        <span style="text-align:right">%</span>
+        <span style="text-align:right">Reste</span>
+      </div>
+      <div class="poste-row">
+        <span class="poste-row-name"><span class="legend-dot" style="background:#3b82f6"></span>Charges générales</span>
+        <span class="poste-row-amount">20 000 €</span>
+        <span class="poste-row-progress"><span class="poste-mini-bar"><span class="poste-mini-fill" style="width:62%;background:#3b82f6"></span></span></span>
+        <span class="poste-row-pct" style="color:#3b82f6">62,0%</span>
+        <span class="poste-row-rest">7 600 €</span>
+      </div>
+      <div class="poste-row">
+        <span class="poste-row-name"><span class="legend-dot" style="background:#8b5cf6"></span>Entretien</span>
+        <span class="poste-row-amount">8 000 €</span>
+        <span class="poste-row-progress"><span class="poste-mini-bar"><span class="poste-mini-fill" style="width:52.5%;background:#8b5cf6"></span></span></span>
+        <span class="poste-row-pct" style="color:#8b5cf6">52,5%</span>
+        <span class="poste-row-rest">3 800 €</span>
+      </div>
+      <div class="poste-row">
+        <span class="poste-row-name"><span class="legend-dot" style="background:#f59e0b"></span>Eau froide <span class="poste-badge badge-warning" style="margin-left:4px;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(251,191,36,0.1);color:#fbbf24">⚠ Alerte</span></span>
+        <span class="poste-row-amount">8 500 €</span>
+        <span class="poste-row-progress"><span class="poste-mini-bar"><span class="poste-mini-fill" style="width:89.4%;background:#f59e0b"></span></span></span>
+        <span class="poste-row-pct" style="color:#f59e0b">89,4%</span>
+        <span class="poste-row-rest">900 €</span>
+      </div>
+      <div class="poste-row">
+        <span class="poste-row-name"><span class="legend-dot" style="background:#ef4444"></span>Ascenseur <span class="poste-badge badge-danger" style="margin-left:4px;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(239,68,68,0.1);color:#f87171">⚠ Dépassé</span></span>
+        <span class="poste-row-amount">4 500 €</span>
+        <span class="poste-row-progress"><span class="poste-mini-bar"><span class="poste-mini-fill" style="width:100%;background:#ef4444"></span></span></span>
+        <span class="poste-row-pct" style="color:#ef4444">115,6%</span>
+        <span class="poste-row-rest" style="color:#f87171">-700 €</span>
+      </div>
+      <div class="poste-row">
+        <span class="poste-row-name"><span class="legend-dot" style="background:#22c55e"></span>Assurance</span>
+        <span class="poste-row-amount">4 000 €</span>
+        <span class="poste-row-progress"><span class="poste-mini-bar"><span class="poste-mini-fill" style="width:52.5%;background:#22c55e"></span></span></span>
+        <span class="poste-row-pct" style="color:#22c55e">52,5%</span>
+        <span class="poste-row-rest">1 900 €</span>
+      </div>
+      <div class="poste-row">
+        <span class="poste-row-name"><span class="legend-dot" style="background:#06b6d4"></span>Ménage</span>
+        <span class="poste-row-amount">3 000 €</span>
+        <span class="poste-row-progress"><span class="poste-mini-bar"><span class="poste-mini-fill" style="width:60%;background:#06b6d4"></span></span></span>
+        <span class="poste-row-pct" style="color:#06b6d4">60,0%</span>
+        <span class="poste-row-rest">1 200 €</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
