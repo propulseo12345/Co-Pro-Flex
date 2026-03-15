@@ -1,11 +1,10 @@
 'use client';
 
-import { X, Paperclip, Eye, Edit2, Send, CheckCircle, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import { X, Paperclip, Eye, Edit2, Send, CheckCircle, XCircle } from 'lucide-react';
 import { DepenseEtendue } from '@/data/mock';
 import { PosteBudgetData } from '../types';
-import { DepenseStatusBadge } from '../DepenseStatusBadge';
-import styles from '../Budget.module.css';
+import styles from './DepenseDetailModal.module.css';
 
 interface DepenseDetailModalProps {
   selectedDepense: DepenseEtendue;
@@ -17,6 +16,19 @@ interface DepenseDetailModalProps {
   onValidate?: (depenseId: string) => void;
   onReject?: (depenseId: string, commentaire: string) => void;
   isValidator?: boolean;
+}
+
+function getStatusBadge(statut?: string) {
+  if (!statut) return null;
+  const map: Record<string, { label: string; className: string }> = {
+    VALIDEE: { label: 'Validée', className: styles.statusValidee },
+    BROUILLON: { label: 'Brouillon', className: styles.statusBrouillon },
+    EN_ATTENTE_VALIDATION: { label: 'En attente', className: styles.statusEnAttente },
+    REJETEE: { label: 'Rejetée', className: styles.statusRejetee },
+  };
+  const config = map[statut];
+  if (!config) return null;
+  return <span className={`${styles.statusBadge} ${config.className}`}>{config.label}</span>;
 }
 
 export function DepenseDetailModal({
@@ -39,6 +51,9 @@ export function DepenseDetailModal({
     selectedDepense.statut === 'BROUILLON'
   );
   const canValidate = isValidator && selectedDepense.statut === 'EN_ATTENTE_VALIDATION';
+  const posteLabel = selectedDepense.poste
+    ? postesBudget.find((p) => p.poste === selectedDepense.poste)?.label || 'Non classé'
+    : 'Non classé';
 
   const handleReject = () => {
     if (rejectComment.trim() && onReject) {
@@ -50,298 +65,134 @@ export function DepenseDetailModal({
   };
 
   return (
-    <div className={styles.modalOverlay} aria-hidden="true" onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-            <h2 className={styles.modalTitle}>Détail de la dépense</h2>
-            {selectedDepense.statut && (
-              <DepenseStatusBadge statut={selectedDepense.statut} />
-            )}
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <h2 className={styles.title}>Détail de la dépense</h2>
+            {getStatusBadge(selectedDepense.statut)}
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 'var(--space-sm)',
-            }}
-           aria-label="Fermer"><X size={24} aria-hidden="true" /></button>
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Fermer">
+            <X size={18} />
+          </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
-          {/* Montant principal */}
-          <div
-            style={{
-              padding: 'var(--space-xl)',
-              background: 'var(--bg-secondary)',
-              borderRadius: 'var(--radius-md)',
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 'var(--text-sm)',
-                color: 'var(--text-secondary)',
-                marginBottom: 'var(--space-xs)',
-              }}
-            >
-              Montant
-            </div>
-            <div style={{ fontSize: 'var(--text-3xl)', fontWeight: '700', color: 'var(--danger)' }}>
-              -{selectedDepense.montant.toLocaleString()} €
-            </div>
+        {/* Body */}
+        <div className={styles.body}>
+          {/* Amount hero */}
+          <div className={styles.amountCard}>
+            <div className={styles.amountLabel}>Montant</div>
+            <div className={styles.amountValue}>-{selectedDepense.montant.toLocaleString('fr-FR')} €</div>
           </div>
 
-          {/* Commentaire de rejet si présent */}
+          {/* Reject banner */}
           {selectedDepense.statut === 'REJETEE' && selectedDepense.commentaireRejet && (
-            <div
-              style={{
-                padding: 'var(--space-md)',
-                background: 'var(--danger-light)',
-                border: '1px solid var(--danger)',
-                borderRadius: 'var(--radius-md)',
-              }}
-            >
-              <strong style={{ color: 'var(--danger)', display: 'block', marginBottom: 'var(--space-xs)' }}>
-                Motif du rejet :
-              </strong>
-              <p style={{ margin: 0, color: 'var(--text-main)' }}>
-                {selectedDepense.commentaireRejet}
-              </p>
+            <div className={styles.rejectBanner}>
+              <div className={styles.rejectTitle}>Motif du rejet :</div>
+              <p className={styles.rejectText}>{selectedDepense.commentaireRejet}</p>
             </div>
           )}
 
-          {/* Informations de base */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-md)' }}>
-            <div>
-              <label
-                style={{
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--text-secondary)',
-                  display: 'block',
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
-                Date
-              </label>
-              <div style={{ fontSize: 'var(--text-md)', fontWeight: '600', color: 'var(--text-main)' }}>
-                {new Date(selectedDepense.date).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </div>
+          {/* Date + Poste */}
+          <div className={styles.infoGrid}>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Date</span>
+              <span className={styles.infoValue}>
+                {new Date(selectedDepense.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </span>
             </div>
-            <div>
-              <label
-                style={{
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--text-secondary)',
-                  display: 'block',
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
-                Poste budgétaire
-              </label>
-              <div style={{ fontSize: 'var(--text-md)', fontWeight: '600', color: 'var(--text-main)' }}>
-                {selectedDepense.poste
-                  ? postesBudget.find((p) => p.poste === selectedDepense.poste)?.label
-                  : 'Non classé'}
-              </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Poste budgétaire</span>
+              <span className={styles.infoValue}>{posteLabel}</span>
             </div>
           </div>
 
-          {/* Libellé et fournisseur */}
-          <div>
-            <label
-              style={{
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-secondary)',
-                display: 'block',
-                marginBottom: 'var(--space-xs)',
-              }}
-            >
-              Libellé
-            </label>
-            <div style={{ fontSize: 'var(--text-md)', color: 'var(--text-main)' }}>
-              {selectedDepense.libelle}
+          {/* Libellé */}
+          <div className={styles.infoFull}>
+            <span className={styles.infoLabel}>Libellé</span>
+            <span className={styles.infoValue}>{selectedDepense.libelle}</span>
+          </div>
+
+          {/* Fournisseur */}
+          <div className={styles.infoFull}>
+            <span className={styles.infoLabel}>Fournisseur</span>
+            <span className={styles.infoValue}>{selectedDepense.fournisseur}</span>
+          </div>
+
+          {/* Accounting info */}
+          <div className={styles.accountingGrid}>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Compte</span>
+              <span className={styles.infoValue}>{selectedDepense.compteId}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Récupérable</span>
+              <span className={`${styles.infoValue} ${styles.infoValueSuccess}`}>
+                {selectedDepense.recuperable.toLocaleString('fr-FR')} €
+              </span>
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Déductible</span>
+              <span className={`${styles.infoValue} ${styles.infoValueInfo}`}>
+                {selectedDepense.deductible.toLocaleString('fr-FR')} €
+              </span>
             </div>
           </div>
 
-          <div>
-            <label
-              style={{
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-secondary)',
-                display: 'block',
-                marginBottom: 'var(--space-xs)',
-              }}
-            >
-              Fournisseur
-            </label>
-            <div style={{ fontSize: 'var(--text-md)', color: 'var(--text-main)' }}>
-              {selectedDepense.fournisseur}
+          {/* TVA info if available */}
+          {selectedDepense.montantHT !== undefined && (
+            <div className={styles.accountingGrid}>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Montant HT</span>
+                <span className={styles.infoValue}>{selectedDepense.montantHT.toLocaleString('fr-FR')} €</span>
+              </div>
+              {selectedDepense.tauxTVA !== undefined && (
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>TVA ({selectedDepense.tauxTVA}%)</span>
+                  <span className={styles.infoValue}>{(selectedDepense.montantTVA ?? 0).toLocaleString('fr-FR')} €</span>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
-          {/* Informations comptables */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-md)' }}>
-            <div>
-              <label
-                style={{
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--text-secondary)',
-                  display: 'block',
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
-                Compte
-              </label>
-              <div style={{ fontSize: 'var(--text-md)', fontWeight: '600', color: 'var(--text-main)' }}>
-                {selectedDepense.compteId}
-              </div>
-            </div>
-            <div>
-              <label
-                style={{
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--text-secondary)',
-                  display: 'block',
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
-                Récupérable
-              </label>
-              <div style={{ fontSize: 'var(--text-md)', fontWeight: '600', color: 'var(--success)' }}>
-                {selectedDepense.recuperable.toLocaleString()} €
-              </div>
-            </div>
-            <div>
-              <label
-                style={{
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--text-secondary)',
-                  display: 'block',
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
-                Déductible
-              </label>
-              <div style={{ fontSize: 'var(--text-md)', fontWeight: '600', color: 'var(--info)' }}>
-                {selectedDepense.deductible.toLocaleString()} €
-              </div>
-            </div>
-          </div>
-
-          {/* Pièce jointe */}
+          {/* Attachment */}
           {(selectedDepense.pieceJointe || selectedDepense.pieceJointeDetails) ? (
-            <div
-              style={{
-                padding: 'var(--space-md)',
-                background: 'var(--success-light)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--success)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-                <Paperclip size={16} color="var(--success)" aria-hidden="true" />
-                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--success)', fontWeight: '600' }}>
-                  Pièce justificative attachée
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: 'var(--text-sm)',
-                  color: 'var(--text-main)',
-                  marginTop: 'var(--space-xs)',
-                  marginLeft: 'calc(16px + var(--space-sm))',
-                }}
-              >
-                {selectedDepense.pieceJointeDetails?.fichierNom || selectedDepense.pieceJointe}
+            <div className={`${styles.attachmentCard} ${styles.attachmentPresent}`}>
+              <Paperclip size={16} color="#4ade80" />
+              <div className={styles.attachmentInfo}>
+                <div className={styles.attachmentTitle} style={{ color: '#4ade80' }}>Pièce justificative attachée</div>
+                <div className={styles.attachmentSub}>
+                  {selectedDepense.pieceJointeDetails?.fichierNom || selectedDepense.pieceJointe}
+                </div>
               </div>
             </div>
           ) : (
-            <div
-              style={{
-                padding: 'var(--space-md)',
-                background: 'var(--warning-light)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--warning)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-                <Paperclip size={16} color="var(--warning)" aria-hidden="true" />
-                <span style={{ fontSize: 'var(--text-sm)', color: 'var(--warning)', fontWeight: '600' }}>
-                  Aucune pièce justificative
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: 'var(--text-sm)',
-                  color: 'var(--text-secondary)',
-                  marginTop: 'var(--space-xs)',
-                  marginLeft: 'calc(16px + var(--space-sm))',
-                }}
-              >
-                Une facture est obligatoire pour valider cette dépense.
+            <div className={`${styles.attachmentCard} ${styles.attachmentMissing}`}>
+              <Paperclip size={16} color="#fbbf24" />
+              <div className={styles.attachmentInfo}>
+                <div className={styles.attachmentTitle} style={{ color: '#fbbf24' }}>Aucune pièce justificative</div>
+                <div className={styles.attachmentSub}>Une facture est obligatoire pour valider cette dépense.</div>
               </div>
             </div>
           )}
 
-          {/* Formulaire de rejet */}
+          {/* Reject form */}
           {showRejectForm && (
-            <div
-              style={{
-                padding: 'var(--space-md)',
-                background: 'var(--bg-secondary)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <label
-                style={{
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: '600',
-                  display: 'block',
-                  marginBottom: 'var(--space-sm)',
-                }}
-              >
-                Motif du rejet *
-              </label>
+            <div className={styles.rejectForm}>
+              <label className={styles.rejectFormLabel}>Motif du rejet *</label>
               <textarea
+                className={styles.rejectTextarea}
                 value={rejectComment}
                 onChange={(e) => setRejectComment(e.target.value)}
                 placeholder="Indiquez le motif du rejet..."
-                style={{
-                  width: '100%',
-                  minHeight: '80px',
-                  padding: 'var(--space-sm)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)',
-                  resize: 'vertical',
-                }}
               />
-              <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setShowRejectForm(false)}
-                >
+              <div className={styles.rejectActions}>
+                <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowRejectForm(false)}>
                   Annuler
                 </button>
                 <button
-                  className="btn btn-danger btn-sm"
+                  className={`${styles.btn} ${styles.btnDanger} ${!rejectComment.trim() ? styles.btnDisabled : ''}`}
                   onClick={handleReject}
                   disabled={!rejectComment.trim()}
                 >
@@ -352,81 +203,35 @@ export function DepenseDetailModal({
           )}
         </div>
 
-        <div
-          style={{
-            marginTop: 'var(--space-xl)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 'var(--space-md)',
-          }}
-        >
-          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            {/* Actions de validation (pour les validateurs) */}
+        {/* Footer */}
+        <div className={styles.footer}>
+          <div className={styles.footerLeft}>
             {canValidate && !showRejectForm && (
               <>
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    if (onValidate) {
-                      onValidate(selectedDepense.id);
-                      onClose();
-                    }
-                  }}
-                >
-                  <CheckCircle size={16} aria-hidden="true" />
-                  Valider
+                <button className={`${styles.btn} ${styles.btnSuccess}`} onClick={() => { onValidate?.(selectedDepense.id); onClose(); }}>
+                  <CheckCircle size={14} /> Valider
                 </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => setShowRejectForm(true)}
-                >
-                  <XCircle size={16} aria-hidden="true" />
-                  Rejeter
+                <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => setShowRejectForm(true)}>
+                  <XCircle size={14} /> Rejeter
                 </button>
               </>
             )}
           </div>
-
-          <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
-            <button onClick={onClose} className="btn btn-secondary">
-              Fermer
-            </button>
-
-            {/* Boutons d'action utilisateur */}
+          <div className={styles.footerRight}>
+            <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={onClose}>Fermer</button>
             {isEditable && onEdit && (
-              <button
-                className="btn btn-outline"
-                onClick={() => {
-                  onEdit(selectedDepense);
-                  onClose();
-                }}
-              >
-                <Edit2 size={16} aria-hidden="true" />
-                Modifier
+              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => { onEdit(selectedDepense); onClose(); }}>
+                <Edit2 size={14} /> Modifier
               </button>
             )}
-
             {canSubmit && onSubmitForValidation && (
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  onSubmitForValidation(selectedDepense.id);
-                  onClose();
-                }}
-              >
-                <Send size={16} aria-hidden="true" />
-                Soumettre à validation
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => { onSubmitForValidation(selectedDepense.id); onClose(); }}>
+                <Send size={14} /> Soumettre
               </button>
             )}
-
             {(selectedDepense.pieceJointe || selectedDepense.pieceJointeDetails) && (
-              <button
-                className="btn btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}
-                onClick={() => onViewDocument(selectedDepense.pieceJointeDetails?.fichierNom || selectedDepense.pieceJointe || '')}
-              >
-                <Eye size={16} aria-hidden="true" />
-                Consulter la pièce jointe
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => onViewDocument(selectedDepense.pieceJointeDetails?.fichierNom || selectedDepense.pieceJointe || '')}>
+                <Eye size={14} /> Voir la pièce
               </button>
             )}
           </div>

@@ -1,0 +1,341 @@
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+/* ── Modal container ── */
+.modal {
+  background: #161822;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms;
+}
+
+.closeBtn:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+/* ── Body ── */
+.body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Amount hero ── */
+.amountCard {
+  padding: 20px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.amountLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.amountValue {
+  font-size: 28px;
+  font-weight: 800;
+  color: #f87171;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Info grid ── */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.infoValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.infoValueSuccess {
+  color: #4ade80;
+}
+
+.infoValueInfo {
+  color: #60a5fa;
+}
+
+/* ── Full width info row ── */
+.infoFull {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Accounting row ── */
+.accountingGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── Reject banner ── */
+.rejectBanner {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 10px;
+}
+
+.rejectTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f87171;
+  margin-bottom: 4px;
+}
+
+.rejectText {
+  font-size: 13px;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+/* ── Attachment card ── */
+.attachmentCard {
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.attachmentPresent {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.attachmentMissing {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.attachmentInfo {
+  flex: 1;
+}
+
+.attachmentTitle {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.attachmentSub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ── Reject form ── */
+.rejectForm {
+  padding: 16px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+}
+
+.rejectFormLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.rejectTextarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  background: #161822;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.rejectTextarea::placeholder {
+  color: #475569;
+}
+
+.rejectActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.footerLeft {
+  display: flex;
+  gap: 8px;
+}
+
+.footerRight {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 150ms;
+  border: none;
+}
+
+.btnSecondary {
+  background: none;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.btnSecondary:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+.btnPrimary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btnPrimary:hover {
+  background: #2563eb;
+}
+
+.btnSuccess {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.btnSuccess:hover {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.btnDanger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.btnDanger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.btnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Status badge ── */
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.statusValidee {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.statusBrouillon {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+.statusEnAttente {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.statusRejetee {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
