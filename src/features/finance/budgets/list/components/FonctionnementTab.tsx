@@ -85,6 +85,10 @@ export function FonctionnementTab({
           tauxTVA: d.tauxTVA,
           montantTVA: d.montantTVA,
         }))}
+        onSelectDepense={(dep) => {
+          const original = depensesFiltrees.find((d: any) => d.id === dep.id);
+          if (original) onSelectDepense(original);
+        }}
       />
 
       <BudgetDepensesTable
