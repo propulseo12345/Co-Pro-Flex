@@ -13,10 +13,10 @@ interface BudgetPostesListProps {
 }
 
 export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }: BudgetPostesListProps) {
-  const [expandedPoste, setExpandedPoste] = useState<PosteBudget | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const handleToggle = (posteId: PosteBudget) => {
-    setExpandedPoste((prev) => (prev === posteId ? null : posteId));
+  const handleToggle = (index: number) => {
+    setExpandedIndex((prev) => (prev === index ? null : index));
   };
 
   return (
@@ -28,21 +28,21 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectPoste }:
         <span className={styles.headerRight}>%</span>
         <span className={styles.headerRight}>Reste</span>
       </div>
-      {postesBudget.map((poste) => {
+      {postesBudget.map((poste, index) => {
         const pct = poste.budgetVote > 0 ? (poste.consomme / poste.budgetVote) * 100 : 0;
         const rest = poste.budgetVote - poste.consomme;
         const color = POSTE_COLORS[poste.poste] || '#6B7280';
         const isConsumed = pct >= 100 && rest >= 0;
         const isOver = pct > 100 && rest < 0;
         const isAlert = pct >= 80 && pct < 100;
-        const isExpanded = expandedPoste === poste.poste;
+        const isExpanded = expandedIndex === index;
         const posteDepenses = depenses.filter((d) => d.poste === poste.poste);
 
         return (
-          <div key={poste.poste}>
+          <div key={`${poste.poste}-${index}`}>
             <div
               className={`${styles.row} ${isExpanded ? styles.rowExpanded : ''}`}
-              onClick={() => handleToggle(poste.poste)}
+              onClick={() => handleToggle(index)}
             >
               <span className={styles.rowName}>
                 <ChevronDown
