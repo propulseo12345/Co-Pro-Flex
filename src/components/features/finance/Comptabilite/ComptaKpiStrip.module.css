@@ -7,8 +7,8 @@
 .card {
   flex: 1;
   padding: var(--space-md) var(--space-lg);
-  background: var(--surface);
-  border: 1px solid var(--border-light);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: var(--radius-xl);
 }
 
