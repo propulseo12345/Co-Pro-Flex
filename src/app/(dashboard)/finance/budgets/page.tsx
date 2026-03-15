@@ -126,6 +126,7 @@ export default function BudgetsPage() {
           <FonctionnementTab
             budgets={budgets}
             selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
             budgetAnnuelVote={budgetAnnuelVote}
             postesBudget={postesBudget}
             totals={totals}

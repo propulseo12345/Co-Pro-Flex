@@ -6,11 +6,16 @@ import {
   BudgetPostesList,
   BudgetDepensesTable,
 } from '@/components/features/finance/Budget';
+import { getExercicesList } from '@/lib/dates';
 import type { PosteBudget } from '@/components/features/finance/Budget/types';
+import styles from './FonctionnementTab.module.css';
+
+const AVAILABLE_YEARS = getExercicesList(4).map(y => parseInt(y));
 
 interface FonctionnementTabProps {
   budgets: any[];
   selectedYear: number;
+  onYearChange: (year: number) => void;
   budgetAnnuelVote: number;
   postesBudget: any[];
   totals: any;
@@ -31,6 +36,7 @@ interface FonctionnementTabProps {
 export function FonctionnementTab({
   budgets,
   selectedYear,
+  onYearChange,
   budgetAnnuelVote,
   postesBudget,
   totals,
@@ -49,6 +55,22 @@ export function FonctionnementTab({
 }: FonctionnementTabProps) {
   return (
     <div>
+      <div className={styles.exerciceBar}>
+        <div className={styles.yearPill}>
+          <span className={styles.dot} />
+          Exercice {selectedYear}
+        </div>
+        <select
+          className={styles.yearSelect}
+          value={selectedYear}
+          onChange={(e) => onYearChange(Number(e.target.value))}
+        >
+          {AVAILABLE_YEARS.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+      </div>
+
       <BudgetOverviewHero
         budgetAnnuelVote={budgetAnnuelVote}
         totalConsomme={totals.totalConsomme}
