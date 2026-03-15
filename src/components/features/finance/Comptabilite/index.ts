@@ -3,6 +3,7 @@ export { ComptaTopBar } from './ComptaTopBar';
 export { ComptaTabs } from './ComptaTabs';
 export { ComptaSidebar } from './ComptaSidebar';
 export { ComptaStats } from './ComptaStats';
+export { ComptaKpiStrip } from './ComptaKpiStrip';
 export { ComptaFilters } from './ComptaFilters';
 export { ComptaInfoBanner } from './ComptaInfoBanner';
 export {

@@ -4,7 +4,7 @@ import { useComptabilitePage } from '@/features/finance/comptabilite';
 import {
   ComptaSidebar,
   ComptaTopBar,
-  ComptaStats,
+  ComptaKpiStrip,
   ComptaFilters,
   ComptaLoadingState,
   ComptaErrorState,
@@ -90,15 +90,11 @@ export default function ComptabilitePage() {
 
           <FinanceAnnexeStats periodId={page.selectedPeriodId} />
 
-          <ComptaStats
-            activeTab={page.activeTab}
+          <ComptaKpiStrip
             totalDebit={page.totalDebit}
             totalCredit={page.totalCredit}
-            totalDepenses={0}
-            totalBudgetPrevu={0}
+            ecrituresCount={page.filteredOperations.length}
             isBalanced={page.isBalanced}
-            ecart={page.ecart}
-            balanceStats={page.balanceStats}
           />
 
           {(page.activeTab === 'grand-livre' || page.activeTab === 'compte-gestion') && (
