@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
-import { HighBar } from '@/components/layout/HighBar';
-import { ModuleSidebar } from '@/components/layout/ModuleSidebar';
+import { UnifiedSidebar } from '@/components/layout/UnifiedSidebar';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { VentesProvider } from '@/providers/VentesProvider';
 import { CoproProvider } from '@/providers/CoproContext';
@@ -30,9 +29,8 @@ export default function DashboardLayout({
             <ToastProvider>
               <SidebarProvider>
                 <div className="app-container">
-                  <HighBar />
+                  <UnifiedSidebar />
                   <AppBody>
-                    <ModuleSidebar />
                     <main className="main-content">
                       <Suspense fallback={<LoadingFallback />}>
                         {children}

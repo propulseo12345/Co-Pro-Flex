@@ -482,21 +482,16 @@ textarea:focus-visible,
 .app-body {
   display: flex;
   flex: 1;
-  padding-top: var(--highbar-height);
+  padding-top: 0;
 }
 
 .main-content {
   flex: 1;
   padding: var(--space-xl);
-  margin-left: var(--sidebar-nav-width);
-  min-height: calc(100vh - var(--highbar-height));
+  margin-left: var(--sidebar-nav-width, 240px);
+  min-height: 100vh;
   overflow-y: auto;
   transition: margin-left var(--transition-base);
-}
-
-/* No sidebar (dashboard) — content takes full width */
-.main-content:only-child {
-  margin-left: 0;
 }
 
 /* Mobile Layout */

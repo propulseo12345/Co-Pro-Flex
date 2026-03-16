@@ -1,0 +1,237 @@
+<h2>Onglet Rapprochement — Design du tableau unifié</h2>
+<p class="subtitle">2 variantes pour le rapprochement bancaire. Cliquez sur votre préféré.</p>
+
+<div class="cards">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #0d1117;">
+      <div style="font-family: system-ui; color: #e6edf3; font-size: 11px;">
+
+        <!-- Recap bar -->
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:1; display:flex; align-items:center; gap:8px; background:#161b22; border-radius:6px; padding:8px 12px;">
+            <div style="width:36px; height:36px; background:#1f6feb20; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#58a6ff; font-size:14px; font-weight:700;">12</div>
+            <div><div style="font-size:8px; color:#8b949e;">Rapprochés</div><div style="font-size:11px; font-weight:600; color:#3fb950;">sur 17</div></div>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; gap:8px; background:#f0883e10; border:1px solid #f0883e30; border-radius:6px; padding:8px 12px;">
+            <div style="width:36px; height:36px; background:#f0883e20; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#f0883e; font-size:14px; font-weight:700;">5</div>
+            <div><div style="font-size:8px; color:#8b949e;">Non rapprochés</div><div style="font-size:11px; font-weight:600; color:#f0883e;">2 340 €</div></div>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; gap:8px; background:#f8514910; border:1px solid #f8514930; border-radius:6px; padding:8px 12px;">
+            <div style="width:36px; height:36px; background:#f8514920; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#f85149; font-size:14px; font-weight:700;">Δ</div>
+            <div><div style="font-size:8px; color:#8b949e;">Écart solde</div><div style="font-size:11px; font-weight:600; color:#f85149;">-320 €</div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; background:#161b22; border-radius:6px; padding:8px 12px;">
+            <div style="width:36px; height:36px; background:#3fb95020; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px;">📊</div>
+            <div><div style="font-size:8px; color:#8b949e;">Progression</div>
+              <div style="width:80px; height:6px; background:#21262d; border-radius:3px; margin-top:3px;">
+                <div style="width:70%; height:100%; background:#3fb950; border-radius:3px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table with inline status -->
+        <div style="background:#161b22; border-radius:8px; padding:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:8px;">
+            <div style="flex:1; padding:5px 8px; background:#0d1117; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:9px;">🔍 Rechercher...</div>
+            <span style="padding:4px 8px; background:#1f6feb33; color:#58a6ff; border-radius:4px; font-size:9px;">Tous</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">Non rapprochés</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">Rapprochés</span>
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:9px;">
+            <tr style="color:#8b949e; border-bottom:1px solid #21262d;">
+              <td style="padding:5px;">Statut</td><td>Date</td><td>Libellé mouvement</td><td style="text-align:right;">Montant</td><td>Écriture liée</td><td>Écart</td><td></td>
+            </tr>
+            <tr style="border-bottom:1px solid #21262d15;">
+              <td style="padding:5px;"><span style="color:#3fb950;">●</span></td>
+              <td>15/03</td>
+              <td>Appel fonds T1 — Lot 4</td>
+              <td style="text-align:right; color:#3fb950;">+1 250 €</td>
+              <td><span style="background:#3fb95015; color:#3fb950; padding:2px 6px; border-radius:3px; font-size:8px;">JB-0342 — 701000</span></td>
+              <td style="color:#3fb950; font-size:8px;">0 €</td>
+              <td><span style="color:#8b949e; font-size:8px; cursor:pointer;">✕</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #21262d15;">
+              <td style="padding:5px;"><span style="color:#3fb950;">●</span></td>
+              <td>12/03</td>
+              <td>Virement SCI Dupont</td>
+              <td style="text-align:right; color:#3fb950;">+3 200 €</td>
+              <td><span style="background:#3fb95015; color:#3fb950; padding:2px 6px; border-radius:3px; font-size:8px;">JB-0339 — 411000</span></td>
+              <td style="color:#3fb950; font-size:8px;">0 €</td>
+              <td><span style="color:#8b949e; font-size:8px; cursor:pointer;">✕</span></td>
+            </tr>
+            <tr style="background:#f0883e08; border-bottom:1px solid #21262d15;">
+              <td style="padding:5px;"><span style="color:#f0883e;">○</span></td>
+              <td>14/03</td>
+              <td>ENGIE — Facture mars</td>
+              <td style="text-align:right; color:#f85149;">-342 €</td>
+              <td style="color:#8b949e; font-size:8px;">—</td>
+              <td></td>
+              <td><span style="color:#58a6ff; cursor:pointer; font-size:9px; font-weight:600;">Rapprocher</span></td>
+            </tr>
+            <tr style="background:#f0883e08; border-bottom:1px solid #21262d15;">
+              <td style="padding:5px;"><span style="color:#f0883e;">○</span></td>
+              <td>10/03</td>
+              <td>Ascenseur OTIS — maintenance</td>
+              <td style="text-align:right; color:#f85149;">-890 €</td>
+              <td style="color:#8b949e; font-size:8px;">—</td>
+              <td></td>
+              <td><span style="color:#58a6ff; cursor:pointer; font-size:9px; font-weight:600;">Rapprocher</span></td>
+            </tr>
+          </table>
+
+          <!-- Inline suggestion panel (expanded for one row) -->
+          <div style="margin-top:8px; background:#0d1117; border:1px solid #1f6feb40; border-radius:6px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-size:10px; font-weight:600; color:#58a6ff;">💡 Suggestions pour "ENGIE — Facture mars" (-342 €)</div>
+              <span style="color:#8b949e; cursor:pointer; font-size:10px;">✕</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:8px; background:#161b22; border:1px solid #30363d; border-radius:4px; padding:6px 10px; cursor:pointer;">
+                <span style="background:#3fb95020; color:#3fb950; padding:2px 6px; border-radius:3px; font-size:8px; font-weight:600;">98%</span>
+                <div style="flex:1;"><div style="font-size:9px;">JB-0341 — ENGIE mars 2026</div><div style="font-size:8px; color:#8b949e;">Débit 342,00 € — 615000 — Journal Achats</div></div>
+                <span style="color:#3fb950; font-size:8px;">Écart: 0 €</span>
+                <button style="background:#1f6feb; color:white; border:none; padding:3px 10px; border-radius:4px; font-size:8px; cursor:pointer;">Rapprocher</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; background:#161b22; border:1px solid #30363d; border-radius:4px; padding:6px 10px; cursor:pointer; opacity:0.7;">
+                <span style="background:#d2992220; color:#d29922; padding:2px 6px; border-radius:3px; font-size:8px; font-weight:600;">45%</span>
+                <div style="flex:1;"><div style="font-size:9px;">JB-0338 — Énergie parties communes</div><div style="font-size:8px; color:#8b949e;">Débit 298,50 € — 614000 — Journal Achats</div></div>
+                <span style="color:#d29922; font-size:8px;">Écart: 43,50 €</span>
+                <button style="background:#21262d; color:#8b949e; border:none; padding:3px 10px; border-radius:4px; font-size:8px; cursor:pointer;">Rapprocher</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Table avec panel suggestions inline</h3>
+      <p>Table unique avec colonne "Écriture liée" (remplie si rapproché, vide sinon). Clic sur "Rapprocher" ouvre un panel de suggestions sous la table avec score de confiance et écart. Barre de progression en haut. Pas de modale.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #0d1117;">
+      <div style="font-family: system-ui; color: #e6edf3; font-size: 11px;">
+
+        <!-- Recap bar (same) -->
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:1; display:flex; align-items:center; gap:8px; background:#161b22; border-radius:6px; padding:8px 12px;">
+            <div style="font-size:8px; color:#8b949e;">Rapprochés</div>
+            <div style="font-size:12px; font-weight:700; color:#3fb950;">12/17</div>
+            <div style="flex:1; height:4px; background:#21262d; border-radius:2px;"><div style="width:70%; height:100%; background:#3fb950; border-radius:2px;"></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; background:#f0883e10; border:1px solid #f0883e30; border-radius:6px; padding:8px 12px;">
+            <span style="color:#f0883e; font-weight:600;">5</span><span style="font-size:9px; color:#f0883e;">non rapprochés</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; background:#f8514910; border:1px solid #f8514930; border-radius:6px; padding:8px 12px;">
+            <span style="font-size:9px; color:#f85149;">Écart: -320 €</span>
+          </div>
+        </div>
+
+        <!-- Split: table left, slide-over right -->
+        <div style="display:grid; grid-template-columns: 1fr 280px; gap:10px;">
+          <!-- Table -->
+          <div style="background:#161b22; border-radius:8px; padding:10px;">
+            <table style="width:100%; border-collapse:collapse; font-size:9px;">
+              <tr style="color:#8b949e; border-bottom:1px solid #21262d;">
+                <td style="padding:5px;"></td><td>Date</td><td>Libellé</td><td style="text-align:right;">Montant</td><td>Statut</td><td></td>
+              </tr>
+              <tr style="border-bottom:1px solid #21262d15;">
+                <td style="padding:5px;"><span style="color:#3fb950;">●</span></td>
+                <td>15/03</td><td>Appel fonds T1</td>
+                <td style="text-align:right; color:#3fb950;">+1 250 €</td>
+                <td><span style="background:#3fb95015; color:#3fb950; padding:1px 5px; border-radius:3px; font-size:8px;">JB-0342</span></td>
+                <td></td>
+              </tr>
+              <tr style="border-bottom:1px solid #21262d15;">
+                <td style="padding:5px;"><span style="color:#3fb950;">●</span></td>
+                <td>12/03</td><td>Virement SCI</td>
+                <td style="text-align:right; color:#3fb950;">+3 200 €</td>
+                <td><span style="background:#3fb95015; color:#3fb950; padding:1px 5px; border-radius:3px; font-size:8px;">JB-0339</span></td>
+                <td></td>
+              </tr>
+              <tr style="background:#1f6feb10; border:1px solid #1f6feb40; border-bottom:1px solid #21262d15;">
+                <td style="padding:5px;"><span style="color:#f0883e;">○</span></td>
+                <td>14/03</td><td style="font-weight:600;">ENGIE — mars</td>
+                <td style="text-align:right; color:#f85149; font-weight:600;">-342 €</td>
+                <td style="color:#8b949e;">—</td>
+                <td><span style="color:#58a6ff;">→</span></td>
+              </tr>
+              <tr style="background:#f0883e08; border-bottom:1px solid #21262d15;">
+                <td style="padding:5px;"><span style="color:#f0883e;">○</span></td>
+                <td>10/03</td><td>OTIS maintenance</td>
+                <td style="text-align:right; color:#f85149;">-890 €</td>
+                <td style="color:#8b949e;">—</td>
+                <td></td>
+              </tr>
+              <tr style="background:#f0883e08;">
+                <td style="padding:5px;"><span style="color:#f0883e;">○</span></td>
+                <td>08/03</td><td>Prélèvement EDF</td>
+                <td style="text-align:right; color:#f85149;">-156 €</td>
+                <td style="color:#8b949e;">—</td>
+                <td></td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Slide-over panel -->
+          <div style="background:#161b22; border:1px solid #1f6feb40; border-radius:8px; padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="font-size:10px; font-weight:600; color:#58a6ff;">Rapprocher</div>
+              <span style="color:#8b949e; cursor:pointer;">✕</span>
+            </div>
+
+            <!-- Selected movement -->
+            <div style="background:#0d1117; border-radius:6px; padding:8px; margin-bottom:10px;">
+              <div style="font-size:8px; color:#8b949e; margin-bottom:2px;">Mouvement sélectionné</div>
+              <div style="font-size:10px; font-weight:600;">ENGIE — Facture mars</div>
+              <div style="font-size:12px; color:#f85149; font-weight:700;">-342,00 €</div>
+              <div style="font-size:8px; color:#8b949e;">14/03/2026</div>
+            </div>
+
+            <!-- Suggestions -->
+            <div style="font-size:9px; color:#8b949e; margin-bottom:6px;">Écritures suggérées</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="background:#0d1117; border:1px solid #3fb95040; border-radius:6px; padding:8px; cursor:pointer;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <span style="font-size:9px; font-weight:600;">JB-0341</span>
+                  <span style="background:#3fb95020; color:#3fb950; padding:1px 5px; border-radius:3px; font-size:7px; font-weight:600;">98% match</span>
+                </div>
+                <div style="font-size:8px; color:#8b949e;">ENGIE mars 2026</div>
+                <div style="font-size:8px; color:#8b949e;">615000 — Achats</div>
+                <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                  <span style="font-size:10px; color:#f85149; font-weight:600;">-342,00 €</span>
+                  <span style="font-size:8px; color:#3fb950;">Écart: 0 €</span>
+                </div>
+                <button style="width:100%; margin-top:6px; background:#1f6feb; color:white; border:none; padding:4px; border-radius:4px; font-size:8px; cursor:pointer;">Rapprocher</button>
+              </div>
+              <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:8px; cursor:pointer; opacity:0.6;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <span style="font-size:9px; font-weight:600;">JB-0338</span>
+                  <span style="background:#d2992220; color:#d29922; padding:1px 5px; border-radius:3px; font-size:7px; font-weight:600;">45%</span>
+                </div>
+                <div style="font-size:8px; color:#8b949e;">Énergie parties communes</div>
+                <div style="font-size:8px; color:#8b949e;">614000 — Achats</div>
+                <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                  <span style="font-size:10px; color:#f85149;">-298,50 €</span>
+                  <span style="font-size:8px; color:#d29922;">Écart: 43,50 €</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Table + Panel latéral slide-over</h3>
+      <p>Table simplifiée à gauche (clic sur une ligne sélectionne). Panel latéral droit qui s'ouvre avec le mouvement sélectionné + suggestions d'écritures classées par score. La ligne active est mise en surbrillance. Panel fermable, pas de modale.</p>
+    </div>
+  </div>
+
+</div>

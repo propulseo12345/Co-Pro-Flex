@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoProFlex — Mouvements Bancaires — Workflow Unifié</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0d14; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+  /* Sidebar */
+  .sidebar { width: 220px; background: #0f1219; border-right: 1px solid #1e293b; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10; }
+  .sidebar-logo { padding: 16px 20px; font-weight: 700; font-size: 18px; color: #60a5fa; border-bottom: 1px solid #1e293b; }
+  .sidebar-logo span { color: #94a3b8; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #64748b; font-size: 13px; cursor: pointer; }
+  .sidebar-item:hover { background: #1e293b40; color: #94a3b8; }
+  .sidebar-item.active { background: #3b82f610; color: #60a5fa; border-right: 2px solid #3b82f6; }
+  .sidebar-sub { padding: 6px 20px 6px 48px; font-size: 12px; color: #64748b; cursor: pointer; }
+  .sidebar-sub.active { color: #60a5fa; font-weight: 500; }
+  .sidebar-section { padding: 8px 20px 4px; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
+
+  /* Main */
+  .main { margin-left: 220px; flex: 1; min-height: 100vh; }
+
+  /* Header */
+  .header { background: #0f1219; border-bottom: 1px solid #1e293b; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5; }
+  .header-left h1 { font-size: 16px; font-weight: 600; }
+  .header-breadcrumb { font-size: 12px; color: #64748b; margin-bottom: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+  .btn:hover { border-color: #475569; color: #e2e8f0; }
+  .btn-primary { background: #3b82f6; border-color: #3b82f6; color: white; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-success { background: #22c55e; border-color: #22c55e; color: #0f1219; font-weight: 600; }
+  .btn-success:hover { background: #16a34a; }
+  .sync-status { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 11px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+
+  .page { padding: 20px 24px; }
+
+  /* Account pills */
+  .account-pills { display: flex; gap: 12px; margin-bottom: 16px; }
+  .account-pill { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 14px 20px; cursor: pointer; flex: 1; max-width: 300px; }
+  .account-pill.active { border-color: #3b82f6; background: #3b82f610; }
+  .account-pill-name { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  .account-pill-balance { font-size: 22px; font-weight: 700; }
+  .account-pill-iban { font-size: 10px; color: #475569; margin-top: 4px; font-family: monospace; }
+
+  /* MODE SWITCHER — vue table vs workflow */
+  .mode-switcher { display: flex; gap: 0; margin-bottom: 16px; background: #111827; border: 1px solid #1e293b; border-radius: 8px; padding: 3px; width: fit-content; }
+  .mode-btn { padding: 8px 20px; border-radius: 6px; font-size: 12px; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.15s; border: none; background: transparent; }
+  .mode-btn:hover { color: #94a3b8; }
+  .mode-btn.active { background: #1e293b; color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .mode-btn .badge-count { background: #ef4444; color: white; padding: 1px 6px; border-radius: 8px; font-size: 9px; font-weight: 600; }
+  .mode-btn .badge-info { background: #3b82f630; color: #60a5fa; padding: 1px 6px; border-radius: 8px; font-size: 9px; }
+
+  /* Workflow tabs */
+  .workflow-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #1e293b; }
+  .workflow-tab { padding: 10px 20px; color: #64748b; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; display: flex; align-items: center; gap: 8px; }
+  .workflow-tab:hover { color: #94a3b8; }
+  .workflow-tab.active { color: #60a5fa; border-bottom-color: #3b82f6; }
+  .workflow-tab .tab-count { background: #1e293b; color: #94a3b8; padding: 1px 8px; border-radius: 10px; font-size: 10px; }
+  .workflow-tab.active .tab-count { background: #3b82f620; color: #60a5fa; }
+  .workflow-tab.done .tab-count { background: #22c55e20; color: #22c55e; }
+
+  /* Summary bar */
+  .summary-bar { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 24px; align-items: center; }
+  .summary-stat { text-align: center; }
+  .summary-stat-value { font-size: 24px; font-weight: 700; }
+  .summary-stat-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .summary-divider { width: 1px; height: 40px; background: #1e293b; }
+  .summary-progress { flex: 1; }
+  .summary-progress-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .summary-progress-label { font-size: 12px; color: #94a3b8; }
+  .summary-progress-pct { font-size: 12px; color: #22c55e; font-weight: 600; }
+  .progress-bar { height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .progress-fill.green { background: #22c55e; }
+  .progress-fill.blue { background: #3b82f6; }
+  .progress-fill.orange { background: #f59e0b; }
+
+  /* Batch table */
+  .table-wrap { background: #111827; border: 1px solid #1e293b; border-radius: 10px; overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; padding: 10px 14px; background: #0f1219; color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; border-bottom: 1px solid #1e293b; }
+  .table td { padding: 10px 14px; border-bottom: 1px solid #0f121940; font-size: 13px; }
+  .table tr:hover { background: #1e293b20; }
+  .table tr.matched { background: #22c55e05; }
+  .table tr.suggested { background: #3b82f605; }
+  .table tr.manual { background: #f59e0b05; }
+
+  .amount { font-family: 'SF Mono', monospace; font-size: 13px; font-weight: 500; }
+  .amount.credit { color: #22c55e; }
+  .amount.debit { color: #ef4444; }
+
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+  .badge-high { background: #22c55e20; color: #22c55e; }
+  .badge-medium { background: #f59e0b15; color: #f59e0b; }
+  .badge-low { background: #64748b20; color: #94a3b8; }
+  .badge-manual { background: #1e293b; color: #64748b; }
+  .badge-done { background: #22c55e15; color: #22c55e; }
+
+  .compte-tag { background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; }
+  .entity-link { color: #60a5fa; font-size: 11px; cursor: pointer; }
+  .entity-link:hover { text-decoration: underline; }
+
+  .batch-select { background: #1e293b; border: 1px solid #334155; color: #e2e8f0; padding: 5px 8px; border-radius: 4px; font-size: 11px; min-width: 160px; }
+
+  /* Match zone for rapprochement */
+  .match-zone { display: flex; align-items: center; gap: 6px; }
+  .match-arrow { color: #3b82f6; font-size: 16px; }
+  .match-target { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 4px 10px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
+  .match-target.matched { border-color: #22c55e40; background: #22c55e08; }
+  .match-target .ecart { font-size: 9px; color: #64748b; }
+  .match-target .ecart.zero { color: #22c55e; }
+
+  /* Bottom action bar */
+  .action-bar { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 12px 20px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .action-bar-left { display: flex; align-items: center; gap: 16px; }
+  .action-bar-info { font-size: 12px; color: #94a3b8; }
+  .action-bar-info strong { color: #e2e8f0; }
+
+  /* Filters mini */
+  .filters-mini { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+  .filter-chip { padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; border: 1px solid #1e293b; background: #111827; color: #94a3b8; }
+  .filter-chip.active { border-color: #3b82f6; background: #3b82f610; color: #60a5fa; }
+  .filter-chip.warning.active { border-color: #f59e0b; background: #f59e0b10; color: #f59e0b; }
+  .filter-search { background: #111827; border: 1px solid #1e293b; color: #e2e8f0; padding: 5px 10px; border-radius: 6px; font-size: 11px; width: 200px; }
+
+  /* Import zone */
+  .import-zone { border: 2px dashed #334155; border-radius: 10px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .import-zone:hover { border-color: #3b82f6; background: #3b82f605; }
+  .import-zone-icon { font-size: 36px; margin-bottom: 12px; }
+  .import-zone-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .import-zone-sub { font-size: 12px; color: #64748b; }
+  .import-formats { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+  .import-format { background: #1e293b; padding: 4px 10px; border-radius: 4px; font-size: 10px; color: #94a3b8; }
+
+  /* Clôture */
+  .cloture-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cloture-card { background: #111827; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; }
+  .cloture-card.ready { border-color: #22c55e40; }
+  .cloture-card.blocked { border-color: #ef444440; }
+  .cloture-month { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .cloture-checks { list-style: none; font-size: 12px; }
+  .cloture-checks li { padding: 3px 0; display: flex; align-items: center; gap: 6px; }
+  .cloture-checks .check-ok { color: #22c55e; }
+  .cloture-checks .check-ko { color: #ef4444; }
+  .cloture-checks .check-text { color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">CoProFlex <span>Résidence Les Lilas</span></div>
+  <div class="sidebar-nav">
+    <div class="sidebar-item"><span style="width:18px;text-align:center;">⌂</span> Dashboard</div>
+    <div class="sidebar-item"><span style="width:18px;text-align:center;">👥</span> Copropriétaires</div>
+    <div class="sidebar-section">Gestion</div>
+    <div class="sidebar-item active"><span style="width:18px;text-align:center;">€</span> Finance</div>
+    <div class="sidebar-sub active">↳ Mouvements bancaires</div>
+    <div class="sidebar-sub">↳ Budgets</div>
+    <div class="sidebar-sub">↳ Appels de fonds</div>
+    <div class="sidebar-sub">↳ Factures</div>
+    <div class="sidebar-item"><span style="width:18px;text-align:center;">🔧</span> Maintenance</div>
+    <div class="sidebar-item"><span style="width:18px;text-align:center;">📄</span> Documents</div>
+    <div class="sidebar-item"><span style="width:18px;text-align:center;">💬</span> Communication</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="header">
+    <div class="header-left">
+      <div class="header-breadcrumb">Finance / Mouvements bancaires</div>
+      <h1>Mouvements bancaires</h1>
+    </div>
+    <div class="header-right">
+      <div class="sync-status"><span class="sync-dot"></span> Sync il y a 2h 30min</div>
+      <button class="btn">⟳ Rafraîchir</button>
+      <button class="btn-primary btn">+ Saisie manuelle</button>
+    </div>
+  </header>
+
+  <div class="page">
+    <!-- Account pills -->
+    <div class="account-pills">
+      <div class="account-pill active">
+        <div class="account-pill-name">Compte courant</div>
+        <div class="account-pill-balance">10 533,31 €</div>
+        <div class="account-pill-iban">FR76 •••• •••• •••• 4521</div>
+      </div>
+      <div class="account-pill">
+        <div class="account-pill-name">Fonds travaux (ALUR)</div>
+        <div class="account-pill-balance">28 450,00 €</div>
+        <div class="account-pill-iban">FR76 •••• •••• •••• 8903</div>
+      </div>
+    </div>
+
+    <!-- ===== MODE SWITCHER ===== -->
+    <div class="mode-switcher">
+      <button class="mode-btn" onclick="showMode('table')">📋 Vue table</button>
+      <button class="mode-btn active" onclick="showMode('workflow')">⚡ Workflow <span class="badge-count">10</span></button>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- MODE TABLE (collapsed) -->
+    <!-- ================================================ -->
+    <div id="mode-table" style="display:none;">
+      <div style="background:#1e293b;border-radius:8px;padding:40px;text-align:center;color:#64748b;">
+        <div style="font-size:14px;margin-bottom:4px;">Vue table classique — consultation des mouvements</div>
+        <div style="font-size:12px;">Identique à la vue actuelle (table, filtres, recherche)</div>
+      </div>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- MODE WORKFLOW -->
+    <!-- ================================================ -->
+    <div id="mode-workflow">
+
+      <!-- Summary bar -->
+      <div class="summary-bar">
+        <div class="summary-stat">
+          <div class="summary-stat-value" style="color:#f59e0b;">3</div>
+          <div class="summary-stat-label">Non catégorisés</div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" style="color:#3b82f6;">4</div>
+          <div class="summary-stat-label">Non rapprochés</div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" style="color:#22c55e;">5</div>
+          <div class="summary-stat-label">Auto-matchés</div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" style="color:#e2e8f0;">44,00 €</div>
+          <div class="summary-stat-label">Écart soldes</div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-progress">
+          <div class="summary-progress-header">
+            <span class="summary-progress-label">Progression mensuelle</span>
+            <span class="summary-progress-pct">67%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill green" style="width:67%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflow tabs -->
+      <div class="workflow-tabs">
+        <div class="workflow-tab" onclick="showTab('import')">
+          📥 Import <span class="tab-count">—</span>
+        </div>
+        <div class="workflow-tab active" onclick="showTab('categorisation')">
+          🏷 Catégorisation <span class="tab-count">3</span>
+        </div>
+        <div class="workflow-tab" onclick="showTab('rapprochement')">
+          ⟷ Rapprochement <span class="tab-count">4</span>
+        </div>
+        <div class="workflow-tab" onclick="showTab('cloture')">
+          ✓ Clôture <span class="tab-count">—</span>
+        </div>
+      </div>
+
+      <!-- ===== TAB: IMPORT ===== -->
+      <div id="tab-import" style="display:none;">
+        <div class="import-zone">
+          <div class="import-zone-icon">📄</div>
+          <div class="import-zone-title">Glissez un relevé bancaire ou cliquez pour parcourir</div>
+          <div class="import-zone-sub">Le fichier sera analysé et les mouvements pré-catégorisés automatiquement</div>
+          <div class="import-formats">
+            <span class="import-format">CSV</span>
+            <span class="import-format">OFX</span>
+            <span class="import-format">CFONB 120</span>
+            <span class="import-format">QIF</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;background:#111827;border:1px solid #1e293b;border-radius:8px;padding:16px;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">Historique d'imports</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e293b;font-size:12px;">
+            <span>releve_mars_2025.csv</span>
+            <span style="color:#94a3b8;">12 mouvements importés</span>
+            <span style="color:#64748b;">15/03/2025 09:42</span>
+            <span class="badge badge-done">✓ Traité</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px;">
+            <span>releve_fev_2025.ofx</span>
+            <span style="color:#94a3b8;">18 mouvements importés</span>
+            <span style="color:#64748b;">02/03/2025 14:15</span>
+            <span class="badge badge-done">✓ Traité</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: CATEGORISATION ===== -->
+      <div id="tab-categorisation">
+        <div class="filters-mini">
+          <span class="filter-chip active">Tous (7)</span>
+          <span class="filter-chip warning active">⚠ Non catégorisés (3)</span>
+          <span class="filter-chip">Auto-suggérés (5)</span>
+          <span style="flex:1;"></span>
+          <input class="filter-search" placeholder="Filtrer..." />
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:36px;"><input type="checkbox" checked style="accent-color:#22c55e;"></th>
+                <th>Date</th>
+                <th>Libellé</th>
+                <th style="text-align:right;">Montant</th>
+                <th>Suggestion compte</th>
+                <th>Confiance</th>
+                <th>Entité détectée</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+                <td style="color:#94a3b8;font-size:12px;">15/03</td>
+                <td>VIR SEPA M. Lambert</td>
+                <td style="text-align:right;"><span class="amount credit">+750,00</span></td>
+                <td><span class="compte-tag">701</span> Appels de fonds</td>
+                <td><span class="badge badge-high">Haute</span></td>
+                <td><span class="entity-link">AF-2025-T1 Lot 5</span></td>
+                <td><span class="badge badge-high">✓ Auto</span></td>
+              </tr>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+                <td style="color:#94a3b8;font-size:12px;">14/03</td>
+                <td>PRLV VEOLIA</td>
+                <td style="text-align:right;"><span class="amount debit">-156,80</span></td>
+                <td><span class="compte-tag">601</span> Eau</td>
+                <td><span class="badge badge-high">Haute</span></td>
+                <td><span class="entity-link">FAC-VEOLIA-2025-03</span></td>
+                <td><span class="badge badge-high">✓ Auto</span></td>
+              </tr>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+                <td style="color:#94a3b8;font-size:12px;">12/03</td>
+                <td>PRLV AXA ASSURANCE</td>
+                <td style="text-align:right;"><span class="amount debit">-892,40</span></td>
+                <td><span class="compte-tag">616</span> Assurance</td>
+                <td><span class="badge badge-high">Haute</span></td>
+                <td><span class="entity-link">FAC-AXA-2025-03</span></td>
+                <td><span class="badge badge-high">✓ Auto</span></td>
+              </tr>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#f59e0b;"></td>
+                <td style="color:#94a3b8;font-size:12px;">13/03</td>
+                <td>VIR REF 12345</td>
+                <td style="text-align:right;"><span class="amount credit">+500,00</span></td>
+                <td><span class="compte-tag">701</span> Appels de fonds</td>
+                <td><span class="badge badge-medium">Moyenne</span></td>
+                <td style="color:#64748b;">—</td>
+                <td><span class="badge badge-medium">? Suggestion</span></td>
+              </tr>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#f59e0b;"></td>
+                <td style="color:#94a3b8;font-size:12px;">10/03</td>
+                <td>PRLV ENGIE GAZ</td>
+                <td style="text-align:right;"><span class="amount debit">-234,10</span></td>
+                <td><span class="compte-tag">603</span> Chauffage</td>
+                <td><span class="badge badge-medium">Moyenne</span></td>
+                <td style="color:#64748b;">—</td>
+                <td><span class="badge badge-medium">? Suggestion</span></td>
+              </tr>
+              <tr class="manual">
+                <td><input type="checkbox" disabled></td>
+                <td style="color:#94a3b8;font-size:12px;">08/03</td>
+                <td style="font-weight:500;">PRLV INCONNU REF987</td>
+                <td style="text-align:right;"><span class="amount debit">-78,90</span></td>
+                <td><select class="batch-select"><option>— Choisir un compte —</option><option>601 Eau</option><option>602 Électricité</option><option>603 Chauffage</option><option>611 Nettoyage</option><option>614 Maintenance</option><option>615 Réparations</option><option>616 Assurance</option><option>621 Honoraires syndic</option><option>671 Travaux votés AG</option></select></td>
+                <td><span class="badge badge-manual">Manuel</span></td>
+                <td style="color:#64748b;">—</td>
+                <td><span class="badge badge-manual">⚠ À traiter</span></td>
+              </tr>
+              <tr class="manual">
+                <td><input type="checkbox" disabled></td>
+                <td style="color:#94a3b8;font-size:12px;">05/03</td>
+                <td style="font-weight:500;">CHQ 0045678</td>
+                <td style="text-align:right;"><span class="amount debit">-1 500,00</span></td>
+                <td><select class="batch-select"><option>— Choisir un compte —</option><option>615 Réparations</option><option>621 Honoraires syndic</option><option>671 Travaux votés AG</option><option>672 Travaux urgents</option></select></td>
+                <td><span class="badge badge-manual">Manuel</span></td>
+                <td style="color:#64748b;">—</td>
+                <td><span class="badge badge-manual">⚠ À traiter</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <span class="action-bar-info"><strong>5</strong> sélectionnés sur 7</span>
+            <div class="progress-bar" style="width:120px;height:6px;"><div class="progress-fill green" style="width:71%;"></div></div>
+            <span style="font-size:11px;color:#94a3b8;">5/7 auto-suggérés</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn">Tout désélectionner</button>
+            <button class="btn-success btn" style="border:none;">✓ Appliquer 5 suggestions</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: RAPPROCHEMENT ===== -->
+      <div id="tab-rapprochement" style="display:none;">
+        <div class="filters-mini">
+          <span class="filter-chip active">Non rapprochés (4)</span>
+          <span class="filter-chip">Rapprochés ce mois (8)</span>
+          <span style="flex:1;"></span>
+          <span style="font-size:11px;color:#64748b;">Écart banque/compta : </span>
+          <span style="font-size:13px;font-weight:600;color:#f59e0b;">44,00 €</span>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:36px;"><input type="checkbox" style="accent-color:#22c55e;"></th>
+                <th>Date</th>
+                <th>Mouvement bancaire</th>
+                <th style="text-align:right;">Montant</th>
+                <th style="text-align:center;">↔</th>
+                <th>Écriture comptable suggérée</th>
+                <th style="text-align:right;">Écart</th>
+                <th>Confiance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+                <td style="color:#94a3b8;font-size:12px;">14/03</td>
+                <td>PRLV EDF Parties communes</td>
+                <td style="text-align:right;"><span class="amount debit">-234,50</span></td>
+                <td style="text-align:center;">
+                  <div class="match-zone"><span class="match-arrow">⟷</span></div>
+                </td>
+                <td>
+                  <div class="match-target matched">
+                    <span class="compte-tag">602</span>
+                    <span>FAC-EDF-2025-03</span>
+                    <span class="amount debit" style="font-size:11px;">234,50 C</span>
+                  </div>
+                </td>
+                <td style="text-align:right;"><span style="color:#22c55e;font-size:12px;font-family:monospace;">0,00 €</span></td>
+                <td><span class="badge badge-high">Haute</span></td>
+              </tr>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+                <td style="color:#94a3b8;font-size:12px;">12/03</td>
+                <td>PRLV OTIS Ascenseur</td>
+                <td style="text-align:right;"><span class="amount debit">-189,00</span></td>
+                <td style="text-align:center;">
+                  <div class="match-zone"><span class="match-arrow">⟷</span></div>
+                </td>
+                <td>
+                  <div class="match-target matched">
+                    <span class="compte-tag">614</span>
+                    <span>FAC-OTIS-2025-03</span>
+                    <span class="amount debit" style="font-size:11px;">189,00 C</span>
+                  </div>
+                </td>
+                <td style="text-align:right;"><span style="color:#22c55e;font-size:12px;font-family:monospace;">0,00 €</span></td>
+                <td><span class="badge badge-high">Haute</span></td>
+              </tr>
+              <tr class="suggested">
+                <td><input type="checkbox" checked style="accent-color:#f59e0b;"></td>
+                <td style="color:#94a3b8;font-size:12px;">11/03</td>
+                <td>VIR SEPA Mme Martin</td>
+                <td style="text-align:right;"><span class="amount credit">+1 200,00</span></td>
+                <td style="text-align:center;">
+                  <div class="match-zone"><span class="match-arrow">⟷</span></div>
+                </td>
+                <td>
+                  <div class="match-target">
+                    <span class="compte-tag">701</span>
+                    <span>AF-2025-T1 Lot 7</span>
+                    <span class="amount credit" style="font-size:11px;">1 200,00 D</span>
+                  </div>
+                </td>
+                <td style="text-align:right;"><span style="color:#22c55e;font-size:12px;font-family:monospace;">0,00 €</span></td>
+                <td><span class="badge badge-medium">Moyenne</span></td>
+              </tr>
+              <tr class="manual">
+                <td><input type="checkbox" disabled></td>
+                <td style="color:#94a3b8;font-size:12px;">05/03</td>
+                <td style="font-weight:500;">CHQ 0045678</td>
+                <td style="text-align:right;"><span class="amount debit">-1 500,00</span></td>
+                <td style="text-align:center;">
+                  <div class="match-zone"><span class="match-arrow" style="color:#64748b;">⟷</span></div>
+                </td>
+                <td>
+                  <select class="batch-select" style="width:100%;">
+                    <option>— Sélectionner une écriture —</option>
+                    <option>OD-2025-001 | Opération diverse | 1 456,00 D</option>
+                    <option>FAC-SYNDIC-2025-01 | Honoraires | 1 500,00 C</option>
+                  </select>
+                </td>
+                <td style="text-align:right;"><span style="color:#64748b;font-size:12px;">—</span></td>
+                <td><span class="badge badge-manual">Manuel</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <span class="action-bar-info"><strong>3</strong> matchs prêts à valider</span>
+            <span style="font-size:11px;color:#94a3b8;">|</span>
+            <span style="font-size:11px;color:#94a3b8;">Écart résiduel après validation : <strong style="color:#22c55e;">0,00 €</strong></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn">↕ Créer écriture</button>
+            <button class="btn-success btn" style="border:none;">✓ Valider 3 rapprochements</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: CLOTURE ===== -->
+      <div id="tab-cloture" style="display:none;">
+        <div style="color:#94a3b8;font-size:12px;margin-bottom:16px;">
+          Vérification des prérequis pour la clôture mensuelle. Tous les mouvements doivent être catégorisés et rapprochés.
+        </div>
+        <div class="cloture-grid">
+          <div class="cloture-card ready">
+            <div class="cloture-month" style="color:#22c55e;">Janvier 2025</div>
+            <ul class="cloture-checks">
+              <li><span class="check-ok">✓</span><span class="check-text">12/12 catégorisés</span></li>
+              <li><span class="check-ok">✓</span><span class="check-text">12/12 rapprochés</span></li>
+              <li><span class="check-ok">✓</span><span class="check-text">Écart : 0,00 €</span></li>
+            </ul>
+            <div style="margin-top:10px;"><span class="badge badge-done">✓ Clôturé le 05/02</span></div>
+          </div>
+          <div class="cloture-card ready">
+            <div class="cloture-month" style="color:#22c55e;">Février 2025</div>
+            <ul class="cloture-checks">
+              <li><span class="check-ok">✓</span><span class="check-text">18/18 catégorisés</span></li>
+              <li><span class="check-ok">✓</span><span class="check-text">18/18 rapprochés</span></li>
+              <li><span class="check-ok">✓</span><span class="check-text">Écart : 0,00 €</span></li>
+            </ul>
+            <div style="margin-top:10px;"><span class="badge badge-done">✓ Clôturé le 04/03</span></div>
+          </div>
+          <div class="cloture-card blocked">
+            <div class="cloture-month" style="color:#f59e0b;">Mars 2025</div>
+            <ul class="cloture-checks">
+              <li><span class="check-ko">✗</span><span class="check-text">9/12 catégorisés</span></li>
+              <li><span class="check-ko">✗</span><span class="check-text">8/12 rapprochés</span></li>
+              <li><span class="check-ko">✗</span><span class="check-text">Écart : 44,00 €</span></li>
+            </ul>
+            <div style="margin-top:10px;">
+              <button class="btn" style="font-size:11px;padding:4px 12px;">Traiter les 3 non catégorisés →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /mode-workflow -->
+  </div>
+</div>
+
+<script>
+function showMode(mode) {
+  document.getElementById('mode-table').style.display = mode === 'table' ? 'block' : 'none';
+  document.getElementById('mode-workflow').style.display = mode === 'workflow' ? 'block' : 'none';
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function showTab(tab) {
+  ['import','categorisation','rapprochement','cloture'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.workflow-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<h2>Flow de catégorisation des mouvements</h2>
+<p class="subtitle">Comment le syndic catégorise un mouvement non identifié ?</p>
+
+<div class="cards">
+  <!-- Option A: Modal (current) -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding: 16px; font-family: system-ui; font-size: 13px;">
+        <!-- Background dimmed table -->
+        <div style="opacity: 0.3; margin-bottom: 8px;">
+          <div style="background: #0f1219; padding: 6px 10px; border-radius: 4px; color: #e2e8f0; font-size: 11px;">
+            VIR SEPA M. Dupont — +850,00 €
+          </div>
+          <div style="background: #1a1d2e; padding: 6px 10px; border-radius: 4px; color: #e2e8f0; font-size: 11px; margin-top: 2px;">
+            PRLV EDF — -234,50 €
+          </div>
+        </div>
+        <!-- Modal overlay -->
+        <div style="background: #111827; border: 1px solid #334155; border-radius: 12px; padding: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="color: #e2e8f0; font-weight: 600; font-size: 13px;">Catégoriser le mouvement</span>
+            <span style="color: #64748b; cursor: pointer;">✕</span>
+          </div>
+          <div style="background: #1a1d2e; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+            <div style="color: #94a3b8; font-size: 10px;">Mouvement sélectionné</div>
+            <div style="display: flex; justify-content: space-between; color: #e2e8f0; font-size: 12px; margin-top: 4px;">
+              <span>VIR REF 12345</span><span style="color: #22c55e;">+500,00 €</span>
+            </div>
+          </div>
+          <div style="color: #94a3b8; font-size: 10px; margin-bottom: 6px;">SUGGESTIONS</div>
+          <div style="background: #1a2332; border: 1px solid #22c55e40; border-radius: 6px; padding: 8px; margin-bottom: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="color: #e2e8f0; font-size: 11px;">701 — Appels de fonds</div>
+                <div style="color: #64748b; font-size: 9px;">Montant correspond à AF-2025-T1 Lot 12</div>
+              </div>
+              <span style="background: #22c55e30; color: #22c55e; padding: 1px 6px; border-radius: 10px; font-size: 9px;">Haute</span>
+            </div>
+          </div>
+          <div style="background: #1a2332; border: 1px solid #334155; border-radius: 6px; padding: 8px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="color: #e2e8f0; font-size: 11px;">714 — Produits divers</div>
+                <div style="color: #64748b; font-size: 9px;">Pattern libellé "VIR"</div>
+              </div>
+              <span style="background: #f59e0b30; color: #f59e0b; padding: 1px 6px; border-radius: 10px; font-size: 9px;">Basse</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <select style="flex: 1; background: #1e293b; border: 1px solid #334155; color: #e2e8f0; padding: 6px; border-radius: 6px; font-size: 11px;">
+              <option>701 — Appels de fonds</option>
+            </select>
+            <button style="background: #3b82f6; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 11px; cursor: pointer;">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Modal centrée (actuel)</h3>
+      <p>Modal avec suggestions + dropdown override. Bloque la vue table. Un mouvement à la fois. Simple mais lent pour traiter 20+ mouvements non catégorisés.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Inline -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding: 16px; font-family: system-ui; font-size: 13px;">
+        <div style="border: 1px solid #334155; border-radius: 8px; overflow: hidden;">
+          <!-- Normal row -->
+          <div style="padding: 8px 12px; background: #0f1219; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #22c55e; font-size: 10px;">●</span>
+              <span style="color: #e2e8f0; font-size: 12px;">VIR SEPA Dupont</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #94a3b8; font-size: 10px; background: #1e293b; padding: 1px 6px; border-radius: 4px;">701</span>
+              <span style="color: #22c55e; font-size: 12px;">+850,00 €</span>
+            </div>
+          </div>
+          <!-- Expanded inline row -->
+          <div style="background: #111827; border-bottom: 1px solid #1e293b; border-left: 3px solid #f59e0b;">
+            <div style="padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; background: #1a1d2e;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: #f59e0b; font-size: 10px;">○</span>
+                <span style="color: #e2e8f0; font-size: 12px; font-weight: 600;">VIR REF 12345</span>
+              </div>
+              <span style="color: #22c55e; font-size: 12px;">+500,00 €</span>
+            </div>
+            <div style="padding: 8px 12px; display: flex; gap: 6px; flex-wrap: wrap;">
+              <button style="background: #22c55e20; color: #22c55e; border: 1px solid #22c55e40; padding: 4px 10px; border-radius: 16px; font-size: 10px; cursor: pointer;">
+                701 Appels de fonds <span style="opacity: 0.6;">• Haute</span>
+              </button>
+              <button style="background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 4px 10px; border-radius: 16px; font-size: 10px; cursor: pointer;">
+                714 Produits divers <span style="opacity: 0.6;">• Basse</span>
+              </button>
+              <button style="background: #1e293b; color: #64748b; border: 1px dashed #334155; padding: 4px 10px; border-radius: 16px; font-size: 10px; cursor: pointer;">
+                + Autre compte...
+              </button>
+            </div>
+          </div>
+          <!-- Next uncategorized -->
+          <div style="padding: 8px 12px; background: #0f1219; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #f59e0b; font-size: 10px;">○</span>
+              <span style="color: #e2e8f0; font-size: 12px;">PRLV INCONNU</span>
+            </div>
+            <span style="color: #ef4444; font-size: 12px;">-78,90 €</span>
+          </div>
+          <!-- Normal row -->
+          <div style="padding: 8px 12px; background: #1a1d2e; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #22c55e; font-size: 10px;">●</span>
+              <span style="color: #e2e8f0; font-size: 12px;">PRLV EDF</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #94a3b8; font-size: 10px; background: #1e293b; padding: 1px 6px; border-radius: 4px;">602</span>
+              <span style="color: #ef4444; font-size: 12px;">-234,50 €</span>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom bar -->
+        <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-size: 10px;">2 non catégorisés restants</span>
+          <div style="display: flex; gap: 6px;">
+            <button style="background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 3px 10px; border-radius: 4px; font-size: 10px; cursor: pointer;">↑ Préc.</button>
+            <button style="background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 3px 10px; border-radius: 4px; font-size: 10px; cursor: pointer;">↓ Suiv.</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Inline expandable (pills cliquables)</h3>
+      <p>La ligne se déplie dans la table. Suggestions en pills cliquables (1 clic = catégorisé). Navigation Préc/Suiv pour enchaîner. Pas de modal, pas de contexte perdu. Rapide pour traiter en batch.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Batch -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding: 16px; font-family: system-ui; font-size: 13px;">
+        <!-- Header -->
+        <div style="background: #1e293b; border-radius: 8px 8px 0 0; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; border-bottom: none;">
+          <div>
+            <span style="color: #e2e8f0; font-weight: 600; font-size: 12px;">Mode catégorisation rapide</span>
+            <span style="color: #64748b; font-size: 10px; margin-left: 8px;">7 mouvements à traiter</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button style="background: #22c55e; color: #0f1219; border: none; padding: 4px 12px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer;">Appliquer suggestions (5)</button>
+            <button style="background: #334155; color: #94a3b8; border: none; padding: 4px 12px; border-radius: 4px; font-size: 10px; cursor: pointer;">Ignorer tout</button>
+          </div>
+        </div>
+        <!-- Batch table -->
+        <div style="border: 1px solid #334155; border-radius: 0 0 8px 8px; overflow: hidden;">
+          <div style="display: grid; grid-template-columns: 24px 1fr 120px 100px 80px; padding: 6px 10px; background: #1a1d2e; border-bottom: 1px solid #334155; color: #64748b; font-size: 9px;">
+            <span>☑</span><span>MOUVEMENT</span><span>SUGGESTION</span><span>CONFIANCE</span><span>MONTANT</span>
+          </div>
+          <!-- Row 1: auto-matched -->
+          <div style="display: grid; grid-template-columns: 24px 1fr 120px 100px 80px; padding: 6px 10px; background: #0f1219; border-bottom: 1px solid #1e293b; align-items: center;">
+            <input type="checkbox" checked style="accent-color: #22c55e;">
+            <span style="color: #e2e8f0; font-size: 11px;">VIR SEPA Dupont</span>
+            <span style="color: #94a3b8; font-size: 10px;">701 Appels</span>
+            <span style="background: #22c55e30; color: #22c55e; padding: 1px 6px; border-radius: 10px; font-size: 9px; width: fit-content;">Haute</span>
+            <span style="color: #22c55e; font-size: 11px;">+850</span>
+          </div>
+          <!-- Row 2 -->
+          <div style="display: grid; grid-template-columns: 24px 1fr 120px 100px 80px; padding: 6px 10px; background: #1a1d2e; border-bottom: 1px solid #1e293b; align-items: center;">
+            <input type="checkbox" checked style="accent-color: #22c55e;">
+            <span style="color: #e2e8f0; font-size: 11px;">PRLV EDF</span>
+            <span style="color: #94a3b8; font-size: 10px;">602 Electricité</span>
+            <span style="background: #22c55e30; color: #22c55e; padding: 1px 6px; border-radius: 10px; font-size: 9px; width: fit-content;">Haute</span>
+            <span style="color: #ef4444; font-size: 11px;">-234</span>
+          </div>
+          <!-- Row 3: medium -->
+          <div style="display: grid; grid-template-columns: 24px 1fr 120px 100px 80px; padding: 6px 10px; background: #0f1219; border-bottom: 1px solid #1e293b; align-items: center;">
+            <input type="checkbox" checked style="accent-color: #f59e0b;">
+            <span style="color: #e2e8f0; font-size: 11px;">PRLV OTIS</span>
+            <span style="color: #94a3b8; font-size: 10px;">614 Maintenance</span>
+            <span style="background: #f59e0b30; color: #f59e0b; padding: 1px 6px; border-radius: 10px; font-size: 9px; width: fit-content;">Moyenne</span>
+            <span style="color: #ef4444; font-size: 11px;">-189</span>
+          </div>
+          <!-- Row 4: manual needed -->
+          <div style="display: grid; grid-template-columns: 24px 1fr 120px 100px 80px; padding: 6px 10px; background: #1a1d2e; border-bottom: 1px solid #1e293b; align-items: center;">
+            <input type="checkbox" disabled>
+            <span style="color: #e2e8f0; font-size: 11px;">VIR REF 12345</span>
+            <select style="background: #1e293b; border: 1px solid #334155; color: #f59e0b; padding: 2px 4px; border-radius: 4px; font-size: 9px;">
+              <option>— Choisir —</option>
+            </select>
+            <span style="color: #64748b; font-size: 9px;">Manuel</span>
+            <span style="color: #22c55e; font-size: 11px;">+500</span>
+          </div>
+          <!-- Row 5 -->
+          <div style="display: grid; grid-template-columns: 24px 1fr 120px 100px 80px; padding: 6px 10px; background: #0f1219; align-items: center;">
+            <input type="checkbox" disabled>
+            <span style="color: #e2e8f0; font-size: 11px;">PRLV INCONNU</span>
+            <select style="background: #1e293b; border: 1px solid #334155; color: #f59e0b; padding: 2px 4px; border-radius: 4px; font-size: 9px;">
+              <option>— Choisir —</option>
+            </select>
+            <span style="color: #64748b; font-size: 9px;">Manuel</span>
+            <span style="color: #ef4444; font-size: 11px;">-79</span>
+          </div>
+        </div>
+        <!-- Progress -->
+        <div style="margin-top: 8px; background: #1e293b; border-radius: 6px; padding: 6px 12px; display: flex; align-items: center; gap: 10px;">
+          <div style="background: #334155; border-radius: 10px; flex: 1; height: 6px; overflow: hidden;">
+            <div style="background: #22c55e; width: 71%; height: 100%; border-radius: 10px;"></div>
+          </div>
+          <span style="color: #94a3b8; font-size: 10px; white-space: nowrap;">5/7 auto-suggérés</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Mode batch (traitement en masse)</h3>
+      <p>Vue dédiée listant tous les non-catégorisés. Suggestions pré-remplies avec checkbox. "Appliquer suggestions" en 1 clic pour les haute confiance. Dropdown manuel pour le reste. Idéal syndic pro traitant des dizaines de mouvements.</p>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons" style="margin-top: 24px;">
+  <div class="pros">
+    <h4>Recommandation : B + C combinés</h4>
+    <ul>
+      <li><strong>B (inline)</strong> pour catégoriser au fil de l'eau dans la vue table</li>
+      <li><strong>C (batch)</strong> accessible via le bandeau alerte "X non catégorisés" pour traitement mensuel</li>
+      <li>Le syndic choisit son workflow selon le contexte</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>Trade-offs</h4>
+    <ul>
+      <li>A : modal bloquante, lente pour 20+ mouvements</li>
+      <li>B seul : bien au fil de l'eau, pas optimal pour rattrapage mensuel</li>
+      <li>C seul : overkill pour 1-2 mouvements ponctuels</li>
+    </ul>
+  </div>
+</div>

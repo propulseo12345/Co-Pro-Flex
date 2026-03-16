@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoProFlex — Mouvements Bancaires</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0d14; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+  /* Sidebar */
+  .sidebar { width: 220px; background: #0f1219; border-right: 1px solid #1e293b; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10; }
+  .sidebar-logo { padding: 16px 20px; font-weight: 700; font-size: 18px; color: #60a5fa; border-bottom: 1px solid #1e293b; }
+  .sidebar-logo span { color: #94a3b8; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #64748b; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .sidebar-item:hover { background: #1e293b40; color: #94a3b8; }
+  .sidebar-item.active { background: #3b82f610; color: #60a5fa; border-right: 2px solid #3b82f6; }
+  .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidebar-sub { padding-left: 48px; font-size: 12px; }
+  .sidebar-sub.active { color: #60a5fa; font-weight: 500; }
+  .sidebar-section { padding: 8px 20px 4px; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
+
+  /* Main content */
+  .main { margin-left: 220px; flex: 1; min-height: 100vh; }
+
+  /* Header */
+  .header { background: #0f1219; border-bottom: 1px solid #1e293b; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-left h1 { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+  .header-breadcrumb { font-size: 12px; color: #64748b; }
+  .header-breadcrumb a { color: #64748b; text-decoration: none; }
+  .header-breadcrumb a:hover { color: #94a3b8; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .header-btn:hover { border-color: #475569; color: #e2e8f0; }
+  .header-btn-primary { background: #3b82f6; border-color: #3b82f6; color: white; }
+  .header-btn-primary:hover { background: #2563eb; }
+
+  /* Page content */
+  .page { padding: 20px 24px; }
+
+  /* Account pills */
+  .account-pills { display: flex; gap: 12px; margin-bottom: 16px; }
+  .account-pill { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 14px 20px; cursor: pointer; transition: all 0.15s; flex: 1; max-width: 320px; }
+  .account-pill:hover { border-color: #334155; }
+  .account-pill.active { border-color: #3b82f6; background: #3b82f610; }
+  .account-pill-name { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  .account-pill-balance { font-size: 22px; font-weight: 700; color: #e2e8f0; }
+  .account-pill-iban { font-size: 10px; color: #475569; margin-top: 4px; font-family: monospace; }
+
+  /* Alert banners */
+  .alerts { display: flex; gap: 10px; margin-bottom: 16px; }
+  .alert { flex: 1; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .alert-warning { background: #f59e0b10; border: 1px solid #f59e0b30; }
+  .alert-warning .alert-icon { color: #f59e0b; }
+  .alert-info { background: #3b82f610; border: 1px solid #3b82f630; }
+  .alert-info .alert-icon { color: #3b82f6; }
+  .alert-success { background: #22c55e08; border: 1px solid #22c55e20; }
+  .alert-success .alert-icon { color: #22c55e; }
+  .alert-icon { font-size: 16px; }
+  .alert-text { font-size: 12px; color: #e2e8f0; }
+  .alert-text strong { font-weight: 600; }
+  .alert-sub { font-size: 10px; color: #64748b; }
+  .alert-progress { height: 4px; background: #334155; border-radius: 2px; flex: 1; max-width: 100px; }
+  .alert-progress-fill { height: 100%; background: #22c55e; border-radius: 2px; }
+
+  /* Filters */
+  .filters { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+  .filter-search { background: #111827; border: 1px solid #1e293b; color: #e2e8f0; padding: 7px 12px 7px 32px; border-radius: 6px; font-size: 12px; width: 240px; outline: none; }
+  .filter-search:focus { border-color: #3b82f6; }
+  .filter-search-wrap { position: relative; }
+  .filter-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; }
+  .filter-pill { background: #111827; border: 1px solid #1e293b; color: #94a3b8; padding: 6px 12px; border-radius: 16px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+  .filter-pill:hover { border-color: #334155; color: #e2e8f0; }
+  .filter-pill.active { background: #3b82f610; border-color: #3b82f6; color: #60a5fa; }
+  .filter-pill.warning { background: #f59e0b10; border-color: #f59e0b40; color: #f59e0b; }
+  .filter-divider { width: 1px; height: 20px; background: #1e293b; }
+
+  /* Table */
+  .table-wrap { background: #111827; border: 1px solid #1e293b; border-radius: 10px; overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; padding: 10px 14px; background: #0f1219; color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; border-bottom: 1px solid #1e293b; }
+  .table td { padding: 10px 14px; border-bottom: 1px solid #0f121940; font-size: 13px; }
+  .table tr { transition: background 0.1s; }
+  .table tr:hover { background: #1e293b30; }
+  .table tr.categorized { }
+  .table tr.uncategorized { background: #f59e0b05; }
+  .table tr.uncategorized:hover { background: #f59e0b10; }
+  .table tr.selected { background: #3b82f610; }
+
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  .status-dot.green { background: #22c55e; }
+  .status-dot.orange { background: #f59e0b; }
+  .status-dot.red { background: #ef4444; }
+
+  .amount { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; font-weight: 500; }
+  .amount.credit { color: #22c55e; }
+  .amount.debit { color: #ef4444; }
+
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+  .badge-charge { background: #ef444420; color: #ef4444; }
+  .badge-produit { background: #22c55e20; color: #22c55e; }
+  .badge-none { background: #f59e0b15; color: #f59e0b; border: 1px dashed #f59e0b40; }
+
+  .entity-link { color: #60a5fa; font-size: 11px; cursor: pointer; }
+  .entity-link:hover { text-decoration: underline; }
+
+  .compte-tag { background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; }
+
+  .action-btn { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 4px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+  .action-btn:hover { border-color: #60a5fa; color: #60a5fa; }
+  .action-btn.primary { border-color: #3b82f6; color: #3b82f6; }
+  .action-btn.primary:hover { background: #3b82f610; }
+
+  /* Tab navigation for options */
+  .option-tabs { display: flex; gap: 0; margin: 30px 0 0; border-bottom: 2px solid #1e293b; position: sticky; top: 56px; background: #0a0d14; z-index: 4; padding: 0 24px; margin-left: -24px; margin-right: -24px; }
+  .option-tab { padding: 12px 24px; color: #64748b; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-weight: 500; }
+  .option-tab:hover { color: #94a3b8; }
+  .option-tab.active { color: #60a5fa; border-bottom-color: #3b82f6; }
+  .option-tab .tab-badge { background: #3b82f620; color: #60a5fa; padding: 1px 6px; border-radius: 8px; font-size: 10px; margin-left: 6px; }
+
+  /* Inline categorization (Option B) */
+  .inline-expand { background: #111827; border-left: 3px solid #f59e0b; }
+  .inline-expand td { padding: 0 !important; }
+  .inline-expand-content { padding: 6px 14px 10px 40px; }
+  .inline-suggestions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .suggest-pill { padding: 5px 12px; border-radius: 16px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .suggest-pill.high { background: #22c55e15; color: #22c55e; border: 1px solid #22c55e40; }
+  .suggest-pill.high:hover { background: #22c55e25; }
+  .suggest-pill.medium { background: #f59e0b10; color: #f59e0b; border: 1px solid #f59e0b30; }
+  .suggest-pill.medium:hover { background: #f59e0b20; }
+  .suggest-pill.low { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  .suggest-pill.low:hover { background: #334155; }
+  .suggest-pill.other { background: transparent; color: #64748b; border: 1px dashed #334155; }
+  .suggest-pill .conf { opacity: 0.6; font-size: 9px; }
+  .inline-nav { display: flex; gap: 6px; margin-left: auto; }
+  .inline-nav-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 3px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+
+  /* Batch mode (Option C) */
+  .batch-header { background: #1e293b; border-radius: 8px 8px 0 0; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; border-bottom: none; }
+  .batch-header-title { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+  .batch-header-count { color: #64748b; font-size: 12px; margin-left: 8px; }
+  .batch-actions { display: flex; gap: 8px; }
+  .batch-btn { padding: 6px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500; border: none; }
+  .batch-btn.apply { background: #22c55e; color: #0f1219; }
+  .batch-btn.apply:hover { background: #16a34a; }
+  .batch-btn.skip { background: #334155; color: #94a3b8; }
+  .batch-table { width: 100%; border-collapse: collapse; }
+  .batch-table th { text-align: left; padding: 8px 12px; background: #111827; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; }
+  .batch-table td { padding: 8px 12px; border-bottom: 1px solid #1e293b20; font-size: 12px; color: #e2e8f0; }
+  .batch-table tr:nth-child(even) { background: #0f121950; }
+  .batch-select { background: #1e293b; border: 1px solid #334155; color: #f59e0b; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+  .batch-progress { margin-top: 10px; background: #1e293b; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+  .batch-progress-bar { flex: 1; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; }
+  .batch-progress-fill { height: 100%; background: #22c55e; border-radius: 3px; transition: width 0.3s; }
+  .batch-progress-text { color: #94a3b8; font-size: 11px; white-space: nowrap; }
+
+  /* Solde bar at bottom of table */
+  .solde-bar { background: #0f1219; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; }
+  .solde-bar span { font-size: 12px; color: #64748b; }
+  .solde-bar .solde-value { color: #e2e8f0; font-weight: 600; font-family: monospace; }
+
+  /* Section title */
+  .section-title { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #1e293b; }
+
+  /* Scrollable area for option previews */
+  .option-preview { margin-top: 20px; }
+  .option-label { display: inline-flex; align-items: center; gap: 8px; background: #3b82f615; border: 1px solid #3b82f640; color: #60a5fa; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+  .option-desc { color: #94a3b8; font-size: 12px; margin-bottom: 16px; line-height: 1.5; }
+
+  .sync-status { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 11px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">CoProFlex <span>Résidence Les Lilas</span></div>
+  <div class="sidebar-nav">
+    <div class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Dashboard
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Copropriétaires
+    </div>
+    <div class="sidebar-section">Gestion</div>
+    <div class="sidebar-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Finance
+    </div>
+    <div class="sidebar-sub active">↳ Mouvements bancaires</div>
+    <div class="sidebar-sub">↳ Budgets</div>
+    <div class="sidebar-sub">↳ Appels de fonds</div>
+    <div class="sidebar-sub">↳ Factures</div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Maintenance
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Documents
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Communication
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div>
+        <div class="header-breadcrumb"><a href="#">Finance</a> / Mouvements bancaires</div>
+        <h1>Mouvements bancaires</h1>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="sync-status"><span class="sync-dot"></span> Sync il y a 2h 30min</div>
+      <button class="header-btn">⟳ Rafraîchir</button>
+      <button class="header-btn">↓ Import</button>
+      <button class="header-btn-primary header-btn">+ Saisie manuelle</button>
+    </div>
+  </header>
+
+  <div class="page">
+    <!-- Account pills -->
+    <div class="account-pills">
+      <div class="account-pill active">
+        <div class="account-pill-name">Compte courant</div>
+        <div class="account-pill-balance">10 533,31 €</div>
+        <div class="account-pill-iban">FR76 •••• •••• •••• 4521</div>
+      </div>
+      <div class="account-pill">
+        <div class="account-pill-name">Fonds travaux (ALUR)</div>
+        <div class="account-pill-balance">28 450,00 €</div>
+        <div class="account-pill-iban">FR76 •••• •••• •••• 8903</div>
+      </div>
+    </div>
+
+    <!-- Alert banners -->
+    <div class="alerts">
+      <div class="alert alert-warning">
+        <span class="alert-icon">⚠</span>
+        <div>
+          <div class="alert-text"><strong>3 non catégorisés</strong> (1 578,90 €)</div>
+          <div class="alert-sub">Dont 1 depuis plus de 7 jours</div>
+        </div>
+      </div>
+      <div class="alert alert-info">
+        <span class="alert-icon">◐</span>
+        <div style="flex:1">
+          <div class="alert-text"><strong>4 non rapprochés</strong> — écart 44,00 €</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <div class="alert-progress" style="max-width:140px"><div class="alert-progress-fill" style="width:67%"></div></div>
+            <span class="alert-sub">67% rapproché</span>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-success">
+        <span class="alert-icon">●</span>
+        <div>
+          <div class="alert-text">Prochaine sync dans <strong>16h</strong></div>
+          <div class="alert-sub">Mode automatique — quotidien</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-search-wrap">
+        <span class="filter-search-icon">🔍</span>
+        <input class="filter-search" placeholder="Rechercher un mouvement..." />
+      </div>
+      <div class="filter-divider"></div>
+      <span class="filter-pill active">Tous</span>
+      <span class="filter-pill">↓ Entrées</span>
+      <span class="filter-pill">↑ Sorties</span>
+      <div class="filter-divider"></div>
+      <span class="filter-pill warning">⚠ Non catégorisés</span>
+      <span class="filter-pill">○ Non rapprochés</span>
+    </div>
+
+    <!-- ======================================= -->
+    <!-- OPTION TABS -->
+    <!-- ======================================= -->
+    <div class="option-tabs">
+      <div class="option-tab active" onclick="showOption('a')">Option A — Modal</div>
+      <div class="option-tab" onclick="showOption('b')">Option B — Inline <span class="tab-badge">Recommandé</span></div>
+      <div class="option-tab" onclick="showOption('c')">Option C — Batch <span class="tab-badge">Recommandé</span></div>
+    </div>
+
+    <!-- ======================================= -->
+    <!-- OPTION A: MODAL (current) -->
+    <!-- ======================================= -->
+    <div id="option-a" class="option-preview">
+      <div class="option-label">A — Modal centrée (actuel)</div>
+      <div class="option-desc">Le clic sur "Catégoriser" ouvre une modal bloquante. Un mouvement à la fois. Simple mais lent pour traiter 20+ mouvements.</div>
+
+      <div class="table-wrap" style="position: relative;">
+        <!-- Dimmed overlay -->
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);z-index:2;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+          <!-- Modal -->
+          <div style="background:#111827;border:1px solid #334155;border-radius:12px;padding:20px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <span style="font-weight:600;font-size:15px;">Catégoriser le mouvement</span>
+              <span style="color:#64748b;cursor:pointer;font-size:18px;">✕</span>
+            </div>
+            <div style="background:#1a1d2e;border-radius:8px;padding:12px;margin-bottom:16px;">
+              <div style="color:#64748b;font-size:10px;margin-bottom:4px;">Mouvement sélectionné</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-weight:500;">VIR REF 12345</div><div style="color:#64748b;font-size:11px;margin-top:2px;">15/03/2025</div></div>
+                <span class="amount credit">+500,00 €</span>
+              </div>
+            </div>
+            <div style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Suggestions</div>
+            <div style="background:#22c55e08;border:1px solid #22c55e30;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">701 — Appels de fonds</div>
+                  <div style="color:#64748b;font-size:11px;margin-top:2px;">Montant correspond à AF-2025-T1 Lot 12</div>
+                </div>
+                <span class="badge badge-produit">Haute</span>
+              </div>
+            </div>
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:14px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:13px;">714 — Produits divers</div>
+                  <div style="color:#64748b;font-size:11px;margin-top:2px;">Pattern "VIR" dans libellé</div>
+                </div>
+                <span class="badge" style="background:#f59e0b15;color:#f59e0b;">Basse</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <select style="flex:1;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:8px 12px;border-radius:6px;font-size:12px;">
+                <option>701 — Appels de fonds</option>
+                <option>714 — Produits divers</option>
+                <option>716 — Produits financiers</option>
+              </select>
+              <button class="header-btn-primary header-btn" style="padding:8px 20px;">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+
+        <table class="table">
+          <thead><tr><th style="width:30px"></th><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Compte</th><th>Entité liée</th><th style="text-align:right">Montant</th><th style="text-align:right">Solde</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">15/03</td><td>VIR SEPA M. Dupont</td><td><span class="badge badge-produit">Produit</span></td><td><span class="compte-tag">701</span></td><td><span class="entity-link">AF-2025-T1 Lot 3</span></td><td style="text-align:right"><span class="amount credit">+850,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">12 197,55</td><td></td></tr>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">14/03</td><td>PRLV EDF Parties communes</td><td><span class="badge badge-charge">Charge</span></td><td><span class="compte-tag">602</span></td><td><span class="entity-link">FAC-EDF-2025-03</span></td><td style="text-align:right"><span class="amount debit">-234,50</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 347,55</td><td></td></tr>
+            <tr class="uncategorized selected"><td><span class="status-dot orange"></span></td><td style="color:#94a3b8;font-size:12px;">13/03</td><td style="font-weight:500;">VIR REF 12345</td><td><span class="badge badge-none">Non catégorisé</span></td><td>—</td><td>—</td><td style="text-align:right"><span class="amount credit">+500,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 582,05</td><td><button class="action-btn primary">Catégoriser</button></td></tr>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">12/03</td><td>PRLV OTIS Ascenseur</td><td><span class="badge badge-charge">Charge</span></td><td><span class="compte-tag">614</span></td><td><span class="entity-link">FAC-OTIS-2025-03</span></td><td style="text-align:right"><span class="amount debit">-189,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 082,05</td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="solde-bar">
+          <span>12 mouvements — Mars 2025</span>
+          <span>Solde actuel : <span class="solde-value">10 533,31 €</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================= -->
+    <!-- OPTION B: INLINE EXPANDABLE -->
+    <!-- ======================================= -->
+    <div id="option-b" class="option-preview" style="display:none;">
+      <div class="option-label">B — Inline expandable (pills cliquables)</div>
+      <div class="option-desc">La ligne se déplie directement dans la table. Suggestions en pills — 1 clic = catégorisé. Navigation Préc/Suiv pour enchaîner. Pas de modal, pas de perte de contexte. <strong>Recommandé pour le quotidien.</strong></div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th style="width:30px"></th><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Compte</th><th>Entité liée</th><th style="text-align:right">Montant</th><th style="text-align:right">Solde</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">15/03</td><td>VIR SEPA M. Dupont</td><td><span class="badge badge-produit">Produit</span></td><td><span class="compte-tag">701</span></td><td><span class="entity-link">AF-2025-T1 Lot 3</span></td><td style="text-align:right"><span class="amount credit">+850,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">12 197,55</td><td></td></tr>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">14/03</td><td>PRLV EDF Parties communes</td><td><span class="badge badge-charge">Charge</span></td><td><span class="compte-tag">602</span></td><td><span class="entity-link">FAC-EDF-2025-03</span></td><td style="text-align:right"><span class="amount debit">-234,50</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 347,55</td><td></td></tr>
+            <!-- Uncategorized row - expanded -->
+            <tr class="uncategorized" style="background:#f59e0b08;border-left:3px solid #f59e0b;">
+              <td><span class="status-dot orange"></span></td><td style="color:#94a3b8;font-size:12px;">13/03</td><td style="font-weight:600;">VIR REF 12345</td><td><span class="badge badge-none">Non catégorisé</span></td><td>—</td><td>—</td><td style="text-align:right"><span class="amount credit">+500,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 582,05</td><td></td>
+            </tr>
+            <tr class="inline-expand">
+              <td colspan="9">
+                <div class="inline-expand-content">
+                  <div class="inline-suggestions">
+                    <span style="color:#64748b;font-size:10px;margin-right:4px;">Suggestions :</span>
+                    <span class="suggest-pill high">701 Appels de fonds <span class="conf">• Haute</span></span>
+                    <span class="suggest-pill medium">703 Avances <span class="conf">• Moyenne</span></span>
+                    <span class="suggest-pill low">714 Produits divers <span class="conf">• Basse</span></span>
+                    <span class="suggest-pill other">+ Autre compte...</span>
+                    <div class="inline-nav">
+                      <button class="inline-nav-btn">↑ Préc.</button>
+                      <button class="inline-nav-btn">↓ Suiv.</button>
+                      <span style="color:#64748b;font-size:10px;margin-left:4px;">1/3</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <!-- Next uncategorized -->
+            <tr class="uncategorized"><td><span class="status-dot orange"></span></td><td style="color:#94a3b8;font-size:12px;">10/03</td><td>PRLV INCONNU REF987</td><td><span class="badge badge-none">Non catégorisé</span></td><td>—</td><td>—</td><td style="text-align:right"><span class="amount debit">-78,90</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">10 612,05</td><td><button class="action-btn primary">Catégoriser</button></td></tr>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">12/03</td><td>PRLV OTIS Ascenseur</td><td><span class="badge badge-charge">Charge</span></td><td><span class="compte-tag">614</span></td><td><span class="entity-link">FAC-OTIS-2025-03</span></td><td style="text-align:right"><span class="amount debit">-189,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 082,05</td><td></td></tr>
+            <tr class="categorized"><td><span class="status-dot green"></span></td><td style="color:#94a3b8;font-size:12px;">11/03</td><td>VIR SEPA Mme Martin</td><td><span class="badge badge-produit">Produit</span></td><td><span class="compte-tag">701</span></td><td><span class="entity-link">AF-2025-T1 Lot 7</span></td><td style="text-align:right"><span class="amount credit">+1 200,00</span></td><td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 271,05</td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="solde-bar">
+          <span>12 mouvements — Mars 2025 — <strong style="color:#f59e0b;">3 non catégorisés</strong></span>
+          <span>Solde actuel : <span class="solde-value">10 533,31 €</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================= -->
+    <!-- OPTION C: BATCH MODE -->
+    <!-- ======================================= -->
+    <div id="option-c" class="option-preview" style="display:none;">
+      <div class="option-label">C — Mode batch (traitement en masse)</div>
+      <div class="option-desc">Vue dédiée accessible depuis le bandeau alerte "3 non catégorisés". Liste tous les mouvements à traiter, suggestions pré-remplies, validation en 1 clic. <strong>Recommandé pour le traitement mensuel.</strong></div>
+
+      <div class="batch-header">
+        <div>
+          <span class="batch-header-title">Catégorisation rapide</span>
+          <span class="batch-header-count">7 mouvements à traiter — Mars 2025</span>
+        </div>
+        <div class="batch-actions">
+          <button class="batch-btn apply">✓ Appliquer suggestions (5)</button>
+          <button class="batch-btn skip">Tout ignorer</button>
+          <button class="action-btn" style="padding:6px 14px;font-size:12px;">← Retour table</button>
+        </div>
+      </div>
+      <div class="table-wrap" style="border-radius:0 0 10px 10px;">
+        <table class="batch-table">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" checked style="accent-color:#22c55e;"></th>
+              <th>Date</th>
+              <th>Libellé</th>
+              <th>Montant</th>
+              <th>Suggestion</th>
+              <th>Confiance</th>
+              <th>Entité détectée</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+              <td style="color:#94a3b8;font-size:11px;">15/03</td>
+              <td>VIR SEPA M. Lambert</td>
+              <td><span class="amount credit">+750,00</span></td>
+              <td><span class="compte-tag">701</span> Appels de fonds</td>
+              <td><span class="badge badge-produit">Haute</span></td>
+              <td><span class="entity-link">AF-2025-T1 Lot 5</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+              <td style="color:#94a3b8;font-size:11px;">14/03</td>
+              <td>PRLV VEOLIA</td>
+              <td><span class="amount debit">-156,80</span></td>
+              <td><span class="compte-tag">601</span> Eau</td>
+              <td><span class="badge badge-produit">Haute</span></td>
+              <td><span class="entity-link">FAC-VEOLIA-2025-03</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" checked style="accent-color:#f59e0b;"></td>
+              <td style="color:#94a3b8;font-size:11px;">13/03</td>
+              <td>VIR REF 12345</td>
+              <td><span class="amount credit">+500,00</span></td>
+              <td><span class="compte-tag">701</span> Appels de fonds</td>
+              <td><span class="badge" style="background:#f59e0b15;color:#f59e0b;">Moyenne</span></td>
+              <td style="color:#64748b;">—</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+              <td style="color:#94a3b8;font-size:11px;">12/03</td>
+              <td>PRLV AXA ASSURANCE</td>
+              <td><span class="amount debit">-892,40</span></td>
+              <td><span class="compte-tag">616</span> Assurance</td>
+              <td><span class="badge badge-produit">Haute</span></td>
+              <td><span class="entity-link">FAC-AXA-2025-03</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" checked style="accent-color:#22c55e;"></td>
+              <td style="color:#94a3b8;font-size:11px;">10/03</td>
+              <td>PRLV ENGIE GAZ</td>
+              <td><span class="compte-tag">603</span> Chauffage</td>
+              <td><span class="amount debit">-234,10</span></td>
+              <td><span class="badge badge-produit">Haute</span></td>
+              <td><span class="entity-link">FAC-ENGIE-2025-03</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" disabled></td>
+              <td style="color:#94a3b8;font-size:11px;">08/03</td>
+              <td>PRLV INCONNU REF987</td>
+              <td><span class="amount debit">-78,90</span></td>
+              <td><select class="batch-select"><option>— Choisir un compte —</option><option>601 Eau</option><option>602 Électricité</option><option>603 Chauffage</option><option>611 Nettoyage</option><option>614 Maintenance</option><option>615 Réparations</option><option>616 Assurance</option><option>621 Honoraires syndic</option></select></td>
+              <td style="color:#64748b;font-size:10px;">Manuel</td>
+              <td style="color:#64748b;">—</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" disabled></td>
+              <td style="color:#94a3b8;font-size:11px;">05/03</td>
+              <td>CHQ 0045678</td>
+              <td><span class="amount debit">-1 500,00</span></td>
+              <td><select class="batch-select"><option>— Choisir un compte —</option><option>615 Réparations</option><option>671 Travaux votés AG</option><option>672 Travaux urgents</option></select></td>
+              <td style="color:#64748b;font-size:10px;">Manuel</td>
+              <td style="color:#64748b;">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="batch-progress">
+        <div class="batch-progress-bar"><div class="batch-progress-fill" style="width:71%;"></div></div>
+        <span class="batch-progress-text">5/7 auto-suggérés — 2 nécessitent une saisie manuelle</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showOption(id) {
+  document.querySelectorAll('.option-preview').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.option-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('option-' + id).style.display = 'block';
+  event.currentTarget.classList.add('active');
+
+  // Record selection
+  if (window.__recordEvent) window.__recordEvent('option-switch', id);
+}
+</script>
+</body>
+</html>

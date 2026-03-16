@@ -1,0 +1,272 @@
+<h2>Refonte Mouvements Bancaires — Layout global</h2>
+<p class="subtitle">3 approches pour organiser la page. Cliquez sur celle qui vous inspire le plus.</p>
+
+<div class="cards">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #0d1117;">
+      <div style="font-family: system-ui; color: #e6edf3; font-size: 11px;">
+
+        <!-- TopBar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 16px; background: #161b22; border-radius: 8px; margin-bottom: 10px;">
+          <div>
+            <div style="font-weight:700; font-size:14px;">Mouvements bancaires</div>
+            <div style="color:#8b949e; font-size:10px;">Suivi temps réel</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span style="padding:4px 8px; background:#21262d; border-radius:4px; font-size:9px;">Compte courant ▾</span>
+            <span style="padding:4px 8px; background:#21262d; border-radius:4px; font-size:9px; color:#3fb950;">● Sync OK — il y a 2h</span>
+            <span style="padding:4px 8px; background:#1f6feb; border-radius:4px; font-size:9px;">Synchroniser</span>
+          </div>
+        </div>
+
+        <!-- Mega KPI Strip -->
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:12px;">
+          <div style="background:#161b22; border-radius:8px; padding:12px; text-align:center;">
+            <div style="color:#8b949e; font-size:9px;">Solde actuel</div>
+            <div style="font-size:18px; font-weight:700; color:#58a6ff;">45 230 €</div>
+            <div style="font-size:8px; color:#3fb950;">+2.3% ce mois</div>
+          </div>
+          <div style="background:#161b22; border-radius:8px; padding:12px; text-align:center;">
+            <div style="color:#8b949e; font-size:9px;">Entrées</div>
+            <div style="font-size:18px; font-weight:700; color:#3fb950;">+12 450 €</div>
+          </div>
+          <div style="background:#161b22; border-radius:8px; padding:12px; text-align:center;">
+            <div style="color:#8b949e; font-size:9px;">Sorties</div>
+            <div style="font-size:18px; font-weight:700; color:#f85149;">-8 920 €</div>
+          </div>
+          <div style="background:#161b22; border-radius:8px; padding:12px; text-align:center;">
+            <div style="color:#8b949e; font-size:9px;">Non catégorisés</div>
+            <div style="font-size:18px; font-weight:700; color:#d29922;">3</div>
+            <div style="font-size:8px; color:#d29922;">1 240 € à traiter</div>
+          </div>
+          <div style="background:#161b22; border-radius:8px; padding:12px; text-align:center;">
+            <div style="color:#8b949e; font-size:9px;">Non rapprochés</div>
+            <div style="font-size:18px; font-weight:700; color:#f0883e;">5</div>
+            <div style="font-size:8px; color:#f0883e;">Écart: 320 €</div>
+          </div>
+        </div>
+
+        <!-- Tabs + Table -->
+        <div style="display:flex; gap:0; margin-bottom:8px;">
+          <div style="padding:6px 14px; background:#1f6feb; color:white; border-radius:6px 6px 0 0; font-size:10px; font-weight:600;">Mouvements</div>
+          <div style="padding:6px 14px; background:#21262d; color:#8b949e; border-radius:6px 6px 0 0; font-size:10px;">Rapprochement</div>
+        </div>
+        <div style="background:#161b22; border-radius:0 8px 8px 8px; padding:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:8px;">
+            <div style="flex:1; padding:5px 8px; background:#0d1117; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:9px;">🔍 Rechercher...</div>
+            <span style="padding:4px 8px; background:#1f6feb33; color:#58a6ff; border-radius:4px; font-size:9px;">Tous</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">Entrées</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">Sorties</span>
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:9px;">
+            <tr style="color:#8b949e; border-bottom:1px solid #21262d;">
+              <td style="padding:4px;">Date</td><td>Libellé</td><td style="text-align:right;">Montant</td><td style="text-align:right;">Solde</td><td>Catégorie</td><td></td>
+            </tr>
+            <tr style="border-bottom:1px solid #21262d20;">
+              <td style="padding:4px;">15/03</td><td>Appel fonds T1 — Lot 4</td><td style="text-align:right; color:#3fb950;">+1 250 €</td><td style="text-align:right;">45 230 €</td><td><span style="color:#3fb950;">✓ 701</span></td><td></td>
+            </tr>
+            <tr style="border-bottom:1px solid #21262d20;">
+              <td style="padding:4px;">14/03</td><td>ENGIE — Facture mars</td><td style="text-align:right; color:#f85149;">-342 €</td><td style="text-align:right;">43 980 €</td><td><span style="color:#d29922;">⚠ Non cat.</span></td><td><span style="color:#58a6ff; cursor:pointer;">Catégoriser</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #21262d20;">
+              <td style="padding:4px;">12/03</td><td>Virement — SCI Dupont</td><td style="text-align:right; color:#3fb950;">+3 200 €</td><td style="text-align:right;">44 322 €</td><td><span style="color:#3fb950;">✓ 411</span></td><td></td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Dashboard Condensé</h3>
+      <p>Header compact avec sélecteur de compte + indicateur sync intégré. KPI strip élargi (5 items avec non-catégorisés et non-rapprochés). Table unifiée sous onglets. Tout en une vue, scroll minimal.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #0d1117;">
+      <div style="font-family: system-ui; color: #e6edf3; font-size: 11px;">
+
+        <!-- TopBar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 16px; background: #161b22; border-radius: 8px; margin-bottom: 10px;">
+          <div>
+            <div style="font-weight:700; font-size:14px;">Mouvements bancaires</div>
+            <div style="color:#8b949e; font-size:10px;">Copropriété Les Érables</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span style="padding:4px 8px; background:#1f6feb; border-radius:4px; font-size:9px;">Import</span>
+            <span style="padding:4px 8px; background:#1f6feb; border-radius:4px; font-size:9px;">Synchroniser</span>
+          </div>
+        </div>
+
+        <!-- Layout: sidebar + main -->
+        <div style="display:grid; grid-template-columns: 220px 1fr; gap:10px;">
+
+          <!-- Sidebar -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Compte courant -->
+            <div style="background:#161b22; border:2px solid #1f6feb; border-radius:8px; padding:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-weight:600; font-size:10px;">Compte courant</span>
+                <span style="font-size:8px; color:#3fb950;">● Connecté</span>
+              </div>
+              <div style="font-size:18px; font-weight:700; color:#58a6ff; margin-bottom:4px;">45 230 €</div>
+              <div style="font-size:8px; color:#8b949e;">FR76 3000 4028 ... 0001</div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:6px; border-top:1px solid #21262d;">
+                <div style="text-align:center;"><div style="color:#8b949e; font-size:7px;">Entrées</div><div style="color:#3fb950; font-size:10px; font-weight:600;">+12.4k</div></div>
+                <div style="text-align:center;"><div style="color:#8b949e; font-size:7px;">Sorties</div><div style="color:#f85149; font-size:10px; font-weight:600;">-8.9k</div></div>
+                <div style="text-align:center;"><div style="color:#8b949e; font-size:7px;">Δ Solde</div><div style="color:#3fb950; font-size:10px; font-weight:600;">+3.5k</div></div>
+              </div>
+            </div>
+            <!-- Fonds travaux -->
+            <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:10px; opacity:0.7;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-weight:600; font-size:10px;">Fonds de travaux</span>
+                <span style="font-size:8px; color:#3fb950;">● Connecté</span>
+              </div>
+              <div style="font-size:16px; font-weight:700; margin-bottom:4px;">18 500 €</div>
+              <div style="font-size:8px; color:#8b949e;">FR76 3000 4028 ... 0002</div>
+            </div>
+            <!-- Alertes compactes -->
+            <div style="background:#d2992220; border:1px solid #d2992240; border-radius:8px; padding:8px;">
+              <div style="font-size:9px; font-weight:600; color:#d29922; margin-bottom:4px;">⚠ 3 à traiter</div>
+              <div style="font-size:8px; color:#d29922;">2 non catégorisés</div>
+              <div style="font-size:8px; color:#f0883e;">5 non rapprochés</div>
+              <div style="font-size:8px; color:#f85149;">Écart: 320 €</div>
+            </div>
+            <!-- Sync compact -->
+            <div style="background:#161b22; border-radius:8px; padding:8px;">
+              <div style="font-size:9px; font-weight:600; margin-bottom:4px;">Synchronisation</div>
+              <div style="font-size:8px; color:#3fb950;">Dernière: il y a 2h</div>
+              <div style="font-size:8px; color:#8b949e;">Prochaine: dans 4h</div>
+              <div style="font-size:8px; color:#8b949e;">Mode: automatique</div>
+            </div>
+          </div>
+
+          <!-- Main content -->
+          <div>
+            <div style="display:flex; gap:0; margin-bottom:8px;">
+              <div style="padding:6px 14px; background:#1f6feb; color:white; border-radius:6px 6px 0 0; font-size:10px; font-weight:600;">Mouvements</div>
+              <div style="padding:6px 14px; background:#21262d; color:#8b949e; border-radius:6px 6px 0 0; font-size:10px;">Rapprochement <span style="background:#f0883e; color:white; padding:1px 5px; border-radius:8px; font-size:8px;">5</span></div>
+            </div>
+            <div style="background:#161b22; border-radius:0 8px 8px 8px; padding:10px;">
+              <div style="display:flex; gap:6px; margin-bottom:8px;">
+                <div style="flex:1; padding:5px 8px; background:#0d1117; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:9px;">🔍 Rechercher...</div>
+                <span style="padding:4px 8px; background:#1f6feb33; color:#58a6ff; border-radius:4px; font-size:9px;">Tous</span>
+                <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">Entrées</span>
+                <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">Sorties</span>
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:9px;">
+                <tr style="color:#8b949e; border-bottom:1px solid #21262d;">
+                  <td style="padding:4px;">Date</td><td>Libellé</td><td style="text-align:right;">Montant</td><td style="text-align:right;">Solde</td><td>Catégorie</td><td></td>
+                </tr>
+                <tr style="border-bottom:1px solid #21262d20;"><td style="padding:4px;">15/03</td><td>Appel fonds T1</td><td style="text-align:right; color:#3fb950;">+1 250 €</td><td style="text-align:right;">45 230 €</td><td><span style="color:#3fb950;">✓ 701</span></td><td></td></tr>
+                <tr style="border-bottom:1px solid #21262d20;"><td style="padding:4px;">14/03</td><td>ENGIE — mars</td><td style="text-align:right; color:#f85149;">-342 €</td><td style="text-align:right;">43 980 €</td><td><span style="color:#d29922;">⚠</span></td><td><span style="color:#58a6ff;">Cat.</span></td></tr>
+                <tr style="border-bottom:1px solid #21262d20;"><td style="padding:4px;">12/03</td><td>Virement SCI</td><td style="text-align:right; color:#3fb950;">+3 200 €</td><td style="text-align:right;">44 322 €</td><td><span style="color:#3fb950;">✓ 411</span></td><td></td></tr>
+                <tr><td style="padding:4px;">10/03</td><td>Ascenseur OTIS</td><td style="text-align:right; color:#f85149;">-890 €</td><td style="text-align:right;">41 122 €</td><td><span style="color:#3fb950;">✓ 615</span></td><td></td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Sidebar Comptes + Contexte</h3>
+      <p>Sidebar gauche avec les 2 comptes (sélecteur visuel + mini-stats intégrées), alertes condensées et sync compacte. Zone principale avec table sous onglets. Les comptes et le contexte sont toujours visibles.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #0d1117;">
+      <div style="font-family: system-ui; color: #e6edf3; font-size: 11px;">
+
+        <!-- TopBar with integrated account selector -->
+        <div style="padding: 12px 16px; background: #161b22; border-radius: 8px; margin-bottom: 10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+              <div style="font-weight:700; font-size:14px;">Mouvements bancaires</div>
+              <div style="color:#8b949e; font-size:10px;">Suivi en temps réel</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <span style="padding:4px 8px; background:#21262d; border-radius:4px; font-size:9px;">Import</span>
+              <span style="padding:4px 8px; background:#21262d; border-radius:4px; font-size:9px;">RIB</span>
+              <span style="padding:4px 8px; background:#1f6feb; border-radius:4px; font-size:9px;">Synchroniser</span>
+            </div>
+          </div>
+          <!-- Inline account pills -->
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1; display:flex; align-items:center; gap:10px; background:#1f6feb15; border:1px solid #1f6feb; border-radius:6px; padding:8px 12px;">
+              <div style="width:32px; height:32px; background:#1f6feb; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">CC</div>
+              <div style="flex:1;">
+                <div style="font-size:9px; color:#8b949e;">Compte courant</div>
+                <div style="font-size:14px; font-weight:700; color:#58a6ff;">45 230 €</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:8px; color:#3fb950;">↑ 12.4k</div>
+                <div style="font-size:8px; color:#f85149;">↓ 8.9k</div>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; gap:10px; background:#21262d; border:1px solid #30363d; border-radius:6px; padding:8px 12px; opacity:0.7;">
+              <div style="width:32px; height:32px; background:#30363d; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">FT</div>
+              <div style="flex:1;">
+                <div style="font-size:9px; color:#8b949e;">Fonds de travaux</div>
+                <div style="font-size:14px; font-weight:700;">18 500 €</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert banner compact -->
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:1; display:flex; align-items:center; gap:6px; background:#d2992215; border:1px solid #d2992230; border-radius:6px; padding:6px 10px;">
+            <span style="color:#d29922; font-size:12px;">⚠</span>
+            <span style="font-size:9px; color:#d29922; font-weight:600;">3 non catégorisés</span>
+            <span style="margin-left:auto; font-size:8px; color:#58a6ff; cursor:pointer;">Traiter →</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; gap:6px; background:#f0883e15; border:1px solid #f0883e30; border-radius:6px; padding:6px 10px;">
+            <span style="color:#f0883e; font-size:12px;">⚡</span>
+            <span style="font-size:9px; color:#f0883e; font-weight:600;">5 non rapprochés — écart 320 €</span>
+            <span style="margin-left:auto; font-size:8px; color:#58a6ff; cursor:pointer;">Voir →</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; background:#161b22; border:1px solid #30363d; border-radius:6px; padding:6px 10px;">
+            <span style="color:#3fb950; font-size:10px;">●</span>
+            <span style="font-size:9px; color:#8b949e;">Sync il y a 2h</span>
+          </div>
+        </div>
+
+        <!-- Tabs + Table -->
+        <div style="display:flex; gap:0; margin-bottom:8px;">
+          <div style="padding:6px 14px; background:#1f6feb; color:white; border-radius:6px 6px 0 0; font-size:10px; font-weight:600;">Mouvements (24)</div>
+          <div style="padding:6px 14px; background:#21262d; color:#8b949e; border-radius:6px 6px 0 0; font-size:10px;">Rapprochement <span style="background:#f0883e; color:white; padding:1px 5px; border-radius:8px; font-size:8px;">5</span></div>
+        </div>
+        <div style="background:#161b22; border-radius:0 8px 8px 8px; padding:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:8px;">
+            <div style="flex:1; padding:5px 8px; background:#0d1117; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:9px;">🔍 Rechercher...</div>
+            <span style="padding:4px 8px; background:#1f6feb33; color:#58a6ff; border-radius:4px; font-size:9px;">Tous</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">↓ Entrées</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">↑ Sorties</span>
+            <span style="padding:4px 8px; background:#21262d; color:#8b949e; border-radius:4px; font-size:9px;">⚠ Non cat.</span>
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:9px;">
+            <tr style="color:#8b949e; border-bottom:1px solid #21262d;">
+              <td style="padding:4px;">Date</td><td>Libellé</td><td>Entité liée</td><td style="text-align:right;">Montant</td><td style="text-align:right;">Solde</td><td>Catégorie</td><td></td>
+            </tr>
+            <tr style="border-bottom:1px solid #21262d20;"><td style="padding:4px;">15/03</td><td>Appel fonds T1 — Lot 4</td><td><span style="background:#1f6feb20; color:#58a6ff; padding:1px 6px; border-radius:3px; font-size:8px;">📄 AF-2026-01</span></td><td style="text-align:right; color:#3fb950;">+1 250 €</td><td style="text-align:right;">45 230 €</td><td><span style="color:#3fb950;">✓ 701</span></td><td></td></tr>
+            <tr style="background:#d2992208; border-bottom:1px solid #21262d20;"><td style="padding:4px;">14/03</td><td>ENGIE — Facture mars</td><td><span style="background:#d2992220; color:#d29922; padding:1px 6px; border-radius:3px; font-size:8px;">🏢 ENGIE</span></td><td style="text-align:right; color:#f85149;">-342 €</td><td style="text-align:right;">43 980 €</td><td><span style="color:#d29922;">⚠ —</span></td><td><span style="color:#58a6ff; cursor:pointer;">Catégoriser</span></td></tr>
+            <tr style="border-bottom:1px solid #21262d20;"><td style="padding:4px;">12/03</td><td>Virement — SCI Dupont</td><td><span style="background:#3fb95020; color:#3fb950; padding:1px 6px; border-radius:3px; font-size:8px;">👤 Dupont</span></td><td style="text-align:right; color:#3fb950;">+3 200 €</td><td style="text-align:right;">44 322 €</td><td><span style="color:#3fb950;">✓ 411</span></td><td></td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Header Fusionné + Bandeaux Alertes</h3>
+      <p>Comptes en "pills" intégrées au header (solde + mini-stats inline). Bandeaux d'alerte cliquables (non-cat + non-rapprochés + sync) en une seule ligne. Table enrichie avec colonne "Entité liée" et highlight des lignes non catégorisées. Zéro section intermédiaire.</p>
+    </div>
+  </div>
+
+</div>

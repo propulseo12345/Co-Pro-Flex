@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoProFlex — Preview Sidebar Unifiée</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0d14; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+  /* ============================== */
+  /* SIDEBAR UNIFIÉE               */
+  /* ============================== */
+  .sidebar {
+    width: 240px;
+    background: #0f1219;
+    border-right: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 20;
+    transition: width 0.2s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+
+  /* Logo */
+  .sidebar-logo {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .sidebar-logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; color: white;
+  }
+  .sidebar-logo-text { font-weight: 700; font-size: 16px; color: #e2e8f0; }
+  .sidebar-logo-sub { font-size: 11px; color: #64748b; font-weight: 400; display: block; margin-top: 1px; }
+
+  /* Copro selector */
+  .copro-selector {
+    margin: 12px 12px 8px;
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .copro-selector:hover { border-color: #334155; }
+  .copro-selector-name { font-size: 13px; font-weight: 500; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+  .copro-selector-name .chevron { color: #475569; font-size: 10px; }
+  .copro-selector-address { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+  /* Navigation sections */
+  .sidebar-section {
+    padding: 16px 16px 6px;
+    color: #475569;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Module items */
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    color: #8892a4;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.12s;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .sidebar-item:hover { background: #1e293b30; color: #c8cfd8; }
+  .sidebar-item.active {
+    background: #3b82f608;
+    color: #60a5fa;
+    border-left-color: #3b82f6;
+    font-weight: 500;
+  }
+  .sidebar-item .icon {
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .sidebar-item .item-badge {
+    margin-left: auto;
+    background: #ef4444;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .sidebar-item .item-badge.info {
+    background: #3b82f620;
+    color: #60a5fa;
+  }
+  .sidebar-item .expand-arrow {
+    margin-left: auto;
+    color: #475569;
+    font-size: 10px;
+    transition: transform 0.15s;
+  }
+  .sidebar-item.expanded .expand-arrow { transform: rotate(90deg); }
+
+  /* Sub items */
+  .sidebar-sub {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px 7px 49px;
+    color: #64748b;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.12s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar-sub:hover { background: #1e293b20; color: #94a3b8; }
+  .sidebar-sub.active {
+    color: #60a5fa;
+    font-weight: 500;
+    background: #3b82f605;
+    border-left-color: #3b82f640;
+  }
+  .sidebar-sub .sub-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #334155;
+    flex-shrink: 0;
+  }
+  .sidebar-sub.active .sub-dot { background: #3b82f6; }
+
+  /* Sidebar footer */
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 12px;
+    border-top: 1px solid #1e293b;
+    flex-shrink: 0;
+  }
+  .sidebar-footer-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 8px;
+    color: #64748b;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .sidebar-footer-item:hover { background: #1e293b; color: #94a3b8; }
+  .sidebar-footer-divider { height: 1px; background: #1e293b; margin: 4px 0; }
+  .sidebar-user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .sidebar-user:hover { background: #1e293b; }
+  .sidebar-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: white;
+  }
+  .sidebar-user-name { font-size: 12px; color: #e2e8f0; }
+  .sidebar-user-role { font-size: 10px; color: #64748b; }
+
+  /* ============================== */
+  /* MAIN CONTENT                   */
+  /* ============================== */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  /* Header simplifié (pas de nav — juste breadcrumb + actions) */
+  .header {
+    background: #0f1219;
+    border-bottom: 1px solid #1e293b;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .header-left h1 { font-size: 17px; font-weight: 600; }
+  .header-breadcrumb { font-size: 12px; color: #64748b; margin-bottom: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+  .btn:hover { border-color: #475569; color: #e2e8f0; }
+  .btn-primary { background: #3b82f6; border-color: #3b82f6; color: white; }
+  .btn-icon { padding: 7px 9px; }
+
+  /* Search bar in header */
+  .header-search {
+    background: #111827;
+    border: 1px solid #1e293b;
+    color: #e2e8f0;
+    padding: 7px 12px 7px 34px;
+    border-radius: 6px;
+    font-size: 12px;
+    width: 260px;
+    outline: none;
+    position: relative;
+  }
+  .header-search:focus { border-color: #3b82f6; }
+  .header-search-wrap { position: relative; }
+  .header-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; pointer-events: none; }
+  .header-search-shortcut { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #1e293b; color: #475569; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-family: monospace; border: 1px solid #334155; }
+
+  .sync-status { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 11px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+
+  .notif-btn { position: relative; }
+  .notif-btn .notif-dot { position: absolute; top: 4px; right: 6px; width: 7px; height: 7px; background: #ef4444; border-radius: 50%; border: 1.5px solid #0f1219; }
+
+  /* ============================== */
+  /* PAGE CONTENT                   */
+  /* ============================== */
+  .page { padding: 20px 24px; }
+
+  /* Account pills */
+  .account-pills { display: flex; gap: 12px; margin-bottom: 16px; }
+  .account-pill { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 14px 20px; cursor: pointer; flex: 1; max-width: 300px; transition: all 0.15s; }
+  .account-pill:hover { border-color: #334155; }
+  .account-pill.active { border-color: #3b82f6; background: #3b82f608; }
+  .account-pill-name { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  .account-pill-balance { font-size: 22px; font-weight: 700; }
+  .account-pill-iban { font-size: 10px; color: #475569; margin-top: 4px; font-family: monospace; }
+
+  /* Alert banners */
+  .alerts { display: flex; gap: 10px; margin-bottom: 16px; }
+  .alert { flex: 1; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.15s; }
+  .alert:hover { filter: brightness(1.1); }
+  .alert-warning { background: #f59e0b08; border: 1px solid #f59e0b25; }
+  .alert-info { background: #3b82f608; border: 1px solid #3b82f625; }
+  .alert-success { background: #22c55e06; border: 1px solid #22c55e18; }
+  .alert-icon { font-size: 16px; }
+  .alert-text { font-size: 12px; color: #e2e8f0; }
+  .alert-text strong { font-weight: 600; }
+  .alert-sub { font-size: 10px; color: #64748b; }
+  .alert-progress { height: 4px; background: #334155; border-radius: 2px; flex: 1; max-width: 100px; }
+  .alert-progress-fill { height: 100%; background: #22c55e; border-radius: 2px; }
+
+  /* Filters */
+  .filters { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+  .filter-search-wrap { position: relative; }
+  .filter-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; }
+  .filter-search { background: #111827; border: 1px solid #1e293b; color: #e2e8f0; padding: 7px 12px 7px 32px; border-radius: 6px; font-size: 12px; width: 220px; outline: none; }
+  .filter-pill { background: #111827; border: 1px solid #1e293b; color: #94a3b8; padding: 6px 12px; border-radius: 16px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+  .filter-pill:hover { border-color: #334155; color: #e2e8f0; }
+  .filter-pill.active { background: #3b82f610; border-color: #3b82f6; color: #60a5fa; }
+  .filter-pill.warning { background: #f59e0b10; border-color: #f59e0b40; color: #f59e0b; }
+  .filter-divider { width: 1px; height: 20px; background: #1e293b; }
+
+  /* Table */
+  .table-wrap { background: #111827; border: 1px solid #1e293b; border-radius: 10px; overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; padding: 10px 14px; background: #0f1219; color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; border-bottom: 1px solid #1e293b; }
+  .table td { padding: 10px 14px; border-bottom: 1px solid #0f121930; font-size: 13px; }
+  .table tr { transition: background 0.1s; }
+  .table tr:hover { background: #1e293b20; }
+  .table tr.uncategorized { background: #f59e0b04; }
+
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  .status-dot.green { background: #22c55e; }
+  .status-dot.orange { background: #f59e0b; }
+
+  .amount { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; font-weight: 500; }
+  .amount.credit { color: #22c55e; }
+  .amount.debit { color: #ef4444; }
+
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+  .badge-charge { background: #ef444418; color: #ef4444; }
+  .badge-produit { background: #22c55e18; color: #22c55e; }
+  .badge-none { background: #f59e0b10; color: #f59e0b; border: 1px dashed #f59e0b35; }
+
+  .entity-link { color: #60a5fa; font-size: 11px; cursor: pointer; }
+  .entity-link:hover { text-decoration: underline; }
+  .compte-tag { background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; }
+
+  .action-btn { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 4px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+  .action-btn:hover { border-color: #60a5fa; color: #60a5fa; }
+  .action-btn.primary { border-color: #3b82f6; color: #3b82f6; }
+
+  .solde-bar { background: #0f1219; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; }
+  .solde-bar span { font-size: 12px; color: #64748b; }
+  .solde-value { color: #e2e8f0 !important; font-weight: 600; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<!-- ============================== -->
+<!-- SIDEBAR UNIFIÉE               -->
+<!-- ============================== -->
+<nav class="sidebar">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">CF</div>
+    <div>
+      <div class="sidebar-logo-text">CoProFlex</div>
+      <span class="sidebar-logo-sub">Gestion de copropriété</span>
+    </div>
+  </div>
+
+  <!-- Copro selector -->
+  <div class="copro-selector">
+    <div class="copro-selector-name">Résidence Les Lilas <span class="chevron">▾</span></div>
+    <div class="copro-selector-address">12 rue des Lilas, 75011 Paris</div>
+  </div>
+
+  <!-- Navigation principale -->
+  <div class="sidebar-section">Principal</div>
+
+  <div class="sidebar-item">
+    <span class="icon">⌂</span> Dashboard
+  </div>
+
+  <div class="sidebar-item">
+    <span class="icon">📋</span> Assemblées Générales
+    <span class="item-badge info">1</span>
+  </div>
+
+  <div class="sidebar-item">
+    <span class="icon">👥</span> Copropriétaires
+    <span class="expand-arrow">›</span>
+  </div>
+
+  <div class="sidebar-section">Gestion</div>
+
+  <div class="sidebar-item active expanded">
+    <span class="icon">€</span> Finance
+    <span class="expand-arrow">›</span>
+  </div>
+  <div class="sidebar-sub">
+    <span class="sub-dot"></span> Comptabilité
+  </div>
+  <div class="sidebar-sub">
+    <span class="sub-dot"></span> Budgets
+  </div>
+  <div class="sidebar-sub">
+    <span class="sub-dot"></span> Factures
+  </div>
+  <div class="sidebar-sub">
+    <span class="sub-dot"></span> Appels de fonds
+  </div>
+  <div class="sidebar-sub active">
+    <span class="sub-dot"></span> Mouvements bancaires
+  </div>
+
+  <div class="sidebar-item">
+    <span class="icon">🔧</span> Maintenance
+    <span class="expand-arrow">›</span>
+  </div>
+
+  <div class="sidebar-item">
+    <span class="icon">📄</span> Documents
+    <span class="expand-arrow">›</span>
+  </div>
+
+  <div class="sidebar-item">
+    <span class="icon">💬</span> Communication
+    <span class="expand-arrow">›</span>
+  </div>
+
+  <div class="sidebar-item">
+    <span class="icon">⚖</span> Contentieux
+    <span class="item-badge">3</span>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-item">
+      <span class="icon" style="font-size:14px;">◐</span> Thème sombre
+    </div>
+    <div class="sidebar-footer-item">
+      <span class="icon" style="font-size:14px;">⚙</span> Paramètres
+    </div>
+    <div class="sidebar-footer-divider"></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">JD</div>
+      <div>
+        <div class="sidebar-user-name">Jean Dupont</div>
+        <div class="sidebar-user-role">Syndic professionnel</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================== -->
+<!-- MAIN                           -->
+<!-- ============================== -->
+<div class="main">
+  <!-- Header simplifié — plus de tabs, juste contextuel -->
+  <header class="header">
+    <div class="header-left">
+      <div>
+        <div class="header-breadcrumb">Finance / Mouvements bancaires</div>
+        <h1>Mouvements bancaires</h1>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-search-wrap">
+        <span class="header-search-icon">🔍</span>
+        <input class="header-search" placeholder="Recherche globale..." />
+        <span class="header-search-shortcut">⌘K</span>
+      </div>
+      <div class="sync-status"><span class="sync-dot"></span> Sync 2h</div>
+      <button class="btn btn-icon notif-btn">🔔 <span class="notif-dot"></span></button>
+      <button class="btn">↓ Import</button>
+      <button class="btn btn-primary">+ Saisie manuelle</button>
+    </div>
+  </header>
+
+  <!-- Page content -->
+  <div class="page">
+    <!-- Account pills -->
+    <div class="account-pills">
+      <div class="account-pill active">
+        <div class="account-pill-name">Compte courant</div>
+        <div class="account-pill-balance">10 533,31 €</div>
+        <div class="account-pill-iban">FR76 •••• •••• •••• 4521</div>
+      </div>
+      <div class="account-pill">
+        <div class="account-pill-name">Fonds travaux (ALUR)</div>
+        <div class="account-pill-balance">28 450,00 €</div>
+        <div class="account-pill-iban">FR76 •••• •••• •••• 8903</div>
+      </div>
+    </div>
+
+    <!-- Alert banners -->
+    <div class="alerts">
+      <div class="alert alert-warning">
+        <span class="alert-icon">⚠</span>
+        <div>
+          <div class="alert-text"><strong>3 non catégorisés</strong> (1 578,90 €)</div>
+          <div class="alert-sub">Dont 1 depuis plus de 7 jours</div>
+        </div>
+      </div>
+      <div class="alert alert-info">
+        <span class="alert-icon">◐</span>
+        <div style="flex:1;">
+          <div class="alert-text"><strong>4 non rapprochés</strong> — écart 44,00 €</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <div class="alert-progress" style="max-width:140px;"><div class="alert-progress-fill" style="width:67%;"></div></div>
+            <span class="alert-sub">67% rapproché</span>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-success">
+        <span class="alert-icon">●</span>
+        <div>
+          <div class="alert-text">Prochaine sync <strong>16h</strong></div>
+          <div class="alert-sub">Automatique — quotidien</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-search-wrap">
+        <span class="filter-search-icon">🔍</span>
+        <input class="filter-search" placeholder="Rechercher un mouvement..." />
+      </div>
+      <div class="filter-divider"></div>
+      <span class="filter-pill active">Tous</span>
+      <span class="filter-pill">↓ Entrées</span>
+      <span class="filter-pill">↑ Sorties</span>
+      <div class="filter-divider"></div>
+      <span class="filter-pill warning">⚠ Non catégorisés</span>
+      <span class="filter-pill">○ Non rapprochés</span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:30px;"></th>
+            <th>Date</th>
+            <th>Libellé</th>
+            <th>Catégorie</th>
+            <th>Compte</th>
+            <th>Entité liée</th>
+            <th style="text-align:right;">Montant</th>
+            <th style="text-align:right;">Solde</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">15/03</td>
+            <td>VIR SEPA M. Dupont</td>
+            <td><span class="badge badge-produit">Produit</span></td>
+            <td><span class="compte-tag">701</span></td>
+            <td><span class="entity-link">AF-2025-T1 Lot 3</span></td>
+            <td style="text-align:right;"><span class="amount credit">+850,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">12 197,55</td>
+            <td><button class="action-btn">Rapprocher</button></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">14/03</td>
+            <td>PRLV EDF Parties communes</td>
+            <td><span class="badge badge-charge">Charge</span></td>
+            <td><span class="compte-tag">602</span></td>
+            <td><span class="entity-link">FAC-EDF-2025-03</span></td>
+            <td style="text-align:right;"><span class="amount debit">-234,50</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 347,55</td>
+            <td></td>
+          </tr>
+          <tr class="uncategorized">
+            <td><span class="status-dot orange"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">13/03</td>
+            <td style="font-weight:500;">VIR REF 12345</td>
+            <td><span class="badge badge-none">Non catégorisé</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td style="text-align:right;"><span class="amount credit">+500,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 582,05</td>
+            <td><button class="action-btn primary">Catégoriser</button></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">12/03</td>
+            <td>PRLV OTIS Ascenseur</td>
+            <td><span class="badge badge-charge">Charge</span></td>
+            <td><span class="compte-tag">614</span></td>
+            <td><span class="entity-link">FAC-OTIS-2025-03</span></td>
+            <td style="text-align:right;"><span class="amount debit">-189,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 082,05</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">11/03</td>
+            <td>VIR SEPA Mme Martin</td>
+            <td><span class="badge badge-produit">Produit</span></td>
+            <td><span class="compte-tag">701</span></td>
+            <td><span class="entity-link">AF-2025-T1 Lot 7</span></td>
+            <td style="text-align:right;"><span class="amount credit">+1 200,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 271,05</td>
+            <td><button class="action-btn">Rapprocher</button></td>
+          </tr>
+          <tr class="uncategorized">
+            <td><span class="status-dot orange"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">10/03</td>
+            <td style="font-weight:500;">PRLV INCONNU REF987</td>
+            <td><span class="badge badge-none">Non catégorisé</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td style="text-align:right;"><span class="amount debit">-78,90</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">10 612,15</td>
+            <td><button class="action-btn primary">Catégoriser</button></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">09/03</td>
+            <td>PRLV AXA Assurance</td>
+            <td><span class="badge badge-charge">Charge</span></td>
+            <td><span class="compte-tag">616</span></td>
+            <td><span class="entity-link">FAC-AXA-2025-Q1</span></td>
+            <td style="text-align:right;"><span class="amount debit">-892,40</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">10 691,05</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">08/03</td>
+            <td>VIR SEPA M. Bernard</td>
+            <td><span class="badge badge-produit">Produit</span></td>
+            <td><span class="compte-tag">701</span></td>
+            <td><span class="entity-link">AF-2025-T1 Lot 12</span></td>
+            <td style="text-align:right;"><span class="amount credit">+650,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 583,45</td>
+            <td></td>
+          </tr>
+          <tr class="uncategorized">
+            <td><span class="status-dot orange"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">05/03</td>
+            <td style="font-weight:500;">CHQ 0045678</td>
+            <td><span class="badge badge-none">Non catégorisé</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td style="text-align:right;"><span class="amount debit">-1 500,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">10 933,45</td>
+            <td><button class="action-btn primary">Catégoriser</button></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">03/03</td>
+            <td>VIR SEPA M. Petit</td>
+            <td><span class="badge badge-produit">Produit</span></td>
+            <td><span class="compte-tag">701</span></td>
+            <td><span class="entity-link">AF-2025-T1 Lot 2</span></td>
+            <td style="text-align:right;"><span class="amount credit">+950,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">12 433,45</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot green"></span></td>
+            <td style="color:#94a3b8;font-size:12px;">01/03</td>
+            <td>PRLV Syndic — Honoraires T1</td>
+            <td><span class="badge badge-charge">Charge</span></td>
+            <td><span class="compte-tag">621</span></td>
+            <td><span class="entity-link">FAC-SYNDIC-2025-T1</span></td>
+            <td style="text-align:right;"><span class="amount debit">-1 800,00</span></td>
+            <td style="text-align:right;color:#94a3b8;font-family:monospace;font-size:12px;">11 483,45</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="solde-bar">
+        <span>11 mouvements — Mars 2025</span>
+        <span>Solde actuel : <span class="solde-value">10 533,31 €</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

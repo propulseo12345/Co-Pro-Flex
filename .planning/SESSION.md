@@ -1,22 +1,23 @@
-# Session State — 2026-03-16 22:00
+# Session State — 2026-03-16 23:30
 
 ## Branch
 v2
 
 ## Completed This Session
-- Brainstorm + design + spec refonte Mouvements bancaires (vue unifiée, pills comptes, bandeaux alertes, table rapprochement intégré)
-- Implémentation complète : 5 nouveaux composants (AccountPills, AlertBanners, MovementFilters, UnifiedMovementsTable, RapprochementSlideOver)
-- Hook adapté (rapprochementFilter, showSlideOver, fix router.push, suppression console.error/ongletActif)
-- Suppression 9 composants obsolètes, CSS aligné dark theme Finance
-- Commit f3b7cb8
+- Brainstorm complet rapprochement bancaire (6 questions, recherche marché, maquettes visuelles)
+- Spec validée + review passée: docs/superpowers/specs/2026-03-16-rapprochement-bancaire-design.md
+- Plan implémentation 17 tasks: docs/superpowers/plans/2026-03-16-rapprochement-bancaire.md
+- UnifiedSidebar implémentée (remplace HighBar + ModuleSidebar)
+- Bug identifié: mouvements non filtrés par compte CC/FT (sauvé en mémoire)
 
 ## Next Task
-Feature complète catégorisation + rapprochement bancaire — actuellement les actions catégoriser/rapprocher appellent Supabase mais échouent silencieusement si pas de copro connectée. Besoin : implémenter le flow complet avec mock data fallback fonctionnel ou connecter réellement à Supabase.
+Exécuter le plan d'implémentation — Task 1: mise à jour types.ts (accountId, statutRapprochement, nouveaux types)
 
 ## Blockers
 None
 
 ## Key Context
-- Les données viennent de Supabase (useBankMovements, useReconcileBankMovement) mais fallback local si pas de coproId
-- CSS Finance = couleurs hardcodées (#1a1d2e, #e2e8f0, etc.) pas les variables CSS — sauvé en mémoire
-- Le .main-content global gère le padding — les pages ne doivent PAS en ajouter
+- Sidebar unifiée déjà live (UnifiedSidebar remplace HighBar+ModuleSidebar dans layout.tsx)
+- CSS Finance = couleurs hardcodées (#1a1d2e, #e2e8f0) pas les variables CSS
+- Le .main-content global gère le padding — pages ne doivent PAS en ajouter
+- Pas de test unitaire configuré (pas Jest/Vitest), vérification manuelle sur localhost

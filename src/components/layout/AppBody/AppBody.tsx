@@ -8,7 +8,7 @@ export function AppBody({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="app-body"
-      style={{ '--sidebar-nav-width': collapsed ? '52px' : '220px' } as React.CSSProperties}
+      style={{ '--sidebar-nav-width': collapsed ? '60px' : '240px' } as React.CSSProperties}
     >
       {children}
     </div>

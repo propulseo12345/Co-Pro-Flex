@@ -1,0 +1,243 @@
+<h2>Mouvements Bancaires — Vue unifiée finale</h2>
+<p class="subtitle">Page complète : header fusionné, bandeaux alertes, table unique avec rapprochement intégré + panel slide-over. Cliquez si ça vous convient.</p>
+
+<div class="cards">
+  <div class="card" data-choice="approved" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 24px; background: #0d1117;">
+      <div style="font-family: system-ui; color: #e6edf3; font-size: 11px;">
+
+        <!-- ═══════ TOPBAR + ACCOUNT PILLS ═══════ -->
+        <div style="padding: 14px 18px; background: #161b22; border-radius: 10px; margin-bottom: 10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div>
+              <div style="font-weight:700; font-size:15px; letter-spacing:-0.3px;">Mouvements bancaires</div>
+              <div style="color:#8b949e; font-size:10px;">Suivi en temps réel — Copropriété Les Érables</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <span style="padding:5px 10px; background:#21262d; border:1px solid #30363d; border-radius:6px; font-size:9px; cursor:pointer;">↓ Import</span>
+              <span style="padding:5px 10px; background:#21262d; border:1px solid #30363d; border-radius:6px; font-size:9px; cursor:pointer;">RIB</span>
+              <span style="padding:5px 10px; background:#1f6feb; border-radius:6px; font-size:9px; font-weight:600; cursor:pointer;">⟳ Synchroniser</span>
+            </div>
+          </div>
+          <!-- Account pills -->
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1; display:flex; align-items:center; gap:12px; background:#1f6feb12; border:1.5px solid #1f6feb; border-radius:8px; padding:10px 14px; cursor:pointer;">
+              <div style="width:36px; height:36px; background:linear-gradient(135deg,#1f6feb,#58a6ff); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:white;">CC</div>
+              <div style="flex:1;">
+                <div style="font-size:9px; color:#8b949e;">Compte courant</div>
+                <div style="font-size:16px; font-weight:700; color:#58a6ff; letter-spacing:-0.5px;">45 230,00 €</div>
+              </div>
+              <div style="text-align:right; line-height:1.6;">
+                <div style="font-size:8px; color:#3fb950;">↑ +12 450 €</div>
+                <div style="font-size:8px; color:#f85149;">↓ -8 920 €</div>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; gap:12px; background:#21262d; border:1.5px solid #30363d; border-radius:8px; padding:10px 14px; cursor:pointer; opacity:0.6;">
+              <div style="width:36px; height:36px; background:#30363d; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#8b949e;">FT</div>
+              <div style="flex:1;">
+                <div style="font-size:9px; color:#8b949e;">Fonds de travaux</div>
+                <div style="font-size:16px; font-weight:700; letter-spacing:-0.5px;">18 500,00 €</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ ALERT BANNERS ═══════ -->
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:1; display:flex; align-items:center; gap:8px; background:#d2992210; border:1px solid #d2992225; border-radius:6px; padding:7px 12px; cursor:pointer;">
+            <span style="color:#d29922; font-size:13px;">⚠</span>
+            <span style="font-size:9px; color:#d29922; font-weight:600;">3 non catégorisés</span>
+            <span style="font-size:8px; color:#8b949e;">(1 240 €)</span>
+            <span style="margin-left:auto; font-size:8px; color:#58a6ff;">Filtrer →</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; gap:8px; background:#f0883e10; border:1px solid #f0883e25; border-radius:6px; padding:7px 12px; cursor:pointer;">
+            <span style="color:#f0883e; font-size:13px;">⚡</span>
+            <span style="font-size:9px; color:#f0883e; font-weight:600;">5 non rapprochés</span>
+            <span style="font-size:8px; color:#8b949e;">(écart 320 €)</span>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:6px;">
+              <div style="width:50px; height:4px; background:#21262d; border-radius:2px;"><div style="width:70%; height:100%; background:#3fb950; border-radius:2px;"></div></div>
+              <span style="font-size:8px; color:#3fb950;">12/17</span>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; background:#161b22; border:1px solid #30363d; border-radius:6px; padding:7px 12px;">
+            <span style="color:#3fb950; font-size:10px;">●</span>
+            <span style="font-size:9px; color:#8b949e;">Sync il y a 2h</span>
+          </div>
+        </div>
+
+        <!-- ═══════ TABLE + SLIDE-OVER ═══════ -->
+        <div style="display:grid; grid-template-columns: 1fr 260px; gap:10px;">
+
+          <!-- Main table -->
+          <div style="background:#161b22; border-radius:8px; padding:12px;">
+            <!-- Filters -->
+            <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:180px; padding:6px 10px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#8b949e; font-size:9px;">🔍 Rechercher par libellé, montant, fournisseur...</div>
+              <span style="padding:5px 10px; background:#1f6feb25; color:#58a6ff; border-radius:6px; font-size:9px; font-weight:600; cursor:pointer;">Tous (24)</span>
+              <span style="padding:5px 10px; background:#21262d; color:#8b949e; border-radius:6px; font-size:9px; cursor:pointer;">↓ Entrées</span>
+              <span style="padding:5px 10px; background:#21262d; color:#8b949e; border-radius:6px; font-size:9px; cursor:pointer;">↑ Sorties</span>
+              <span style="padding:5px 10px; background:#21262d; color:#8b949e; border-radius:6px; font-size:9px; cursor:pointer;">⚠ Non cat.</span>
+              <span style="padding:5px 10px; background:#f0883e20; color:#f0883e; border:1px solid #f0883e40; border-radius:6px; font-size:9px; cursor:pointer;">○ Non rappr.</span>
+            </div>
+
+            <!-- Table -->
+            <table style="width:100%; border-collapse:collapse; font-size:9px;">
+              <tr style="color:#8b949e; border-bottom:1px solid #21262d; font-size:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                <td style="padding:6px 5px; width:20px;"></td>
+                <td style="padding:6px 5px;">Date</td>
+                <td style="padding:6px 5px;">Libellé</td>
+                <td style="padding:6px 5px;">Entité</td>
+                <td style="padding:6px 5px; text-align:right;">Montant</td>
+                <td style="padding:6px 5px; text-align:right;">Solde</td>
+                <td style="padding:6px 5px;">Catégorie</td>
+                <td style="padding:6px 5px;">Rapproch.</td>
+                <td style="padding:6px 5px;"></td>
+              </tr>
+
+              <!-- Row 1: fully matched -->
+              <tr style="border-bottom:1px solid #21262d12;">
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:10px;">●</span></td>
+                <td style="padding:6px 5px; color:#8b949e;">15/03</td>
+                <td style="padding:6px 5px;">Appel fonds T1 — Lot 4</td>
+                <td style="padding:6px 5px;"><span style="background:#1f6feb15; color:#58a6ff; padding:2px 6px; border-radius:4px; font-size:7px;">📄 AF-2026-01</span></td>
+                <td style="padding:6px 5px; text-align:right; color:#3fb950; font-weight:600;">+1 250,00 €</td>
+                <td style="padding:6px 5px; text-align:right; color:#8b949e;">45 230 €</td>
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:8px;">✓ 701000</span></td>
+                <td style="padding:6px 5px;"><span style="background:#3fb95012; color:#3fb950; padding:2px 6px; border-radius:4px; font-size:7px;">JB-0342</span></td>
+                <td style="padding:6px 5px;"></td>
+              </tr>
+
+              <!-- Row 2: non catégorisé + selected for rapprochement -->
+              <tr style="background:#1f6feb08; border:1px solid #1f6feb30; border-radius:4px;">
+                <td style="padding:6px 5px;"><span style="color:#f0883e; font-size:10px;">○</span></td>
+                <td style="padding:6px 5px; color:#8b949e;">14/03</td>
+                <td style="padding:6px 5px; font-weight:600;">ENGIE — Facture mars</td>
+                <td style="padding:6px 5px;"><span style="background:#d2992218; color:#d29922; padding:2px 6px; border-radius:4px; font-size:7px;">🏢 ENGIE</span></td>
+                <td style="padding:6px 5px; text-align:right; color:#f85149; font-weight:600;">-342,00 €</td>
+                <td style="padding:6px 5px; text-align:right; color:#8b949e;">43 980 €</td>
+                <td style="padding:6px 5px;"><span style="color:#d29922; font-size:8px;">⚠ Non cat.</span></td>
+                <td style="padding:6px 5px; color:#8b949e; font-size:8px;">—</td>
+                <td style="padding:6px 5px;"><span style="color:#58a6ff; cursor:pointer; font-weight:600; font-size:8px;">Rapprocher →</span></td>
+              </tr>
+
+              <!-- Row 3: catégorisé, rapproché -->
+              <tr style="border-bottom:1px solid #21262d12;">
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:10px;">●</span></td>
+                <td style="padding:6px 5px; color:#8b949e;">12/03</td>
+                <td style="padding:6px 5px;">Virement — SCI Dupont</td>
+                <td style="padding:6px 5px;"><span style="background:#3fb95012; color:#3fb950; padding:2px 6px; border-radius:4px; font-size:7px;">👤 Dupont</span></td>
+                <td style="padding:6px 5px; text-align:right; color:#3fb950; font-weight:600;">+3 200,00 €</td>
+                <td style="padding:6px 5px; text-align:right; color:#8b949e;">44 322 €</td>
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:8px;">✓ 411000</span></td>
+                <td style="padding:6px 5px;"><span style="background:#3fb95012; color:#3fb950; padding:2px 6px; border-radius:4px; font-size:7px;">JB-0339</span></td>
+                <td style="padding:6px 5px;"></td>
+              </tr>
+
+              <!-- Row 4: catégorisé, non rapproché -->
+              <tr style="background:#f0883e06; border-bottom:1px solid #21262d12;">
+                <td style="padding:6px 5px;"><span style="color:#f0883e; font-size:10px;">○</span></td>
+                <td style="padding:6px 5px; color:#8b949e;">10/03</td>
+                <td style="padding:6px 5px;">Ascenseur OTIS — maintenance</td>
+                <td style="padding:6px 5px;"><span style="background:#8b949e15; color:#8b949e; padding:2px 6px; border-radius:4px; font-size:7px;">🏢 OTIS</span></td>
+                <td style="padding:6px 5px; text-align:right; color:#f85149;">-890,00 €</td>
+                <td style="padding:6px 5px; text-align:right; color:#8b949e;">41 122 €</td>
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:8px;">✓ 615000</span></td>
+                <td style="padding:6px 5px; color:#8b949e; font-size:8px;">—</td>
+                <td style="padding:6px 5px;"><span style="color:#58a6ff; cursor:pointer; font-size:8px;">Rapprocher</span></td>
+              </tr>
+
+              <!-- Row 5 -->
+              <tr style="background:#f0883e06; border-bottom:1px solid #21262d12;">
+                <td style="padding:6px 5px;"><span style="color:#f0883e; font-size:10px;">○</span></td>
+                <td style="padding:6px 5px; color:#8b949e;">08/03</td>
+                <td style="padding:6px 5px;">Prélèvement EDF parties communes</td>
+                <td style="padding:6px 5px;"><span style="background:#8b949e15; color:#8b949e; padding:2px 6px; border-radius:4px; font-size:7px;">🏢 EDF</span></td>
+                <td style="padding:6px 5px; text-align:right; color:#f85149;">-156,00 €</td>
+                <td style="padding:6px 5px; text-align:right; color:#8b949e;">42 012 €</td>
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:8px;">✓ 614000</span></td>
+                <td style="padding:6px 5px; color:#8b949e; font-size:8px;">—</td>
+                <td style="padding:6px 5px;"><span style="color:#58a6ff; cursor:pointer; font-size:8px;">Rapprocher</span></td>
+              </tr>
+
+              <!-- Row 6: fully done -->
+              <tr style="border-bottom:1px solid #21262d12;">
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:10px;">●</span></td>
+                <td style="padding:6px 5px; color:#8b949e;">05/03</td>
+                <td style="padding:6px 5px;">Appel fonds T4 2025 — Lot 12</td>
+                <td style="padding:6px 5px;"><span style="background:#1f6feb15; color:#58a6ff; padding:2px 6px; border-radius:4px; font-size:7px;">📄 AF-2025-04</span></td>
+                <td style="padding:6px 5px; text-align:right; color:#3fb950;">+980,00 €</td>
+                <td style="padding:6px 5px; text-align:right; color:#8b949e;">42 168 €</td>
+                <td style="padding:6px 5px;"><span style="color:#3fb950; font-size:8px;">✓ 701000</span></td>
+                <td style="padding:6px 5px;"><span style="background:#3fb95012; color:#3fb950; padding:2px 6px; border-radius:4px; font-size:7px;">JB-0335</span></td>
+                <td style="padding:6px 5px;"></td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- ═══════ SLIDE-OVER PANEL ═══════ -->
+          <div style="background:#161b22; border:1.5px solid #1f6feb40; border-radius:10px; padding:14px; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="font-size:11px; font-weight:700; color:#58a6ff;">⚡ Rapprocher</div>
+              <span style="color:#8b949e; cursor:pointer; font-size:12px;">✕</span>
+            </div>
+
+            <!-- Selected movement recap -->
+            <div style="background:#0d1117; border-radius:8px; padding:10px; margin-bottom:12px;">
+              <div style="font-size:8px; color:#8b949e; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Mouvement</div>
+              <div style="font-size:11px; font-weight:600;">ENGIE — Facture mars</div>
+              <div style="display:flex; justify-content:space-between; margin-top:6px;">
+                <span style="font-size:14px; color:#f85149; font-weight:700;">-342,00 €</span>
+                <span style="font-size:9px; color:#8b949e; align-self:flex-end;">14/03/2026</span>
+              </div>
+            </div>
+
+            <!-- Suggestions header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-size:9px; color:#8b949e; text-transform:uppercase; letter-spacing:0.5px;">Écritures suggérées</div>
+              <span style="font-size:8px; color:#58a6ff; cursor:pointer;">Rechercher</span>
+            </div>
+
+            <!-- Suggestion 1: high confidence -->
+            <div style="background:#0d1117; border:1.5px solid #3fb95040; border-radius:8px; padding:10px; margin-bottom:8px; cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:10px; font-weight:700;">JB-0341</span>
+                <span style="background:#3fb95020; color:#3fb950; padding:2px 8px; border-radius:10px; font-size:8px; font-weight:700;">98%</span>
+              </div>
+              <div style="font-size:9px; color:#e6edf3; margin-bottom:2px;">ENGIE mars 2026</div>
+              <div style="font-size:8px; color:#8b949e; margin-bottom:6px;">Débit 342,00 € · 615000 · Journal Achats</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:8px; color:#3fb950; font-weight:600;">Écart: 0,00 €</span>
+                <button style="background:#1f6feb; color:white; border:none; padding:4px 14px; border-radius:6px; font-size:9px; font-weight:600; cursor:pointer;">Rapprocher</button>
+              </div>
+            </div>
+
+            <!-- Suggestion 2: medium -->
+            <div style="background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:10px; margin-bottom:8px; cursor:pointer; opacity:0.65;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:10px; font-weight:700;">JB-0338</span>
+                <span style="background:#d2992220; color:#d29922; padding:2px 8px; border-radius:10px; font-size:8px; font-weight:700;">45%</span>
+              </div>
+              <div style="font-size:9px; color:#e6edf3; margin-bottom:2px;">Énergie parties communes</div>
+              <div style="font-size:8px; color:#8b949e; margin-bottom:6px;">Débit 298,50 € · 614000 · Journal Achats</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:8px; color:#d29922;">Écart: 43,50 €</span>
+                <button style="background:#21262d; color:#8b949e; border:none; padding:4px 14px; border-radius:6px; font-size:9px; cursor:pointer;">Rapprocher</button>
+              </div>
+            </div>
+
+            <!-- Manual match -->
+            <div style="margin-top:auto; padding-top:10px; border-top:1px solid #21262d;">
+              <button style="width:100%; background:transparent; color:#58a6ff; border:1px dashed #1f6feb40; padding:8px; border-radius:6px; font-size:9px; cursor:pointer;">+ Saisie manuelle d'écriture</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Vue unifiée — Mouvements + Rapprochement</h3>
+      <p>Plus d'onglets. Une seule table avec toutes les colonnes (date, libellé, entité, montant, solde, catégorie, rapprochement). Filtres enrichis (non cat. + non rapprochés). Panel slide-over au clic sur "Rapprocher". Bandeaux d'alerte cliquables qui activent les filtres. Ligne sélectionnée en surbrillance bleue.</p>
+    </div>
+  </div>
+</div>
