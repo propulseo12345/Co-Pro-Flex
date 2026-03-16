@@ -72,8 +72,8 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: var(--radius-md);
     transition: all var(--transition-base);
 }
@@ -102,17 +102,17 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    background: var(--bg-secondary);
+    background: rgba(148, 163, 184, 0.1);
     border: none;
     border-radius: 50%;
-    color: var(--text-tertiary);
+    color: #64748b;
     cursor: pointer;
     transition: all var(--transition-base);
 }
 
 .clearSearch:hover {
-    background: var(--danger-light);
-    color: var(--danger);
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
 }
 
 .sortButton {
@@ -120,10 +120,10 @@
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm) var(--space-md);
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: var(--radius-md);
-    color: var(--text-secondary);
+    color: #94a3b8;
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
@@ -142,8 +142,8 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: var(--radius-md);
 }
 
@@ -167,8 +167,8 @@
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm) var(--space-md);
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: var(--radius-md);
 }
 
@@ -203,10 +203,10 @@
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm) var(--space-md);
-    background: transparent;
-    border: 1px solid var(--border);
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: var(--radius-md);
-    color: var(--text-secondary);
+    color: #94a3b8;
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
@@ -259,35 +259,38 @@
 
 /* Table */
 .tableContainer {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 12px;
     overflow: hidden;
 }
 
 .table {
     width: 100%;
+    min-width: 1100px;
     border-collapse: collapse;
 }
 
 .table thead {
-    background: var(--bg-secondary);
+    background: rgba(148, 163, 184, 0.03);
 }
 
 .table th {
     padding: var(--space-md);
     text-align: left;
-    font-size: var(--text-sm);
+    font-size: 10px;
     font-weight: 600;
-    color: var(--text-main);
-    border-bottom: 2px solid var(--border);
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .table td {
     padding: var(--space-md);
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
     font-size: var(--text-sm);
-    color: var(--text-main);
+    color: #e2e8f0;
 }
 
 .table tbody tr {
@@ -295,7 +298,7 @@
 }
 
 .table tbody tr:hover {
-    background: var(--bg-secondary);
+    background: rgba(148, 163, 184, 0.04);
 }
 
 .table tbody tr:last-child td {
@@ -308,7 +311,7 @@
 }
 
 .rowClickable:hover {
-    background: var(--primary-light) !important;
+    background: rgba(59, 130, 246, 0.06) !important;
 }
 
 /* Sortable headers */
@@ -318,7 +321,7 @@
 }
 
 .sortableHeader:hover {
-    background: var(--bg-tertiary);
+    background: rgba(148, 163, 184, 0.05);
 }
 
 .headerContent {
@@ -328,7 +331,7 @@
 }
 
 .sortIcon {
-    color: var(--text-tertiary);
+    color: #475569;
     opacity: 0.5;
 }
 
@@ -348,19 +351,45 @@
 .fournisseurCell {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: 10px;
     font-weight: 500;
+    color: #e2e8f0;
+}
+
+.fournisseurAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.fournisseurAvatarRetard {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+}
+
+.fournisseurAvatarPaye {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
 }
 
 .referenceCell {
     font-family: monospace;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .montant {
     font-weight: 600;
     font-family: monospace;
-    color: var(--text-main);
+    color: #e2e8f0;
+    font-variant-numeric: tabular-nums;
 }
 
 /* Échéance */
@@ -387,20 +416,20 @@
 
 /* Ligne de facture en retard */
 .rowEnRetard {
-    background: var(--danger-light, rgba(239, 68, 68, 0.05)) !important;
+    background: rgba(239, 68, 68, 0.06) !important;
 }
 
 .rowEnRetard:hover {
-    background: var(--danger-light, rgba(239, 68, 68, 0.1)) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
 }
 
 /* Ligne d'avoir */
 .rowAvoir {
-    background: var(--success-bg, rgba(34, 197, 94, 0.05));
+    background: rgba(34, 197, 94, 0.04);
 }
 
 .rowAvoir:hover {
-    background: var(--success-bg, rgba(34, 197, 94, 0.1)) !important;
+    background: rgba(34, 197, 94, 0.08) !important;
 }
 
 /* Badge Type (Facture/Avoir) */
@@ -416,8 +445,8 @@
 }
 
 .typeBadgeFacture {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
+    background: rgba(148, 163, 184, 0.08);
+    color: #94a3b8;
 }
 
 .typeBadgeAvoir {
@@ -496,32 +525,32 @@
 
 /* Statut: Brouillon (gris/neutre) */
 .statutBrouillon {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
 }
 
 /* Statut: À valider (bleu/info) */
 .statutAValider {
-    background: var(--info-light, #dbeafe);
-    color: var(--info, #2563eb);
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
 }
 
 /* Statut: Validée (violet/purple) */
 .statutValidee {
-    background: #f3e8ff;
-    color: #7c3aed;
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
 }
 
 /* Statut: À payer (orange/warning) */
 .statutAPayer {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
 }
 
 /* Statut: Payée (étape finale - vert/success) */
 .statutPayee {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
 }
 
 /* PDF Viewer Inline */
@@ -704,20 +733,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    width: 30px;
+    height: 30px;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 6px;
+    color: #64748b;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: all 150ms;
 }
 
 .actionButton:hover {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
 }
 
 /* Empty State */
@@ -1225,18 +1254,18 @@
 }
 
 .posteBadgeOk {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
 }
 
 .posteBadgeWarning {
-    background: var(--warning-light);
-    color: var(--warning);
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
 }
 
 .posteBadgeDanger {
-    background: var(--danger-light);
-    color: var(--danger);
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
 }
 
 .posteReste {
@@ -1265,25 +1294,25 @@
 }
 
 .pjButtonPresent {
-    background: var(--success-light);
-    color: var(--success);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
     cursor: pointer;
 }
 
 .pjButtonPresent:hover {
-    background: var(--success);
-    color: white;
+    background: rgba(34, 197, 94, 0.25);
+    color: #22c55e;
     transform: scale(1.1);
 }
 
 .pjButtonAbsent {
-    background: var(--bg-secondary);
-    color: var(--text-tertiary);
+    background: rgba(148, 163, 184, 0.06);
+    color: #475569;
 }
 
 .pjButtonAlerte {
-    background: var(--danger-light);
-    color: var(--danger);
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
     animation: pjAlertePulse 2s ease-in-out infinite;
 }
 

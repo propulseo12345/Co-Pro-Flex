@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useBudget } from '@/hooks/modules/useBudget';
-import { BudgetTopBar, BudgetNavBar } from '@/components/features/finance/Budget';
+import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
+import { BudgetNavBar } from '@/components/features/finance/Budget';
+import { Download, Plus } from 'lucide-react';
 import {
   FonctionnementTab,
   TravauxTab,
@@ -76,11 +78,20 @@ export default function BudgetsPage() {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <BudgetTopBar
-          selectedYear={selectedYear}
-          onYearChange={setSelectedYear}
-          onCreateBudget={() => setShowCreateBudgetModal(true)}
-          onExportPDF={() => {}}
+        <FinanceTopBar
+          title="Budgets"
+          pill={{ label: `Exercice ${selectedYear}`, variant: 'blue', dotVariant: 'blue' }}
+          actions={
+            <>
+              <button className={topBarStyles.btnIcon} onClick={() => {}} title="Export PDF">
+                <Download size={16} />
+              </button>
+              <button className={topBarStyles.btnPrimary} onClick={() => setShowCreateBudgetModal(true)}>
+                <Plus size={16} />
+                Créer un budget
+              </button>
+            </>
+          }
         />
         <BudgetNavBar activeTab={activeTab} onTabChange={setActiveTab} />
         <div className={styles.content}>
@@ -95,11 +106,20 @@ export default function BudgetsPage() {
   if (error) {
     return (
       <div className={styles.page}>
-        <BudgetTopBar
-          selectedYear={selectedYear}
-          onYearChange={setSelectedYear}
-          onCreateBudget={() => setShowCreateBudgetModal(true)}
-          onExportPDF={() => {}}
+        <FinanceTopBar
+          title="Budgets"
+          pill={{ label: `Exercice ${selectedYear}`, variant: 'blue', dotVariant: 'blue' }}
+          actions={
+            <>
+              <button className={topBarStyles.btnIcon} onClick={() => {}} title="Export PDF">
+                <Download size={16} />
+              </button>
+              <button className={topBarStyles.btnPrimary} onClick={() => setShowCreateBudgetModal(true)}>
+                <Plus size={16} />
+                Créer un budget
+              </button>
+            </>
+          }
         />
         <BudgetNavBar activeTab={activeTab} onTabChange={setActiveTab} />
         <div className={styles.content}>
@@ -113,11 +133,20 @@ export default function BudgetsPage() {
 
   return (
     <div className={styles.page}>
-      <BudgetTopBar
-        selectedYear={selectedYear}
-        onYearChange={setSelectedYear}
-        onCreateBudget={() => setShowCreateBudgetModal(true)}
-        onExportPDF={() => alert('Export PDF en cours...')}
+      <FinanceTopBar
+        title="Budgets"
+        pill={{ label: `Exercice ${selectedYear}`, variant: 'blue', dotVariant: 'blue' }}
+        actions={
+          <>
+            <button className={topBarStyles.btnIcon} onClick={() => alert('Export PDF en cours...')} title="Export PDF">
+              <Download size={16} />
+            </button>
+            <button className={topBarStyles.btnPrimary} onClick={() => setShowCreateBudgetModal(true)}>
+              <Plus size={16} />
+              Créer un budget
+            </button>
+          </>
+        }
       />
       <BudgetNavBar activeTab={activeTab} onTabChange={setActiveTab} />
 

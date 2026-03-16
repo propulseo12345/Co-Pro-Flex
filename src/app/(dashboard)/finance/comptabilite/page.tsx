@@ -1,10 +1,9 @@
 'use client';
 
+import { Download, FileSpreadsheet, Copy, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useComptabilitePage } from '@/features/finance/comptabilite';
 import {
-  ComptaTopBar,
   ComptaNavBar,
-  ComptaKpiStrip,
   ComptaViewSwitcher,
   ComptaLoadingState,
   ComptaErrorState,
@@ -14,8 +13,35 @@ import {
   ClotureModal,
   HistoriqueModal,
 } from '@/components/features/finance/Comptabilite';
+import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar/FinanceTopBar';
+import { FinanceKpiStrip } from '@/components/layout/FinanceKpiStrip/FinanceKpiStrip';
+import type { FinanceKpi } from '@/components/layout/FinanceKpiStrip/FinanceKpiStrip';
 import { FinanceAnnexeStats } from '@/components/features/finance/FinanceAnnexeStats';
+import { formatCurrency } from '@/components/features/finance/Comptabilite/utils';
+import type { TabCompta } from '@/components/features/finance/Comptabilite/types';
 import styles from './comptabilite.module.css';
+
+const TAB_TITLES: Record<TabCompta, string> = {
+  'grand-livre': 'Grand Livre',
+  'livre-comptable': 'Livre comptable',
+  'balance': 'Balance',
+  'compte-gestion': 'Compte de gestion',
+  'annexe-1': 'Annexe 1 — État financier',
+  'annexe-2': 'Annexe 2 — Gestion courante',
+  'annexe-3': 'Annexe 3 — Clés de répartition',
+  'annexe-4': 'Annexe 4 — Travaux',
+  'annexe-5': 'Annexe 5 — Non clôturés',
+};
+
+function formatPeriodLabel(start?: string, end?: string): string {
+  if (!start || !end) return '';
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const year = startDate.getFullYear();
+  const fmt = (d: Date) =>
+    `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return `Exercice ${year} — ${fmt(startDate)} au ${fmt(endDate)}`;
+}
 
 export default function ComptabilitePage() {
   const page = useComptabilitePage();
@@ -28,13 +54,26 @@ export default function ComptabilitePage() {
     return <ComptaErrorState error={page.error} onRetry={page.handleRefresh} />;
   }
 
+  const title = TAB_TITLES[page.activeTab] || 'Comptabilité';
+
   if (!page.openPeriod) {
     return (
       <div className={styles.page}>
-        <ComptaTopBar
-          activeTab={page.activeTab}
-          onExportPDF={page.exportToPDF}
-          onExportExcel={page.exportToExcel}
+        <FinanceTopBar
+          title={title}
+          actions={
+            <>
+              <button className={topBarStyles.btnIcon} onClick={page.exportToPDF} title="Export PDF">
+                <Download size={16} />
+              </button>
+              <button className={topBarStyles.btnIcon} onClick={page.exportToExcel} title="Export Excel">
+                <FileSpreadsheet size={16} />
+              </button>
+              <button className={topBarStyles.btnIcon} title="Copier">
+                <Copy size={16} />
+              </button>
+            </>
+          }
         />
         <ComptaNavBar activeTab={page.activeTab} onTabChange={page.setActiveTab} />
         <div className={styles.content}>
@@ -44,17 +83,69 @@ export default function ComptabilitePage() {
     );
   }
 
+  const periodLabel = formatPeriodLabel(page.openPeriod.start_date, page.openPeriod.end_date);
+  const isOpen = page.openPeriod.status === 'open';
+
+  const kpis: FinanceKpi[] = [
+    { label: 'Total Débit', value: formatCurrency(page.totalDebit), color: '#ef4444' },
+    { label: 'Total Crédit', value: formatCurrency(page.totalCredit), color: '#22c55e' },
+    {
+      label: 'Écritures',
+      value: String(page.filteredOperations.length),
+      color: '#3b82f6',
+      trend: (
+        <span style={{ color: '#22c55e' }}>
+          <CheckCircle size={12} /> Toutes comptabilisées
+        </span>
+      ),
+    },
+    {
+      label: 'État balance',
+      value: page.isBalanced ? 'Équilibrée' : 'Déséquilibrée',
+      color: page.isBalanced ? '#22c55e' : '#ef4444',
+      trend: !page.isBalanced ? (
+        <span style={{ color: '#ef4444' }}>
+          <AlertCircle size={12} /> Vérifier les écritures
+        </span>
+      ) : undefined,
+    },
+  ];
+
   return (
     <div className={styles.page}>
-      <ComptaTopBar
-        activeTab={page.activeTab}
-        periodStart={page.openPeriod.start_date}
-        periodEnd={page.openPeriod.end_date}
-        periodStatus={page.openPeriod.status}
-        onExportPDF={page.exportToPDF}
-        onExportExcel={page.exportToExcel}
-        onShowCloture={() => page.setShowClotureModal(true)}
-        isReadOnly={page.isReadOnly}
+      <FinanceTopBar
+        title={title}
+        pill={
+          periodLabel
+            ? {
+                label: periodLabel,
+                variant: 'green',
+                dotVariant: isOpen ? 'green' : 'gray',
+              }
+            : undefined
+        }
+        actions={
+          <>
+            <button className={topBarStyles.btnIcon} onClick={page.exportToPDF} title="Export PDF">
+              <Download size={16} />
+            </button>
+            <button className={topBarStyles.btnIcon} onClick={page.exportToExcel} title="Export Excel">
+              <FileSpreadsheet size={16} />
+            </button>
+            <button className={topBarStyles.btnIcon} title="Copier">
+              <Copy size={16} />
+            </button>
+            {!page.isReadOnly && (
+              <button
+                className={topBarStyles.btnDanger}
+                onClick={() => page.setShowClotureModal(true)}
+              >
+                <Lock size={14} />
+                Clôturer {page.openPeriod.start_date ? new Date(page.openPeriod.start_date).getFullYear() : ''}
+              </button>
+            )}
+          </>
+        }
       />
 
       <ComptaNavBar activeTab={page.activeTab} onTabChange={page.setActiveTab} />
@@ -78,12 +169,7 @@ export default function ComptabilitePage() {
 
         <FinanceAnnexeStats periodId={page.selectedPeriodId} />
 
-        <ComptaKpiStrip
-          totalDebit={page.totalDebit}
-          totalCredit={page.totalCredit}
-          ecrituresCount={page.filteredOperations.length}
-          isBalanced={page.isBalanced}
-        />
+        <FinanceKpiStrip items={kpis} />
 
         {page.activeTab === 'grand-livre' && (
           <ComptaViewSwitcher

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factures Table — 3 designs</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .intro { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
+
+  .options-grid { display: flex; flex-direction: column; gap: 40px; max-width: 1300px; margin: 0 auto; }
+
+  .option-block { border: 2px solid rgba(148,163,184,0.1); border-radius: 16px; overflow: hidden; cursor: pointer; transition: all 0.3s; }
+  .option-block:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-2px); }
+  .option-block.selected { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.2); }
+
+  .option-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: rgba(148,163,184,0.05); border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .option-letter { width: 36px; height: 36px; border-radius: 50%; background: #3b82f6; color: white; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .option-title { font-size: 18px; font-weight: 700; }
+  .option-desc { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+  .option-tags { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
+  .tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .tag-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .tag-green { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .tag-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .reco { display: inline-block; margin-left: 12px; font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(34,197,94,0.15); color: #22c55e; font-weight: 600; vertical-align: middle; }
+
+  .mockup { padding: 20px; background: #131620; }
+
+  /* ── Shared elements ── */
+  .filters { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .search { flex: 1; min-width: 220px; padding: 9px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.1); border-radius: 8px; color: #94a3b8; font-size: 13px; }
+  .filter-el { padding: 9px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.1); border-radius: 8px; color: #94a3b8; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .chip { padding: 6px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.1); border-radius: 20px; font-size: 12px; color: #94a3b8; }
+  .chip.active { background: rgba(59,130,246,0.15); color: #3b82f6; border-color: rgba(59,130,246,0.3); }
+
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .bg { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .ba { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .br { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .bb { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .bn { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+  .amt { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+  .av { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .sup { display: flex; align-items: center; gap: 10px; }
+  .sup-name { font-weight: 500; font-size: 13px; }
+  .sup-meta { font-size: 11px; color: #64748b; }
+
+  .icon-btn { width: 28px; height: 28px; border-radius: 6px; background: rgba(148,163,184,0.06); border: none; color: #64748b; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .icon-btn:hover { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .actions-cell { display: flex; gap: 4px; justify-content: flex-end; }
+
+  /* Selection indicator */
+  .selected-indicator { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: #3b82f6; color: white; border-radius: 12px; font-weight: 600; font-size: 14px; display: none; z-index: 100; box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+  .selected-indicator.visible { display: block; }
+
+  /* ═══════ A — Table compacte Qonto ═══════ */
+  .tbl-a { width: 100%; border-collapse: collapse; }
+  .tbl-a th { text-align: left; padding: 10px 14px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .tbl-a td { padding: 14px; font-size: 13px; border-bottom: 1px solid rgba(148,163,184,0.05); }
+  .tbl-a tr:hover td { background: rgba(148,163,184,0.03); }
+  .tbl-a .r { text-align: right; }
+
+  .row-retard { background: rgba(239,68,68,0.04); }
+  .row-retard td:first-child { border-left: 3px solid #ef4444; }
+  .echeance-retard { color: #ef4444; font-weight: 600; font-size: 12px; }
+  .echeance-ok { color: #94a3b8; font-size: 12px; }
+  .poste-tag { padding: 2px 8px; background: rgba(59,130,246,0.1); border-radius: 10px; font-size: 10px; color: #3b82f6; font-weight: 500; }
+
+  /* ═══════ B — Table + barre latérale statut ═══════ */
+  .b-wrap { display: flex; gap: 16px; }
+  .b-sidebar { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+  .b-stat-card { padding: 12px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; cursor: pointer; transition: all 150ms; }
+  .b-stat-card:hover { border-color: rgba(148,163,184,0.2); }
+  .b-stat-card.active { border-color: #3b82f6; background: rgba(59,130,246,0.06); }
+  .b-stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+  .b-stat-label { font-size: 13px; font-weight: 500; }
+  .b-stat-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .b-stat-count { font-size: 11px; color: #64748b; }
+  .b-stat-amount { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .b-main { flex: 1; min-width: 0; }
+
+  .tbl-b { width: 100%; border-collapse: collapse; background: #1a1d2e; border-radius: 12px; overflow: hidden; border: 1px solid rgba(148,163,184,0.08); }
+  .tbl-b th { text-align: left; padding: 10px 14px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .tbl-b td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid rgba(148,163,184,0.04); }
+  .tbl-b tr:hover td { background: rgba(148,163,184,0.03); }
+  .tbl-b .r { text-align: right; }
+
+  /* ═══════ C — Cards groupées par statut ═══════ */
+  .c-group { margin-bottom: 20px; }
+  .c-group-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px 10px 0 0; }
+  .c-group-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .c-group-label { font-size: 14px; font-weight: 600; }
+  .c-group-count { font-size: 11px; color: #64748b; padding: 2px 8px; background: rgba(148,163,184,0.1); border-radius: 10px; }
+  .c-group-total { margin-left: auto; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .tbl-c { width: 100%; border-collapse: collapse; background: rgba(26,29,46,0.5); border: 1px solid rgba(148,163,184,0.08); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; }
+  .tbl-c td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid rgba(148,163,184,0.04); }
+  .tbl-c tr:last-child td { border-bottom: none; }
+  .tbl-c tr:hover td { background: rgba(148,163,184,0.03); }
+  .tbl-c .r { text-align: right; }
+</style>
+</head>
+<body>
+
+<h1>Vue Table Factures — 3 designs</h1>
+<p class="intro">Clique sur le design qui correspond le mieux à l'usage syndic quotidien</p>
+
+<div class="options-grid">
+
+<!-- ═══════ OPTION A — Table compacte Qonto ═══════ -->
+<div class="option-block" data-choice="a" onclick="selectOption(this)">
+  <div class="option-header">
+    <div class="option-letter">A</div>
+    <div>
+      <div class="option-title">Table compacte avec avatars <span class="reco">Recommandé</span></div>
+      <div class="option-desc">Style Qonto — table propre, avatars fournisseurs, actions inline au hover, filtres par chips + search + dropdown</div>
+    </div>
+    <div class="option-tags"><span class="tag tag-blue">Qonto</span></div>
+  </div>
+  <div class="mockup">
+    <div class="filters">
+      <div class="search">🔍 Rechercher par fournisseur, référence...</div>
+      <div class="filter-el">🏢 Tous les fournisseurs ▾</div>
+      <div class="chip active">Tous</div>
+      <div class="chip">Ce mois</div>
+      <div class="chip">Énergie</div>
+      <div class="chip">Ascenseur</div>
+      <div class="chip">Assurance</div>
+      <div class="filter-el" style="margin-left:auto">↓ Récent</div>
+    </div>
+    <div style="background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:12px;overflow:hidden">
+    <table class="tbl-a">
+      <thead><tr>
+        <th style="width:220px">Fournisseur</th>
+        <th>Référence</th>
+        <th>Date</th>
+        <th>Échéance</th>
+        <th>Poste</th>
+        <th class="r">Montant TTC</th>
+        <th>Statut</th>
+        <th class="r" style="width:100px"></th>
+      </tr></thead>
+      <tbody>
+        <tr class="row-retard">
+          <td><div class="sup"><div class="av" style="background:rgba(239,68,68,0.12);color:#ef4444">EN</div><div><div class="sup-name">ENGIE Energie</div><div class="sup-meta">Contrat N°E-789</div></div></div></td>
+          <td style="color:#94a3b8;font-family:monospace;font-size:12px">FAC-2026-0042</td>
+          <td style="color:#94a3b8;font-size:12px">29/01/2026</td>
+          <td><div class="echeance-retard">⚠ 27/02/2026<br><span style="font-size:10px">17j de retard</span></div></td>
+          <td><span class="poste-tag">Énergie</span></td>
+          <td class="r amt">410,00 €</td>
+          <td><span class="badge br">⚠ En retard</span></td>
+          <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td>
+        </tr>
+        <tr>
+          <td><div class="sup"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6">EP</div><div><div class="sup-name">ENTRETIEN PLUS S...</div><div class="sup-meta">SIRET 442 123 456</div></div></div></td>
+          <td style="color:#94a3b8;font-family:monospace;font-size:12px">FAC-2026-0041</td>
+          <td style="color:#94a3b8;font-size:12px">31/01/2026</td>
+          <td><div class="echeance-ok">30/03/2026</div></td>
+          <td><span class="poste-tag">Entretien</span></td>
+          <td class="r amt">100,00 €</td>
+          <td><span class="badge bb">✓ Validée</span></td>
+          <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td>
+        </tr>
+        <tr>
+          <td><div class="sup"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6">EP</div><div><div class="sup-name">ENTRETIEN PLUS S...</div><div class="sup-meta">SIRET 442 123 456</div></div></div></td>
+          <td style="color:#94a3b8;font-family:monospace;font-size:12px">FAC-2026-0040</td>
+          <td style="color:#94a3b8;font-size:12px">31/01/2026</td>
+          <td><div class="echeance-ok">30/03/2026</div></td>
+          <td><span class="poste-tag">Entretien</span></td>
+          <td class="r amt">2 002,00 €</td>
+          <td><span class="badge bg">✓ Payée</span></td>
+          <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">📋</div><div class="icon-btn">⋯</div></div></td>
+        </tr>
+        <tr>
+          <td><div class="sup"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6">EP</div><div><div class="sup-name">ENTRETIEN PLUS S...</div><div class="sup-meta">SIRET 442 123 456</div></div></div></td>
+          <td style="color:#94a3b8;font-family:monospace;font-size:12px">FAC-2026-0039</td>
+          <td style="color:#94a3b8;font-size:12px">31/01/2026</td>
+          <td><div class="echeance-ok">30/03/2026</div></td>
+          <td><span class="poste-tag">Entretien</span></td>
+          <td class="r amt">232,00 €</td>
+          <td><span class="badge bb">✓ Validée</span></td>
+          <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td>
+        </tr>
+        <tr>
+          <td><div class="sup"><div class="av" style="background:rgba(34,197,94,0.12);color:#22c55e">EP</div><div><div class="sup-name">ENTRETIEN PLUS S...</div><div class="sup-meta">SIRET 442 123 456</div></div></div></td>
+          <td style="color:#94a3b8;font-family:monospace;font-size:12px">FA-2025-002</td>
+          <td style="color:#94a3b8;font-size:12px">18/01/2025</td>
+          <td><div class="echeance-ok">18/02/2025</div></td>
+          <td><span style="color:#475569;font-size:11px">—</span></td>
+          <td class="r amt">370,00 €</td>
+          <td><span class="badge bg">✓ Payée</span></td>
+          <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">📋</div><div class="icon-btn">⋯</div></div></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ OPTION B — Table + sidebar statuts ═══════ -->
+<div class="option-block" data-choice="b" onclick="selectOption(this)">
+  <div class="option-header">
+    <div class="option-letter">B</div>
+    <div>
+      <div class="option-title">Table + sidebar résumé statuts</div>
+      <div class="option-desc">Sidebar gauche avec résumé par statut (cliquable = filtre), table principale à droite — vue comptable</div>
+    </div>
+    <div class="option-tags"><span class="tag tag-purple">Pennylane</span></div>
+  </div>
+  <div class="mockup">
+    <div class="filters">
+      <div class="search" style="flex:1">🔍 Rechercher...</div>
+      <div class="filter-el">📅 Janvier 2026 ▾</div>
+      <div class="filter-el">↓ Récent</div>
+    </div>
+    <div class="b-wrap">
+      <div class="b-sidebar">
+        <div class="b-stat-card active">
+          <div><span class="b-stat-dot" style="background:#e2e8f0"></span><span class="b-stat-label">Toutes</span></div>
+          <div class="b-stat-row"><span class="b-stat-count">6 factures</span><span class="b-stat-amount" style="color:#e2e8f0">3 914 €</span></div>
+        </div>
+        <div class="b-stat-card">
+          <div><span class="b-stat-dot" style="background:#ef4444"></span><span class="b-stat-label">En retard</span></div>
+          <div class="b-stat-row"><span class="b-stat-count">1 facture</span><span class="b-stat-amount" style="color:#ef4444">410 €</span></div>
+        </div>
+        <div class="b-stat-card">
+          <div><span class="b-stat-dot" style="background:#3b82f6"></span><span class="b-stat-label">Validées</span></div>
+          <div class="b-stat-row"><span class="b-stat-count">2 factures</span><span class="b-stat-amount" style="color:#3b82f6">332 €</span></div>
+        </div>
+        <div class="b-stat-card">
+          <div><span class="b-stat-dot" style="background:#22c55e"></span><span class="b-stat-label">Payées</span></div>
+          <div class="b-stat-row"><span class="b-stat-count">3 factures</span><span class="b-stat-amount" style="color:#22c55e">3 172 €</span></div>
+        </div>
+      </div>
+      <div class="b-main">
+        <table class="tbl-b">
+          <thead><tr>
+            <th>Fournisseur</th>
+            <th>Réf.</th>
+            <th>Échéance</th>
+            <th class="r">Montant</th>
+            <th>Statut</th>
+            <th class="r"></th>
+          </tr></thead>
+          <tbody>
+            <tr style="background:rgba(239,68,68,0.04)">
+              <td><div class="sup"><div class="av" style="background:rgba(239,68,68,0.12);color:#ef4444">EN</div><div><div class="sup-name">ENGIE Energie</div></div></div></td>
+              <td style="color:#94a3b8;font-size:12px">FAC-2026-0042</td>
+              <td><span class="echeance-retard">⚠ 17j retard</span></td>
+              <td class="r amt">410 €</td>
+              <td><span class="badge br">En retard</span></td>
+              <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">💳</div></div></td>
+            </tr>
+            <tr>
+              <td><div class="sup"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6">EP</div><div><div class="sup-name">ENTRETIEN PLUS</div></div></div></td>
+              <td style="color:#94a3b8;font-size:12px">FAC-2026-0041</td>
+              <td style="color:#94a3b8;font-size:12px">30/03/2026</td>
+              <td class="r amt">100 €</td>
+              <td><span class="badge bb">Validée</span></td>
+              <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">💳</div></div></td>
+            </tr>
+            <tr>
+              <td><div class="sup"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6">EP</div><div><div class="sup-name">ENTRETIEN PLUS</div></div></div></td>
+              <td style="color:#94a3b8;font-size:12px">FAC-2026-0040</td>
+              <td style="color:#94a3b8;font-size:12px">30/03/2026</td>
+              <td class="r amt" style="color:#22c55e">2 002 €</td>
+              <td><span class="badge bg">Payée</span></td>
+              <td><div class="actions-cell"><div class="icon-btn">👁</div></div></td>
+            </tr>
+            <tr>
+              <td><div class="sup"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6">EP</div><div><div class="sup-name">ENTRETIEN PLUS</div></div></div></td>
+              <td style="color:#94a3b8;font-size:12px">FAC-2026-0039</td>
+              <td style="color:#94a3b8;font-size:12px">30/03/2026</td>
+              <td class="r amt">232 €</td>
+              <td><span class="badge bb">Validée</span></td>
+              <td><div class="actions-cell"><div class="icon-btn">👁</div><div class="icon-btn">💳</div></div></td>
+            </tr>
+            <tr>
+              <td><div class="sup"><div class="av" style="background:rgba(34,197,94,0.12);color:#22c55e">EP</div><div><div class="sup-name">ENTRETIEN PLUS</div></div></div></td>
+              <td style="color:#94a3b8;font-size:12px">FA-2025-002</td>
+              <td style="color:#94a3b8;font-size:12px">18/02/2025</td>
+              <td class="r amt" style="color:#22c55e">370 €</td>
+              <td><span class="badge bg">Payée</span></td>
+              <td><div class="actions-cell"><div class="icon-btn">👁</div></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ OPTION C — Table groupée par statut ═══════ -->
+<div class="option-block" data-choice="c" onclick="selectOption(this)">
+  <div class="option-header">
+    <div class="option-letter">C</div>
+    <div>
+      <div class="option-title">Table groupée par statut (accordéons)</div>
+      <div class="option-desc">Factures regroupées par statut — headers expandables avec totaux, vue pipeline en lignes</div>
+    </div>
+    <div class="option-tags"><span class="tag tag-green">Tiime</span></div>
+  </div>
+  <div class="mockup">
+    <div class="filters">
+      <div class="search" style="flex:1">🔍 Rechercher par fournisseur, référence...</div>
+      <div class="filter-el">🏢 Tous fournisseurs ▾</div>
+      <div class="filter-el">📅 2026 ▾</div>
+      <div class="filter-el" style="margin-left:auto">↓ Récent</div>
+    </div>
+
+    <!-- Groupe En retard -->
+    <div class="c-group">
+      <div class="c-group-header">
+        <div class="c-group-dot" style="background:#ef4444"></div>
+        <span class="c-group-label">En retard</span>
+        <span class="c-group-count">1</span>
+        <span class="c-group-total" style="color:#ef4444">410,00 €</span>
+      </div>
+      <table class="tbl-c">
+        <tbody>
+          <tr>
+            <td style="width:40px;padding-left:16px"><div class="av" style="background:rgba(239,68,68,0.12);color:#ef4444;width:28px;height:28px;font-size:10px">EN</div></td>
+            <td><div><div class="sup-name">ENGIE Energie</div><div class="sup-meta">FAC-2026-0042</div></div></td>
+            <td><span class="echeance-retard">⚠ 27/02 — 17j retard</span></td>
+            <td><span class="poste-tag">Énergie</span></td>
+            <td class="r amt" style="color:#ef4444">410,00 €</td>
+            <td class="r"><div class="actions-cell"><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Groupe Validées / À payer -->
+    <div class="c-group">
+      <div class="c-group-header">
+        <div class="c-group-dot" style="background:#3b82f6"></div>
+        <span class="c-group-label">Validées / En attente</span>
+        <span class="c-group-count">2</span>
+        <span class="c-group-total" style="color:#3b82f6">332,00 €</span>
+      </div>
+      <table class="tbl-c">
+        <tbody>
+          <tr>
+            <td style="width:40px;padding-left:16px"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6;width:28px;height:28px;font-size:10px">EP</div></td>
+            <td><div><div class="sup-name">ENTRETIEN PLUS</div><div class="sup-meta">FAC-2026-0041</div></div></td>
+            <td><span class="echeance-ok">Éch. 30/03/2026</span></td>
+            <td><span class="poste-tag">Entretien</span></td>
+            <td class="r amt">100,00 €</td>
+            <td class="r"><div class="actions-cell"><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td>
+          </tr>
+          <tr>
+            <td style="width:40px;padding-left:16px"><div class="av" style="background:rgba(59,130,246,0.12);color:#3b82f6;width:28px;height:28px;font-size:10px">EP</div></td>
+            <td><div><div class="sup-name">ENTRETIEN PLUS</div><div class="sup-meta">FAC-2026-0039</div></div></td>
+            <td><span class="echeance-ok">Éch. 30/03/2026</span></td>
+            <td><span class="poste-tag">Entretien</span></td>
+            <td class="r amt">232,00 €</td>
+            <td class="r"><div class="actions-cell"><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Groupe Payées -->
+    <div class="c-group">
+      <div class="c-group-header">
+        <div class="c-group-dot" style="background:#22c55e"></div>
+        <span class="c-group-label">Payées</span>
+        <span class="c-group-count">3</span>
+        <span class="c-group-total" style="color:#22c55e">3 172,00 €</span>
+      </div>
+      <table class="tbl-c">
+        <tbody>
+          <tr style="opacity:0.7">
+            <td style="width:40px;padding-left:16px"><div class="av" style="background:rgba(34,197,94,0.12);color:#22c55e;width:28px;height:28px;font-size:10px">EP</div></td>
+            <td><div><div class="sup-name">ENTRETIEN PLUS</div><div class="sup-meta">FAC-2026-0040 · Madrid</div></div></td>
+            <td style="color:#64748b;font-size:12px">✓ Payée le 15/02/2026</td>
+            <td><span class="poste-tag">Entretien</span></td>
+            <td class="r amt" style="color:#22c55e">2 002,00 €</td>
+            <td class="r"><div class="actions-cell"><div class="icon-btn">👁</div></div></td>
+          </tr>
+          <tr style="opacity:0.7">
+            <td style="width:40px;padding-left:16px"><div class="av" style="background:rgba(34,197,94,0.12);color:#22c55e;width:28px;height:28px;font-size:10px">EP</div></td>
+            <td><div><div class="sup-name">ENTRETIEN PLUS</div><div class="sup-meta">FA-2025-002</div></div></td>
+            <td style="color:#64748b;font-size:12px">✓ Payée le 18/01/2025</td>
+            <td><span style="color:#475569;font-size:11px">—</span></td>
+            <td class="r amt" style="color:#22c55e">370,00 €</td>
+            <td class="r"><div class="actions-cell"><div class="icon-btn">👁</div></div></td>
+          </tr>
+          <tr style="opacity:0.7">
+            <td style="width:40px;padding-left:16px"><div class="av" style="background:rgba(34,197,94,0.12);color:#22c55e;width:28px;height:28px;font-size:10px">EP</div></td>
+            <td><div><div class="sup-name">ENTRETIEN PLUS</div><div class="sup-meta">FA-2025-001</div></div></td>
+            <td style="color:#64748b;font-size:12px">✓ Payée le 10/01/2025</td>
+            <td><span style="color:#475569;font-size:11px">—</span></td>
+            <td class="r amt" style="color:#22c55e">800,00 €</td>
+            <td class="r"><div class="actions-cell"><div class="icon-btn">👁</div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="selected-indicator" id="indicator"></div>
+
+<script>
+function selectOption(el) {
+  document.querySelectorAll('.option-block').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const choice = el.dataset.choice;
+  const titles = { a: 'A — Table compacte avec avatars (Qonto)', b: 'B — Table + sidebar résumé statuts (Pennylane)', c: 'C — Table groupée par statut (Tiime)' };
+  const ind = document.getElementById('indicator');
+  ind.textContent = '✓ Sélection : ' + titles[choice];
+  ind.classList.add('visible');
+  fetch('/event', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({type:'click',choice:choice,text:titles[choice],timestamp:Date.now()}) }).catch(() => {});
+}
+</script>
+
+</body>
+</html>

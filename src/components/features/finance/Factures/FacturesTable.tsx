@@ -196,7 +196,9 @@ export function FacturesTable({
                   </div>
                 </td>
                 <td className={styles.fournisseurCell}>
-                  <Building2 size={16} aria-hidden="true" />
+                  <div className={`${styles.fournisseurAvatar} ${enRetard ? styles.fournisseurAvatarRetard : facture.statut === 'PAYEE' ? styles.fournisseurAvatarPaye : ''}`}>
+                    {facture.fournisseur.slice(0, 2).toUpperCase()}
+                  </div>
                   <div>
                     <TruncatedText text={facture.fournisseur} maxWidth={150} tooltipPosition="bottom" />
                     {isAvoir && factureOrigine && (

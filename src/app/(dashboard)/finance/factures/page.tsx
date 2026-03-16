@@ -1,9 +1,15 @@
 'use client';
 
-import { FacturesHeader } from '@/components/features/finance/Factures/FacturesHeader';
-import { FacturesKPI } from '@/components/features/finance/Factures/FacturesKPI';
-import { FacturesFilters } from '@/components/features/finance/Factures/FacturesFilters';
-import { FacturesTable } from '@/components/features/finance/Factures/FacturesTable';
+import { Download, Plus } from 'lucide-react';
+import { useFacturesPageV2 } from '@/features/finance/factures';
+import {
+  FacturesViewToggle,
+  FacturesKanbanView,
+  FacturesTableView,
+} from '@/features/finance/factures';
+import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
+import { FinanceKpiStrip } from '@/components/layout/FinanceKpiStrip';
+import type { FinanceKpi } from '@/components/layout/FinanceKpiStrip';
 import { PaymentModal } from '@/components/features/finance/Factures/modals/PaymentModal';
 import { AccountingModal } from '@/components/features/finance/Factures/modals/AccountingModal';
 import { ViewModal } from '@/components/features/finance/Factures/modals/ViewModal';
@@ -12,44 +18,58 @@ import { DeleteModal } from '@/components/features/finance/Factures/modals/Delet
 import { NewFactureModal } from '@/components/features/finance/Factures/modals/NewFactureModal';
 import { AvoirModal } from '@/components/features/finance/Factures/modals/AvoirModal';
 import { useBudget } from '@/hooks/modules/useBudget';
-import { useFacturesPage } from '@/features/finance';
 import styles from './factures.module.css';
 
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount);
+}
+
 export default function FacturesPage() {
-  const page = useFacturesPage();
+  const page = useFacturesPageV2();
   const { postesBudget } = useBudget();
 
+  if (page.isLoading) {
+    return (
+      <div className={styles.page} style={{ color: '#94a3b8', textAlign: 'center' }}>
+        Chargement des factures...
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.container}>
-      <FacturesHeader onNewFacture={page.handleNewFacture} />
-      <FacturesKPI kpiData={page.kpiData} onKPIClick={page.handleKPIClick} activeFilter={page.kpiFilter || undefined} />
-      <FacturesFilters
-        searchTerm={page.searchTerm}
-        onSearchChange={page.setSearchTerm}
-        statutFilter={page.statutFilter}
-        onStatutFilterChange={page.handleStatutFilterChange}
-        sortOrder={page.sortOrder}
-        onSortOrderChange={() => page.setSortOrder(prev => prev === 'DESC' ? 'ASC' : 'DESC')}
-        fournisseurFilter={page.fournisseurFilter}
-        onFournisseurFilterChange={page.setFournisseurFilter}
-        fournisseurs={page.fournisseurs}
-        periodeFilter={page.periodeFilter}
-        onPeriodeFilterChange={page.setPeriodeFilter}
+    <div className={styles.page}>
+      <FinanceTopBar
+        title="Factures fournisseurs"
+        subtitle="Suivi et gestion des factures prestataires"
+        actions={
+          <>
+            <FacturesViewToggle viewMode={page.viewMode} onViewModeChange={page.setViewMode} />
+            <button className={topBarStyles.btnGhost} onClick={() => {/* TODO */}}>
+              <Download size={14} /> Export
+            </button>
+            <button className={topBarStyles.btnPrimary} onClick={page.handleNewFacture}>
+              <Plus size={14} /> Nouvelle facture
+            </button>
+          </>
+        }
       />
-      <FacturesTable
-        factures={page.filteredFactures}
-        postesBudget={postesBudget}
-        onStatutClick={page.handleStatutClick}
-        onCategorize={page.handleCategorize}
-        onView={page.handleView}
-        onEdit={page.handleEdit}
-        onDelete={page.handleDelete}
-        onCreateAvoir={page.handleCreateAvoir}
-        onViewPJ={page.handleView}
-        sortColumn={page.sortColumn}
-        sortDirection={page.sortDirection}
-        onSort={page.handleSort}
+      <FinanceKpiStrip
+        items={[
+          { label: 'Factures', value: String(page.kpiData.nombreFactures), color: '#3b82f6' },
+          { label: 'Total payé', value: formatCurrency(page.montantPaye), color: '#22c55e' },
+          { label: 'En retard', value: formatCurrency(page.kpiData.montantEchu), color: '#ef4444' },
+          { label: 'Cette semaine', value: `${page.kpiData.echeancesSemaine} éch.` },
+        ] satisfies FinanceKpi[]}
       />
+
+      {page.viewMode === 'kanban' ? (
+        <FacturesKanbanView
+          columns={page.kanbanColumns}
+          onCardClick={page.handleView}
+        />
+      ) : (
+        <FacturesTableView page={page} postesBudget={postesBudget} />
+      )}
 
       {page.showPaymentModal && page.selectedFacture && (
         <PaymentModal facture={page.selectedFacture} onClose={page.closePaymentModal} onPaymentComplete={page.handlePaymentComplete} />

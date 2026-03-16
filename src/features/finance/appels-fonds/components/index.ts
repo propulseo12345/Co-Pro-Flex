@@ -7,3 +7,4 @@ export { DetailHeader } from './DetailHeader';
 export { CoproTable } from './CoproTable';
 export { TabListe } from './TabListe';
 export { CreateCallWizard } from './CreateCallWizard';
+export { AppelsFondsKpiStrip } from './AppelsFondsKpiStrip';

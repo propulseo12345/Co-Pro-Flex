@@ -11,8 +11,8 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md) 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base);
@@ -40,18 +40,19 @@
 .iconPurple { background: rgba(167, 139, 250, 0.15); color: #A78BFA; }
 
 .label {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-size: 11px;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
 }
 
 .value {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--text-main);
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
 }
 
 .valueGreen { color: var(--success); }
@@ -73,8 +74,8 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-md);
   font-size: var(--text-sm);

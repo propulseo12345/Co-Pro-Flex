@@ -1,21 +1,23 @@
-# Session State — 2026-03-16 23:30
+# Session State — 2026-03-16 21:00
 
 ## Branch
 v2
 
 ## Completed This Session
-- Recherche web bonnes pratiques Claude Code (repos, hooks, skills, context mgmt)
-- Règle "confirmation avant action" ajoutée dans CLAUDE.md + feedback memory
-- Split CLAUDE.md (470→75 lignes) + 3 fichiers @import (conventions, business-rules, modules)
-- Hooks: PreToolUse block-dangerous.sh + PostToolUse eslint --fix auto
-- 3 slash commands: /project:review, /project:fix-types, /project:check-build
+- Dark theme appels de fonds (KPI strip + CSS cards/tabs/accordéons #1a1d2e)
+- Brainstorm + design + implémentation refonte Factures (Kanban 4 colonnes + Table toggle + sidebar statuts)
+- Composants unifiés FinanceTopBar + FinanceKpiStrip créés et déployés sur 5 pages Finance
+- Refonte CSS table Factures (avatars, badges, actions, dark theme complet)
+- Fix double padding + max-width sur pages Finance (factures, appels-fonds)
 
 ## Next Task
-Tests E2E: créer budget travaux avec échéancier + vérifier modale détail + marquer phase payée. Ou traiter les problèmes sécu identifiés (isManager||true, XSS, open redirect).
+Refonte complète page Mouvements bancaires — recherche inspiration + 3 previews + implémentation (même process que Factures)
 
 ## Blockers
 None
 
 ## Key Context
-- Prettier non installé, hooks utilisent ESLint uniquement
-- Routes dupliquées factures/invoices et mouvements-bancaires/bank-movements toujours présentes
+- FinanceTopBar + FinanceKpiStrip dans src/components/layout/ — réutilisables pour toutes les sous-sections
+- Le .main-content global a déjà padding: var(--space-xl) — les pages NE doivent PAS ajouter de padding
+- Conflit global .card dans globals.css override les CSS modules → utiliser des noms comme .kpiCard
+- Visual companion server peut être relancé pour les previews brainstorm

@@ -1,0 +1,169 @@
+/* ── Grid ── */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* ── Column ── */
+.column {
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.colHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.colTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.colDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.colCount {
+  font-size: 11px;
+  color: #64748b;
+  padding: 2px 8px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+}
+
+.colTotal {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.colBody {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Card ── */
+.card {
+  padding: 12px;
+  background: #131620;
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.cardOverdue {
+  border-left: 3px solid #ef4444;
+}
+
+.cardPaid {
+  opacity: 0.7;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.cardSupplier {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.cardAmount {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
+}
+
+.cardRef {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.cardBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardDate {
+  font-size: 11px;
+  color: #475569;
+}
+
+.cardUrgent {
+  font-size: 10px;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.cardPoste {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  color: #94a3b8;
+}
+
+/* Color overrides */
+.amountRed { color: #ef4444; }
+.amountGreen { color: #22c55e; }
+.totalRed { color: #ef4444; }
+.totalAmber { color: #f59e0b; }
+.totalBlue { color: #3b82f6; }
+.totalGreen { color: #22c55e; }
+
+/* ── Empty ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: #475569;
+  font-size: 12px;
+  text-align: center;
+  flex: 1;
+  opacity: 0.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .columns { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .columns { grid-template-columns: 1fr; }
+}

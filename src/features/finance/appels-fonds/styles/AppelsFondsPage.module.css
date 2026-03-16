@@ -60,14 +60,14 @@
 
 .btnSecondary {
   composes: btn;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-main);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: #e2e8f0;
 }
 
 .btnSecondary:hover {
-  background: var(--bg-tertiary);
-  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.25);
 }
 
 /* ── Period Bar ── */
@@ -82,9 +82,9 @@
   gap: 12px;
   width: 100%;
   padding: 12px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 150ms;
   font-family: inherit;
@@ -98,12 +98,12 @@
 .periodLabel {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-main);
+  color: #e2e8f0;
 }
 
 .periodMeta {
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: #64748b;
   margin-left: 4px;
 }
 
@@ -125,9 +125,9 @@
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.4);
   z-index: 50;
   overflow: hidden;
@@ -169,12 +169,12 @@
 .periodOptionName {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-main);
+  color: #e2e8f0;
 }
 
 .periodOptionDates {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: #64748b;
   margin-left: auto;
 }
 
@@ -184,9 +184,9 @@
   gap: 4px;
   margin-bottom: 24px;
   padding: 4px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
 }
 
 .tab {

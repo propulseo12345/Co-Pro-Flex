@@ -1,5 +1,9 @@
 'use client';
 
+import { Download, Upload, RefreshCw } from 'lucide-react';
+import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
+import { FinanceKpiStrip } from '@/components/layout/FinanceKpiStrip';
+import type { FinanceKpi } from '@/components/layout/FinanceKpiStrip';
 import { useMouvementsBancairesPage } from '../../../../features/finance/mouvements-bancaires/hooks';
 import {
   SyncSection,
@@ -12,11 +16,14 @@ import {
   RapprochementModal,
   EntityDetailModal,
   ImportModal,
-  PageHeader,
   NewMovementsNotification,
   TabsNavigation,
 } from '../../../../features/finance/mouvements-bancaires/components';
 import styles from './mouvements-bancaires.module.css';
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(amount);
+}
 
 export default function MouvementsBancairesPage() {
   const hook = useMouvementsBancairesPage();
@@ -25,15 +32,43 @@ export default function MouvementsBancairesPage() {
     // Placeholder for RIB download
   };
 
+  const isSyncing = hook.statutConnexion.statut === 'en_cours';
+
+  const kpis: FinanceKpi[] = [
+    { label: 'Solde actuel', value: formatCurrency(hook.soldeActuel), color: '#3b82f6' },
+    { label: 'Entrées', value: formatCurrency(hook.totalEntrees), color: '#22c55e' },
+    { label: 'Sorties', value: formatCurrency(hook.totalSorties), color: '#ef4444' },
+    { label: 'Solde initial', value: formatCurrency(hook.soldeInitial) },
+  ];
+
   return (
     <div className={styles.container}>
-      <PageHeader
-        isRefreshing={hook.isRefreshing}
-        isSyncing={hook.statutConnexion.statut === 'en_cours'}
-        onDownloadRIB={downloadRIB}
-        onImportClick={() => hook.setShowImportModal(true)}
-        onRefresh={hook.handleRefresh}
+      <FinanceTopBar
+        title="Mouvements bancaires"
+        subtitle="Suivi en temps réel de vos comptes bancaires"
+        actions={
+          <>
+            <button className={topBarStyles.btnGhost} onClick={downloadRIB}>
+              <Download size={15} />
+              Télécharger RIB
+            </button>
+            <button className={topBarStyles.btnGhost} onClick={() => hook.setShowImportModal(true)}>
+              <Upload size={15} />
+              Import manuel
+            </button>
+            <button
+              className={topBarStyles.btnGhost}
+              onClick={hook.handleRefresh}
+              disabled={hook.isRefreshing || isSyncing}
+            >
+              <RefreshCw size={15} className={hook.isRefreshing ? topBarStyles.spinning : undefined} />
+              {hook.isRefreshing ? 'Synchronisation...' : 'Synchroniser'}
+            </button>
+          </>
+        }
       />
+
+      <FinanceKpiStrip items={kpis} />
 
       {hook.alerteNouveauxMouvements && (
         <NewMovementsNotification

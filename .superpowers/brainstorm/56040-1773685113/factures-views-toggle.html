@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factures — Modes de vue</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px; }
+
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .intro { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
+
+  .options-grid { display: flex; flex-direction: column; gap: 40px; max-width: 1200px; margin: 0 auto; }
+
+  .option-block {
+    border: 2px solid rgba(148,163,184,0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .option-block:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-2px); }
+  .option-block.selected { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.2); }
+
+  .option-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px;
+    background: rgba(148,163,184,0.05);
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+  }
+  .option-letter {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #3b82f6; color: white; font-weight: 700; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .option-title { font-size: 18px; font-weight: 700; }
+  .option-desc { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+  .option-tags { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
+  .tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .tag-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .tag-green { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .tag-amber { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .tag-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+  .mockup { padding: 20px; background: #131620; }
+
+  /* ── Shared ── */
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .title { font-size: 20px; font-weight: 700; }
+  .kpi-mini { display: flex; gap: 16px; margin-top: 4px; }
+  .kpi-item { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+  .kpi-num { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi-lbl { color: #64748b; font-size: 12px; }
+  .blue { color: #3b82f6; } .green { color: #22c55e; } .red { color: #ef4444; } .amber { color: #f59e0b; }
+  .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
+  .btn-ghost { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.15); color: #e2e8f0; }
+  .btn-primary { background: #3b82f6; color: white; }
+
+  .view-toggle { display: flex; gap: 0; background: #1a1d2e; border-radius: 8px; border: 1px solid rgba(148,163,184,0.1); overflow: hidden; }
+  .view-btn { padding: 6px 14px; font-size: 12px; color: #64748b; cursor: pointer; border: none; background: none; font-family: inherit; }
+  .view-btn.active { background: rgba(59,130,246,0.15); color: #3b82f6; }
+
+  /* ── Kanban ── */
+  .columns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .column { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 14px; min-height: 280px; }
+  .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .col-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .col-count { font-size: 11px; color: #64748b; padding: 2px 8px; background: rgba(148,163,184,0.1); border-radius: 10px; }
+  .col-total { font-size: 12px; font-weight: 600; color: #94a3b8; font-variant-numeric: tabular-nums; }
+
+  .card { padding: 12px; background: #131620; border: 1px solid rgba(148,163,184,0.06); border-radius: 8px; margin-bottom: 8px; transition: all 0.15s; }
+  .card:hover { border-color: rgba(59,130,246,0.3); }
+  .card-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .card-supplier { font-size: 13px; font-weight: 600; }
+  .card-amount { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card-ref { font-size: 11px; color: #64748b; margin-bottom: 6px; }
+  .card-bottom { display: flex; justify-content: space-between; align-items: center; }
+  .card-date { font-size: 11px; color: #475569; }
+  .card-poste { font-size: 10px; padding: 2px 8px; background: rgba(148,163,184,0.08); border-radius: 10px; color: #94a3b8; }
+  .card-overdue { border-left: 3px solid #ef4444; }
+  .card-urgent { font-size: 10px; color: #ef4444; font-weight: 600; }
+
+  /* ── Table ── */
+  .tbl { width: 100%; border-collapse: collapse; background: #1a1d2e; border-radius: 12px; overflow: hidden; border: 1px solid rgba(148,163,184,0.08); }
+  .tbl th { text-align: left; padding: 10px 14px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(148,163,184,0.08); background: rgba(148,163,184,0.03); }
+  .tbl td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid rgba(148,163,184,0.05); }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl tr:hover td { background: rgba(148,163,184,0.03); }
+  .th-r { text-align: right; }
+  .td-r { text-align: right; }
+  .supplier { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .sup-name { font-weight: 500; }
+  .sup-ref { font-size: 11px; color: #64748b; }
+  .amount { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .bg { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .ba { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .br { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .bb { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .inline-act { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .tbl tr:hover .inline-act { opacity: 1; }
+  .icon-btn { width: 26px; height: 26px; border-radius: 6px; background: rgba(148,163,184,0.08); border: none; color: #94a3b8; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+  /* ── Split ── */
+  .split-layout { display: grid; grid-template-columns: 380px 1fr; gap: 0; height: 420px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(148,163,184,0.08); }
+  .split-list { background: #1a1d2e; overflow-y: auto; border-right: 1px solid rgba(148,163,184,0.08); }
+  .split-list-header { padding: 12px 16px; border-bottom: 1px solid rgba(148,163,184,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .split-search { width: calc(100% - 32px); padding: 7px 12px; background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.1); border-radius: 8px; color: #94a3b8; font-size: 12px; margin: 8px 16px; }
+  .split-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid rgba(148,163,184,0.05); cursor: pointer; transition: background 0.15s; }
+  .split-item:hover { background: rgba(148,163,184,0.05); }
+  .split-item.active { background: rgba(59,130,246,0.08); border-left: 3px solid #3b82f6; }
+  .split-av { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .split-info { flex: 1; min-width: 0; }
+  .split-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .split-ref2 { font-size: 11px; color: #64748b; }
+  .split-right { text-align: right; flex-shrink: 0; }
+  .split-amt { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .split-date2 { font-size: 11px; color: #64748b; }
+
+  .detail-panel { background: #131620; padding: 20px; overflow-y: auto; }
+  .detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .detail-supplier { font-size: 18px; font-weight: 700; }
+  .detail-ref { font-size: 13px; color: #64748b; margin-top: 2px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .detail-card { padding: 12px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; }
+  .detail-label { font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 3px; }
+  .detail-value { font-size: 15px; font-weight: 700; }
+  .timeline { margin-top: 12px; }
+  .tl-title { font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tl-item { display: flex; gap: 10px; padding: 6px 0; }
+  .tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .tl-text { font-size: 12px; color: #94a3b8; }
+  .tl-date { font-size: 11px; color: #475569; }
+  .pdf-zone { margin-top: 14px; padding: 32px; background: #1a1d2e; border-radius: 10px; border: 1px dashed rgba(148,163,184,0.15); text-align: center; color: #64748b; font-size: 13px; }
+
+  /* Filters row shared */
+  .filters { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+  .search-bar { flex: 1; padding: 8px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.1); border-radius: 8px; color: #94a3b8; font-size: 13px; }
+  .chip { padding: 6px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.1); border-radius: 20px; font-size: 12px; color: #94a3b8; }
+  .chip.active { background: rgba(59,130,246,0.15); color: #3b82f6; border-color: rgba(59,130,246,0.3); }
+
+  /* Selection indicator */
+  .selected-indicator {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    padding: 12px 24px; background: #3b82f6; color: white; border-radius: 12px;
+    font-weight: 600; font-size: 14px; display: none; z-index: 100;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+  }
+  .selected-indicator.visible { display: block; }
+
+  .reco { display: inline-block; margin-left: 12px; font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(34,197,94,0.15); color: #22c55e; font-weight: 600; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<h1>Factures — Quel mode de vue ?</h1>
+<p class="intro">Le Kanban est la vue par défaut. Faut-il proposer d'autres vues ? Clique sur ton choix.</p>
+
+<div class="options-grid">
+
+<!-- ═══════════════ OPTION 1 — Kanban Only ═══════════════ -->
+<div class="option-block" data-choice="1" onclick="selectOption(this)">
+  <div class="option-header">
+    <div class="option-letter">1</div>
+    <div>
+      <div class="option-title">Kanban uniquement</div>
+      <div class="option-desc">Une seule vue Kanban — simple, pas de toggle, toute l'interaction se fait via les colonnes et les cards</div>
+    </div>
+    <div class="option-tags">
+      <span class="tag tag-blue">Simple</span>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="topbar">
+      <div>
+        <div class="title">Factures fournisseurs</div>
+        <div class="kpi-mini">
+          <div class="kpi-item"><span class="kpi-num blue">47</span><span class="kpi-lbl">factures</span></div>
+          <div class="kpi-item"><span class="kpi-num green">35 890 €</span><span class="kpi-lbl">payé</span></div>
+          <div class="kpi-item"><span class="kpi-num red">4 200 €</span><span class="kpi-lbl">en retard</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-bar" style="width:220px">🔍 Rechercher...</div>
+        <button class="btn btn-primary">+ Nouvelle facture</button>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#ef4444"></div>En retard <span class="col-count">3</span></div><div class="col-total red">4 200 €</div></div>
+        <div class="card card-overdue"><div class="card-top"><div class="card-supplier">ENGIE</div><div class="card-amount red">2 340 €</div></div><div class="card-ref">FAC-0042</div><div class="card-bottom"><div class="card-urgent">⚠ 15j retard</div><div class="card-poste">Énergie</div></div></div>
+        <div class="card card-overdue"><div class="card-top"><div class="card-supplier">Plombier Exp.</div><div class="card-amount red">1 100 €</div></div><div class="card-ref">FAC-0039</div><div class="card-bottom"><div class="card-urgent">⚠ 8j retard</div><div class="card-poste">Plomberie</div></div></div>
+        <div class="card card-overdue"><div class="card-top"><div class="card-supplier">Vert Jardin</div><div class="card-amount red">760 €</div></div><div class="card-ref">FAC-0036</div><div class="card-bottom"><div class="card-urgent">⚠ 3j retard</div><div class="card-poste">Espaces verts</div></div></div>
+      </div>
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#f59e0b"></div>A payer <span class="col-count">9</span></div><div class="col-total amber">8 230 €</div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">OTIS</div><div class="card-amount">1 890 €</div></div><div class="card-ref">FAC-0041</div><div class="card-bottom"><div class="card-date">Éch. 10/03</div><div class="card-poste">Ascenseur</div></div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">SGP Plomb.</div><div class="card-amount">1 250 €</div></div><div class="card-ref">FAC-0035</div><div class="card-bottom"><div class="card-date">Éch. 15/03</div><div class="card-poste">Plomberie</div></div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">Securitas</div><div class="card-amount">980 €</div></div><div class="card-ref">FAC-0040</div><div class="card-bottom"><div class="card-date">Éch. 20/03</div><div class="card-poste">Sécurité</div></div></div>
+      </div>
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#3b82f6"></div>En attente <span class="col-count">8</span></div><div class="col-total blue">6 420 €</div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">Savelys</div><div class="card-amount">3 200 €</div></div><div class="card-ref">FAC-0034</div><div class="card-bottom"><div class="card-date">Validation CS</div><div class="card-poste">Chauffage</div></div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">NetImmeuble</div><div class="card-amount">420 €</div></div><div class="card-ref">FAC-0033</div><div class="card-bottom"><div class="card-date">En vérif.</div><div class="card-poste">Nettoyage</div></div></div>
+      </div>
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#22c55e"></div>Payées <span class="col-count">24</span></div><div class="col-total green">35 890 €</div></div>
+        <div class="card" style="opacity:0.7"><div class="card-top"><div class="card-supplier">AXA</div><div class="card-amount green">4 500 €</div></div><div class="card-ref">FAC-0038</div><div class="card-bottom"><div class="card-date">✓ 02/02</div><div class="card-poste">Assurance</div></div></div>
+        <div class="card" style="opacity:0.7"><div class="card-top"><div class="card-supplier">Véolia</div><div class="card-amount green">890 €</div></div><div class="card-ref">FAC-0037</div><div class="card-bottom"><div class="card-date">✓ 28/01</div><div class="card-poste">Entretien</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ OPTION 2 — Kanban + Table ═══════════════ -->
+<div class="option-block" data-choice="2" onclick="selectOption(this)">
+  <div class="option-header">
+    <div class="option-letter">2</div>
+    <div>
+      <div class="option-title">Kanban + Table <span class="reco">Recommandé</span></div>
+      <div class="option-desc">Toggle Kanban/Table — Kanban par défaut pour le workflow, Table pour la recherche avancée et les exports</div>
+    </div>
+    <div class="option-tags">
+      <span class="tag tag-green">Équilibré</span>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="topbar">
+      <div>
+        <div class="title">Factures fournisseurs</div>
+        <div class="kpi-mini">
+          <div class="kpi-item"><span class="kpi-num blue">47</span><span class="kpi-lbl">factures</span></div>
+          <div class="kpi-item"><span class="kpi-num green">35 890 €</span><span class="kpi-lbl">payé</span></div>
+          <div class="kpi-item"><span class="kpi-num red">4 200 €</span><span class="kpi-lbl">en retard</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="view-toggle">
+          <div class="view-btn">📋 Table</div>
+          <div class="view-btn active">📊 Kanban</div>
+        </div>
+        <button class="btn btn-ghost">Export</button>
+        <button class="btn btn-primary">+ Nouvelle</button>
+      </div>
+    </div>
+
+    <!-- Kanban (active) -->
+    <div style="margin-bottom:16px;padding:8px 12px;background:rgba(59,130,246,0.08);border-radius:8px;font-size:12px;color:#3b82f6;display:flex;align-items:center;gap:8px">
+      <span style="font-weight:600">📊 Vue Kanban active</span> <span style="color:#64748b">— basculer en Table pour recherche avancée et export CSV</span>
+    </div>
+    <div class="columns" style="margin-bottom:20px">
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#ef4444"></div>En retard <span class="col-count">3</span></div><div class="col-total red">4 200 €</div></div>
+        <div class="card card-overdue"><div class="card-top"><div class="card-supplier">ENGIE</div><div class="card-amount red">2 340 €</div></div><div class="card-ref">FAC-0042</div><div class="card-bottom"><div class="card-urgent">⚠ 15j retard</div><div class="card-poste">Énergie</div></div></div>
+        <div class="card card-overdue"><div class="card-top"><div class="card-supplier">Plombier Exp.</div><div class="card-amount red">1 100 €</div></div><div class="card-ref">FAC-0039</div><div class="card-bottom"><div class="card-urgent">⚠ 8j retard</div><div class="card-poste">Plomberie</div></div></div>
+      </div>
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#f59e0b"></div>A payer <span class="col-count">9</span></div><div class="col-total amber">8 230 €</div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">OTIS</div><div class="card-amount">1 890 €</div></div><div class="card-ref">FAC-0041</div><div class="card-bottom"><div class="card-date">Éch. 10/03</div><div class="card-poste">Ascenseur</div></div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">SGP Plomb.</div><div class="card-amount">1 250 €</div></div><div class="card-ref">FAC-0035</div><div class="card-bottom"><div class="card-date">Éch. 15/03</div><div class="card-poste">Plomberie</div></div></div>
+      </div>
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#3b82f6"></div>En attente <span class="col-count">8</span></div><div class="col-total blue">6 420 €</div></div>
+        <div class="card"><div class="card-top"><div class="card-supplier">Savelys</div><div class="card-amount">3 200 €</div></div><div class="card-ref">FAC-0034</div><div class="card-bottom"><div class="card-date">Validation CS</div><div class="card-poste">Chauffage</div></div></div>
+      </div>
+      <div class="column">
+        <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#22c55e"></div>Payées <span class="col-count">24</span></div><div class="col-total green">35 890 €</div></div>
+        <div class="card" style="opacity:0.7"><div class="card-top"><div class="card-supplier">AXA</div><div class="card-amount green">4 500 €</div></div><div class="card-ref">FAC-0038</div><div class="card-bottom"><div class="card-date">✓ 02/02</div><div class="card-poste">Assurance</div></div></div>
+      </div>
+    </div>
+
+    <!-- Table (preview inactif) -->
+    <div style="padding:8px 12px;background:rgba(148,163,184,0.05);border-radius:8px;font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="font-weight:600">📋 Aperçu vue Table</span> <span>— disponible via le toggle</span>
+    </div>
+    <div style="opacity:0.5">
+    <div class="filters">
+      <div class="search-bar" style="flex:1">🔍 Rechercher par fournisseur, référence, montant...</div>
+      <div class="chip active">Tous</div>
+      <div class="chip">Ce mois</div>
+      <div class="chip">Énergie</div>
+      <div class="chip">Entretien</div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Fournisseur</th><th>Réf.</th><th>Date</th><th>Échéance</th><th>Poste</th><th class="th-r">Montant</th><th>Statut</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><div class="supplier"><div class="avatar" style="background:rgba(239,68,68,0.12);color:#ef4444">EN</div><div><div class="sup-name">ENGIE</div><div class="sup-ref">FAC-0042</div></div></div></td><td style="color:#64748b;font-size:12px">FAC-0042</td><td style="color:#94a3b8;font-size:12px">15/02</td><td style="font-size:12px;color:#ef4444">⚠ 01/03</td><td><span class="badge bb">Énergie</span></td><td class="td-r"><span class="amount">2 340 €</span></td><td><span class="badge br">En retard</span></td><td><div class="inline-act"><div class="icon-btn">👁</div><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td></tr>
+        <tr><td><div class="supplier"><div class="avatar" style="background:rgba(34,197,94,0.12);color:#22c55e">OT</div><div><div class="sup-name">OTIS</div><div class="sup-ref">FAC-0041</div></div></div></td><td style="color:#64748b;font-size:12px">FAC-0041</td><td style="color:#94a3b8;font-size:12px">10/02</td><td style="font-size:12px;color:#94a3b8">10/03</td><td><span class="badge bb">Ascenseur</span></td><td class="td-r"><span class="amount">1 890 €</span></td><td><span class="badge ba">A payer</span></td><td><div class="inline-act"><div class="icon-btn">👁</div><div class="icon-btn">💳</div><div class="icon-btn">⋯</div></div></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ OPTION 3 — Kanban + Table + Split ═══════════════ -->
+<div class="option-block" data-choice="3" onclick="selectOption(this)">
+  <div class="option-header">
+    <div class="option-letter">3</div>
+    <div>
+      <div class="option-title">Kanban + Table + Détail (3 vues)</div>
+      <div class="option-desc">Triple toggle — Kanban pour le pipeline, Table pour la recherche, Split pour l'analyse détaillée avec PDF</div>
+    </div>
+    <div class="option-tags">
+      <span class="tag tag-purple">Complet</span>
+      <span class="tag tag-amber">Complexe</span>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="topbar">
+      <div>
+        <div class="title">Factures fournisseurs</div>
+        <div class="kpi-mini">
+          <div class="kpi-item"><span class="kpi-num blue">47</span><span class="kpi-lbl">factures</span></div>
+          <div class="kpi-item"><span class="kpi-num green">35 890 €</span><span class="kpi-lbl">payé</span></div>
+          <div class="kpi-item"><span class="kpi-num red">4 200 €</span><span class="kpi-lbl">en retard</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="view-toggle">
+          <div class="view-btn">📋 Table</div>
+          <div class="view-btn active">📊 Kanban</div>
+          <div class="view-btn">📄 Détail</div>
+        </div>
+        <button class="btn btn-ghost">Export</button>
+        <button class="btn btn-primary">+ Nouvelle</button>
+      </div>
+    </div>
+
+    <!-- 3 mini previews -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <!-- Mini Kanban -->
+      <div style="background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:10px;padding:12px">
+        <div style="font-size:12px;font-weight:600;color:#3b82f6;margin-bottom:10px;display:flex;align-items:center;gap:6px">📊 Vue Kanban <span style="font-size:10px;color:#22c55e;background:rgba(34,197,94,0.15);padding:2px 8px;border-radius:10px">par défaut</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="background:#131620;border-radius:6px;padding:8px">
+            <div style="font-size:10px;color:#ef4444;font-weight:600;margin-bottom:4px">● En retard (3)</div>
+            <div style="background:rgba(148,163,184,0.05);border-radius:4px;padding:4px 6px;font-size:10px;margin-bottom:3px">ENGIE · 2 340 €</div>
+            <div style="background:rgba(148,163,184,0.05);border-radius:4px;padding:4px 6px;font-size:10px">Plombier · 1 100 €</div>
+          </div>
+          <div style="background:#131620;border-radius:6px;padding:8px">
+            <div style="font-size:10px;color:#f59e0b;font-weight:600;margin-bottom:4px">● A payer (9)</div>
+            <div style="background:rgba(148,163,184,0.05);border-radius:4px;padding:4px 6px;font-size:10px;margin-bottom:3px">OTIS · 1 890 €</div>
+            <div style="background:rgba(148,163,184,0.05);border-radius:4px;padding:4px 6px;font-size:10px">SGP · 1 250 €</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#64748b;text-align:center">Pipeline visuel des factures</div>
+      </div>
+      <!-- Mini Table -->
+      <div style="background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:10px;padding:12px">
+        <div style="font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:10px">📋 Vue Table</div>
+        <div style="display:flex;gap:4px;margin-bottom:8px">
+          <div style="flex:1;padding:4px 8px;background:rgba(148,163,184,0.06);border-radius:4px;font-size:10px;color:#64748b">🔍 Rechercher...</div>
+          <div style="padding:4px 8px;background:rgba(59,130,246,0.1);border-radius:4px;font-size:10px;color:#3b82f6">Filtres</div>
+        </div>
+        <div style="font-size:9px;color:#475569;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2px;padding:4px 6px;background:rgba(148,163,184,0.03);border-radius:4px;margin-bottom:4px">
+          <span>FOURNISSEUR</span><span>MONTANT</span><span>STATUT</span><span>DATE</span>
+        </div>
+        <div style="font-size:10px;padding:4px 6px;border-bottom:1px solid rgba(148,163,184,0.05);display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2px">
+          <span>ENGIE</span><span style="color:#ef4444">2 340 €</span><span style="color:#ef4444">Retard</span><span style="color:#64748b">15/02</span>
+        </div>
+        <div style="font-size:10px;padding:4px 6px;border-bottom:1px solid rgba(148,163,184,0.05);display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2px">
+          <span>OTIS</span><span>1 890 €</span><span style="color:#f59e0b">A payer</span><span style="color:#64748b">10/02</span>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#64748b;text-align:center">Recherche avancée + export</div>
+      </div>
+      <!-- Mini Split -->
+      <div style="background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:10px;padding:12px">
+        <div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">📄 Vue Détail</div>
+        <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:6px;height:120px">
+          <div style="background:#131620;border-radius:6px;padding:8px;overflow:hidden">
+            <div style="font-size:10px;color:#64748b;margin-bottom:6px">Liste</div>
+            <div style="padding:3px 6px;background:rgba(59,130,246,0.08);border-left:2px solid #3b82f6;border-radius:2px;font-size:10px;margin-bottom:3px">ENGIE · 2 340 €</div>
+            <div style="padding:3px 6px;font-size:10px;color:#94a3b8;margin-bottom:3px">OTIS · 1 890 €</div>
+            <div style="padding:3px 6px;font-size:10px;color:#94a3b8">AXA · 4 500 €</div>
+          </div>
+          <div style="background:#131620;border-radius:6px;padding:8px;overflow:hidden">
+            <div style="font-size:10px;color:#64748b;margin-bottom:4px">Détail</div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:4px">ENGIE Energie</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div style="background:rgba(148,163,184,0.06);border-radius:4px;padding:4px;font-size:9px"><span style="color:#64748b">Montant</span><br><span style="color:#ef4444;font-weight:600">2 340 €</span></div>
+              <div style="background:rgba(148,163,184,0.06);border-radius:4px;padding:4px;font-size:9px"><span style="color:#64748b">Éch.</span><br><span style="color:#ef4444;font-weight:600">01/03</span></div>
+            </div>
+            <div style="margin-top:4px;padding:8px;background:rgba(148,163,184,0.04);border-radius:4px;text-align:center;font-size:9px;color:#475569">📄 PDF</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#64748b;text-align:center">Contexte complet + PDF inline</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="selected-indicator" id="indicator"></div>
+
+<script>
+function selectOption(el) {
+  document.querySelectorAll('.option-block').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const choice = el.dataset.choice;
+  const titles = { '1': '1 — Kanban uniquement', '2': '2 — Kanban + Table', '3': '3 — Kanban + Table + Détail (3 vues)' };
+  const ind = document.getElementById('indicator');
+  ind.textContent = '✓ Sélection : ' + titles[choice];
+  ind.classList.add('visible');
+  fetch('/event', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({type:'click',choice:choice,text:titles[choice],timestamp:Date.now()}) }).catch(() => {});
+}
+</script>
+
+</body>
+</html>
