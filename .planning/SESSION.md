@@ -1,23 +1,24 @@
-# Session State — 2026-03-16 23:30
+# Session State — 2026-03-16 24:00
 
 ## Branch
 v2
 
 ## Completed This Session
-- Brainstorm complet rapprochement bancaire (6 questions, recherche marché, maquettes visuelles)
-- Spec validée + review passée: docs/superpowers/specs/2026-03-16-rapprochement-bancaire-design.md
-- Plan implémentation 17 tasks: docs/superpowers/plans/2026-03-16-rapprochement-bancaire.md
-- UnifiedSidebar implémentée (remplace HighBar + ModuleSidebar)
-- Bug identifié: mouvements non filtrés par compte CC/FT (sauvé en mémoire)
+- Plan rapprochement bancaire 17/17 tasks exécuté en une session
+- Domain: types enrichis, PLAN_COMPTABLE_ESSENTIEL 15 comptes, matching engine 3 règles, parseur CFONB120
+- Bug fix: mouvements filtrés par accountId (CC vs FT)
+- Hook refactor: workflow state, batch handlers, suggestions engine
+- 7 composants UI: WorkflowModeSwitcher, WorkflowSummaryBar, WorkflowTabs, ImportTab, BatchCategorisation, SplitReconciliation, ClotureTab
+- Page intégrée: toggle table/workflow 4 onglets
+- Suppression module rapprochement-bancaire obsolète
 
 ## Next Task
-Exécuter le plan d'implémentation — Task 1: mise à jour types.ts (accountId, statutRapprochement, nouveaux types)
+Tests manuels sur localhost:3000/finance/mouvements-bancaires — vérifier toggle table/workflow, 4 onglets, filtre CC/FT, catégorisation batch, rapprochement
 
 ## Blockers
 None
 
 ## Key Context
-- Sidebar unifiée déjà live (UnifiedSidebar remplace HighBar+ModuleSidebar dans layout.tsx)
+- Pas de Jest/Vitest configuré — tests manuels uniquement via dev server
 - CSS Finance = couleurs hardcodées (#1a1d2e, #e2e8f0) pas les variables CSS
-- Le .main-content global gère le padding — pages ne doivent PAS en ajouter
-- Pas de test unitaire configuré (pas Jest/Vitest), vérification manuelle sur localhost
+- Erreurs TS pré-existantes dans factures (pas liées à notre travail)
