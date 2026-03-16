@@ -1,24 +1,22 @@
-# Session State — 2026-03-15 20:00
+# Session State — 2026-03-16 22:00
 
 ## Branch
 v2
 
 ## Completed This Session
-- Refonte TravauxDetailModal: dark theme Qonto + empty states (3 onglets: Échéancier/Documents/Historique)
-- Persistance devis: upload vers Supabase Storage + GED avec budget_id
-- Échéancier prestataire complet: migration DB (budget_payment_schedules + documents.budget_id), templates (5 modèles + retenue garantie 5%), API CRUD, hook usePaymentSchedule, PaymentSchedulePreview, intégration CreateBudgetModal + useBudget
-- Déplacement sélecteur exercice: de TopBar → contenu FonctionnementTab (TopBar générique)
-- Supprimé budget test "Ravalement de façade 2" en DB
+- Première review complète du codebase (4 agents parallèles: archi, sécu, métier, UI)
+- Fix seuils majorité AG Art. 25-1/26 (Math.floor+1) + passerelle Art. 26-1
+- Phase relance J+90 contentieux + IDs échéancier uniques (crypto.randomUUID)
+- Modal useId(), validation CreateBudgetModal, dark mode TravauxDetailModal (CSS vars)
+- Supprimé 91 console.log, 47 any→types stricts, code mort (assemblees/, legacy hook)
 
 ## Next Task
-Test E2E complet: créer budget travaux avec échéancier + vérifier modale détail (3 onglets) + marquer phase payée. Puis fix éventuels.
+Définir les bonnes pratiques de sessions de code (nouvelle session dédiée). Puis reprendre test E2E: créer budget travaux avec échéancier + vérifier modale détail + marquer phase payée.
 
 ## Blockers
 None
 
 ## Key Context
-- membership_role enum: 'gestionnaire' (pas 'manager') — corrigé dans migration RLS
-- budgetsTravaux chargés tous exercices confondus (loadAllWorks)
-- computeAmounts retourne number[] (pas d'objets), zippé avec phasesConfig dans useBudget
-- Spec: docs/superpowers/specs/2026-03-15-echeancier-prestataire-design.md
-- Plan: docs/superpowers/plans/2026-03-15-echeancier-prestataire.md
+- Review identifié des problèmes sécu (isManager||true, XSS, open redirect) — à traiter avant prod, pas urgent en dev
+- Build OK après tous les fixes (62 fichiers, -390 lignes net)
+- Routes dupliquées factures/invoices et mouvements-bancaires/bank-movements encore présentes (non traitées cette session)
