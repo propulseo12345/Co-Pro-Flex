@@ -1,23 +1,22 @@
-# Session State — 2026-03-16 21:00
+# Session State — 2026-03-16 22:00
 
 ## Branch
 v2
 
 ## Completed This Session
-- Dark theme appels de fonds (KPI strip + CSS cards/tabs/accordéons #1a1d2e)
-- Brainstorm + design + implémentation refonte Factures (Kanban 4 colonnes + Table toggle + sidebar statuts)
-- Composants unifiés FinanceTopBar + FinanceKpiStrip créés et déployés sur 5 pages Finance
-- Refonte CSS table Factures (avatars, badges, actions, dark theme complet)
-- Fix double padding + max-width sur pages Finance (factures, appels-fonds)
+- Brainstorm + design + spec refonte Mouvements bancaires (vue unifiée, pills comptes, bandeaux alertes, table rapprochement intégré)
+- Implémentation complète : 5 nouveaux composants (AccountPills, AlertBanners, MovementFilters, UnifiedMovementsTable, RapprochementSlideOver)
+- Hook adapté (rapprochementFilter, showSlideOver, fix router.push, suppression console.error/ongletActif)
+- Suppression 9 composants obsolètes, CSS aligné dark theme Finance
+- Commit f3b7cb8
 
 ## Next Task
-Refonte complète page Mouvements bancaires — recherche inspiration + 3 previews + implémentation (même process que Factures)
+Feature complète catégorisation + rapprochement bancaire — actuellement les actions catégoriser/rapprocher appellent Supabase mais échouent silencieusement si pas de copro connectée. Besoin : implémenter le flow complet avec mock data fallback fonctionnel ou connecter réellement à Supabase.
 
 ## Blockers
 None
 
 ## Key Context
-- FinanceTopBar + FinanceKpiStrip dans src/components/layout/ — réutilisables pour toutes les sous-sections
-- Le .main-content global a déjà padding: var(--space-xl) — les pages NE doivent PAS ajouter de padding
-- Conflit global .card dans globals.css override les CSS modules → utiliser des noms comme .kpiCard
-- Visual companion server peut être relancé pour les previews brainstorm
+- Les données viennent de Supabase (useBankMovements, useReconcileBankMovement) mais fallback local si pas de coproId
+- CSS Finance = couleurs hardcodées (#1a1d2e, #e2e8f0, etc.) pas les variables CSS — sauvé en mémoire
+- Le .main-content global gère le padding — les pages ne doivent PAS en ajouter
