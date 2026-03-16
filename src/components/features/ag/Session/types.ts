@@ -43,6 +43,14 @@ export interface MajorityResult {
     totalTantiemes: number;
     seuilUntiers: number;
   };
+  passerelle261Eligible?: boolean;
+  passerelle261Data?: {
+    pourTantiemes: number;
+    totalTantiemes: number;
+    seuilDemiTantiemes: number;
+    coprosPour: number;
+    totalCoproprietaires: number;
+  };
 }
 
 export interface PasserelleVoteInitial {

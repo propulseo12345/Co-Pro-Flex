@@ -97,7 +97,7 @@ function initService(): void {
         [LEGACY_DISTRIBUTION_JOBS_KEY, LEGACY_GED_DOCUMENTS_KEY].forEach(key => {
             const data = localStorage.getItem(key);
             if (data) {
-                console.warn(`[PVDistribution] Suppression localStorage legacy: ${key}`);
+                // Legacy localStorage cleanup
                 localStorage.removeItem(key);
             }
         });
@@ -167,7 +167,7 @@ class PVDistributionService {
         pdfBlob?: Blob
     ): Promise<GEDArchiveResult> {
         initService();
-        console.log('[PVDistribution] Archivage GED en cours...', pvDocumentId);
+        // Archivage GED en cours
 
         try {
             // Générer le chemin dans la GED
@@ -201,7 +201,7 @@ class PVDistributionService {
                     archivedAt: new Date(),
                 };
 
-                console.log('[PVDistribution] Document archivé:', doc.id);
+                // Document archivé
                 return result;
             }
 
@@ -252,7 +252,7 @@ class PVDistributionService {
         results: NotificationRecipient[];
     }> {
         initService();
-        console.log('[PVDistribution] Envoi aux copropriétaires...', recipients.length);
+        // Envoi aux copropriétaires
 
         const defaultOptions: DistributionOptions = {
             autoSendAfterArchive: true,
@@ -300,13 +300,13 @@ class PVDistributionService {
                 notification.sentAt = new Date();
                 sent++;
 
-                console.log('[PVDistribution] Email envoyé à:', recipient.email);
+                // Email envoyé
             }
 
             results.push(notification);
         }
 
-        console.log('[PVDistribution] Envoi terminé:', { sent, failed });
+        // Envoi terminé
         return { sent, failed, results };
     }
 
@@ -413,7 +413,7 @@ class PVDistributionService {
             job.completedAt = new Date();
             activeDistributionJobs.set(jobId, { ...job });
 
-            console.log('[PVDistribution] Job terminé:', jobId);
+            // Job terminé
         } catch (error) {
             job.status = 'failed';
             job.error = error instanceof Error ? error.message : 'Erreur inconnue';

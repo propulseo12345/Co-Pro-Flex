@@ -81,7 +81,7 @@ export class AGSessionPersistenceService {
     this.isValid = isValidUUID(agId);
 
     if (!this.isValid) {
-      console.warn('[AGSessionPersistence] Invalid AG ID (not UUID):', agId);
+      // Invalid AG ID (not UUID)
     }
   }
 
@@ -369,11 +369,9 @@ export class AGSessionPersistenceService {
         const data = getData();
         await this.saveAll(data);
         this.isDirty = false;
-        console.log('[AGSessionPersistence] Auto-save effectué (Supabase)');
+        // Auto-save completed
       }
     }, intervalMs);
-
-    console.log(`[AGSessionPersistence] Auto-save démarré (${intervalMs}ms, mode: Supabase)`);
   }
 
   /**
@@ -383,7 +381,6 @@ export class AGSessionPersistenceService {
     if (this.autoSaveInterval) {
       clearInterval(this.autoSaveInterval);
       this.autoSaveInterval = null;
-      console.log('[AGSessionPersistence] Auto-save arrêté');
     }
   }
 
@@ -429,7 +426,6 @@ export class AGSessionPersistenceService {
     }
 
     this.isDirty = false;
-    console.log('[AGSessionPersistence] Données supprimées');
   }
 
   /**

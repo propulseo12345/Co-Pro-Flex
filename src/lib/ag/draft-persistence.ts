@@ -78,9 +78,9 @@ export async function saveDraft(
       return { success: true, source: 'supabase' };
     }
 
-    console.warn('[saveDraft] Supabase error, falling back to localStorage:', error.message);
+    // Supabase error, falling back to localStorage
   } catch (err) {
-    console.warn('[saveDraft] Supabase exception:', err);
+    // Supabase exception
   }
 
   // Fallback to localStorage
@@ -137,7 +137,7 @@ export async function loadDraft<T>(
       }
     }
   } catch (err) {
-    console.warn('[loadDraft] Supabase exception:', err);
+    // Supabase exception
   }
 
   // Fallback to localStorage
@@ -179,7 +179,7 @@ export async function loadAllDrafts(
       return result as Record<AgDraftType, unknown>;
     }
   } catch (err) {
-    console.warn('[loadAllDrafts] Exception:', err);
+    // loadAllDrafts exception
   }
 
   return null;
@@ -207,7 +207,7 @@ export async function clearDraft(
       .eq('ag_id', agId)
       .eq('draft_type', draftType as RpcDraftType);
   } catch (err) {
-    console.warn('[clearDraft] Exception:', err);
+    // clearDraft exception
   }
 }
 

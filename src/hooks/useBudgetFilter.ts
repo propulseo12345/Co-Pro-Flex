@@ -67,6 +67,7 @@ export function useBudgetFilter({
 
     // Calculer les stats par poste
     depenses.forEach((d) => {
+      if (!d.poste) return;
       const current = statsParPoste.get(d.poste) || { montant: 0, count: 0 };
       statsParPoste.set(d.poste, {
         montant: current.montant + d.montant,

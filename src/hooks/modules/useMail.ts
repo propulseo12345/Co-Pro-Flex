@@ -128,7 +128,7 @@ export function useMail(options: UseMailOptions = {}): UseMailReturn {
     if (autoPurge) {
       const purged = mailService.purgerMailsExpires(coproprieteId);
       if (purged > 0) {
-        console.log(`[Mail] ${purged} mail(s) purgé(s) automatiquement`);
+        // Auto-purged expired mails
       }
     }
     loadMails();

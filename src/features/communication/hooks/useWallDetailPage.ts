@@ -200,7 +200,7 @@ export function useWallDetailPage({ publicationId }: UseWallDetailPageParams) {
 
   const handleLikeComment = useCallback((commentId: string) => {
     // Will be implemented in WRITE phase
-    console.log('Like comment:', commentId);
+    // Like comment (no-op, will be implemented)
   }, []);
 
   const handleReply = useCallback((commentId: string) => {

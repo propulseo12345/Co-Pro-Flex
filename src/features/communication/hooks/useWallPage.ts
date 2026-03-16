@@ -190,7 +190,7 @@ export function useWallPage() {
   }, [currentCoproId]);
 
   const handleDeleteDraft = useCallback((id: string) => {
-    console.log('Delete draft:', id);
+    // Delete draft (no-op)
   }, []);
 
   const handleEditPublication = useCallback((id: string) => {

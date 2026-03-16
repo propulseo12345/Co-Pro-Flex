@@ -201,13 +201,13 @@ export function useAgDrafts(): UseAgDraftsReturn {
           .order('last_activity_at', { ascending: false });
 
         if (viewError) {
-          console.warn('[useAgDrafts] View query failed, using fallback:', viewError.message);
+          // View query failed, using fallback
           useViewFailed = true;
         } else {
           progressData = data as AgDraftProgress[];
         }
       } catch {
-        console.warn('[useAgDrafts] View not available, using fallback');
+        // View not available, using fallback
         useViewFailed = true;
       }
 
@@ -356,7 +356,7 @@ export function useAgDrafts(): UseAgDraftsReturn {
         throw new Error(errorMessage);
       }
 
-      console.log('[useAgDrafts] Draft deleted successfully:', data.deleted_counts);
+      // Draft deleted successfully
 
       // Rafraîchir la liste
       await loadDrafts();

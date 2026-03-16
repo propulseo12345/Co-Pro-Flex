@@ -609,6 +609,7 @@ export function CreateBudgetModal({
             <button
               className="btn btn-primary"
               onClick={handleSubmitTravaux}
+              disabled={!typeTravaux || !budgetName || montantTotal <= 0}
             >
               <Plus size={16} aria-hidden="true" />
               Créer le budget travaux

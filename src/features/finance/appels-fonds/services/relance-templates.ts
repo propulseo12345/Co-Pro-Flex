@@ -1,7 +1,7 @@
 export interface RelancePhaseConfig {
   phase: number;
   label: string;
-  type: 'amiable' | 'formelle' | 'mise_en_demeure';
+  type: 'amiable' | 'formelle' | 'mise_en_demeure' | 'contentieux';
   delayDays: number;
   defaultChannel: 'email' | 'courrier' | 'both';
 }
@@ -10,6 +10,7 @@ export const RELANCE_PHASES: RelancePhaseConfig[] = [
   { phase: 1, label: 'Relance amiable', type: 'amiable', delayDays: 15, defaultChannel: 'email' },
   { phase: 2, label: 'Relance formelle', type: 'formelle', delayDays: 30, defaultChannel: 'both' },
   { phase: 3, label: 'Mise en demeure', type: 'mise_en_demeure', delayDays: 60, defaultChannel: 'courrier' },
+  { phase: 4, label: 'Contentieux', type: 'contentieux', delayDays: 90, defaultChannel: 'courrier' },
 ];
 
 export interface RelanceTemplateVars {
@@ -97,6 +98,32 @@ Cette somme est echue depuis le ${vars.echeance}, soit ${vars.joursRetard} jours
 Conformement a l'article 19 de la loi n° 65-557 du 10 juillet 1965, a defaut de paiement dans un delai de 8 jours a compter de la reception de la presente, nous nous verrons dans l'obligation de transmettre ce dossier au conseil syndical en vue d'engager une procedure de recouvrement judiciaire.
 
 Les frais de procedure seraient alors a votre charge.
+
+Cordialement,
+${vars.syndic}`;
+
+    case 'contentieux':
+      return `${vars.copropriete}
+${vars.syndic}
+
+LETTRE RECOMMANDEE AVEC ACCUSE DE RECEPTION
+
+${vars.coproprietaire}
+Lot ${vars.lot}
+
+Le ${vars.date}
+
+Objet : Engagement de procedure de recouvrement — Article 19 de la loi du 10 juillet 1965
+
+Madame, Monsieur,
+
+Malgre notre mise en demeure restee sans effet, nous vous informons que le conseil syndical a autorise l'engagement d'une procedure de recouvrement judiciaire pour la somme de ${vars.montant} correspondant aux charges impayees de votre lot ${vars.lot} au titre de l'appel "${vars.appel}".
+
+Cette somme est en retard de ${vars.joursRetard} jours.
+
+Conformement a l'article 19 de la loi n° 65-557 du 10 juillet 1965, l'ensemble des frais de procedure, y compris les honoraires d'avocat, seront a votre charge exclusive.
+
+Cette lettre constitue le dernier avis avant transmission du dossier a notre conseil juridique.
 
 Cordialement,
 ${vars.syndic}`;

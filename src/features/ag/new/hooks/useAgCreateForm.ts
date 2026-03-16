@@ -252,7 +252,7 @@ export function useAgCreateForm() {
         }
 
         const agId = result.ag_id;
-        console.log('[useAgCreateForm] AG créée avec succès, UUID:', agId);
+        // AG created successfully
 
         // Créer les résolutions obligatoires avec templates complets et variables
         const typeAG = formData.type === 'ORDINAIRE' ? 'ORDINAIRE' : 'EXTRAORDINAIRE';
@@ -277,10 +277,10 @@ export function useAgCreateForm() {
             : undefined,
         });
 
-        console.log('[useAgCreateForm] Résolutions créées:', resolutionsResult.resolutionsCreated);
+        // Resolutions created
 
         if (!resolutionsResult.success && resolutionsResult.resolutionsCreated === 0) {
-          console.warn('[useAgCreateForm] Aucune résolution créée:', resolutionsResult.results);
+          // No resolutions created
         }
 
         // Naviguer vers la page agenda avec l'UUID Supabase

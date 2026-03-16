@@ -517,7 +517,6 @@ export function useAgDraftAutoCreate() {
 
         const newId = created.id;
         setDraftId(newId);
-        console.log('[useAgDraftAutoCreate] Nouvelle AG créée:', newId);
       } catch (err) {
         console.error('[useAgDraftAutoCreate] Error:', err);
         setError(err instanceof Error ? err.message : 'Erreur lors de la création');

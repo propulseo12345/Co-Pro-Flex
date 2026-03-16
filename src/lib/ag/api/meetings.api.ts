@@ -274,14 +274,14 @@ export async function updateAgCurrentStep(
     });
 
     if (error) {
-      console.warn('[updateAgCurrentStep] Error:', error.message);
+      // updateAgCurrentStep error
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.warn('[updateAgCurrentStep] Exception:', errorMessage);
+    // updateAgCurrentStep exception
     return { success: false, error: errorMessage };
   }
 }

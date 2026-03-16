@@ -40,7 +40,7 @@ export async function addResolution(input: AddResolutionInput): Promise<AddResol
     if (errorMsg.includes('401') || errorMsg.includes('JWT') || errorMsg.includes('auth') ||
         errorMsg.includes('Session') || errorMsg.includes('FunctionsFetchError') ||
         errorMsg.includes('non_2xx_response')) {
-      console.log('[addResolution] Edge function échouée, tentative d\'insert direct...');
+      // Edge function failed, trying direct insert
       return addResolutionDirect(input);
     }
 
@@ -54,7 +54,7 @@ export async function addResolution(input: AddResolutionInput): Promise<AddResol
 async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolutionResponse> {
   const supabase = createUntypedClient();
 
-  console.log('[addResolutionDirect] Insert direct pour:', input.title);
+  // Direct insert for resolution
 
   try {
     // Construire l'objet à insérer
@@ -81,8 +81,6 @@ async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolu
       vote_details: {},
     };
 
-    console.log('[addResolutionDirect] Données à insérer:', insertData);
-
     const { data, error } = await supabase
       .from('ag_resolutions')
       .insert(insertData)
@@ -96,8 +94,6 @@ async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolu
         error: error.message || 'Erreur lors de l\'insertion',
       };
     }
-
-    console.log('[addResolutionDirect] Résolution créée avec ID:', data?.id);
 
     return {
       success: true,

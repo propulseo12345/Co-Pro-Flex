@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef, ReactNode } from 'react';
+import { useEffect, useCallback, useRef, useId, ReactNode } from 'react';
 import { X } from 'lucide-react';
 import styles from './Modal.module.css';
 
@@ -33,6 +33,7 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   const handleEscape = useCallback(
     (event: KeyboardEvent) => {
@@ -76,13 +77,13 @@ export function Modal({
         className={`${styles.modal} ${styles[size]} ${className}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
       >
         {(title || showCloseButton) && (
           <header className={styles.header}>
             {title && (
-              <h2 id="modal-title" className={styles.title}>
+              <h2 id={titleId} className={styles.title}>
                 {title}
               </h2>
             )}

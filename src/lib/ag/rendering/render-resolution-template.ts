@@ -203,7 +203,7 @@ export function renderResolutionBody(
     // Vérifier si la variable existe
     if (!variables || !(trimmedName in variables)) {
       if (warnOnMissing) {
-        console.warn(`[${context}] Variable non trouvée: ${trimmedName}`);
+        // Variable non trouvée: trimmedName
       }
       return showBracketsForMissing ? `[${trimmedName}]` : '';
     }

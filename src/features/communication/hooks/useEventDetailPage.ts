@@ -131,7 +131,7 @@ export function useEventDetailPage({ eventId }: UseEventDetailPageParams) {
     if (!event) return;
     const updatedEvent = { ...event, userStatus: status };
     setEvent(updatedEvent);
-    console.log('RSVP:', status);
+    // RSVP status updated
   }, [event]);
 
   const handleExportICS = useCallback(() => {

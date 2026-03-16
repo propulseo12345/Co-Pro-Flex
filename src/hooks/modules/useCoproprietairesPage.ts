@@ -225,6 +225,3 @@ export function useCoproprietairesPage() {
     isSaving,
   };
 }
-
-// Re-export for backward compatibility
-export { INITIAL_COPROPRIETAIRES } from './useCoproprietairesPage.legacy';

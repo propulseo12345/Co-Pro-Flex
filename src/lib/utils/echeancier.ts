@@ -15,7 +15,7 @@ export function genererEcheances(
     switch (mode) {
         case 'UNE_FOIS':
             echeances.push({
-                id: 'ech-' + Date.now(),
+                id: crypto.randomUUID(),
                 dateExigibilite: dateDebut,
                 montantTotal: montantTotal,
                 ordre: 1,
@@ -30,7 +30,7 @@ export function genererEcheances(
                 const dateEch = new Date(dateDebutObj);
                 dateEch.setMonth(dateEch.getMonth() + (i * 6));
                 echeances.push({
-                    id: 'ech-' + Date.now() + '-' + i,
+                    id: crypto.randomUUID(),
                     dateExigibilite: dateEch.toISOString().split('T')[0],
                     montantTotal: montantSemestriel,
                     ordre: i + 1,
@@ -46,7 +46,7 @@ export function genererEcheances(
                 const dateEch = new Date(dateDebutObj);
                 dateEch.setMonth(dateEch.getMonth() + (i * 3));
                 echeances.push({
-                    id: 'ech-' + Date.now() + '-' + i,
+                    id: crypto.randomUUID(),
                     dateExigibilite: dateEch.toISOString().split('T')[0],
                     montantTotal: montantTrimestriel,
                     ordre: i + 1,
@@ -63,7 +63,7 @@ export function genererEcheances(
                 const dateEch = new Date(dateDebutObj);
                 dateEch.setMonth(dateEch.getMonth() + i);
                 echeances.push({
-                    id: 'ech-' + Date.now() + '-' + i,
+                    id: crypto.randomUUID(),
                     dateExigibilite: dateEch.toISOString().split('T')[0],
                     montantTotal: montantParEcheance,
                     ordre: i + 1,
@@ -91,7 +91,7 @@ export function creerEcheancier(
     const echeances = genererEcheances(mode, montantTotal, dateDebut, nombreEcheances);
 
     return {
-        id: 'echeancier-' + Date.now(),
+        id: crypto.randomUUID(),
         resolutionId,
         budgetId,
         modeEcheancier: mode,

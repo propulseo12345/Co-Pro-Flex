@@ -313,7 +313,7 @@ class PVTemplateService {
         if (typeof window !== 'undefined') {
             const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
             if (legacyData) {
-                console.warn('[PVTemplateService] Suppression données localStorage legacy');
+                // Cleanup legacy localStorage data
                 localStorage.removeItem(LEGACY_STORAGE_KEY);
             }
         }
@@ -482,7 +482,7 @@ class PVTemplateService {
 
             if (error) {
                 if (error.code === '42P01') {
-                    console.warn('[PVTemplateService] Table pv_templates non disponible');
+                    // Table pv_templates non disponible
                 }
                 throw error;
             }

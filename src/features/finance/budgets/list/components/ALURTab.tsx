@@ -6,12 +6,14 @@ import {
   ALURTransfertHistory,
 } from '@/components/features/finance/Budget';
 
+import type { FondsALUR, CoproprietaireALUR } from '@/components/features/finance/Budget/types';
+
 interface ALURTabProps {
-  fondsALUR: any;
-  coproprietairesALUR: any[];
+  fondsALUR: FondsALUR;
+  coproprietairesALUR: CoproprietaireALUR[];
   budgetAnnuelVote: number;
   onOpenTransferModal: () => void;
-  onSelectCoproprietaire: (copro: any | null) => void;
+  onSelectCoproprietaire: (copro: CoproprietaireALUR | null) => void;
 }
 
 export function ALURTab({

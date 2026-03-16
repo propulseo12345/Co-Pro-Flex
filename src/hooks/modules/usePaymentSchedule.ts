@@ -38,7 +38,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       const rows = await scheduleApi.listPaymentSchedules(budgetId);
       setPhases(rows.map(mapRowToPhase));
     } catch (err) {
-      console.warn('Erreur chargement échéancier:', err);
+      // Erreur chargement échéancier
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +65,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       await loadPhases();
       return true;
     } catch (err) {
-      console.warn('Erreur création échéancier:', err);
+      // Erreur création échéancier
       return false;
     }
   }, [currentCoproId, loadPhases]);
@@ -81,7 +81,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       await loadPhases();
       return true;
     } catch (err) {
-      console.warn('Erreur marquage payé:', err);
+      // Erreur marquage payé
       return false;
     }
   }, [loadPhases]);
@@ -95,7 +95,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       await loadPhases();
       return true;
     } catch (err) {
-      console.warn('Erreur mise à jour phase:', err);
+      // Erreur mise à jour phase
       return false;
     }
   }, [loadPhases]);

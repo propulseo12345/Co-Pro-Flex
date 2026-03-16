@@ -158,7 +158,7 @@ function initService(): void {
         [LEGACY_JOBS_KEY, LEGACY_DOCUMENTS_KEY].forEach(key => {
             const data = localStorage.getItem(key);
             if (data) {
-                console.warn(`[PVGeneration] Suppression localStorage legacy: ${key}`);
+                // Legacy localStorage cleanup
                 localStorage.removeItem(key);
             }
         });
@@ -186,7 +186,7 @@ export function createPVJob(agId: string): PVJob {
     // Vérifier s'il y a déjà un job en cours pour cette AG (idempotence)
     for (const job of activeJobs.values()) {
         if (job.agId === agId && (job.status === 'queued' || job.status === 'running')) {
-            console.log('[PVGeneration] Job existant trouvé:', job.id);
+            // Job existant trouvé
             return job;
         }
     }
@@ -208,7 +208,7 @@ export function createPVJob(agId: string): PVJob {
     };
 
     activeJobs.set(job.id, job);
-    console.log('[PVGeneration] Nouveau job créé:', job.id);
+    // Nouveau job créé
     return job;
 }
 
@@ -411,7 +411,7 @@ export async function startPVGeneration(options: GeneratePVOptions): Promise<PVJ
     // Vérifier si un document existe déjà
     const existingDoc = await getPVDocumentForAG(agId, coproId);
     if (existingDoc && !forceRegenerate) {
-        console.log('[PVGeneration] Document existant trouvé, pas de regénération');
+        // Document existant trouvé, pas de regénération
         return {
             id: `existing-${existingDoc.id}`,
             agId,
@@ -535,7 +535,7 @@ async function runPVGeneration(jobId: string, options: GeneratePVOptions): Promi
             },
         });
 
-        console.log('[PVGeneration] Génération terminée:', documentId);
+        // Génération terminée
     } catch (error) {
         console.error('[PVGeneration] Erreur:', error);
 
@@ -649,7 +649,7 @@ export async function sendPVToCoproprietaires(
     }
 
     // TODO: Intégrer avec le vrai service d'email
-    console.log('[PVGeneration] Envoi du PV à', recipientIds.length, 'copropriétaires');
+    // Envoi du PV aux copropriétaires
 
     await updatePVDocumentStatus(documentId, 'sent', {
         sentAt: new Date(),

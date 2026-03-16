@@ -93,7 +93,7 @@ export function ajouterResolutionsAGOrdinaire(
             return null;
         }
 
-        console.log(`ajouterResolutionsAGOrdinaire: ${toutesResolutions.length} résolutions sauvegardées pour AG ${agId}`);
+        // Résolutions sauvegardées
     } catch (error) {
         console.error('ajouterResolutionsAGOrdinaire: Erreur localStorage', error);
         return null;

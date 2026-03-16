@@ -147,7 +147,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string, newName?: string): Promise<IPVTemplate | null> => {
             // TODO: Implement duplicateTemplate in PVTemplateService
-            console.warn('[usePVTemplates] duplicateTemplate not yet implemented');
+            // TODO: Implement duplicateTemplate in PVTemplateService
             return null;
         },
         []
@@ -193,7 +193,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string): Promise<boolean> => {
             // TODO: Implement setAsDefault in PVTemplateService
-            console.warn('[usePVTemplates] setAsDefault not yet implemented');
+            // TODO: Implement setAsDefault in PVTemplateService
             return false;
         },
         []
@@ -207,7 +207,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string, sectionId: string, updates: Partial<IPVSection>): Promise<boolean> => {
             // TODO: Implement updateSection in PVTemplateService
-            console.warn('[usePVTemplates] updateSection not yet implemented');
+            // TODO: Implement updateSection in PVTemplateService
             return false;
         },
         []
@@ -217,7 +217,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string, sectionId: string, enabled: boolean): Promise<boolean> => {
             // TODO: Implement toggleSection in PVTemplateService
-            console.warn('[usePVTemplates] toggleSection not yet implemented');
+            // TODO: Implement toggleSection in PVTemplateService
             return false;
         },
         []
@@ -227,7 +227,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string, sectionIds: string[]): Promise<boolean> => {
             // TODO: Implement reorderSections in PVTemplateService
-            console.warn('[usePVTemplates] reorderSections not yet implemented');
+            // TODO: Implement reorderSections in PVTemplateService
             return false;
         },
         []
@@ -241,7 +241,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string, specUpdates: Partial<IPVTemplateSpec>): Promise<boolean> => {
             // TODO: Implement updateTemplateSpec in PVTemplateService
-            console.warn('[usePVTemplates] updateTemplateSpec not yet implemented');
+            // TODO: Implement updateTemplateSpec in PVTemplateService
             return false;
         },
         []
@@ -255,7 +255,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (templateId: string): string | null => {
             // TODO: Implement exportTemplate in PVTemplateService
-            console.warn('[usePVTemplates] exportTemplate not yet implemented');
+            // TODO: Implement exportTemplate in PVTemplateService
             return null;
         },
         []
@@ -265,7 +265,7 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (jsonString: string): Promise<IPVTemplate | null> => {
             // TODO: Implement importTemplate in PVTemplateService
-            console.warn('[usePVTemplates] importTemplate not yet implemented');
+            // TODO: Implement importTemplate in PVTemplateService
             return null;
         },
         []

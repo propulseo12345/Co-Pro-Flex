@@ -80,7 +80,7 @@ export const checkMajority = (
     case 'ART_25_1': {
       const seuilCopros = Math.floor(totalCoproprietaires / 2) + 1;
       const coprosPour = resolutionVotes.filter(v => v.vote === 'POUR').length;
-      const seuilTantiemes = (totalTantiemes * 2) / 3;
+      const seuilTantiemes = Math.floor(totalTantiemes * 2 / 3) + 1;
       const adoptedArt251 = coprosPour >= seuilCopros && stats.pour >= seuilTantiemes;
       return {
         adopted: adoptedArt251,
@@ -91,15 +91,40 @@ export const checkMajority = (
     }
 
     case 'ART_26': {
-      const seuilTantiemesArt26 = (totalTantiemes * 2) / 3;
+      const seuilTantiemesArt26 = Math.floor(totalTantiemes * 2 / 3) + 1;
       const coprosPourArt26 = resolutionVotes.filter(v => v.vote === 'POUR').length;
       const seuilCoprosArt26 = Math.floor(totalCoproprietaires / 2) + 1;
       const adoptedArt26 = coprosPourArt26 >= seuilCoprosArt26 && stats.pour >= seuilTantiemesArt26;
+
+      // Passerelle 26-1: si échec mais au moins 1/2 des tantièmes
+      const seuilDemiPourPasserelle261 = Math.floor(totalTantiemes / 2) + 1;
+      const passerelle261Eligible = !adoptedArt26 && stats.pour >= seuilDemiPourPasserelle261;
+
       return {
         adopted: adoptedArt26,
         reason: adoptedArt26
-          ? `Adoptée : ${coprosPourArt26} copropriétaires pour (seuil: ${seuilCoprosArt26}) ET ${stats.pour} tantièmes pour (seuil: ${seuilTantiemesArt26.toFixed(0)})`
-          : `Rejetée : ${coprosPourArt26} copropriétaires pour (seuil requis: ${seuilCoprosArt26}) ET/OU ${stats.pour} tantièmes pour (seuil requis: ${seuilTantiemesArt26.toFixed(0)})`
+          ? `Adoptée : ${coprosPourArt26} copropriétaires pour (seuil: ${seuilCoprosArt26}) ET ${stats.pour} tantièmes pour (seuil: ${seuilTantiemesArt26})`
+          : `Rejetée : ${coprosPourArt26} copropriétaires pour (seuil requis: ${seuilCoprosArt26}) ET/OU ${stats.pour} tantièmes pour (seuil requis: ${seuilTantiemesArt26})`,
+        passerelle261Eligible,
+        passerelle261Data: passerelle261Eligible ? {
+          pourTantiemes: stats.pour,
+          totalTantiemes,
+          seuilDemiTantiemes: seuilDemiPourPasserelle261,
+          coprosPour: coprosPourArt26,
+          totalCoproprietaires
+        } : undefined
+      };
+    }
+
+    case 'ART_26_1': {
+      // Second vote à la majorité de l'article 25 (majorité absolue)
+      const seuilArt25 = Math.floor(totalTantiemes / 2) + 1;
+      const adopted261 = stats.pour >= seuilArt25;
+      return {
+        adopted: adopted261,
+        reason: adopted261
+          ? `Adoptée (passerelle 26-1) : ${stats.pour} tantièmes pour (seuil: ${seuilArt25})`
+          : `Rejetée (passerelle 26-1) : ${stats.pour} tantièmes pour (seuil requis: ${seuilArt25})`
       };
     }
 

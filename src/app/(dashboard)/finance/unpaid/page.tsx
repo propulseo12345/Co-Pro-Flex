@@ -13,13 +13,13 @@ export default function UnpaidPage() {
 
   const handleCall = (ownerName: string, lotRef: string) => {
     // TODO: Intégration téléphonie
-    console.log(`[TODO] Appel vers ${ownerName} (Lot ${lotRef})`);
+    // TODO: Intégration téléphonie
     alert(`Appel en cours vers ${ownerName} (Lot ${lotRef})...\n\nNote: Cette fonctionnalité pourrait être intégrée avec un système de téléphonie.`);
   };
 
   const handleSendReminder = (ownerName: string, lotRef: string, montant: number) => {
     // TODO: Intégration communication - pour l'instant juste un log
-    console.log(`[TODO] Relance à ${ownerName} (Lot ${lotRef}) pour ${montant} €`);
+    // TODO: Intégration communication
     const confirm = window.confirm(`Envoyer une relance à ${ownerName} (Lot ${lotRef}) pour ${montant.toLocaleString('fr-FR')} € ?`);
     if (confirm) {
       // TODO: Appeler l'API de communication quand elle sera prête

@@ -7,9 +7,9 @@ import type { BudgetTravaux } from '@/components/features/finance/Budget/types';
 import styles from './TravauxTab.module.css';
 
 interface TravauxTabProps {
-  budgetsTravaux: any[];
-  onOpenTravauxDetail: (travaux: any) => void;
-  onOpenNewAppelFonds: (travaux: any) => void;
+  budgetsTravaux: BudgetTravaux[];
+  onOpenTravauxDetail: (travaux: BudgetTravaux) => void;
+  onOpenNewAppelFonds: (travaux: BudgetTravaux) => void;
   onCreateBudget: () => void;
 }
 

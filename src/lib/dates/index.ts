@@ -43,12 +43,12 @@ export function parseDbDate(isoString: string | null | undefined): Date | null {
   try {
     const date = new Date(isoString);
     if (isNaN(date.getTime())) {
-      console.warn(`[dates] Invalid date string: ${isoString}`);
+      // Invalid date string
       return null;
     }
     return date;
   } catch (err) {
-    console.warn(`[dates] Failed to parse date: ${isoString}`, err);
+    // Failed to parse date
     return null;
   }
 }

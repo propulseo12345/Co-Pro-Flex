@@ -171,23 +171,8 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   // DERIVED DATA (calculé depuis DB, pas d'état local)
   // -------------------------------------------------------------------------
   const resolutions = useMemo(() => {
-    console.log('[useAgAgendaPage] dbResolutions count:', dbResolutions.length);
     return dbResolutions.map(dbToFrontendResolution);
   }, [dbResolutions]);
-
-  // Debug: Log des valeurs importantes
-  useEffect(() => {
-    console.log('[useAgAgendaPage] État actuel:', {
-      agId,
-      currentCoproId,
-      isManager,
-      meetingExists: !!meeting,
-      meetingType: meeting?.meeting_type,
-      dbResolutionsCount: dbResolutions.length,
-      dbLoading,
-      dbError,
-    });
-  }, [agId, currentCoproId, isManager, meeting, dbResolutions.length, dbLoading, dbError]);
 
   // Titres des résolutions existantes (pour éviter les doublons dans la bibliothèque)
   const existingResolutionTitles = useMemo(() => {
@@ -469,17 +454,6 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   // MUTATIONS: PRÉ-REMPLIR RÉSOLUTIONS OBLIGATOIRES
   // -------------------------------------------------------------------------
   const handlePrefillObligatoires = useCallback(async () => {
-    console.log('[handlePrefillObligatoires] ========== DÉMARRAGE ==========');
-    console.log('[handlePrefillObligatoires] État:', {
-      currentCoproId,
-      isManager,
-      meetingExists: !!meeting,
-      meetingId: meeting?.id,
-      meetingType: meeting?.meeting_type,
-      agId,
-      dbResolutionsCount: dbResolutions.length,
-    });
-
     // Vérification détaillée des conditions
     if (!currentCoproId) {
       const errorMsg = 'Erreur: Aucune copropriété sélectionnée (currentCoproId est null)';
@@ -503,28 +477,21 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     }
 
     const typeAG: TypeAG = meeting.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE';
-    console.log('[handlePrefillObligatoires] Type AG détecté:', typeAG);
 
     const templatesObligatoires = getResolutionsObligatoires(typeAG);
-    console.log('[handlePrefillObligatoires] Templates obligatoires trouvés:', templatesObligatoires.length);
-    console.log('[handlePrefillObligatoires] Templates:', templatesObligatoires.map(t => t.titre));
 
     if (templatesObligatoires.length === 0) {
       const errorMsg = `Aucun template obligatoire trouvé pour le type d'AG "${typeAG}"`;
-      console.warn('[handlePrefillObligatoires]', errorMsg);
       setSaveState({ isSaving: false, lastSaved: null, error: errorMsg });
       return;
     }
 
     // Identifier les templates déjà présents via le titre (car pas de templateId en DB)
     const existingTitles = new Set(dbResolutions.map(r => r.title.toLowerCase()));
-    console.log('[handlePrefillObligatoires] Résolutions existantes:', Array.from(existingTitles));
 
     const templatesToAdd = templatesObligatoires.filter(t => !existingTitles.has(t.titre.toLowerCase()));
-    console.log('[handlePrefillObligatoires] Templates à ajouter:', templatesToAdd.length);
 
     if (templatesToAdd.length === 0) {
-      console.log('[handlePrefillObligatoires] Toutes les résolutions obligatoires sont déjà présentes');
       setPrefillWarning({ total: templatesObligatoires.length, added: 0, skipped: templatesObligatoires.length });
       setTimeout(() => setPrefillWarning(null), 5000);
       return;
@@ -540,7 +507,6 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
 
       for (let i = 0; i < sortedTemplates.length; i++) {
         const template = sortedTemplates[i];
-        console.log('[handlePrefillObligatoires] Ajout résolution', i + 1, '/', sortedTemplates.length, ':', template.titre);
 
         // Pré-remplir les variables
         const variableNames = extractVariableNames(template.texte);
@@ -552,7 +518,6 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         }
 
         // Persister en DB via edge function
-        console.log('[handlePrefillObligatoires] Appel addResolutionMutation.execute pour:', template.titre);
         const result = await addResolutionMutation.execute({
           ag_id: agId,
           title: template.titre,
@@ -563,29 +528,16 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
           action_type: template.action_type,
         });
 
-        console.log('[handlePrefillObligatoires] Résultat:', JSON.stringify(result));
-
         if (result.success) {
           addedCount++;
-          console.log('[handlePrefillObligatoires] ✓ Résolution ajoutée avec succès:', template.titre);
         } else {
           const errorDetail = result.error || 'Erreur inconnue';
           errors.push(`${template.titre}: ${errorDetail}`);
-          console.error('[handlePrefillObligatoires] ✗ Erreur ajout:', template.titre, errorDetail);
         }
       }
 
-      console.log('[handlePrefillObligatoires] ========== RÉSUMÉ ==========');
-      console.log('[handlePrefillObligatoires] Total ajoutées:', addedCount, '/', sortedTemplates.length);
-
-      if (errors.length > 0) {
-        console.error('[handlePrefillObligatoires] Erreurs:', errors);
-      }
-
       // Re-fetch pour synchroniser
-      console.log('[handlePrefillObligatoires] Refresh des résolutions...');
       await refreshResolutions();
-      console.log('[handlePrefillObligatoires] Refresh terminé, nouvelles résolutions:', dbResolutions.length);
 
       const skippedCount = templatesObligatoires.length - templatesToAdd.length;
 
@@ -826,7 +778,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         updated_at: new Date().toISOString(),
       }).eq('id', agId);
     } catch (err) {
-      console.warn('[useAgAgendaPage] Failed to update current_step:', err);
+      // Failed to update current_step
     }
 
     router.push(`/ag/${agId}/convocation`);

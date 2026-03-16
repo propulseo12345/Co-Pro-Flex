@@ -96,9 +96,7 @@ export function useNotifications() {
         });
 
         // Log pour la simulation
-        console.log(`[MAIL SIMULE] Envoyé à: ${destinataires.join(', ')}`);
-        console.log(`[MAIL SIMULE] Sujet: ${notification.titre}`);
-        console.log(`[MAIL SIMULE] Message: ${notification.message}`);
+        // Mail simulation sent
 
         resolve(true);
       }, 500);

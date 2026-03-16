@@ -153,7 +153,7 @@ export async function renderDocumentToPages(file: UploadedDocFile): Promise<Rend
     return renderImagePage(file);
   }
 
-  console.warn(`[pdf-document-renderer] Type non supporté: ${mime} (${file.name})`);
+  // Unsupported mime type
   return [];
 }
 

@@ -258,7 +258,7 @@ export function VentesProvider({ children }: { children: ReactNode }) {
     (venteId: string, documentId: string, statut: VenteDocument['statut'], signePar?: string) => {
       // This would update the document in the step payload
       // For MVP, we just log this
-      console.log('updateDocumentStatus:', { venteId, documentId, statut, signePar });
+      // updateDocumentStatus (no-op for MVP)
     },
     []
   );
@@ -298,7 +298,7 @@ export function VentesProvider({ children }: { children: ReactNode }) {
   const addHistorique = useCallback(
     (venteId: string, action: string, utilisateur: string, details?: string) => {
       // For MVP, history is not persisted separately
-      console.log('addHistorique:', { venteId, action, utilisateur, details });
+      // addHistorique (no-op for MVP)
     },
     []
   );

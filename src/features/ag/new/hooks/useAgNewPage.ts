@@ -211,7 +211,7 @@ export function useAgNewPage() {
           startsAt: meetingDatetime,
         });
 
-        console.log(`[NewAGPage] Remote meeting link generated: ${meeting.url} (${meeting.provider})`);
+        // Remote meeting link generated
       }
 
       // Add standard resolutions for ordinary AG
@@ -222,7 +222,7 @@ export function useAgNewPage() {
           await saveDraft(draftId, 'resolutions', resolutions);
           // Mark that resolutions have been created
           await saveDraft(draftId, 'milestones', { resolutionsCreated: true });
-          console.log(`[NewAGPage] ${resolutions.length} resolutions saved for AG ${draftId}`);
+          // Resolutions saved for AG
         }
       }
 

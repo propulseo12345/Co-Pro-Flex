@@ -536,7 +536,7 @@ export function useBudget() {
             }
           } catch (uploadErr) {
             // Non-bloquant : le budget est créé, on log l'erreur upload
-            console.warn('Erreur upload devis:', uploadErr);
+            // Non-bloquant: erreur upload devis
           }
         }
       }
@@ -587,7 +587,7 @@ export function useBudget() {
 
           await scheduleApi.createPaymentPhases(inputs);
         } catch (schedErr) {
-          console.warn('Erreur création échéancier:', schedErr);
+          // Erreur création échéancier
         }
       }
 

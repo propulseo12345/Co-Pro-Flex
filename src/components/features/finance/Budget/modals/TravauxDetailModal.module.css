@@ -12,15 +12,15 @@
 
 /* ── Modal ── */
 .modal {
-  background: #161822;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
   border-radius: 16px;
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-xl);
 }
 
 /* ── Header ── */
@@ -29,7 +29,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .headerInfo {
@@ -40,7 +40,7 @@
 .title {
   font-size: 17px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
   white-space: nowrap;
   overflow: hidden;
@@ -49,7 +49,7 @@
 
 .subtitle {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 0;
   line-height: 1.4;
 }
@@ -60,7 +60,7 @@
   border-radius: 8px;
   border: none;
   background: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -71,8 +71,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-primary);
 }
 
 /* ── Tabs ── */
@@ -80,7 +80,7 @@
   display: flex;
   gap: 0;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .tab {
@@ -90,7 +90,7 @@
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-tertiary);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -100,12 +100,12 @@
 }
 
 .tab:hover {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .tabActive {
-  color: #e2e8f0;
-  border-bottom-color: #3b82f6;
+  color: var(--text-primary);
+  border-bottom-color: var(--color-primary-600);
 }
 
 .tabCount {
@@ -113,13 +113,13 @@
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 10px;
-  background: rgba(148, 163, 184, 0.1);
-  color: #64748b;
+  background: var(--border-light);
+  color: var(--text-tertiary);
 }
 
 .tabActive .tabCount {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  background: var(--color-primary-100);
+  color: var(--color-primary-500);
 }
 
 /* ── Body ── */
@@ -143,24 +143,24 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: rgba(148, 163, 184, 0.06);
+  background: var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
+  color: var(--text-tertiary);
   margin-bottom: 16px;
 }
 
 .emptyTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 0 0 6px 0;
 }
 
 .emptyText {
   font-size: 13px;
-  color: #475569;
+  color: var(--text-tertiary);
   margin: 0;
   max-width: 280px;
   line-height: 1.5;
@@ -193,7 +193,7 @@
   top: 36px;
   bottom: 0;
   width: 1px;
-  background: rgba(148, 163, 184, 0.1);
+  background: var(--border-light);
 }
 
 .timelineDot {
@@ -222,7 +222,7 @@
 
 .timelineDate {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -230,20 +230,20 @@
 .timelineAmount {
   font-size: 13px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
 
 .timelineEventTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 2px 0;
 }
 
 .timelineDesc {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.4;
 }
@@ -255,7 +255,7 @@
   margin-top: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #60a5fa;
+  color: var(--color-primary-500);
   background: none;
   border: none;
   padding: 0;
@@ -264,7 +264,7 @@
 }
 
 .timelineDocLink:hover {
-  color: #93bbfd;
+  color: var(--color-primary-600);
 }
 
 /* ── Étapes ── */
@@ -276,8 +276,8 @@
 
 .etapeCard {
   padding: 16px;
-  background: #1a1d2e;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -291,8 +291,8 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(59, 130, 246, 0.12);
-  color: #60a5fa;
+  background: var(--color-primary-100);
+  color: var(--color-primary-500);
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -309,13 +309,13 @@
 .etapeTitre {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 2px 0;
 }
 
 .etapeDesc {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -332,23 +332,23 @@
 }
 
 .badgeTermine {
-  background: rgba(34, 197, 94, 0.1);
-  color: #4ade80;
+  background: var(--success-light);
+  color: var(--success-dark);
 }
 
 .badgeEnCours {
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
+  background: var(--color-primary-100);
+  color: var(--color-primary-500);
 }
 
 .badgeEnRetard {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 .badgeAFaire {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  background: var(--border-light);
+  color: var(--text-secondary);
 }
 
 .etapeMeta {
@@ -357,7 +357,7 @@
   gap: 12px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  border-top: 1px solid var(--border-light);
 }
 
 .etapeMetaItem {
@@ -365,7 +365,7 @@
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .etapeMetaItem svg {
@@ -373,11 +373,11 @@
 }
 
 .amountOk {
-  color: #4ade80;
+  color: var(--success-dark);
 }
 
 .amountOver {
-  color: #f87171;
+  color: var(--danger);
 }
 
 /* ── Prestataires ── */
@@ -389,8 +389,8 @@
 
 .prestaCard {
   padding: 16px;
-  background: #1a1d2e;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -405,8 +405,8 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: rgba(99, 102, 241, 0.12);
-  color: #818cf8;
+  background: var(--icon-bg-indigo);
+  color: var(--indigo-500);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -416,13 +416,13 @@
 .prestaName {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .prestaMetier {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 0;
 }
 
@@ -437,16 +437,16 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .prestaRow svg {
-  color: #475569;
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
 .prestaRow a {
-  color: #60a5fa;
+  color: var(--color-primary-500);
   text-decoration: none;
 }
 
@@ -466,22 +466,22 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: #1a1d2e;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
   transition: border-color 150ms;
 }
 
 .docCard:hover {
-  border-color: rgba(148, 163, 184, 0.15);
+  border-color: var(--border);
 }
 
 .docIcon {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
+  background: var(--color-primary-100);
+  color: var(--color-primary-500);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -496,7 +496,7 @@
 .docName {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -515,18 +515,18 @@
   font-weight: 500;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(148, 163, 184, 0.08);
-  color: #94a3b8;
+  background: var(--border-light);
+  color: var(--text-secondary);
 }
 
 .docDate {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .docSize {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .docActions {
@@ -540,7 +540,7 @@
   border-radius: 6px;
   border: none;
   background: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -549,8 +549,8 @@
 }
 
 .docBtn:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-primary);
 }
 
 /* ── Footer ── */
@@ -558,7 +558,7 @@
   display: flex;
   justify-content: flex-end;
   padding: 16px 24px;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border-light);
 }
 
 .btnSecondary {
@@ -572,13 +572,13 @@
   gap: 6px;
   transition: all 150ms;
   background: none;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  color: #94a3b8;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
 }
 
 .btnSecondary:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-primary);
 }
 
 /* ── Schedule table ── */
@@ -593,10 +593,10 @@
   gap: 8px;
   padding: 8px 12px;
   font-size: 11px;
-  color: #475569;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .scheduleRow {
@@ -606,7 +606,7 @@
   padding: 10px 12px;
   font-size: 13px;
   align-items: center;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .rowRetention {
@@ -619,21 +619,21 @@
 }
 
 .scheduleLabel {
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .schedulePct {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .scheduleAmount {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .scheduleDate {
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
@@ -642,7 +642,7 @@
   display: flex;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #1a1d2e;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   font-size: 13px;
 }
@@ -654,22 +654,22 @@
 }
 
 .summaryLabel {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .summaryValue {
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .summaryValueSuccess {
   font-weight: 700;
-  color: #4ade80;
+  color: var(--success-dark);
 }
 
 .progressTrack {
   height: 6px;
-  background: rgba(148, 163, 184, 0.1);
+  background: var(--border-light);
   border-radius: 3px;
   overflow: hidden;
   margin-top: 8px;
@@ -677,7 +677,7 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #22c55e, #4ade80);
+  background: linear-gradient(90deg, var(--success), var(--success-dark));
   border-radius: 3px;
   transition: width 300ms;
 }
@@ -688,7 +688,7 @@
   border-radius: 6px;
   border: none;
   background: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -697,8 +697,8 @@
 }
 
 .actionBtn:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-primary);
 }
 
 /* ── Responsive ── */

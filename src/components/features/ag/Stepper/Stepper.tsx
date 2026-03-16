@@ -32,9 +32,6 @@ const STEPS_CONFIG: StepConfig[] = [
 const FETCH_RETRY_ATTEMPTS = 2;
 const FETCH_RETRY_DELAYS = [300, 800]; // ms
 
-// Debug mode (dev only)
-const DEBUG_STEPPER = process.env.NODE_ENV === 'development';
-
 // ============================================================================
 // CACHE HELPERS (sessionStorage - UX fallback, synchronized with DB)
 // ============================================================================
@@ -62,9 +59,7 @@ function setCachedMaxStep(agId: string, value: number): void {
     if (typeof window === 'undefined') return;
     try {
         sessionStorage.setItem(getCacheKey(agId), String(value));
-        if (DEBUG_STEPPER) {
-            console.info('[Stepper] Cache updated:', { agId, value });
-        }
+        // Cache updated
     } catch {
         // ignore
     }
@@ -101,14 +96,6 @@ function computeInitialMaxStep(currentStep: number, agId?: string): number {
     // Check cache for potentially higher value
     if (agId) {
         const cached = getCachedMaxStep(agId);
-        if (DEBUG_STEPPER) {
-            console.info('[Stepper] computeInitialMaxStep:', {
-                agId,
-                currentStep,
-                cached,
-                willUse: cached !== null ? Math.max(initial, cached) : initial
-            });
-        }
         if (cached !== null && cached >= 1 && cached <= 9) {
             initial = Math.max(initial, cached);
         }
@@ -150,17 +137,6 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
         setMaxStepReached(prev => {
             // STICKY: Always take the maximum of all known values
             const updated = Math.max(prev, newValue);
-
-            if (DEBUG_STEPPER) {
-                console.info('[Stepper] updateMaxStepReached:', {
-                    source,
-                    prev,
-                    newValue,
-                    updated,
-                    currentStep,
-                    changed: updated !== prev
-                });
-            }
 
             // CRITICAL FIX: Always sync cache if updated > cached value
             // This ensures cache is written even on first visit to a step
@@ -211,28 +187,9 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                     // Never let any value go DOWN
                     const trueMax = Math.max(dbMax, currentCached ?? 1, currentState, currentStep);
 
-                    // ============================================================
-                    // AUDIT LOG (dev only) - as requested
-                    // ============================================================
-                    if (DEBUG_STEPPER) {
-                        console.info('[Stepper] AUDIT FETCH:', {
-                            agId,
-                            'DB.current_step': dbCurrentStep,
-                            'DB.max_step_reached': dbMaxStepReached,
-                            'dbMax (from DB)': dbMax,
-                            'route currentStep': currentStep,
-                            'state maxStepReached': currentState,
-                            'cache': currentCached,
-                            'trueMax (computed)': trueMax,
-                        });
-                    }
-
                     // CRITICAL: Write to cache with TRUE MAX (never decrease)
                     if (currentCached === null || trueMax > currentCached) {
                         setCachedMaxStep(agId, trueMax);
-                        if (DEBUG_STEPPER) {
-                            console.info('[Stepper] Cache written:', { agId, trueMax });
-                        }
                     }
 
                     // Update state with TRUE MAX (sticky - only increases)
@@ -242,22 +199,12 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                     // ERROR: Retry or fallback
                     if (attempt < FETCH_RETRY_ATTEMPTS) {
                         const delay = FETCH_RETRY_DELAYS[attempt] || 500;
-                        if (DEBUG_STEPPER) {
-                            console.warn(`[Stepper] Fetch failed, retry ${attempt + 1}/${FETCH_RETRY_ATTEMPTS} in ${delay}ms`, error?.message);
-                        }
                         await new Promise(resolve => setTimeout(resolve, delay));
                         if (isMountedRef.current) {
                             return fetchWithRetry(attempt + 1);
                         }
                     } else {
                         // All retries exhausted: keep current state (don't downgrade)
-                        if (DEBUG_STEPPER) {
-                            console.warn('[Stepper] Fetch failed after retries, keeping current state:', {
-                                currentStep,
-                                maxStepReached: maxStepReachedRef.current,
-                                error: error?.message
-                            });
-                        }
                         // DON'T call updateMaxStepReached with currentStep - keep existing state
                         setFetchFailed(true);
                     }
@@ -268,17 +215,11 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                 // Exception: Retry or fallback
                 if (attempt < FETCH_RETRY_ATTEMPTS) {
                     const delay = FETCH_RETRY_DELAYS[attempt] || 500;
-                    if (DEBUG_STEPPER) {
-                        console.warn(`[Stepper] Exception, retry ${attempt + 1}/${FETCH_RETRY_ATTEMPTS} in ${delay}ms`, err);
-                    }
                     await new Promise(resolve => setTimeout(resolve, delay));
                     if (isMountedRef.current) {
                         return fetchWithRetry(attempt + 1);
                     }
                 } else {
-                    if (DEBUG_STEPPER) {
-                        console.warn('[Stepper] Exception after retries, keeping current state:', err);
-                    }
                     // DON'T downgrade - keep existing state
                     setFetchFailed(true);
                 }
@@ -306,43 +247,16 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
         const cached = getCachedMaxStep(agId);
         const currentMax = maxStepReachedRef.current;
 
-        if (DEBUG_STEPPER) {
-            console.info('[Stepper] Sync check on navigation:', {
-                currentStep,
-                stateMaxStepReached: currentMax,
-                cached,
-            });
-        }
-
         // Compute the true max from all sources
         const trueMax = Math.max(currentStep, cached ?? 1, currentMax);
 
         // If true max is higher than current state, update
         if (trueMax > currentMax) {
-            if (DEBUG_STEPPER) {
-                console.info('[Stepper] Syncing to trueMax:', { trueMax, currentMax });
-            }
             setMaxStepReached(trueMax);
             // Also update cache
             setCachedMaxStep(agId, trueMax);
         }
     }, [agId, currentStep]); // Runs on every navigation - uses ref for current state
-
-    // ========================================================================
-    // Log state changes for debugging (dev only)
-    // ========================================================================
-    useEffect(() => {
-        if (DEBUG_STEPPER) {
-            console.info('[Stepper] STATE:', {
-                agId,
-                currentStep,
-                maxStepReached,
-                isLoading,
-                fetchFailed,
-                cached: agId ? getCachedMaxStep(agId) : null,
-            });
-        }
-    }, [agId, currentStep, maxStepReached, isLoading, fetchFailed]);
 
     // ========================================================================
     // NAVIGATION HANDLER
@@ -352,15 +266,6 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
 
         const targetUrl = getStepUrl(agId, stepConfig);
         const clickable = isStepClickable(stepConfig.numero, maxStepReached, true);
-
-        if (process.env.NODE_ENV === 'development') {
-            console.info('[Stepper] Click:', {
-                step: stepConfig.numero,
-                targetUrl,
-                maxStepReached,
-                clickable
-            });
-        }
 
         if (clickable) {
             router.push(targetUrl);

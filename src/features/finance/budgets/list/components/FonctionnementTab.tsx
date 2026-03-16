@@ -7,29 +7,42 @@ import {
   BudgetDepensesTable,
 } from '@/components/features/finance/Budget';
 import { getExercicesList } from '@/lib/dates';
-import type { PosteBudget } from '@/components/features/finance/Budget/types';
+import type { PosteBudget, PosteBudgetData } from '@/components/features/finance/Budget/types';
+import type { BudgetWithStatus } from '@/hooks/modules/useBudget';
+import type { DepenseEtendue } from '@/data/mock';
 import styles from './FonctionnementTab.module.css';
 
 const AVAILABLE_YEARS = getExercicesList(4).map(y => parseInt(y));
 
+interface BudgetTotals {
+  totalConsomme: number;
+  budgetRestant: number;
+  projectedYearEnd: number;
+  projectedDifference: number;
+  monthsElapsed: number;
+  monthsRemaining: number;
+  avgMonthlyConsumption: number;
+  fiabiliteNiveau: 'faible' | 'moyenne' | 'bonne';
+}
+
 interface FonctionnementTabProps {
-  budgets: any[];
+  budgets: BudgetWithStatus[];
   selectedYear: number;
   onYearChange: (year: number) => void;
   budgetAnnuelVote: number;
-  postesBudget: any[];
-  totals: any;
-  postesEnAlerte: any[];
+  postesBudget: PosteBudgetData[];
+  totals: BudgetTotals;
+  postesEnAlerte: PosteBudgetData[];
   posteActifChart: PosteBudget | null;
-  depensesFiltrees: any[];
-  onEditBudget: (budget: any) => void;
-  onLinkToAG: (budget: any) => void;
-  onTransformBudget: (budget: any) => void;
-  onDeleteBudget: (budget: any) => void;
-  onSelectBudget: (budget: any) => void;
+  depensesFiltrees: DepenseEtendue[];
+  onEditBudget: (budget: BudgetWithStatus) => void;
+  onLinkToAG: (budget: BudgetWithStatus) => void;
+  onTransformBudget: (budget: BudgetWithStatus) => void;
+  onDeleteBudget: (budget: BudgetWithStatus) => void;
+  onSelectBudget: (budget: BudgetWithStatus) => void;
   onCreateBudget: () => void;
   onSelectPoste: (poste: PosteBudget | null) => void;
-  onSelectDepense: (depense: any | null) => void;
+  onSelectDepense: (depense: DepenseEtendue | null) => void;
   onPosteChartSelect: (poste: PosteBudget | null) => void;
 }
 
@@ -76,7 +89,7 @@ export function FonctionnementTab({
         totalConsomme={totals.totalConsomme}
         budgetRestant={totals.budgetRestant}
         postesEnAlerte={postesEnAlerte.length}
-        postesEnAlerteLabels={postesEnAlerte.map((p: any) => p.label).join(', ')}
+        postesEnAlerteLabels={postesEnAlerte.map((p: PosteBudgetData) => p.label).join(', ')}
         postesBudget={postesBudget}
       />
 
@@ -93,13 +106,13 @@ export function FonctionnementTab({
 
       <BudgetPostesList
         postesBudget={postesBudget}
-        depenses={depensesFiltrees.map((d: any) => ({
+        depenses={depensesFiltrees.map((d: DepenseEtendue) => ({
           id: d.id,
           libelle: d.libelle,
           date: d.date,
           montant: d.montant,
           poste: d.poste,
-          compteCharge: d.compteCharge || d.compteId || '',
+          compteCharge: d.compteId || '',
           fournisseur: d.fournisseur || '',
           statut: d.statut || '',
           pieceJointe: d.pieceJointe || d.pieceJointeDetails?.fichierNom || '',
@@ -108,7 +121,7 @@ export function FonctionnementTab({
           montantTVA: d.montantTVA,
         }))}
         onSelectDepense={(dep) => {
-          const original = depensesFiltrees.find((d: any) => d.id === dep.id);
+          const original = depensesFiltrees.find((d: DepenseEtendue) => d.id === dep.id);
           if (original) onSelectDepense(original);
         }}
       />

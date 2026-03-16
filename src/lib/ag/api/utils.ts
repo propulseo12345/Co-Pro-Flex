@@ -20,9 +20,6 @@ export async function invokeEdgeFunction<T>(
 ): Promise<T> {
   const supabase = createUntypedClient();
 
-  console.log(`[invokeEdgeFunction] Appel de ${functionName} via SDK...`);
-  console.log(`[invokeEdgeFunction] Payload:`, JSON.stringify(payload).substring(0, 200));
-
   try {
     // Utiliser la méthode native du SDK Supabase
     const { data, error } = await supabase.functions.invoke(functionName, {
@@ -40,15 +37,12 @@ export async function invokeEdgeFunction<T>(
       throw new Error(error.message || 'Erreur lors de l\'appel à la fonction');
     }
 
-    console.log(`[invokeEdgeFunction] Résultat:`, data);
     return data as T;
 
   } catch (err) {
     console.error(`[invokeEdgeFunction] Exception:`, err);
 
     // Si le SDK échoue, essayer avec fetch direct après refresh de session
-    console.log(`[invokeEdgeFunction] Fallback vers fetch direct...`);
-
     // Rafraîchir la session
     const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
 
@@ -62,8 +56,6 @@ export async function invokeEdgeFunction<T>(
       throw new Error('Non authentifié - veuillez vous reconnecter');
     }
 
-    console.log(`[invokeEdgeFunction] Session rafraîchie, user: ${session.user?.email}`);
-
     const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${functionName}`;
 
     const response = await fetch(url, {
@@ -76,8 +68,6 @@ export async function invokeEdgeFunction<T>(
       body: JSON.stringify(payload),
     });
 
-    console.log(`[invokeEdgeFunction] Fallback response status: ${response.status}`);
-
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[invokeEdgeFunction] Fallback HTTP Error: ${response.status}`, errorText);
@@ -85,7 +75,6 @@ export async function invokeEdgeFunction<T>(
     }
 
     const result = await response.json();
-    console.log(`[invokeEdgeFunction] Fallback résultat:`, result);
     return result as T;
   }
 }

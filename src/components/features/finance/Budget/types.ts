@@ -57,8 +57,8 @@ export interface DepenseBudget {
   libelle: string;
   date: string;
   montant: number;
-  poste: PosteBudget;
-  compteCharge: string;
+  poste?: PosteBudget;
+  compteCharge?: string;
   fournisseur?: string;
   statut?: string;
   pieceJointe?: string;

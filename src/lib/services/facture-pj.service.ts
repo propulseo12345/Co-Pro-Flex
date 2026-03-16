@@ -35,7 +35,7 @@ class FacturePJService {
     if (typeof window !== 'undefined') {
       const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyData) {
-        console.warn('[FacturePJService] Suppression données localStorage legacy');
+        // Legacy localStorage cleanup
         localStorage.removeItem(LEGACY_STORAGE_KEY);
       }
     }

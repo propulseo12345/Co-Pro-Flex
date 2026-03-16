@@ -602,7 +602,7 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
                 .eq('id', budgetResolutionIdRef.current);
             }
           } catch (err) {
-            console.warn('[useAgEditPage] Failed to sync budget_postes to resolution:', err);
+            // Failed to sync budget_postes to resolution
           }
         }
 

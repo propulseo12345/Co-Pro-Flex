@@ -67,14 +67,14 @@ const DEPRECATED_ERROR = 'DEPRECATED: Utiliser les hooks Supabase (useLotsData, 
 /** @deprecated */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const deprecatedMethod = async <T>(..._args: any[]): Promise<ApiResult<T>> => {
-  console.warn('[financeApi] ' + DEPRECATED_ERROR);
+  // deprecated - no-op
   return { success: false, error: DEPRECATED_ERROR };
 };
 
 /** @deprecated */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const deprecatedListMethod = async <T>(..._args: any[]): Promise<ApiResult<PaginatedResponse<T>>> => {
-  console.warn('[financeApi] ' + DEPRECATED_ERROR);
+  // deprecated - no-op
   return {
     success: true,
     data: { data: [] as T[], total: 0, page: 1, pageSize: 20, totalPages: 0 }
@@ -134,7 +134,7 @@ export interface RepartitionResult {
 export const clesRepartitionApi = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list: async (..._args: any[]): Promise<ApiResult<PaginatedResponse<MockCleRepartition>>> => {
-    console.warn('[financeApi] ' + DEPRECATED_ERROR);
+    // deprecated - no-op
     return {
       success: true,
       data: { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }
@@ -142,7 +142,7 @@ export const clesRepartitionApi = {
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getById: async (..._args: any[]): Promise<ApiResult<MockCleRepartition>> => {
-    console.warn('[financeApi] ' + DEPRECATED_ERROR);
+    // deprecated - no-op
     return { success: false, error: DEPRECATED_ERROR };
   },
   create: deprecatedMethod,
@@ -150,7 +150,7 @@ export const clesRepartitionApi = {
   delete: deprecatedMethod,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   calculerRepartition: async (..._args: any[]): Promise<ApiResult<RepartitionResult>> => {
-    console.warn('[financeApi] ' + DEPRECATED_ERROR);
+    // deprecated - no-op
     return { success: false, error: DEPRECATED_ERROR };
   },
   validerTantiemes: deprecatedMethod,
@@ -259,7 +259,7 @@ export const comptesComptablesApi = {
 /** @deprecated - Utiliser les vues Supabase directement */
 export const financeStatsApi = {
   getStats: async (): Promise<ApiResult<FinanceStatsLocal>> => {
-    console.warn('[financeApi] ' + DEPRECATED_ERROR);
+    // deprecated - no-op
     return {
       success: true,
       data: {

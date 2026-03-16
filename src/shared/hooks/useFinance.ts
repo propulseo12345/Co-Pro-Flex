@@ -55,7 +55,6 @@ function useDeprecatedHook<T>(
 
   useEffect(() => {
     if (!hasWarned) {
-      console.warn(DEPRECATED_MSG(hookName, replacement));
       setHasWarned(true);
     }
   }, [hasWarned, hookName, replacement]);
@@ -65,7 +64,7 @@ function useDeprecatedHook<T>(
     isLoading: false,
     error: null,
     refetch: async () => {
-      console.warn(DEPRECATED_MSG(hookName, replacement));
+      // deprecated - no-op
     },
   };
 }
@@ -334,11 +333,11 @@ export function useFinanceStats() {
 
 const deprecatedMutation = (name: string) => ({
   mutate: async () => {
-    console.warn(`[${name}] DEPRECATED - Utiliser les hooks Supabase`);
+    // deprecated - no-op
     return null;
   },
   mutateAsync: async () => {
-    console.warn(`[${name}] DEPRECATED - Utiliser les hooks Supabase`);
+    // deprecated
     throw new Error('DEPRECATED');
   },
   isLoading: false,

@@ -200,7 +200,7 @@ class OnPremiseSignatureProvider implements SignatureProviderInterface {
 
     async sendReminder(): Promise<void> {
         // Pour la signature sur place, on ne peut pas envoyer de rappel automatique
-        console.log('[OnPremiseSignature] Rappel non applicable pour signature sur place');
+        // Rappel non applicable pour signature sur place
     }
 
     async getSignedDocument(requestId: string): Promise<Blob> {
@@ -273,7 +273,7 @@ class DocuSignProvider implements SignatureProviderInterface {
     async initialize(config: SignatureProviderConfig): Promise<void> {
         this.config = config;
         // TODO: Initialiser le client DocuSign avec les credentials
-        console.log('[DocuSign] Provider initialisé (stub)');
+        // DocuSign provider initialized (stub)
     }
 
     async createSignatureRequest(options: CreateSignatureRequestOptions): Promise<SignatureRequest> {
@@ -302,7 +302,7 @@ class DocuSignProvider implements SignatureProviderInterface {
         requests[requestId] = request;
         saveSignatureRequests(requests);
 
-        console.log('[DocuSign] Demande créée (stub):', requestId);
+        // DocuSign request created (stub)
         return request;
     }
 
@@ -314,12 +314,12 @@ class DocuSignProvider implements SignatureProviderInterface {
 
     async voidSignatureRequest(requestId: string, reason?: string): Promise<void> {
         // TODO: Appeler l'API DocuSign pour annuler l'envelope
-        console.log('[DocuSign] Annulation (stub):', requestId, reason);
+        // DocuSign cancellation (stub)
     }
 
     async sendReminder(requestId: string, recipientId?: string): Promise<void> {
         // TODO: Appeler l'API DocuSign pour envoyer un rappel
-        console.log('[DocuSign] Rappel envoyé (stub):', requestId, recipientId);
+        // DocuSign reminder sent (stub)
     }
 
     async getSignedDocument(requestId: string): Promise<Blob> {
@@ -329,7 +329,7 @@ class DocuSignProvider implements SignatureProviderInterface {
 
     async handleWebhook(payload: unknown): Promise<SignatureRequest> {
         // TODO: Parser le webhook DocuSign et mettre à jour le statut
-        console.log('[DocuSign] Webhook reçu (stub):', payload);
+        // DocuSign webhook received (stub)
         throw new Error('[DocuSign] handleWebhook non implémenté');
     }
 }
@@ -345,7 +345,7 @@ class YouSignProvider implements SignatureProviderInterface {
     async initialize(config: SignatureProviderConfig): Promise<void> {
         this.config = config;
         // TODO: Initialiser le client Yousign avec les credentials
-        console.log('[Yousign] Provider initialisé (stub)');
+        // Yousign provider initialized (stub)
     }
 
     async createSignatureRequest(options: CreateSignatureRequestOptions): Promise<SignatureRequest> {
@@ -374,7 +374,7 @@ class YouSignProvider implements SignatureProviderInterface {
         requests[requestId] = request;
         saveSignatureRequests(requests);
 
-        console.log('[Yousign] Demande créée (stub):', requestId);
+        // Yousign request created (stub)
         return request;
     }
 
@@ -384,11 +384,11 @@ class YouSignProvider implements SignatureProviderInterface {
     }
 
     async voidSignatureRequest(requestId: string, reason?: string): Promise<void> {
-        console.log('[Yousign] Annulation (stub):', requestId, reason);
+        // Yousign cancellation (stub)
     }
 
     async sendReminder(requestId: string, recipientId?: string): Promise<void> {
-        console.log('[Yousign] Rappel envoyé (stub):', requestId, recipientId);
+        // Yousign reminder sent (stub)
     }
 
     async getSignedDocument(requestId: string): Promise<Blob> {
@@ -396,7 +396,7 @@ class YouSignProvider implements SignatureProviderInterface {
     }
 
     async handleWebhook(payload: unknown): Promise<SignatureRequest> {
-        console.log('[Yousign] Webhook reçu (stub):', payload);
+        // Yousign webhook received (stub)
         throw new Error('[Yousign] handleWebhook non implémenté');
     }
 }

@@ -199,7 +199,7 @@ export const searchableRoutes: SearchableRoute[] = [
     {
         title: 'Assemblées',
         description: 'Liste des assemblées',
-        path: '/assemblees',
+        path: '/ag',
         keywords: ['assemblée', 'assemblées', 'réunion', 'ag'],
         category: 'Assemblées'
     },

@@ -344,7 +344,7 @@ export function useVotesCorrespondance({
             if (error) {
                 console.error('[useVotesCorrespondance] Error saving votes:', error);
             } else if (data?.success) {
-                console.log('[useVotesCorrespondance] Votes saved:', data.upserted_count);
+                // Votes saved successfully
             }
         } catch (err) {
             console.error('[useVotesCorrespondance] Save error:', err);

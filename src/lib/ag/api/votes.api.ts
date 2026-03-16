@@ -41,7 +41,7 @@ export async function castVote(input: CastVoteInput): Promise<CastVoteResponse> 
       errorMsg.includes('Unauthorized') ||
       errorMsg.includes('non-2xx')
     ) {
-      console.log('[castVote] Edge function échouée, tentative d\'upsert direct...');
+      // Edge function failed, trying direct upsert
       return castVoteDirect(input);
     }
     throw err;
@@ -120,7 +120,7 @@ async function castVoteDirect(input: CastVoteInput): Promise<CastVoteResponse> {
       result = data;
     }
 
-    console.log('[castVoteDirect] Vote enregistré avec ID:', result?.id);
+    // Vote enregistré
 
     return {
       success: true,

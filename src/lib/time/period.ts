@@ -58,7 +58,7 @@ export function normalizeDateInput(date: Date | string | number): string {
 
   // Vérifier que la date est valide
   if (isNaN(d.getTime())) {
-    console.warn('[period] Invalid date input:', date);
+    // Invalid date input
     return `${CURRENT_BUSINESS_YEAR}-01-01`;
   }
 
@@ -83,11 +83,7 @@ export function assertBusinessYear(date: Date | string, context?: string): void 
   if (process.env.NODE_ENV === 'development') {
     if (!isInCurrentBusinessYear(date)) {
       const d = typeof date === 'string' ? new Date(date) : date;
-      console.warn(
-        `[period] Date hors exercice ${CURRENT_BUSINESS_YEAR}:`,
-        d.toISOString(),
-        context ? `(${context})` : ''
-      );
+      // Date hors exercice
     }
   }
 }

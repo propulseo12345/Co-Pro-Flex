@@ -90,7 +90,6 @@ export function useAGStepGuard({
         // FIX: Wrapper dans try-catch pour éviter les erreurs silencieuses
         try {
             if (!agId || !stepId) {
-                console.warn('[useAGStepGuard] agId ou stepId manquant:', { agId, stepId });
                 setState('error');
                 setErrorMessage('Identifiant de l\'AG ou de l\'étape manquant');
                 return;
@@ -99,7 +98,6 @@ export function useAGStepGuard({
             // Vérifier que l'étape existe
             const step = getStepById(stepId);
             if (!step) {
-                console.warn('[useAGStepGuard] Étape inconnue:', stepId);
                 setState('error');
                 setErrorMessage(`Étape "${stepId}" non trouvée dans le workflow`);
                 return;
@@ -110,16 +108,6 @@ export function useAGStepGuard({
             // Construire le contexte depuis localStorage (côté client uniquement)
             const ctx = buildPrerequisitesContext(agId);
             setContext(ctx);
-
-            // Debug log en développement
-            if (process.env.NODE_ENV === 'development') {
-                console.log('[useAGStepGuard] Contexte construit:', {
-                    stepId,
-                    agExists: ctx.agExists,
-                    hasResolutions: ctx.hasResolutions,
-                    resolutionsCount: ctx.resolutionsCount,
-                });
-            }
 
             // Valider les prérequis métier
             const result = validateStepBusinessPrerequisites(stepId, ctx);
@@ -170,7 +158,7 @@ export function useAGStepGuard({
         // FIX: Timeout de sécurité pour éviter le loading infini
         timeoutRef.current = setTimeout(() => {
             if (state === 'loading') {
-                console.warn('[useAGStepGuard] Timeout atteint, forçage en état allowed');
+                // Timeout reached, forcing allowed state
                 setState('allowed');
                 setErrorMessage('Le chargement a pris trop de temps. Vérifiez les données.');
             }

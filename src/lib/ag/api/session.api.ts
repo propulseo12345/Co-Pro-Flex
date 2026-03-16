@@ -166,7 +166,7 @@ export async function registerAttendance(input: RegisterAttendanceInput): Promis
 async function registerAttendanceDirect(input: RegisterAttendanceInput): Promise<RegisterAttendanceResponse> {
   const supabase = createUntypedClient();
 
-  console.log('[registerAttendanceDirect] Upsert direct pour:', input.coproprietaire_id);
+  // Direct upsert for attendance
 
   try {
     let tantiemes = 0;
@@ -265,7 +265,7 @@ async function registerAttendanceDirect(input: RegisterAttendanceInput): Promise
       result = data;
     }
 
-    console.log('[registerAttendanceDirect] Attendance enregistrée avec ID:', result?.id);
+    // Attendance enregistrée
 
     return {
       success: true,

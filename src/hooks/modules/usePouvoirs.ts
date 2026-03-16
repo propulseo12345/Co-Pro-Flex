@@ -653,7 +653,7 @@ export function usePouvoirs({ agId }: UsePouvoirsOptions): UsePouvoirsReturn {
 
     const save = useCallback(() => {
         // No-op: All saves are now done via Supabase RPCs
-        console.log('[usePouvoirs] save() called - data is already persisted to Supabase');
+        // No-op: All saves are now done via Supabase RPCs
     }, []);
 
     return {

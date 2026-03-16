@@ -97,17 +97,15 @@ export async function getActiveCopro(): Promise<ActiveCopro | null> {
         // Si l'utilisateur n'est pas authentifié, ce n'est pas grave
         // On continue avec la méthode standard
         if (!bootstrapError.message.includes('Not authenticated')) {
-          console.warn('[ActiveCopro] DEV bootstrap warning:', bootstrapError.message);
+          // DEV bootstrap warning
         }
       } else if (bootstrapData) {
         coproIdFromBootstrap = bootstrapData as string;
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[ActiveCopro] DEV bootstrap: membership ensured for copro', coproIdFromBootstrap);
-        }
+        // DEV bootstrap: membership ensured
       }
     } catch (bootstrapErr) {
       // Silently ignore bootstrap errors - fallback to standard method
-      console.warn('[ActiveCopro] DEV bootstrap failed, using standard method:', bootstrapErr);
+      // DEV bootstrap failed, using standard method
     }
     // =================================================================
     // END DEV BOOTSTRAP

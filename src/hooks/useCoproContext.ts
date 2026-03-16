@@ -89,7 +89,7 @@ export function useCoproContext(): CoproContextValue {
         .single();
 
       if (profileError && profileError.code !== 'PGRST116') {
-        console.warn('Profile fetch error:', profileError);
+        // Profile fetch error (non-critical)
       }
       setProfile(profileData as CoproProfile | null);
 
@@ -103,7 +103,7 @@ export function useCoproContext(): CoproContextValue {
         .single();
 
       if (coproError || !coproData) {
-        console.warn('Copro fetch error:', coproError);
+        // Copro fetch error
         setCoproId(null);
         setCopro(null);
         return;

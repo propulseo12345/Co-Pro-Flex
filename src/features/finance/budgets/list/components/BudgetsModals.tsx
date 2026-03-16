@@ -12,31 +12,42 @@ import {
   NouvelAppelFondsTravauxModal,
   LinkToAGModal,
 } from '@/components/features/finance/Budget';
-import type { PosteBudget } from '@/components/features/finance/Budget/types';
+import type {
+  PosteBudget,
+  PosteBudgetData,
+  BudgetTravaux,
+  FondsALUR,
+  CoproprietaireALUR,
+  NouveauBudgetForm,
+  NouvelAppelFondsForm,
+  ResolutionAG,
+} from '@/components/features/finance/Budget/types';
+import type { BudgetWithStatus, BudgetN1Data } from '@/hooks/modules/useBudget';
+import type { DepenseEtendue } from '@/data/mock';
 
 type DetailTab = 'echeancier' | 'documents' | 'historique';
 
 interface BudgetsModalsProps {
   // ALUR Modal
-  selectedCoproprietaireALUR: any | null;
+  selectedCoproprietaireALUR: CoproprietaireALUR | null;
   selectedYear: number;
   onCloseCoproprietaireALUR: () => void;
 
   // Transfer Modal
   showTransferModal: boolean;
-  fondsALUR: any;
-  budgetsTravaux: any[];
+  fondsALUR: FondsALUR;
+  budgetsTravaux: BudgetTravaux[];
   onCloseTransferModal: () => void;
   onTransferALUR: (montant: number, destination: 'COMPTE_COURANT' | 'BUDGET_TRAVAUX', budgetId?: string) => void;
 
   // Poste Detail Modal
   selectedPoste: PosteBudget | null;
-  postesBudget: any[];
+  postesBudget: PosteBudgetData[];
   onClosePosteDetail: () => void;
-  onSelectDepense: (depense: any | null) => void;
+  onSelectDepense: (depense: DepenseEtendue | null) => void;
 
   // Depense Detail Modal
-  selectedDepense: any | null;
+  selectedDepense: DepenseEtendue | null;
   onCloseDepenseDetail: () => void;
   onViewDocument: (doc: string | null) => void;
 
@@ -46,33 +57,33 @@ interface BudgetsModalsProps {
 
   // Create Budget Modal
   showCreateBudgetModal: boolean;
-  budgetN1: any | null;
-  onCreateBudget: (data: any) => void;
+  budgetN1?: BudgetN1Data | null;
+  onCreateBudget: (data: NouveauBudgetForm) => void;
   onCloseCreateBudget: () => void;
 
   // Transform Budget Modal
   showTransformBudgetModal: boolean;
-  selectedBudgetForTransform: any | null;
+  selectedBudgetForTransform: BudgetWithStatus | null;
   onCloseTransformBudget: () => void;
   onTransformToAppele: () => void;
 
   // Travaux Detail Modal
   showTravauxDetailModal: boolean;
-  selectedTravauxDetail: any | null;
+  selectedTravauxDetail: BudgetTravaux | null;
   activeDetailTab: DetailTab;
   onDetailTabChange: (tab: DetailTab) => void;
   onCloseTravauxDetail: () => void;
 
   // Nouvel Appel Fonds Modal
   showNewAppelFondsModal: boolean;
-  selectedTravauxForAppel: any | null;
-  onGenerateProchainAppel: (data: any) => void;
+  selectedTravauxForAppel: BudgetTravaux | null;
+  onGenerateProchainAppel: (travauxId: string) => void;
   onCloseNewAppelFonds: () => void;
 
   // Link to AG Modal
   showLinkToAGModal: boolean;
-  selectedBudgetForLink: any | null;
-  resolutionsAG: any[];
+  selectedBudgetForLink: BudgetWithStatus | null;
+  resolutionsAG: ResolutionAG[];
   onLinkToAG: (budgetId: string, resolutionId: string) => void | Promise<boolean>;
   onCloseLinkToAG: () => void;
 }
@@ -172,7 +183,7 @@ export function BudgetsModals({
       {showCreateBudgetModal && (
         <CreateBudgetModal
           selectedYear={selectedYear}
-          budgetN1={budgetN1}
+          budgetN1={budgetN1 ?? undefined}
           onCreateBudget={onCreateBudget}
           onClose={onCloseCreateBudget}
         />

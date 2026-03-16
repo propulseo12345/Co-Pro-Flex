@@ -172,7 +172,7 @@ export async function createRemoteMeeting(
     case 'meet':
     case 'teams':
     case 'webex':
-      console.warn(`[remote-meeting] Provider ${provider} requires OAuth, falling back to Jitsi`);
+      // Provider requires OAuth, falling back to Jitsi
       return createJitsiMeeting(input);
 
     default:

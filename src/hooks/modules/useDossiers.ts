@@ -64,7 +64,7 @@ export function useDossiers(options: UseDossiersOptions = {}) {
     if (typeof window !== 'undefined') {
       const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyData) {
-        console.warn('[useDossiers] Suppression données localStorage legacy');
+        // Legacy localStorage cleanup
         localStorage.removeItem(LEGACY_STORAGE_KEY);
       }
     }
@@ -99,7 +99,7 @@ export function useDossiers(options: UseDossiersOptions = {}) {
         if (supabaseError) {
           // Si la table n'existe pas (code 42P01), retourner empty state sans erreur
           if (supabaseError.code === '42P01') {
-            console.info('[useDossiers] Table dossiers non disponible - mode empty state');
+            // Table dossiers non disponible - mode empty state
             setDossiers([]);
           } else {
             throw supabaseError;
@@ -158,7 +158,7 @@ export function useDossiers(options: UseDossiersOptions = {}) {
       if (supabaseError) {
         // Si la table n'existe pas, log et return false
         if (supabaseError.code === '42P01') {
-          console.warn('[useDossiers] Table dossiers non disponible - sauvegarde impossible');
+          // Table dossiers non disponible - sauvegarde impossible
           return false;
         }
         throw supabaseError;
