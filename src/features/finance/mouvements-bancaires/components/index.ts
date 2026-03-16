@@ -1,13 +1,12 @@
-export { SyncSection } from './SyncSection';
-export { AlertsSection } from './AlertsSection';
-export { AccountCards } from './AccountCards';
-export { StatsCards } from './StatsCards';
-export { MovementsTab } from './MovementsTab';
-export { RapprochementTab } from './RapprochementTab';
+// New components
+export { AccountPills } from './AccountPills';
+export { AlertBanners } from './AlertBanners';
+export { MovementFilters } from './MovementFilters';
+export { UnifiedMovementsTable } from './UnifiedMovementsTable';
+export { RapprochementSlideOver } from './RapprochementSlideOver';
+
+// Conserved components
 export { CategorisationModal } from './CategorisationModal';
-export { RapprochementModal } from './RapprochementModal';
 export { EntityDetailModal } from './EntityDetailModal';
 export { ImportModal } from './ImportModal';
-export { PageHeader } from './PageHeader';
 export { NewMovementsNotification } from './NewMovementsNotification';
-export { TabsNavigation } from './TabsNavigation';

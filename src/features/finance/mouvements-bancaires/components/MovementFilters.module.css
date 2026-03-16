@@ -1,0 +1,77 @@
+.filtersContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.searchBox svg {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: #64748b;
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #e2e8f0;
+}
+
+.filterBtnActive {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.filterBtnWarning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
+.filterBtnOrange {
+  background: rgba(240, 136, 62, 0.1);
+  border-color: rgba(240, 136, 62, 0.25);
+  color: #f0883e;
+}

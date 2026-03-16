@@ -1,0 +1,230 @@
+.panel {
+  background: #1a1d2e;
+  border: 1.5px solid rgba(59, 130, 246, 0.25);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.panelTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+}
+
+.closeBtn:hover {
+  color: #e2e8f0;
+}
+
+.mouvementRecap {
+  background: rgba(148, 163, 184, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.recapLabel {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.recapLibelle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.recapFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.recapMontant {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.recapMontantEntree {
+  color: #22c55e;
+}
+
+.recapMontantSortie {
+  color: #ef4444;
+}
+
+.recapDate {
+  font-size: 13px;
+  color: #94a3b8;
+  align-self: flex-end;
+}
+
+.suggestionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.suggestionsTitle {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestionCard {
+  background: rgba(148, 163, 184, 0.06);
+  border: 1.5px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.suggestionCard:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.suggestionCardHigh {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.suggestionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.suggestionPiece {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.confidenceBadge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.confidenceHigh {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.confidenceMedium {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.confidenceLow {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.suggestionLibelle {
+  font-size: 13px;
+  color: #e2e8f0;
+  margin-bottom: 2px;
+}
+
+.suggestionMeta {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.suggestionFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ecartLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ecartOk {
+  color: #22c55e;
+}
+
+.ecartWarning {
+  color: #f59e0b;
+}
+
+.rapprocherBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 4px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.rapprocherBtn:hover {
+  opacity: 0.9;
+}
+
+.rapprocherBtnSecondary {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.emptyMessage {
+  font-size: 13px;
+  color: #64748b;
+  padding: 14px;
+}
+
+.manualSection {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.manualBtn {
+  width: 100%;
+  background: transparent;
+  color: #3b82f6;
+  border: 1px dashed rgba(59, 130, 246, 0.3);
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.manualBtn:hover {
+  background: rgba(59, 130, 246, 0.05);
+}

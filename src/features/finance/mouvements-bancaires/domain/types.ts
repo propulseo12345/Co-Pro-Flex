@@ -1,7 +1,6 @@
 export type TypeMouvement = 'ENTREE' | 'SORTIE';
 export type TypeCompte = 'courant' | 'travaux';
 export type CategorieComptable = 'charge' | 'produit' | '';
-export type OngletActif = 'mouvements' | 'rapprochement';
 export type StatutRapprochement = 'rapproche' | 'non_rapproche' | 'en_attente';
 
 export type StatutSync = 'connecte' | 'deconnecte' | 'erreur' | 'en_cours';

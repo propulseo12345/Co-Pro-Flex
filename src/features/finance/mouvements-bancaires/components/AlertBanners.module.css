@@ -1,0 +1,131 @@
+.bannersContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.banner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  background: #1a1d2e;
+}
+
+.bannerClickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bannerClickable:hover {
+  filter: brightness(1.15);
+}
+
+.bannerNonCat {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.15);
+}
+
+.bannerNonRappr {
+  background: rgba(240, 136, 62, 0.08);
+  border-color: rgba(240, 136, 62, 0.15);
+}
+
+.bannerSync {
+  background: #1a1d2e;
+  border-color: rgba(148, 163, 184, 0.08);
+  flex: 0 0 auto;
+}
+
+.bannerIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.bannerLabel {
+  font-weight: 600;
+  white-space: nowrap;
+  color: #e2e8f0;
+}
+
+.bannerNonCat .bannerLabel {
+  color: #f59e0b;
+}
+
+.bannerNonRappr .bannerLabel {
+  color: #f0883e;
+}
+
+.bannerDetail {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.bannerAction {
+  margin-left: auto;
+  font-size: 12px;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.syncDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.syncDotOk {
+  background: #22c55e;
+}
+
+.syncDotError {
+  background: #ef4444;
+}
+
+.syncDotSyncing {
+  background: #3b82f6;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.syncLabel {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.progressBar {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progressTrack {
+  width: 50px;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+.progressLabel {
+  font-size: 12px;
+  color: #22c55e;
+  font-weight: 600;
+}

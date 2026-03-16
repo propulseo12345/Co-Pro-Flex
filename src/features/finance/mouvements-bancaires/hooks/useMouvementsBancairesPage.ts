@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type {
   TypeCompte,
   TypeMouvement,
   CategorieComptable,
-  OngletActif,
   TypeImport,
   MouvementBancaireBase,
   MouvementBancaire,
@@ -39,6 +39,7 @@ import { useCopro } from '@/providers/CoproContext';
 import { useBankMovements, useImportBankMovement, useReconcileBankMovement, useOpenPeriod } from '@/hooks/modules/useFinanceData';
 
 export function useMouvementsBancairesPage() {
+  const router = useRouter();
   const { currentCoproId } = useCopro();
   const { data: supabaseBankMovements, isLoading, error, refresh } = useBankMovements();
   const { data: openPeriod } = useOpenPeriod();
@@ -107,8 +108,9 @@ export function useMouvementsBancairesPage() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [alerteNouveauxMouvements, setAlerteNouveauxMouvements] = useState<number | null>(null);
+  const [rapprochementFilter, setRapprochementFilter] = useState<'tous' | 'rapproche' | 'non_rapproche'>('tous');
+  const [showSlideOver, setShowSlideOver] = useState(false);
 
-  const [ongletActif, setOngletActif] = useState<OngletActif>('mouvements');
   // Initialize with empty array - will be populated from Supabase ledger entries
   const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>([]);
   const [selectedMouvementRapprochement, setSelectedMouvementRapprochement] = useState<MouvementBancaire | null>(null);
@@ -149,6 +151,14 @@ export function useMouvementsBancairesPage() {
     return { ...result, mouvementsNonRapproches };
   }, [soldeActuel, ecrituresComptables, mouvements]);
 
+  const isMouvementRapproche = useCallback((mouvementId: string) => {
+    return ecrituresComptables.some(ec => ec.mouvementRapproche === mouvementId);
+  }, [ecrituresComptables]);
+
+  const getEcritureRapprochee = useCallback((mouvementId: string) => {
+    return ecrituresComptables.find(ec => ec.mouvementRapproche === mouvementId);
+  }, [ecrituresComptables]);
+
   const filteredMouvements = useMemo(() => {
     return mouvements.filter(mouvement => {
       const matchesSearch =
@@ -163,9 +173,15 @@ export function useMouvementsBancairesPage() {
         (categorieFilter === 'CATEGORISE' && mouvement.categorise) ||
         (categorieFilter === 'NON_CATEGORISE' && !mouvement.categorise);
 
-      return matchesSearch && matchesType && matchesCategorie;
+      const isRapproche = isMouvementRapproche(mouvement.id);
+      const matchesRapprochement =
+        rapprochementFilter === 'tous' ||
+        (rapprochementFilter === 'rapproche' && isRapproche) ||
+        (rapprochementFilter === 'non_rapproche' && !isRapproche);
+
+      return matchesSearch && matchesType && matchesCategorie && matchesRapprochement;
     });
-  }, [mouvements, searchTerm, typeFilter, categorieFilter]);
+  }, [mouvements, searchTerm, typeFilter, categorieFilter, rapprochementFilter, isMouvementRapproche]);
 
   const totalEntrees = useMemo(() => {
     return mouvements
@@ -437,10 +453,6 @@ export function useMouvementsBancairesPage() {
         target_id: selectedCompte, // Account code as target
       });
 
-      if (result.error) {
-        console.error('Categorize error:', result.error);
-      }
-
       // Update local state optimistically
       setMouvementsBase(prev =>
         prev.map(m =>
@@ -490,14 +502,14 @@ export function useMouvementsBancairesPage() {
         url = `/maintenance/contrats?fournisseur=${entite.id}`;
         break;
     }
-    window.location.href = url;
-  }, []);
+    if (url) router.push(url);
+  }, [router]);
 
   const handleOpenRapprochement = useCallback((mouvement: MouvementBancaire) => {
     setSelectedMouvementRapprochement(mouvement);
     const suggestions = genererSuggestionsRapprochement(mouvement, ecrituresComptables);
     setSuggestionsRapprochement(suggestions);
-    setShowRapprochementModal(true);
+    setShowSlideOver(true);
   }, [ecrituresComptables]);
 
   const handleRapprocher = useCallback(async (ecritureId: string) => {
@@ -512,10 +524,6 @@ export function useMouvementsBancairesPage() {
         target_type: 'other', // Could be 'payment' or 'supplier_payment' based on ecriture type
         target_id: ecritureId,
       });
-
-      if (result.error) {
-        console.error('Reconcile error:', result.error);
-      }
 
       // Update local state
       setEcrituresComptables(prev =>
@@ -532,7 +540,7 @@ export function useMouvementsBancairesPage() {
       setIsMutating(false);
     }
 
-    setShowRapprochementModal(false);
+    setShowSlideOver(false);
     setSelectedMouvementRapprochement(null);
     setSuggestionsRapprochement([]);
   }, [selectedMouvementRapprochement, reconcileMutation, refreshWithTimestamp]);
@@ -546,14 +554,6 @@ export function useMouvementsBancairesPage() {
       )
     );
   }, []);
-
-  const isMouvementRapproche = useCallback((mouvementId: string) => {
-    return ecrituresComptables.some(ec => ec.mouvementRapproche === mouvementId);
-  }, [ecrituresComptables]);
-
-  const getEcritureRapprochee = useCallback((mouvementId: string) => {
-    return ecrituresComptables.find(ec => ec.mouvementRapproche === mouvementId);
-  }, [ecrituresComptables]);
 
   const downloadRIB = useCallback(() => {
     // Placeholder
@@ -608,11 +608,11 @@ export function useMouvementsBancairesPage() {
     importFile,
     isImporting,
     alerteNouveauxMouvements,
-    ongletActif,
+    rapprochementFilter,
+    showSlideOver,
     ecrituresComptables,
     selectedMouvementRapprochement,
     suggestionsRapprochement,
-    showRapprochementModal,
     compteActuel,
     alertes: alertesNonCategorises,
     alertesNonCategorises,
@@ -639,8 +639,8 @@ export function useMouvementsBancairesPage() {
     setImportType,
     setImportFile,
     setAlerteNouveauxMouvements,
-    setOngletActif,
-    setShowRapprochementModal,
+    setRapprochementFilter,
+    setShowSlideOver,
 
     // Handlers
     handleRefresh,
