@@ -38,7 +38,7 @@ export function PortefeuilleTable({ coproprietes, formatMontant, formatDate }: P
               <td><div className={styles.progressCell}><div className={styles.progressBar}><div className={`${styles.progressFill} ${getProgressClass(budgetPct)}`} style={{ width: `${Math.min(budgetPct, 100)}%` }} /></div><span className={styles.progressLabel}>{budgetPct.toFixed(0)}% · {formatMontant(copro.budgetRestant)} restant</span></div></td>
               <td className={styles.textCenter}>
                 <div className={styles.rapprochementCell}>
-                  {copro.mouvementsNonRapproches > 0 ? (<Link href={`/finance/rapprochement-bancaire?copro=${copro.id}`} className={`${styles.rapprochementStatus} ${styles.rapprochementPending}`}><Clock size={14} />{copro.mouvementsNonRapproches} mvt</Link>) : (<span className={`${styles.rapprochementStatus} ${styles.rapprochementOk}`}><CheckCircle size={14} />OK</span>)}
+                  {copro.mouvementsNonRapproches > 0 ? (<Link href={`/finance/mouvements-bancaires?copro=${copro.id}`} className={`${styles.rapprochementStatus} ${styles.rapprochementPending}`}><Clock size={14} />{copro.mouvementsNonRapproches} mvt</Link>) : (<span className={`${styles.rapprochementStatus} ${styles.rapprochementOk}`}><CheckCircle size={14} />OK</span>)}
                   <span className={styles.rapprochementDate}>{formatDate(copro.dernierRapprochement)}</span>
                 </div>
               </td>

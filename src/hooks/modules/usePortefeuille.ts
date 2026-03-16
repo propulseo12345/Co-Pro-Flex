@@ -113,7 +113,7 @@ const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
         severite: 'critique',
         titre: 'Rapprochement en retard',
         description: '12 mouvements non rapprochés depuis 24 jours',
-        lien: '/finance/rapprochement-bancaire',
+        lien: '/finance/mouvements-bancaires',
       },
       {
         id: 'alert-6',

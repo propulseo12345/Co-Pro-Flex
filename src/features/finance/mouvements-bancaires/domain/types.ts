@@ -5,7 +5,7 @@ export type StatutRapprochement = 'rapproche' | 'non_rapproche' | 'en_attente';
 
 export type StatutSync = 'connecte' | 'deconnecte' | 'erreur' | 'en_cours';
 export type ModeSync = 'automatique' | 'manuel';
-export type TypeImport = 'csv' | 'ofx' | 'qif';
+export type TypeImport = 'csv' | 'ofx' | 'cfonb' | 'manual';
 
 export interface HistoriqueSynchronisation {
   id: string;
@@ -63,6 +63,11 @@ export interface MouvementBancaireBase {
   categorie?: CategorieComptable;
   fournisseur?: string;
   entiteLiee?: EntiteLiee;
+  accountId: string;
+  importSource?: 'csv' | 'ofx' | 'cfonb' | 'manual';
+  matchRule?: 'auto' | 'manual' | 'rule-based';
+  statutRapprochement: StatutRapprochement;
+  ecritureRapprocheeId?: string;
 }
 
 export interface MouvementBancaire extends MouvementBancaireBase {
@@ -153,3 +158,25 @@ export interface StatsNonCategorises {
   entrees: number;
   sorties: number;
 }
+
+export interface IReconciliationPeriod {
+  id: string;
+  accountId: string;
+  periodStart: string;
+  periodEnd: string;
+  statementBalance: number;
+  computedBalance: number;
+  variance: number;
+  status: 'draft' | 'in_progress' | 'reconciled' | 'validated';
+  validatedAt?: string;
+}
+
+export interface ICompteComptable {
+  code: string;
+  label: string;
+  categorie: 'charge' | 'produit';
+  keywords: string[];
+}
+
+export type WorkflowMode = 'table' | 'workflow';
+export type WorkflowTab = 'import' | 'categorisation' | 'rapprochement' | 'cloture';

@@ -353,6 +353,9 @@ export function parseCSVBancaire(csvContent: string): MouvementBancaireBase[] {
       categorise: suggestion !== null,
       compteComptable: suggestion ? `${suggestion.compte} - ${suggestion.label}` : undefined,
       categorie: suggestion?.categorie,
+      accountId: '', // sera rempli par le composant ImportTab
+      statutRapprochement: 'non_rapproche',
+      importSource: 'csv',
     });
   }
 
@@ -486,4 +489,85 @@ export function getTempsJusquaSync(prochaineSynchronisation: string | null, mode
     return `Dans ${diffHeures}h${diffMinutes > 0 ? ` ${diffMinutes}min` : ''}`;
   }
   return `Dans ${diffMinutes} min`;
+}
+
+/**
+ * Parse un fichier CFONB120 (format bancaire français, lignes fixes 120 chars).
+ * Encodage attendu: Latin-1, converti en UTF-8.
+ * Records parsés: type 04 (mouvements). Types 01/07 ignorés (header/footer).
+ * Lignes malformées ignorées avec warning.
+ */
+export function parseCFONB120(content: string): {
+  mouvements: MouvementBancaireBase[];
+  warnings: string[];
+} {
+  const mouvements: MouvementBancaireBase[] = [];
+  const warnings: string[] = [];
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.length < 120) {
+      if (line.trim().length > 0) {
+        warnings.push(`Ligne ${i + 1}: ignorée (${line.length} chars au lieu de 120)`);
+      }
+      continue;
+    }
+
+    const recordType = line.substring(0, 2);
+
+    // Only parse type 04 (movement records)
+    if (recordType !== '04') continue;
+
+    try {
+      const sens = line.substring(32, 33); // C = crédit, D = débit
+      const montantStr = line.substring(33, 46).trim();
+      const montantCentimes = parseInt(montantStr, 10);
+      if (isNaN(montantCentimes)) {
+        warnings.push(`Ligne ${i + 1}: montant invalide "${montantStr}"`);
+        continue;
+      }
+
+      const montant = montantCentimes / 100;
+      const dateStr = line.substring(46, 52); // JJMMAA
+      const jour = dateStr.substring(0, 2);
+      const mois = dateStr.substring(2, 4);
+      const annee = dateStr.substring(4, 6);
+      const date = `20${annee}-${mois}-${jour}`;
+
+      const libelle = line.substring(52, 83).trim();
+
+      mouvements.push({
+        id: `cfonb-${i}`,
+        date,
+        libelle,
+        montant: sens === 'D' ? -montant : montant,
+        type: sens === 'D' ? 'SORTIE' : 'ENTREE',
+        categorise: false,
+        accountId: '', // sera rempli par le composant ImportTab
+        statutRapprochement: 'non_rapproche',
+        importSource: 'cfonb',
+      });
+    } catch {
+      warnings.push(`Ligne ${i + 1}: erreur de parsing`);
+    }
+  }
+
+  return { mouvements, warnings };
+}
+
+/**
+ * Détecte le format d'un fichier bancaire par son contenu.
+ */
+export function detecterFormatImport(content: string, filename: string): 'csv' | 'ofx' | 'cfonb' {
+  const ext = filename.toLowerCase().split('.').pop();
+  if (ext === 'ofx' || ext === 'qfx') return 'ofx';
+
+  // CFONB: lignes de 120 chars exactement
+  const lines = content.split('\n').filter(l => l.trim().length > 0);
+  if (lines.length > 0 && lines.every(l => l.length === 120 || l.length === 0)) {
+    return 'cfonb';
+  }
+
+  return 'csv';
 }

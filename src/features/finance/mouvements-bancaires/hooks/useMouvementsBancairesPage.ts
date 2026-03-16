@@ -15,14 +15,16 @@ import type {
   SuggestionCategorie,
   SuggestionRapprochement,
   EntiteLiee,
+  WorkflowMode,
+  WorkflowTab,
 } from '../domain/types';
-// Import only constants that are still needed - NOT MOCK data
 import {
   MOCK_COMPTE_COURANT,
   MOCK_COMPTE_TRAVAUX,
-  COMPTES_CHARGE,
-  COMPTES_PRODUIT,
+  PLAN_COMPTABLE_ESSENTIEL,
 } from '../domain/constants';
+import { genererSuggestionsBatch, genererRapprochementsBatch } from '../domain/matching-engine';
+import type { SuggestionCategorieResult, SuggestionRapprochementResult } from '../domain/matching-engine';
 import {
   calculerSoldesAvecValidation,
   calculerAlertesNonCategorises,
@@ -64,6 +66,8 @@ export function useMouvementsBancairesPage() {
       libelle: mov.label,
       reference: mov.bank_ref || undefined,
       categorise: mov.status === 'matched',
+      accountId: (mov as unknown as Record<string, unknown>).account_id as string || '1',
+      statutRapprochement: mov.status === 'matched' ? 'rapproche' as const : 'non_rapproche' as const,
     }));
   }, [supabaseBankMovements]);
 
@@ -117,11 +121,20 @@ export function useMouvementsBancairesPage() {
   const [suggestionsRapprochement, setSuggestionsRapprochement] = useState<SuggestionRapprochement[]>([]);
   const [showRapprochementModal, setShowRapprochementModal] = useState(false);
 
+  // Workflow state
+  const [workflowMode, setWorkflowMode] = useState<WorkflowMode>('table');
+  const [activeTab, setActiveTab] = useState<WorkflowTab>('categorisation');
+
   const compteActuel = compteActif === 'courant' ? MOCK_COMPTE_COURANT : MOCK_COMPTE_TRAVAUX;
 
+  // Bug fix: filtrer les mouvements par compte actif (accountId)
+  const mouvementsFiltresParCompte = useMemo(() => {
+    return mouvementsBase.filter(m => m.accountId === compteActuel.id);
+  }, [mouvementsBase, compteActuel.id]);
+
   const { mouvements, erreurs, soldeActuel } = useMemo(() => {
-    return calculerSoldesAvecValidation(mouvementsBase, compteActuel.soldeInitial);
-  }, [mouvementsBase, compteActuel.soldeInitial]);
+    return calculerSoldesAvecValidation(mouvementsFiltresParCompte, compteActuel.soldeInitial);
+  }, [mouvementsFiltresParCompte, compteActuel.soldeInitial]);
 
   const alertesNonCategorises = useMemo(() => {
     return calculerAlertesNonCategorises(mouvements);
@@ -150,6 +163,17 @@ export function useMouvementsBancairesPage() {
     }).length;
     return { ...result, mouvementsNonRapproches };
   }, [soldeActuel, ecrituresComptables, mouvements]);
+
+  // Batch suggestions (matching engine)
+  const suggestionsCategorisation = useMemo(() => {
+    const nonCategorises = mouvements.filter(m => !m.categorise);
+    return genererSuggestionsBatch(nonCategorises, mouvements);
+  }, [mouvements]);
+
+  const suggestionsRapprochementBatch = useMemo(() => {
+    const aRapprocher = mouvements.filter(m => m.categorise && m.statutRapprochement !== 'rapproche');
+    return genererRapprochementsBatch(aRapprocher, ecrituresComptables);
+  }, [mouvements, ecrituresComptables]);
 
   const isMouvementRapproche = useCallback((mouvementId: string) => {
     return ecrituresComptables.some(ec => ec.mouvementRapproche === mouvementId);
@@ -419,9 +443,7 @@ export function useMouvementsBancairesPage() {
 
     setIsMutating(true);
 
-    const compteLabel = selectedCategorie === 'charge'
-      ? COMPTES_CHARGE.find(c => c.code === selectedCompte)?.label
-      : COMPTES_PRODUIT.find(c => c.code === selectedCompte)?.label;
+    const compteLabel = PLAN_COMPTABLE_ESSENTIEL.find(c => c.code === selectedCompte)?.label;
 
     let entiteLiee: EntiteLiee | undefined = undefined;
     if (selectedSuggestion?.entiteReference) {
@@ -545,6 +567,60 @@ export function useMouvementsBancairesPage() {
     setSuggestionsRapprochement([]);
   }, [selectedMouvementRapprochement, reconcileMutation, refreshWithTimestamp]);
 
+  const handleBatchCategorise = useCallback(async (
+    selections: Map<string, { compte: string; categorie: CategorieComptable }>
+  ) => {
+    setIsMutating(true);
+    try {
+      const promises = Array.from(selections.entries()).map(([mouvementId, { compte }]) =>
+        reconcileMutation.mutate({
+          bank_movement_id: mouvementId,
+          target_type: 'other',
+          target_id: compte,
+        })
+      );
+      await Promise.all(promises);
+      // Mise à jour locale
+      setMouvementsBase(prev => prev.map(m => {
+        const sel = selections.get(m.id);
+        if (!sel) return m;
+        const compteInfo = PLAN_COMPTABLE_ESSENTIEL.find(c => c.code === sel.compte);
+        return { ...m, categorise: true, compteComptable: `${sel.compte} - ${compteInfo?.label || ''}`, categorie: sel.categorie };
+      }));
+    } finally {
+      setIsMutating(false);
+    }
+  }, [reconcileMutation]);
+
+  const handleBatchRapprocher = useCallback(async (
+    matches: Map<string, string> // mouvementId → ecritureId
+  ) => {
+    setIsMutating(true);
+    try {
+      const promises = Array.from(matches.entries()).map(([mouvementId, ecritureId]) =>
+        reconcileMutation.mutate({
+          bank_movement_id: mouvementId,
+          target_type: 'other',
+          target_id: ecritureId,
+        })
+      );
+      await Promise.all(promises);
+      // Mise à jour locale
+      setMouvementsBase(prev => prev.map(m => {
+        const ecritureId = matches.get(m.id);
+        if (!ecritureId) return m;
+        return { ...m, statutRapprochement: 'rapproche' as const, ecritureRapprocheeId: ecritureId };
+      }));
+      setEcrituresComptables(prev => prev.map(ec => {
+        const mouvementId = Array.from(matches.entries()).find(([, eId]) => eId === ec.id)?.[0];
+        if (!mouvementId) return ec;
+        return { ...ec, rapproche: true, mouvementRapproche: mouvementId };
+      }));
+    } finally {
+      setIsMutating(false);
+    }
+  }, [reconcileMutation]);
+
   const handleAnnulerRapprochement = useCallback((ecritureId: string) => {
     setEcrituresComptables(prev =>
       prev.map(ec =>
@@ -656,15 +732,24 @@ export function useMouvementsBancairesPage() {
     handleOpenRapprochement,
     handleRapprocher,
     handleAnnulerRapprochement,
+    handleBatchCategorise,
+    handleBatchRapprocher,
     isMouvementRapproche,
     getEcritureRapprochee,
     downloadRIB,
     getTempsDepuisDerniereSync,
     getTempsJusquaProchaineSync,
 
+    // Workflow
+    workflowMode,
+    setWorkflowMode,
+    activeTab,
+    setActiveTab,
+    suggestionsCategorisation,
+    suggestionsRapprochementBatch,
+
     // Constants
-    COMPTES_CHARGE,
-    COMPTES_PRODUIT,
+    PLAN_COMPTABLE_ESSENTIEL,
     MOCK_COMPTE_COURANT,
     MOCK_COMPTE_TRAVAUX,
   };

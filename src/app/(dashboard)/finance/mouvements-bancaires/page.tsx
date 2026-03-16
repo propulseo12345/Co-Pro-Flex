@@ -1,6 +1,7 @@
 'use client';
 
-import { Download, Upload, RefreshCw } from 'lucide-react';
+import { useCallback } from 'react';
+import { Download, RefreshCw } from 'lucide-react';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import { useMouvementsBancairesPage } from '../../../../features/finance/mouvements-bancaires/hooks';
 import {
@@ -8,12 +9,17 @@ import {
   AlertBanners,
   MovementFilters,
   UnifiedMovementsTable,
-  RapprochementSlideOver,
-  CategorisationModal,
   EntityDetailModal,
-  ImportModal,
   NewMovementsNotification,
+  WorkflowModeSwitcher,
+  WorkflowSummaryBar,
+  WorkflowTabs,
+  ImportTab,
+  BatchCategorisation,
+  SplitReconciliation,
+  ClotureTab,
 } from '../../../../features/finance/mouvements-bancaires/components';
+import type { MouvementBancaireBase } from '../../../../features/finance/mouvements-bancaires/domain/types';
 
 export default function MouvementsBancairesPage() {
   const hook = useMouvementsBancairesPage();
@@ -31,6 +37,30 @@ export default function MouvementsBancairesPage() {
     hook.setCategorieFilter('TOUS');
   };
 
+  const handleImportMouvements = useCallback((mouvements: MouvementBancaireBase[]) => {
+    // For now, add imported mouvements to local state
+    // Will be replaced by Supabase import when connected
+    hook.setShowImportModal(false);
+  }, [hook]);
+
+  // Workflow counts
+  const workflowCounts = {
+    import: 0,
+    categorisation: hook.suggestionsCategorisation.length,
+    rapprochement: hook.suggestionsRapprochementBatch.length,
+    cloture: 0,
+  };
+
+  const pendingCount = hook.statsNonCategorises.total + (hook.ecartSoldes?.mouvementsNonRapproches ?? 0);
+
+  // Progression: % of mouvements fully processed (categorised + rapproché)
+  const totalMouvements = hook.mouvements.length;
+  const categorises = hook.mouvements.filter(m => m.categorise).length;
+  const rapproches = hook.mouvements.filter(m => hook.isMouvementRapproche(m.id)).length;
+  const progression = totalMouvements > 0
+    ? Math.round(((categorises + rapproches) / (totalMouvements * 2)) * 100)
+    : 100;
+
   return (
     <div>
       <FinanceTopBar
@@ -38,13 +68,14 @@ export default function MouvementsBancairesPage() {
         subtitle="Suivi en temps réel de vos comptes bancaires"
         actions={
           <>
+            <WorkflowModeSwitcher
+              mode={hook.workflowMode}
+              onModeChange={hook.setWorkflowMode}
+              pendingCount={pendingCount}
+            />
             <button className={topBarStyles.btnGhost} onClick={hook.downloadRIB}>
               <Download size={15} />
               RIB
-            </button>
-            <button className={topBarStyles.btnGhost} onClick={() => hook.setShowImportModal(true)}>
-              <Upload size={15} />
-              Import
             </button>
             <button
               className={topBarStyles.btnGhost}
@@ -85,69 +116,88 @@ export default function MouvementsBancairesPage() {
         onFilterNonRapproches={handleFilterNonRapproches}
       />
 
-      <MovementFilters
-        searchTerm={hook.searchTerm}
-        typeFilter={hook.typeFilter}
-        categorieFilter={hook.categorieFilter}
-        rapprochementFilter={hook.rapprochementFilter}
-        totalCount={hook.mouvements.length}
-        onSearchChange={hook.setSearchTerm}
-        onTypeFilterChange={hook.setTypeFilter}
-        onCategorieFilterChange={hook.setCategorieFilter}
-        onRapprochementFilterChange={hook.setRapprochementFilter}
-      />
-
-      <UnifiedMovementsTable
-        mouvements={hook.filteredMouvements}
-        selectedMouvementId={hook.selectedMouvementRapprochement?.id ?? null}
-        showPanel={hook.showSlideOver}
-        isMouvementRapproche={hook.isMouvementRapproche}
-        getEcritureRapprochee={hook.getEcritureRapprochee}
-        onCategoriserClick={hook.handleCategoriserClick}
-        onRapprocherClick={hook.handleOpenRapprochement}
-        onOpenEntityDetail={hook.handleOpenEntityDetail}
-      >
-        {hook.showSlideOver && hook.selectedMouvementRapprochement && (
-          <RapprochementSlideOver
-            mouvement={hook.selectedMouvementRapprochement}
-            suggestions={hook.suggestionsRapprochement}
-            ecrituresComptables={hook.ecrituresComptables}
-            onRapprocher={hook.handleRapprocher}
-            onClose={() => hook.setShowSlideOver(false)}
+      {hook.workflowMode === 'table' ? (
+        <>
+          <MovementFilters
+            searchTerm={hook.searchTerm}
+            typeFilter={hook.typeFilter}
+            categorieFilter={hook.categorieFilter}
+            rapprochementFilter={hook.rapprochementFilter}
+            totalCount={hook.mouvements.length}
+            onSearchChange={hook.setSearchTerm}
+            onTypeFilterChange={hook.setTypeFilter}
+            onCategorieFilterChange={hook.setCategorieFilter}
+            onRapprochementFilterChange={hook.setRapprochementFilter}
           />
-        )}
-      </UnifiedMovementsTable>
 
-      <CategorisationModal
-        isOpen={hook.showCategorieModal}
-        selectedMouvement={hook.selectedMouvement}
-        suggestions={hook.suggestions}
-        selectedSuggestion={hook.selectedSuggestion}
-        selectedCategorie={hook.selectedCategorie}
-        selectedCompte={hook.selectedCompte}
-        onClose={() => hook.setShowCategorieModal(false)}
-        onApplySuggestion={hook.handleApplySuggestion}
-        onCategorieChange={hook.handleCategorieChange}
-        onCompteChange={hook.handleCompteChange}
-        onSave={hook.handleSaveCategorie}
-      />
+          <UnifiedMovementsTable
+            mouvements={hook.filteredMouvements}
+            selectedMouvementId={hook.selectedMouvementRapprochement?.id ?? null}
+            showPanel={hook.showSlideOver}
+            isMouvementRapproche={hook.isMouvementRapproche}
+            getEcritureRapprochee={hook.getEcritureRapprochee}
+            onCategoriserClick={hook.handleCategoriserClick}
+            onRapprocherClick={hook.handleOpenRapprochement}
+            onOpenEntityDetail={hook.handleOpenEntityDetail}
+          />
+        </>
+      ) : (
+        <>
+          <WorkflowSummaryBar
+            nonCategorises={hook.statsNonCategorises}
+            nonRapproches={hook.ecartSoldes?.mouvementsNonRapproches ?? 0}
+            suggestionsPretes={hook.suggestionsCategorisation.filter(s => s.suggestion).length}
+            ecartSoldes={hook.ecartSoldes?.ecart ?? 0}
+            progressionMensuelle={progression}
+          />
+
+          <WorkflowTabs
+            activeTab={hook.activeTab}
+            onTabChange={hook.setActiveTab}
+            counts={workflowCounts}
+          />
+
+          {hook.activeTab === 'import' && (
+            <ImportTab
+              onImport={handleImportMouvements}
+              isImporting={hook.isImporting}
+              accountId={hook.compteActuel.id}
+            />
+          )}
+
+          {hook.activeTab === 'categorisation' && (
+            <BatchCategorisation
+              suggestions={hook.suggestionsCategorisation}
+              onApply={hook.handleBatchCategorise}
+              isMutating={hook.isMutating}
+            />
+          )}
+
+          {hook.activeTab === 'rapprochement' && (
+            <SplitReconciliation
+              suggestions={hook.suggestionsRapprochementBatch}
+              ecritures={hook.ecrituresComptables}
+              onApply={hook.handleBatchRapprocher}
+              isMutating={hook.isMutating}
+              ecartSoldes={hook.ecartSoldes?.ecart ?? 0}
+            />
+          )}
+
+          {hook.activeTab === 'cloture' && (
+            <ClotureTab
+              mouvements={hook.mouvements}
+              ecritures={hook.ecrituresComptables}
+              onTabChange={hook.setActiveTab}
+            />
+          )}
+        </>
+      )}
 
       <EntityDetailModal
         isOpen={hook.showDetailModal}
         selectedEntite={hook.selectedEntite}
         onClose={() => hook.setShowDetailModal(false)}
         onNavigate={hook.handleNavigateToEntity}
-      />
-
-      <ImportModal
-        isOpen={hook.showImportModal}
-        importType={hook.importType}
-        importFile={hook.importFile}
-        isImporting={hook.isImporting}
-        onClose={() => hook.setShowImportModal(false)}
-        onImportTypeChange={hook.setImportType}
-        onFileChange={hook.setImportFile}
-        onImport={hook.handleImportFile}
       />
     </div>
   );

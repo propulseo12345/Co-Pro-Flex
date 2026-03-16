@@ -1,0 +1,272 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  border: 2px dashed #1e293b;
+  border-radius: 12px;
+  background: #111827;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropZone:hover,
+.dropZoneActive {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dropIcon {
+  color: #64748b;
+}
+
+.dropText {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.dropLink {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.formats {
+  display: flex;
+  gap: 8px;
+}
+
+.formatBadge {
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  font-size: 0.8125rem;
+}
+
+.clearBtn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.warnings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  font-size: 0.8125rem;
+}
+
+.preview {
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #1e293b;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.previewInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+}
+
+.previewFileName {
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+
+.previewFormat {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.previewCount {
+  color: #64748b;
+  font-size: 0.8125rem;
+}
+
+.previewActions {
+  display: flex;
+  gap: 8px;
+}
+
+.cancelBtn {
+  padding: 6px 14px;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: #1e293b;
+}
+
+.confirmBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.confirmBtn:hover {
+  background: #2563eb;
+}
+
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.table td {
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.dateCell {
+  white-space: nowrap;
+  color: #94a3b8;
+}
+
+.libelleCell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.montantPositif {
+  color: #22c55e;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.montantNegatif {
+  color: #ef4444;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.typeEntree {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.typeSortie {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.statusCategorise {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #22c55e;
+  font-size: 0.75rem;
+}
+
+.statusNonCategorise {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.moreRows {
+  padding: 10px 12px;
+  color: #64748b;
+  font-size: 0.75rem;
+  text-align: center;
+}
