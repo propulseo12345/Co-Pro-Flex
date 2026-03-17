@@ -79,3 +79,4 @@ src/
 @docs/claude/conventions.md
 @docs/claude/business-rules.md
 @docs/claude/modules.md
+@docs/claude/design-system.md
