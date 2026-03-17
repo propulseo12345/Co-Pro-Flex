@@ -10,6 +10,7 @@ import {
   MovementFilters,
   UnifiedMovementsTable,
   EntityDetailModal,
+  CategorisationModal,
   NewMovementsNotification,
   WorkflowModeSwitcher,
   WorkflowSummaryBar,
@@ -192,6 +193,20 @@ export default function MouvementsBancairesPage() {
           )}
         </>
       )}
+
+      <CategorisationModal
+        isOpen={hook.showCategorieModal}
+        selectedMouvement={hook.selectedMouvement}
+        suggestions={hook.suggestions}
+        selectedSuggestion={hook.selectedSuggestion}
+        selectedCategorie={hook.selectedCategorie}
+        selectedCompte={hook.selectedCompte}
+        onClose={() => hook.setShowCategorieModal(false)}
+        onApplySuggestion={hook.handleApplySuggestion}
+        onCategorieChange={hook.handleCategorieChange}
+        onCompteChange={hook.handleCompteChange}
+        onSave={hook.handleSaveCategorie}
+      />
 
       <EntityDetailModal
         isOpen={hook.showDetailModal}

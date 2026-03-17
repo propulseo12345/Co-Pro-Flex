@@ -1,24 +1,21 @@
-# Session State — 2026-03-16 24:00
+# Session State — 2026-03-17 20:50
 
 ## Branch
 v2
 
 ## Completed This Session
-- Plan rapprochement bancaire 17/17 tasks exécuté en une session
-- Domain: types enrichis, PLAN_COMPTABLE_ESSENTIEL 15 comptes, matching engine 3 règles, parseur CFONB120
-- Bug fix: mouvements filtrés par accountId (CC vs FT)
-- Hook refactor: workflow state, batch handlers, suggestions engine
-- 7 composants UI: WorkflowModeSwitcher, WorkflowSummaryBar, WorkflowTabs, ImportTab, BatchCategorisation, SplitReconciliation, ClotureTab
-- Page intégrée: toggle table/workflow 4 onglets
-- Suppression module rapprochement-bancaire obsolète
+- CategorisationModal restauré depuis git, adapté PLAN_COMPTABLE_ESSENTIEL, branché dans page.tsx
+- Brainstorm charte graphique: choix approche C (skill auto + doc référence), variables CSS comme source de vérité
+- Preview HTML DA créée (.planning/da-preview.html) avec 12 patterns UI, couleurs Finance validées par user
+- Extraction complète des vraies couleurs Finance (surfaces #1a1d2e, borders 0.04-0.1 opacity, semantic #22c55e/#ef4444/#f59e0b)
 
 ## Next Task
-Tests manuels sur localhost:3000/finance/mouvements-bancaires — vérifier toggle table/workflow, 4 onglets, filtre CC/FT, catégorisation batch, rapprochement
+Écrire docs/claude/design-system.md (charte graphique Finance DA) + créer .claude/skills/apply-design-system.md (skill auto-trigger UI). Utiliser les valeurs extraites dans da-preview.html validé par user.
 
 ## Blockers
 None
 
 ## Key Context
-- Pas de Jest/Vitest configuré — tests manuels uniquement via dev server
-- CSS Finance = couleurs hardcodées (#1a1d2e, #e2e8f0) pas les variables CSS
-- Erreurs TS pré-existantes dans factures (pas liées à notre travail)
+- Finance DA != globals.css : surfaces plus sombres (#1a1d2e vs #1e2330), borders 2-5x plus subtiles, couleurs sémantiques saturées (green-500, red-500)
+- User veut skill déclenchement auto sur toute création/modif composant UI (option C)
+- Référence visuelle validée: .planning/da-preview.html

@@ -4,6 +4,7 @@ export { AlertBanners } from './AlertBanners';
 export { MovementFilters } from './MovementFilters';
 export { UnifiedMovementsTable } from './UnifiedMovementsTable';
 export { EntityDetailModal } from './EntityDetailModal';
+export { CategorisationModal } from './CategorisationModal';
 export { NewMovementsNotification } from './NewMovementsNotification';
 
 // Nouveaux — workflow
