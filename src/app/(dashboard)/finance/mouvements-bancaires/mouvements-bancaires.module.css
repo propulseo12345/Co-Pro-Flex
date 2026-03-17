@@ -356,13 +356,15 @@
 
 .montantEntree {
     font-weight: 700;
-    font-family: monospace;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-variant-numeric: tabular-nums;
     color: var(--success);
 }
 
 .montantSortie {
     font-weight: 700;
-    font-family: monospace;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-variant-numeric: tabular-nums;
     color: var(--danger);
 }
 
@@ -476,25 +478,25 @@
 }
 
 .modalContent {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
+    background: #1a1d2e;
+    border-radius: 12px;
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
 .modalHeader {
     padding: var(--space-xl);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .modalTitle {
-    font-size: var(--text-2xl);
+    font-size: 20px;
     font-weight: 700;
     color: var(--text-main);
     margin: 0;
@@ -529,7 +531,7 @@
     gap: var(--space-md);
     justify-content: flex-end;
     padding: var(--space-xl);
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 /* Mouvement Info */
@@ -538,8 +540,9 @@
     flex-direction: column;
     gap: var(--space-md);
     padding: var(--space-lg);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
+    background: #131620;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 8px;
     margin-bottom: var(--space-xl);
 }
 
@@ -550,14 +553,18 @@
 }
 
 .infoLabel {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .infoValue {
-    font-size: var(--text-sm);
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text-main);
+    color: #e2e8f0;
+    font-variant-numeric: tabular-nums;
 }
 
 /* Form Group */
@@ -569,18 +576,20 @@
 }
 
 .formGroup label {
-    font-size: var(--text-sm);
+    font-size: 11px;
     font-weight: 600;
-    color: var(--text-main);
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .formGroup select {
     padding: var(--space-md);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    color: var(--text-main);
-    font-size: var(--text-sm);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 8px;
+    background: #131620;
+    color: #e2e8f0;
+    font-size: 13px;
     transition: all var(--transition-base);
 }
 
@@ -602,11 +611,11 @@
 /* Buttons */
 .cancelButton {
     padding: var(--space-md) var(--space-xl);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    color: var(--text-main);
-    font-size: var(--text-sm);
+    background: #131620;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
@@ -632,9 +641,9 @@
 }
 
 .saveButton:hover:not(:disabled) {
-    background: var(--primary-dark);
+    background: #2563eb;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .saveButton:disabled {
@@ -999,9 +1008,9 @@
 .suggestionsSection {
     margin-bottom: var(--space-xl);
     padding: var(--space-lg);
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
-    border: 1px solid #7dd3fc;
-    border-radius: var(--radius-lg);
+    background: rgba(59, 130, 246, 0.06);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 12px;
 }
 
 .suggestionsSectionHeader {
@@ -1019,7 +1028,7 @@
 }
 
 .suggestionsIcon {
-    color: #0ea5e9;
+    color: #3b82f6;
 }
 
 .suggestionsList {
@@ -1030,16 +1039,16 @@
 
 .suggestionCard {
     padding: var(--space-md);
-    background: var(--surface);
-    border: 2px solid #e2e8f0;
-    border-radius: var(--radius-md);
+    background: #131620;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 8px;
     cursor: pointer;
     transition: all var(--transition-base);
 }
 
 .suggestionCard:hover {
-    border-color: var(--primary);
-    transform: translateX(4px);
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
 }
 
 .suggestionCardSelected {
@@ -1077,17 +1086,17 @@
 }
 
 .suggestionConfianceHaute {
-    background: rgba(34, 197, 94, 0.2);
-    color: #86efac;
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
 }
 
 .suggestionConfianceMoyenne {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fcd34d;
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
 }
 
 .suggestionConfianceBasse {
-    background: rgba(148, 163, 184, 0.2);
+    background: rgba(148, 163, 184, 0.1);
     color: #94a3b8;
 }
 
@@ -1100,15 +1109,17 @@
 }
 
 .suggestionCompte {
-    font-size: var(--text-md);
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text-main);
+    color: #e2e8f0;
     margin-bottom: var(--space-xs);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-variant-numeric: tabular-nums;
 }
 
 .suggestionRaison {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
+    font-size: 13px;
+    color: #94a3b8;
     line-height: 1.5;
 }
 
@@ -1137,7 +1148,7 @@
 /* Catégorisation manuelle */
 .manualCategorisation {
     padding-top: var(--space-lg);
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .manualTitle {

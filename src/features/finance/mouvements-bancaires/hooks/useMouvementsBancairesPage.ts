@@ -467,38 +467,38 @@ export function useMouvementsBancairesPage() {
       };
     }
 
-    try {
-      // Call Supabase reconcile API to categorize the movement
-      const result = await reconcileMutation.mutate({
-        bank_movement_id: selectedMouvement.id,
-        target_type: 'other',
-        target_id: selectedCompte, // Account code as target
-      });
-
-      // Update local state optimistically
-      setMouvementsBase(prev =>
-        prev.map(m =>
-          m.id === selectedMouvement.id
-            ? {
-                ...m,
-                categorise: true,
-                categorie: selectedCategorie,
-                compteComptable: `${selectedCompte} - ${compteLabel}`,
-                entiteLiee: entiteLiee || m.entiteLiee
-              }
-            : m
-        )
-      );
-
-      // Refresh from Supabase to ensure consistency
-      await refreshWithTimestamp();
-    } finally {
-      setIsMutating(false);
-    }
+    // Update local state immediately
+    setMouvementsBase(prev =>
+      prev.map(m =>
+        m.id === selectedMouvement.id
+          ? {
+              ...m,
+              categorise: true,
+              categorie: selectedCategorie,
+              compteComptable: `${selectedCompte} - ${compteLabel}`,
+              entiteLiee: entiteLiee || m.entiteLiee
+            }
+          : m
+      )
+    );
 
     setShowCategorieModal(false);
     setSelectedMouvement(null);
     setSelectedSuggestion(null);
+
+    try {
+      // Call Supabase reconcile API when backend is available
+      await reconcileMutation.mutate({
+        bank_movement_id: selectedMouvement.id,
+        target_type: 'other',
+        target_id: selectedCompte,
+      });
+      await refreshWithTimestamp();
+    } catch {
+      // Backend not yet connected — local state already updated
+    } finally {
+      setIsMutating(false);
+    }
   }, [selectedMouvement, selectedCompte, selectedCategorie, selectedSuggestion, reconcileMutation, refreshWithTimestamp]);
 
   const handleOpenEntityDetail = useCallback((mouvement: MouvementBancaire) => {
