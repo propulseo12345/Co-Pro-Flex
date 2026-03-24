@@ -16,6 +16,35 @@
   --input: hsl(0, 0%, 18%);
 }
 
+/* ── Playground Sections (light) ── */
+
+.playgroundSection {
+  --pg-bg: #FEF5E4;
+  --pg-bg-white: #FFFFFF;
+  --pg-text: #052641;
+  --pg-text-secondary: #807E7A;
+  --pg-text-tertiary: #AAAAAA;
+  --pg-accent: #3079FF;
+  --pg-orange: #FC5F35;
+  --pg-yellow: #FFA211;
+  --pg-green: #55AC63;
+  --pg-blue: #0081F1;
+  --pg-border: #E2DFD8;
+  --pg-font-display: 'DM Serif Display', serif;
+  --pg-font-body: 'Inter', sans-serif;
+}
+
+/* ── Transition Dark → Light ── */
+
+.transition {
+  height: 200px;
+  background: linear-gradient(
+    to bottom,
+    hsl(201, 100%, 13%) 0%,
+    #FEF5E4 100%
+  );
+}
+
 /* ── Animations ── */
 
 @keyframes fade-rise {

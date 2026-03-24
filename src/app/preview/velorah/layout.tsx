@@ -1,4 +1,9 @@
 import type { Metadata } from 'next';
+import { DM_Serif_Display, Instrument_Serif, Inter } from 'next/font/google';
+
+const dmSerif = DM_Serif_Display({ subsets: ['latin'], weight: '400', variable: '--pg-font-display' });
+const instrumentSerif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-display' });
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--pg-font-body' });
 
 export const metadata: Metadata = {
   title: 'CoProFlex — La gestion de copropriété, simplifiée',
@@ -11,15 +16,7 @@ export default function VelorahLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="fr" className={`${dmSerif.variable} ${instrumentSerif.variable} ${inter.variable}`}>
       <body>{children}</body>
     </html>
   );
