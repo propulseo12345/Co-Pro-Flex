@@ -1,18 +1,24 @@
-# Session State — 2026-03-18 00:00
+# Session State — 2026-03-24 03:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- DA appliquée au CategorisationModal: couleurs hardcodées (#1a1d2e, #131620, rgba borders), labels uppercase, typo mono tabular-nums, glow bleu, badges DA
-- Fix catégorisation locale: setMouvementsBase avant appel Supabase, modal fonctionne sans backend
+- Landing page hero Velorah créée (video bg, liquid-glass, Instrument Serif)
+- Texte adapté à CoProFlex (titre, nav, CTA)
+- Brainstorm sections landing page avec visual companion
+- Section Fonctionnalités: validé format "split view" (liste modules gauche + app preview droite)
+- Previews HTML brainstorm dans .superpowers/brainstorm/
 
 ## Next Task
-Tester la catégorisation complète (vérifier que le mouvement passe en "catégorisé" dans la table après save). Étendre l'application DA aux autres composants Finance si besoin.
+Finaliser brainstorm: valider Témoignages (3 options: A grille, B grande citation, C masonry), puis Tarifs, CTA Final, Footer. Ensuite écrire spec + plan + implémenter en React/Next.js dans src/app/preview/velorah/
 
 ## Blockers
 None
 
 ## Key Context
-- Supabase pas encore connecté — toute l'app tourne sur données mockées, les mutations API échouent silencieusement
-- Les variables CSS (var(--surface), etc.) ne reflètent pas la DA Finance — toujours hardcoder les couleurs dans les CSS Modules Finance
+- Landing page dans src/app/preview/velorah/ (layout isolé, pas d'impact CoProFlex)
+- Fonctionnalités: format split view type Playground (accordéon + mock app)
+- Section "Comment ça marche" retirée
+- Design: dark navy HSL(201,100%,13%), Instrument Serif + Inter, liquid-glass
+- Previews brainstorm dans .superpowers/brainstorm/66038-1773970430/

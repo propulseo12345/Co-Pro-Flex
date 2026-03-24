@@ -1,0 +1,243 @@
+/* ── Velorah Landing Page ── */
+
+:root {
+  --font-display: 'Instrument Serif', serif;
+  --font-body: 'Inter', sans-serif;
+
+  --background: hsl(201, 100%, 13%);
+  --foreground: hsl(0, 0%, 100%);
+  --muted-foreground: hsl(240, 4%, 66%);
+  --primary: hsl(0, 0%, 100%);
+  --primary-foreground: hsl(0, 0%, 4%);
+  --secondary: hsl(0, 0%, 10%);
+  --muted: hsl(0, 0%, 10%);
+  --accent: hsl(0, 0%, 10%);
+  --border: hsl(0, 0%, 18%);
+  --input: hsl(0, 0%, 18%);
+}
+
+/* ── Animations ── */
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animateFadeRise {
+  animation: fade-rise 0.8s ease-out both;
+}
+
+.animateFadeRiseDelay {
+  animation: fade-rise 0.8s ease-out 0.2s both;
+}
+
+.animateFadeRiseDelay2 {
+  animation: fade-rise 0.8s ease-out 0.4s both;
+}
+
+/* ── Liquid Glass ── */
+
+.liquidGlass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquidGlass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Page ── */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--background);
+  font-family: var(--font-body);
+  color: var(--foreground);
+}
+
+/* ── Video Background ── */
+
+.videoBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* ── Navigation ── */
+
+.nav {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.logoSup {
+  font-size: 0.75rem;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.navLinks {
+  display: none;
+  align-items: center;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .navLinks {
+    display: flex;
+  }
+}
+
+.navLink {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.navLink:hover {
+  color: var(--foreground);
+}
+
+.navLinkActive {
+  color: var(--foreground);
+}
+
+.navCta {
+  border-radius: 9999px;
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.navCta:hover {
+  transform: scale(1.03);
+}
+
+/* ── Hero ── */
+
+.hero {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 24px 40px;
+}
+
+@media (min-width: 640px) {
+  .hero {
+    padding-top: 32px;
+  }
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 3rem;
+  line-height: 0.95;
+  letter-spacing: -2.46px;
+  max-width: 80rem;
+  color: var(--foreground);
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .heroTitle {
+    font-size: 4.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .heroTitle {
+    font-size: 6rem;
+  }
+}
+
+.heroMuted {
+  font-style: normal;
+  color: var(--muted-foreground);
+}
+
+.heroSubtext {
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  max-width: 42rem;
+  margin-top: 32px;
+  line-height: 1.7;
+}
+
+@media (min-width: 640px) {
+  .heroSubtext {
+    font-size: 1.125rem;
+  }
+}
+
+.heroCta {
+  border-radius: 9999px;
+  padding: 20px 56px;
+  font-size: 1rem;
+  color: var(--foreground);
+  margin-top: 48px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.heroCta:hover {
+  transform: scale(1.03);
+}
