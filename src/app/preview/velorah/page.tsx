@@ -1,5 +1,6 @@
 import styles from './velorah.module.css';
 import { LogoCarousel } from './components/LogoCarousel';
+import { DiscoverSection } from './components/DiscoverSection';
 
 export default function VelorahPage() {
   return (
@@ -71,6 +72,7 @@ export default function VelorahPage() {
       <div className={styles.transition} />
       <div className={styles.playgroundSection}>
         <LogoCarousel />
+        <DiscoverSection />
         {/* More sections will be added here */}
       </div>
     </div>
