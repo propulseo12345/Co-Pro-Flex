@@ -1,0 +1,113 @@
+.outer {
+  background: #052641;
+  padding: 80px 24px;
+}
+
+/* ─── Inner cream card ─── */
+.inner {
+  background: var(--pg-bg);
+  border-radius: 16px;
+  padding: 64px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.title {
+  font-family: var(--pg-font-display);
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--pg-text);
+  margin: 0;
+}
+
+.description {
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--pg-text-secondary);
+  margin: 0;
+  max-width: 480px;
+}
+
+.ctaButton {
+  background: var(--pg-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 48px;
+  font-family: var(--pg-font-body);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  margin-top: 4px;
+}
+
+.ctaButton:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+/* ─── Feature cards ─── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 48px auto 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.cardIcon {
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.cardTitle {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.cardDescription {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .inner {
+    padding: 40px 24px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
