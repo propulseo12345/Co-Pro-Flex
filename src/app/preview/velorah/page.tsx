@@ -1,6 +1,8 @@
 import styles from './velorah.module.css';
 import { LogoCarousel } from './components/LogoCarousel';
 import { DiscoverSection } from './components/DiscoverSection';
+import { FeatureGrid } from './components/FeatureGrid';
+import { Vote, FileText, PiggyBank, Receipt, Wrench, FolderOpen } from 'lucide-react';
 
 export default function VelorahPage() {
   return (
@@ -73,7 +75,66 @@ export default function VelorahPage() {
       <div className={styles.playgroundSection}>
         <LogoCarousel />
         <DiscoverSection />
-        {/* More sections will be added here */}
+
+        {/* Section 4 — AG */}
+        <FeatureGrid
+          label="Assemblées Générales"
+          labelColor="#FC5F35"
+          title="Des AG aussi simples que vos réunions d'équipe"
+          description="Votes temps réel, procès-verbaux automatiques, convocations conformes — tout le processus d'AG digitalisé."
+          testimonial={{
+            quote: "Depuis CoProFlex, nos AG se déroulent en 1h au lieu de 3. Les votes sont instantanés et le PV est prêt à la signature en fin de séance.",
+            author: "Marie Dupont",
+            role: "Syndic professionnelle, Nexity",
+            bgColor: "#FC5F35",
+          }}
+          cards={[
+            { type: 'large', title: 'Votes temps réel', description: 'Résultats instantanés avec calcul automatique des majorités', screenshot: '/velorah/screenshots/screenshot-ag-votes.svg' },
+            { type: 'large', title: 'PV automatique', description: 'Procès-verbal généré et prêt à signer en fin de séance', screenshot: '/velorah/screenshots/screenshot-ag-pv.svg' },
+            { type: 'small', title: '14 résolutions auto-générées', icon: Vote },
+            { type: 'small', title: 'Votes par correspondance', icon: FileText },
+          ]}
+        />
+
+        {/* Section 5 — Finance */}
+        <FeatureGrid
+          label="Finance"
+          labelColor="#55AC63"
+          title="La vision financière complète de votre copropriété"
+          description="Budgets, appels de fonds, impayés et comptabilité — une vue à 360° de vos finances."
+          testimonial={{
+            quote: "Le suivi des impayés avec relances automatiques nous a fait gagner 15% de taux de recouvrement en 6 mois.",
+            author: "Thomas Bernard",
+            role: "Gestionnaire, Foncia",
+            bgColor: "#55AC63",
+          }}
+          cards={[
+            { type: 'large', title: 'Budgets prévisionnels', description: "Prévisionnel, travaux et ALUR en un coup d'œil", screenshot: '/velorah/screenshots/screenshot-finance-budget.svg' },
+            { type: 'large', title: 'Appels de fonds', description: 'Échéanciers automatiques et suivi des paiements', screenshot: '/velorah/screenshots/screenshot-finance-appels.svg' },
+            { type: 'small', title: 'Suivi impayés & relances auto', icon: PiggyBank },
+            { type: 'small', title: 'Comptabilité : journaux, grand livre, balance', icon: Receipt },
+          ]}
+        />
+
+        {/* Section 6 — Maintenance & Documents */}
+        <FeatureGrid
+          label="Maintenance & Documents"
+          labelColor="#0081F1"
+          title="Maintenance & Documents sous contrôle"
+          description="Carnet d'entretien, ordres de service, GED et contrats — tout centralisé et accessible."
+          testimonial={{
+            quote: "La GED a transformé notre organisation. Plus aucun document perdu, tout est accessible en 2 clics par les copropriétaires.",
+            author: "Sophie Laurent",
+            role: "Présidente du conseil syndical",
+            bgColor: "#0081F1",
+          }}
+          cards={[
+            { type: 'large', title: "Carnet d'entretien", description: 'Suivi des interventions et ordres de service', screenshot: '/velorah/screenshots/screenshot-maintenance.svg' },
+            { type: 'large', title: 'Gestion documentaire', description: 'PV, règlements, contrats, diagnostics — tout archivé', screenshot: '/velorah/screenshots/screenshot-documents.svg' },
+            { type: 'small', title: 'Contrats & alertes renouvellement', icon: Wrench },
+            { type: 'small', title: 'Communication & messagerie', icon: FolderOpen },
+          ]}
+        />
       </div>
     </div>
   );
