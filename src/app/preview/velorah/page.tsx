@@ -2,6 +2,9 @@ import styles from './velorah.module.css';
 import { LogoCarousel } from './components/LogoCarousel';
 import { DiscoverSection } from './components/DiscoverSection';
 import { FeatureGrid } from './components/FeatureGrid';
+import { InteractiveSlider } from './components/InteractiveSlider';
+import { Testimonials } from './components/Testimonials';
+import { Sizes } from './components/Sizes';
 import { Vote, FileText, PiggyBank, Receipt, Wrench, FolderOpen } from 'lucide-react';
 
 export default function VelorahPage() {
@@ -135,6 +138,15 @@ export default function VelorahPage() {
             { type: 'small', title: 'Communication & messagerie', icon: FolderOpen },
           ]}
         />
+
+        {/* Section 7 — Interactive Slider */}
+        <InteractiveSlider />
+
+        {/* Section 8 — Testimonials */}
+        <Testimonials />
+
+        {/* Section 9 — Sizes */}
+        <Sizes />
       </div>
     </div>
   );
