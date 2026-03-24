@@ -1,24 +1,23 @@
-# Session State — 2026-03-24 03:15
+# Session State — 2026-03-24 22:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- Landing page hero Velorah créée (video bg, liquid-glass, Instrument Serif)
-- Texte adapté à CoProFlex (titre, nav, CTA)
-- Brainstorm sections landing page avec visual companion
-- Section Fonctionnalités: validé format "split view" (liste modules gauche + app preview droite)
-- Previews HTML brainstorm dans .superpowers/brainstorm/
+- Brainstorm landing page Playground → CoProFlex (12 sections, style light/warm)
+- Spec document validé + reviewed (docs/superpowers/specs/2026-03-24-landing-page-playground-design.md)
+- Plan d'implémentation 12 tasks (docs/superpowers/plans/2026-03-24-landing-page-playground.md)
+- Implémentation complète : Layout/fonts, placeholders SVG, LogoCarousel, DiscoverSection, FeatureGrid×3, InteractiveSlider, Testimonials, Sizes, Support, CtaSection, Footer
+- Fix vidéo bg qui couvrait tout (heroWrapper + z-index)
 
 ## Next Task
-Finaliser brainstorm: valider Témoignages (3 options: A grille, B grande citation, C masonry), puis Tarifs, CTA Final, Footer. Ensuite écrire spec + plan + implémenter en React/Next.js dans src/app/preview/velorah/
+Polish visuel : remplacer placeholders SVG par vrais screenshots CoProFlex, sourcer illustrations aquarelles immobilier, affiner les styles pour fidélité pixel-perfect au Figma Playground
 
 ## Blockers
 None
 
 ## Key Context
-- Landing page dans src/app/preview/velorah/ (layout isolé, pas d'impact CoProFlex)
-- Fonctionnalités: format split view type Playground (accordéon + mock app)
-- Section "Comment ça marche" retirée
-- Design: dark navy HSL(201,100%,13%), Instrument Serif + Inter, liquid-glass
-- Previews brainstorm dans .superpowers/brainstorm/66038-1773970430/
+- Landing page dans src/app/preview/velorah/ (layout isolé, pas d'impact CoProFlex dashboard)
+- Le layout Velorah utilise un <div> wrapper (pas <html>) pour éviter conflit avec root layout
+- Vidéo bg confinée dans .heroWrapper, sections light dans .playgroundSection avec z-index: 1
+- Figma source : https://www.figma.com/design/4CtUHPsdfreKbQvQDVqp7R/Sans-titre?node-id=1-715

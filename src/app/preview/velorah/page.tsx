@@ -13,22 +13,23 @@ import { Vote, FileText, PiggyBank, Receipt, Wrench, FolderOpen } from 'lucide-r
 export default function VelorahPage() {
   return (
     <div className={styles.page}>
-      {/* Video Background */}
-      <video
-        className={styles.videoBg}
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
-          type="video/mp4"
-        />
-      </video>
+      {/* Hero Wrapper — contient la vidéo bg, nav et hero */}
+      <div className={styles.heroWrapper}>
+        <video
+          className={styles.videoBg}
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+            type="video/mp4"
+          />
+        </video>
 
-      {/* Navigation */}
-      <nav className={styles.nav}>
+        {/* Navigation */}
+        <nav className={styles.nav}>
         <div className={styles.logo}>
           CoProFlex
         </div>
@@ -76,6 +77,7 @@ export default function VelorahPage() {
           Découvrir CoProFlex
         </button>
       </section>
+      </div>{/* Fin heroWrapper */}
 
       <div className={styles.transition} />
       <div className={styles.playgroundSection}>

@@ -19,6 +19,8 @@
 /* ── Playground Sections (light) ── */
 
 .playgroundSection {
+  position: relative;
+  z-index: 1;
   --pg-bg: #FEF5E4;
   --pg-bg-white: #FFFFFF;
   --pg-text: #052641;
@@ -37,6 +39,8 @@
 /* ── Transition Dark → Light ── */
 
 .transition {
+  position: relative;
+  z-index: 1;
   height: 200px;
   background: linear-gradient(
     to bottom,
@@ -111,10 +115,17 @@
 .page {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
   background: var(--background);
   font-family: var(--font-body);
   color: var(--foreground);
+}
+
+/* ── Hero Wrapper (contient la vidéo) ── */
+
+.heroWrapper {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
 }
 
 /* ── Video Background ── */

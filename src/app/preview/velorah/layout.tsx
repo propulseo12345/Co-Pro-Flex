@@ -16,8 +16,8 @@ export default function VelorahLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${dmSerif.variable} ${instrumentSerif.variable} ${inter.variable}`}>
-      <body>{children}</body>
-    </html>
+    <div className={`${dmSerif.variable} ${instrumentSerif.variable} ${inter.variable}`}>
+      {children}
+    </div>
   );
 }
