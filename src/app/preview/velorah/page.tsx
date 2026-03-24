@@ -5,6 +5,9 @@ import { FeatureGrid } from './components/FeatureGrid';
 import { InteractiveSlider } from './components/InteractiveSlider';
 import { Testimonials } from './components/Testimonials';
 import { Sizes } from './components/Sizes';
+import { Support } from './components/Support';
+import { CtaSection } from './components/CtaSection';
+import { Footer } from './components/Footer';
 import { Vote, FileText, PiggyBank, Receipt, Wrench, FolderOpen } from 'lucide-react';
 
 export default function VelorahPage() {
@@ -147,6 +150,15 @@ export default function VelorahPage() {
 
         {/* Section 9 — Sizes */}
         <Sizes />
+
+        {/* Section 10 — Support */}
+        <Support />
+
+        {/* Section 11 — CTA */}
+        <CtaSection />
+
+        {/* Section 12 — Footer */}
+        <Footer />
       </div>
     </div>
   );
