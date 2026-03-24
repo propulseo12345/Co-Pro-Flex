@@ -1,4 +1,5 @@
 import styles from './velorah.module.css';
+import { LogoCarousel } from './components/LogoCarousel';
 
 export default function VelorahPage() {
   return (
@@ -66,6 +67,12 @@ export default function VelorahPage() {
           Découvrir CoProFlex
         </button>
       </section>
+
+      <div className={styles.transition} />
+      <div className={styles.playgroundSection}>
+        <LogoCarousel />
+        {/* More sections will be added here */}
+      </div>
     </div>
   );
 }

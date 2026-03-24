@@ -1,0 +1,48 @@
+.section {
+  background: var(--pg-bg);
+  padding: 48px 0;
+  overflow: hidden;
+}
+
+.title {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pg-text-secondary);
+  text-align: center;
+  margin-bottom: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.track {
+  display: flex;
+  gap: 48px;
+  animation: scroll 30s linear infinite;
+  width: max-content;
+}
+
+.logo {
+  flex-shrink: 0;
+  width: 120px;
+  height: 40px;
+  background: var(--pg-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pg-font-body);
+  font-size: 12px;
+  color: var(--pg-text-tertiary);
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+}
