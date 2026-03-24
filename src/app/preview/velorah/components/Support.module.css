@@ -6,6 +6,19 @@
 .blocA {
   background: var(--pg-bg-white);
   padding: 80px 24px;
+  position: relative;
+}
+
+.blocA::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, var(--pg-bg), var(--pg-bg-white));
+  pointer-events: none;
+  z-index: 0;
 }
 
 .blocAInner {

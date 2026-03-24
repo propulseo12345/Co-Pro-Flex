@@ -9,30 +9,47 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 48px;
+  background: rgba(226, 223, 216, 0.45);
+  border: 1px solid var(--pg-border);
+  border-radius: 28px;
+  padding: 6px 8px;
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .tab {
-  padding: 10px 20px;
-  border-radius: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 20px;
   font-size: 14px;
   cursor: pointer;
   color: var(--pg-text-secondary);
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   font-family: var(--pg-font-body);
-  transition: color 0.2s;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.tab:hover {
+  color: var(--pg-text);
 }
 
 .tabActive {
   color: var(--pg-accent);
   font-weight: 600;
+  background: white;
+  border-color: rgba(226, 223, 216, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .arrowBtn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1px solid var(--pg-border);
   background: white;
@@ -41,42 +58,23 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: var(--pg-text-secondary);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.arrowBtn:hover {
+  border-color: var(--pg-accent);
+  color: var(--pg-accent);
 }
 
 .screenshotFrame {
   max-width: 900px;
   margin: 0 auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   position: relative;
-}
-
-.screenshotImg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.illustrationLeft {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 280px;
-  height: 400px;
-  left: 0;
-  pointer-events: none;
-}
-
-.illustrationRight {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 280px;
-  height: 400px;
-  right: 0;
-  pointer-events: none;
+  height: 520px;
 }
 
 .videoLink {
@@ -94,6 +92,66 @@
 
 .playIcon {
   color: var(--pg-accent);
+}
+
+/* Illustrations latérales — ancrées au bas de la section */
+.illustrationLeft {
+  position: absolute;
+  bottom: 140px;
+  left: 0;
+  width: 302px;
+  height: 374px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.illustrationLeft img {
+  object-fit: contain;
+  object-position: bottom left;
+}
+
+.illustrationRight {
+  position: absolute;
+  bottom: 140px;
+  right: 30px;
+  width: 274px;
+  height: 346px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.illustrationRight img {
+  object-fit: contain;
+  object-position: bottom right;
+}
+
+/* Le contenu passe au-dessus des illustrations */
+.tabs,
+.screenshotFrame,
+.videoLink {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 1400px) {
+  .illustrationLeft {
+    width: 230px;
+    height: 288px;
+  }
+
+  .illustrationRight {
+    width: 216px;
+    height: 274px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .illustrationLeft,
+  .illustrationRight {
+    opacity: 0.35;
+    width: 240px;
+    height: 300px;
+  }
 }
 
 @media (max-width: 768px) {

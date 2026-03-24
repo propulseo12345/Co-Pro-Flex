@@ -1,0 +1,342 @@
+/* Styles dark theme partagés pour les mini-démos landing page */
+
+.demoContainer {
+  background: #0f1117;
+  color: #e2e8f0;
+  padding: 24px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  height: 520px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* KPI Strip — 4 colonnes */
+.kpiStrip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kpiCard {
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.kpiLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.kpiValue {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiTrend {
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+  color: #64748b;
+}
+
+/* Section title */
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 12px;
+}
+
+/* Cards list */
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s, transform 0.15s;
+  cursor: default;
+}
+
+.card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.cardTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.cardMeta {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.badgeUrgent {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.badgeWarning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+}
+
+.badgeInfo {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.badgeSuccess {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.badgeNeutral {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  text-align: left;
+  padding: 8px 10px;
+  background: rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.tableCell {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  padding: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.tableRow {
+  transition: background 0.15s;
+}
+
+.tableRow:hover {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+/* Progress bar */
+.progressBar {
+  height: 4px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+/* Two column layout */
+.twoColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Amount formatting */
+.amount {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.amountPositive {
+  color: #22c55e;
+}
+
+.amountNegative {
+  color: #ef4444;
+}
+
+/* TopBar mini */
+.topBar {
+  background: #161822;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topBarTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.topBarSubtitle {
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.topBarActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnPrimary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btnPrimary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btnGhost {
+  background: rgba(148, 163, 184, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btnGhost:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+}
+
+/* Dot indicator */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Folder tree */
+.folderItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.folderItem:hover {
+  background: rgba(148, 163, 184, 0.06);
+}
+
+.folderItemActive {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.folderCount {
+  margin-left: auto;
+  font-size: 10px;
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* Segmented control */
+.segmented {
+  display: inline-flex;
+  background: #131620;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.segmentItem {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.segmentItemActive {
+  background: #1a1d2e;
+  color: #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Priority dot */
+.priorityDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

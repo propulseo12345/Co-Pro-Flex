@@ -1,17 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode, type ComponentType } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import {
+  ChevronLeft, ChevronRight, Play,
+  LayoutDashboard, Vote, PiggyBank, Wrench, FolderOpen, MessageCircle,
+} from 'lucide-react';
 import styles from './DiscoverSection.module.css';
+import { DemoDashboard } from './demos/DemoDashboard';
+import { DemoAg } from './demos/DemoAg';
+import { DemoFinance } from './demos/DemoFinance';
+import { DemoMaintenance } from './demos/DemoMaintenance';
+import { DemoDocuments } from './demos/DemoDocuments';
+import { DemoCommunication } from './demos/DemoCommunication';
 
-const TABS = [
-  { id: 'dashboard', label: 'Dashboard', screenshot: '/velorah/screenshots/screenshot-dashboard.svg' },
-  { id: 'ag', label: 'AG', screenshot: '/velorah/screenshots/screenshot-ag.svg' },
-  { id: 'finance', label: 'Finance', screenshot: '/velorah/screenshots/screenshot-finance-budget.svg' },
-  { id: 'maintenance', label: 'Maintenance', screenshot: '/velorah/screenshots/screenshot-maintenance.svg' },
-  { id: 'documents', label: 'Documents', screenshot: '/velorah/screenshots/screenshot-documents.svg' },
-  { id: 'communication', label: 'Communication', screenshot: '/velorah/screenshots/screenshot-communication.svg' },
+interface TabDef {
+  id: string;
+  label: string;
+  icon: ComponentType<{ size?: number }>;
+  demo: ReactNode;
+}
+
+const TABS: TabDef[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, demo: <DemoDashboard /> },
+  { id: 'ag', label: 'AG', icon: Vote, demo: <DemoAg /> },
+  { id: 'finance', label: 'Finance', icon: PiggyBank, demo: <DemoFinance /> },
+  { id: 'maintenance', label: 'Maintenance', icon: Wrench, demo: <DemoMaintenance /> },
+  { id: 'documents', label: 'Documents', icon: FolderOpen, demo: <DemoDocuments /> },
+  { id: 'communication', label: 'Communication', icon: MessageCircle, demo: <DemoCommunication /> },
 ];
 
 export function DiscoverSection() {
@@ -21,18 +37,18 @@ export function DiscoverSection() {
     <section className={styles.section}>
       <div className={styles.illustrationLeft}>
         <Image
-          src="/velorah/illustrations/illustration-haussmann-left.svg"
-          alt="Immeuble haussmannien"
+          src="/velorah/illustrations/illustration-left.png"
+          alt="Immeuble haussmannien avec gestionnaire"
           fill
-          sizes="280px"
+          sizes="300px"
         />
       </div>
       <div className={styles.illustrationRight}>
         <Image
-          src="/velorah/illustrations/illustration-garden-right.svg"
-          alt="Jardin de copropriété"
+          src="/velorah/illustrations/illustration-right.png"
+          alt="Bureau de gestion immobilière"
           fill
-          sizes="280px"
+          sizes="300px"
         />
       </div>
 
@@ -45,17 +61,21 @@ export function DiscoverSection() {
           <ChevronLeft size={18} />
         </button>
 
-        {TABS.map((tab, i) => (
-          <button
-            key={tab.id}
-            className={`${styles.tab} ${i === activeTab ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab(i)}
-            role="tab"
-            aria-selected={i === activeTab}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {TABS.map((tab, i) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              className={`${styles.tab} ${i === activeTab ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab(i)}
+              role="tab"
+              aria-selected={i === activeTab}
+            >
+              <Icon size={16} />
+              {tab.label}
+            </button>
+          );
+        })}
 
         <button
           className={styles.arrowBtn}
@@ -67,14 +87,7 @@ export function DiscoverSection() {
       </div>
 
       <div className={styles.screenshotFrame}>
-        <Image
-          className={styles.screenshotImg}
-          src={TABS[activeTab].screenshot}
-          alt={`Module ${TABS[activeTab].label} de CoProFlex`}
-          width={1200}
-          height={800}
-          priority={activeTab === 0}
-        />
+        {TABS[activeTab].demo}
       </div>
 
       <div className={styles.videoLink}>

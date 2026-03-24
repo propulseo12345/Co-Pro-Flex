@@ -86,6 +86,7 @@ export default function VelorahPage() {
 
         {/* Section 4 — AG */}
         <FeatureGrid
+          background="white"
           label="Assemblées Générales"
           labelColor="#FC5F35"
           title="Des AG aussi simples que vos réunions d'équipe"
@@ -106,6 +107,7 @@ export default function VelorahPage() {
 
         {/* Section 5 — Finance */}
         <FeatureGrid
+          background="cream"
           label="Finance"
           labelColor="#55AC63"
           title="La vision financière complète de votre copropriété"
@@ -126,6 +128,7 @@ export default function VelorahPage() {
 
         {/* Section 6 — Maintenance & Documents */}
         <FeatureGrid
+          background="white"
           label="Maintenance & Documents"
           labelColor="#0081F1"
           title="Maintenance & Documents sous contrôle"

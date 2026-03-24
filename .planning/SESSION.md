@@ -1,23 +1,24 @@
-# Session State — 2026-03-24 22:15
+# Session State — 2026-03-25 00:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- Brainstorm landing page Playground → CoProFlex (12 sections, style light/warm)
-- Spec document validé + reviewed (docs/superpowers/specs/2026-03-24-landing-page-playground-design.md)
-- Plan d'implémentation 12 tasks (docs/superpowers/plans/2026-03-24-landing-page-playground.md)
-- Implémentation complète : Layout/fonts, placeholders SVG, LogoCarousel, DiscoverSection, FeatureGrid×3, InteractiveSlider, Testimonials, Sizes, Support, CtaSection, Footer
-- Fix vidéo bg qui couvrait tout (heroWrapper + z-index)
+- Mini-démos interactives Section 3 (DiscoverSection) : 6 composants (Dashboard, AG, Finance, Maintenance, Documents, Communication)
+- Styles dark theme partagés (demo-shared.module.css) + données marketing (demoData.ts)
+- Onglets avec icônes Lucide + style pill (fond blanc, texte bleu sur actif, barre fond beige)
+- Illustrations latérales (immeuble haussmannien + bureau immobilier) positionnées
+- Hauteur fixe 520px sur le cadre démo (plus de saut entre onglets)
+- Alternance fond blanc/crème sur FeatureGrid sections 4-5-6
+- Fondu dégradé entre toutes les sections (60px, ::before gradient)
 
 ## Next Task
-Polish visuel : remplacer placeholders SVG par vrais screenshots CoProFlex, sourcer illustrations aquarelles immobilier, affiner les styles pour fidélité pixel-perfect au Figma Playground
+Sections 4-5-6 (FeatureGrid) : remplacer les screenshots SVG placeholder par des mini-démos interactives (réutiliser les composants demos/ existants). Puis faire pareil pour Section 7 (InteractiveSlider) et Section 11 (CtaSection).
 
 ## Blockers
-None
+Disque quasi plein — next build échouait (ENOSPC). Nettoyer .next/cache et /private/tmp/claude-501/ si besoin.
 
 ## Key Context
-- Landing page dans src/app/preview/velorah/ (layout isolé, pas d'impact CoProFlex dashboard)
-- Le layout Velorah utilise un <div> wrapper (pas <html>) pour éviter conflit avec root layout
-- Vidéo bg confinée dans .heroWrapper, sections light dans .playgroundSection avec z-index: 1
-- Figma source : https://www.figma.com/design/4CtUHPsdfreKbQvQDVqp7R/Sans-titre?node-id=1-715
+- Démos dans src/app/preview/velorah/components/demos/ (6 composants + shared CSS + data)
+- Les FeatureGrid cards "large" pointent encore vers des SVG placeholder inexistants
+- Le screenshotFrame a height: 520px fixe, le demoContainer aussi
