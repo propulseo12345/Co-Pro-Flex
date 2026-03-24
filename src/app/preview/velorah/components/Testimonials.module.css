@@ -1,0 +1,139 @@
+.section {
+  background: var(--pg-bg-white);
+  padding: 80px 24px;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+/* Video placeholder */
+.videoPlaceholder {
+  background: var(--pg-border);
+  border-radius: 16px;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playBtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--pg-accent);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.playBtn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(48, 121, 255, 0.35);
+}
+
+/* Quotes column */
+.quotesCol {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.title {
+  font-family: var(--pg-font-display);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--pg-text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.quoteContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 160px;
+}
+
+.quote {
+  font-family: var(--pg-font-display);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--pg-text);
+  margin: 0;
+  line-height: 1.4;
+  transition: opacity 0.4s ease;
+}
+
+.author {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.authorName {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pg-text);
+}
+
+.authorRole {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: var(--pg-text-secondary);
+}
+
+/* Authors bar */
+.authorsBar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.authorBtn {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--pg-border);
+  background: transparent;
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pg-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.authorBtn:hover {
+  background: var(--pg-bg);
+  color: var(--pg-text);
+}
+
+.authorBtnActive {
+  background: var(--pg-accent);
+  color: white;
+  border-color: var(--pg-accent);
+}
+
+@media (max-width: 768px) {
+  .inner {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .quote {
+    font-size: 20px;
+  }
+}
