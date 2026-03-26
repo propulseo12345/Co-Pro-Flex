@@ -1,8 +1,99 @@
 .section {
   background: var(--pg-bg);
-  padding: 80px 0;
+  padding: 0 0 80px;
   position: relative;
   overflow: hidden;
+}
+
+/* ── Hero Content ── */
+
+.heroContent {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 24px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 4px;
+  background: var(--pg-text);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--pg-bg);
+  font-family: var(--pg-font-body);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+}
+
+.heroBadgeDot {
+  display: none;
+}
+
+.heroTitle {
+  font-family: var(--pg-font-display);
+  font-size: 46px;
+  font-weight: 400;
+  color: var(--pg-text);
+  line-height: 1.12;
+  margin: 0 0 14px;
+}
+
+.heroTitle em {
+  font-style: italic;
+  font-family: 'Instrument Serif', serif;
+  color: var(--pg-text-secondary);
+  font-weight: 400;
+}
+
+.heroDesc {
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+  line-height: 1.6;
+  max-width: 580px;
+  margin: 0 auto 24px;
+  font-family: var(--pg-font-body);
+}
+
+.heroCta {
+  display: inline-flex;
+  padding: 12px 32px;
+  border-radius: 99px;
+  background: var(--pg-accent);
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--pg-font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(48, 121, 255, 0.3);
+}
+
+.heroCta:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(48, 121, 255, 0.35);
+}
+
+.heroSocial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--pg-text-secondary);
+  font-family: var(--pg-font-body);
+}
+
+.heroSocial strong {
+  color: var(--pg-text);
 }
 
 .tabs {
@@ -10,7 +101,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-bottom: 48px;
+  margin-bottom: 28px;
   background: rgba(226, 223, 216, 0.45);
   border: 1px solid var(--pg-border);
   border-radius: 28px;
@@ -60,11 +151,30 @@
   flex-shrink: 0;
   color: var(--pg-text-secondary);
   transition: border-color 0.2s, color 0.2s;
+  position: relative;
 }
 
 .arrowBtn:hover {
   border-color: var(--pg-accent);
   color: var(--pg-accent);
+}
+
+.arrowBtnNext {
+  overflow: visible;
+}
+
+.progressRing {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+}
+
+.arrowIcon {
+  position: relative;
+  z-index: 1;
 }
 
 .screenshotFrame {

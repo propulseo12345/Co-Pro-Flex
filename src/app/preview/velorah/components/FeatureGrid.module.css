@@ -76,7 +76,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 280px 1fr 1fr;
   gap: 16px;
 }
 
@@ -134,13 +134,16 @@
 .cardDemo {
   border-radius: 16px 16px 0 0;
   overflow: hidden;
-  max-height: 320px;
+  max-height: 230px;
 }
 
 .cardDemo > * {
-  height: 320px;
+  height: 300px;
   border-radius: 0;
   font-size: 0.85em;
+  transform: scale(0.77);
+  transform-origin: top left;
+  width: 130%;
 }
 
 .cardBody {

@@ -1,5 +1,5 @@
 .outer {
-  background: #052641;
+  background: var(--pg-bg-white);
   padding: 80px 24px;
   position: relative;
 }
@@ -11,22 +11,25 @@
   left: 0;
   right: 0;
   height: 60px;
-  background: linear-gradient(to bottom, var(--pg-bg), #052641);
+  background: linear-gradient(to bottom, var(--pg-bg), var(--pg-bg-white));
   pointer-events: none;
   z-index: 0;
 }
 
-/* ─── Inner cream card ─── */
-.inner {
-  background: var(--pg-bg);
-  border-radius: 16px;
-  padding: 64px;
-  max-width: 800px;
+/* ─── Split layout ─── */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 1100px;
   margin: 0 auto;
-  text-align: center;
+}
+
+/* ─── Left ─── */
+.left {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 20px;
 }
 
@@ -45,82 +48,106 @@
   line-height: 1.6;
   color: var(--pg-text-secondary);
   margin: 0;
-  max-width: 480px;
 }
 
-.ctaButton {
+.trust {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+}
+
+.trustIcon {
+  color: #55AC63;
+  flex-shrink: 0;
+}
+
+/* ─── Form (right) ─── */
+.form {
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pg-text);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--pg-border);
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text);
+  background: white;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--pg-accent);
+}
+
+.input::placeholder {
+  color: var(--pg-text-tertiary);
+}
+
+.formBtn {
   background: var(--pg-accent);
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  padding: 16px 48px;
-  font-family: var(--pg-font-body);
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  margin-top: 4px;
-}
-
-.ctaButton:hover {
-  opacity: 0.88;
-  transform: translateY(-1px);
-}
-
-/* ─── Feature cards ─── */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  max-width: 1000px;
-  margin: 48px auto 0;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
-}
-
-.cardIcon {
-  color: #ffffff;
-  opacity: 0.9;
-}
-
-.cardTitle {
+  padding: 14px;
   font-family: var(--pg-font-body);
   font-size: 15px;
   font-weight: 600;
-  color: #ffffff;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s;
 }
 
-.cardDescription {
-  font-family: var(--pg-font-body);
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.5;
+.formBtn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(48, 121, 255, 0.3);
 }
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .inner {
-    padding: 40px 24px;
+  .split {
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
   .title {
     font-size: 30px;
   }
 
-  .cards {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 32px;
-  }
-}
-
-@media (max-width: 480px) {
-  .cards {
-    grid-template-columns: 1fr;
+  .form {
+    padding: 24px;
   }
 }

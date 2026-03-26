@@ -16,7 +16,10 @@ export default function VelorahLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${dmSerif.variable} ${instrumentSerif.variable} ${inter.variable}`}>
+    <div
+      className={`${dmSerif.variable} ${instrumentSerif.variable} ${inter.variable}`}
+      style={{ background: '#FEF5E4', color: '#052641' }}
+    >
       {children}
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Users, MessageCircle, TrendingUp, ThumbsUp, Clock } from 'lucide-react';
+import { Users, MessageCircle, TrendingUp } from 'lucide-react';
 import styles from './Support.module.css';
 
 export function Support() {
@@ -72,48 +72,6 @@ export function Support() {
         </div>
       </div>
 
-      {/* Bloc B — cream background */}
-      <div className={styles.blocB}>
-        <div className={styles.blocBInner}>
-          {/* Left: illustration (decorative) */}
-          <div className={styles.blocBIllustrationWrap}>
-            <Image
-              src="/velorah/illustrations/illustration-support.svg"
-              alt=""
-              fill
-              className={styles.illustration}
-              aria-hidden="true"
-            />
-          </div>
-
-          {/* Right: stats */}
-          <div className={styles.statsContent}>
-            <h2 className={styles.statsTitle}>
-              Un support récompensé par nos utilisateurs
-            </h2>
-            <div className={styles.statsGrid}>
-              <div className={styles.statItem}>
-                <div className={styles.statIconWrap}>
-                  <ThumbsUp size={20} className={styles.statIcon} />
-                </div>
-                <div className={styles.statText}>
-                  <span className={styles.statValue}>98%</span>
-                  <span className={styles.statLabel}>satisfaction client</span>
-                </div>
-              </div>
-              <div className={styles.statItem}>
-                <div className={styles.statIconWrap}>
-                  <Clock size={20} className={styles.statIcon} />
-                </div>
-                <div className={styles.statText}>
-                  <span className={styles.statValue}>{'< 2h'}</span>
-                  <span className={styles.statLabel}>Temps de réponse moyen</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

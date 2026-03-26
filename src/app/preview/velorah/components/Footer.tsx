@@ -3,19 +3,15 @@ import styles from './Footer.module.css';
 const COLUMNS = [
   {
     heading: 'Produit',
-    links: ['Fonctionnalités', 'Tarifs', 'Intégrations', 'Sécurité', 'Roadmap'],
+    links: ['Fonctionnalités', 'Tarifs', 'Sécurité', 'Roadmap'],
   },
   {
     heading: 'Ressources',
-    links: ["Blog", 'Guides', 'Webinaires', "Centre d'aide", 'API'],
+    links: ['Blog', 'Guides', "Centre d'aide", 'API'],
   },
   {
     heading: 'Entreprise',
-    links: ['À propos', 'Contact', 'Carrières', 'Presse', 'Partenaires'],
-  },
-  {
-    heading: 'Légal',
-    links: ['CGU', 'Confidentialité', 'Cookies', 'Mentions légales'],
+    links: ['À propos', 'Contact', 'CGU', 'Confidentialité'],
   },
 ] as const;
 
@@ -23,30 +19,12 @@ export function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        {/* Logo */}
-        <div className={styles.logo}>CoProFlex</div>
-
-        {/* Link columns */}
-        <nav className={styles.grid} aria-label="Footer navigation">
-          {COLUMNS.map(({ heading, links }) => (
-            <div key={heading} className={styles.col}>
-              <span className={styles.colHeading}>{heading}</span>
-              <ul className={styles.linkList}>
-                {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className={styles.link}>{link}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </nav>
-
-        {/* Bottom bar */}
-        <div className={styles.bottom}>
-          <span className={styles.copyright}>
-            © 2026 CoProFlex. Tous droits réservés.
-          </span>
+        {/* Brand + description */}
+        <div className={styles.brand}>
+          <div className={styles.logo}>CoProFlex</div>
+          <p className={styles.brandDesc}>
+            La plateforme tout-en-un qui simplifie la copropriété pour les syndics et les copropriétaires.
+          </p>
           <div className={styles.contact}>
             <a href="mailto:contact@coproflex.fr" className={styles.contactLink}>
               contact@coproflex.fr
@@ -57,6 +35,27 @@ export function Footer() {
             </a>
           </div>
         </div>
+
+        {/* Link columns */}
+        {COLUMNS.map(({ heading, links }) => (
+          <nav key={heading} className={styles.col}>
+            <span className={styles.colHeading}>{heading}</span>
+            <ul className={styles.linkList}>
+              {links.map((link) => (
+                <li key={link}>
+                  <a href="#" className={styles.link}>{link}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
+      </div>
+
+      {/* Bottom bar */}
+      <div className={styles.bottom}>
+        <span className={styles.copyright}>
+          © 2026 CoProFlex. Tous droits réservés.
+        </span>
       </div>
     </footer>
   );

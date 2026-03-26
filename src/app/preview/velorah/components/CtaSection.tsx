@@ -1,52 +1,53 @@
 'use client';
 
-import { Unlock, BookOpen, ShieldCheck, Headphones } from 'lucide-react';
+import { Check } from 'lucide-react';
 import styles from './CtaSection.module.css';
 
-const CARDS = [
-  {
-    Icon: Unlock,
-    title: 'Sans engagement',
-    description: 'Testez sans risque, résiliez quand vous voulez',
-  },
-  {
-    Icon: BookOpen,
-    title: 'Onboarding inclus',
-    description: 'Formation et migration de données incluses',
-  },
-  {
-    Icon: ShieldCheck,
-    title: 'Données sécurisées',
-    description: 'Hébergement en France, chiffrement bout-en-bout',
-  },
-  {
-    Icon: Headphones,
-    title: 'Support dédié',
-    description: "Une équipe d'experts à votre écoute",
-  },
+const TRUST_ITEMS = [
+  'Sans engagement, résiliez à tout moment',
+  'Migration de données incluse',
+  'Hébergement en France, RGPD',
+  'Support dédié < 2h',
 ] as const;
 
 export function CtaSection() {
   return (
     <section className={styles.outer}>
-      {/* Inner wrapper — cream card */}
-      <div className={styles.inner}>
-        <h2 className={styles.title}>Demander une démo gratuite</h2>
-        <p className={styles.description}>
-          Découvrez CoProFlex en 30 minutes avec un expert dédié
-        </p>
-        <button className={styles.ctaButton}>Demander une démo</button>
-      </div>
-
-      {/* Feature cards below */}
-      <div className={styles.cards}>
-        {CARDS.map(({ Icon, title, description }) => (
-          <div key={title} className={styles.card}>
-            <Icon size={28} className={styles.cardIcon} />
-            <span className={styles.cardTitle}>{title}</span>
-            <span className={styles.cardDescription}>{description}</span>
+      <div className={styles.split}>
+        <div className={styles.left}>
+          <h2 className={styles.title}>Simplifiez votre copropriété dès aujourd&rsquo;hui</h2>
+          <p className={styles.description}>
+            Remplissez ce formulaire et un expert vous contacte sous 24h pour une démo personnalisée de 30 minutes.
+          </p>
+          <div className={styles.trust}>
+            {TRUST_ITEMS.map((item) => (
+              <div key={item} className={styles.trustItem}>
+                <Check size={18} className={styles.trustIcon} />
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
+          <div className={styles.field}>
+            <label className={styles.label}>Nom complet</label>
+            <input className={styles.input} placeholder="Jean Dupont" />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Email professionnel</label>
+            <input className={styles.input} type="email" placeholder="jean@syndic.fr" />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Téléphone</label>
+            <input className={styles.input} type="tel" placeholder="+33 6 12 34 56 78" />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Nombre de lots gérés</label>
+            <input className={styles.input} placeholder="ex: 150" />
+          </div>
+          <button className={styles.formBtn} type="submit">Demander ma démo gratuite</button>
+        </form>
       </div>
     </section>
   );
