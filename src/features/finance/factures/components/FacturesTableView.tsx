@@ -6,6 +6,7 @@ import { FacturesTable } from '@/components/features/finance/Factures/FacturesTa
 import { isFactureEnRetard } from '@/components/features/finance/Factures/types';
 import type { Facture } from '@/components/features/finance/Factures/types';
 import type { PosteBudgetData } from '@/components/features/finance/Budget/types';
+import type { StatutFilterValue } from '@/features/finance/invoices/useFacturesPage';
 import { FacturesStatusSidebar } from './FacturesStatusSidebar';
 import type { SidebarFilter } from './FacturesStatusSidebar';
 import styles from './FacturesTableView.module.css';
@@ -15,8 +16,8 @@ interface FacturesTableViewProps {
     factures: Facture[];
     searchTerm: string;
     setSearchTerm: (v: string) => void;
-    statutFilter: string;
-    handleStatutFilterChange: (v: string) => void;
+    statutFilter: StatutFilterValue;
+    handleStatutFilterChange: (v: StatutFilterValue) => void;
     sortOrder: string;
     setSortOrder: (fn: (prev: string) => string) => void;
     fournisseurFilter: string;

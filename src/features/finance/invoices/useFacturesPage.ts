@@ -29,7 +29,7 @@ import {
 // Store original Supabase invoice IDs for mutations
 const invoiceIdMap = new Map<string, string>(); // local ID -> supabase ID
 
-type StatutFilterValue = 'TOUS' | StatutFacture;
+export type StatutFilterValue = 'TOUS' | StatutFacture;
 
 // Map Supabase status to local status
 function mapSupabaseStatus(status: string): StatutFacture {
