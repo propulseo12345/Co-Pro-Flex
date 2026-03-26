@@ -93,6 +93,53 @@ export const DEMO_DOCUMENTS = {
   ],
 };
 
+export const DEMO_AG_VOTES = {
+  resolutions: [
+    { num: 1, title: 'Approbation des comptes 2025', article: 'Art. 24', pour: 78, contre: 15, abstention: 7, status: 'Adoptée' as const },
+    { num: 2, title: 'Budget prévisionnel 2026', article: 'Art. 24', pour: 82, contre: 12, abstention: 6, status: 'Adoptée' as const },
+    { num: 3, title: 'Ravalement façade nord', article: 'Art. 25', pour: 55, contre: 35, abstention: 10, status: 'Rejetée' as const },
+    { num: 4, title: 'Remplacement chaudière collective', article: 'Art. 25', pour: 68, contre: 22, abstention: 10, status: 'Adoptée' as const },
+    { num: 5, title: 'Mandat du syndic 2026-2029', article: 'Art. 25', pour: 71, contre: 20, abstention: 9, status: 'Adoptée' as const },
+  ],
+  summary: {
+    total: 14,
+    adoptees: 11,
+    rejetees: 2,
+    enCours: 1,
+  },
+};
+
+export const DEMO_AG_PV = {
+  sections: [
+    { title: 'Ouverture de séance', content: 'Le président du conseil syndical ouvre la séance à 18h35. Le quorum est atteint avec 67% des tantièmes représentés.' },
+    { title: 'Désignation du bureau', content: 'M. Martin est élu président de séance. Mme Duval est désignée secrétaire. M. Lefèvre est scrutateur.' },
+    { title: 'Résolution n°1 — Approbation des comptes', content: 'Les comptes de l\'exercice 2025 sont approuvés à la majorité de l\'article 24 avec 78% des voix pour.' },
+    { title: 'Résolution n°2 — Budget prévisionnel', content: 'Le budget prévisionnel 2026 de 245 000 € est voté à la majorité de l\'article 24.' },
+  ],
+  meta: {
+    ag: 'AG Ordinaire Annuelle 2026',
+    date: '15 Avril 2026',
+    pages: 8,
+    status: 'Prêt à signer',
+    signataires: { fait: 2, total: 3 },
+  },
+};
+
+export const DEMO_APPELS_FONDS = {
+  kpis: [
+    { label: 'Montant total', value: '245 000 €', color: '#e2e8f0' },
+    { label: 'Encaissé', value: '183 200 €', color: '#22c55e' },
+    { label: 'En attente', value: '57 520 €', color: '#f59e0b' },
+    { label: 'Impayés', value: '4 280 €', color: '#ef4444' },
+  ],
+  echeancier: [
+    { trimestre: 'T1 — Janv. 2026', montant: 61250, encaisse: 61250, taux: 100, status: 'Soldé' as const },
+    { trimestre: 'T2 — Avr. 2026', montant: 61250, encaisse: 58700, taux: 96, status: 'En cours' as const },
+    { trimestre: 'T3 — Juil. 2026', montant: 61250, encaisse: 42130, taux: 69, status: 'En cours' as const },
+    { trimestre: 'T4 — Oct. 2026', montant: 61250, encaisse: 21120, taux: 34, status: 'À venir' as const },
+  ],
+};
+
 export const DEMO_COMMUNICATION = {
   messages: [
     { from: 'Syndic', subject: 'Convocation AG — 15 Avril 2026', time: 'Il y a 2j', unread: true },

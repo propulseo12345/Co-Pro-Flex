@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import {
   Search, Settings, ChevronDown, ChevronRight,
-  Sun, Moon, PanelLeftClose, PanelLeftOpen, Bell,
+  Sun, Moon, PanelLeftClose, PanelLeftOpen, Bell, Globe,
 } from 'lucide-react';
 import { MODULES, getActiveModule } from '@/lib/config/navigation';
 import { searchRoutes, SearchableRoute } from '@/lib/config/search';
@@ -245,6 +245,10 @@ export default function UnifiedSidebar() {
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           {!collapsed && <span>{theme === 'dark' ? 'Thème clair' : 'Thème sombre'}</span>}
         </button>
+        <Link href="/preview/velorah" className={styles.footerItem} title="Landing Page">
+          <Globe size={16} />
+          {!collapsed && <span>Landing Page</span>}
+        </Link>
         <Link href="/settings" className={styles.footerItem}>
           <Settings size={16} />
           {!collapsed && <span>Paramètres</span>}

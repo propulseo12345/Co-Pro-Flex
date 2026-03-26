@@ -9,6 +9,12 @@ import { Support } from './components/Support';
 import { CtaSection } from './components/CtaSection';
 import { Footer } from './components/Footer';
 import { Vote, FileText, PiggyBank, Receipt, Wrench, FolderOpen } from 'lucide-react';
+import { DemoAgVotes } from './components/demos/DemoAgVotes';
+import { DemoAgPv } from './components/demos/DemoAgPv';
+import { DemoFinance } from './components/demos/DemoFinance';
+import { DemoAppelsFonds } from './components/demos/DemoAppelsFonds';
+import { DemoMaintenance } from './components/demos/DemoMaintenance';
+import { DemoDocuments } from './components/demos/DemoDocuments';
 
 export default function VelorahPage() {
   return (
@@ -98,8 +104,8 @@ export default function VelorahPage() {
             bgColor: "#FC5F35",
           }}
           cards={[
-            { type: 'large', title: 'Votes temps réel', description: 'Résultats instantanés avec calcul automatique des majorités', screenshot: '/velorah/screenshots/screenshot-ag-votes.svg' },
-            { type: 'large', title: 'PV automatique', description: 'Procès-verbal généré et prêt à signer en fin de séance', screenshot: '/velorah/screenshots/screenshot-ag-pv.svg' },
+            { type: 'large', title: 'Votes temps réel', description: 'Résultats instantanés avec calcul automatique des majorités', demo: <DemoAgVotes /> },
+            { type: 'large', title: 'PV automatique', description: 'Procès-verbal généré et prêt à signer en fin de séance', demo: <DemoAgPv /> },
             { type: 'small', title: '14 résolutions auto-générées', icon: Vote },
             { type: 'small', title: 'Votes par correspondance', icon: FileText },
           ]}
@@ -119,8 +125,8 @@ export default function VelorahPage() {
             bgColor: "#55AC63",
           }}
           cards={[
-            { type: 'large', title: 'Budgets prévisionnels', description: "Prévisionnel, travaux et ALUR en un coup d'œil", screenshot: '/velorah/screenshots/screenshot-finance-budget.svg' },
-            { type: 'large', title: 'Appels de fonds', description: 'Échéanciers automatiques et suivi des paiements', screenshot: '/velorah/screenshots/screenshot-finance-appels.svg' },
+            { type: 'large', title: 'Budgets prévisionnels', description: "Prévisionnel, travaux et ALUR en un coup d'œil", demo: <DemoFinance /> },
+            { type: 'large', title: 'Appels de fonds', description: 'Échéanciers automatiques et suivi des paiements', demo: <DemoAppelsFonds /> },
             { type: 'small', title: 'Suivi impayés & relances auto', icon: PiggyBank },
             { type: 'small', title: 'Comptabilité : journaux, grand livre, balance', icon: Receipt },
           ]}
@@ -140,8 +146,8 @@ export default function VelorahPage() {
             bgColor: "#0081F1",
           }}
           cards={[
-            { type: 'large', title: "Carnet d'entretien", description: 'Suivi des interventions et ordres de service', screenshot: '/velorah/screenshots/screenshot-maintenance.svg' },
-            { type: 'large', title: 'Gestion documentaire', description: 'PV, règlements, contrats, diagnostics — tout archivé', screenshot: '/velorah/screenshots/screenshot-documents.svg' },
+            { type: 'large', title: "Carnet d'entretien", description: 'Suivi des interventions et ordres de service', demo: <DemoMaintenance /> },
+            { type: 'large', title: 'Gestion documentaire', description: 'PV, règlements, contrats, diagnostics — tout archivé', demo: <DemoDocuments /> },
             { type: 'small', title: 'Contrats & alertes renouvellement', icon: Wrench },
             { type: 'small', title: 'Communication & messagerie', icon: FolderOpen },
           ]}

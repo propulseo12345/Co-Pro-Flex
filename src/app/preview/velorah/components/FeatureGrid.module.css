@@ -131,6 +131,18 @@
   display: block;
 }
 
+.cardDemo {
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  max-height: 320px;
+}
+
+.cardDemo > * {
+  height: 320px;
+  border-radius: 0;
+  font-size: 0.85em;
+}
+
 .cardBody {
   padding: 20px;
 }

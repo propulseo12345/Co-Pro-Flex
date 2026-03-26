@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import Image from 'next/image';
 import styles from './FeatureGrid.module.css';
 
@@ -19,6 +19,7 @@ interface FeatureGridProps {
     title: string;
     description?: string;
     screenshot?: string;
+    demo?: ReactNode;
     icon?: ComponentType<{ size?: number; className?: string }>;
   }>;
 }
@@ -65,7 +66,9 @@ export function FeatureGrid({
           if (card.type === 'large') {
             return (
               <div key={i} className={styles.cardLarge}>
-                {card.screenshot && (
+                {card.demo ? (
+                  <div className={styles.cardDemo}>{card.demo}</div>
+                ) : card.screenshot ? (
                   <Image
                     className={styles.cardImage}
                     src={card.screenshot}
@@ -73,7 +76,7 @@ export function FeatureGrid({
                     width={600}
                     height={400}
                   />
-                )}
+                ) : null}
                 <div className={styles.cardBody}>
                   <h3>{card.title}</h3>
                   {card.description && <p>{card.description}</p>}
