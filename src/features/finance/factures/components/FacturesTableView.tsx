@@ -6,36 +6,13 @@ import { FacturesTable } from '@/components/features/finance/Factures/FacturesTa
 import { isFactureEnRetard } from '@/components/features/finance/Factures/types';
 import type { Facture } from '@/components/features/finance/Factures/types';
 import type { PosteBudgetData } from '@/components/features/finance/Budget/types';
-import type { StatutFilterValue } from '@/features/finance/invoices/useFacturesPage';
+import type { useFacturesPageV2 } from '@/features/finance/factures';
 import { FacturesStatusSidebar } from './FacturesStatusSidebar';
 import type { SidebarFilter } from './FacturesStatusSidebar';
 import styles from './FacturesTableView.module.css';
 
 interface FacturesTableViewProps {
-  page: {
-    factures: Facture[];
-    searchTerm: string;
-    setSearchTerm: (v: string) => void;
-    statutFilter: StatutFilterValue;
-    handleStatutFilterChange: (v: StatutFilterValue) => void;
-    sortOrder: string;
-    setSortOrder: (fn: (prev: string) => string) => void;
-    fournisseurFilter: string;
-    setFournisseurFilter: (v: string) => void;
-    fournisseurs: string[];
-    periodeFilter: { debut: string; fin: string } | null;
-    setPeriodeFilter: (v: { debut: string; fin: string } | null) => void;
-    filteredFactures: Facture[];
-    handleStatutClick: (f: Facture) => void;
-    handleCategorize: (f: Facture) => void;
-    handleView: (f: Facture) => void;
-    handleEdit: (f: Facture) => void;
-    handleDelete: (f: Facture) => void;
-    handleCreateAvoir: (f: Facture) => void;
-    sortColumn: string;
-    sortDirection: string;
-    handleSort: (col: string) => void;
-  };
+  page: ReturnType<typeof useFacturesPageV2>;
   postesBudget: PosteBudgetData[];
 }
 
