@@ -6,36 +6,23 @@ import {
     MOCK_PRESTATAIRES_SYNDIC,
     MOCK_PRESTATAIRES_COPRO,
     MOCK_PRESTATAIRES_COPROFLEX,
-    MOCK_INTERVENTIONS_DETAILLEES,
     MOCK_CONTRATS_DETAILLES,
     MOCK_AVIS_COPROFLEX
 } from '@/data/mock';
 import { Prestataire, InterventionDetaille, DomaineActivite } from '@/types';
-import type { Provider } from '@/types/supabase';
-import { getInterventionsCountByPrestataire, getDerniereInterventionByPrestataire } from '@/lib/services/interventions.service';
+import type { Provider, LogbookOverview } from '@/types/supabase';
 import { useToast } from '@/providers/ToastProvider';
 import { useProviders, useLogbook } from '@/hooks/modules/useMaintenanceData';
-
-function enrichirPrestataire(p: Prestataire): Prestataire {
-    const countMap = getInterventionsCountByPrestataire();
-    const dateMap = getDerniereInterventionByPrestataire();
-    return {
-        ...p,
-        nombreInterventions: countMap.get(p.id) || 0,
-        derniereIntervention: dateMap.get(p.id)
-    };
-}
 
 export function useProviderDetailPage(id: string) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showToast } = useToast();
     const { providers: supabaseProviders, updateProvider, deleteProvider } = useProviders({ autoFetch: true });
-    const { createEntry } = useLogbook({ autoFetch: false });
+    const { entries: dbEntries, createEntry, fetchEntries } = useLogbook({ autoFetch: true });
 
     const [showAddIntervention, setShowAddIntervention] = useState(false);
     const [showEditModal, setShowEditModal] = useState(searchParams.get('edit') === 'true');
-    const [interventions, setInterventions] = useState<InterventionDetaille[]>(MOCK_INTERVENTIONS_DETAILLEES);
 
     // Chercher d'abord dans les mocks, puis dans Supabase
     const allPrestataires = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO, ...MOCK_PRESTATAIRES_COPROFLEX];
@@ -62,23 +49,37 @@ export function useProviderDetailPage(id: string) {
     } as Prestataire : undefined;
 
     const foundPrestataire = foundMock || foundSupabase;
-    const [prestataire, setPrestataire] = useState<Prestataire | undefined>(
-        foundPrestataire ? enrichirPrestataire(foundPrestataire) : undefined
-    );
+    const [prestataire, setPrestataire] = useState<Prestataire | undefined>(foundPrestataire);
 
     // Mettre à jour quand les données Supabase arrivent (chargement async)
     useEffect(() => {
         if (!prestataire && foundPrestataire) {
-            setPrestataire(enrichirPrestataire(foundPrestataire));
+            setPrestataire(foundPrestataire);
         }
     }, [supabaseProviders]);
 
-    const prestataireInterventions = useMemo(() =>
-        interventions
-            .filter(i => i.prestataireId === id)
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-        [interventions, id]
-    );
+    // Interventions depuis Supabase, filtrées par provider_id
+    const prestataireInterventions = useMemo(() => {
+        return dbEntries
+            .filter(e => e.provider_id === id)
+            .sort((a, b) => new Date(b.happened_at || '').getTime() - new Date(a.happened_at || '').getTime())
+            .map(e => ({
+                id: e.id || '',
+                date: e.happened_at || '',
+                titre: e.title || '',
+                description: e.description || '',
+                statut: (e.status || 'planifiee').toUpperCase() as InterventionDetaille['statut'],
+                type: (e.entry_type || 'entretien').toUpperCase() as InterventionDetaille['type'],
+                intervenant: e.provider_name || '',
+                prestataireId: e.provider_id || '',
+                coproprieteId: e.copro_id || undefined,
+                contratId: e.contract_id || undefined,
+                ordreServiceId: e.service_order_id || undefined,
+                domaine: (e.domain || '') as string,
+                cout: e.cost ?? undefined,
+                montant: e.cost ?? undefined,
+            }) as InterventionDetaille);
+    }, [dbEntries, id]);
 
     const contrats = useMemo(() =>
         MOCK_CONTRATS_DETAILLES.filter(c => c.prestataireId === id),
@@ -115,9 +116,6 @@ export function useProviderDetailPage(id: string) {
     };
 
     const handleAddIntervention = async (data: Partial<InterventionDetaille>) => {
-        setInterventions(prev => [data as InterventionDetaille, ...prev]);
-        showToast({ type: 'success', message: 'Intervention ajoutée avec succès' });
-
         try {
             await createEntry({
                 title: data.titre || '',
@@ -125,10 +123,14 @@ export function useProviderDetailPage(id: string) {
                 happened_at: data.date || new Date().toISOString(),
                 status: data.statut?.toLowerCase() || 'planifiee',
                 provider_id: data.prestataireId || id,
+                provider_name_snapshot: prestataire?.nom || '',
                 entry_type: 'entretien',
+                copro_id: '',
             } as unknown as import('@/types/supabase').LogbookEntryInsert);
+            showToast({ type: 'success', message: 'Intervention ajoutée avec succès' });
         } catch (err) {
             console.error('[useProviderDetailPage] Supabase createEntry error:', err);
+            showToast({ type: 'error', message: 'Erreur lors de l\'ajout de l\'intervention' });
         }
     };
 

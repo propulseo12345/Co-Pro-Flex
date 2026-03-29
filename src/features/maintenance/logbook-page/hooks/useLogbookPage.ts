@@ -11,6 +11,7 @@ import type {
     StatsCategorie,
     LogbookKpis,
     FiltreKpi,
+    PrestataireOption,
     ToastCreationProps,
 } from '@/components/features/maintenance/Logbook/types';
 import type { DocumentTechnique, ContratAssurance, ContratDetaille, TravauxPrevisionnel, Prestataire, InformationsCopropriete } from '@/types';
@@ -101,6 +102,8 @@ export interface ModalsState {
     selectedDocument: DocumentTechnique | null;
     newInterventionForm: InterventionFormData;
     coproprieteInfo: InformationsCopropriete;
+    prestatairesOptions: PrestataireOption[];
+    isSubmitting: boolean;
 }
 
 export interface ModalsHandlers {
@@ -255,6 +258,8 @@ export function useLogbookPage(): UseLogbookPageReturn {
         selectedDocument: logbook.selectedDocument,
         newInterventionForm: logbook.newInterventionForm,
         coproprieteInfo: logbook.coproprieteInfo,
+        prestatairesOptions: logbook.prestatairesOptions,
+        isSubmitting: logbook.isSubmitting,
     };
 
     const modalsHandlers: ModalsHandlers = {

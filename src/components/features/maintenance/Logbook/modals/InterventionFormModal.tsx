@@ -16,6 +16,8 @@ export function InterventionFormModal({
     isEditing,
     formData,
     equipementsPrincipaux,
+    prestataires,
+    isSubmitting,
     onFormDataChange,
     onSubmit,
     onClose
@@ -155,15 +157,40 @@ export function InterventionFormModal({
                         </div>
                     </div>
                     <div style={groupStyle}>
-                        <label style={labelStyle}>Intervenant</label>
-                        <input
-                            type="text"
+                        <label style={labelStyle}>Prestataire</label>
+                        <select
                             style={inputStyle}
-                            value={formData.intervenant}
-                            onChange={(e) => onFormDataChange({ ...formData, intervenant: e.target.value })}
-                            placeholder="Nom de l'intervenant ou de la société"
-                        />
+                            value={formData.prestataireId}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === '__new__') {
+                                    onFormDataChange({ ...formData, prestataireId: '__new__', nouveauPrestataire: '', intervenant: '' });
+                                } else {
+                                    const prest = prestataires.find(p => p.id === val);
+                                    onFormDataChange({ ...formData, prestataireId: val, nouveauPrestataire: '', intervenant: prest?.nom || '' });
+                                }
+                            }}
+                        >
+                            <option value="">— Sélectionner un prestataire —</option>
+                            {prestataires.map(p => (
+                                <option key={p.id} value={p.id}>{p.nom}</option>
+                            ))}
+                            <option value="__new__">+ Créer un nouveau prestataire</option>
+                        </select>
                     </div>
+                    {formData.prestataireId === '__new__' && (
+                        <div style={groupStyle}>
+                            <label style={labelStyle}>Nom du nouveau prestataire</label>
+                            <input
+                                type="text"
+                                style={inputStyle}
+                                value={formData.nouveauPrestataire}
+                                onChange={(e) => onFormDataChange({ ...formData, nouveauPrestataire: e.target.value, intervenant: e.target.value })}
+                                placeholder="Nom de la société ou de l'intervenant"
+                                autoFocus
+                            />
+                        </div>
+                    )}
                     <div style={{ ...rowStyle, marginBottom: 16 }}>
                         <EquipementCombobox
                             value={formData.equipementConcerne}
@@ -184,8 +211,10 @@ export function InterventionFormModal({
                     <button style={btnCancelStyle} onClick={onClose}>
                         Annuler
                     </button>
-                    <button style={btnSubmitStyle} onClick={onSubmit}>
-                        {isEditing ? (
+                    <button style={{ ...btnSubmitStyle, opacity: isSubmitting ? 0.6 : 1 }} onClick={onSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            'Enregistrement...'
+                        ) : isEditing ? (
                             <><Save size={14} aria-hidden="true" /> Enregistrer</>
                         ) : (
                             <><Plus size={14} aria-hidden="true" /> Créer l&apos;intervention</>

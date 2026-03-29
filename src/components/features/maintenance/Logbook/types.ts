@@ -149,8 +149,16 @@ export interface InterventionFormData {
     type: InterventionType;
     statut: InterventionStatut;
     intervenant: string;
+    prestataireId: string;
+    nouveauPrestataire: string;
     equipementConcerne: string;
     cout: string;
+}
+
+/** Prestataire simplifié pour le sélecteur */
+export interface PrestataireOption {
+    id: string;
+    nom: string;
 }
 
 // Données du formulaire copropriété
@@ -316,6 +324,8 @@ export interface InterventionFormModalProps {
     isEditing: boolean;
     formData: InterventionFormData;
     equipementsPrincipaux: string[];
+    prestataires: PrestataireOption[];
+    isSubmitting?: boolean;
     onFormDataChange: (data: InterventionFormData) => void;
     onSubmit: () => void;
     onClose: () => void;

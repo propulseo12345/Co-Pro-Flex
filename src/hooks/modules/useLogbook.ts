@@ -5,8 +5,6 @@ import {
     MOCK_INFORMATIONS_COPROPRIETE,
     MOCK_TRAVAUX_PREVISIONNELS,
     MOCK_DOCUMENTS_TECHNIQUES,
-    MOCK_PRESTATAIRES_SYNDIC,
-    MOCK_PRESTATAIRES_COPRO,
     MOCK_ASSURANCES_COPROPRIETE
 } from '@/data/mock';
 import {
@@ -14,13 +12,10 @@ import {
     subscribeToContracts,
 } from '@/lib/services/contracts.service';
 import {
-    getAllInterventions,
-    subscribeToInterventions,
-    addIntervention as addInterventionService,
-    updateIntervention as updateInterventionService,
-    getInterventionAlerts,
-    type AlerteIntervention
-} from '@/lib/services/interventions.service';
+    useLogbook as useLogbookSupabase,
+    useProviders,
+} from '@/hooks/modules/useMaintenanceData';
+import type { LogbookOverview, LogbookAlert, LogbookEntryInsert } from '@/types/supabase';
 import type {
     Intervention,
     InterventionFormData,
@@ -34,12 +29,69 @@ import type {
     DocumentsByCategory,
     CATEGORIES_DOCUMENTS,
     FiltreKpi,
+    PrestataireOption,
     ResultatCreationIntervention,
     ToastCreationProps,
     ToastType
 } from '@/components/features/maintenance/Logbook/types';
 import { isDocumentExpired, isDocumentExpiringSoon, isEcheanceProche, isGarantieEnCours, getInitialInterventionForm } from '@/components/features/maintenance/Logbook/utils';
-import { DocumentTechnique, ContratAssurance } from '@/types';
+import { DocumentTechnique, ContratAssurance, CategoriePrestataire } from '@/types';
+import type { Prestataire } from '@/types';
+
+// ============================================================================
+// MAPPING DB ↔ FRONT
+// ============================================================================
+
+const STATUS_DB_TO_FRONT: Record<string, Intervention['statut']> = {
+    planifiee: 'PLANIFIEE',
+    en_cours: 'EN_COURS',
+    terminee: 'TERMINEE',
+};
+const STATUS_FRONT_TO_DB: Record<string, string> = {
+    PLANIFIEE: 'planifiee',
+    EN_COURS: 'en_cours',
+    TERMINEE: 'terminee',
+};
+const CATEGORY_DB_TO_FRONT: Record<string, Intervention['categorie']> = {
+    courante: 'COURANTE',
+    travaux_importants: 'TRAVAUX_IMPORTANTS',
+};
+const CATEGORY_FRONT_TO_DB: Record<string, string> = {
+    COURANTE: 'courante',
+    TRAVAUX_IMPORTANTS: 'travaux_importants',
+};
+const TYPE_DB_TO_FRONT: Record<string, Intervention['type']> = {
+    entretien: 'ENTRETIEN',
+    controle: 'INSPECTION',
+    incident: 'REPARATION',
+    visite: 'INSPECTION',
+    travaux: 'ENTRETIEN',
+    diagnostic: 'INSPECTION',
+};
+const TYPE_FRONT_TO_DB: Record<string, string> = {
+    ENTRETIEN: 'entretien',
+    REPARATION: 'incident',
+    INSPECTION: 'controle',
+};
+
+/** Convertit une entrée Supabase en type Intervention front */
+function toIntervention(entry: LogbookOverview): Intervention {
+    return {
+        id: entry.id || '',
+        date: entry.happened_at || '',
+        titre: entry.title || '',
+        description: entry.description || '',
+        statut: STATUS_DB_TO_FRONT[entry.status || ''] || 'PLANIFIEE',
+        categorie: CATEGORY_DB_TO_FRONT[entry.category || ''] || 'COURANTE',
+        type: TYPE_DB_TO_FRONT[entry.entry_type || ''] || 'ENTRETIEN',
+        cout: entry.cost ?? undefined,
+        intervenant: entry.provider_name || '',
+        prestataireId: entry.provider_id || undefined,
+        equipementConcerne: (entry as Record<string, unknown>).equipment_concerned as string || undefined,
+        contratId: entry.contract_id || undefined,
+        ordreServiceId: entry.service_order_id || undefined,
+    };
+}
 
 // Catégories de documents
 const CATEGORIES_DOCS: Record<string, string[]> = {
@@ -67,17 +119,41 @@ export function useLogbook() {
         getAllContrats // SSR fallback
     );
 
-    // Synchroniser avec le service partagé des interventions (statuts mis à jour automatiquement)
-    const interventions = useSyncExternalStore(
-        subscribeToInterventions,
-        getAllInterventions,
-        getAllInterventions // SSR fallback
-    ) as Intervention[];
+    // === SUPABASE: interventions + prestataires ===
+    const {
+        entries: dbEntries,
+        alerts: dbAlerts,
+        isLoading: isLoadingEntries,
+        error: entriesError,
+        fetchEntries,
+        createEntry,
+        updateEntry,
+    } = useLogbookSupabase();
 
-    // Alertes d'interventions (J-7, J, J+1)
-    const interventionAlerts = useMemo<AlerteIntervention[]>(() => {
-        return getInterventionAlerts(getAllInterventions());
-    }, [interventions]);
+    const {
+        providers: dbProviders,
+        createProvider,
+    } = useProviders();
+
+    // Mapper les entrées DB vers le type front
+    const interventions = useMemo<Intervention[]>(
+        () => dbEntries.map(toIntervention),
+        [dbEntries]
+    );
+
+    // Liste des prestataires pour le sélecteur
+    const prestatairesOptions = useMemo<PrestataireOption[]>(
+        () => dbProviders
+            .filter(p => p.id && p.name)
+            .map(p => ({ id: p.id as string, nom: p.name as string })),
+        [dbProviders]
+    );
+
+    // Alertes depuis la vue Supabase
+    const interventionAlerts = useMemo(() => dbAlerts, [dbAlerts]);
+
+    // État de soumission
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // États onglets et vues
     const [activeTab, setActiveTab] = useState<ActiveTab>('interventions');
@@ -127,8 +203,23 @@ export function useLogbook() {
         syndicEmail: MOCK_INFORMATIONS_COPROPRIETE.syndic.email || '',
     });
 
-    // Données
-    const allPrestataires = useMemo(() => [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO], []);
+    // Données — prestataires depuis Supabase
+    const allPrestataires = useMemo(() => {
+        const mapped = dbProviders
+            .filter(p => p.id && p.name)
+            .map(p => ({
+                id: p.id as string,
+                nom: p.name as string,
+                categorie: (p.category || 'copropriete').toUpperCase(),
+                domaines: ((p.domains || []) as string[]).map(d => d.toUpperCase()),
+                telephone: p.phone || '',
+                email: p.email || '',
+                adresse: '',
+                dateAjout: p.created_at || '',
+                nombreInterventions: p.interventions_count || 0,
+            }));
+        return mapped as unknown as Prestataire[];
+    }, [dbProviders]);
 
     // Helpers pour équipements - utilise les contrats synchronisés
     const getContratsForEquipement = useCallback((equipement: string) => {
@@ -339,12 +430,11 @@ export function useLogbook() {
         setToastCreation(null);
     }, []);
 
-    const handleCreateIntervention = useCallback((): ResultatCreationIntervention => {
+    const handleCreateIntervention = useCallback(async (): Promise<ResultatCreationIntervention> => {
         // Validation
         if (!newInterventionForm.titre?.trim()) {
             setToastCreation({
-                visible: true,
-                type: 'error',
+                visible: true, type: 'error',
                 titre: 'Erreur de validation',
                 message: 'Le titre est obligatoire',
                 estVisibleAvecFiltre: false,
@@ -352,79 +442,132 @@ export function useLogbook() {
             return { succes: false, erreur: 'Le titre est obligatoire', visibleAvecFiltreActuel: false };
         }
 
-        if (!newInterventionForm.intervenant?.trim()) {
+        if (!newInterventionForm.prestataireId && !newInterventionForm.intervenant?.trim()) {
             setToastCreation({
-                visible: true,
-                type: 'error',
+                visible: true, type: 'error',
                 titre: 'Erreur de validation',
-                message: 'L\'intervenant est obligatoire',
+                message: 'Sélectionnez un prestataire ou saisissez un intervenant',
                 estVisibleAvecFiltre: false,
             });
-            return { succes: false, erreur: 'L\'intervenant est obligatoire', visibleAvecFiltreActuel: false };
+            return { succes: false, erreur: 'Prestataire obligatoire', visibleAvecFiltreActuel: false };
         }
 
-        // Création de l'intervention
-        const nouvelleIntervention: Intervention = {
-            id: `intervention-${Date.now()}`,
-            titre: newInterventionForm.titre.trim(),
-            description: newInterventionForm.description || '',
-            date: newInterventionForm.date || new Date().toISOString().split('T')[0],
-            categorie: newInterventionForm.categorie,
-            type: newInterventionForm.type,
-            statut: newInterventionForm.statut,
-            intervenant: newInterventionForm.intervenant.trim(),
-            equipementConcerne: newInterventionForm.equipementConcerne || undefined,
-            cout: newInterventionForm.cout ? parseFloat(newInterventionForm.cout) : undefined,
-        };
+        if (newInterventionForm.prestataireId === '__new__' && !newInterventionForm.nouveauPrestataire?.trim()) {
+            setToastCreation({
+                visible: true, type: 'error',
+                titre: 'Erreur de validation',
+                message: 'Le nom du nouveau prestataire est obligatoire',
+                estVisibleAvecFiltre: false,
+            });
+            return { succes: false, erreur: 'Nom prestataire obligatoire', visibleAvecFiltreActuel: false };
+        }
 
-        // Ajout via le service (statuts gérés automatiquement)
-        addInterventionService(nouvelleIntervention as unknown as Parameters<typeof addInterventionService>[0]);
+        setIsSubmitting(true);
 
-        // Vérifier la visibilité avec les filtres actuels
-        const visibleKpi = estVisibleAvecFiltreKpi(nouvelleIntervention, filtreKpiActif);
-        const visibleListe = estVisibleAvecFiltresListe(nouvelleIntervention);
-        const estVisible = visibleKpi && visibleListe && activeTab === 'interventions';
+        try {
+            // Si nouveau prestataire → créer d'abord
+            let providerId: string | undefined;
+            let providerName = newInterventionForm.intervenant.trim();
 
-        // Déterminer le message du toast
-        let labelFiltre: string | undefined;
-        if (!estVisible) {
-            if (!visibleKpi && filtreKpiActif !== null) {
-                labelFiltre = LABELS_FILTRES_KPI[filtreKpiActif];
-            } else if (!visibleListe) {
-                labelFiltre = 'Filtres de liste actifs';
-            } else if (activeTab !== 'interventions') {
-                labelFiltre = 'Onglet actuel';
+            if (newInterventionForm.prestataireId === '__new__') {
+                const newProvider = await createProvider({
+                    name: newInterventionForm.nouveauPrestataire.trim(),
+                    category: 'copropriete',
+                    domains: [],
+                    copro_id: '',
+                } as Parameters<typeof createProvider>[0]);
+                providerId = newProvider.id;
+                providerName = newProvider.name;
+            } else if (newInterventionForm.prestataireId) {
+                providerId = newInterventionForm.prestataireId;
+                const found = prestatairesOptions.find(p => p.id === providerId);
+                if (found) providerName = found.nom;
             }
+
+            // Insert en DB
+            const entry: LogbookEntryInsert = {
+                title: newInterventionForm.titre.trim(),
+                description: newInterventionForm.description || null,
+                happened_at: newInterventionForm.date || new Date().toISOString().split('T')[0],
+                category: CATEGORY_FRONT_TO_DB[newInterventionForm.categorie] as LogbookEntryInsert['category'],
+                entry_type: TYPE_FRONT_TO_DB[newInterventionForm.type] as LogbookEntryInsert['entry_type'],
+                status: STATUS_FRONT_TO_DB[newInterventionForm.statut] || 'planifiee',
+                provider_id: providerId || null,
+                provider_name_snapshot: providerName || null,
+                equipment_concerned: newInterventionForm.equipementConcerne || null,
+                cost: newInterventionForm.cout ? parseFloat(newInterventionForm.cout) : null,
+                copro_id: '', // sera rempli par createEntry
+            };
+
+            await createEntry(entry);
+
+            // Construire l'intervention front pour le toast
+            const nouvelleIntervention: Intervention = {
+                id: `temp-${Date.now()}`,
+                titre: newInterventionForm.titre.trim(),
+                description: newInterventionForm.description || '',
+                date: newInterventionForm.date || new Date().toISOString().split('T')[0],
+                categorie: newInterventionForm.categorie,
+                type: newInterventionForm.type,
+                statut: newInterventionForm.statut,
+                intervenant: providerName,
+                prestataireId: providerId,
+                equipementConcerne: newInterventionForm.equipementConcerne || undefined,
+                cout: newInterventionForm.cout ? parseFloat(newInterventionForm.cout) : undefined,
+            };
+
+            // Vérifier la visibilité avec les filtres actuels
+            const visibleKpi = estVisibleAvecFiltreKpi(nouvelleIntervention, filtreKpiActif);
+            const visibleListe = estVisibleAvecFiltresListe(nouvelleIntervention);
+            const estVisible = visibleKpi && visibleListe && activeTab === 'interventions';
+
+            let labelFiltre: string | undefined;
+            if (!estVisible) {
+                if (!visibleKpi && filtreKpiActif !== null) {
+                    labelFiltre = LABELS_FILTRES_KPI[filtreKpiActif];
+                } else if (!visibleListe) {
+                    labelFiltre = 'Filtres de liste actifs';
+                } else if (activeTab !== 'interventions') {
+                    labelFiltre = 'Onglet actuel';
+                }
+            }
+
+            setToastCreation({
+                visible: true,
+                type: estVisible ? 'success' : 'warning',
+                titre: estVisible ? 'Intervention créée' : 'Intervention créée (non visible)',
+                message: `"${nouvelleIntervention.titre}" a été enregistrée.`,
+                intervention: nouvelleIntervention,
+                estVisibleAvecFiltre: estVisible,
+                labelFiltre,
+            });
+
+            setShowNewInterventionModal(false);
+            setNewInterventionForm(getInitialInterventionForm());
+
+            setTimeout(() => { setToastCreation(null); }, estVisible ? 5000 : 10000);
+
+            return {
+                succes: true,
+                intervention: nouvelleIntervention,
+                visibleAvecFiltreActuel: estVisible,
+                filtreActuel: filtreKpiActif,
+                labelFiltre,
+            };
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Erreur lors de la création';
+            setToastCreation({
+                visible: true, type: 'error',
+                titre: 'Erreur',
+                message,
+                estVisibleAvecFiltre: false,
+            });
+            setTimeout(() => { setToastCreation(null); }, 8000);
+            return { succes: false, erreur: message, visibleAvecFiltreActuel: false };
+        } finally {
+            setIsSubmitting(false);
         }
-
-        // Afficher le toast
-        setToastCreation({
-            visible: true,
-            type: estVisible ? 'success' : 'warning',
-            titre: estVisible ? 'Intervention créée' : 'Intervention créée (non visible)',
-            message: `"${nouvelleIntervention.titre}" a été enregistrée.`,
-            intervention: nouvelleIntervention,
-            estVisibleAvecFiltre: estVisible,
-            labelFiltre,
-        });
-
-        // Fermer la modal et réinitialiser le formulaire
-        setShowNewInterventionModal(false);
-        setNewInterventionForm(getInitialInterventionForm());
-
-        // Auto-fermeture du toast après 5s si visible, 10s sinon
-        setTimeout(() => {
-            setToastCreation(null);
-        }, estVisible ? 5000 : 10000);
-
-        return {
-            succes: true,
-            intervention: nouvelleIntervention,
-            visibleAvecFiltreActuel: estVisible,
-            filtreActuel: filtreKpiActif,
-            labelFiltre,
-        };
-    }, [newInterventionForm, filtreKpiActif, activeTab, estVisibleAvecFiltreKpi, estVisibleAvecFiltresListe]);
+    }, [newInterventionForm, filtreKpiActif, activeTab, estVisibleAvecFiltreKpi, estVisibleAvecFiltresListe, createEntry, createProvider, prestatairesOptions]);
 
     /** Affiche l'intervention créée en réinitialisant les filtres */
     const voirInterventionCreee = useCallback(() => {
@@ -448,17 +591,17 @@ export function useLogbook() {
             type: intervention.type,
             statut: intervention.statut,
             intervenant: intervention.intervenant,
+            prestataireId: intervention.prestataireId || '',
+            nouveauPrestataire: '',
             equipementConcerne: intervention.equipementConcerne || '',
             cout: intervention.cout?.toString() || '',
         });
     }, []);
 
-    const handleSaveIntervention = useCallback(() => {
-        // Validation des champs obligatoires
+    const handleSaveIntervention = useCallback(async () => {
         if (!newInterventionForm.titre?.trim()) {
             setToastCreation({
-                visible: true,
-                type: 'error',
+                visible: true, type: 'error',
                 titre: 'Erreur de validation',
                 message: 'Le titre est obligatoire',
                 estVisibleAvecFiltre: false,
@@ -466,59 +609,70 @@ export function useLogbook() {
             return;
         }
 
-        if (!newInterventionForm.intervenant?.trim()) {
+        if (!editingIntervention) return;
+
+        setIsSubmitting(true);
+
+        try {
+            // Si nouveau prestataire → créer d'abord
+            let providerId: string | undefined = editingIntervention.prestataireId;
+            let providerName = newInterventionForm.intervenant.trim();
+
+            if (newInterventionForm.prestataireId === '__new__' && newInterventionForm.nouveauPrestataire?.trim()) {
+                const newProvider = await createProvider({
+                    name: newInterventionForm.nouveauPrestataire.trim(),
+                    category: 'copropriete',
+                    domains: [],
+                    copro_id: '',
+                } as Parameters<typeof createProvider>[0]);
+                providerId = newProvider.id;
+                providerName = newProvider.name;
+            } else if (newInterventionForm.prestataireId && newInterventionForm.prestataireId !== '__new__') {
+                providerId = newInterventionForm.prestataireId;
+                const found = prestatairesOptions.find(p => p.id === providerId);
+                if (found) providerName = found.nom;
+            }
+
+            await updateEntry(editingIntervention.id, {
+                title: newInterventionForm.titre.trim(),
+                description: newInterventionForm.description || null,
+                happened_at: newInterventionForm.date,
+                category: CATEGORY_FRONT_TO_DB[newInterventionForm.categorie] as LogbookEntryInsert['category'],
+                entry_type: TYPE_FRONT_TO_DB[newInterventionForm.type] as LogbookEntryInsert['entry_type'],
+                status: STATUS_FRONT_TO_DB[newInterventionForm.statut] || 'planifiee',
+                provider_id: providerId || null,
+                provider_name_snapshot: providerName || null,
+                equipment_concerned: newInterventionForm.equipementConcerne || null,
+                cost: newInterventionForm.cout ? parseFloat(newInterventionForm.cout) : null,
+                completed_at: newInterventionForm.statut === 'TERMINEE' ? new Date().toISOString() : null,
+            });
+
+            const titreModifie = newInterventionForm.titre.trim();
+
+            setEditingIntervention(null);
+            setNewInterventionForm(getInitialInterventionForm());
+
             setToastCreation({
-                visible: true,
-                type: 'error',
-                titre: 'Erreur de validation',
-                message: 'L\'intervenant est obligatoire',
+                visible: true, type: 'success',
+                titre: 'Modifications enregistrées',
+                message: `"${titreModifie}" a été mis à jour avec succès.`,
+                estVisibleAvecFiltre: true,
+            });
+
+            setTimeout(() => { setToastCreation(null); }, 4000);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+            setToastCreation({
+                visible: true, type: 'error',
+                titre: 'Erreur',
+                message,
                 estVisibleAvecFiltre: false,
             });
-            return;
+            setTimeout(() => { setToastCreation(null); }, 8000);
+        } finally {
+            setIsSubmitting(false);
         }
-
-        if (!editingIntervention) {
-            return;
-        }
-
-        // Mise à jour de l'intervention dans la liste
-        const interventionModifiee: Intervention = {
-            ...editingIntervention,
-            titre: newInterventionForm.titre.trim(),
-            description: newInterventionForm.description || '',
-            date: newInterventionForm.date,
-            categorie: newInterventionForm.categorie,
-            type: newInterventionForm.type,
-            statut: newInterventionForm.statut,
-            intervenant: newInterventionForm.intervenant.trim(),
-            equipementConcerne: newInterventionForm.equipementConcerne || undefined,
-            cout: newInterventionForm.cout ? parseFloat(newInterventionForm.cout) : undefined,
-        };
-
-        // Mise à jour via le service
-        updateInterventionService(interventionModifiee as unknown as Parameters<typeof updateInterventionService>[0]);
-
-        const titreModifie = newInterventionForm.titre.trim();
-
-        // Fermeture du modal et reset du formulaire
-        setEditingIntervention(null);
-        setNewInterventionForm(getInitialInterventionForm());
-
-        // Toast de confirmation
-        setToastCreation({
-            visible: true,
-            type: 'success',
-            titre: 'Modifications enregistrées',
-            message: `"${titreModifie}" a été mis à jour avec succès.`,
-            intervention: interventionModifiee,
-            estVisibleAvecFiltre: true,
-        });
-
-        // Auto-fermeture du toast après 4 secondes
-        setTimeout(() => {
-            setToastCreation(null);
-        }, 4000);
-    }, [editingIntervention, newInterventionForm]);
+    }, [editingIntervention, newInterventionForm, updateEntry, createProvider, prestatairesOptions]);
 
     const handleFiltreKpiChange = useCallback((filtre: FiltreKpi) => {
         // Si on clique sur le même filtre, on désactive
@@ -581,14 +735,17 @@ export function useLogbook() {
     }, [selectedEquipement]);
 
     return {
-        // Données - contrats et interventions synchronisés avec les services partagés
+        // Données — interventions depuis Supabase
         coproprieteInfo: MOCK_INFORMATIONS_COPROPRIETE,
-        contrats, // Synchronisé avec le service contracts
+        contrats,
         travaux: MOCK_TRAVAUX_PREVISIONNELS,
         documents: MOCK_DOCUMENTS_TECHNIQUES,
         assurances: MOCK_ASSURANCES_COPROPRIETE,
         allPrestataires,
-        interventionAlerts, // Alertes d'interventions (J-7, J, J+1)
+        prestatairesOptions,
+        interventionAlerts,
+        isLoadingEntries,
+        isSubmitting,
 
         // États
         activeTab,

@@ -40,6 +40,8 @@ export function LogbookModals({ modals, handlers }: LogbookModalsProps) {
                 isEditing={false}
                 formData={modals.newInterventionForm}
                 equipementsPrincipaux={modals.coproprieteInfo.equipementsPrincipaux}
+                prestataires={modals.prestatairesOptions || []}
+                isSubmitting={modals.isSubmitting}
                 onFormDataChange={handlers.setNewInterventionForm}
                 onSubmit={handlers.handleCreateIntervention}
                 onClose={() => handlers.setShowNewInterventionModal(false)}
@@ -50,6 +52,8 @@ export function LogbookModals({ modals, handlers }: LogbookModalsProps) {
                 isEditing={true}
                 formData={modals.newInterventionForm}
                 equipementsPrincipaux={modals.coproprieteInfo.equipementsPrincipaux}
+                prestataires={modals.prestatairesOptions || []}
+                isSubmitting={modals.isSubmitting}
                 onFormDataChange={handlers.setNewInterventionForm}
                 onSubmit={handlers.handleSaveIntervention}
                 onClose={() => handlers.setEditingIntervention(null)}

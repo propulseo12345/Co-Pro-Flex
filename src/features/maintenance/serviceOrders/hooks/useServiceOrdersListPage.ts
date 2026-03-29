@@ -37,7 +37,7 @@ function adaptToLegacyFormat(order: ServiceOrderOverview) {
     fournisseurNom: order.provider_name,
     typeOrdre: order.order_type === 'contractuel' ? 'CONTRACTUEL' : 'CLASSIQUE',
     statut: order.status ? mapStatusToLegacy(order.status) : 'BROUILLON',
-    urgence: order.urgency === 'critical' || order.urgency === 'high' || order.urgency === 'urgent',
+    urgence: order.urgency === 'critical' || order.urgency === 'high',
     montantEstime: order.estimated_amount,
     montantDevis: order.quoted_amount,
     montantReel: order.actual_amount,

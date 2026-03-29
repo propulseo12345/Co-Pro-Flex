@@ -1,6 +1,7 @@
 'use client';
 
-import { use, Suspense } from 'react';
+import { use, Suspense, useState } from 'react';
+import type { InterventionDetaille } from '@/types';
 import Link from 'next/link';
 import { ArrowLeft, Edit2, Trash2, Plus, Phone, Mail, MapPin, User, Building2, Calendar, FileText, Star } from 'lucide-react';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
@@ -63,6 +64,8 @@ function ProviderDetailContent({ id }: { id: string }) {
     handleAddIntervention,
     handleEditSave,
   } = useProviderDetailPage(id);
+
+  const [selectedIntervention, setSelectedIntervention] = useState<InterventionDetaille | null>(null);
 
   if (!prestataire) {
     return (
@@ -334,11 +337,15 @@ function ProviderDetailContent({ id }: { id: string }) {
                 : inter.statut === 'EN_COURS' ? '#60a5fa'
                 : inter.statut === 'PLANIFIEE' ? C.warning : C.textSecondary;
               return (
-                <div key={inter.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 14px', borderRadius: 8,
+                <button key={inter.id} onClick={() => setSelectedIntervention(inter)} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                  padding: '10px 14px', borderRadius: 8, cursor: 'pointer',
                   background: C.cardSecondary, border: `1px solid ${C.borderLight}`,
-                }}>
+                  fontFamily: 'inherit', textAlign: 'left', transition: 'border-color 0.15s, transform 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.borderLight; e.currentTarget.style.transform = 'none'; }}
+                >
                   <span style={{ color: statutColor, fontSize: 10 }}>&#9679;</span>
                   <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: C.text }}>{inter.titre}</span>
                   <span style={{ fontSize: 12, color: C.textTertiary }}>
@@ -352,7 +359,7 @@ function ProviderDetailContent({ id }: { id: string }) {
                       {inter.montant.toLocaleString('fr-FR')} &euro;
                     </span>
                   )}
-                </div>
+                </button>
               );
             })}
           </div>
@@ -400,6 +407,74 @@ function ProviderDetailContent({ id }: { id: string }) {
           onSave={handleEditSave}
         />
       )}
+
+      {/* Modale détail intervention */}
+      {selectedIntervention && (() => {
+        const inter = selectedIntervention;
+        const statutLabel = inter.statut === 'TERMINEE' ? 'Terminée' : inter.statut === 'EN_COURS' ? 'En cours' : 'Planifiée';
+        const statutColor = inter.statut === 'TERMINEE' ? C.success : inter.statut === 'EN_COURS' ? '#60a5fa' : C.warning;
+        const t = String(inter.type);
+        const typeLabel = t === 'ENTRETIEN' ? 'Entretien' : t === 'REPARATION' ? 'Réparation' : t === 'INSPECTION' ? 'Inspection' : t;
+        return (
+          <div
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem' }}
+            onClick={() => setSelectedIntervention(null)}
+          >
+            <div onClick={e => e.stopPropagation()} style={{ background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 560, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: `1px solid ${C.border}` }}>
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: `1px solid ${C.border}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <FileText size={18} style={{ color: C.textSecondary }} />
+                  <span style={{ fontSize: 16, fontWeight: 700, color: C.text }}>Détail intervention</span>
+                </div>
+                <button onClick={() => setSelectedIntervention(null)} style={{ background: 'none', border: 'none', color: C.textTertiary, cursor: 'pointer', padding: 4 }}>✕</button>
+              </div>
+              {/* Body */}
+              <div style={{ padding: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: C.text }}>{inter.titre}</h3>
+                  <span style={{ padding: '4px 12px', borderRadius: 8, fontSize: 11, fontWeight: 600, background: `${statutColor}15`, color: statutColor }}>{statutLabel}</span>
+                </div>
+                {inter.description && <p style={{ margin: '0 0 20px', fontSize: 13, color: C.textSecondary, lineHeight: 1.6 }}>{inter.description}</p>}
+                {/* KPI tiles */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+                  <div style={{ background: C.cardSecondary, borderRadius: 8, padding: '12px 16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: inter.montant ? C.danger : C.text, fontVariantNumeric: 'tabular-nums', fontFamily: "'SF Mono','Fira Code',monospace" }}>
+                      {inter.montant ? `${inter.montant.toLocaleString('fr-FR')} €` : '—'}
+                    </div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.textTertiary, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 4 }}>Coût</div>
+                  </div>
+                  <div style={{ background: C.cardSecondary, borderRadius: 8, padding: '12px 16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: statutColor }}>{statutLabel}</div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.textTertiary, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 4 }}>Statut</div>
+                  </div>
+                  <div style={{ background: C.cardSecondary, borderRadius: 8, padding: '12px 16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: C.text }}>{typeLabel}</div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.textTertiary, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 4 }}>Type</div>
+                  </div>
+                </div>
+                {/* Details */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.textTertiary, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>📅 Date</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{new Date(inter.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.textTertiary, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>👤 Intervenant</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{inter.intervenant || prestataire.nom}</div>
+                  </div>
+                </div>
+              </div>
+              {/* Footer */}
+              <div style={{ padding: '12px 24px', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={() => setSelectedIntervention(null)} style={{ padding: '8px 16px', background: C.cardSecondary, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }

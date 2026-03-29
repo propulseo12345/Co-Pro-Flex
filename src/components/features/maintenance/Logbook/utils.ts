@@ -96,6 +96,8 @@ export const getInitialInterventionForm = () => ({
     type: 'ENTRETIEN' as const,
     statut: 'PLANIFIEE' as const,
     intervenant: '',
+    prestataireId: '',
+    nouveauPrestataire: '',
     equipementConcerne: '',
     cout: '',
 });
