@@ -3,11 +3,8 @@
 import { useState } from 'react';
 import { ContratDetaille, TypeContrat } from '@/types';
 import { MOCK_TYPES_CONTRAT } from '@/data/mock';
-import { Plus, Upload, X } from 'lucide-react';
-import { DateRangePicker } from '@/components/ui/DatePicker';
+import { Plus, Upload, X, FileText } from 'lucide-react';
 import { isValid, parseISO, format } from 'date-fns';
-import clsx from 'clsx';
-import styles from '../Contracts.module.css';
 import { generateId } from '../utils';
 
 interface AddContractModalProps {
@@ -84,210 +81,224 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
         };
 
         onAdd(newContrat);
-
-        // Reset form
         setFormData({
-            libelle: '',
-            numeroContrat: '',
-            type: '',
-            prestataireId: '',
-            description: '',
-            conditionsParticulieres: '',
-            dateDebut: '',
-            dateFin: '',
-            taciteReconduction: false,
-            delaiResiliation: 30,
-            coutAnnuel: '',
-            fichierPDF: '',
-            estReglementaire: false
+            libelle: '', numeroContrat: '', type: '', prestataireId: '',
+            description: '', conditionsParticulieres: '', dateDebut: '', dateFin: '',
+            taciteReconduction: false, delaiResiliation: 30, coutAnnuel: '',
+            fichierPDF: '', estReglementaire: false
         });
         setErrors({});
         onClose();
     };
 
+    // Styles inline dark theme
+    const overlay: React.CSSProperties = {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.5)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem',
+    };
+    const modal: React.CSSProperties = {
+        background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 640,
+        maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+        border: '1px solid rgba(148,163,184,0.08)',
+    };
+    const header: React.CSSProperties = {
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '16px 24px', borderBottom: '1px solid rgba(148,163,184,0.08)',
+    };
+    const label: React.CSSProperties = {
+        display: 'block', marginBottom: 6, fontSize: 10, fontWeight: 600,
+        color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px',
+    };
+    const input: React.CSSProperties = {
+        width: '100%', padding: '10px 14px',
+        border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
+        fontSize: 13, color: '#e2e8f0', background: '#131620',
+        fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+    };
+    const inputErr: React.CSSProperties = { ...input, borderColor: '#ef4444' };
+    const textarea: React.CSSProperties = { ...input, minHeight: 70, resize: 'vertical' };
+    const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 };
+    const group: React.CSSProperties = { marginBottom: 16 };
+    const errText: React.CSSProperties = { fontSize: 11, color: '#ef4444', marginTop: 4, display: 'block' };
+    const footer: React.CSSProperties = {
+        padding: '12px 24px', borderTop: '1px solid rgba(148,163,184,0.08)',
+        display: 'flex', justifyContent: 'flex-end', gap: 8,
+    };
+    const btnCancel: React.CSSProperties = {
+        padding: '8px 16px', background: '#131620',
+        border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
+        color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+    };
+    const btnSubmit: React.CSSProperties = {
+        padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
+        color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+        fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6,
+    };
+    const checkLabel: React.CSSProperties = {
+        display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
+        color: '#e2e8f0', cursor: 'pointer', paddingTop: 22,
+    };
+
     return (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-                <div className={styles.modalHeader}>
-                    <h2>Ajouter un contrat</h2>
-                    <button className={styles.modalClose} onClick={onClose}>&times;</button>
+        <div style={overlay} onClick={onClose}>
+            <div style={modal} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+                <div style={header}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <FileText size={18} style={{ color: '#3b82f6' }} />
+                        <span style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>Nouveau contrat</span>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
+                        <X size={18} />
+                    </button>
                 </div>
-                <form onSubmit={handleSubmit} className={styles.modalContent}>
-                    <div className={styles.formGrid}>
-                        <div className={styles.formGroup}>
-                            <label>Libellé du contrat *</label>
-                            <input
-                                type="text"
-                                value={formData.libelle}
+
+                <form onSubmit={handleSubmit} style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+                    {/* Libellé + Numéro */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={label}>Libellé du contrat <span style={{ color: '#ef4444' }}>*</span></label>
+                            <input style={errors.libelle ? inputErr : input} value={formData.libelle}
                                 onChange={e => setFormData({ ...formData, libelle: e.target.value })}
-                                placeholder="Ex: Maintenance Ascenseur"
-                                className={errors.libelle ? styles.inputError : ''}
-                            />
-                            {errors.libelle && <span className={styles.errorText}>{errors.libelle}</span>}
+                                placeholder="Ex: Maintenance Ascenseur" />
+                            {errors.libelle && <span style={errText}>{errors.libelle}</span>}
                         </div>
-
-                        <div className={styles.formGroup}>
-                            <label>Numéro de contrat</label>
-                            <input
-                                type="text"
-                                value={formData.numeroContrat}
+                        <div style={group}>
+                            <label style={label}>Numéro de contrat</label>
+                            <input style={input} value={formData.numeroContrat}
                                 onChange={e => setFormData({ ...formData, numeroContrat: e.target.value })}
-                                placeholder="Ex: CT-2024-001"
-                            />
+                                placeholder="Ex: CT-2024-001" />
                         </div>
+                    </div>
 
-                        <div className={styles.formGroup}>
-                            <label>Type *</label>
-                            <select
-                                value={formData.type}
-                                onChange={e => setFormData({ ...formData, type: e.target.value as TypeContrat})}
-                                className={errors.type ? styles.inputError : ''}
-                            >
-                                <option value="">Sélectionner un type</option>
+                    {/* Type + Prestataire */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={label}>Type <span style={{ color: '#ef4444' }}>*</span></label>
+                            <select style={errors.type ? inputErr : input} value={formData.type}
+                                onChange={e => setFormData({ ...formData, type: e.target.value as TypeContrat })}>
+                                <option value="">— Sélectionner un type —</option>
                                 {MOCK_TYPES_CONTRAT.map(type => (
                                     <option key={type.value} value={type.value}>{type.label}</option>
                                 ))}
                             </select>
-                            {errors.type && <span className={styles.errorText}>{errors.type}</span>}
+                            {errors.type && <span style={errText}>{errors.type}</span>}
                         </div>
-
-                        <div className={styles.formGroup}>
-                            <label>Prestataire *</label>
-                            <select
-                                value={formData.prestataireId}
-                                onChange={e => setFormData({ ...formData, prestataireId: e.target.value})}
-                                className={errors.prestataireId ? styles.inputError : ''}
-                            >
-                                <option value="">Sélectionner un prestataire</option>
+                        <div style={group}>
+                            <label style={label}>Prestataire <span style={{ color: '#ef4444' }}>*</span></label>
+                            <select style={errors.prestataireId ? inputErr : input} value={formData.prestataireId}
+                                onChange={e => setFormData({ ...formData, prestataireId: e.target.value })}>
+                                <option value="">— Sélectionner un prestataire —</option>
                                 {prestataires.map(p => (
                                     <option key={p.id} value={p.id}>{p.nom}</option>
                                 ))}
                             </select>
-                            {errors.prestataireId && <span className={styles.errorText}>{errors.prestataireId}</span>}
+                            {errors.prestataireId && <span style={errText}>{errors.prestataireId}</span>}
                         </div>
+                    </div>
 
-                        <div className={clsx(styles.formGroup, styles.fullWidth)}>
-                            <label>Description / Informations supplémentaires</label>
-                            <textarea
-                                value={formData.description}
-                                onChange={e => setFormData({ ...formData, description: e.target.value})}
-                                rows={3}
-                                placeholder="Informations complémentaires sur le contrat..."
-                            />
+                    {/* Description */}
+                    <div style={group}>
+                        <label style={label}>Description</label>
+                        <textarea style={textarea} value={formData.description}
+                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Informations complémentaires sur le contrat..." rows={3} />
+                    </div>
+
+                    {/* Conditions */}
+                    <div style={group}>
+                        <label style={label}>Conditions particulières</label>
+                        <textarea style={textarea} value={formData.conditionsParticulieres}
+                            onChange={e => setFormData({ ...formData, conditionsParticulieres: e.target.value })}
+                            placeholder="Clauses spécifiques, conditions de renouvellement..." rows={2} />
+                    </div>
+
+                    {/* Dates */}
+                    <div style={{ ...row, marginBottom: 16 }}>
+                        <div>
+                            <label style={label}>Date de début <span style={{ color: '#ef4444' }}>*</span></label>
+                            <input type="date" style={errors.dateDebut ? inputErr : input} value={formData.dateDebut}
+                                onChange={e => setFormData({ ...formData, dateDebut: e.target.value })} />
+                            {errors.dateDebut && <span style={errText}>{errors.dateDebut}</span>}
                         </div>
-
-                        <div className={clsx(styles.formGroup, styles.fullWidth)}>
-                            <label>Conditions particulières</label>
-                            <textarea
-                                value={formData.conditionsParticulieres}
-                                onChange={e => setFormData({ ...formData, conditionsParticulieres: e.target.value})}
-                                rows={3}
-                                placeholder="Clauses spécifiques, conditions de renouvellement, exclusions..."
-                            />
+                        <div>
+                            <label style={label}>Date de fin <span style={{ color: '#ef4444' }}>*</span></label>
+                            <input type="date" style={errors.dateFin ? inputErr : input} value={formData.dateFin}
+                                onChange={e => setFormData({ ...formData, dateFin: e.target.value })} />
+                            {errors.dateFin && <span style={errText}>{errors.dateFin}</span>}
                         </div>
+                    </div>
 
-                        <div className={clsx(styles.formGroup, styles.fullWidth)}>
-                            <DateRangePicker
-                                labelStart="Date de début"
-                                labelEnd="Date de fin"
-                                valueStart={formData.dateDebut ? parseISO(formData.dateDebut) : null}
-                                valueEnd={formData.dateFin ? parseISO(formData.dateFin) : null}
-                                onChangeStart={(date) => {
-                                    if (date && isValid(date)) {
-                                        setFormData({ ...formData, dateDebut: format(date, 'yyyy-MM-dd') });
-                                    } else {
-                                        setFormData({ ...formData, dateDebut: '' });
-                                    }
-                                }}
-                                onChangeEnd={(date) => {
-                                    if (date && isValid(date)) {
-                                        setFormData({ ...formData, dateFin: format(date, 'yyyy-MM-dd') });
-                                    } else {
-                                        setFormData({ ...formData, dateFin: '' });
-                                    }
-                                }}
-                                required
-                                errorStart={errors.dateDebut}
-                                errorEnd={errors.dateFin}
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.taciteReconduction}
+                    {/* Tacite reconduction + Délai résiliation */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={checkLabel}>
+                                <input type="checkbox" checked={formData.taciteReconduction}
                                     onChange={e => setFormData({ ...formData, taciteReconduction: e.target.checked })}
-                                />
+                                    style={{ accentColor: '#3b82f6', width: 16, height: 16 }} />
                                 Tacite reconduction
                             </label>
                         </div>
-
-                        <div className={styles.formGroup}>
-                            <label>Délai de résiliation (jours)</label>
-                            <input type="number" value={formData.delaiResiliation} onChange={e => setFormData({ ...formData, delaiResiliation: parseInt(e.target.value) || 0})}
-                                min="0"
-                            />
+                        <div style={group}>
+                            <label style={label}>Délai de résiliation (jours)</label>
+                            <input type="number" style={input} value={formData.delaiResiliation}
+                                onChange={e => setFormData({ ...formData, delaiResiliation: parseInt(e.target.value) || 0 })}
+                                min="0" />
                         </div>
+                    </div>
 
-                        <div className={styles.formGroup}>
-                            <label>Coût annuel (€) *</label>
-                            <input type="number" value={formData.coutAnnuel} onChange={e => setFormData({ ...formData, coutAnnuel: e.target.value})}
-                                min="0"
-                                step="0.01"
-                                placeholder="0.00"
-                                className={errors.coutAnnuel ? styles.inputError : ''}
-                            />
-                            {errors.coutAnnuel && <span className={styles.errorText}>{errors.coutAnnuel}</span>}
+                    {/* Coût annuel + Réglementaire */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={label}>Coût annuel (€) <span style={{ color: '#ef4444' }}>*</span></label>
+                            <input type="number" style={errors.coutAnnuel ? inputErr : input} value={formData.coutAnnuel}
+                                onChange={e => setFormData({ ...formData, coutAnnuel: e.target.value })}
+                                min="0" step="0.01" placeholder="0.00" />
+                            {errors.coutAnnuel && <span style={errText}>{errors.coutAnnuel}</span>}
                         </div>
-
-                        <div className={styles.formGroup}>
-                            <label className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.estReglementaire}
+                        <div style={group}>
+                            <label style={checkLabel}>
+                                <input type="checkbox" checked={formData.estReglementaire}
                                     onChange={e => setFormData({ ...formData, estReglementaire: e.target.checked })}
-                                />
+                                    style={{ accentColor: '#3b82f6', width: 16, height: 16 }} />
                                 Contrat réglementaire
                             </label>
                         </div>
+                    </div>
 
-                        <div className={clsx(styles.formGroup, styles.fullWidth)}>
-                            <label>Document PDF du contrat</label>
-                            <div className={styles.fileUpload}>
-                                <input
-                                    type="file"
-                                    accept=".pdf"
-                                    id="contrat-pdf-upload"
-                                    onChange={e => setFormData({ ...formData, fichierPDF: e.target.files?.[0]?.name || '' })}
-                                    className={styles.fileInput}
-                                />
-                                <label htmlFor="contrat-pdf-upload" className={styles.fileUploadLabel}>
-                                    <Upload size={18} aria-hidden="true" />
-                                    <span>{formData.fichierPDF || 'Choisir un fichier PDF'}</span>
-                                </label>
-                                {formData.fichierPDF && (
-                                    <button
-                                        type="button"
-                                        className={styles.fileClear}
-                                        onClick={() => setFormData({ ...formData, fichierPDF: '' })}
-                                    >
-                                        <X size={14} aria-hidden="true" />
-                                    </button>
-                                )}
-                            </div>
+                    {/* Upload PDF */}
+                    <div style={group}>
+                        <label style={label}>Document PDF du contrat</label>
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '10px 14px', borderRadius: 8,
+                            border: '1px dashed rgba(148,163,184,0.15)', background: '#131620',
+                            cursor: 'pointer', position: 'relative',
+                        }}>
+                            <input type="file" accept=".pdf" id="contrat-pdf-upload"
+                                onChange={e => setFormData({ ...formData, fichierPDF: e.target.files?.[0]?.name || '' })}
+                                style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
+                            <Upload size={16} style={{ color: '#64748b' }} />
+                            <span style={{ fontSize: 13, color: formData.fichierPDF ? '#e2e8f0' : '#64748b' }}>
+                                {formData.fichierPDF || 'Choisir un fichier PDF'}
+                            </span>
+                            {formData.fichierPDF && (
+                                <button type="button" onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, fichierPDF: '' }); }}
+                                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 2 }}>
+                                    <X size={14} />
+                                </button>
+                            )}
                         </div>
                     </div>
-
-                    <div className={styles.modalActions}>
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>
-                            Annuler
-                        </button>
-                        <button type="submit" className="btn btn-primary">
-                            <Plus size={16} aria-hidden="true" /> Créer le contrat
-                        </button>
-                    </div>
                 </form>
+
+                <div style={footer}>
+                    <button type="button" style={btnCancel} onClick={onClose}>Annuler</button>
+                    <button type="button" style={btnSubmit} onClick={handleSubmit as unknown as () => void}>
+                        <Plus size={14} /> Créer le contrat
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
-import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation } from '@/types';
+import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation, Prestataire } from '@/types';
 import type { ContractInsert } from '@/types/supabase';
-import { MOCK_PRESTATAIRES_SYNDIC, MOCK_PRESTATAIRES_COPRO, MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
+import { MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
 import { getUniquePrestataires, formatMontant } from '@/components/features/maintenance/Contracts/utils';
 import type { ExportFormat } from '@/components/features/maintenance/Contracts/types';
 import { useCopro } from '@/providers/CoproContext';
@@ -18,10 +18,7 @@ import {
     updateContratSyndic,
     subscribeToContracts,
 } from '@/lib/services/contracts.service';
-import { useContracts as useContractsSupabase } from '@/hooks/modules/useMaintenanceData';
-
-// Tous les prestataires combinés
-const ALL_PRESTATAIRES = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO];
+import { useContracts as useContractsSupabase, useProviders } from '@/hooks/modules/useMaintenanceData';
 
 export function useContracts() {
     const { currentCoproId } = useCopro();
@@ -30,6 +27,26 @@ export function useContracts() {
         createContract: supabaseCreateContract,
         updateContract: supabaseUpdateContract,
     } = useContractsSupabase({ autoFetch: false });
+
+    const { providers: dbProviders } = useProviders({ autoFetch: true });
+
+    // Prestataires depuis Supabase
+    const supabasePrestataires = useMemo(() => {
+        const mapped = dbProviders
+            .filter(p => p.id && p.name)
+            .map(p => ({
+                id: p.id as string,
+                nom: p.name as string,
+                categorie: (p.category || 'copropriete').toUpperCase(),
+                domaines: ((p.domains || []) as string[]).map(d => d.toUpperCase()),
+                telephone: p.phone || '',
+                email: p.email || '',
+                adresse: '',
+                dateAjout: p.created_at || '',
+                nombreInterventions: p.interventions_count || 0,
+            }));
+        return mapped as unknown as Prestataire[];
+    }, [dbProviders]);
 
     // Load contracts from Supabase on mount / copro change
     useEffect(() => {
@@ -318,7 +335,7 @@ CoProFlex - Gestion de copropriété
         contrats,
         filteredContrats,
         contratSyndic,
-        prestataires: ALL_PRESTATAIRES,
+        prestataires: supabasePrestataires,
         uniquePrestataires,
 
         // Filtres
