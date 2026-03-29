@@ -46,33 +46,9 @@ function getJoursDepuis(dateStr: string): number {
  * - TERMINEE reste TERMINEE
  */
 function updateInterventionStatuts(interventions: InterventionCarnet[]): InterventionCarnet[] {
-    return interventions.map(intervention => {
-        // Les interventions terminées restent terminées
-        if (intervention.statut === 'TERMINEE') {
-            return intervention;
-        }
-
-        const joursDepuis = getJoursDepuis(intervention.date);
-
-        // Si la date est aujourd'hui et l'intervention est planifiée, on la passe en cours
-        if (intervention.statut === 'PLANIFIEE' && joursDepuis === 0) {
-            return {
-                ...intervention,
-                statut: 'EN_COURS' as const
-            };
-        }
-
-        // Si la date est passée et l'intervention est encore planifiée,
-        // on la passe aussi en cours (elle devrait avoir démarré)
-        if (intervention.statut === 'PLANIFIEE' && joursDepuis > 0) {
-            return {
-                ...intervention,
-                statut: 'EN_COURS' as const
-            };
-        }
-
-        return intervention;
-    });
+    // Le statut est contrôlé manuellement par l'utilisateur via la modale.
+    // Pas de changement automatique PLANIFIEE → EN_COURS basé sur la date.
+    return interventions;
 }
 
 /**

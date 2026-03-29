@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Maintenance (style Finance)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ========== NAV TABS ========== */
+  .moduleNav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 4px;
+    width: fit-content;
+  }
+  .moduleNav button {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .moduleNav button:hover { color: #94a3b8; background: rgba(148,163,184,0.06); }
+  .moduleNav button.active {
+    background: #1a1d2e;
+    color: #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* ========== TOP BAR ========== */
+  .topBar {
+    background: #161822;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .topBarLeft { display: flex; flex-direction: column; gap: 2px; }
+  .topBarTitle {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #e2e8f0;
+  }
+  .topBarSubtitle { font-size: 13px; color: #64748b; }
+  .topBarRight { display: flex; gap: 8px; align-items: center; }
+  .topBarPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pillGreen { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .pillAmber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .pillRed { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+  .btnGhost {
+    padding: 7px 14px;
+    border: 1px solid rgba(148,163,184,0.08);
+    background: rgba(148,163,184,0.06);
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btnGhost:hover { border-color: rgba(59,130,246,0.4); color: #e2e8f0; }
+
+  .btnPrimary {
+    padding: 7px 16px;
+    border: none;
+    background: #3b82f6;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btnPrimary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+  .btnIcon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(148,163,184,0.08);
+    background: rgba(148,163,184,0.06);
+    color: #94a3b8;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 16px;
+  }
+  .btnIcon:hover { border-color: rgba(59,130,246,0.4); color: #e2e8f0; }
+
+  /* ========== KPI STRIP ========== */
+  .kpiStrip {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpiCard {
+    flex: 1;
+    padding: 16px 20px;
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .kpiCard:hover { border-color: rgba(59,130,246,0.3); }
+  .kpiCard.kpiActive { border-color: #3b82f6; background: rgba(59,130,246,0.06); }
+  .kpiLabel {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+  .kpiValue {
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #e2e8f0;
+  }
+  .kpiTrend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  /* ========== ALERT BANNERS ========== */
+  .banners {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .banner {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .banner:hover { filter: brightness(1.15); }
+  .bannerAmber { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.15); }
+  .bannerAmber .bannerLabel { color: #f59e0b; font-weight: 600; }
+  .bannerRed { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.15); }
+  .bannerRed .bannerLabel { color: #ef4444; font-weight: 600; }
+  .bannerBlue { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.15); }
+  .bannerBlue .bannerLabel { color: #60a5fa; font-weight: 600; }
+  .bannerDetail { color: #94a3b8; font-size: 12px; }
+  .bannerAction { margin-left: auto; color: #60a5fa; font-size: 12px; font-weight: 500; }
+
+  /* ========== FILTERS ========== */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .searchBox {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 10px;
+    color: #64748b;
+    font-size: 13px;
+  }
+  .searchBox input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #e2e8f0;
+    outline: none;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .searchBox input::placeholder { color: #64748b; }
+  .filterBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .filterBtn:hover { border-color: rgba(59,130,246,0.4); color: #e2e8f0; }
+  .filterBtn.active { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.4); color: #3b82f6; font-weight: 600; }
+
+  /* ========== TABLE ========== */
+  .tableContainer {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 14px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr {
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+  }
+  th {
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+  }
+  td {
+    padding: 10px 8px;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: rgba(59,130,246,0.04); }
+
+  /* ========== BADGES ========== */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badgeGreen { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .badgeRed { background: rgba(239,68,68,0.1); color: #f87171; }
+  .badgeAmber { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .badgeBlue { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .badgeGray { background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .badgePurple { background: rgba(167,139,250,0.1); color: #a78bfa; }
+
+  /* ========== SPLIT VIEW ========== */
+  .splitView {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+  }
+  .splitList {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 8px;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+  .splitItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .splitItem:hover { background: rgba(148,163,184,0.04); }
+  .splitItem.splitItemActive {
+    background: rgba(59,130,246,0.08);
+    border-color: rgba(59,130,246,0.3);
+  }
+  .splitItemAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .splitItemInfo { flex: 1; min-width: 0; }
+  .splitItemName { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .splitItemMeta { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  .splitDetail {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .detailTitle { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .detailSub { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+  .detailStats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .detailStatCard {
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.06);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .detailStatValue { font-size: 20px; font-weight: 700; }
+  .detailStatLabel { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 4px; }
+
+  .infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .infoItem {}
+  .infoItemLabel { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px; }
+  .infoItemValue { font-size: 13px; color: #e2e8f0; font-weight: 500; }
+
+  /* ========== WORKFLOW BAR ========== */
+  .workflowBar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.06);
+    border-radius: 10px;
+  }
+  .workflowStep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+  }
+  .workflowStep.stepDone { color: #22c55e; }
+  .workflowStep.stepActive { color: #3b82f6; font-weight: 700; }
+  .workflowDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #334155;
+  }
+  .stepDone .workflowDot { background: #22c55e; }
+  .stepActive .workflowDot { background: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.5); }
+  .workflowLine {
+    flex: 1;
+    height: 2px;
+    background: #334155;
+    margin: 0 6px;
+    min-width: 16px;
+  }
+  .workflowLine.lineDone { background: #22c55e; }
+
+  /* ========== COST BAR ========== */
+  .costBar {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .costBarTitle { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+  .costBarTotal { font-size: 20px; font-weight: 700; color: #e2e8f0; font-variant-numeric: tabular-nums; }
+  .costBarBreakdown { display: flex; gap: 16px; margin-left: auto; }
+  .costBarItem { text-align: center; }
+  .costBarItemValue { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .costBarItemLabel { font-size: 10px; text-transform: uppercase; color: #64748b; margin-top: 2px; }
+
+  /* ========== DOMAIN TAGS ========== */
+  .domainTag {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  /* ========== SECTIONS ========== */
+  .section { margin-bottom: 32px; }
+  .sectionTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sectionDivider {
+    height: 1px;
+    background: rgba(148,163,184,0.08);
+    margin: 32px 0;
+  }
+
+  /* ========== SYNDIC BANNER ========== */
+  .syndicBanner {
+    background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(167,139,250,0.06));
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .syndicAvatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+  }
+  .syndicInfo { flex: 1; }
+  .syndicName { font-size: 14px; font-weight: 700; color: #e2e8f0; }
+  .syndicMeta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+  /* ========== TIMELINE ========== */
+  .timeline { position: relative; padding-left: 24px; }
+  .timelineLine {
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(148,163,184,0.12);
+  }
+  .timelineItem {
+    position: relative;
+    padding: 12px 0 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .timelineDot {
+    position: absolute;
+    left: -20px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+  .timelineContent {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.06);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .timelineContent:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-1px); }
+  .timelineName { font-size: 13px; font-weight: 600; }
+  .timelineMeta { font-size: 11px; color: #64748b; }
+  .timelineAmount { margin-left: auto; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: #e2e8f0; }
+
+  .actionLink {
+    color: #3b82f6;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .actionLink:hover { color: #60a5fa; text-decoration: underline; }
+
+  /* Montants */
+  .montantCredit { color: #22c55e; font-weight: 600; }
+  .montantDebit { color: #ef4444; font-weight: 600; }
+  .montantNeutral { color: #e2e8f0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.15); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.25); }
+
+  .pageContainer { max-width: 1200px; margin: 0 auto; }
+  .hidden { display: none; }
+
+  /* Star rating */
+  .starInline { color: #FBBF24; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="pageContainer">
+
+<!-- ===== MODULE NAV ===== -->
+<div class="moduleNav">
+  <button class="active" onclick="showSection('logbook')">Carnet d'entretien</button>
+  <button onclick="showSection('contracts')">Contrats</button>
+  <button onclick="showSection('providers')">Prestataires</button>
+  <button onclick="showSection('orders')">Ordres de service</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1 : CARNET D'ENTRETIEN (LOGBOOK)                     -->
+<!-- ============================================================ -->
+<div id="section-logbook">
+
+  <!-- TopBar -->
+  <div class="topBar">
+    <div class="topBarLeft">
+      <div class="topBarTitle">Carnet d'entretien</div>
+      <div class="topBarSubtitle">Historique des interventions et travaux</div>
+    </div>
+    <div class="topBarRight">
+      <span class="topBarPill pillGreen">● À jour</span>
+      <button class="btnGhost">⬇ Exporter</button>
+      <button class="btnPrimary">+ Intervention</button>
+    </div>
+  </div>
+
+  <!-- KPI Strip -->
+  <div class="kpiStrip">
+    <div class="kpiCard kpiActive">
+      <div class="kpiLabel">INTERVENTIONS</div>
+      <div class="kpiValue">24</div>
+      <div class="kpiTrend" style="color:#22c55e;">↑ 3 ce mois</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">EN COURS</div>
+      <div class="kpiValue" style="color:#f59e0b;">4</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">PLANIFIÉES</div>
+      <div class="kpiValue" style="color:#60a5fa;">2</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">ÉQUIPEMENTS</div>
+      <div class="kpiValue">12</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">COÛT ANNUEL</div>
+      <div class="kpiValue" style="color:#ef4444;">18 450 €</div>
+      <div class="kpiTrend" style="color:#ef4444;">↑ +12% vs N-1</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">URGENCES</div>
+      <div class="kpiValue" style="color:#ef4444;">1</div>
+    </div>
+  </div>
+
+  <!-- Alert Banners -->
+  <div class="banners">
+    <div class="banner bannerAmber">
+      <span class="bannerLabel">⚠ 4 interventions en cours</span>
+      <span class="bannerDetail">(2 450 €)</span>
+      <span class="bannerAction">Filtrer →</span>
+    </div>
+    <div class="banner bannerRed">
+      <span class="bannerLabel">🔴 1 urgence non traitée</span>
+      <span class="bannerDetail">Fuite colonne montante</span>
+      <span class="bannerAction">Voir →</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="searchBox">
+      <span>🔍</span>
+      <input type="text" placeholder="Rechercher par libellé, prestataire, équipement...">
+    </div>
+    <button class="filterBtn active">Tous (24)</button>
+    <button class="filterBtn">↓ Courantes</button>
+    <button class="filterBtn">↑ Travaux</button>
+    <button class="filterBtn">⚙ Équipement</button>
+    <button class="filterBtn">📅 Année</button>
+  </div>
+
+  <!-- Table -->
+  <div class="tableContainer">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>DATE</th>
+          <th>INTERVENTION</th>
+          <th>ÉQUIPEMENT</th>
+          <th>PRESTATAIRE</th>
+          <th>COÛT</th>
+          <th>STATUT</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>●</td>
+          <td style="color:#94a3b8;">15/03</td>
+          <td>Fuite colonne montante — 3ème étage</td>
+          <td style="color:#94a3b8;">Plomberie</td>
+          <td>Dupont Plomberie</td>
+          <td class="montantDebit">-1 200 €</td>
+          <td><span class="badge badgeRed">Urgence</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td>●</td>
+          <td style="color:#94a3b8;">12/03</td>
+          <td>Révision chaudière collective</td>
+          <td style="color:#94a3b8;">Chauffage</td>
+          <td>Thermiplus</td>
+          <td class="montantDebit">-850 €</td>
+          <td><span class="badge badgeAmber">En cours</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td>●</td>
+          <td style="color:#94a3b8;">08/03</td>
+          <td>Remplacement interphone bât. B</td>
+          <td style="color:#94a3b8;">Interphone</td>
+          <td>TechImmo</td>
+          <td class="montantDebit">-3 200 €</td>
+          <td><span class="badge badgeBlue">Programmé</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td>●</td>
+          <td style="color:#94a3b8;">01/03</td>
+          <td>Entretien espaces verts — taille haies</td>
+          <td style="color:#94a3b8;">Espaces verts</td>
+          <td>GreenCo</td>
+          <td class="montantDebit">-450 €</td>
+          <td><span class="badge badgeGreen">Terminé</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td>●</td>
+          <td style="color:#94a3b8;">25/02</td>
+          <td>Contrôle annuel ascenseur</td>
+          <td style="color:#94a3b8;">Ascenseur</td>
+          <td>Otis France</td>
+          <td class="montantDebit">-680 €</td>
+          <td><span class="badge badgeGreen">Terminé</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td>●</td>
+          <td style="color:#94a3b8;">18/02</td>
+          <td>Remplacement ampoules parking -2</td>
+          <td style="color:#94a3b8;">Électricité</td>
+          <td>ElecPro</td>
+          <td class="montantDebit">-180 €</td>
+          <td><span class="badge badgeGreen">Terminé</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2 : CONTRATS                                         -->
+<!-- ============================================================ -->
+<div id="section-contracts" class="hidden">
+
+  <!-- TopBar -->
+  <div class="topBar">
+    <div class="topBarLeft">
+      <div class="topBarTitle">Contrats de maintenance</div>
+      <div class="topBarSubtitle">Gestion des contrats, assurances et échéances</div>
+    </div>
+    <div class="topBarRight">
+      <span class="topBarPill pillAmber">⚠ 2 expirent bientôt</span>
+      <button class="btnGhost">⬇ Exporter</button>
+      <button class="btnPrimary">+ Contrat</button>
+    </div>
+  </div>
+
+  <!-- KPI Strip -->
+  <div class="kpiStrip">
+    <div class="kpiCard">
+      <div class="kpiLabel">CONTRATS ACTIFS</div>
+      <div class="kpiValue">8</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">EXPIRENT < 90J</div>
+      <div class="kpiValue" style="color:#f59e0b;">2</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">COÛT ANNUEL TOTAL</div>
+      <div class="kpiValue">24 680 €</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">PRESTATAIRES LIÉS</div>
+      <div class="kpiValue">6</div>
+    </div>
+  </div>
+
+  <!-- Syndic Banner -->
+  <div class="syndicBanner">
+    <div class="syndicAvatar">SC</div>
+    <div class="syndicInfo">
+      <div class="syndicName">Syndic Conseil — Contrat principal</div>
+      <div class="syndicMeta">Échéance : 31/12/2026 · Honoraires : 12 500 € / an · Mandat en cours</div>
+    </div>
+    <button class="btnGhost">Modifier</button>
+    <button class="btnGhost">Renouveler</button>
+  </div>
+
+  <!-- Cost Bar -->
+  <div class="costBar">
+    <div>
+      <div class="costBarTitle">COÛT ANNUEL</div>
+      <div class="costBarTotal">24 680 €</div>
+    </div>
+    <div class="costBarBreakdown">
+      <div class="costBarItem">
+        <div class="costBarItemValue" style="color:#60a5fa;">12 500 €</div>
+        <div class="costBarItemLabel">Syndic</div>
+      </div>
+      <div class="costBarItem">
+        <div class="costBarItemValue" style="color:#22c55e;">4 200 €</div>
+        <div class="costBarItemLabel">Ascenseur</div>
+      </div>
+      <div class="costBarItem">
+        <div class="costBarItemValue" style="color:#f59e0b;">3 800 €</div>
+        <div class="costBarItemLabel">Chauffage</div>
+      </div>
+      <div class="costBarItem">
+        <div class="costBarItemValue" style="color:#a78bfa;">2 100 €</div>
+        <div class="costBarItemLabel">Ménage</div>
+      </div>
+      <div class="costBarItem">
+        <div class="costBarItemValue" style="color:#94a3b8;">2 080 €</div>
+        <div class="costBarItemLabel">Autres</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="searchBox">
+      <span>🔍</span>
+      <input type="text" placeholder="Rechercher un contrat, prestataire...">
+    </div>
+    <button class="filterBtn active">Tous (8)</button>
+    <button class="filterBtn">Actifs</button>
+    <button class="filterBtn">Expirent bientôt</button>
+    <button class="filterBtn">Résiliés</button>
+  </div>
+
+  <!-- Timeline Table -->
+  <div class="tableContainer">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>CONTRAT</th>
+          <th>PRESTATAIRE</th>
+          <th>DOMAINE</th>
+          <th>ÉCHÉANCE</th>
+          <th>COÛT / AN</th>
+          <th>STATUT</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:#22c55e;">●</td>
+          <td>Maintenance ascenseur</td>
+          <td>Otis France</td>
+          <td><span class="domainTag" style="background:rgba(91,141,239,0.12);color:#5b8def;">Ascenseur</span></td>
+          <td style="color:#94a3b8;">15/06/2027</td>
+          <td class="montantNeutral">4 200 €</td>
+          <td><span class="badge badgeGreen">Actif</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td style="color:#22c55e;">●</td>
+          <td>Entretien chauffage collectif</td>
+          <td>Thermiplus</td>
+          <td><span class="domainTag" style="background:rgba(229,166,62,0.12);color:#e5a63e;">Chauffage</span></td>
+          <td style="color:#94a3b8;">30/09/2026</td>
+          <td class="montantNeutral">3 800 €</td>
+          <td><span class="badge badgeGreen">Actif</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+        <tr>
+          <td style="color:#f59e0b;">●</td>
+          <td>Contrat ménage parties communes</td>
+          <td>CleanPro</td>
+          <td><span class="domainTag" style="background:rgba(62,207,142,0.12);color:#3ecf8e;">Ménage</span></td>
+          <td style="color:#f59e0b;">15/05/2026</td>
+          <td class="montantNeutral">2 100 €</td>
+          <td><span class="badge badgeAmber">Expire bientôt</span></td>
+          <td><a class="actionLink">Renouveler</a></td>
+        </tr>
+        <tr>
+          <td style="color:#f59e0b;">●</td>
+          <td>Assurance multirisque immeuble</td>
+          <td>AXA Immo</td>
+          <td><span class="domainTag" style="background:rgba(248,113,113,0.12);color:#f87171;">Assurance</span></td>
+          <td style="color:#f59e0b;">01/04/2026</td>
+          <td class="montantNeutral">1 850 €</td>
+          <td><span class="badge badgeRed">Expire dans 3j</span></td>
+          <td><a class="actionLink">Renouveler</a></td>
+        </tr>
+        <tr>
+          <td style="color:#22c55e;">●</td>
+          <td>Entretien espaces verts</td>
+          <td>GreenCo</td>
+          <td><span class="domainTag" style="background:rgba(52,211,153,0.12);color:#34d399;">Espaces verts</span></td>
+          <td style="color:#94a3b8;">01/12/2026</td>
+          <td class="montantNeutral">1 680 €</td>
+          <td><span class="badge badgeGreen">Actif</span></td>
+          <td><a class="actionLink">Détails</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3 : PRESTATAIRES                                     -->
+<!-- ============================================================ -->
+<div id="section-providers" class="hidden">
+
+  <!-- TopBar -->
+  <div class="topBar">
+    <div class="topBarLeft">
+      <div class="topBarTitle">Annuaire prestataires</div>
+      <div class="topBarSubtitle">Coordonnées et suivi des professionnels</div>
+    </div>
+    <div class="topBarRight">
+      <button class="btnGhost">⬇ Exporter</button>
+      <button class="btnPrimary">+ Prestataire</button>
+    </div>
+  </div>
+
+  <!-- KPI Strip -->
+  <div class="kpiStrip">
+    <div class="kpiCard">
+      <div class="kpiLabel">TOTAL</div>
+      <div class="kpiValue">14</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">ACTIFS</div>
+      <div class="kpiValue" style="color:#22c55e;">11</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">INTERVENTIONS TOTAL</div>
+      <div class="kpiValue">67</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">NOTE MOYENNE</div>
+      <div class="kpiValue" style="color:#fbbf24;">4.2 ★</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="searchBox">
+      <span>🔍</span>
+      <input type="text" placeholder="Rechercher par nom, domaine...">
+    </div>
+    <button class="filterBtn active">Tous (14)</button>
+    <button class="filterBtn">Copropriété</button>
+    <button class="filterBtn">Syndic</button>
+    <button class="filterBtn">CoproFlex</button>
+  </div>
+
+  <!-- Split View -->
+  <div class="splitView">
+    <div class="splitList">
+      <div class="splitItem splitItemActive">
+        <div class="splitItemAvatar" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:white;">OT</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">Otis France</div>
+          <div class="splitItemMeta">
+            <span class="domainTag" style="background:rgba(91,141,239,0.12);color:#5b8def;">Ascenseur</span>
+            <span style="color:#fbbf24;margin-left:8px;">★ 4.5</span>
+          </div>
+        </div>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:linear-gradient(135deg,#e5a63e,#fbbf24);color:white;">TH</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">Thermiplus</div>
+          <div class="splitItemMeta">
+            <span class="domainTag" style="background:rgba(229,166,62,0.12);color:#e5a63e;">Chauffage</span>
+            <span style="color:#fbbf24;margin-left:8px;">★ 4.2</span>
+          </div>
+        </div>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:white;">DP</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">Dupont Plomberie</div>
+          <div class="splitItemMeta">
+            <span class="domainTag" style="background:rgba(96,165,250,0.12);color:#60a5fa;">Plomberie</span>
+            <span style="color:#fbbf24;margin-left:8px;">★ 3.8</span>
+          </div>
+        </div>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:linear-gradient(135deg,#34d399,#3ecf8e);color:white;">GC</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">GreenCo</div>
+          <div class="splitItemMeta">
+            <span class="domainTag" style="background:rgba(52,211,153,0.12);color:#34d399;">Espaces verts</span>
+            <span style="color:#fbbf24;margin-left:8px;">★ 4.7</span>
+          </div>
+        </div>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:linear-gradient(135deg,#3ecf8e,#34d399);color:white;">CP</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">CleanPro</div>
+          <div class="splitItemMeta">
+            <span class="domainTag" style="background:rgba(62,207,142,0.12);color:#3ecf8e;">Ménage</span>
+            <span style="color:#fbbf24;margin-left:8px;">★ 4.0</span>
+          </div>
+        </div>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:white;">TI</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">TechImmo</div>
+          <div class="splitItemMeta">
+            <span class="domainTag" style="background:rgba(167,139,250,0.12);color:#a78bfa;">Interphone</span>
+            <span style="color:#fbbf24;margin-left:8px;">★ 4.3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="splitDetail">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px;">
+        <div>
+          <div class="detailTitle">Otis France</div>
+          <div class="detailSub">Maintenance et installation d'ascenseurs</div>
+        </div>
+        <span class="badge badgeGreen">Actif</span>
+      </div>
+
+      <div class="detailStats">
+        <div class="detailStatCard">
+          <div class="detailStatValue" style="color:#60a5fa;">12</div>
+          <div class="detailStatLabel">Interventions</div>
+        </div>
+        <div class="detailStatCard">
+          <div class="detailStatValue" style="color:#fbbf24;">4.5 ★</div>
+          <div class="detailStatLabel">Note moyenne</div>
+        </div>
+        <div class="detailStatCard">
+          <div class="detailStatValue" style="color:#e2e8f0;">8 640 €</div>
+          <div class="detailStatLabel">Total facturé</div>
+        </div>
+      </div>
+
+      <div class="infoGrid">
+        <div class="infoItem">
+          <div class="infoItemLabel">TÉLÉPHONE</div>
+          <div class="infoItemValue">01 42 36 78 90</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">EMAIL</div>
+          <div class="infoItemValue" style="color:#60a5fa;">contact@otis-france.fr</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">ADRESSE</div>
+          <div class="infoItemValue">15 rue de la Mécanique, 75011 Paris</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">SIRET</div>
+          <div class="infoItemValue" style="color:#94a3b8;">542 107 632 00089</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">CONTRAT LIÉ</div>
+          <div class="infoItemValue" style="color:#60a5fa;">Maintenance ascenseur → 15/06/2027</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">DOMAINES</div>
+          <div class="infoItemValue">
+            <span class="domainTag" style="background:rgba(91,141,239,0.12);color:#5b8def;">Ascenseur</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btnGhost">📞 Appeler</button>
+        <button class="btnGhost">✉ Email</button>
+        <button class="btnPrimary">+ Ordre de service</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4 : ORDRES DE SERVICE                                -->
+<!-- ============================================================ -->
+<div id="section-orders" class="hidden">
+
+  <!-- TopBar -->
+  <div class="topBar">
+    <div class="topBarLeft">
+      <div class="topBarTitle">Ordres de service</div>
+      <div class="topBarSubtitle">Suivi des interventions et workflow</div>
+    </div>
+    <div class="topBarRight">
+      <span class="topBarPill pillBlue">● 3 en attente</span>
+      <button class="btnGhost">⬇ Exporter</button>
+      <button class="btnPrimary">+ Ordre de service</button>
+    </div>
+  </div>
+
+  <!-- KPI Strip -->
+  <div class="kpiStrip">
+    <div class="kpiCard kpiActive">
+      <div class="kpiLabel">TOTAL</div>
+      <div class="kpiValue">18</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">BROUILLONS</div>
+      <div class="kpiValue" style="color:#64748b;">2</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">EN ATTENTE</div>
+      <div class="kpiValue" style="color:#fbbf24;">3</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">PROGRAMMÉS</div>
+      <div class="kpiValue" style="color:#60a5fa;">4</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">RÉALISÉS</div>
+      <div class="kpiValue" style="color:#22c55e;">7</div>
+    </div>
+    <div class="kpiCard">
+      <div class="kpiLabel">CLÔTURÉS</div>
+      <div class="kpiValue" style="color:#a78bfa;">2</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="searchBox">
+      <span>🔍</span>
+      <input type="text" placeholder="Rechercher par titre, numéro, fournisseur...">
+    </div>
+    <button class="filterBtn active">Tous (18)</button>
+    <button class="filterBtn">Urgence</button>
+    <button class="filterBtn">Type</button>
+    <button class="filterBtn">Fournisseur</button>
+  </div>
+
+  <!-- Split View -->
+  <div class="splitView">
+    <div class="splitList">
+      <div class="splitItem splitItemActive">
+        <div class="splitItemAvatar" style="background:rgba(239,68,68,0.15);color:#f87171;">!</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">OS-2026-018 · Fuite colonne montante</div>
+          <div class="splitItemMeta">Dupont Plomberie · <span style="color:#ef4444;">Urgence</span></div>
+        </div>
+        <span class="montantDebit" style="font-size:12px;">-1 200 €</span>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:rgba(59,130,246,0.15);color:#60a5fa;">→</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">OS-2026-017 · Remplacement interphone B</div>
+          <div class="splitItemMeta">TechImmo · Programmé le 22/03</div>
+        </div>
+        <span class="montantDebit" style="font-size:12px;">-3 200 €</span>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:rgba(251,191,36,0.15);color:#fbbf24;">⏳</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">OS-2026-016 · Révision chaudière</div>
+          <div class="splitItemMeta">Thermiplus · En attente réponse</div>
+        </div>
+        <span class="montantDebit" style="font-size:12px;">-850 €</span>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:rgba(34,197,94,0.15);color:#4ade80;">✓</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">OS-2026-015 · Taille haies mars</div>
+          <div class="splitItemMeta">GreenCo · Réalisé</div>
+        </div>
+        <span class="montantDebit" style="font-size:12px;">-450 €</span>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:rgba(34,197,94,0.15);color:#4ade80;">✓</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">OS-2026-014 · Contrôle ascenseur annuel</div>
+          <div class="splitItemMeta">Otis France · Réalisé</div>
+        </div>
+        <span class="montantDebit" style="font-size:12px;">-680 €</span>
+      </div>
+      <div class="splitItem">
+        <div class="splitItemAvatar" style="background:rgba(167,139,250,0.15);color:#a78bfa;">◉</div>
+        <div class="splitItemInfo">
+          <div class="splitItemName">OS-2026-013 · Réparation portail parking</div>
+          <div class="splitItemMeta">SecurImmo · Clôturé</div>
+        </div>
+        <span class="montantDebit" style="font-size:12px;">-520 €</span>
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="splitDetail">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">OS-2026-018</div>
+          <div class="detailTitle">Fuite colonne montante — 3ème étage</div>
+          <div class="detailSub">Dupont Plomberie · Créé le 15/03/2026</div>
+        </div>
+        <span class="badge badgeRed">Urgence</span>
+      </div>
+
+      <!-- Workflow -->
+      <div class="workflowBar">
+        <div class="workflowStep stepDone"><div class="workflowDot"></div> Brouillon</div>
+        <div class="workflowLine lineDone"></div>
+        <div class="workflowStep stepDone"><div class="workflowDot"></div> Envoyé</div>
+        <div class="workflowLine lineDone"></div>
+        <div class="workflowStep stepActive"><div class="workflowDot"></div> En attente</div>
+        <div class="workflowLine"></div>
+        <div class="workflowStep"><div class="workflowDot"></div> Programmé</div>
+        <div class="workflowLine"></div>
+        <div class="workflowStep"><div class="workflowDot"></div> Réalisé</div>
+        <div class="workflowLine"></div>
+        <div class="workflowStep"><div class="workflowDot"></div> Clôturé</div>
+      </div>
+
+      <div class="detailStats">
+        <div class="detailStatCard">
+          <div class="detailStatValue" style="color:#ef4444;">1 200 €</div>
+          <div class="detailStatLabel">Montant estimé</div>
+        </div>
+        <div class="detailStatCard">
+          <div class="detailStatValue" style="color:#f59e0b;">En attente</div>
+          <div class="detailStatLabel">Statut</div>
+        </div>
+        <div class="detailStatCard">
+          <div class="detailStatValue" style="color:#ef4444;">Urgent</div>
+          <div class="detailStatLabel">Priorité</div>
+        </div>
+      </div>
+
+      <div class="infoGrid">
+        <div class="infoItem">
+          <div class="infoItemLabel">TYPE</div>
+          <div class="infoItemValue">Intervention corrective</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">ÉQUIPEMENT</div>
+          <div class="infoItemValue">Plomberie — Colonne montante</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">LOCALISATION</div>
+          <div class="infoItemValue">Bâtiment A, 3ème étage</div>
+        </div>
+        <div class="infoItem">
+          <div class="infoItemLabel">ENVOYÉ LE</div>
+          <div class="infoItemValue">15/03/2026 à 09:30</div>
+        </div>
+      </div>
+
+      <div style="padding:12px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:#f87171;margin-bottom:4px;">Description</div>
+        <div style="font-size:13px;color:#e2e8f0;">Fuite importante sur la colonne montante eau froide au niveau du 3ème étage. Infiltration dans l'appartement 3B. Intervention urgente nécessaire.</div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btnGhost">👁 Aperçu PDF</button>
+        <button class="btnGhost">✉ Relancer</button>
+        <button class="btnPrimary">✓ Marquer programmé</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('[id^="section-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('section-' + id).classList.remove('hidden');
+  document.querySelectorAll('.moduleNav button').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

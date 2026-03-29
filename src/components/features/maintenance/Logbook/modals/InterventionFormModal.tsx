@@ -22,46 +22,104 @@ export function InterventionFormModal({
 }: InterventionFormModalProps) {
     if (!isOpen) return null;
 
+    const overlayStyle: React.CSSProperties = {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0, 0, 0, 0.5)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem',
+    };
+    const modalStyle: React.CSSProperties = {
+        background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 600,
+        maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
+        border: '1px solid rgba(148, 163, 184, 0.08)',
+    };
+    const headerStyle: React.CSSProperties = {
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '16px 24px', borderBottom: '1px solid rgba(148, 163, 184, 0.08)',
+    };
+    const titleStyle: React.CSSProperties = {
+        margin: 0, fontSize: 18, fontWeight: 700, color: '#e2e8f0',
+        display: 'flex', alignItems: 'center', gap: 10,
+    };
+    const closeStyle: React.CSSProperties = {
+        background: 'none', border: 'none', color: '#64748b', cursor: 'pointer',
+        padding: 6, borderRadius: 6, display: 'flex',
+    };
+    const contentStyle: React.CSSProperties = {
+        flex: 1, overflowY: 'auto', padding: 24,
+    };
+    const labelStyle: React.CSSProperties = {
+        display: 'block', marginBottom: 6, fontSize: 10, fontWeight: 600,
+        color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px',
+    };
+    const inputStyle: React.CSSProperties = {
+        width: '100%', padding: '10px 14px',
+        border: '1px solid rgba(148, 163, 184, 0.08)', borderRadius: 8,
+        fontSize: 13, color: '#e2e8f0', background: '#131620',
+        fontFamily: 'inherit', outline: 'none',
+    };
+    const textareaStyle: React.CSSProperties = {
+        ...inputStyle, minHeight: 80, resize: 'vertical',
+    };
+    const rowStyle: React.CSSProperties = {
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
+    };
+    const groupStyle: React.CSSProperties = { marginBottom: 16 };
+    const footerStyle: React.CSSProperties = {
+        padding: '12px 24px', borderTop: '1px solid rgba(148, 163, 184, 0.08)',
+        display: 'flex', justifyContent: 'flex-end', gap: 8,
+    };
+    const btnCancelStyle: React.CSSProperties = {
+        padding: '8px 16px', background: '#131620',
+        border: '1px solid rgba(148, 163, 184, 0.08)', borderRadius: 8,
+        color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+        fontFamily: 'inherit',
+    };
+    const btnSubmitStyle: React.CSSProperties = {
+        padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
+        color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+        fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6,
+    };
+
     return (
-        <div className={styles.modalOverlay} aria-hidden="true" onClick={onClose}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-                <div className={styles.modalHeader}>
-                    <h3>
-                        {isEditing ? <Edit3 size={20} aria-hidden="true" /> : <Plus size={20} aria-hidden="true" />}
+        <div style={overlayStyle} aria-hidden="true" onClick={onClose}>
+            <div style={modalStyle} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+                <div style={headerStyle}>
+                    <h3 style={titleStyle}>
+                        {isEditing ? <Edit3 size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
                         {isEditing ? " Modifier l'intervention" : ' Nouvelle intervention'}
                     </h3>
-                    <button className={styles.modalClose} onClick={onClose} aria-label="Fermer"><X size={20} aria-hidden="true" /></button>
+                    <button style={closeStyle} onClick={onClose} aria-label="Fermer"><X size={18} aria-hidden="true" /></button>
                 </div>
-                <div className={styles.modalContent}>
-                    <div className={styles.formGroup}>
-                        <label className="required">Titre</label>
+                <div style={contentStyle}>
+                    <div style={groupStyle}>
+                        <label style={labelStyle}>Titre</label>
                         <input
                             type="text"
-                            className={clsx(styles.formInput)}
+                            style={inputStyle}
                             value={formData.titre}
                             onChange={(e) => onFormDataChange({ ...formData, titre: e.target.value })}
                             placeholder="Titre de l'intervention"
                         />
                     </div>
-                    <div className={styles.formGroup}>
-                        <label>Description</label>
+                    <div style={groupStyle}>
+                        <label style={labelStyle}>Description</label>
                         <textarea
-                            className={clsx(styles.formInput, styles.formTextarea)}
+                            style={textareaStyle}
                             value={formData.description}
                             onChange={(e) => onFormDataChange({ ...formData, description: e.target.value})}
                             placeholder="Description détaillée de l'intervention"
                         />
                     </div>
-                    <div className={styles.formRow}>
-                        <div className={styles.formGroup}>
-                            <label>Date</label>
-                            <input type="date" className={styles.formInput} value={formData.date} onChange={(e) => onFormDataChange({ ...formData, date: e.target.value})}
-                            />
+                    <div style={{ ...rowStyle, marginBottom: 16 }}>
+                        <div>
+                            <label style={labelStyle}>Date</label>
+                            <input type="date" style={inputStyle} value={formData.date} onChange={(e) => onFormDataChange({ ...formData, date: e.target.value})} />
                         </div>
-                        <div className={styles.formGroup}>
-                            <label>Catégorie</label>
+                        <div>
+                            <label style={labelStyle}>Catégorie</label>
                             <select
-                                className={clsx(styles.formInput, styles.formSelect)}
+                                style={inputStyle}
                                 value={formData.categorie}
                                 onChange={(e) => onFormDataChange({ ...formData, categorie: e.target.value as 'COURANTE' | 'TRAVAUX_IMPORTANTS'})}
                             >
@@ -70,11 +128,11 @@ export function InterventionFormModal({
                             </select>
                         </div>
                     </div>
-                    <div className={styles.formRow}>
-                        <div className={styles.formGroup}>
-                            <label>Type</label>
+                    <div style={{ ...rowStyle, marginBottom: 16 }}>
+                        <div>
+                            <label style={labelStyle}>Type</label>
                             <select
-                                className={clsx(styles.formInput, styles.formSelect)}
+                                style={inputStyle}
                                 value={formData.type}
                                 onChange={(e) => onFormDataChange({ ...formData, type: e.target.value as 'ENTRETIEN' | 'REPARATION' | 'INSPECTION'})}
                             >
@@ -83,10 +141,10 @@ export function InterventionFormModal({
                                 <option value="INSPECTION">Inspection</option>
                             </select>
                         </div>
-                        <div className={styles.formGroup}>
-                            <label>Statut</label>
+                        <div>
+                            <label style={labelStyle}>Statut</label>
                             <select
-                                className={clsx(styles.formInput, styles.formSelect)}
+                                style={inputStyle}
                                 value={formData.statut}
                                 onChange={(e) => onFormDataChange({ ...formData, statut: e.target.value as 'PLANIFIEE' | 'EN_COURS' | 'TERMINEE'})}
                             >
@@ -96,45 +154,43 @@ export function InterventionFormModal({
                             </select>
                         </div>
                     </div>
-                    <div className={styles.formGroup}>
-                        <label className="required">Intervenant</label>
+                    <div style={groupStyle}>
+                        <label style={labelStyle}>Intervenant</label>
                         <input
                             type="text"
-                            className={styles.formInput}
+                            style={inputStyle}
                             value={formData.intervenant}
                             onChange={(e) => onFormDataChange({ ...formData, intervenant: e.target.value })}
                             placeholder="Nom de l'intervenant ou de la société"
                         />
                     </div>
-                    <div className={styles.formRow}>
+                    <div style={{ ...rowStyle, marginBottom: 16 }}>
                         <EquipementCombobox
                             value={formData.equipementConcerne}
                             equipementsPrincipaux={equipementsPrincipaux}
                             onChange={(equipement) => onFormDataChange({ ...formData, equipementConcerne: equipement })}
                             placeholder="Rechercher ou créer un équipement..."
                         />
-                        <div className={styles.formGroup}>
-                            <label>Coût (€)</label>
-                            <input type="number" className={styles.formInput} value={formData.cout} onChange={(e) => onFormDataChange({ ...formData, cout: e.target.value})}
+                        <div>
+                            <label style={labelStyle}>Coût (€)</label>
+                            <input type="number" style={inputStyle} value={formData.cout} onChange={(e) => onFormDataChange({ ...formData, cout: e.target.value})}
                                 placeholder="0"
                                 min="0"
                             />
                         </div>
                     </div>
                 </div>
-                <div className={styles.modalFooter}>
-                    <div className={styles.modalActions}>
-                        <button className="btn btn-secondary" onClick={onClose}>
-                            Annuler
-                        </button>
-                        <button className="btn btn-primary" onClick={onSubmit}>
-                            {isEditing ? (
-                                <><Save size={16} aria-hidden="true" /> Enregistrer</>
-                            ) : (
-                                <><Plus size={16} aria-hidden="true" /> Créer l&apos;intervention</>
-                            )}
-                        </button>
-                    </div>
+                <div style={footerStyle}>
+                    <button style={btnCancelStyle} onClick={onClose}>
+                        Annuler
+                    </button>
+                    <button style={btnSubmitStyle} onClick={onSubmit}>
+                        {isEditing ? (
+                            <><Save size={14} aria-hidden="true" /> Enregistrer</>
+                        ) : (
+                            <><Plus size={14} aria-hidden="true" /> Créer l&apos;intervention</>
+                        )}
+                    </button>
                 </div>
             </div>
         </div>

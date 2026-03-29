@@ -73,6 +73,7 @@ export const MODULES: ModuleConfig[] = [
       { label: 'Contrats', href: '/maintenance/contracts', icon: ClipboardList },
       { label: 'Prestataires', href: '/maintenance/providers', icon: Users },
       { label: 'Ordres de service', href: '/maintenance/service-orders', icon: Wrench },
+      { label: 'PPT', href: '/maintenance/ppt', icon: Calendar },
     ],
   },
   {

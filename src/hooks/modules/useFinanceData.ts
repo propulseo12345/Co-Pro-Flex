@@ -584,6 +584,30 @@ export function useReconcileBankMovement() {
   return { ...state, mutate };
 }
 
+export function useCategorizeBankMovement() {
+  const { currentCoproId } = useCopro();
+  const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
+
+  const mutate = useCallback(async (payload: Omit<financeApi.CategorizeBankMovementPayload, 'copro_id'>) => {
+    if (!currentCoproId) {
+      return { data: null, error: 'Aucune copropriété sélectionnée' };
+    }
+
+    setState({ isLoading: true, error: null });
+
+    const result = await financeApi.categorizeBankMovement({
+      ...payload,
+      copro_id: currentCoproId,
+    });
+
+    setState({ isLoading: false, error: result.error });
+
+    return result;
+  }, [currentCoproId]);
+
+  return { ...state, mutate };
+}
+
 // ============================================================================
 // PAYMENT REMINDERS (RELANCES IMPAYÉS)
 // ============================================================================

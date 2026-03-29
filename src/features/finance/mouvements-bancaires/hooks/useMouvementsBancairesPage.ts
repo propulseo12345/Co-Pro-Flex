@@ -38,7 +38,7 @@ import {
   getTempsJusquaSync,
 } from '../domain/utils';
 import { useCopro } from '@/providers/CoproContext';
-import { useBankMovements, useImportBankMovement, useReconcileBankMovement, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+import { useBankMovements, useImportBankMovement, useReconcileBankMovement, useCategorizeBankMovement, useOpenPeriod } from '@/hooks/modules/useFinanceData';
 
 export function useMouvementsBancairesPage() {
   const router = useRouter();
@@ -47,6 +47,7 @@ export function useMouvementsBancairesPage() {
   const { data: openPeriod } = useOpenPeriod();
   const importMutation = useImportBankMovement();
   const reconcileMutation = useReconcileBankMovement();
+  const categorizeMutation = useCategorizeBankMovement();
 
   // Enhanced refresh that updates timestamp
   const refreshWithTimestamp = useCallback(async () => {
@@ -65,7 +66,9 @@ export function useMouvementsBancairesPage() {
       montant: mov.direction === 'credit' ? Number(mov.amount_abs) : -Number(mov.amount_abs),
       libelle: mov.label,
       reference: mov.bank_ref || undefined,
-      categorise: mov.status === 'matched',
+      categorise: mov.status === 'matched' || !!mov.account_code,
+      categorie: (mov.account_category as CategorieComptable) || undefined,
+      compteComptable: mov.account_code ? `${mov.account_code}` : undefined,
       accountId: (mov as unknown as Record<string, unknown>).account_id as string || '1',
       statutRapprochement: mov.status === 'matched' ? 'rapproche' as const : 'non_rapproche' as const,
     }));
@@ -487,19 +490,18 @@ export function useMouvementsBancairesPage() {
     setSelectedSuggestion(null);
 
     try {
-      // Call Supabase reconcile API when backend is available
-      await reconcileMutation.mutate({
+      // Persist categorisation to Supabase (direct UPDATE on bank_movements)
+      await categorizeMutation.mutate({
         bank_movement_id: selectedMouvement.id,
-        target_type: 'other',
-        target_id: selectedCompte,
+        account_code: selectedCompte,
+        account_category: selectedCategorie,
       });
-      await refreshWithTimestamp();
     } catch {
       // Backend not yet connected — local state already updated
     } finally {
       setIsMutating(false);
     }
-  }, [selectedMouvement, selectedCompte, selectedCategorie, selectedSuggestion, reconcileMutation, refreshWithTimestamp]);
+  }, [selectedMouvement, selectedCompte, selectedCategorie, selectedSuggestion, categorizeMutation]);
 
   const handleOpenEntityDetail = useCallback((mouvement: MouvementBancaire) => {
     if (mouvement.entiteLiee) {

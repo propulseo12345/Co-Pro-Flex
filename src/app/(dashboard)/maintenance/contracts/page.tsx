@@ -1,129 +1,51 @@
 'use client';
 
-import { PlannedOrdersSection } from '@/components/features/maintenance/Contracts';
 import {
-  ContractsPageHeader,
   ContractsModals,
-  ContractsKpiBar,
-  ContractsSyndicBanner,
-  ContractsCostBar,
-  ContractsTimelineSection,
 } from '@/features/maintenance/contracts/components';
+import { ContractsFinanceView } from '@/features/maintenance/contracts/components/ContractsFinanceView';
 import { useContractsPage } from '@/features/maintenance/contracts/hooks';
 
 export default function ContractsPage() {
-  const {
-    // Data
-    contrats,
-    filteredContrats,
-    contratSyndic,
-    prestataires,
-    uniquePrestataires,
-    // Filters
-    searchTerm,
-    setSearchTerm,
-    statutFilter,
-    setStatutFilter,
-    categorieFilter,
-    setCategorieFilter,
-    typeFilter,
-    setTypeFilter,
-    prestataireFilter,
-    setPrestataireFilter,
-
-    // Modals
-    isAddModalOpen,
-    setIsAddModalOpen,
-    isEditSyndicModalOpen,
-    setIsEditSyndicModalOpen,
-    contratToResiliate,
-    setContratToResiliate,
-    contratToEdit,
-    setContratToEdit,
-    contratExpireDecision,
-    setContratExpireDecision,
-
-    // Actions
-    handleAddContrat,
-    handleSaveContrat,
-    handleTelecharger,
-    handleSaveSyndic,
-    handleSyndicAction,
-    handleExport,
-    handleVoirDetails,
-    handleOpenDecisionModal,
-    handleRenouvelerContrat,
-    handleResilierContratExpire,
-    handleResiliationConfirm,
-    handleGenerateOrder,
-  } = useContractsPage();
+  const pageData = useContractsPage();
 
   return (
     <div className="container">
-      <ContractsPageHeader
-        onExport={handleExport}
-        onAddContract={() => setIsAddModalOpen(true)}
+      <ContractsFinanceView
+        contrats={pageData.contrats}
+        filteredContrats={pageData.filteredContrats}
+        contratSyndic={pageData.contratSyndic}
+        searchTerm={pageData.searchTerm}
+        setSearchTerm={pageData.setSearchTerm}
+        statutFilter={pageData.statutFilter}
+        setStatutFilter={pageData.setStatutFilter}
+        onExport={pageData.handleExport}
+        onAddContract={() => pageData.setIsAddModalOpen(true)}
+        onEditSyndic={() => pageData.setIsEditSyndicModalOpen(true)}
+        onVoirDetails={pageData.handleVoirDetails}
+        onOpenDecisionModal={pageData.handleOpenDecisionModal}
       />
 
-      <ContractsKpiBar
-        contrats={contrats}
-        contratSyndic={contratSyndic}
-      />
-
-      <ContractsSyndicBanner
-        contratSyndic={contratSyndic}
-        onEditSyndic={() => setIsEditSyndicModalOpen(true)}
-        onSyndicAction={handleSyndicAction}
-      />
-
-      <ContractsCostBar
-        contrats={contrats}
-        contratSyndic={contratSyndic}
-      />
-
-      <ContractsTimelineSection
-        filteredContrats={filteredContrats}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        statutFilter={statutFilter}
-        onStatutChange={setStatutFilter}
-        categorieFilter={categorieFilter}
-        onCategorieChange={setCategorieFilter}
-        typeFilter={typeFilter}
-        onTypeChange={setTypeFilter}
-        prestataireFilter={prestataireFilter}
-        onPrestataireChange={setPrestataireFilter}
-        uniquePrestataires={uniquePrestataires}
-        onVoirDetails={handleVoirDetails}
-        onModifier={setContratToEdit}
-        onResilier={setContratToResiliate}
-        onTelecharger={handleTelecharger}
-      />
-
-      <PlannedOrdersSection
-        contrats={contrats}
-        onGenerateOrder={handleGenerateOrder}
-      />
-
+      {/* Modals conservées telles quelles */}
       <ContractsModals
-        isAddModalOpen={isAddModalOpen}
-        onCloseAddModal={() => setIsAddModalOpen(false)}
-        prestataires={prestataires}
-        onAddContrat={handleAddContrat}
-        contratToEdit={contratToEdit}
-        onCloseEditModal={() => setContratToEdit(null)}
-        onSaveContrat={handleSaveContrat}
-        isEditSyndicModalOpen={isEditSyndicModalOpen}
-        contratSyndic={contratSyndic}
-        onSaveSyndic={handleSaveSyndic}
-        onCloseEditSyndicModal={() => setIsEditSyndicModalOpen(false)}
-        contratToResiliate={contratToResiliate}
-        onCloseResiliationModal={() => setContratToResiliate(null)}
-        onConfirmResiliation={handleResiliationConfirm}
-        contratExpireDecision={contratExpireDecision}
-        onCloseDecisionModal={() => setContratExpireDecision(null)}
-        onRenouveler={handleRenouvelerContrat}
-        onResilier={handleResilierContratExpire}
+        isAddModalOpen={pageData.isAddModalOpen}
+        onCloseAddModal={() => pageData.setIsAddModalOpen(false)}
+        prestataires={pageData.prestataires}
+        onAddContrat={pageData.handleAddContrat}
+        contratToEdit={pageData.contratToEdit}
+        onCloseEditModal={() => pageData.setContratToEdit(null)}
+        onSaveContrat={pageData.handleSaveContrat}
+        isEditSyndicModalOpen={pageData.isEditSyndicModalOpen}
+        contratSyndic={pageData.contratSyndic}
+        onSaveSyndic={pageData.handleSaveSyndic}
+        onCloseEditSyndicModal={() => pageData.setIsEditSyndicModalOpen(false)}
+        contratToResiliate={pageData.contratToResiliate}
+        onCloseResiliationModal={() => pageData.setContratToResiliate(null)}
+        onConfirmResiliation={pageData.handleResiliationConfirm}
+        contratExpireDecision={pageData.contratExpireDecision}
+        onCloseDecisionModal={() => pageData.setContratExpireDecision(null)}
+        onRenouveler={pageData.handleRenouvelerContrat}
+        onResilier={pageData.handleResilierContratExpire}
       />
     </div>
   );

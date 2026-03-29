@@ -121,6 +121,8 @@ export interface BankMovementOverview {
   label: string;
   bank_ref: string | null;
   status: 'unmatched' | 'matched' | 'ignored';
+  account_code: string | null;
+  account_category: string | null;
   created_at: string;
   total_matched: number;
   remaining_to_match: number;
@@ -720,6 +722,32 @@ export interface ReconcileBankMovementPayload {
 
 export async function reconcileBankMovement(payload: ReconcileBankMovementPayload): Promise<ApiResult<{ match_id: string; movement_status: string }>> {
   return invokeEdgeFunction('reconcile_bank_movement', payload);
+}
+
+export interface CategorizeBankMovementPayload {
+  copro_id: string;
+  bank_movement_id: string;
+  account_code: string;
+  account_category: string;
+}
+
+export async function categorizeBankMovement(payload: CategorizeBankMovementPayload): Promise<ApiResult<{ success: boolean }>> {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase
+    .from('bank_movements')
+    .update({
+      account_code: payload.account_code,
+      account_category: payload.account_category,
+    })
+    .eq('id', payload.bank_movement_id)
+    .eq('copro_id', payload.copro_id);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: { success: true }, error: null };
 }
 
 // ============================================================================

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Maintenance ANCIENNES VERSIONS (avant refonte Finance)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 24px; }
+
+  .pageContainer { max-width: 1200px; margin: 0 auto; }
+
+  /* Module Nav */
+  .moduleNav { display: flex; gap: 4px; margin-bottom: 24px; background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 4px; width: fit-content; }
+  .moduleNav button { padding: 8px 20px; border: none; background: transparent; color: #64748b; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .moduleNav button:hover { color: #94a3b8; }
+  .moduleNav button.active { background: #1a1d2e; color: #e2e8f0; }
+
+  .label { font-size: 12px; background: rgba(239,68,68,0.15); color: #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-left: 12px; }
+
+  /* ========== OLD STYLE — Page Header ========== */
+  .oldPageHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .oldPageTitle { font-size: 1.5rem; font-weight: 700; color: var(--text-primary, #e2e8f0); }
+  .oldPageActions { display: flex; gap: 8px; }
+  .oldBtnPrimary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #2563eb; border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .oldBtnSecondary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: transparent; border: 1px solid rgba(148,163,184,0.2); border-radius: 8px; color: #94a3b8; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+
+  /* ========== OLD STYLE — KPI Bar ========== */
+  .oldKpiBar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .oldKpiBar.cols6 { grid-template-columns: repeat(6, 1fr); }
+  .oldKpiCard { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(148,163,184,0.05); border: 1px solid rgba(148,163,184,0.1); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .oldKpiCard:hover { border-color: rgba(148,163,184,0.2); }
+  .oldKpiIcon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .oldKpiValue { font-size: 1.125rem; font-weight: 700; }
+  .oldKpiLabel { font-size: 0.6875rem; color: #64748b; }
+
+  /* ========== OLD STYLE — Tabs ========== */
+  .oldTabsBar { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid rgba(148,163,184,0.1); padding-bottom: 8px; }
+  .oldTabBtn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: none; background: transparent; color: #64748b; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 6px; font-family: inherit; }
+  .oldTabBtn:hover { color: #e2e8f0; background: rgba(148,163,184,0.06); }
+  .oldTabBtn.active { color: #e2e8f0; background: rgba(59,130,246,0.1); }
+  .oldTabCount { font-size: 11px; background: rgba(148,163,184,0.1); padding: 1px 6px; border-radius: 10px; color: #94a3b8; }
+
+  /* ========== OLD STYLE — Search & Filters ========== */
+  .oldSearchSection { margin-bottom: 16px; }
+  .oldSearchInput { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: rgba(148,163,184,0.05); border: 1px solid rgba(148,163,184,0.1); border-radius: 8px; color: #64748b; font-size: 13px; margin-bottom: 10px; }
+  .oldSearchInput input { flex: 1; border: none; background: transparent; color: #e2e8f0; outline: none; font-size: 13px; font-family: inherit; }
+  .oldSearchInput input::placeholder { color: #64748b; }
+  .oldFilterChips { display: flex; gap: 8px; }
+  .oldChip { padding: 6px 12px; background: rgba(148,163,184,0.05); border: 1px solid rgba(148,163,184,0.1); border-radius: 6px; color: #94a3b8; font-size: 12px; cursor: pointer; font-family: inherit; appearance: none; }
+
+  /* ========== OLD STYLE — Split View ========== */
+  .oldSplitView { display: grid; grid-template-columns: 340px 1fr; gap: 16px; }
+  .oldSplitList { background: rgba(148,163,184,0.03); border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; padding: 6px; max-height: 500px; overflow-y: auto; }
+  .oldSplitItem { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; width: 100%; text-align: left; color: inherit; font-family: inherit; }
+  .oldSplitItem:hover { background: rgba(148,163,184,0.06); }
+  .oldSplitItem.active { background: rgba(59,130,246,0.08); border-left: 3px solid #2563eb; }
+  .oldSplitItemLeft { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .oldAvatar { width: 32px; height: 32px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+  .oldSplitItemName { font-size: 13px; font-weight: 600; color: #e2e8f0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oldSplitItemMeta { font-size: 11px; color: #64748b; display: block; }
+  .oldSplitItemIcon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .oldSplitItemMontant { font-size: 12px; font-weight: 600; color: #94a3b8; }
+
+  /* ========== OLD STYLE — Detail Panel ========== */
+  .oldSplitDetail { background: rgba(148,163,184,0.03); border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; padding: 20px; }
+  .oldDetailHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .oldAvatarXl { width: 48px; height: 48px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; }
+  .oldDetailName { font-size: 16px; font-weight: 700; }
+  .oldDetailVille { font-size: 12px; color: #64748b; }
+  .oldStatutBadge { font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 500; margin-left: auto; }
+  .oldDetailDomaines { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .oldDomaineBadge { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+  .oldDetailStatsRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .oldDetailStatCard { text-align: center; padding: 10px; background: rgba(148,163,184,0.04); border: 1px solid rgba(148,163,184,0.06); border-radius: 8px; }
+  .oldDetailStatValue { font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .oldDetailStatLabel { font-size: 10px; color: #64748b; text-transform: uppercase; margin-top: 4px; }
+  .oldDetailContact { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .oldDetailContactRow { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #94a3b8; }
+  .oldDetailActions { display: flex; gap: 8px; }
+
+  /* ========== OLD STYLE — Contracts specifics ========== */
+  .oldSyndicBanner { display: flex; align-items: center; gap: 16px; padding: 14px 18px; background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.15); border-radius: 10px; margin-bottom: 16px; }
+  .oldSyndicAvatar { width: 40px; height: 40px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
+  .oldSyndicName { font-size: 14px; font-weight: 700; }
+  .oldSyndicMeta { font-size: 12px; color: #94a3b8; }
+  .oldCostBar { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: rgba(148,163,184,0.04); border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; margin-bottom: 16px; }
+  .oldCostLabel { font-size: 11px; color: #64748b; text-transform: uppercase; }
+  .oldCostValue { font-size: 18px; font-weight: 700; }
+  .oldCostBreakdown { display: flex; gap: 16px; margin-left: auto; }
+  .oldCostItem { text-align: center; }
+  .oldCostItemValue { font-size: 13px; font-weight: 600; }
+  .oldCostItemLabel { font-size: 10px; color: #64748b; }
+
+  /* Timeline */
+  .oldTimeline { display: flex; flex-direction: column; gap: 8px; }
+  .oldTimelineItem { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(148,163,184,0.04); border: 1px solid rgba(148,163,184,0.06); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+  .oldTimelineItem:hover { border-color: rgba(148,163,184,0.15); }
+  .oldTimelineDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Workflow */
+  .oldWorkflow { display: flex; align-items: center; gap: 0; margin-bottom: 16px; padding: 12px 16px; background: rgba(148,163,184,0.04); border: 1px solid rgba(148,163,184,0.06); border-radius: 8px; }
+  .oldWorkflowStep { font-size: 10px; color: #475569; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .oldWorkflowStep.done { color: #22c55e; }
+  .oldWorkflowStep.current { color: #3b82f6; font-weight: 700; }
+  .oldWorkflowDot { width: 6px; height: 6px; border-radius: 50%; background: #334155; }
+  .oldWorkflowStep.done .oldWorkflowDot { background: #22c55e; }
+  .oldWorkflowStep.current .oldWorkflowDot { background: #3b82f6; }
+  .oldWorkflowLine { flex: 1; height: 1px; background: #334155; margin: 0 4px; min-width: 12px; }
+  .oldWorkflowLine.done { background: #22c55e; }
+
+  .hidden { display: none; }
+  .star { color: #FBBF24; }
+</style>
+</head>
+<body>
+<div class="pageContainer">
+
+<h2 style="margin-bottom:16px; color:#ef4444; font-size:14px; text-transform:uppercase; letter-spacing:0.1em;">
+  Anciennes versions — avant refonte Finance
+</h2>
+
+<div class="moduleNav">
+  <button class="active" onclick="showOld('contracts')">Contrats</button>
+  <button onclick="showOld('providers')">Prestataires</button>
+  <button onclick="showOld('orders')">Ordres de service</button>
+</div>
+
+<!-- ============================== CONTRATS ============================== -->
+<div id="old-contracts">
+  <div class="oldPageHeader">
+    <h1 class="oldPageTitle">Contrats</h1>
+    <div class="oldPageActions">
+      <button class="oldBtnSecondary">Exporter</button>
+      <button class="oldBtnPrimary">+ Ajouter un contrat</button>
+    </div>
+  </div>
+
+  <div class="oldKpiBar cols6">
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(37,99,235,0.1);color:#2563eb;">📋</div>
+      <div><div class="oldKpiValue">8</div><div class="oldKpiLabel">Total</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(62,207,142,0.1);color:#3ecf8e;">✓</div>
+      <div><div class="oldKpiValue">5</div><div class="oldKpiLabel">Actifs</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(229,166,62,0.1);color:#e5a63e;">⚠</div>
+      <div><div class="oldKpiValue">2</div><div class="oldKpiLabel">Expirent bientôt</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(227,93,106,0.1);color:#e35d6a;">✕</div>
+      <div><div class="oldKpiValue">1</div><div class="oldKpiLabel">Expirés</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">€</div>
+      <div><div class="oldKpiValue">24 680 €</div><div class="oldKpiLabel">Coût annuel</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">📋</div>
+      <div><div class="oldKpiValue">12 500 €</div><div class="oldKpiLabel">Syndic</div></div>
+    </div>
+  </div>
+
+  <div class="oldSyndicBanner">
+    <div class="oldSyndicAvatar">S</div>
+    <div style="flex:1;">
+      <div class="oldSyndicName">Syndic Conseil — Contrat principal</div>
+      <div class="oldSyndicMeta">Échéance : 31/12/2026 · Honoraires : 12 500 € / an</div>
+    </div>
+    <button class="oldBtnSecondary">Modifier</button>
+  </div>
+
+  <div class="oldCostBar">
+    <div>
+      <div class="oldCostLabel">COÛT ANNUEL TOTAL</div>
+      <div class="oldCostValue">24 680 €</div>
+    </div>
+    <div class="oldCostBreakdown">
+      <div class="oldCostItem"><div class="oldCostItemValue" style="color:#5b8def;">4 200 €</div><div class="oldCostItemLabel">Ascenseur</div></div>
+      <div class="oldCostItem"><div class="oldCostItemValue" style="color:#e5a63e;">3 800 €</div><div class="oldCostItemLabel">Chauffage</div></div>
+      <div class="oldCostItem"><div class="oldCostItemValue" style="color:#3ecf8e;">2 100 €</div><div class="oldCostItemLabel">Ménage</div></div>
+      <div class="oldCostItem"><div class="oldCostItemValue" style="color:#F87171;">1 850 €</div><div class="oldCostItemLabel">Assurance</div></div>
+    </div>
+  </div>
+
+  <div class="oldSearchSection">
+    <div class="oldSearchInput"><span>🔍</span><input placeholder="Rechercher un contrat..."></div>
+    <div class="oldFilterChips">
+      <select class="oldChip"><option>Tous statuts</option></select>
+      <select class="oldChip"><option>Toutes catégories</option></select>
+      <select class="oldChip"><option>Tous types</option></select>
+      <select class="oldChip"><option>Tous prestataires</option></select>
+    </div>
+  </div>
+
+  <div class="oldTimeline">
+    <div class="oldTimelineItem">
+      <div class="oldTimelineDot" style="background:#3ecf8e;"></div>
+      <div style="flex:1;"><span style="font-size:13px;font-weight:600;">Maintenance ascenseur</span><br><span style="font-size:11px;color:#64748b;">Otis France · Échéance 15/06/2027</span></div>
+      <span style="font-size:12px;font-weight:600;">4 200 €/an</span>
+      <span class="oldStatutBadge" style="color:#3ecf8e;background:rgba(62,207,142,0.1);">Actif</span>
+    </div>
+    <div class="oldTimelineItem">
+      <div class="oldTimelineDot" style="background:#3ecf8e;"></div>
+      <div style="flex:1;"><span style="font-size:13px;font-weight:600;">Entretien chauffage collectif</span><br><span style="font-size:11px;color:#64748b;">Thermiplus · Échéance 30/09/2026</span></div>
+      <span style="font-size:12px;font-weight:600;">3 800 €/an</span>
+      <span class="oldStatutBadge" style="color:#3ecf8e;background:rgba(62,207,142,0.1);">Actif</span>
+    </div>
+    <div class="oldTimelineItem">
+      <div class="oldTimelineDot" style="background:#e5a63e;"></div>
+      <div style="flex:1;"><span style="font-size:13px;font-weight:600;">Contrat ménage parties communes</span><br><span style="font-size:11px;color:#64748b;">CleanPro · Échéance 15/05/2026</span></div>
+      <span style="font-size:12px;font-weight:600;">2 100 €/an</span>
+      <span class="oldStatutBadge" style="color:#e5a63e;background:rgba(229,166,62,0.1);">À renouveler</span>
+    </div>
+    <div class="oldTimelineItem">
+      <div class="oldTimelineDot" style="background:#e35d6a;"></div>
+      <div style="flex:1;"><span style="font-size:13px;font-weight:600;">Assurance multirisque immeuble</span><br><span style="font-size:11px;color:#64748b;">AXA Immo · Échéance 01/04/2026</span></div>
+      <span style="font-size:12px;font-weight:600;">1 850 €/an</span>
+      <span class="oldStatutBadge" style="color:#e35d6a;background:rgba(227,93,106,0.1);">Expiré</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PRESTATAIRES ============================== -->
+<div id="old-providers" class="hidden">
+  <div class="oldPageHeader">
+    <h1 class="oldPageTitle">Prestataires</h1>
+    <div class="oldPageActions">
+      <button class="oldBtnSecondary">Exporter</button>
+      <button class="oldBtnPrimary">+ Ajouter un prestataire</button>
+    </div>
+  </div>
+
+  <div class="oldKpiBar">
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(37,99,235,0.1);color:#2563eb;">👥</div>
+      <div><div class="oldKpiValue">14</div><div class="oldKpiLabel">Total</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(52,211,153,0.1);color:#34D399;">🛡</div>
+      <div><div class="oldKpiValue">11</div><div class="oldKpiLabel">Actifs</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(251,191,36,0.1);color:#FBBF24;">🔧</div>
+      <div><div class="oldKpiValue">67</div><div class="oldKpiLabel">Interventions</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(167,139,250,0.1);color:#A78BFA;">⭐</div>
+      <div><div class="oldKpiValue">4.2/5</div><div class="oldKpiLabel">Note moyenne</div></div>
+    </div>
+  </div>
+
+  <div class="oldTabsBar">
+    <button class="oldTabBtn active">👥 Tous <span class="oldTabCount">14</span></button>
+    <button class="oldTabBtn">🏢 Copropriété <span class="oldTabCount">8</span></button>
+    <button class="oldTabBtn">👥 Syndic <span class="oldTabCount">4</span></button>
+    <button class="oldTabBtn">🌐 CoproFlex <span class="oldTabCount">2</span></button>
+  </div>
+
+  <div class="oldSearchSection">
+    <div class="oldSearchInput"><span>🔍</span><input placeholder="Rechercher un prestataire..."></div>
+    <div class="oldFilterChips">
+      <select class="oldChip"><option>Tous domaines</option></select>
+      <select class="oldChip"><option>Alphabétique</option></select>
+    </div>
+  </div>
+
+  <div class="oldSplitView">
+    <div class="oldSplitList">
+      <div class="oldSplitItem active">
+        <div class="oldSplitItemLeft">
+          <div class="oldAvatar">O</div>
+          <div><span class="oldSplitItemName">Otis France</span><span class="oldSplitItemMeta">Ascenseur</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="star">★ 4.5</span>
+          <span style="color:#34D399;">●</span>
+        </div>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldAvatar">T</div>
+          <div><span class="oldSplitItemName">Thermiplus</span><span class="oldSplitItemMeta">Chauffage</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="star">★ 4.2</span>
+          <span style="color:#34D399;">●</span>
+        </div>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldAvatar">D</div>
+          <div><span class="oldSplitItemName">Dupont Plomberie</span><span class="oldSplitItemMeta">Plomberie</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="star">★ 3.8</span>
+          <span style="color:#34D399;">●</span>
+        </div>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldAvatar">G</div>
+          <div><span class="oldSplitItemName">GreenCo</span><span class="oldSplitItemMeta">Espaces verts</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="star">★ 4.7</span>
+          <span style="color:#34D399;">●</span>
+        </div>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldAvatar">C</div>
+          <div><span class="oldSplitItemName">CleanPro</span><span class="oldSplitItemMeta">Ménage</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="star">★ 4.0</span>
+          <span style="color:#34D399;">●</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="oldSplitDetail">
+      <div class="oldDetailHeader">
+        <div class="oldAvatarXl">O</div>
+        <div>
+          <div class="oldDetailName">Otis France</div>
+          <div class="oldDetailVille">📍 Paris</div>
+        </div>
+        <span class="oldStatutBadge" style="color:#34D399;background:rgba(52,211,153,0.1);">Actif</span>
+      </div>
+      <div class="oldDetailDomaines">
+        <span class="oldDomaineBadge" style="color:#5b8def;background:rgba(91,141,239,0.1);">Ascenseur</span>
+      </div>
+      <div class="oldDetailStatsRow">
+        <div class="oldDetailStatCard"><div class="oldDetailStatValue">12</div><div class="oldDetailStatLabel">Interventions</div></div>
+        <div class="oldDetailStatCard"><div class="oldDetailStatValue"><span class="star">★</span> 4.5</div><div class="oldDetailStatLabel">Note</div></div>
+        <div class="oldDetailStatCard"><div class="oldDetailStatValue">15/01/2026</div><div class="oldDetailStatLabel">Dernière int.</div></div>
+      </div>
+      <div class="oldDetailContact">
+        <div class="oldDetailContactRow">📞 01 42 36 78 90</div>
+        <div class="oldDetailContactRow">✉ contact@otis-france.fr</div>
+        <div class="oldDetailContactRow">👤 Jean Martin <span class="oldChip" style="font-size:10px;">Responsable</span></div>
+        <div class="oldDetailContactRow">📋 1 contrat(s) actif(s)</div>
+      </div>
+      <div class="oldDetailActions">
+        <button class="oldBtnPrimary">↗ Fiche complète</button>
+        <button class="oldBtnSecondary">📞 Appeler</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== ORDRES DE SERVICE ============================== -->
+<div id="old-orders" class="hidden">
+  <div class="oldPageHeader">
+    <h1 class="oldPageTitle">Ordres de service</h1>
+    <div class="oldPageActions">
+      <button class="oldBtnPrimary">+ Créer un ordre de service</button>
+    </div>
+  </div>
+
+  <div class="oldKpiBar cols6">
+    <div class="oldKpiCard" style="border-color:rgba(37,99,235,0.3);">
+      <div class="oldKpiIcon" style="background:rgba(37,99,235,0.1);color:#2563eb;">📋</div>
+      <div><div class="oldKpiValue">18</div><div class="oldKpiLabel">Total</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(100,116,139,0.1);color:#64748b;">⏱</div>
+      <div><div class="oldKpiValue">2</div><div class="oldKpiLabel">Brouillons</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(251,191,36,0.1);color:#FBBF24;">📤</div>
+      <div><div class="oldKpiValue">3</div><div class="oldKpiLabel">En attente</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(96,165,250,0.1);color:#60A5FA;">📅</div>
+      <div><div class="oldKpiValue">4</div><div class="oldKpiLabel">Programmés</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(52,211,153,0.1);color:#34D399;">✓</div>
+      <div><div class="oldKpiValue">7</div><div class="oldKpiLabel">Réalisés</div></div>
+    </div>
+    <div class="oldKpiCard">
+      <div class="oldKpiIcon" style="background:rgba(167,139,250,0.1);color:#A78BFA;">📦</div>
+      <div><div class="oldKpiValue">2</div><div class="oldKpiLabel">Clôturés</div></div>
+    </div>
+  </div>
+
+  <div class="oldSearchSection">
+    <div class="oldSearchInput"><span>🔍</span><input placeholder="Rechercher un ordre de service..."></div>
+    <div class="oldFilterChips">
+      <select class="oldChip"><option>Tous types</option></select>
+      <select class="oldChip"><option>Tous prestataires</option></select>
+    </div>
+  </div>
+
+  <div class="oldSplitView">
+    <div class="oldSplitList">
+      <div class="oldSplitItem active">
+        <div class="oldSplitItemLeft">
+          <div class="oldSplitItemIcon" style="background:rgba(239,68,68,0.1);color:#ef4444;">⚡</div>
+          <div>
+            <span class="oldSplitItemName">Fuite colonne montante</span>
+            <span class="oldSplitItemMeta">OS-2026-018 · Dupont Plomberie</span>
+          </div>
+        </div>
+        <span class="oldSplitItemMontant">1 200 €</span>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldSplitItemIcon" style="background:rgba(37,99,235,0.1);color:#2563eb;">📅</div>
+          <div>
+            <span class="oldSplitItemName">Remplacement interphone B</span>
+            <span class="oldSplitItemMeta">OS-2026-017 · TechImmo</span>
+          </div>
+        </div>
+        <span class="oldSplitItemMontant">3 200 €</span>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldSplitItemIcon" style="background:rgba(251,191,36,0.1);color:#FBBF24;">⏳</div>
+          <div>
+            <span class="oldSplitItemName">Révision chaudière</span>
+            <span class="oldSplitItemMeta">OS-2026-016 · Thermiplus</span>
+          </div>
+        </div>
+        <span class="oldSplitItemMontant">850 €</span>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldSplitItemIcon" style="background:rgba(52,211,153,0.1);color:#34D399;">✓</div>
+          <div>
+            <span class="oldSplitItemName">Taille haies mars</span>
+            <span class="oldSplitItemMeta">OS-2026-015 · GreenCo</span>
+          </div>
+        </div>
+        <span class="oldSplitItemMontant">450 €</span>
+      </div>
+      <div class="oldSplitItem">
+        <div class="oldSplitItemLeft">
+          <div class="oldSplitItemIcon" style="background:rgba(52,211,153,0.1);color:#34D399;">✓</div>
+          <div>
+            <span class="oldSplitItemName">Contrôle ascenseur annuel</span>
+            <span class="oldSplitItemMeta">OS-2026-014 · Otis France</span>
+          </div>
+        </div>
+        <span class="oldSplitItemMontant">680 €</span>
+      </div>
+    </div>
+
+    <div class="oldSplitDetail">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px;color:#64748b;">OS-2026-018</div>
+          <div style="font-size:16px;font-weight:700;">Fuite colonne montante — 3ème étage</div>
+          <div style="font-size:12px;color:#64748b;">Dupont Plomberie · 15/03/2026</div>
+        </div>
+        <span class="oldStatutBadge" style="color:#ef4444;background:rgba(239,68,68,0.1);">Urgence</span>
+      </div>
+
+      <div class="oldWorkflow">
+        <div class="oldWorkflowStep done"><div class="oldWorkflowDot"></div> Brouillon</div>
+        <div class="oldWorkflowLine done"></div>
+        <div class="oldWorkflowStep done"><div class="oldWorkflowDot"></div> Envoyé</div>
+        <div class="oldWorkflowLine done"></div>
+        <div class="oldWorkflowStep current"><div class="oldWorkflowDot"></div> En attente</div>
+        <div class="oldWorkflowLine"></div>
+        <div class="oldWorkflowStep"><div class="oldWorkflowDot"></div> Programmé</div>
+        <div class="oldWorkflowLine"></div>
+        <div class="oldWorkflowStep"><div class="oldWorkflowDot"></div> Réalisé</div>
+        <div class="oldWorkflowLine"></div>
+        <div class="oldWorkflowStep"><div class="oldWorkflowDot"></div> Clôturé</div>
+      </div>
+
+      <div class="oldDetailStatsRow">
+        <div class="oldDetailStatCard"><div class="oldDetailStatValue" style="color:#ef4444;">1 200 €</div><div class="oldDetailStatLabel">Montant estimé</div></div>
+        <div class="oldDetailStatCard"><div class="oldDetailStatValue" style="color:#FBBF24;">En attente</div><div class="oldDetailStatLabel">Statut</div></div>
+        <div class="oldDetailStatCard"><div class="oldDetailStatValue" style="color:#ef4444;">Urgent</div><div class="oldDetailStatLabel">Priorité</div></div>
+      </div>
+
+      <div style="padding:10px 14px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.12);border-radius:8px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:600;color:#f87171;margin-bottom:4px;">Description</div>
+        <div style="font-size:13px;">Fuite importante sur la colonne montante eau froide au niveau du 3ème étage.</div>
+      </div>
+
+      <div class="oldDetailActions">
+        <button class="oldBtnSecondary">👁 Aperçu PDF</button>
+        <button class="oldBtnSecondary">✉ Relancer</button>
+        <button class="oldBtnPrimary">✓ Marquer programmé</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showOld(id) {
+  document.querySelectorAll('[id^="old-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('old-' + id).classList.remove('hidden');
+  document.querySelectorAll('.moduleNav button').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
