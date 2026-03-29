@@ -1,27 +1,25 @@
-# Session State — 2026-03-29 23:45
+# Session State — 2026-03-30 01:00
 
 ## Branch
 v2
 
 ## Completed This Session
-- fix(os-detail): migration Supabase-first lecture/écriture OS (bypass Edge Functions → RPC directes)
-- feat(os-create): createOrder via insert direct + generate_service_order_number RPC
-- feat(os-delete): RPC delete_service_order + bouton suppression dans liste
-- refonte(os-detail): page pipeline interactif inline (12 composants → 5 zones), timeline cliquable accordion
-- feat(os-upload): upload PJ réel Supabase Storage + preview DocumentViewerModal
-- fix: enum origin syndic, urgence boolean, domaines uppercase, labels historique lisibles
-- dark-theme: modals EditProvider + AddIntervention
-- migration: contrats renewals Supabase, AG résolutions saveDraft/loadDraft, listes ref Supabase
+- feat(logbook): migration Supabase carnet d'entretien (CRUD interventions via logbook_entries)
+- feat(logbook): sélecteur prestataire dans formulaire + création à la volée
+- feat(providers): historique interventions Supabase sur fiche prestataire + modale détail cliquable
+- feat(contracts): migration Supabase contrats + lien prestataires bidirectionnel
+- feat(contracts): refonte UI modals ajout/édition dark theme + DatePicker calendrier
+- fix: ProviderSelector crash toLowerCase sur null, statut active par défaut, provider_id bug
+- fix: typage urgency_level OS (retrait 'urgent' inexistant)
 
 ## Next Task
-- Module PPT (contenu TravauxTab migré vers /maintenance/ppt)
-- Connecter l'upload PJ lors de la création d'OS (pas seulement depuis le détail)
-- Audit restant : Communication (messagerie/forum mock), Contentieux (litiges mock)
+- Code review complet de tous les ajouts de cette session (demandé par l'utilisateur)
+- Audit des modules Communication et Contentieux (mock → Supabase)
 
 ## Blockers
 None
 
 ## Key Context
-- Toutes les Edge Functions maintenance-workflow bypassées → RPC Supabase directes (anon key suffit)
-- Upload PJ utilise uploadDocument() de lib/documents/api.ts avec serviceOrderId
-- StatusUpdateModal.tsx encore présent mais plus utilisé (pipeline inline dans page détail)
+- useLogbook.ts et useProviderDetailPage.ts utilisent maintenant useMaintenanceData hooks Supabase
+- Mapping UPPERCASE (front) ↔ lowercase (DB) pour status/category/entry_type dans useLogbook.ts
+- Le type Prestataire a 2 versions (legacy.ts et maintenance.ts) — utiliser celui de @/types
