@@ -3,9 +3,9 @@
 import { ContractEditForm } from '../hooks/useContractDetailPage';
 import type { ContractType } from '@/types/supabase';
 import { Prestataire } from '@/types';
-import ProviderSelector from '@/components/features/maintenance/ProviderSelector';
-import { X, Save } from 'lucide-react';
-import styles from './ContractEditModal.module.css';
+import { X, Save, FileText } from 'lucide-react';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { isValid, parseISO, format } from 'date-fns';
 
 const CONTRACT_TYPE_OPTIONS: { value: ContractType; label: string }[] = [
     { value: 'maintenance', label: 'Maintenance' },
@@ -27,129 +27,174 @@ interface ContractEditModalProps {
 }
 
 export function ContractEditModal({ editForm, prestataires, onFormChange, onSave, onCancel }: ContractEditModalProps) {
+    const overlay: React.CSSProperties = {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.5)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem',
+    };
+    const modal: React.CSSProperties = {
+        background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 640,
+        maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+        border: '1px solid rgba(148,163,184,0.08)',
+    };
+    const header: React.CSSProperties = {
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '16px 24px', borderBottom: '1px solid rgba(148,163,184,0.08)',
+    };
+    const lbl: React.CSSProperties = {
+        display: 'block', marginBottom: 6, fontSize: 10, fontWeight: 600,
+        color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px',
+    };
+    const input: React.CSSProperties = {
+        width: '100%', padding: '10px 14px',
+        border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
+        fontSize: 13, color: '#e2e8f0', background: '#131620',
+        fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+    };
+    const textarea: React.CSSProperties = { ...input, minHeight: 70, resize: 'vertical' };
+    const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 };
+    const group: React.CSSProperties = { marginBottom: 16 };
+    const footer: React.CSSProperties = {
+        padding: '12px 24px', borderTop: '1px solid rgba(148,163,184,0.08)',
+        display: 'flex', justifyContent: 'flex-end', gap: 8,
+    };
+    const btnCancel: React.CSSProperties = {
+        padding: '8px 16px', background: '#131620',
+        border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
+        color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+    };
+    const btnSubmit: React.CSSProperties = {
+        padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
+        color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+        fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6,
+    };
+    const checkLabel: React.CSSProperties = {
+        display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
+        color: '#e2e8f0', cursor: 'pointer', paddingTop: 22,
+    };
+
     return (
-        <div className={styles.modalOverlay} aria-hidden="true" onClick={onCancel}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-                <div className={styles.modalHeader}>
-                    <h2>Modifier le contrat</h2>
-                    <button className={styles.closeButton} onClick={onCancel} aria-label="Fermer">
-                        <X size={20} aria-hidden="true" />
+        <div style={overlay} onClick={onCancel}>
+            <div style={modal} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+                <div style={header}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <FileText size={18} style={{ color: '#3b82f6' }} />
+                        <span style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>Modifier le contrat</span>
+                    </div>
+                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
+                        <X size={18} />
                     </button>
                 </div>
-                <div className={styles.modalContent}>
-                    <div className={styles.formSection}>
-                        <h3>Informations générales</h3>
-                        <div className={styles.formGrid}>
-                            <div className={styles.formGroup}>
-                                <label>Libellé du contrat *</label>
-                                <input
-                                    type="text"
-                                    value={editForm.nom}
-                                    onChange={(e) => onFormChange({ ...editForm, nom: e.target.value })}
-                                    className={styles.formInput}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Numéro de contrat</label>
-                                <input
-                                    type="text"
-                                    value={editForm.numeroContrat}
-                                    onChange={(e) => onFormChange({ ...editForm, numeroContrat: e.target.value })}
-                                    className={styles.formInput}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Type de contrat *</label>
-                                <select
-                                    value={editForm.type}
-                                    onChange={(e) => onFormChange({ ...editForm, type: e.target.value as ContractType | '' })}
-                                    className={styles.formInput}
-                                >
-                                    <option value="">Sélectionner...</option>
-                                    {CONTRACT_TYPE_OPTIONS.map(t => (
-                                        <option key={t.value} value={t.value}>{t.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <ProviderSelector
-                                    value={editForm.prestataireId}
-                                    onChange={(id) => onFormChange({ ...editForm, prestataireId: id })}
-                                    prestataires={prestataires}
-                                    label="Prestataire"
-                                />
-                            </div>
+
+                <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+                    {/* Libellé + Numéro */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={lbl}>Libellé du contrat <span style={{ color: '#ef4444' }}>*</span></label>
+                            <input style={input} value={editForm.nom}
+                                onChange={e => onFormChange({ ...editForm, nom: e.target.value })} />
                         </div>
-                        <div className={styles.formGroup}>
-                            <label>Description</label>
-                            <textarea
-                                value={editForm.description}
-                                onChange={(e) => onFormChange({ ...editForm, description: e.target.value })}
-                                className={styles.formTextarea}
-                                rows={3}
-                            />
+                        <div style={group}>
+                            <label style={lbl}>Numéro de contrat</label>
+                            <input style={input} value={editForm.numeroContrat}
+                                onChange={e => onFormChange({ ...editForm, numeroContrat: e.target.value })} />
                         </div>
                     </div>
 
-                    <div className={styles.formSection}>
-                        <h3>Dates et montants</h3>
-                        <div className={styles.formGrid}>
-                            <div className={styles.formGroup}>
-                                <label>Date de début *</label>
-                                <input
-                                    type="date"
-                                    value={editForm.dateDebut}
-                                    onChange={(e) => onFormChange({ ...editForm, dateDebut: e.target.value })}
-                                    className={styles.formInput}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Date de fin *</label>
-                                <input
-                                    type="date"
-                                    value={editForm.dateFin}
-                                    onChange={(e) => onFormChange({ ...editForm, dateFin: e.target.value })}
-                                    className={styles.formInput}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Coût annuel (€) *</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={editForm.coutAnnuel}
-                                    onChange={(e) => onFormChange({ ...editForm, coutAnnuel: e.target.value })}
-                                    className={styles.formInput}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Délai de résiliation (jours)</label>
-                                <input
-                                    type="number"
-                                    value={editForm.delaiResiliation}
-                                    onChange={(e) => onFormChange({ ...editForm, delaiResiliation: parseInt(e.target.value) })}
-                                    className={styles.formInput}
-                                />
-                            </div>
+                    {/* Type + Prestataire */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={lbl}>Type de contrat <span style={{ color: '#ef4444' }}>*</span></label>
+                            <select style={input} value={editForm.type}
+                                onChange={e => onFormChange({ ...editForm, type: e.target.value as ContractType | '' })}>
+                                <option value="">— Sélectionner —</option>
+                                {CONTRACT_TYPE_OPTIONS.map(t => (
+                                    <option key={t.value} value={t.value}>{t.label}</option>
+                                ))}
+                            </select>
                         </div>
-                        <div className={styles.formGroup}>
-                            <label className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={editForm.taciteReconduction}
-                                    onChange={(e) => onFormChange({ ...editForm, taciteReconduction: e.target.checked })}
-                                />
-                                Tacite reconduction
-                            </label>
+                        <div style={group}>
+                            <label style={lbl}>Prestataire</label>
+                            <select style={input} value={editForm.prestataireId}
+                                onChange={e => onFormChange({ ...editForm, prestataireId: e.target.value })}>
+                                <option value="">— Sélectionner —</option>
+                                {prestataires.map(p => (
+                                    <option key={p.id} value={p.id}>{p.nom}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
+
+                    {/* Description */}
+                    <div style={group}>
+                        <label style={lbl}>Description</label>
+                        <textarea style={textarea} value={editForm.description}
+                            onChange={e => onFormChange({ ...editForm, description: e.target.value })}
+                            rows={3} />
+                    </div>
+
+                    {/* Dates */}
+                    <div style={{ ...row, marginBottom: 16 }}>
+                        <DatePicker
+                            label="Date de début"
+                            value={editForm.dateDebut ? parseISO(editForm.dateDebut) : null}
+                            onChange={(date) => {
+                                if (date && isValid(date)) {
+                                    onFormChange({ ...editForm, dateDebut: format(date, 'yyyy-MM-dd') });
+                                } else {
+                                    onFormChange({ ...editForm, dateDebut: '' });
+                                }
+                            }}
+                            required
+                        />
+                        <DatePicker
+                            label="Date de fin"
+                            value={editForm.dateFin ? parseISO(editForm.dateFin) : null}
+                            onChange={(date) => {
+                                if (date && isValid(date)) {
+                                    onFormChange({ ...editForm, dateFin: format(date, 'yyyy-MM-dd') });
+                                } else {
+                                    onFormChange({ ...editForm, dateFin: '' });
+                                }
+                            }}
+                            required
+                            minDate={editForm.dateDebut ? parseISO(editForm.dateDebut) : undefined}
+                        />
+                    </div>
+
+                    {/* Coût + Délai */}
+                    <div style={row}>
+                        <div style={group}>
+                            <label style={lbl}>Coût annuel (€) <span style={{ color: '#ef4444' }}>*</span></label>
+                            <input type="number" step="0.01" style={input} value={editForm.coutAnnuel}
+                                onChange={e => onFormChange({ ...editForm, coutAnnuel: e.target.value })} />
+                        </div>
+                        <div style={group}>
+                            <label style={lbl}>Délai de résiliation (jours)</label>
+                            <input type="number" style={input} value={editForm.delaiResiliation}
+                                onChange={e => onFormChange({ ...editForm, delaiResiliation: parseInt(e.target.value) || 0 })} />
+                        </div>
+                    </div>
+
+                    {/* Tacite reconduction */}
+                    <div style={group}>
+                        <label style={checkLabel}>
+                            <input type="checkbox" checked={editForm.taciteReconduction}
+                                onChange={e => onFormChange({ ...editForm, taciteReconduction: e.target.checked })}
+                                style={{ accentColor: '#3b82f6', width: 16, height: 16 }} />
+                            Tacite reconduction
+                        </label>
+                    </div>
                 </div>
-                <div className={styles.modalActions}>
-                    <button className="btn btn-secondary" onClick={onCancel}>
-                        <X size={16} aria-hidden="true" /> Annuler
+
+                <div style={footer}>
+                    <button style={btnCancel} onClick={onCancel}>
+                        <X size={14} /> Annuler
                     </button>
-                    <button className="btn btn-primary" onClick={onSave}>
-                        <Save size={16} aria-hidden="true" /> Enregistrer
+                    <button style={btnSubmit} onClick={onSave}>
+                        <Save size={14} /> Enregistrer
                     </button>
                 </div>
             </div>
