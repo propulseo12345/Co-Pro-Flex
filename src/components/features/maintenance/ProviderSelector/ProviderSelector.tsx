@@ -37,9 +37,9 @@ export default function ProviderSelector({
         const matchesCategory = !categories || categories.includes(p.categorie);
         const matchesSearch =
             searchTerm === '' ||
-            p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.domaines.some(d => d.toLowerCase().includes(searchTerm.toLowerCase()));
+            (p.nom || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.domaines || []).some(d => (d || '').toLowerCase().includes(searchTerm.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
 
