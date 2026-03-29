@@ -6,13 +6,12 @@ import {
     MOCK_PRESTATAIRES_SYNDIC,
     MOCK_PRESTATAIRES_COPRO,
     MOCK_PRESTATAIRES_COPROFLEX,
-    MOCK_CONTRATS_DETAILLES,
     MOCK_AVIS_COPROFLEX
 } from '@/data/mock';
-import { Prestataire, InterventionDetaille, DomaineActivite } from '@/types';
-import type { Provider, LogbookOverview } from '@/types/supabase';
+import { Prestataire, InterventionDetaille, ContratDetaille, DomaineActivite } from '@/types';
+import type { Provider, LogbookOverview, ContractOverview } from '@/types/supabase';
 import { useToast } from '@/providers/ToastProvider';
-import { useProviders, useLogbook } from '@/hooks/modules/useMaintenanceData';
+import { useProviders, useLogbook, useContracts as useContractsSupabase } from '@/hooks/modules/useMaintenanceData';
 
 export function useProviderDetailPage(id: string) {
     const router = useRouter();
@@ -20,6 +19,7 @@ export function useProviderDetailPage(id: string) {
     const { showToast } = useToast();
     const { providers: supabaseProviders, updateProvider, deleteProvider } = useProviders({ autoFetch: true });
     const { entries: dbEntries, createEntry, fetchEntries } = useLogbook({ autoFetch: true });
+    const { contracts: dbContracts } = useContractsSupabase({ autoFetch: true });
 
     const [showAddIntervention, setShowAddIntervention] = useState(false);
     const [showEditModal, setShowEditModal] = useState(searchParams.get('edit') === 'true');
@@ -81,10 +81,33 @@ export function useProviderDetailPage(id: string) {
             }) as InterventionDetaille);
     }, [dbEntries, id]);
 
-    const contrats = useMemo(() =>
-        MOCK_CONTRATS_DETAILLES.filter(c => c.prestataireId === id),
-        [id]
-    );
+    // Contrats depuis Supabase, filtrés par provider_id
+    const contrats = useMemo(() => {
+        const STATUS_MAP: Record<string, string> = {
+            draft: 'BROUILLON', active: 'ACTIF', to_renew: 'A_RENOUVELER',
+            expired: 'EXPIRE', terminated: 'RESILIE', archived: 'ARCHIVE',
+        };
+        return dbContracts
+            .filter(c => c.provider_id === id)
+            .map(c => ({
+                id: c.id || '',
+                nom: c.title || '',
+                fournisseur: c.provider_name || '',
+                prestataireId: c.provider_id || '',
+                type: (c.contract_type || 'autre').toUpperCase(),
+                dateDebut: c.start_date || '',
+                dateFin: c.end_date || '',
+                coutAnnuel: c.annual_amount || 0,
+                statut: STATUS_MAP[c.status || ''] || 'ACTIF',
+                description: c.description || undefined,
+                taciteReconduction: c.tacit_renewal ?? false,
+                delaiResiliation: c.notice_months ? c.notice_months * 30 : undefined,
+                estReglementaire: c.is_regulatory ?? false,
+                interventionIds: [],
+                pieceJointes: [],
+                numeroContrat: c.contract_number || undefined,
+            }) as ContratDetaille);
+    }, [dbContracts, id]);
 
     const avis = useMemo(() =>
         prestataire?.categorie === 'COPROFLEX'

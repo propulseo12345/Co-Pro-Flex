@@ -121,7 +121,7 @@ export function useContracts() {
                 title: newContrat.nom,
                 contract_type: newContrat.type.toLowerCase(),
                 contract_number: newContrat.numeroContrat || null,
-                provider_id: newContrat.fournisseur,
+                provider_id: newContrat.prestataireId,
                 start_date: newContrat.dateDebut,
                 end_date: newContrat.dateFin,
                 annual_amount: newContrat.coutAnnuel || null,
