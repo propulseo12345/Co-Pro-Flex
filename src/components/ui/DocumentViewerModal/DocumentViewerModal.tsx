@@ -419,38 +419,7 @@ export default function DocumentViewerModal({
             <Info size={16} />
             Informations
           </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'links' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('links')}
-          >
-            <Link2 size={16} />
-            Entités liées
-            {linkedEntities.length > 0 && (
-              <span className={styles.tabBadge}>{linkedEntities.length}</span>
-            )}
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'versions' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('versions')}
-          >
-            <GitBranch size={16} />
-            Versions
-            {versioningData && (
-              <span
-                className={styles.tabBadge}
-                style={{ backgroundColor: getStatusColor(versioningData.statut) }}
-              >
-                {versioningData.version}
-              </span>
-            )}
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'history' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('history')}
-          >
-            <Clock size={16} />
-            Historique
-          </button>
+          {/* Onglets Entités liées, Versions, Historique masqués — pas utilisés pour l'instant */}
         </div>
 
         {/* Main Content */}

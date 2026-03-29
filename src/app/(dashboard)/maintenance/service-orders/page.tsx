@@ -13,6 +13,7 @@ export default function ServiceOrdersPage() {
         emailPreviewOS,
         handleEmailSend,
         handleCloseEmailPreview,
+        handleDelete,
         goToNew,
         goToDetail,
     } = useServiceOrdersListPage();
@@ -28,6 +29,7 @@ export default function ServiceOrdersPage() {
                 setStatutFilter={setStatutFilter}
                 onGoToNew={goToNew}
                 onGoToDetail={goToDetail}
+                onDelete={handleDelete}
             />
 
             {emailPreviewOS && (

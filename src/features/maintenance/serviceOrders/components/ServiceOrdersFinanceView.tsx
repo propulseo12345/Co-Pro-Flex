@@ -56,6 +56,7 @@ interface ServiceOrdersFinanceViewProps {
   setStatutFilter: (v: any) => void;
   onGoToNew: () => void;
   onGoToDetail: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function ServiceOrdersFinanceView({
@@ -67,6 +68,7 @@ export function ServiceOrdersFinanceView({
   setStatutFilter,
   onGoToNew,
   onGoToDetail,
+  onDelete,
 }: ServiceOrdersFinanceViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = sortedOS.find(o => o.id === selectedId) || sortedOS[0] || null;
@@ -274,6 +276,15 @@ export function ServiceOrdersFinanceView({
               <button className={topBarStyles.btnPrimary} onClick={() => selected.id && onGoToDetail(selected.id)}>
                 Gérer l&apos;ordre
               </button>
+              {onDelete && (
+                <button
+                  className={topBarStyles.btnGhost}
+                  style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                  onClick={() => selected.id && onDelete(selected.id)}
+                >
+                  Supprimer
+                </button>
+              )}
             </div>
           </div>
         ) : (

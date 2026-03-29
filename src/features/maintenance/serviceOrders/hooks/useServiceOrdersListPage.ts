@@ -37,7 +37,7 @@ function adaptToLegacyFormat(order: ServiceOrderOverview) {
     fournisseurNom: order.provider_name,
     typeOrdre: order.order_type === 'contractuel' ? 'CONTRACTUEL' : 'CLASSIQUE',
     statut: order.status ? mapStatusToLegacy(order.status) : 'BROUILLON',
-    urgence: order.urgency,
+    urgence: order.urgency === 'critical' || order.urgency === 'high' || order.urgency === 'urgent',
     montantEstime: order.estimated_amount,
     montantDevis: order.quoted_amount,
     montantReel: order.actual_amount,
@@ -70,6 +70,7 @@ export function useServiceOrdersListPage() {
     updateOrderStatus,
     sendOrderEmail,
     cancelOrder,
+    deleteOrder,
   } = useServiceOrders();
 
   // Fusionner les ordres localStorage (fallback hors-ligne) avec Supabase
@@ -186,15 +187,33 @@ export function useServiceOrdersListPage() {
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir annuler cet ordre de service ?')) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet ordre de service ? Cette action est irréversible.')) return;
+
+    // Vérifier si c'est un OS localStorage (ID non-UUID)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    if (!isUUID) {
+      // Supprimer du localStorage
       try {
-        await cancelOrder(id, 'Annulé par l\'utilisateur');
-      } catch (err) {
-        console.error('Error cancelling order:', err);
-        alert('Erreur lors de l\'annulation');
-      }
+        const stored = localStorage.getItem('newOrdresService');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const filtered = parsed.filter((os: { id: string }) => os.id !== id);
+          localStorage.setItem('newOrdresService', JSON.stringify(filtered));
+        }
+      } catch { /* ignore */ }
+      setLocalOrders(prev => prev.filter(o => o.id !== id));
+      return;
     }
-  }, [cancelOrder]);
+
+    // Supprimer de Supabase
+    try {
+      await deleteOrder(id);
+    } catch (err) {
+      console.error('Error deleting order:', err);
+      alert('Erreur lors de la suppression');
+    }
+  }, [deleteOrder]);
 
   const handleViewPdf = useCallback((osId: string) => {
     const os = allOrders.find(o => o.id === osId);

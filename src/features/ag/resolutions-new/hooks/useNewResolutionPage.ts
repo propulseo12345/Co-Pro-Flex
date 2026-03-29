@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { MAJORITES, type MajorityType } from '@/lib/constants/resolutions';
 import { ModeEcheancier, Echeance } from '@/types';
 import { creerEcheancier, genererEcheances } from '@/lib/utils/echeancier';
+import { saveDraft, loadDraft } from '@/lib/ag/draft-persistence';
 
 export const CLES_REPARTITION = [
   { value: 'CHARGES_GENERALES', label: 'Charges generales' },
@@ -84,7 +85,7 @@ export function useNewResolutionPage() {
     setTimeout(handleMontantOrDateChange, 100);
   }, [handleMontantOrDateChange]);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!titre.trim() || !corps.trim()) {
@@ -108,9 +109,9 @@ export function useNewResolutionPage() {
       }
     }
 
-    // Charger les resolutions existantes
-    const savedResolutions = localStorage.getItem('ag-resolutions-' + agId);
-    const resolutions = savedResolutions ? JSON.parse(savedResolutions) : [];
+    // Charger les resolutions existantes depuis Supabase (fallback localStorage)
+    const { data: savedResolutions } = await loadDraft<unknown[]>(agId, 'resolutions', 'ag-resolutions-' + agId);
+    const resolutions = savedResolutions || [];
 
     // Creer l'echeancier si c'est un appel de fonds
     let echeancier = undefined;
@@ -139,9 +140,9 @@ export function useNewResolutionPage() {
       echeancier: echeancier
     };
 
-    // Ajouter a la liste
+    // Ajouter a la liste et sauvegarder via Supabase (fallback localStorage)
     resolutions.push(newResolution);
-    localStorage.setItem('ag-resolutions-' + agId, JSON.stringify(resolutions));
+    await saveDraft(agId, 'resolutions', resolutions, 'ag-resolutions-' + agId);
 
     // Rediriger vers l'ordre du jour
     router.push(`/ag/${agId}/agenda`);

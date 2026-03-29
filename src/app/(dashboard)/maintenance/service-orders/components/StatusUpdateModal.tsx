@@ -4,11 +4,7 @@ import { useState, useMemo } from 'react';
 import { OrdreService, StatutOrdreService } from '@/types';
 import { getStatutLabel, formatDateTime } from '@/lib/utils/service-order';
 import { simulateGedArchive } from '@/lib/utils/service-order';
-import { X, AlertCircle, CheckCircle, Loader, Clock, Calendar, Receipt, CreditCard } from 'lucide-react';
-import {
-    ORDRE_SERVICE_WORKFLOW_STEPS,
-    ORDRE_SERVICE_STATUT_DESCRIPTIONS
-} from '@/types/enums/statuts';
+import { X, AlertCircle, CheckCircle, Loader, Ban } from 'lucide-react';
 import styles from './StatusUpdateModal.module.css';
 import clsx from 'clsx';
 
@@ -18,25 +14,92 @@ interface StatusUpdateModalProps {
     onStatusUpdate: (updatedOS: OrdreService) => void;
 }
 
-// Délais minimum entre les étapes (en heures)
-const DELAIS_MINIMUM: Record<string, number> = {
-    'BROUILLON_TO_ENVOYE': 0, // Peut être envoyé immédiatement
-    'ENVOYE_TO_EN_ATTENTE_PRESTATAIRE': 1, // Au moins 1h après envoi (temps de réception)
-    'EN_ATTENTE_PRESTATAIRE_TO_INTERVENTION_PROGRAMMEE': 4, // Au moins 4h pour programmer
-    'INTERVENTION_PROGRAMMEE_TO_INTERVENTION_REALISEE': 0, // L'intervention peut être le même jour si programmée
-    'INTERVENTION_REALISEE_TO_CLOTURE': 0, // Peut clôturer immédiatement après réalisation
+// Pipeline steps in order (canonical statuses shown in the pipeline)
+const PIPELINE_STEPS = [
+    'BROUILLON', 'A_ENVOYER', 'ENVOYE', 'EN_ATTENTE_PRESTATAIRE',
+    'INTERVENTION_PROGRAMMEE', 'EN_COURS', 'INTERVENTION_REALISEE', 'CLOTURE'
+] as const;
+
+// Map alias statuses to their pipeline equivalent
+const STATUS_TO_PIPELINE: Record<string, string> = {
+    'ACCEPTE': 'EN_ATTENTE_PRESTATAIRE',
+    'PLANIFIE': 'INTERVENTION_PROGRAMMEE',
+    'REALISE': 'INTERVENTION_REALISEE',
+    'FACTURE': 'INTERVENTION_REALISEE',
+    'PAYE': 'CLOTURE',
+    'ANNULE': 'CLOTURE',
+    'REFUSE': 'ENVOYE',
 };
 
-// Fonction utilitaire pour calculer la différence en heures entre deux dates
-function getHoursDifference(date1: Date, date2: Date): number {
-    return (date2.getTime() - date1.getTime()) / (1000 * 60 * 60);
-}
+const PIPELINE_LABELS: Record<string, string> = {
+    'BROUILLON': 'Brouillon',
+    'A_ENVOYER': 'À envoyer',
+    'ENVOYE': 'Envoyé',
+    'EN_ATTENTE_PRESTATAIRE': 'Accepté',
+    'ACCEPTE': 'Accepté',
+    'INTERVENTION_PROGRAMMEE': 'Programmé',
+    'PLANIFIE': 'Programmé',
+    'EN_COURS': 'En cours',
+    'INTERVENTION_REALISEE': 'Réalisé',
+    'REALISE': 'Réalisé',
+    'FACTURE': 'Facturé',
+    'PAYE': 'Payé',
+    'CLOTURE': 'Clôturé',
+    'ANNULE': 'Annulé',
+    'REFUSE': 'Refusé',
+};
 
-// Fonction pour formater une date pour input datetime-local
-function formatDateForInput(isoString: string | undefined): string {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toISOString().slice(0, 16);
+// Valid transitions
+const VALID_TRANSITIONS: Record<string, StatutOrdreService[]> = {
+    'BROUILLON': ['A_ENVOYER'],
+    'A_ENVOYER': ['ENVOYE', 'BROUILLON'],
+    'ENVOYE': ['EN_ATTENTE_PRESTATAIRE', 'ACCEPTE', 'REFUSE'],
+    'EN_ATTENTE_PRESTATAIRE': ['INTERVENTION_PROGRAMMEE', 'PLANIFIE'],
+    'ACCEPTE': ['PLANIFIE', 'INTERVENTION_PROGRAMMEE'],
+    'REFUSE': ['A_ENVOYER'],
+    'PLANIFIE': ['EN_COURS'],
+    'INTERVENTION_PROGRAMMEE': ['INTERVENTION_REALISEE', 'EN_COURS'],
+    'EN_COURS': ['REALISE', 'INTERVENTION_REALISEE'],
+    'REALISE': ['FACTURE', 'CLOTURE'],
+    'INTERVENTION_REALISEE': ['CLOTURE', 'FACTURE'],
+    'FACTURE': ['PAYE'],
+    'PAYE': ['CLOTURE'],
+    'CLOTURE': [],
+    'ANNULE': []
+};
+
+// Checklist items per transition
+const CHECKLIST_ITEMS: Record<string, string[]> = {
+    'EN_ATTENTE_PRESTATAIRE': ['Confirmation du prestataire reçue', 'Devis conforme au budget'],
+    'ACCEPTE': ['Confirmation du prestataire reçue', 'Devis conforme au budget'],
+    'INTERVENTION_PROGRAMMEE': ['Date d\'intervention confirmée', 'Accès au site organisé'],
+    'PLANIFIE': ['Date d\'intervention confirmée', 'Accès au site organisé'],
+    'EN_COURS': ['Prestataire présent sur site'],
+    'INTERVENTION_REALISEE': ['Travaux vérifiés', 'PV de réception signé'],
+    'REALISE': ['Travaux vérifiés', 'PV de réception signé'],
+    'FACTURE': ['Facture reçue et vérifiée'],
+    'PAYE': ['Paiement effectué'],
+    'CLOTURE': ['Tous les documents archivés'],
+};
+
+// Fields needed per status
+function needsDateProgrammee(status: string): boolean {
+    return ['INTERVENTION_PROGRAMMEE', 'PLANIFIE'].includes(status);
+}
+function needsDateRealisee(status: string): boolean {
+    return ['INTERVENTION_REALISEE', 'REALISE'].includes(status);
+}
+function needsMontant(status: string): boolean {
+    return ['INTERVENTION_REALISEE', 'REALISE'].includes(status);
+}
+function needsFacture(status: string): boolean {
+    return status === 'FACTURE';
+}
+function needsPaiement(status: string): boolean {
+    return status === 'PAYE';
+}
+function needsRefus(status: string): boolean {
+    return status === 'REFUSE';
 }
 
 export default function StatusUpdateModal({
@@ -44,534 +107,410 @@ export default function StatusUpdateModal({
     onClose,
     onStatusUpdate
 }: StatusUpdateModalProps) {
-    const [newStatus, setNewStatus] = useState<StatutOrdreService>(ordreService.statut);
-    const [dateInterventionProgrammee, setDateInterventionProgrammee] = useState('');
-    const [dateInterventionRealisee, setDateInterventionRealisee] = useState('');
+    const currentStatus = ordreService.statut;
+    const pipelineStatus = STATUS_TO_PIPELINE[currentStatus] || currentStatus;
+    const currentIndex = PIPELINE_STEPS.indexOf(pipelineStatus as typeof PIPELINE_STEPS[number]);
+
+    // Available next steps (excluding cancel)
+    const availableNextSteps = useMemo(() => {
+        return (VALID_TRANSITIONS[currentStatus] || []).filter(s => s !== 'ANNULE');
+    }, [currentStatus]);
+
+    // Default to first available
+    const [selectedStatus, setSelectedStatus] = useState<StatutOrdreService | null>(
+        availableNextSteps.length > 0 ? availableNextSteps[0] : null
+    );
+
+    // Checklist state
+    const checklistItems = selectedStatus ? (CHECKLIST_ITEMS[selectedStatus] || []) : [];
+    const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+
+    // Form fields
+    const [dateProgrammee, setDateProgrammee] = useState('');
+    const [dateRealisee, setDateRealisee] = useState('');
     const [montantFinal, setMontantFinal] = useState('');
-    const [noteCloture, setNoteCloture] = useState('');
     const [numeroFacture, setNumeroFacture] = useState('');
     const [datePaiement, setDatePaiement] = useState('');
     const [raisonRefus, setRaisonRefus] = useState('');
+    const [commentaire, setCommentaire] = useState('');
+    const [noteCloture, setNoteCloture] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState('');
 
-    // Définir les transitions de statut valides (workflow strict + annulation)
-    const validTransitions: Record<StatutOrdreService, StatutOrdreService[]> = {
-        'BROUILLON': ['A_ENVOYER', 'ANNULE'],
-        'A_ENVOYER': ['ENVOYE', 'BROUILLON', 'ANNULE'],
-        'ENVOYE': ['ACCEPTE', 'REFUSE', 'EN_ATTENTE_PRESTATAIRE', 'ANNULE'],
-        'EN_ATTENTE_PRESTATAIRE': ['INTERVENTION_PROGRAMMEE', 'PLANIFIE', 'ANNULE'],
-        'ACCEPTE': ['PLANIFIE', 'ANNULE'],
-        'REFUSE': ['A_ENVOYER', 'ANNULE'],
-        'PLANIFIE': ['EN_COURS', 'ANNULE'],
-        'INTERVENTION_PROGRAMMEE': ['INTERVENTION_REALISEE', 'EN_COURS', 'ANNULE'],
-        'EN_COURS': ['REALISE', 'ANNULE'],
-        'REALISE': ['FACTURE', 'CLOTURE'],
-        'INTERVENTION_REALISEE': ['CLOTURE', 'FACTURE'],
-        'FACTURE': ['PAYE'],
-        'PAYE': ['CLOTURE'],
-        'CLOTURE': [],
-        'ANNULE': []
+    // Map pipeline step to available transition
+    const pipelineToTransition = useMemo(() => {
+        const map: Record<string, string> = {};
+        for (const step of PIPELINE_STEPS) {
+            if ((availableNextSteps as string[]).includes(step)) {
+                map[step] = step;
+            }
+            for (const next of availableNextSteps) {
+                const mapped = STATUS_TO_PIPELINE[next] || next;
+                if (mapped === step) {
+                    map[step] = next;
+                }
+            }
+        }
+        return map;
+    }, [availableNextSteps]);
+
+    const handleStageClick = (step: string) => {
+        const transition = pipelineToTransition[step];
+        if (transition) {
+            setSelectedStatus(transition as StatutOrdreService);
+            setCheckedItems(new Set());
+            setError('');
+        }
     };
 
-    const availableStatuses = validTransitions[ordreService.statut] || [];
-
-    const canTransitionTo = (status: StatutOrdreService): boolean => {
-        return availableStatuses.includes(status);
+    const toggleCheck = (index: number) => {
+        setCheckedItems(prev => {
+            const next = new Set(prev);
+            if (next.has(index)) next.delete(index);
+            else next.add(index);
+            return next;
+        });
     };
-
-    // Calcul des dates de référence pour les validations
-    const datesWorkflow = useMemo(() => {
-        return {
-            creation: new Date(ordreService.dateCreation),
-            envoi: ordreService.dateEnvoi ? new Date(ordreService.dateEnvoi) : null,
-            programmee: ordreService.dateInterventionProgrammee ? new Date(ordreService.dateInterventionProgrammee) : null,
-            realisee: ordreService.dateInterventionRealisee ? new Date(ordreService.dateInterventionRealisee) : null,
-            cloture: ordreService.dateCloture ? new Date(ordreService.dateCloture) : null,
-        };
-    }, [ordreService]);
-
-    // Calcul de la date minimum pour l'intervention programmée
-    const minDateInterventionProgrammee = useMemo(() => {
-        // L'intervention doit être programmée après la date d'envoi ou de création
-        const referenceDate = datesWorkflow.envoi || datesWorkflow.creation;
-        const minDate = new Date(referenceDate);
-        minDate.setHours(minDate.getHours() + DELAIS_MINIMUM['EN_ATTENTE_PRESTATAIRE_TO_INTERVENTION_PROGRAMMEE']);
-        return formatDateForInput(minDate.toISOString());
-    }, [datesWorkflow]);
-
-    // Calcul de la date minimum pour l'intervention réalisée
-    const minDateInterventionRealisee = useMemo(() => {
-        // L'intervention réalisée doit être après la date programmée
-        if (datesWorkflow.programmee) {
-            return formatDateForInput(datesWorkflow.programmee.toISOString());
-        }
-        // Si pas encore programmée mais on saisit la date réalisée
-        if (dateInterventionProgrammee) {
-            return dateInterventionProgrammee;
-        }
-        return formatDateForInput(new Date().toISOString());
-    }, [datesWorkflow, dateInterventionProgrammee]);
 
     const validate = (): boolean => {
         setError('');
+        if (!selectedStatus) { setError('Sélectionnez une étape'); return false; }
 
-        if (newStatus === ordreService.statut) {
-            setError('Veuillez sélectionner un nouveau statut');
+        if (needsDateProgrammee(selectedStatus) && !dateProgrammee) {
+            setError('La date d\'intervention programmée est obligatoire');
             return false;
         }
-
-        if (!canTransitionTo(newStatus)) {
-            setError('Cette transition de statut n\'est pas autorisée');
+        if (needsDateRealisee(selectedStatus) && !dateRealisee) {
+            setError('La date de réalisation est obligatoire');
             return false;
         }
-
-        // Validation pour PLANIFIE ou INTERVENTION_PROGRAMMEE
-        if (newStatus === 'INTERVENTION_PROGRAMMEE' || newStatus === 'PLANIFIE') {
-            if (!dateInterventionProgrammee) {
-                setError('La date d\'intervention programmée est obligatoire');
-                return false;
-            }
-
-            const dateProgrammee = new Date(dateInterventionProgrammee);
-            const dateReference = datesWorkflow.envoi || datesWorkflow.creation;
-            const delaiMinimum = DELAIS_MINIMUM['EN_ATTENTE_PRESTATAIRE_TO_INTERVENTION_PROGRAMMEE'];
-
-            // Vérifier que la date programmée est postérieure à la date d'envoi/création
-            if (dateProgrammee <= dateReference) {
-                setError(`La date d'intervention programmée doit être postérieure à la date d'envoi (${formatDateTime(dateReference.toISOString())})`);
-                return false;
-            }
-
-            // Vérifier le délai minimum
-            const heuresDifference = getHoursDifference(dateReference, dateProgrammee);
-            if (heuresDifference < delaiMinimum) {
-                setError(`Un délai minimum de ${delaiMinimum}h est requis entre l'envoi et la programmation de l'intervention`);
-                return false;
-            }
+        if (needsMontant(selectedStatus) && !montantFinal) {
+            setError('Le montant final est obligatoire');
+            return false;
         }
-
-        // Validation pour REALISE ou INTERVENTION_REALISEE
-        if (newStatus === 'INTERVENTION_REALISEE' || newStatus === 'REALISE') {
-            if (!dateInterventionRealisee) {
-                setError('La date d\'intervention réalisée est obligatoire');
-                return false;
-            }
-            if (!montantFinal) {
-                setError('Le montant final est obligatoire');
-                return false;
-            }
-
-            const dateRealisee = new Date(dateInterventionRealisee);
-            const dateProgrammee = datesWorkflow.programmee;
-
-            // Vérifier que la date réalisée est postérieure ou égale à la date programmée
-            if (dateProgrammee && dateRealisee < dateProgrammee) {
-                setError(`La date de réalisation (${formatDateTime(dateRealisee.toISOString())}) ne peut pas être antérieure à la date programmée (${formatDateTime(dateProgrammee.toISOString())})`);
-                return false;
-            }
-
-            // Vérifier que la date réalisée n'est pas dans le futur (avec une tolérance de 1h)
-            const now = new Date();
-            now.setHours(now.getHours() + 1); // Tolérance de 1h
-            if (dateRealisee > now) {
-                setError('La date de réalisation ne peut pas être dans le futur');
-                return false;
-            }
+        if (needsFacture(selectedStatus) && !numeroFacture) {
+            setError('Le numéro de facture est obligatoire');
+            return false;
         }
-
-        // Validation pour FACTURE
-        if (newStatus === 'FACTURE') {
-            if (!numeroFacture) {
-                setError('Le numéro de facture est obligatoire');
-                return false;
-            }
+        if (needsPaiement(selectedStatus) && !datePaiement) {
+            setError('La date de paiement est obligatoire');
+            return false;
         }
-
-        // Validation pour PAYE
-        if (newStatus === 'PAYE') {
-            if (!datePaiement) {
-                setError('La date de paiement est obligatoire');
-                return false;
-            }
+        if (needsRefus(selectedStatus) && !raisonRefus) {
+            setError('La raison du refus est obligatoire');
+            return false;
         }
-
-        // Validation pour REFUSE
-        if (newStatus === 'REFUSE') {
-            if (!raisonRefus) {
-                setError('La raison du refus est obligatoire');
-                return false;
-            }
-        }
-
         return true;
     };
 
     const handleConfirm = async () => {
-        if (!validate()) {
-            return;
-        }
-
+        if (!validate() || !selectedStatus) return;
         setIsProcessing(true);
 
         try {
             const now = new Date().toISOString();
             const updatedOS: OrdreService = {
                 ...ordreService,
-                statut: newStatus,
-                dateModification: now
+                statut: selectedStatus,
+                dateModification: now,
             };
 
-            // Mettre à jour les dates selon le statut
-            if (newStatus === 'ENVOYE') {
-                updatedOS.dateEnvoi = now;
+            if (selectedStatus === 'ENVOYE') updatedOS.dateEnvoi = now;
+            if (needsDateProgrammee(selectedStatus)) {
+                updatedOS.dateInterventionProgrammee = new Date(dateProgrammee).toISOString();
             }
-
-            if (newStatus === 'ACCEPTE') {
-                updatedOS.historique.push({
-                    id: `h-accepte-${Date.now()}`,
-                    date: now,
-                    auteur: 'Prestataire',
-                    action: 'Intervention acceptée par le prestataire'
-                });
-            }
-
-            if (newStatus === 'REFUSE') {
-                updatedOS.historique.push({
-                    id: `h-refuse-${Date.now()}`,
-                    date: now,
-                    auteur: 'Prestataire',
-                    action: `Intervention refusée: ${raisonRefus}`
-                });
-            }
-
-            if (newStatus === 'INTERVENTION_PROGRAMMEE' || newStatus === 'PLANIFIE') {
-                updatedOS.dateInterventionProgrammee = new Date(dateInterventionProgrammee).toISOString();
-            }
-
-            if (newStatus === 'EN_COURS') {
-                updatedOS.historique.push({
-                    id: `h-encours-${Date.now()}`,
-                    date: now,
-                    auteur: 'Système',
-                    action: 'Intervention démarrée'
-                });
-            }
-
-            if (newStatus === 'INTERVENTION_REALISEE' || newStatus === 'REALISE') {
-                updatedOS.dateInterventionRealisee = new Date(dateInterventionRealisee).toISOString();
+            if (needsDateRealisee(selectedStatus)) {
+                updatedOS.dateInterventionRealisee = new Date(dateRealisee).toISOString();
                 updatedOS.montantFinal = parseFloat(montantFinal);
             }
-
-            if (newStatus === 'FACTURE') {
-                updatedOS.historique.push({
-                    id: `h-facture-${Date.now()}`,
-                    date: now,
-                    auteur: 'Syndic Admin',
-                    action: `Facture reçue: ${numeroFacture}`
-                });
-            }
-
-            if (newStatus === 'PAYE') {
-                updatedOS.historique.push({
-                    id: `h-paye-${Date.now()}`,
-                    date: now,
-                    auteur: 'Syndic Admin',
-                    action: `Paiement effectué le ${new Date(datePaiement).toLocaleDateString('fr-FR')}`
-                });
-            }
-
-            if (newStatus === 'CLOTURE') {
+            if (selectedStatus === 'CLOTURE') {
                 updatedOS.dateCloture = now;
-
-                // Archivage automatique
                 const gedId = await simulateGedArchive(updatedOS);
                 updatedOS.archiveGedId = gedId;
                 updatedOS.archiveGedUrl = `#ged/${gedId}`;
-
-                // Ajouter entrée historique pour l'archivage
-                updatedOS.historique.push({
-                    id: `h-archive-${Date.now()}`,
-                    date: now,
-                    auteur: 'Système',
-                    action: 'Archivage automatique dans la GED',
-                    champModifie: 'archiveGedId',
-                    nouvelleValeur: gedId
-                });
-
-                alert(`✓ Ordre de service archivé dans la GED (${gedId})`);
             }
 
-            // Ajouter entrée historique pour le changement de statut
-            updatedOS.historique.push({
-                id: `h-status-${Date.now()}`,
-                date: now,
-                auteur: 'Syndic Admin',
-                action: `Changement de statut`,
+            // Historique
+            const entries = [];
+            if (selectedStatus === 'REFUSE') {
+                entries.push({ id: `h-${Date.now()}`, date: now, auteur: 'Prestataire', action: `Refusé: ${raisonRefus}` });
+            }
+            if (selectedStatus === 'FACTURE') {
+                entries.push({ id: `h-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: `Facture: ${numeroFacture}` });
+            }
+            if (selectedStatus === 'PAYE') {
+                entries.push({ id: `h-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: `Paiement le ${new Date(datePaiement).toLocaleDateString('fr-FR')}` });
+            }
+            if (commentaire.trim()) {
+                entries.push({ id: `h-c-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: commentaire });
+            }
+            if (noteCloture.trim()) {
+                entries.push({ id: `h-n-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: `Note: ${noteCloture}` });
+            }
+            entries.push({
+                id: `h-s-${Date.now()}`, date: now, auteur: 'Syndic Admin',
+                action: 'Changement de statut',
                 champModifie: 'statut',
-                ancienneValeur: getStatutLabel(ordreService.statut),
-                nouvelleValeur: getStatutLabel(newStatus)
+                ancienneValeur: getStatutLabel(currentStatus),
+                nouvelleValeur: getStatutLabel(selectedStatus),
             });
 
-            // Si note de clôture fournie
-            if (newStatus === 'CLOTURE' && noteCloture) {
-                updatedOS.historique.push({
-                    id: `h-note-${Date.now()}`,
-                    date: now,
-                    auteur: 'Syndic Admin',
-                    action: `Note de clôture : ${noteCloture}`
-                });
-            }
+            updatedOS.historique = [...ordreService.historique, ...entries];
 
             onStatusUpdate(updatedOS);
             onClose();
-        } catch (err) {
+        } catch {
             setError('Erreur lors de la mise à jour du statut');
             setIsProcessing(false);
         }
     };
 
+    const handleCancel = async () => {
+        if (!confirm('Annuler cet ordre de service ?')) return;
+        setIsProcessing(true);
+        try {
+            const now = new Date().toISOString();
+            const updatedOS: OrdreService = {
+                ...ordreService,
+                statut: 'ANNULE' as StatutOrdreService,
+                dateModification: now,
+                historique: [...ordreService.historique, {
+                    id: `h-cancel-${Date.now()}`, date: now, auteur: 'Syndic Admin',
+                    action: 'Ordre de service annulé', champModifie: 'statut',
+                    ancienneValeur: getStatutLabel(currentStatus), nouvelleValeur: 'Annulé',
+                }],
+            };
+            onStatusUpdate(updatedOS);
+            onClose();
+        } catch {
+            setError('Erreur lors de l\'annulation');
+            setIsProcessing(false);
+        }
+    };
+
+    const selectedLabel = selectedStatus ? (PIPELINE_LABELS[selectedStatus] || selectedStatus) : '';
+
     return (
-        <div className={styles.overlay} aria-hidden="true" onClick={onClose}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className={styles.overlay} onClick={onClose}>
+            <div className={styles.modal} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
                 {/* Header */}
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Changer le statut</h2>
-                    <button className={styles.closeButton} onClick={onClose} aria-label="Fermer"><X size={20} aria-hidden="true" /></button>
+                    <h2 className={styles.title}>Progression de l&apos;ordre de service</h2>
+                    <button className={styles.closeButton} onClick={onClose} aria-label="Fermer">
+                        <X size={20} />
+                    </button>
                 </div>
 
                 {/* Content */}
                 <div className={styles.content}>
-                    {/* Current Status */}
-                    <div className={styles.currentStatus}>
-                        <span className={styles.label}>Statut actuel :</span>
-                        <span className={styles.statusBadge}>
-                            {getStatutLabel(ordreService.statut)}
-                        </span>
-                    </div>
+                    {/* Pipeline */}
+                    <div className={styles.pipeline}>
+                        {PIPELINE_STEPS.map((step, index) => {
+                            const isDone = index < currentIndex;
+                            const isCurrent = index === currentIndex;
+                            const isClickable = !!pipelineToTransition[step];
+                            const isSelected = selectedStatus === pipelineToTransition[step];
 
-                    {/* Status Workflow Info - Timeline complète */}
-                    <div className={styles.workflowInfo}>
-                        <div className={styles.workflowTitle}>
-                            <Clock size={16} aria-hidden="true" />
-                            <span>Progression du workflow</span>
-                        </div>
-                        <div className={styles.workflowTimeline}>
-                            {ORDRE_SERVICE_WORKFLOW_STEPS.map((step, index) => {
-                                const currentIndex = ORDRE_SERVICE_WORKFLOW_STEPS.indexOf(ordreService.statut);
-                                const isCompleted = index < currentIndex;
-                                const isActive = step === ordreService.statut;
-                                const isPending = index > currentIndex;
-
-                                return (
+                            return (
+                                <div key={step} style={{ display: 'contents' }}>
+                                    {index > 0 && (
+                                        <div className={clsx(styles.pipelineConnector, isDone && styles.connectorDone)} />
+                                    )}
                                     <div
-                                        key={step}
                                         className={clsx(
-                                            styles.timelineStep,
-                                            isCompleted && styles.stepCompleted,
-                                            isActive && styles.stepActive,
-                                            isPending && styles.stepPending
+                                            styles.pipelineStage,
+                                            isDone && styles.stageDone,
+                                            isCurrent && styles.stageCurrent,
+                                            isClickable && styles.stageClickable,
+                                            isSelected && styles.stageSelected,
                                         )}
+                                        onClick={() => isClickable && handleStageClick(step as string)}
                                     >
-                                        <div className={styles.timelineMarker} />
-                                        <div className={styles.timelineContent}>
-                                            <span className={styles.timelineLabel}>
-                                                {getStatutLabel(step)}
-                                            </span>
-                                            {isCompleted && (
-                                                <span className={styles.timelineDate}>Terminé</span>
-                                            )}
-                                            {isActive && (
-                                                <span className={styles.timelineDate}>En cours</span>
-                                            )}
-                                            {isPending && (
-                                                <span className={styles.timelinePending}>En attente</span>
-                                            )}
-                                        </div>
+                                        {PIPELINE_LABELS[step] || getStatutLabel(step)}
+                                        {isDone && <span className={styles.stageDoneIcon}>✓</span>}
+                                        {isCurrent && <span className={styles.stageCurrentDot}>●</span>}
                                     </div>
-                                );
-                            })}
-                        </div>
+                                </div>
+                            );
+                        })}
                     </div>
 
-                    {/* New Status Selection */}
-                    <div className={styles.formGroup}>
-                        <label htmlFor="newStatus" className={styles.label}>
-                            Nouveau statut *
-                        </label>
-                        <select
-                            id="newStatus"
-                            className="input"
-                            value={newStatus}
-                            onChange={(e) => setNewStatus(e.target.value as StatutOrdreService)}
-                        >
-                            <option value={ordreService.statut}>
-                                {getStatutLabel(ordreService.statut)} (actuel)
-                            </option>
-                            {availableStatuses.map((status) => (
-                                <option key={status} value={status}>
-                                    {getStatutLabel(status)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Description du statut sélectionné */}
-                    {newStatus !== ordreService.statut && ORDRE_SERVICE_STATUT_DESCRIPTIONS[newStatus] && (
-                        <p className={styles.statusDescription}>
-                            {ORDRE_SERVICE_STATUT_DESCRIPTIONS[newStatus]}
-                        </p>
-                    )}
-
-                    {/* Champs conditionnels selon le nouveau statut */}
-
-                    {/* REFUSE - Raison du refus */}
-                    {newStatus === 'REFUSE' && (
-                        <div className={styles.formGroup}>
-                            <label htmlFor="raisonRefus" className={styles.label}>
-                                Raison du refus *
-                            </label>
-                            <textarea
-                                id="raisonRefus"
-                                className="input"
-                                rows={3}
-                                placeholder="Indiquez la raison du refus par le prestataire..."
-                                value={raisonRefus}
-                                onChange={(e) => setRaisonRefus(e.target.value)}
-                            />
-                        </div>
-                    )}
-
-                    {/* PLANIFIE / INTERVENTION_PROGRAMMEE - Date d'intervention */}
-                    {(newStatus === 'INTERVENTION_PROGRAMMEE' || newStatus === 'PLANIFIE') && (
-                        <div className={styles.formGroup}>
-                            <label htmlFor="dateIntervention" className={styles.label}>
-                                Date d'intervention programmée *
-                            </label>
-                            <input
-                                id="dateIntervention"
-                                type="datetime-local"
-                                className="input"
-                                value={dateInterventionProgrammee}
-                                min={minDateInterventionProgrammee}
-                                onChange={(e) => setDateInterventionProgrammee(e.target.value)}
-                            />
-                            <div className={styles.dateHint}>
-                                <Calendar size={14} aria-hidden="true" />
-                                <span>
-                                    Doit être postérieure à l'envoi de l'ordre de service
-                                    {datesWorkflow.envoi && ` (${formatDateTime(datesWorkflow.envoi.toISOString())})`}
+                    {/* Action zone */}
+                    {selectedStatus && (
+                        <div className={styles.actionZone}>
+                            {/* From → To */}
+                            <div className={styles.actionHeader}>
+                                <span className={clsx(styles.badge, styles.badgeBlue)}>
+                                    {PIPELINE_LABELS[currentStatus] || getStatutLabel(currentStatus)}
+                                </span>
+                                <span className={styles.actionArrow}>→</span>
+                                <span className={clsx(styles.badge, styles.badgeGreen)}>
+                                    {selectedLabel}
                                 </span>
                             </div>
-                        </div>
-                    )}
 
-                    {/* REALISE / INTERVENTION_REALISEE - Date + Montant final */}
-                    {(newStatus === 'INTERVENTION_REALISEE' || newStatus === 'REALISE') && (
-                        <>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="dateRealisee" className={styles.label}>
-                                    Date d'intervention réalisée *
-                                </label>
-                                <input
-                                    id="dateRealisee"
-                                    type="datetime-local"
-                                    className="input"
-                                    value={dateInterventionRealisee}
-                                    min={minDateInterventionRealisee}
-                                    max={formatDateForInput(new Date().toISOString())}
-                                    onChange={(e) => setDateInterventionRealisee(e.target.value)}
-                                />
-                                <div className={styles.dateHint}>
-                                    <Calendar size={14} aria-hidden="true" />
-                                    <span>
-                                        Doit être postérieure ou égale à la date programmée
-                                        {datesWorkflow.programmee && ` (${formatDateTime(datesWorkflow.programmee.toISOString())})`}
-                                    </span>
+                            <div className={styles.divider} />
+
+                            {/* Checklist */}
+                            {checklistItems.length > 0 && (
+                                <>
+                                    <div className={styles.label}>Checklist avant validation</div>
+                                    <ul className={styles.checklist}>
+                                        {checklistItems.map((item, i) => (
+                                            <li key={i} className={styles.checklistItem}>
+                                                <button
+                                                    type="button"
+                                                    className={clsx(styles.checkBox, checkedItems.has(i) && styles.checkBoxChecked)}
+                                                    onClick={() => toggleCheck(i)}
+                                                >
+                                                    {checkedItems.has(i) ? '✓' : ''}
+                                                </button>
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className={styles.divider} />
+                                </>
+                            )}
+
+                            {/* Contextual fields */}
+                            {needsDateProgrammee(selectedStatus) && (
+                                <div className={styles.fieldsRow}>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.fieldLabel}>Date d&apos;intervention *</label>
+                                        <input
+                                            type="datetime-local"
+                                            className={styles.fieldInput}
+                                            value={dateProgrammee}
+                                            onChange={e => setDateProgrammee(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="montantFinal" className={styles.label}>
-                                    Montant final (€) *
-                                </label>
-                                <input
-                                    id="montantFinal"
-                                    type="number"
-                                    step="0.01"
-                                    className="input"
-                                    placeholder="0.00"
-                                    value={montantFinal}
-                                    onChange={(e) => setMontantFinal(e.target.value)}
-                                />
-                            </div>
-                        </>
-                    )}
+                            )}
 
-                    {/* FACTURE - Numéro de facture */}
-                    {newStatus === 'FACTURE' && (
-                        <div className={styles.formGroup}>
-                            <label htmlFor="numeroFacture" className={styles.label}>
-                                Numéro de facture *
-                            </label>
-                            <div className={styles.inputWithIcon}>
-                                <Receipt size={16} aria-hidden="true" />
-                                <input
-                                    id="numeroFacture"
-                                    type="text"
-                                    className="input"
-                                    placeholder="Ex: FAC-2024-001"
-                                    value={numeroFacture}
-                                    onChange={(e) => setNumeroFacture(e.target.value)}
+                            {needsDateRealisee(selectedStatus) && (
+                                <div className={styles.fieldsRow}>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.fieldLabel}>Date de réalisation *</label>
+                                        <input
+                                            type="datetime-local"
+                                            className={styles.fieldInput}
+                                            value={dateRealisee}
+                                            onChange={e => setDateRealisee(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.fieldLabel}>Montant final (€) *</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className={styles.fieldInput}
+                                            placeholder="0.00"
+                                            value={montantFinal}
+                                            onChange={e => setMontantFinal(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {needsFacture(selectedStatus) && (
+                                <div className={styles.fieldsRow}>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.fieldLabel}>Numéro de facture *</label>
+                                        <input
+                                            type="text"
+                                            className={styles.fieldInput}
+                                            placeholder="FAC-2026-001"
+                                            value={numeroFacture}
+                                            onChange={e => setNumeroFacture(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {needsPaiement(selectedStatus) && (
+                                <div className={styles.fieldsRow}>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.fieldLabel}>Date de paiement *</label>
+                                        <input
+                                            type="date"
+                                            className={styles.fieldInput}
+                                            value={datePaiement}
+                                            max={new Date().toISOString().split('T')[0]}
+                                            onChange={e => setDatePaiement(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {needsRefus(selectedStatus) && (
+                                <div className={styles.fieldGroup}>
+                                    <label className={styles.fieldLabel}>Raison du refus *</label>
+                                    <textarea
+                                        className={styles.fieldInput}
+                                        rows={2}
+                                        placeholder="Indiquez la raison..."
+                                        value={raisonRefus}
+                                        onChange={e => setRaisonRefus(e.target.value)}
+                                        style={{ resize: 'vertical', minHeight: 56 }}
+                                    />
+                                </div>
+                            )}
+
+                            {selectedStatus === 'CLOTURE' && (
+                                <div className={styles.fieldGroup}>
+                                    <label className={styles.fieldLabel}>Note de clôture</label>
+                                    <textarea
+                                        className={styles.fieldInput}
+                                        rows={2}
+                                        placeholder="Observations finales (optionnel)..."
+                                        value={noteCloture}
+                                        onChange={e => setNoteCloture(e.target.value)}
+                                        style={{ resize: 'vertical', minHeight: 56 }}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Comment */}
+                            <div className={styles.commentBox}>
+                                <div className={styles.label}>Note interne</div>
+                                <textarea
+                                    placeholder="Ajouter un commentaire visible dans l'historique..."
+                                    value={commentaire}
+                                    onChange={e => setCommentaire(e.target.value)}
                                 />
                             </div>
                         </div>
                     )}
 
-                    {/* PAYE - Date de paiement */}
-                    {newStatus === 'PAYE' && (
-                        <div className={styles.formGroup}>
-                            <label htmlFor="datePaiement" className={styles.label}>
-                                Date de paiement *
-                            </label>
-                            <div className={styles.inputWithIcon}>
-                                <CreditCard size={16} aria-hidden="true" />
-                                <input
-                                    id="datePaiement"
-                                    type="date"
-                                    className="input"
-                                    value={datePaiement}
-                                    max={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setDatePaiement(e.target.value)}
-                                />
-                            </div>
+                    {/* No available transitions */}
+                    {availableNextSteps.length === 0 && (
+                        <div className={styles.actionZone} style={{ textAlign: 'center', padding: 32 }}>
+                            <p style={{ color: '#94a3b8', fontSize: 14 }}>
+                                Cet ordre de service est {getStatutLabel(currentStatus).toLowerCase()} — aucune transition disponible.
+                            </p>
                         </div>
                     )}
 
-                    {/* CLOTURE - Note de clôture */}
-                    {newStatus === 'CLOTURE' && (
-                        <div className={styles.formGroup}>
-                            <label htmlFor="noteCloture" className={styles.label}>
-                                Note de clôture
-                            </label>
-                            <textarea
-                                id="noteCloture"
-                                className="input"
-                                rows={3}
-                                placeholder="Observations finales (optionnel)..."
-                                value={noteCloture}
-                                onChange={(e) => setNoteCloture(e.target.value)}
-                            />
-                            <div className={styles.archiveNote}>
-                                <AlertCircle size={16} aria-hidden="true" />
-                                <span>L'ordre de service sera automatiquement archivé dans la GED</span>
-                            </div>
+                    {/* Cancel shortcut */}
+                    {currentStatus !== 'CLOTURE' && currentStatus !== 'ANNULE' && (
+                        <div className={styles.cancelRow}>
+                            <button
+                                type="button"
+                                className={styles.btnDanger}
+                                onClick={handleCancel}
+                                disabled={isProcessing}
+                            >
+                                <Ban size={13} />
+                                Annuler cet OS
+                            </button>
                         </div>
                     )}
 
                     {/* Error */}
                     {error && (
                         <div className={styles.error}>
-                            <AlertCircle size={16} aria-hidden="true" />
+                            <AlertCircle size={16} />
                             {error}
                         </div>
                     )}
@@ -585,38 +524,40 @@ export default function StatusUpdateModal({
                         disabled={isProcessing}
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: 6,
-                            padding: '8px 16px', borderRadius: 8,
+                            padding: '8px 20px', borderRadius: 8,
                             background: '#131620', border: '1px solid rgba(148,163,184,0.08)',
                             color: '#e2e8f0', fontSize: 13, fontWeight: 500, cursor: 'pointer',
                             fontFamily: 'inherit', opacity: isProcessing ? 0.5 : 1,
                         }}
                     >
-                        Annuler
+                        Fermer
                     </button>
-                    <button
-                        type="button"
-                        onClick={handleConfirm}
-                        disabled={isProcessing}
-                        style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 6,
-                            padding: '8px 16px', borderRadius: 8,
-                            background: '#3b82f6', border: 'none',
-                            color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                            fontFamily: 'inherit', opacity: isProcessing ? 0.5 : 1,
-                        }}
-                    >
-                        {isProcessing ? (
-                            <>
-                                <Loader size={15} className={styles.spinner} />
-                                Traitement...
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle size={15} aria-hidden="true" />
-                                Confirmer
-                            </>
-                        )}
-                    </button>
+                    {selectedStatus && (
+                        <button
+                            type="button"
+                            onClick={handleConfirm}
+                            disabled={isProcessing}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                                padding: '8px 20px', borderRadius: 8,
+                                background: '#3b82f6', border: 'none',
+                                color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                fontFamily: 'inherit', opacity: isProcessing ? 0.5 : 1,
+                            }}
+                        >
+                            {isProcessing ? (
+                                <>
+                                    <Loader size={15} className={styles.spinner} />
+                                    Traitement...
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle size={15} />
+                                    Valider → {selectedLabel}
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

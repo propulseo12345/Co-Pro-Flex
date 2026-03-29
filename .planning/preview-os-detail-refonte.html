@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Détail — Refonte Pipeline-first</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: Inter, -apple-system, sans-serif; }
+
+  /* ============================================================ */
+  /* Page layout                                                   */
+  /* ============================================================ */
+  .page { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* ============================================================ */
+  /* TopBar                                                        */
+  /* ============================================================ */
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px; background: #161822;
+    border: 1px solid rgba(148,163,184,0.08); border-radius: 12px;
+    margin-bottom: 16px;
+  }
+  .topbar-back {
+    display: flex; align-items: center; gap: 6px;
+    color: #94a3b8; font-size: 13px; font-weight: 500;
+    text-decoration: none; cursor: pointer;
+    padding: 6px 10px; border-radius: 8px;
+    border: none; background: none; font-family: inherit;
+  }
+  .topbar-back:hover { color: #e2e8f0; background: rgba(148,163,184,0.06); }
+  .topbar-divider { width: 1px; height: 24px; background: rgba(148,163,184,0.1); }
+  .topbar-info { flex: 1; }
+  .topbar-number { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+  .topbar-title { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-top: 2px; }
+  .topbar-meta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08);
+    color: #94a3b8; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit;
+  }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+  }
+  .badge-blue { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .badge-green { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .badge-red { background: rgba(239,68,68,0.1); color: #f87171; }
+  .badge-amber { background: rgba(245,158,11,0.1); color: #fbbf24; }
+
+  /* ============================================================ */
+  /* Pipeline Zone                                                 */
+  /* ============================================================ */
+  .pipeline-zone {
+    background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px; margin-bottom: 16px; overflow: hidden;
+  }
+
+  .pipeline-bar {
+    display: flex; align-items: center; gap: 0;
+    padding: 8px; background: #131620;
+  }
+  .pipeline-stage {
+    flex: 1; text-align: center; padding: 12px 4px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+    color: #475569; border-radius: 8px; cursor: default;
+    transition: all 0.15s; min-width: 70px; user-select: none;
+  }
+  .pipeline-stage.done { color: #4ade80; }
+  .pipeline-stage.done .stage-icon { color: #22c55e; }
+  .pipeline-stage.current { color: #3b82f6; background: rgba(59,130,246,0.1); font-weight: 700; }
+  .pipeline-stage.clickable { color: #94a3b8; cursor: pointer; }
+  .pipeline-stage.clickable:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+  .pipeline-stage.selected { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .stage-icon { display: block; font-size: 12px; margin-top: 3px; line-height: 1; }
+  .pipeline-connector { width: 16px; height: 2px; background: rgba(148,163,184,0.1); flex-shrink: 0; }
+  .pipeline-connector.done { background: rgba(34,197,94,0.5); }
+
+  /* Action panel (inside pipeline-zone) */
+  .action-panel { padding: 20px 24px; display: none; }
+  .action-panel.open { display: block; }
+
+  .action-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .action-arrow { font-size: 18px; color: #3b82f6; }
+  .action-divider { height: 1px; background: rgba(148,163,184,0.06); margin: 14px 0; }
+
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid rgba(148,163,184,0.04);
+    font-size: 13px; color: #e2e8f0;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box {
+    width: 20px; height: 20px; border-radius: 6px;
+    border: 1px solid rgba(148,163,184,0.15);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 11px; color: transparent;
+    transition: all 0.15s; background: none; font-family: inherit; padding: 0;
+  }
+  .check-box:hover { border-color: rgba(148,163,184,0.3); }
+  .check-box.checked { background: rgba(34,197,94,0.15); border-color: #22c55e; color: #4ade80; }
+
+  .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .field-group { display: flex; flex-direction: column; gap: 4px; }
+  .field-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+  .field-input {
+    width: 100%; padding: 9px 12px; background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.1); border-radius: 8px;
+    color: #e2e8f0; font-size: 13px; font-family: inherit; outline: none;
+  }
+  .field-input:focus { border-color: rgba(59,130,246,0.4); }
+  .field-input::placeholder { color: #475569; }
+
+  .comment-area { margin-top: 8px; }
+  .comment-area textarea {
+    width: 100%; padding: 9px 12px; background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.1); border-radius: 8px;
+    color: #e2e8f0; font-size: 13px; font-family: inherit; outline: none;
+    resize: vertical; min-height: 48px;
+  }
+  .comment-area textarea:focus { border-color: rgba(59,130,246,0.4); }
+  .comment-area textarea::placeholder { color: #475569; }
+
+  .action-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .btn-danger-sm {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: transparent; border: 1px solid rgba(239,68,68,0.25);
+    color: #ef4444; padding: 6px 12px; border-radius: 8px;
+    font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+  }
+  .btn-danger-sm:hover { background: rgba(239,68,68,0.06); }
+  .action-footer-right { display: flex; gap: 8px; }
+  .btn-cancel {
+    padding: 8px 16px; border-radius: 8px;
+    background: #131620; border: 1px solid rgba(148,163,184,0.08);
+    color: #e2e8f0; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 8px;
+    background: #3b82f6; border: none;
+    color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .btn-primary:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+  /* ============================================================ */
+  /* Content Grid                                                  */
+  /* ============================================================ */
+  .content-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+
+  .card {
+    background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px; padding: 20px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #64748b; margin-bottom: 14px;
+  }
+
+  /* ============================================================ */
+  /* Infos Card                                                    */
+  /* ============================================================ */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .info-item {}
+  .info-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 3px; }
+  .info-value { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+  .info-value.money { font-family: 'SF Mono', 'Fira Code', monospace; font-variant-numeric: tabular-nums; }
+  .info-value.green { color: #4ade80; }
+
+  .description-block { margin-top: 4px; }
+  .description-block p { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+
+  /* Tabs inside card */
+  .card-tabs { display: flex; gap: 0; margin: -20px -20px 16px; border-bottom: 1px solid rgba(148,163,184,0.06); }
+  .card-tab {
+    flex: 1; text-align: center; padding: 12px 8px;
+    font-size: 12px; font-weight: 600; color: #64748b;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+  .card-tab:hover { color: #94a3b8; }
+  .card-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+  .card-tab-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: 9px; background: rgba(59,130,246,0.1);
+    color: #60a5fa; font-size: 10px; font-weight: 700; margin-left: 6px;
+  }
+
+  /* Documents tab content */
+  .doc-list { display: flex; flex-direction: column; gap: 6px; }
+  .doc-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; background: #131620;
+    border: 1px solid rgba(148,163,184,0.04); border-radius: 8px;
+    font-size: 13px; cursor: pointer; transition: all 0.15s;
+  }
+  .doc-item:hover { border-color: rgba(59,130,246,0.2); }
+  .doc-icon { font-size: 16px; }
+  .doc-name { flex: 1; color: #e2e8f0; font-weight: 500; }
+  .doc-size { color: #64748b; font-size: 11px; }
+
+  /* Email tab */
+  .email-preview { padding: 14px; background: #131620; border-radius: 8px; }
+  .email-subject { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
+  .email-body { font-size: 12px; color: #94a3b8; line-height: 1.6; white-space: pre-line; }
+
+  /* ============================================================ */
+  /* Timeline Card                                                 */
+  /* ============================================================ */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item {
+    display: flex; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+  }
+  .timeline-item:last-child { border-bottom: none; }
+
+  .timeline-dot-col { display: flex; flex-direction: column; align-items: center; width: 24px; flex-shrink: 0; padding-top: 2px; }
+  .timeline-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid rgba(148,163,184,0.15); background: #131620;
+    flex-shrink: 0;
+  }
+  .timeline-dot.green { background: #22c55e; border-color: #22c55e; }
+  .timeline-dot.blue { background: #131620; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .timeline-dot.amber { background: #f59e0b; border-color: #f59e0b; }
+  .timeline-line { flex: 1; width: 2px; background: rgba(148,163,184,0.08); margin-top: 4px; }
+
+  .timeline-content { flex: 1; }
+  .timeline-action { font-size: 13px; font-weight: 500; color: #e2e8f0; margin-bottom: 2px; }
+  .timeline-meta { font-size: 11px; color: #64748b; }
+  .timeline-badge { margin-left: 6px; }
+
+  /* Facture inline */
+  .facture-inline {
+    padding: 12px 14px; background: #131620;
+    border: 1px solid rgba(148,163,184,0.06); border-radius: 8px;
+    display: flex; align-items: center; gap: 12px; margin-top: 8px;
+  }
+  .facture-icon { font-size: 20px; }
+  .facture-info { flex: 1; }
+  .facture-number { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .facture-amount { font-size: 12px; color: #4ade80; font-family: 'SF Mono', monospace; }
+
+  /* ============================================================ */
+  /* Responsive                                                    */
+  /* ============================================================ */
+  @media (max-width: 768px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .pipeline-bar { overflow-x: auto; }
+    .pipeline-stage { min-width: 56px; font-size: 9px; }
+    .fields-row { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    .topbar { flex-wrap: wrap; }
+    .topbar-actions { width: 100%; justify-content: flex-end; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============================================================ -->
+  <!-- TopBar                                                        -->
+  <!-- ============================================================ -->
+  <div class="topbar">
+    <button class="topbar-back">← Retour</button>
+    <div class="topbar-divider"></div>
+    <div class="topbar-info">
+      <div class="topbar-number">OS-2026-0003</div>
+      <div class="topbar-title">Réparation fuite colonne EU — Bât A</div>
+      <div class="topbar-meta">PlombElite Services · Créé le 29/03/2026 · <span class="badge badge-blue">Envoyé</span></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost">✏️ Modifier</button>
+      <button class="btn-ghost">📧 Email</button>
+      <button class="btn-ghost">📄 PDF</button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Pipeline Zone (interactive — replaces modal)                  -->
+  <!-- ============================================================ -->
+  <div class="pipeline-zone">
+    <div class="pipeline-bar">
+      <div class="pipeline-stage done">
+        Brouillon
+        <span class="stage-icon">✓</span>
+      </div>
+      <div class="pipeline-connector done"></div>
+      <div class="pipeline-stage done">
+        À envoyer
+        <span class="stage-icon">✓</span>
+      </div>
+      <div class="pipeline-connector done"></div>
+      <div class="pipeline-stage current" id="stage-envoye">
+        Envoyé
+        <span class="stage-icon">●</span>
+      </div>
+      <div class="pipeline-connector"></div>
+      <div class="pipeline-stage clickable selected" onclick="selectStage('accepted')">
+        Accepté
+      </div>
+      <div class="pipeline-connector"></div>
+      <div class="pipeline-stage">Programmé</div>
+      <div class="pipeline-connector"></div>
+      <div class="pipeline-stage">En cours</div>
+      <div class="pipeline-connector"></div>
+      <div class="pipeline-stage">Réalisé</div>
+      <div class="pipeline-connector"></div>
+      <div class="pipeline-stage">Clôturé</div>
+    </div>
+
+    <!-- Action Panel (expands below pipeline) -->
+    <div class="action-panel open" id="action-panel">
+      <div class="action-header">
+        <span class="badge badge-blue">Envoyé</span>
+        <span class="action-arrow">→</span>
+        <span class="badge badge-green" id="action-target-badge">Accepté</span>
+      </div>
+
+      <div class="action-divider"></div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:8px;">
+        Checklist avant validation
+      </div>
+      <ul class="checklist">
+        <li>
+          <button class="check-box checked" onclick="this.classList.toggle('checked')">✓</button>
+          Confirmation du prestataire reçue
+        </li>
+        <li>
+          <button class="check-box" onclick="this.classList.toggle('checked')"></button>
+          Devis conforme au budget
+        </li>
+      </ul>
+
+      <div class="action-divider"></div>
+
+      <div class="fields-row">
+        <div class="field-group">
+          <label class="field-label">Date d'intervention *</label>
+          <input type="datetime-local" class="field-input" value="2026-04-05T09:00">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Montant devis (€)</label>
+          <input type="number" class="field-input" placeholder="850.00">
+        </div>
+      </div>
+
+      <div class="comment-area">
+        <label class="field-label">Note interne</label>
+        <textarea class="field-input" placeholder="Commentaire visible dans l'historique..." style="resize:vertical;min-height:44px;margin-top:4px;"></textarea>
+      </div>
+
+      <div class="action-footer">
+        <button class="btn-danger-sm">⊘ Annuler cet OS</button>
+        <div class="action-footer-right">
+          <button class="btn-cancel" onclick="closePanel()">Réduire</button>
+          <button class="btn-primary">✓ Valider → Accepté</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Content Grid — 2 colonnes                                     -->
+  <!-- ============================================================ -->
+  <div class="content-grid">
+
+    <!-- COLONNE GAUCHE -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Card Informations -->
+      <div class="card">
+        <div class="card-title">Informations</div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Prestataire</div>
+            <div class="info-value">PlombElite Services</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Type</div>
+            <div class="info-value">Classique</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Montant estimé</div>
+            <div class="info-value money">850,00 €</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Priorité</div>
+            <div class="info-value"><span class="badge badge-red">Urgent</span></div>
+          </div>
+        </div>
+
+        <div class="description-block">
+          <div class="info-label">Description</div>
+          <p>Fuite importante sur la colonne d'eaux usées au niveau du 3ème étage, bâtiment A.
+Intervention urgente requise — dégât des eaux signalé par le copropriétaire du lot 12.</p>
+        </div>
+      </div>
+
+      <!-- Card Documents (tabs : PJ / Email) -->
+      <div class="card" style="padding-top:0;">
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this, 'tab-pj')">
+            Pièces jointes <span class="card-tab-count">2</span>
+          </button>
+          <button class="card-tab" onclick="switchTab(this, 'tab-email')">
+            Email envoyé
+          </button>
+        </div>
+
+        <div id="tab-pj">
+          <div class="doc-list">
+            <div class="doc-item">
+              <span class="doc-icon">📷</span>
+              <span class="doc-name">photo-fuite-col-eu.jpg</span>
+              <span class="doc-size">1.2 MB</span>
+            </div>
+            <div class="doc-item">
+              <span class="doc-icon">📄</span>
+              <span class="doc-name">devis-plombelite-2026.pdf</span>
+              <span class="doc-size">340 KB</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-email" style="display:none;">
+          <div class="email-preview">
+            <div class="email-subject">Objet : Ordre de service — Réparation fuite colonne EU</div>
+            <div class="email-body">Bonjour,
+
+Suite à notre constatation, nous vous prions d'intervenir dans les meilleurs délais pour la réparation de la fuite sur la colonne d'eaux usées, bâtiment A, 3ème étage.
+
+Merci de nous confirmer votre disponibilité.
+
+Cordialement,
+Le Syndic</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Timeline Card -->
+      <div class="card">
+        <div class="card-title">Historique</div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot-col">
+              <div class="timeline-dot blue"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                Email envoyé au prestataire
+                <span class="badge badge-blue timeline-badge">Envoyé</span>
+              </div>
+              <div class="timeline-meta">29/03/2026 à 14:30 · Syndic Admin</div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot-col">
+              <div class="timeline-dot green"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                Marqué comme prêt à envoyer
+                <span class="badge badge-green timeline-badge">À envoyer</span>
+              </div>
+              <div class="timeline-meta">29/03/2026 à 14:28 · Syndic Admin</div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot-col">
+              <div class="timeline-dot green"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                Ordre de service créé
+                <span class="badge badge-green timeline-badge">Brouillon</span>
+              </div>
+              <div class="timeline-meta">29/03/2026 à 10:15 · Syndic Admin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Facture (contextuel — apparaît quand il y a une facture liée) -->
+      <div class="card">
+        <div class="card-title">Facture liée</div>
+        <div class="facture-inline">
+          <span class="facture-icon">🧾</span>
+          <div class="facture-info">
+            <div class="facture-number">FAC-2026-0042</div>
+            <div style="font-size:11px;color:#64748b;">PlombElite Services · Reçue le 05/04</div>
+          </div>
+          <div class="facture-amount">850,00 €</div>
+          <span class="badge badge-amber">À valider</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectStage(stage) {
+  document.querySelectorAll('.pipeline-stage.clickable').forEach(s => s.classList.remove('selected'));
+  event.target.closest('.pipeline-stage').classList.add('selected');
+  document.getElementById('action-panel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('action-panel').classList.remove('open');
+}
+
+function switchTab(btn, tabId) {
+  // Deactivate all tabs
+  btn.closest('.card-tabs').querySelectorAll('.card-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  // Hide all tab contents
+  const card = btn.closest('.card');
+  card.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.getElementById(tabId).style.display = 'block';
+}
+</script>
+
+</body>
+</html>

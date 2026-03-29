@@ -2,12 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-    MOCK_CONTRATS_DETAILLES,
-    MOCK_PRESTATAIRES_SYNDIC,
-    MOCK_PRESTATAIRES_COPRO,
-    MOCK_COPROPRIETAIRES
-} from '@/data/mock';
+import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import {
     TypeOrdreService,
     OrdreService,
@@ -20,8 +15,8 @@ import {
     filtrerPrestatairesParCategorie,
     getAlerteIncoherence
 } from '@/lib/utils/intervention-coherence';
-import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
-import type { ServiceOrderInsert } from '@/types/supabase';
+import { useServiceOrders, useProviders, useContracts } from '@/hooks/modules/useMaintenanceData';
+import type { ServiceOrderInsert, ProviderOverview, ContractOverview } from '@/types/supabase';
 
 export interface ServiceOrderFormData {
     typeOrdre: TypeOrdreService;
@@ -44,6 +39,44 @@ export interface ServiceOrderFormData {
     contactSurPlaceNom: string;
     contactSurPlaceTelephone: string;
     contactSurPlaceEmail: string;
+}
+
+// Adapter ProviderOverview Supabase → Prestataire legacy
+function adaptProviderToLegacy(p: ProviderOverview): Prestataire {
+    return {
+        id: p.id || '',
+        nom: p.name || '',
+        email: p.email || '',
+        telephone: p.phone || '',
+        adresse: p.address || '',
+        codePostal: p.postal_code || '',
+        ville: p.city || '',
+        siret: p.siret || '',
+        domaines: (p.domains || []).map(d => d.toUpperCase()) as unknown as string[],
+        categorie: (p.category || 'syndic') as unknown as string,
+        estActif: p.is_active !== false,
+        note: p.rating_avg || 0,
+        nombreAvis: p.rating_count || 0,
+        contactNom: p.contact_name || undefined,
+        contactRole: p.contact_role || undefined,
+    } as unknown as Prestataire;
+}
+
+// Adapter ContractOverview Supabase → ContratDetaille legacy
+function adaptContractToLegacy(c: ContractOverview): ContratDetaille {
+    return {
+        id: c.id || '',
+        nom: c.title || '',
+        numero: c.contract_number || '',
+        type: c.contract_type || '',
+        prestataireId: c.provider_id || '',
+        fournisseur: c.provider_name || '',
+        dateDebut: c.start_date || '',
+        dateFin: c.end_date || '',
+        montantAnnuel: c.annual_amount || 0,
+        statut: c.status || 'active',
+        description: c.description || '',
+    } as unknown as ContratDetaille;
 }
 
 const initialFormData: ServiceOrderFormData = {
@@ -72,15 +105,16 @@ const initialFormData: ServiceOrderFormData = {
 export function useNewServiceOrderPage() {
     const router = useRouter();
     const { createOrder } = useServiceOrders({ autoFetch: false });
+    const { providers: supabaseProviders } = useProviders();
+    const { contracts: supabaseContracts } = useContracts();
     const [formData, setFormData] = useState<ServiceOrderFormData>(initialFormData);
     const [errors, setErrors] = useState<Partial<Record<keyof ServiceOrderFormData, string>>>({});
     const [contactSearchTerm, setContactSearchTerm] = useState('');
     const [showContactDropdown, setShowContactDropdown] = useState(false);
 
-    const allPrestataires: Prestataire[] = useMemo(() => [
-        ...MOCK_PRESTATAIRES_SYNDIC,
-        ...MOCK_PRESTATAIRES_COPRO
-    ], []);
+    const allPrestataires: Prestataire[] = useMemo(() =>
+        supabaseProviders.map(adaptProviderToLegacy),
+    [supabaseProviders]);
 
     const prestatairesFiltered = useMemo(() => {
         return formData.categorieIntervention
@@ -265,7 +299,7 @@ export function useNewServiceOrderPage() {
             description: formData.description || null,
             urgency: formData.priorite === 'URGENT' ? 'urgent' : formData.priorite === 'HIGH' ? 'high' : formData.priorite === 'LOW' ? 'low' : 'normal',
             order_type: formData.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
-            origin: 'manual',
+            origin: 'syndic',
             status,
             estimated_amount: formData.montantEstime ? parseFloat(formData.montantEstime) : null,
             is_art18_emergency: false,
@@ -281,11 +315,12 @@ export function useNewServiceOrderPage() {
             await createOrder(buildSupabaseInsert('draft'));
             alert('✓ Brouillon sauvegardé avec succès !');
             router.push('/maintenance/service-orders');
-        } catch {
+        } catch (err) {
+            console.error('[createOrder] Erreur Supabase:', err);
             // Fallback localStorage si Supabase échoue
             const os = createOrdreService('BROUILLON');
             saveToLocalStorage(os);
-            alert('✓ Brouillon sauvegardé localement (hors-ligne)');
+            alert(`⚠ Sauvegardé localement (erreur DB: ${err instanceof Error ? err.message : 'inconnue'})`);
             router.push('/maintenance/service-orders');
         }
     }, [formData.titre, createOrder, buildSupabaseInsert, createOrdreService, saveToLocalStorage, router]);
@@ -299,11 +334,12 @@ export function useNewServiceOrderPage() {
             await createOrder(buildSupabaseInsert('sent'));
             alert(`✓ Ordre de service envoyé à ${formData.fournisseurNom} !`);
             router.push('/maintenance/service-orders');
-        } catch {
+        } catch (err) {
+            console.error('[createOrder] Erreur Supabase:', err);
             // Fallback localStorage si Supabase échoue
             const os = createOrdreService('ENVOYE');
             saveToLocalStorage(os);
-            alert(`✓ Ordre de service sauvegardé localement (hors-ligne)`);
+            alert(`⚠ Sauvegardé localement (erreur DB: ${err instanceof Error ? err.message : 'inconnue'})`);
             router.push('/maintenance/service-orders');
         }
     }, [validate, createOrder, buildSupabaseInsert, createOrdreService, saveToLocalStorage, formData.fournisseurNom, router]);
@@ -316,7 +352,7 @@ export function useNewServiceOrderPage() {
         prestatairesFiltered,
         alerteCoherence,
         filteredCoproprietaires,
-        contrats: MOCK_CONTRATS_DETAILLES,
+        contrats: supabaseContracts.map(adaptContractToLegacy),
         setContactSearchTerm,
         setShowContactDropdown,
         handleTypeChange,

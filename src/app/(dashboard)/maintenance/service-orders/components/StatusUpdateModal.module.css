@@ -15,7 +15,7 @@
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     width: 100%;
-    max-width: 600px;
+    max-width: 720px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -64,221 +64,304 @@
     gap: 16px;
 }
 
-.currentStatus {
+/* ============================================================ */
+/* Pipeline                                                      */
+/* ============================================================ */
+
+.pipeline {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
+    gap: 0;
+    padding: 6px;
     background: #131620;
-    border: 1px solid rgba(148, 163, 184, 0.06);
-    border-radius: 8px;
+    border-radius: 12px;
+    overflow-x: auto;
 }
 
-.label {
-    font-size: 12px;
+.pipelineStage {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 10px;
     font-weight: 600;
-    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.4px;
+    color: #475569;
+    border-radius: 8px;
+    cursor: default;
+    transition: all 0.15s;
+    min-width: 65px;
+    user-select: none;
 }
 
-.statusBadge {
+.stageDone {
+    color: #4ade80;
+}
+
+.stageDoneIcon {
+    display: block;
+    font-size: 13px;
+    margin-top: 2px;
+    line-height: 1;
+}
+
+.stageCurrent {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    font-weight: 700;
+}
+
+.stageCurrentDot {
+    display: block;
+    font-size: 8px;
+    margin-top: 4px;
+    line-height: 1;
+}
+
+.stageClickable {
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.stageClickable:hover {
+    background: rgba(148, 163, 184, 0.06);
+    color: #e2e8f0;
+}
+
+.stageSelected {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.pipelineConnector {
+    width: 14px;
+    height: 2px;
+    background: rgba(148, 163, 184, 0.12);
+    flex-shrink: 0;
+}
+
+.connectorDone {
+    background: #4ade80;
+}
+
+/* ============================================================ */
+/* Action Zone                                                    */
+/* ============================================================ */
+
+.actionZone {
+    background: #131620;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.actionHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.actionArrow {
+    font-size: 18px;
+    color: #3b82f6;
+}
+
+.badge {
     display: inline-flex;
     align-items: center;
     padding: 4px 12px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
+}
+
+.badgeBlue {
     background: rgba(59, 130, 246, 0.1);
     color: #60a5fa;
 }
 
-/* Workflow */
-.workflowInfo {
-    padding: 16px;
-    background: #131620;
-    border: 1px solid rgba(148, 163, 184, 0.06);
-    border-radius: 8px;
+.badgeGreen {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
 }
 
-.workflowTitle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #94a3b8;
-    margin-bottom: 14px;
+.badgeRed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
 }
 
-.workflowTimeline {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.timelineStep {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 6px 0;
-    position: relative;
-}
-
-.timelineStep::before {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 20px;
-    bottom: -6px;
-    width: 2px;
-    background: rgba(148, 163, 184, 0.08);
-}
-
-.timelineStep:last-child::before { display: none; }
-
-.timelineMarker {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #131620;
-    border: 2px solid rgba(148, 163, 184, 0.12);
-    flex-shrink: 0;
-    z-index: 1;
-    margin-top: 2px;
-}
-
-.timelineStep.stepCompleted .timelineMarker { background: #22c55e; border-color: #22c55e; }
-.timelineStep.stepActive .timelineMarker { background: #131620; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-.timelineStep.stepCompleted::before { background: #22c55e; }
-.timelineStep.stepPending .timelineMarker { background: #131620; border-color: rgba(148, 163, 184, 0.12); }
-
-.timelineContent {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    flex: 1;
-}
-
-.timelineLabel { font-size: 13px; font-weight: 500; color: #e2e8f0; }
-.timelineStep.stepCompleted .timelineLabel { color: #4ade80; }
-.timelineStep.stepActive .timelineLabel { color: #3b82f6; font-weight: 600; }
-.timelineStep.stepPending .timelineLabel { color: #64748b; }
-.timelineDate { font-size: 11px; color: #94a3b8; }
-.timelinePending { font-size: 11px; color: #475569; font-style: italic; }
-
-/* Form */
-.formGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Style inputs dans la modale */
-.content :global(.input),
-.content input[type="text"],
-.content input[type="number"],
-.content input[type="date"],
-.content input[type="datetime-local"],
-.content select,
-.content textarea {
-    width: 100%;
-    padding: 10px 14px;
-    background: #131620;
-    border: 1px solid rgba(148, 163, 184, 0.12);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    color: #e2e8f0;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.content :global(.input)::placeholder,
-.content input::placeholder,
-.content textarea::placeholder {
-    color: #475569;
-}
-
-.content select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-    cursor: pointer;
-}
-
-.content select option { background: #1a1d2e; color: #e2e8f0; }
-
-.content :global(.input):focus,
-.content input:focus,
-.content select:focus,
-.content textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.statusDescription {
-    font-size: 13px;
-    color: #94a3b8;
-    padding: 12px 14px;
-    background: #131620;
-    border-radius: 8px;
-    border-left: 3px solid #3b82f6;
-    margin: 0;
-    line-height: 1.5;
-}
-
-.inputWithIcon {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 0 0 12px;
-    background: #131620;
-    border: 1px solid rgba(148, 163, 184, 0.12);
-    border-radius: 8px;
-}
-
-.inputWithIcon svg { flex-shrink: 0; color: #64748b; }
-
-.inputWithIcon input {
-    border: none !important;
-    background: transparent !important;
-    flex: 1;
-    padding: 10px 14px 10px 4px !important;
-}
-
-.inputWithIcon input:focus {
-    outline: none;
-    box-shadow: none !important;
-}
-
-.dateHint {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 4px;
-}
-
-.dateHint svg { flex-shrink: 0; }
-
-.archiveNote {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 12px 14px;
-    background: rgba(245, 158, 11, 0.06);
-    border: 1px solid rgba(245, 158, 11, 0.15);
-    border-radius: 8px;
-    font-size: 12px;
+.badgeAmber {
+    background: rgba(245, 158, 11, 0.1);
     color: #fbbf24;
 }
 
-.archiveNote svg { flex-shrink: 0; margin-top: 1px; }
+.divider {
+    height: 1px;
+    background: rgba(148, 163, 184, 0.06);
+    margin: 16px 0;
+}
+
+/* Checklist */
+
+.label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 4px;
+}
+
+.checklistItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.checklistItem:last-child {
+    border-bottom: none;
+}
+
+.checkBox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    color: transparent;
+    font-size: 12px;
+    font-family: inherit;
+    padding: 0;
+}
+
+.checkBox:hover {
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.checkBoxChecked {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: #22c55e;
+    color: #4ade80;
+}
+
+/* Fields */
+
+.fieldsRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fieldLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.fieldInput {
+    width: 100%;
+    padding: 10px 12px;
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.fieldInput:focus {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.fieldInput::placeholder {
+    color: #475569;
+}
+
+.commentBox {
+    margin-top: 12px;
+}
+
+.commentBox textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    min-height: 56px;
+    transition: border-color 0.15s;
+}
+
+.commentBox textarea:focus {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.commentBox textarea::placeholder {
+    color: #475569;
+}
+
+/* Cancel shortcut */
+
+.cancelRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.btnDanger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+
+.btnDanger:hover {
+    background: rgba(239, 68, 68, 0.08);
+}
+
+/* Error */
 
 .error {
     display: flex;
@@ -292,11 +375,13 @@
     color: #f87171;
 }
 
+/* Footer */
+
 .footer {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    padding: 20px 24px;
+    padding: 16px 24px;
     border-top: 1px solid rgba(148, 163, 184, 0.08);
 }
 
@@ -309,36 +394,11 @@
     to { transform: rotate(360deg); }
 }
 
-/* Legacy step styles */
-.workflowSteps {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    overflow-x: auto;
-    padding: 6px 0;
-}
-
-.step {
-    padding: 6px 10px;
-    background: #131620;
-    border: 1px solid rgba(148, 163, 184, 0.08);
-    border-radius: 6px;
-    font-size: 11px;
-    color: #64748b;
-    white-space: nowrap;
-}
-
-.stepActive {
-    background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
-    border-color: rgba(59, 130, 246, 0.3);
-    font-weight: 600;
-}
-
-.stepArrow { color: #475569; font-size: 12px; }
-
 @media (max-width: 640px) {
     .modal { max-width: 100%; max-height: 100vh; border-radius: 0; }
+    .pipeline { overflow-x: auto; }
+    .pipelineStage { min-width: 56px; font-size: 9px; }
+    .fieldsRow { grid-template-columns: 1fr; }
     .footer { flex-direction: column-reverse; }
     .footer button { width: 100%; }
 }

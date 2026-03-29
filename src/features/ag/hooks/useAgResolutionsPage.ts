@@ -43,10 +43,25 @@ export function useAgResolutionsPage() {
   const [editingResolution, setEditingResolution] = useState<ICustomResolution | undefined>(undefined);
 
   useEffect(() => {
-    const saved = localStorage.getItem('custom-resolutions-library');
-    if (saved) {
-      setCustomResolutions(JSON.parse(saved));
+    async function loadCustomResolutions() {
+      // Essayer Supabase d'abord (via un draft global), puis fallback localStorage
+      try {
+        const { data } = await loadDraft<ICustomResolution[]>(
+          '00000000-0000-0000-0000-000000000000', // ID global pour la bibliothèque
+          'resolutions',
+          'custom-resolutions-library'
+        );
+        if (data) {
+          setCustomResolutions(data);
+          return;
+        }
+      } catch { /* fallback */ }
+      const saved = localStorage.getItem('custom-resolutions-library');
+      if (saved) {
+        setCustomResolutions(JSON.parse(saved));
+      }
     }
+    loadCustomResolutions();
   }, []);
 
   // Mapper les brouillons d'AG Supabase vers le format AvailableAG
@@ -75,9 +90,15 @@ export function useAgResolutionsPage() {
       });
   }, [agDrafts, isLoadingDrafts]);
 
-  const saveCustomResolutions = (resolutions: ICustomResolution[]) => {
-    localStorage.setItem('custom-resolutions-library', JSON.stringify(resolutions));
+  const saveCustomResolutions = async (resolutions: ICustomResolution[]) => {
     setCustomResolutions(resolutions);
+    // Sauvegarder via Supabase (fallback localStorage)
+    await saveDraft(
+      '00000000-0000-0000-0000-000000000000',
+      'resolutions',
+      resolutions,
+      'custom-resolutions-library'
+    );
   };
 
   const handleSaveResolution = useCallback((resolution: ICustomResolution) => {

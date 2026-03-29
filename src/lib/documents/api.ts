@@ -431,6 +431,9 @@ export async function uploadDocument(
     sourceModule?: DocumentSource;
     documentDate?: string;
     year?: number;
+    serviceOrderId?: string;
+    contractId?: string;
+    invoiceId?: string;
   }
 ): Promise<Document> {
   const supabase = createUntypedClient();
@@ -464,6 +467,9 @@ export async function uploadDocument(
     source_module: options?.sourceModule || 'manual',
     document_date: options?.documentDate || new Date().toISOString().split('T')[0],
     year,
+    service_order_id: options?.serviceOrderId || undefined,
+    contract_id: options?.contractId || undefined,
+    invoice_id: options?.invoiceId || undefined,
   });
 
   return doc;

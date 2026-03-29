@@ -156,9 +156,9 @@ export function EditProviderModal({ prestataire, onClose, onSave }: EditProvider
                     </div>
 
                     <div className={styles.modalFooter}>
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Annuler</button>
-                        <button type="submit" className="btn btn-primary">
-                            <Save size={18} aria-hidden="true" /> Enregistrer
+                        <button type="button" onClick={onClose}>Annuler</button>
+                        <button type="submit">
+                            <Save size={15} aria-hidden="true" /> Enregistrer
                         </button>
                     </div>
                 </form>

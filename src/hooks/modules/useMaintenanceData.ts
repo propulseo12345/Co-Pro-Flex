@@ -386,38 +386,40 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
   const createOrder = useCallback(async (order: ServiceOrderInsert) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
-    // Call edge function for transactional creation
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/maintenance-workflow/create-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-      body: JSON.stringify({
-        coproId: currentCoproId,
-        providerId: order.provider_id,
-        subject: order.subject,
-        description: order.description,
-        urgency: order.urgency,
-        orderType: order.order_type,
-        origin: order.origin,
-        contractId: order.contract_id,
-        buildingId: order.building_id,
-        lotId: order.lot_id,
-        estimatedAmount: order.estimated_amount,
-        isArt18Emergency: order.is_art18_emergency,
-        plannedInterventionDate: order.planned_intervention_date,
-      }),
+    // Générer le numéro d'OS via RPC
+    const { data: orderNumber, error: numError } = await supabase.rpc('generate_service_order_number', {
+      p_copro_id: currentCoproId,
     });
 
-    const result = await response.json();
+    if (numError) throw new Error(numError.message || 'Erreur génération numéro OS');
 
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur lors de la création');
-    }
+    // Insert direct dans la table
+    const { data, error: insertError } = await supabase
+      .from('service_orders')
+      .insert({
+        copro_id: currentCoproId,
+        order_number: orderNumber as string,
+        provider_id: order.provider_id,
+        subject: order.subject,
+        description: order.description,
+        urgency: order.urgency || 'normal',
+        order_type: order.order_type || 'classique',
+        origin: order.origin || 'syndic',
+        status: order.status || 'draft',
+        contract_id: order.contract_id || null,
+        building_id: order.building_id || null,
+        lot_id: order.lot_id || null,
+        estimated_amount: order.estimated_amount || null,
+        is_art18_emergency: order.is_art18_emergency || false,
+        planned_intervention_date: order.planned_intervention_date || null,
+      })
+      .select()
+      .single();
+
+    if (insertError) throw new Error(insertError.message || 'Erreur lors de la création');
 
     await fetchOrders();
-    return result.order as ServiceOrder;
+    return data as ServiceOrder;
   }, [currentCoproId, supabase, fetchOrders]);
 
   const updateOrderStatus = useCallback(async (
@@ -431,27 +433,33 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
       invoiceId?: string;
     }
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/maintenance-workflow/update-status`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-      body: JSON.stringify({
-        orderId,
-        newStatus,
-        ...options,
-      }),
+    // Appel direct à la RPC Supabase (pas besoin d'auth JWT)
+    const { data, error: rpcError } = await supabase.rpc('update_service_order_status', {
+      p_order_id: orderId,
+      p_new_status: newStatus,
+      p_comment: options?.comment || null,
     });
 
-    const result = await response.json();
+    if (rpcError) {
+      throw new Error(rpcError.message || 'Erreur lors de la mise à jour du statut');
+    }
 
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur lors de la mise à jour');
+    // Mettre à jour les montants si fournis (la RPC ne gère que le statut)
+    if (options?.quotedAmount || options?.actualAmount) {
+      const updates: Record<string, unknown> = {};
+      if (options.quotedAmount) updates.quoted_amount = options.quotedAmount;
+      if (options.actualAmount) updates.actual_amount = options.actualAmount;
+      if (options.invoiceId) updates.supplier_invoice_id = options.invoiceId;
+      if (options.refusalReason) updates.refusal_reason = options.refusalReason;
+
+      await supabase
+        .from('service_orders')
+        .update(updates)
+        .eq('id', orderId);
     }
 
     await fetchOrders();
-    return result.order as ServiceOrder;
+    return data as ServiceOrder;
   }, [supabase, fetchOrders]);
 
   const sendOrderEmail = useCallback(async (
@@ -459,83 +467,68 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
     templateType: 'classique' | 'contractuel',
     customMessage?: string
   ) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/maintenance-workflow/send-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-      body: JSON.stringify({ orderId, templateType, customMessage }),
+    // Marquer comme envoyé via RPC
+    await supabase.rpc('update_service_order_status', {
+      p_order_id: orderId,
+      p_new_status: 'sent' as ServiceOrderStatus,
+      p_comment: customMessage || `Email ${templateType} envoyé`,
     });
 
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur lors de l\'envoi');
-    }
-
     await fetchOrders();
-    return result;
+    return { success: true };
   }, [supabase, fetchOrders]);
 
   const linkInvoice = useCallback(async (orderId: string, invoiceId: string, actualAmount: number) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/maintenance-workflow/link-invoice`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-      body: JSON.stringify({ orderId, invoiceId, actualAmount }),
-    });
+    const { error: updateError } = await supabase
+      .from('service_orders')
+      .update({
+        supplier_invoice_id: invoiceId,
+        actual_amount: actualAmount,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderId);
 
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur lors du lien avec la facture');
-    }
+    if (updateError) throw new Error(updateError.message);
 
     await fetchOrders();
-    return result;
+    return { success: true };
   }, [supabase, fetchOrders]);
 
   const completeAndLog = useCallback(async (orderId: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/maintenance-workflow/complete-and-log`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-      body: JSON.stringify({ orderId }),
+    // Passer en closed via RPC
+    await supabase.rpc('update_service_order_status', {
+      p_order_id: orderId,
+      p_new_status: 'closed' as ServiceOrderStatus,
+      p_comment: 'Clôture et archivage',
     });
 
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur lors de la clôture');
-    }
-
     await fetchOrders();
-    return result;
+    return { success: true };
   }, [supabase, fetchOrders]);
 
   const cancelOrder = useCallback(async (orderId: string, reason: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/maintenance-workflow/cancel-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-      body: JSON.stringify({ orderId, reason }),
+    // Annuler via RPC
+    const { error: rpcError } = await supabase.rpc('update_service_order_status', {
+      p_order_id: orderId,
+      p_new_status: 'cancelled' as ServiceOrderStatus,
+      p_comment: reason,
     });
 
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur lors de l\'annulation');
-    }
+    if (rpcError) throw new Error(rpcError.message);
 
     await fetchOrders();
-    return result;
+    return { success: true };
+  }, [supabase, fetchOrders]);
+
+  const deleteOrder = useCallback(async (orderId: string) => {
+    const { error: rpcError } = await supabase.rpc('delete_service_order', {
+      p_order_id: orderId,
+    });
+
+    if (rpcError) throw new Error(rpcError.message || 'Erreur lors de la suppression');
+
+    await fetchOrders();
+    return { success: true };
   }, [supabase, fetchOrders]);
 
   const getOrderEvents = useCallback(async (orderId: string): Promise<ServiceOrderEvent[]> => {
@@ -578,6 +571,7 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
     linkInvoice,
     completeAndLog,
     cancelOrder,
+    deleteOrder,
     getOrderEvents,
   };
 }
