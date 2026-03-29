@@ -5,6 +5,7 @@ import { ContratDetaille, TypeContrat } from '@/types';
 import { MOCK_TYPES_CONTRAT } from '@/data/mock';
 import { Plus, Upload, X, FileText } from 'lucide-react';
 import { isValid, parseISO, format } from 'date-fns';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { generateId } from '../utils';
 
 interface AddContractModalProps {
@@ -216,18 +217,33 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
 
                     {/* Dates */}
                     <div style={{ ...row, marginBottom: 16 }}>
-                        <div>
-                            <label style={label}>Date de début <span style={{ color: '#ef4444' }}>*</span></label>
-                            <input type="date" style={errors.dateDebut ? inputErr : input} value={formData.dateDebut}
-                                onChange={e => setFormData({ ...formData, dateDebut: e.target.value })} />
-                            {errors.dateDebut && <span style={errText}>{errors.dateDebut}</span>}
-                        </div>
-                        <div>
-                            <label style={label}>Date de fin <span style={{ color: '#ef4444' }}>*</span></label>
-                            <input type="date" style={errors.dateFin ? inputErr : input} value={formData.dateFin}
-                                onChange={e => setFormData({ ...formData, dateFin: e.target.value })} />
-                            {errors.dateFin && <span style={errText}>{errors.dateFin}</span>}
-                        </div>
+                        <DatePicker
+                            label="Date de début"
+                            value={formData.dateDebut ? parseISO(formData.dateDebut) : null}
+                            onChange={(date) => {
+                                if (date && isValid(date)) {
+                                    setFormData({ ...formData, dateDebut: format(date, 'yyyy-MM-dd') });
+                                } else {
+                                    setFormData({ ...formData, dateDebut: '' });
+                                }
+                            }}
+                            required
+                            error={errors.dateDebut}
+                        />
+                        <DatePicker
+                            label="Date de fin"
+                            value={formData.dateFin ? parseISO(formData.dateFin) : null}
+                            onChange={(date) => {
+                                if (date && isValid(date)) {
+                                    setFormData({ ...formData, dateFin: format(date, 'yyyy-MM-dd') });
+                                } else {
+                                    setFormData({ ...formData, dateFin: '' });
+                                }
+                            }}
+                            required
+                            minDate={formData.dateDebut ? parseISO(formData.dateDebut) : undefined}
+                            error={errors.dateFin}
+                        />
                     </div>
 
                     {/* Tacite reconduction + Délai résiliation */}
