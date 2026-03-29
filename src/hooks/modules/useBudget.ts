@@ -125,9 +125,6 @@ function mapExpenseToDepense(expense: ExpenseDetail): DepenseEtendue {
 // Hook principal
 // ============================================================================
 
-// Default copro ID for development (from seed data)
-const DEV_COPRO_ID = '11111111-aaaa-bbbb-cccc-111111111111';
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
 
@@ -135,8 +132,7 @@ export function useBudget() {
   // ============================================================================
   // Context
   // ============================================================================
-  const { currentCoproId: contextCoproId } = useCopro();
-  const currentCoproId = contextCoproId || DEV_COPRO_ID;
+  const { currentCoproId } = useCopro();
 
   // ============================================================================
   // Data from Supabase
@@ -464,6 +460,7 @@ export function useBudget() {
   }, [budgets]);
 
   const handleCreateBudget = useCallback(async (form: NouveauBudgetForm): Promise<boolean> => {
+    if (!currentCoproId) return false;
     try {
       const period = await getAccountingPeriod(form.annee);
       if (!period) {
@@ -587,7 +584,7 @@ export function useBudget() {
 
           await scheduleApi.createPaymentPhases(inputs);
         } catch (schedErr) {
-          // Erreur création échéancier
+          console.error('[useBudget] Erreur création échéancier:', schedErr);
         }
       }
 

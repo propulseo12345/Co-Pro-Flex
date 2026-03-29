@@ -107,8 +107,8 @@ export const MAJORITES: Record<MajorityType, { nom: string; description: string;
     },
     ART_25_1: {
         nom: 'Article 25-1',
-        description: 'Double majorité',
-        seuil: 'Majorité de tous les copropriétaires représentant au moins 2/3 des voix'
+        description: 'Passerelle 25→24',
+        seuil: 'Second vote à la majorité simple des voix exprimées (article 24)'
     },
     ART_26: {
         nom: 'Article 26',

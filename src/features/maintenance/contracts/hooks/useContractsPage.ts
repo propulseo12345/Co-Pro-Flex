@@ -83,7 +83,7 @@ export function useContractsPage() {
     // Persister en Supabase avec status pending_renewal
     try {
       await updateContract(contrat.id, {
-        status: 'pending_renewal' as never,
+        status: 'to_renew',
         end_date: nouvelleDateFin,
       } as never);
     } catch {

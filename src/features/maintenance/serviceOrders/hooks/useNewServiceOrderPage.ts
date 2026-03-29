@@ -297,7 +297,7 @@ export function useNewServiceOrderPage() {
             contract_id: formData.typeOrdre === 'CONTRACTUEL' ? formData.contratId : null,
             subject: formData.titre,
             description: formData.description || null,
-            urgency: formData.priorite === 'URGENT' ? 'urgent' : formData.priorite === 'HIGH' ? 'high' : formData.priorite === 'LOW' ? 'low' : 'normal',
+            urgency: formData.priorite === 'URGENT' ? 'high' : formData.priorite === 'HIGH' ? 'high' : formData.priorite === 'LOW' ? 'low' : 'normal',
             order_type: formData.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
             origin: 'syndic',
             status,

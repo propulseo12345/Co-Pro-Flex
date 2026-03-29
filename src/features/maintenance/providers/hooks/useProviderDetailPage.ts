@@ -53,10 +53,10 @@ export function useProviderDetailPage(id: string) {
 
     // Mettre à jour quand les données Supabase arrivent (chargement async)
     useEffect(() => {
-        if (!prestataire && foundPrestataire) {
+        if (foundPrestataire) {
             setPrestataire(foundPrestataire);
         }
-    }, [supabaseProviders]);
+    }, [foundPrestataire]);
 
     // Interventions depuis Supabase, filtrées par provider_id
     const prestataireInterventions = useMemo(() => {
@@ -130,11 +130,11 @@ export function useProviderDetailPage(id: string) {
         if (confirm(`Êtes-vous sûr de vouloir supprimer le prestataire "${prestataire.nom}" ?`)) {
             try {
                 await deleteProvider(id);
+                showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
+                setTimeout(() => router.push('/maintenance/providers'), 1500);
             } catch (err) {
-                console.error('[useProviderDetailPage] Supabase deleteProvider error:', err);
+                showToast({ type: 'error', message: `Erreur lors de la suppression du prestataire` });
             }
-            showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
-            setTimeout(() => router.push('/maintenance/providers'), 1500);
         }
     };
 

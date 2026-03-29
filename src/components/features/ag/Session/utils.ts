@@ -78,15 +78,15 @@ export const checkMajority = (
     }
 
     case 'ART_25_1': {
-      const seuilCopros = Math.floor(totalCoproprietaires / 2) + 1;
-      const coprosPour = resolutionVotes.filter(v => v.vote === 'POUR').length;
-      const seuilTantiemes = Math.floor(totalTantiemes * 2 / 3) + 1;
-      const adoptedArt251 = coprosPour >= seuilCopros && stats.pour >= seuilTantiemes;
+      // Passerelle 25→24 : second vote à la majorité simple des voix exprimées (Art. 24)
+      const voixExprimees = stats.pour + stats.contre + stats.abstention;
+      const seuilArt24 = voixExprimees > 0 ? Math.floor(voixExprimees / 2) + 1 : 1;
+      const adoptedArt251 = voixExprimees > 0 && stats.pour >= seuilArt24;
       return {
         adopted: adoptedArt251,
         reason: adoptedArt251
-          ? `Adoptée : ${coprosPour} copropriétaires pour (seuil: ${seuilCopros}) ET ${stats.pour} tantièmes pour (seuil: ${seuilTantiemes.toFixed(0)})`
-          : `Rejetée : ${coprosPour} copropriétaires pour (seuil requis: ${seuilCopros}) ET/OU ${stats.pour} tantièmes pour (seuil requis: ${seuilTantiemes.toFixed(0)})`
+          ? `Adoptée (passerelle 25-1) : ${stats.pour} tantièmes pour sur ${voixExprimees} exprimés (seuil: ${seuilArt24})`
+          : `Rejetée (passerelle 25-1) : ${stats.pour} tantièmes pour sur ${voixExprimees} exprimés (seuil requis: ${seuilArt24})`
       };
     }
 

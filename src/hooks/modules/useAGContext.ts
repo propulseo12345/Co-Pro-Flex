@@ -7,7 +7,6 @@
  * @created 2026-01-19 (Bug #75)
  */
 
-import { useMemo } from 'react';
 import {
   getProchaineAssemblee,
   getAssembleesPassees,
@@ -506,53 +505,51 @@ function generateQuickActions(
 // ============================================
 
 export function useAGContext(): AGContextInfo {
-  return useMemo(() => {
-    const now = new Date();
-    const prochaineAG = getProchaineAssemblee() || null;
-    const agPassees = getAssembleesPassees();
-    const derniereAG = agPassees[0] || null;
+  const now = new Date();
+  const prochaineAG = getProchaineAssemblee() || null;
+  const agPassees = getAssembleesPassees();
+  const derniereAG = agPassees[0] || null;
 
-    // Calcul des jours
-    const joursAvantProchaine = prochaineAG
-      ? differenceInDays(new Date(prochaineAG.date_ag), now)
-      : null;
+  // Calcul des jours
+  const joursAvantProchaine = prochaineAG
+    ? differenceInDays(new Date(prochaineAG.date_ag), now)
+    : null;
 
-    const joursApresDerniere = derniereAG
-      ? differenceInDays(now, new Date(derniereAG.date_ag))
-      : null;
+  const joursApresDerniere = derniereAG
+    ? differenceInDays(now, new Date(derniereAG.date_ag))
+    : null;
 
-    // Déterminer l'état
-    const state = determineAGState(
-      prochaineAG,
-      derniereAG,
-      joursAvantProchaine,
-      joursApresDerniere
-    );
+  // Déterminer l'état
+  const state = determineAGState(
+    prochaineAG,
+    derniereAG,
+    joursAvantProchaine,
+    joursApresDerniere
+  );
 
-    // Label de l'état
-    const stateLabel = getStateLabel(state, joursAvantProchaine);
+  // Label de l'état
+  const stateLabel = getStateLabel(state, joursAvantProchaine);
 
-    // Générer alertes
-    const alertes = generateAlertes(
-      state,
-      prochaineAG,
-      derniereAG,
-      joursAvantProchaine,
-      joursApresDerniere
-    );
+  // Générer alertes
+  const alertes = generateAlertes(
+    state,
+    prochaineAG,
+    derniereAG,
+    joursAvantProchaine,
+    joursApresDerniere
+  );
 
-    // Générer actions recommandées
-    const actionsRecommandees = generateQuickActions(state, prochaineAG, derniereAG);
+  // Générer actions recommandées
+  const actionsRecommandees = generateQuickActions(state, prochaineAG, derniereAG);
 
-    return {
-      state,
-      stateLabel,
-      prochaineAG,
-      derniereAG,
-      joursAvantProchaine,
-      joursApresDerniere,
-      alertes,
-      actionsRecommandees,
-    };
-  }, []);
+  return {
+    state,
+    stateLabel,
+    prochaineAG,
+    derniereAG,
+    joursAvantProchaine,
+    joursApresDerniere,
+    alertes,
+    actionsRecommandees,
+  };
 }

@@ -89,7 +89,7 @@ export function useServiceOrdersListPage() {
         subject: os.titre,
         description: os.description || null,
         status: (os.statut === 'ENVOYE' ? 'sent' : 'draft') as ServiceOrderStatus,
-        urgency: os.priorite === 'URGENT' ? 'urgent' : 'normal',
+        urgency: os.priorite === 'URGENT' ? 'high' : 'normal',
         order_type: os.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
         origin: 'manual',
         provider_id: os.fournisseurId || null,

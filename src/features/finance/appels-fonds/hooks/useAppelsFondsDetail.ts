@@ -82,7 +82,6 @@ export function useAppelsFondsDetail(callId: string) {
       reminderLevel: (line.status === 'paid' ? 0 : levelsByLot.get(line.lot_id) ?? 0) as ReminderLevel,
     }));
     // Tri : mise en demeure (3) en haut, puis 2, 1, 0, payés en bas
-    const statusOrder: Record<string, number> = { unpaid: 0, partial: 1, paid: 2 };
     return enriched.sort((a, b) => {
       if (a.status === 'paid' && b.status !== 'paid') return 1;
       if (a.status !== 'paid' && b.status === 'paid') return -1;
