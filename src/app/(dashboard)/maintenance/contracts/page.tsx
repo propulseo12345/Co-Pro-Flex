@@ -24,6 +24,9 @@ export default function ContractsPage() {
         onEditSyndic={() => pageData.setIsEditSyndicModalOpen(true)}
         onVoirDetails={pageData.handleVoirDetails}
         onOpenDecisionModal={pageData.handleOpenDecisionModal}
+        pendingRenewals={pageData.pendingRenewals}
+        onConfirmerRenouvellement={pageData.handleConfirmerRenouvellement}
+        onAnnulerRenouvellement={pageData.handleAnnulerRenouvellement}
       />
 
       {/* Modals conservées telles quelles */}
@@ -46,6 +49,11 @@ export default function ContractsPage() {
         onCloseDecisionModal={() => pageData.setContratExpireDecision(null)}
         onRenouveler={pageData.handleRenouvelerContrat}
         onResilier={pageData.handleResilierContratExpire}
+        prestataireEmail={
+          pageData.contratExpireDecision
+            ? pageData.prestataires.find(p => p.id === pageData.contratExpireDecision?.contrat.prestataireId)?.email
+            : undefined
+        }
       />
     </div>
   );

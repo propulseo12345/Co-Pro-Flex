@@ -5,8 +5,28 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MOCK_ORDRES_SERVICE } from '@/data/mock';
 import { MOCK_FACTURES } from '@/components/features/finance/Factures/data';
 import type { Facture } from '@/components/features/finance/Factures/types';
-import { OrdreService, PieceJointeOS } from '@/types';
+import { OrdreService, PieceJointeOS, StatutOrdreService } from '@/types';
 import { simulateFileUpload } from '@/lib/utils/service-order';
+import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
+import type { ServiceOrderStatus } from '@/types/supabase';
+
+const LEGACY_TO_SUPABASE_STATUS: Record<string, ServiceOrderStatus> = {
+    BROUILLON: 'draft',
+    A_ENVOYER: 'to_send',
+    ENVOYE: 'sent',
+    ACCEPTE: 'accepted',
+    EN_ATTENTE_PRESTATAIRE: 'accepted',
+    REFUSE: 'refused',
+    PLANIFIE: 'scheduled',
+    INTERVENTION_PROGRAMMEE: 'scheduled',
+    EN_COURS: 'in_progress',
+    REALISE: 'completed',
+    INTERVENTION_REALISEE: 'completed',
+    FACTURE: 'invoiced',
+    PAYE: 'paid',
+    CLOTURE: 'closed',
+    ANNULE: 'cancelled',
+};
 
 function getAllOrdresService(): OrdreService[] {
     const mockOS = [...MOCK_ORDRES_SERVICE];
@@ -44,6 +64,7 @@ export function useServiceOrderDetailPage(id: string) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const shouldEdit = searchParams.get('edit') === 'true';
+    const { updateOrderStatus } = useServiceOrders({ autoFetch: false });
 
     const [ordreService, setOrdreService] = useState<OrdreService | null>(() => {
         const allOS = getAllOrdresService();
@@ -96,9 +117,21 @@ export function useServiceOrderDetailPage(id: string) {
         setEditedData({});
     }, []);
 
-    const handleStatusUpdate = useCallback((updatedOS: OrdreService) => {
+    const handleStatusUpdate = useCallback(async (updatedOS: OrdreService) => {
         setOrdreService(updatedOS);
-    }, []);
+        // Sync avec Supabase
+        const supabaseStatus = LEGACY_TO_SUPABASE_STATUS[updatedOS.statut];
+        if (supabaseStatus && id) {
+            try {
+                await updateOrderStatus(id, supabaseStatus, {
+                    comment: `Statut changé vers ${updatedOS.statut}`,
+                    quotedAmount: updatedOS.montantFinal ? updatedOS.montantFinal : undefined,
+                });
+            } catch (err) {
+                console.error('Erreur sync Supabase status:', err);
+            }
+        }
+    }, [id, updateOrderStatus]);
 
     const handleUploadPJ = useCallback(async (fichiers: File[]) => {
         if (!ordreService) return;

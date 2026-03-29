@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section Maintenance & Documents — Sélecteur interactif</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  .picker {
+    width: 420px;
+    min-width: 420px;
+    background: #131620;
+    border-right: 1px solid rgba(148,163,184,0.08);
+    padding: 24px;
+    overflow-y: auto;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+
+  .picker h1 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #e2e8f0; }
+  .picker .subtitle { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+
+  .pick-group { margin-bottom: 24px; }
+  .pick-group-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #0081F1; margin-bottom: 10px; }
+
+  .pick-option {
+    padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08);
+    background: #1a1d2e; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .pick-option:hover { border-color: rgba(0,129,241,0.3); background: #252b3b; }
+  .pick-option.selected { border-color: #0081F1; background: rgba(0,129,241,0.08); }
+  .pick-option.selected::after { content: '✓'; position: absolute; top: 10px; right: 12px; color: #0081F1; font-weight: 700; font-size: 14px; }
+
+  .pick-option-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px; }
+  .pick-option-text { font-size: 13px; color: #e2e8f0; line-height: 1.5; }
+
+  .copy-bar { position: sticky; bottom: 0; background: #131620; border-top: 1px solid rgba(148,163,184,0.08); padding: 16px 24px; margin: 0 -24px; }
+  .copy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #0081F1; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { background: #006dd6; transform: translateY(-1px); }
+  .copy-btn.copied { background: #22c55e; }
+
+  .preview-wrap { flex: 1; padding: 32px; overflow-y: auto; }
+  .preview-title-bar { text-align: center; margin-bottom: 24px; }
+  .preview-title-bar h2 { font-size: 14px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+
+  .section { padding: 60px 24px 60px; background: #fff; border-radius: 16px; max-width: 1100px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 40px; }
+  .label-badge { display: inline-flex; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: white; background: #0081F1; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 36px; color: #1a1a1a; margin: 16px 0 0; line-height: 1.2; }
+  .section-desc { font-size: 15px; color: #666; max-width: 620px; margin: 12px auto 0; line-height: 1.6; }
+
+  .grid { display: grid; grid-template-columns: 280px 1fr 1fr; gap: 14px; max-width: 1100px; margin: 0 auto; }
+
+  .card-testimonial { grid-column: span 1; grid-row: span 2; border-radius: 16px; padding: 24px; color: white; display: flex; flex-direction: column; justify-content: space-between; background: #0081F1; }
+  .quote { font-family: 'Playfair Display', serif; font-size: 16px; line-height: 1.4; font-style: italic; }
+  .author { display: flex; flex-direction: column; gap: 4px; font-size: 13px; margin-top: 16px; }
+  .author strong { font-weight: 600; }
+  .author span { opacity: 0.8; font-size: 12px; }
+
+  .card-large { grid-column: span 1; border-radius: 16px; overflow: hidden; background: white; border: 1px solid #e5e5e5; }
+  .card-demo { border-radius: 16px 16px 0 0; overflow: hidden; height: 230px; background: #131620; }
+  .card-body { padding: 14px 18px; }
+  .card-body h3 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .card-body p { font-size: 12px; color: #666; margin: 4px 0 0; line-height: 1.5; }
+
+  .card-small { border-radius: 16px; padding: 18px; background: white; border: 1px solid #e5e5e5; }
+  .card-small-icon { width: 22px; height: 22px; margin-bottom: 8px; }
+  .card-small h3 { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+
+  /* Demo content */
+  .fake-demo { width: 100%; height: 100%; padding: 14px; display: flex; flex-direction: column; gap: 5px; }
+  .demo-header { display: flex; justify-content: space-between; align-items: center; }
+  .demo-title { color: #e2e8f0; font-size: 13px; font-weight: 600; }
+  .demo-subtitle { color: #64748b; font-size: 10px; }
+
+  /* Maintenance demo */
+  .maint-rows { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+  .maint-row { display: flex; align-items: center; justify-content: space-between; background: #1a1d2e; border-radius: 7px; padding: 8px 12px; border: 1px solid rgba(148,163,184,0.08); }
+  .maint-left { display: flex; align-items: center; gap: 8px; }
+  .maint-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .maint-dot.green { background: #22c55e; }
+  .maint-dot.orange { background: #f59e0b; }
+  .maint-dot.blue { background: #3b82f6; }
+  .maint-dot.red { background: #ef4444; }
+  .maint-text { color: #e2e8f0; font-size: 11px; }
+  .maint-meta { color: #64748b; font-size: 9px; }
+  .maint-badge { padding: 2px 8px; border-radius: 5px; font-size: 9px; font-weight: 500; }
+  .maint-badge.done { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .maint-badge.progress { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .maint-badge.planned { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .maint-badge.urgent { background: rgba(239,68,68,0.1); color: #f87171; }
+
+  /* Documents demo */
+  .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; }
+  .doc-item { background: #1a1d2e; border-radius: 7px; padding: 10px; border: 1px solid rgba(148,163,184,0.08); }
+  .doc-icon { font-size: 18px; margin-bottom: 4px; }
+  .doc-name { color: #e2e8f0; font-size: 11px; font-weight: 500; }
+  .doc-info { color: #64748b; font-size: 9px; margin-top: 2px; }
+  .doc-cat { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: 500; background: rgba(59,130,246,0.1); color: #60a5fa; margin-top: 4px; }
+
+  @keyframes flash { 0% { outline: 2px solid #0081F1; outline-offset: 2px; } 100% { outline: 2px solid transparent; outline-offset: 2px; } }
+  .flash { animation: flash 0.6s ease-out; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="picker">
+    <h1>Maintenance & Documents</h1>
+    <p class="subtitle">Clique sur tes choix — la preview se met à jour en direct.</p>
+
+    <!-- TITRE -->
+    <div class="pick-group">
+      <div class="pick-group-label">Titre</div>
+      <div class="pick-option selected" data-target="title" data-value="Zéro document perdu, zéro intervention oubliée">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Zéro document perdu, zéro intervention oubliée</div>
+      </div>
+      <div class="pick-option" data-target="title" data-value="Tout centralisé, rien ne passe entre les mailles">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Tout centralisé, rien ne passe entre les mailles</div>
+      </div>
+      <div class="pick-option" data-target="title" data-value="Votre immeuble sous contrôle, vos documents à portée de clic">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Votre immeuble sous contrôle, vos documents à portée de clic</div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="pick-group">
+      <div class="pick-group-label">Description</div>
+      <div class="pick-option selected" data-target="desc" data-value="Interventions, contrats, PV, diagnostics — tout est centralisé et accessible par le gestionnaire comme par les copropriétaires. Fini les emails avec pièces jointes introuvables.">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Interventions, contrats, PV, diagnostics — tout est centralisé et accessible par le gestionnaire comme par les copropriétaires. Fini les emails avec pièces jointes introuvables.</div>
+      </div>
+      <div class="pick-option" data-target="desc" data-value="Chaque intervention tracée, chaque document classé, chaque contrat suivi. Le gestionnaire garde la main, les copropriétaires trouvent tout en autonomie.">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Chaque intervention tracée, chaque document classé, chaque contrat suivi. Le gestionnaire garde la main, les copropriétaires trouvent tout en autonomie.</div>
+      </div>
+      <div class="pick-option" data-target="desc" data-value="Carnet d'entretien, ordres de service, GED — une seule plateforme pour le gestionnaire et les copropriétaires. Plus aucune information perdue, plus aucun appel pour retrouver un document.">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Carnet d'entretien, ordres de service, GED — une seule plateforme pour le gestionnaire et les copropriétaires. Plus aucune information perdue, plus aucun appel pour retrouver un document.</div>
+      </div>
+    </div>
+
+    <!-- TESTIMONIAL -->
+    <div class="pick-group">
+      <div class="pick-group-label">Testimonial</div>
+      <div class="pick-option selected" data-target="testimonial" data-value="Avant, les copropriétaires m'appelaient pour chaque document. Maintenant tout est en ligne — ils trouvent, je gagne du temps, tout le monde y voit clair.">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Avant, les copropriétaires m'appelaient pour chaque document. Maintenant tout est en ligne — ils trouvent, je gagne du temps, tout le monde y voit clair.</div>
+      </div>
+      <div class="pick-option" data-target="testimonial" data-value="Plus aucun document perdu, plus de mail pour demander un PV. Les copropriétaires ont tout sous la main et moi je me concentre sur la gestion.">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Plus aucun document perdu, plus de mail pour demander un PV. Les copropriétaires ont tout sous la main et moi je me concentre sur la gestion.</div>
+      </div>
+      <div class="pick-option" data-target="testimonial" data-value="Les alertes de renouvellement de contrat m'ont évité deux oublis en 6 mois. Et les copropriétaires suivent les interventions sans m'appeler — tout le monde est autonome.">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Les alertes de renouvellement de contrat m'ont évité deux oublis en 6 mois. Et les copropriétaires suivent les interventions sans m'appeler — tout le monde est autonome.</div>
+      </div>
+    </div>
+
+    <!-- CARD MAINTENANCE -->
+    <div class="pick-group">
+      <div class="pick-group-label">Card — Maintenance</div>
+      <div class="pick-option selected" data-target="card1" data-title="Carnet d'entretien en temps réel" data-desc="Chaque intervention tracée, chaque prestataire suivi — rien ne passe entre les mailles.">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text"><strong>Carnet d'entretien en temps réel</strong><br>Chaque intervention tracée, chaque prestataire suivi — rien ne passe entre les mailles.</div>
+      </div>
+      <div class="pick-option" data-target="card1" data-title="Interventions suivies de bout en bout" data-desc="De la demande à la clôture — ordres de service, prestataires et délais, tout est visible.">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text"><strong>Interventions suivies de bout en bout</strong><br>De la demande à la clôture — ordres de service, prestataires et délais, tout est visible.</div>
+      </div>
+      <div class="pick-option" data-target="card1" data-title="Maintenance centralisée et traçable" data-desc="Historique complet des interventions, accessible au gestionnaire et aux copropriétaires.">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text"><strong>Maintenance centralisée et traçable</strong><br>Historique complet des interventions, accessible au gestionnaire et aux copropriétaires.</div>
+      </div>
+    </div>
+
+    <!-- CARD DOCUMENTS -->
+    <div class="pick-group">
+      <div class="pick-group-label">Card — Documents</div>
+      <div class="pick-option selected" data-target="card2" data-title="Tous vos documents, un seul endroit" data-desc="PV, règlements, contrats, diagnostics — classés, accessibles 24/7, partagés avec les copropriétaires.">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text"><strong>Tous vos documents, un seul endroit</strong><br>PV, règlements, contrats, diagnostics — classés, accessibles 24/7, partagés avec les copropriétaires.</div>
+      </div>
+      <div class="pick-option" data-target="card2" data-title="GED simple et partagée" data-desc="Chaque document classé automatiquement, retrouvable en 2 clics par le gestionnaire et les copropriétaires.">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text"><strong>GED simple et partagée</strong><br>Chaque document classé automatiquement, retrouvable en 2 clics par le gestionnaire et les copropriétaires.</div>
+      </div>
+      <div class="pick-option" data-target="card2" data-title="Documents accessibles, toujours à jour" data-desc="PV, contrats, diagnostics — tout est archivé, versionné et consultable sans passer par le gestionnaire.">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text"><strong>Documents accessibles, toujours à jour</strong><br>PV, contrats, diagnostics — tout est archivé, versionné et consultable sans passer par le gestionnaire.</div>
+      </div>
+    </div>
+
+    <!-- CARD SMALL 1 -->
+    <div class="pick-group">
+      <div class="pick-group-label">Card — Contrats</div>
+      <div class="pick-option selected" data-target="small1" data-value="Contrats suivis, échéances alertées">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Contrats suivis, échéances alertées</div>
+      </div>
+      <div class="pick-option" data-target="small1" data-value="Contrats & alertes de renouvellement automatiques">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Contrats & alertes de renouvellement automatiques</div>
+      </div>
+      <div class="pick-option" data-target="small1" data-value="Aucun contrat oublié, chaque échéance anticipée">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Aucun contrat oublié, chaque échéance anticipée</div>
+      </div>
+    </div>
+
+    <!-- CARD SMALL 2 -->
+    <div class="pick-group">
+      <div class="pick-group-label">Card — Communication</div>
+      <div class="pick-option selected" data-target="small2" data-value="Messagerie intégrée copros & syndic">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Messagerie intégrée copros & syndic</div>
+      </div>
+      <div class="pick-option" data-target="small2" data-value="Communication centralisée, zéro email perdu">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Communication centralisée, zéro email perdu</div>
+      </div>
+      <div class="pick-option" data-target="small2" data-value="Échanges tracés entre gestionnaire et copropriétaires">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Échanges tracés entre gestionnaire et copropriétaires</div>
+      </div>
+    </div>
+
+    <div class="copy-bar">
+      <button class="copy-btn" id="copyBtn">Copier la sélection</button>
+    </div>
+  </div>
+
+  <!-- ─── LIVE PREVIEW ─── -->
+  <div class="preview-wrap">
+    <div class="preview-title-bar"><h2>Preview en direct</h2></div>
+
+    <div class="section">
+      <div class="header">
+        <span class="label-badge">Maintenance & Documents</span>
+        <h2 class="section-title" id="preview-title">Zéro document perdu, zéro intervention oubliée</h2>
+        <p class="section-desc" id="preview-desc">Interventions, contrats, PV, diagnostics — tout est centralisé et accessible par le gestionnaire comme par les copropriétaires. Fini les emails avec pièces jointes introuvables.</p>
+      </div>
+      <div class="grid">
+        <div class="card-testimonial">
+          <blockquote class="quote" id="preview-testimonial">&ldquo;Avant, les copropriétaires m'appelaient pour chaque document. Maintenant tout est en ligne — ils trouvent, je gagne du temps, tout le monde y voit clair.&rdquo;</blockquote>
+          <div class="author"><strong>Sophie Laurent</strong><span>Présidente du conseil syndical</span></div>
+        </div>
+
+        <!-- Card Maintenance -->
+        <div class="card-large">
+          <div class="card-demo">
+            <div class="fake-demo">
+              <div class="demo-header">
+                <div><div class="demo-title">Carnet d'entretien</div><div class="demo-subtitle">Résidence Les Tilleuls</div></div>
+              </div>
+              <div class="maint-rows">
+                <div class="maint-row">
+                  <div class="maint-left"><div class="maint-dot green"></div><div><div class="maint-text">Révision chaudière collective</div><div class="maint-meta">Thermitech · Terminé le 12/03</div></div></div>
+                  <span class="maint-badge done">Clôturé</span>
+                </div>
+                <div class="maint-row">
+                  <div class="maint-left"><div class="maint-dot blue"></div><div><div class="maint-text">Réparation fuite toiture</div><div class="maint-meta">Étanchéité Pro · Intervention 28/03</div></div></div>
+                  <span class="maint-badge progress">En cours</span>
+                </div>
+                <div class="maint-row">
+                  <div class="maint-left"><div class="maint-dot orange"></div><div><div class="maint-text">Remplacement interphone</div><div class="maint-meta">ElecImmo · Devis en attente</div></div></div>
+                  <span class="maint-badge planned">Planifié</span>
+                </div>
+                <div class="maint-row">
+                  <div class="maint-left"><div class="maint-dot red"></div><div><div class="maint-text">Panne ascenseur B</div><div class="maint-meta">OtisService · Urgent</div></div></div>
+                  <span class="maint-badge urgent">Urgent</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body"><h3 id="preview-card1-title">Carnet d'entretien en temps réel</h3><p id="preview-card1-desc">Chaque intervention tracée, chaque prestataire suivi — rien ne passe entre les mailles.</p></div>
+        </div>
+
+        <!-- Card Documents -->
+        <div class="card-large">
+          <div class="card-demo">
+            <div class="fake-demo">
+              <div class="demo-header">
+                <div><div class="demo-title">Documents</div><div class="demo-subtitle">42 documents · 6 catégories</div></div>
+              </div>
+              <div class="doc-grid">
+                <div class="doc-item"><div class="doc-icon">📋</div><div class="doc-name">PV AG 2025</div><div class="doc-info">PDF · 1.2 Mo · 15/06/2025</div><div class="doc-cat">Procès-verbaux</div></div>
+                <div class="doc-item"><div class="doc-icon">📜</div><div class="doc-name">Règlement copropriété</div><div class="doc-info">PDF · 3.8 Mo · v2 · 2024</div><div class="doc-cat">Règlements</div></div>
+                <div class="doc-item"><div class="doc-icon">🔧</div><div class="doc-name">Contrat ascenseur</div><div class="doc-info">PDF · 420 Ko · Exp. 12/2026</div><div class="doc-cat">Contrats</div></div>
+                <div class="doc-item"><div class="doc-icon">⚡</div><div class="doc-name">DPE collectif</div><div class="doc-info">PDF · 2.1 Mo · 03/2025</div><div class="doc-cat">Diagnostics</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body"><h3 id="preview-card2-title">Tous vos documents, un seul endroit</h3><p id="preview-card2-desc">PV, règlements, contrats, diagnostics — classés, accessibles 24/7, partagés avec les copropriétaires.</p></div>
+        </div>
+
+        <div class="card-small">
+          <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#0081F1" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          <h3 id="preview-small1">Contrats suivis, échéances alertées</h3>
+        </div>
+        <div class="card-small">
+          <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#0081F1" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <h3 id="preview-small2">Messagerie intégrée copros & syndic</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const targets = {
+    title: document.getElementById('preview-title'),
+    desc: document.getElementById('preview-desc'),
+    testimonial: document.getElementById('preview-testimonial'),
+    small1: document.getElementById('preview-small1'),
+    small2: document.getElementById('preview-small2'),
+  };
+
+  document.querySelectorAll('.pick-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const target = opt.dataset.target;
+      opt.parentElement.querySelectorAll('.pick-option').forEach(s => s.classList.remove('selected'));
+      opt.classList.add('selected');
+
+      if (target === 'title') {
+        targets.title.textContent = opt.dataset.value;
+        targets.title.classList.remove('flash'); void targets.title.offsetWidth; targets.title.classList.add('flash');
+      } else if (target === 'desc') {
+        targets.desc.textContent = opt.dataset.value;
+        targets.desc.classList.remove('flash'); void targets.desc.offsetWidth; targets.desc.classList.add('flash');
+      } else if (target === 'testimonial') {
+        targets.testimonial.innerHTML = '&ldquo;' + opt.dataset.value + '&rdquo;';
+        targets.testimonial.classList.remove('flash'); void targets.testimonial.offsetWidth; targets.testimonial.classList.add('flash');
+      } else if (target === 'card1' || target === 'card2') {
+        const t = document.getElementById('preview-' + target + '-title');
+        const d = document.getElementById('preview-' + target + '-desc');
+        t.textContent = opt.dataset.title;
+        d.textContent = opt.dataset.desc;
+        t.parentElement.classList.remove('flash'); void t.parentElement.offsetWidth; t.parentElement.classList.add('flash');
+      } else if (target === 'small1' || target === 'small2') {
+        targets[target].textContent = opt.dataset.value;
+        targets[target].classList.remove('flash'); void targets[target].offsetWidth; targets[target].classList.add('flash');
+      }
+    });
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const selections = {};
+    document.querySelectorAll('.pick-option.selected').forEach(opt => {
+      const target = opt.dataset.target;
+      const tag = opt.querySelector('.pick-option-tag').textContent;
+      if (target === 'card1' || target === 'card2') {
+        selections[target] = tag + ': ' + opt.dataset.title + ' — ' + opt.dataset.desc;
+      } else {
+        selections[target] = tag + ': ' + (opt.dataset.value || '');
+      }
+    });
+
+    const text = `MAINTENANCE & DOCUMENTS — Sélection
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Titre: ${selections.title || ''}
+Description: ${selections.desc || ''}
+Testimonial: ${selections.testimonial || ''}
+Card Maintenance: ${selections.card1 || ''}
+Card Documents: ${selections.card2 || ''}
+Card Contrats: ${selections.small1 || ''}
+Card Communication: ${selections.small2 || ''}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copié !';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copier la sélection'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+</script>
+
+</body>
+</html>

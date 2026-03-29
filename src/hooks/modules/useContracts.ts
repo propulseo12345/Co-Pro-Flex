@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation } from '@/types';
+import type { ContractInsert } from '@/types/supabase';
 import { MOCK_PRESTATAIRES_SYNDIC, MOCK_PRESTATAIRES_COPRO, MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
 import { getUniquePrestataires, formatMontant } from '@/components/features/maintenance/Contracts/utils';
 import type { ExportFormat } from '@/components/features/maintenance/Contracts/types';
@@ -17,6 +18,7 @@ import {
     updateContratSyndic,
     subscribeToContracts,
 } from '@/lib/services/contracts.service';
+import { useContracts as useContractsSupabase } from '@/hooks/modules/useMaintenanceData';
 
 // Tous les prestataires combinés
 const ALL_PRESTATAIRES = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO];
@@ -24,6 +26,10 @@ const ALL_PRESTATAIRES = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPR
 export function useContracts() {
     const { currentCoproId } = useCopro();
     const { showToast } = useToast();
+    const {
+        createContract: supabaseCreateContract,
+        updateContract: supabaseUpdateContract,
+    } = useContractsSupabase({ autoFetch: false });
 
     // Load contracts from Supabase on mount / copro change
     useEffect(() => {
@@ -62,7 +68,11 @@ export function useContracts() {
     // Prestataires uniques pour le filtre
     const uniquePrestataires = useMemo(() => getUniquePrestataires(contrats), [contrats]);
 
-    // Contrats filtrés
+    // Contrats filtrés + triés par priorité statut (expirés en premier)
+    const STATUT_PRIORITY: Record<string, number> = {
+        EXPIRE: 0, A_RENOUVELER: 1, ACTIF: 2, BROUILLON: 3, RESILIE: 4,
+    };
+
     const filteredContrats = useMemo(() => {
         return contrats.filter(c => {
             const matchesSearch = searchTerm === '' ||
@@ -76,6 +86,10 @@ export function useContracts() {
             const matchesType = typeFilter === 'TOUS' || c.type === typeFilter;
             const matchesPrestataire = prestataireFilter === 'TOUS' || c.fournisseur === prestataireFilter;
             return matchesSearch && matchesStatut && matchesCategorie && matchesType && matchesPrestataire;
+        }).sort((a, b) => {
+            const pa = STATUT_PRIORITY[a.statut] ?? 5;
+            const pb = STATUT_PRIORITY[b.statut] ?? 5;
+            return pa - pb;
         });
     }, [contrats, searchTerm, statutFilter, categorieFilter, typeFilter, prestataireFilter]);
 
@@ -83,13 +97,50 @@ export function useContracts() {
     const handleAddContrat = useCallback((newContrat: ContratDetaille) => {
         addContrat(newContrat);
         showToast({ type: 'success', message: `Contrat "${newContrat.nom}" créé avec succès` });
-    }, [showToast]);
+
+        // Sync to Supabase
+        try {
+            supabaseCreateContract({
+                title: newContrat.nom,
+                contract_type: newContrat.type.toLowerCase(),
+                contract_number: newContrat.numeroContrat || null,
+                provider_id: newContrat.fournisseur,
+                start_date: newContrat.dateDebut,
+                end_date: newContrat.dateFin,
+                annual_amount: newContrat.coutAnnuel || null,
+                is_regulatory: newContrat.estReglementaire ?? false,
+                tacit_renewal: newContrat.taciteReconduction ?? false,
+                notice_months: newContrat.delaiResiliation ? Math.round(newContrat.delaiResiliation / 30) : null,
+                description: newContrat.description || null,
+            } as unknown as ContractInsert);
+        } catch (err) {
+            console.error('[Supabase] Failed to sync new contract:', err);
+        }
+    }, [showToast, supabaseCreateContract]);
 
     // Modifier un contrat
     const handleSaveContrat = useCallback((updatedContrat: ContratDetaille) => {
         updateContrat(updatedContrat);
         showToast({ type: 'success', message: `Contrat "${updatedContrat.nom}" modifié avec succès` });
-    }, [showToast]);
+
+        // Sync to Supabase
+        try {
+            supabaseUpdateContract(updatedContrat.id, {
+                title: updatedContrat.nom,
+                contract_type: updatedContrat.type.toLowerCase(),
+                contract_number: updatedContrat.numeroContrat || null,
+                start_date: updatedContrat.dateDebut,
+                end_date: updatedContrat.dateFin,
+                annual_amount: updatedContrat.coutAnnuel || null,
+                is_regulatory: updatedContrat.estReglementaire ?? false,
+                tacit_renewal: updatedContrat.taciteReconduction ?? false,
+                notice_months: updatedContrat.delaiResiliation ? Math.round(updatedContrat.delaiResiliation / 30) : null,
+                description: updatedContrat.description || null,
+            } as unknown as Partial<import('@/types/supabase').Contract>);
+        } catch (err) {
+            console.error('[Supabase] Failed to sync contract update:', err);
+        }
+    }, [showToast, supabaseUpdateContract]);
 
     // Résilier un contrat
     const handleConfirmResiliation = useCallback((template?: TemplateResiliation) => {

@@ -186,28 +186,30 @@ export function useProvidersHubPage() {
     showToast({ type: 'success', message: 'Export généré avec succès' });
   }, [allPrestataires, showToast]);
 
-  const handleAddPrestataire = useCallback(async (prestataireData: {
-    nom: string;
-    categorie: 'COPROPRIETE' | 'SYNDIC';
-    domaines: string[];
-    email?: string;
-    telephone?: string;
-    ville?: string;
-  }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleAddPrestataire = useCallback(async (prestataireData: any) => {
     try {
+      // Support both legacy Prestataire format and simplified format
+      const nom = prestataireData.nom || prestataireData.name || '';
+      const categorie = (prestataireData.categorie || prestataireData.category || 'COPROPRIETE').toLowerCase();
+      const domaines = (prestataireData.domaines || prestataireData.domains || []).map((d: string) => d.toLowerCase());
+
       const providerInsert: ProviderInsert = {
         copro_id: '', // Will be set by hook
-        name: prestataireData.nom,
-        category: prestataireData.categorie.toLowerCase() as ProviderCategory,
-        domains: prestataireData.domaines as ProviderDomain[],
+        name: nom,
+        category: categorie as ProviderCategory,
+        domains: domaines as ProviderDomain[],
         email: prestataireData.email || null,
-        phone: prestataireData.telephone || null,
-        city: prestataireData.ville || null,
+        phone: prestataireData.telephone || prestataireData.phone || null,
+        city: prestataireData.ville || prestataireData.city || null,
+        address: prestataireData.adresse || prestataireData.address || null,
+        postal_code: prestataireData.codePostal || prestataireData.postal_code || null,
+        siret: prestataireData.siren || prestataireData.siret || null,
         is_active: true,
       };
 
       await createProvider(providerInsert);
-      showToast({ type: 'success', message: `Prestataire "${prestataireData.nom}" ajouté avec succès` });
+      showToast({ type: 'success', message: `Prestataire "${nom}" ajouté avec succès` });
       setIsAddModalOpen(false);
     } catch (err) {
       console.error('Error creating provider:', err);

@@ -581,26 +581,38 @@ export default function StatusUpdateModal({
                 <div className={styles.footer}>
                     <button
                         type="button"
-                        className="btn btn-secondary"
                         onClick={onClose}
                         disabled={isProcessing}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '8px 16px', borderRadius: 8,
+                            background: '#131620', border: '1px solid rgba(148,163,184,0.08)',
+                            color: '#e2e8f0', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                            fontFamily: 'inherit', opacity: isProcessing ? 0.5 : 1,
+                        }}
                     >
                         Annuler
                     </button>
                     <button
                         type="button"
-                        className="btn btn-primary"
                         onClick={handleConfirm}
                         disabled={isProcessing}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '8px 16px', borderRadius: 8,
+                            background: '#3b82f6', border: 'none',
+                            color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            fontFamily: 'inherit', opacity: isProcessing ? 0.5 : 1,
+                        }}
                     >
                         {isProcessing ? (
                             <>
-                                <Loader size={16} className={styles.spinner} />
+                                <Loader size={15} className={styles.spinner} />
                                 Traitement...
                             </>
                         ) : (
                             <>
-                                <CheckCircle size={16} aria-hidden="true" />
+                                <CheckCircle size={15} aria-hidden="true" />
                                 Confirmer
                             </>
                         )}

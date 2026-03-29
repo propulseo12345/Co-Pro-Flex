@@ -28,6 +28,8 @@ interface ContractsModalsProps {
   onCloseDecisionModal: () => void;
   onRenouveler: (contrat: ContratDetaille, nouvelleDateFin: string) => void;
   onResilier: (contrat: ContratDetaille, raison: string, archiver: boolean) => void;
+  /** Email du prestataire pour la notification de renouvellement */
+  prestataireEmail?: string;
 }
 
 export function ContractsModals({
@@ -49,6 +51,7 @@ export function ContractsModals({
   onCloseDecisionModal,
   onRenouveler,
   onResilier,
+  prestataireEmail,
 }: ContractsModalsProps) {
   return (
     <>
@@ -86,6 +89,7 @@ export function ContractsModals({
         <ContratDecisionModal
           contrat={contratExpireDecision.contrat}
           joursDepasses={contratExpireDecision.joursDepasses}
+          prestataireEmail={prestataireEmail}
           onClose={onCloseDecisionModal}
           onRenouveler={onRenouveler}
           onResilier={onResilier}

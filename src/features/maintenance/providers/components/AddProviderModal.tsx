@@ -274,11 +274,30 @@ export function AddProviderModal({ isOpen, onClose, onAdd }: AddProviderModalPro
                     </div>
 
                     <div className={styles.modalActions}>
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                                padding: '8px 16px', borderRadius: 8,
+                                background: '#131620', border: '1px solid rgba(148,163,184,0.08)',
+                                color: '#e2e8f0', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                                fontFamily: 'inherit',
+                            }}
+                        >
                             Annuler
                         </button>
-                        <button type="submit" className="btn btn-primary">
-                            <Plus size={16} aria-hidden="true" /> Ajouter le prestataire
+                        <button
+                            type="submit"
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                                padding: '8px 16px', borderRadius: 8,
+                                background: '#3b82f6', border: 'none',
+                                color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                fontFamily: 'inherit',
+                            }}
+                        >
+                            <Plus size={15} aria-hidden="true" /> Ajouter le prestataire
                         </button>
                     </div>
                 </form>

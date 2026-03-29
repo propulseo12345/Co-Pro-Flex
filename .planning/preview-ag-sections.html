@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Section AG (3 options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #f5f5f0; color: #1a1a1a; }
+
+  .option-label {
+    text-align: center;
+    padding: 32px 24px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .option-label h1 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #FC5F35;
+    background: rgba(252, 95, 53, 0.1);
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 99px;
+  }
+
+  .section {
+    padding: 60px 24px 80px;
+    position: relative;
+    background: #fff;
+    border-bottom: 2px dashed #ddd;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section > * {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .label {
+    display: inline-flex;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    background: #FC5F35;
+  }
+
+  .title {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    color: #1a1a1a;
+    margin: 16px 0 0;
+    line-height: 1.2;
+  }
+
+  .description {
+    font-size: 16px;
+    color: #666;
+    max-width: 600px;
+    margin: 12px auto 0;
+    line-height: 1.6;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 1fr;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .card-testimonial {
+    grid-column: span 1;
+    grid-row: span 2;
+    border-radius: 16px;
+    padding: 28px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #FC5F35;
+  }
+
+  .quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  .author { display: flex; flex-direction: column; gap: 4px; font-size: 14px; margin-top: 20px; }
+  .author strong { font-weight: 600; }
+  .author span { opacity: 0.8; font-size: 13px; }
+
+  .card-large {
+    grid-column: span 1;
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e5e5e5;
+  }
+
+  .card-demo {
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    height: 230px;
+    background: #131620;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .card-body { padding: 16px 20px; }
+  .card-body h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+  .card-body p { font-size: 13px; color: #666; margin: 6px 0 0; line-height: 1.5; }
+
+  .card-small {
+    border-radius: 16px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e5e5e5;
+  }
+  .card-small-icon {
+    width: 24px; height: 24px;
+    margin-bottom: 10px;
+    color: #FC5F35;
+  }
+  .card-small h3 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+
+  /* Fake demo content */
+  .fake-demo {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .demo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .demo-title { color: #e2e8f0; font-size: 14px; font-weight: 600; }
+  .demo-subtitle { color: #64748b; font-size: 11px; }
+  .demo-tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .demo-tab {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #1a1d2e;
+    color: #e2e8f0;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .demo-tab.active { background: #3b82f6; color: white; }
+  .demo-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .demo-stat {
+    background: #1a1d2e;
+    border-radius: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .demo-stat-label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+  .demo-stat-value { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-top: 2px; }
+  .demo-stat-value.green { color: #22c55e; }
+  .demo-stat-value.red { color: #ef4444; }
+  .demo-stat-value.blue { color: #3b82f6; }
+
+  .demo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1d2e;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .demo-row-left { display: flex; align-items: center; gap: 8px; }
+  .demo-row-check { width: 16px; height: 16px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; }
+  .demo-row-text { color: #e2e8f0; font-size: 12px; }
+  .demo-badge {
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+  }
+  .demo-row-meta { color: #64748b; font-size: 10px; margin-top: 2px; }
+  .demo-row-meta .green { color: #22c55e; }
+  .demo-row-meta .red { color: #ef4444; }
+
+  /* PV demo */
+  .pv-doc {
+    background: #1a1d2e;
+    border-radius: 8px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148,163,184,0.08);
+    flex: 1;
+  }
+  .pv-line { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+  .pv-label { color: #64748b; font-size: 10px; text-transform: uppercase; min-width: 80px; }
+  .pv-value { color: #e2e8f0; font-size: 12px; }
+  .pv-resolution { margin-top: 10px; }
+  .pv-resolution-title { color: #3b82f6; font-size: 11px; font-weight: 600; }
+  .pv-resolution-text { color: #94a3b8; font-size: 11px; margin-top: 2px; line-height: 1.4; }
+  .pv-footer { color: #475569; font-size: 10px; margin-top: 10px; font-style: italic; }
+
+  svg { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ============ OPTION A ============ -->
+<div class="option-label"><h1>Option A — Simplicité + Transparence</h1></div>
+<section class="section">
+  <div class="header">
+    <span class="label">Assemblées Générales</span>
+    <h2 class="title">Des AG aussi simples que vos réunions d'équipe</h2>
+    <p class="description">Convocation, votes, PV — tout se fait en quelques clics. Les copropriétaires suivent en direct, le gestionnaire n'a plus rien à ressaisir.</p>
+  </div>
+  <div class="grid">
+    <div class="card-testimonial">
+      <blockquote class="quote">&ldquo;Plus de recomptage, plus de PV à rédiger après coup. Tout est calculé et généré en direct — mes copropriétaires voient les résultats en même temps que moi.&rdquo;</blockquote>
+      <div class="author"><strong>Marie Dupont</strong><span>Syndic professionnelle, Nexity</span></div>
+    </div>
+    <div class="card-large">
+      <div class="card-demo">
+        <div class="fake-demo">
+          <div class="demo-header">
+            <div><div class="demo-title">Votes en direct</div><div class="demo-subtitle">AG Ordinaire — 15 Avril 2026</div></div>
+            <div class="demo-tabs"><div class="demo-tab active">Résultats</div><div class="demo-tab">Détail</div></div>
+          </div>
+          <div class="demo-stats">
+            <div class="demo-stat"><div class="demo-stat-label">Résolutions</div><div class="demo-stat-value">14</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">Adoptées</div><div class="demo-stat-value green">11</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">Rejetées</div><div class="demo-stat-value red">2</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">En cours</div><div class="demo-stat-value blue">1</div></div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-row-left">
+              <div class="demo-row-check">✓</div>
+              <div><div class="demo-row-text">Approbation des comptes 2025</div><div class="demo-row-meta">Art. 24 · <span class="green">Pour 78%</span> · <span class="red">Contre 15%</span> · Abst. 7%</div></div>
+            </div>
+            <div class="demo-badge">Adoptée</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body"><h3>Votes en direct, résultats instantanés</h3><p>Majorités calculées automatiquement — art. 24, 25, 26. Zéro erreur, zéro ressaisie.</p></div>
+    </div>
+    <div class="card-large">
+      <div class="card-demo">
+        <div class="fake-demo">
+          <div class="demo-header">
+            <div><div class="demo-title" style="color:#3b82f6;">RÉSOLUTION N°2 — BUDGET PRÉVISIONNEL</div></div>
+          </div>
+          <div class="pv-doc">
+            <div class="pv-line"><span class="pv-label">Exercice</span><span class="pv-value">2025</span></div>
+            <div class="pv-line"><span class="pv-label">Majorité</span><span class="pv-value">Article 24</span></div>
+            <div class="pv-line"><span class="pv-label">Résultat</span><span class="pv-value" style="color:#22c55e;">Approuvée — 78% des voix</span></div>
+            <div class="pv-resolution">
+              <div class="pv-resolution-title">Détail</div>
+              <div class="pv-resolution-text">Le budget prévisionnel 2026 de 245 000 € est voté à la majorité de l'article 24.</div>
+            </div>
+            <div class="pv-footer">... suite sur 8 pages</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body"><h3>PV généré en fin de séance</h3><p>Plus besoin de rédiger après l'AG. Le procès-verbal est prêt, partagé et signable immédiatement.</p></div>
+    </div>
+    <div class="card-small">
+      <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#FC5F35" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <h3>Résolutions conformes pré-rédigées</h3>
+    </div>
+    <div class="card-small">
+      <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#FC5F35" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <h3>Participation à distance & correspondance</h3>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPTION B ============ -->
+<div class="option-label"><h1>Option B — Gain de temps + Zéro ressaisie</h1></div>
+<section class="section">
+  <div class="header">
+    <span class="label">Assemblées Générales</span>
+    <h2 class="title">Des AG aussi simples que vos réunions d'équipe</h2>
+    <p class="description">Fini la ressaisie, les erreurs de comptage et les PV rédigés le lendemain. Tout se passe en direct — gestionnaire et copropriétaires sur la même page.</p>
+  </div>
+  <div class="grid">
+    <div class="card-testimonial">
+      <blockquote class="quote">&ldquo;Avant, je passais 2 jours à finaliser chaque PV. Maintenant il est prêt quand les copropriétaires quittent la salle. C'est un autre métier.&rdquo;</blockquote>
+      <div class="author"><strong>Marie Dupont</strong><span>Syndic professionnelle, Nexity</span></div>
+    </div>
+    <div class="card-large">
+      <div class="card-demo">
+        <div class="fake-demo">
+          <div class="demo-header">
+            <div><div class="demo-title">Votes en direct</div><div class="demo-subtitle">AG Ordinaire — 15 Avril 2026</div></div>
+            <div class="demo-tabs"><div class="demo-tab active">Résultats</div><div class="demo-tab">Détail</div></div>
+          </div>
+          <div class="demo-stats">
+            <div class="demo-stat"><div class="demo-stat-label">Résolutions</div><div class="demo-stat-value">14</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">Adoptées</div><div class="demo-stat-value green">11</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">Rejetées</div><div class="demo-stat-value red">2</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">En cours</div><div class="demo-stat-value blue">1</div></div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-row-left">
+              <div class="demo-row-check">✓</div>
+              <div><div class="demo-row-text">Approbation des comptes 2025</div><div class="demo-row-meta">Art. 24 · <span class="green">Pour 78%</span> · <span class="red">Contre 15%</span> · Abst. 7%</div></div>
+            </div>
+            <div class="demo-badge">Adoptée</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body"><h3>Votes en direct & majorités auto</h3><p>Résultats instantanés, majorités calculées — art. 24, 25, 26. Plus aucune erreur de comptage.</p></div>
+    </div>
+    <div class="card-large">
+      <div class="card-demo">
+        <div class="fake-demo">
+          <div class="demo-header">
+            <div><div class="demo-title" style="color:#3b82f6;">RÉSOLUTION N°2 — BUDGET PRÉVISIONNEL</div></div>
+          </div>
+          <div class="pv-doc">
+            <div class="pv-line"><span class="pv-label">Exercice</span><span class="pv-value">2025</span></div>
+            <div class="pv-line"><span class="pv-label">Majorité</span><span class="pv-value">Article 24</span></div>
+            <div class="pv-line"><span class="pv-label">Résultat</span><span class="pv-value" style="color:#22c55e;">Approuvée — 78% des voix</span></div>
+            <div class="pv-resolution">
+              <div class="pv-resolution-title">Détail</div>
+              <div class="pv-resolution-text">Le budget prévisionnel 2026 de 245 000 € est voté à la majorité de l'article 24.</div>
+            </div>
+            <div class="pv-footer">... suite sur 8 pages</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body"><h3>PV instantané, prêt à signer</h3><p>Le procès-verbal se génère pendant l'AG. En sortant, il est prêt — plus jamais de rédaction après coup.</p></div>
+    </div>
+    <div class="card-small">
+      <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#FC5F35" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <h3>Résolutions pré-rédigées conformes</h3>
+    </div>
+    <div class="card-small">
+      <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#FC5F35" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <h3>Vote à distance & par correspondance</h3>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPTION C ============ -->
+<div class="option-label"><h1>Option C — Visibilité partagée gestionnaire / copros</h1></div>
+<section class="section">
+  <div class="header">
+    <span class="label">Assemblées Générales</span>
+    <h2 class="title">Des AG aussi simples que vos réunions d'équipe</h2>
+    <p class="description">Chaque résolution votée en temps réel, chaque résultat visible par tous. Le gestionnaire pilote, les copropriétaires suivent — plus aucune zone d'ombre.</p>
+  </div>
+  <div class="grid">
+    <div class="card-testimonial">
+      <blockquote class="quote">&ldquo;Mes copropriétaires voient les résultats de vote en direct. Plus de contestation, plus de doute. La confiance a changé de niveau.&rdquo;</blockquote>
+      <div class="author"><strong>Marie Dupont</strong><span>Syndic professionnelle, Nexity</span></div>
+    </div>
+    <div class="card-large">
+      <div class="card-demo">
+        <div class="fake-demo">
+          <div class="demo-header">
+            <div><div class="demo-title">Votes en direct</div><div class="demo-subtitle">AG Ordinaire — 15 Avril 2026</div></div>
+            <div class="demo-tabs"><div class="demo-tab active">Résultats</div><div class="demo-tab">Détail</div></div>
+          </div>
+          <div class="demo-stats">
+            <div class="demo-stat"><div class="demo-stat-label">Résolutions</div><div class="demo-stat-value">14</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">Adoptées</div><div class="demo-stat-value green">11</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">Rejetées</div><div class="demo-stat-value red">2</div></div>
+            <div class="demo-stat"><div class="demo-stat-label">En cours</div><div class="demo-stat-value blue">1</div></div>
+          </div>
+          <div class="demo-row">
+            <div class="demo-row-left">
+              <div class="demo-row-check">✓</div>
+              <div><div class="demo-row-text">Approbation des comptes 2025</div><div class="demo-row-meta">Art. 24 · <span class="green">Pour 78%</span> · <span class="red">Contre 15%</span> · Abst. 7%</div></div>
+            </div>
+            <div class="demo-badge">Adoptée</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body"><h3>Résultats de vote en temps réel</h3><p>Chaque copropriétaire voit les résultats en même temps que le gestionnaire. Transparence totale.</p></div>
+    </div>
+    <div class="card-large">
+      <div class="card-demo">
+        <div class="fake-demo">
+          <div class="demo-header">
+            <div><div class="demo-title" style="color:#3b82f6;">RÉSOLUTION N°2 — BUDGET PRÉVISIONNEL</div></div>
+          </div>
+          <div class="pv-doc">
+            <div class="pv-line"><span class="pv-label">Exercice</span><span class="pv-value">2025</span></div>
+            <div class="pv-line"><span class="pv-label">Majorité</span><span class="pv-value">Article 24</span></div>
+            <div class="pv-line"><span class="pv-label">Résultat</span><span class="pv-value" style="color:#22c55e;">Approuvée — 78% des voix</span></div>
+            <div class="pv-resolution">
+              <div class="pv-resolution-title">Détail</div>
+              <div class="pv-resolution-text">Le budget prévisionnel 2026 de 245 000 € est voté à la majorité de l'article 24.</div>
+            </div>
+            <div class="pv-footer">... suite sur 8 pages</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body"><h3>PV généré, partagé, signé</h3><p>Le procès-verbal est accessible par tous dès la fin de séance. Chaque décision est tracée noir sur blanc.</p></div>
+    </div>
+    <div class="card-small">
+      <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#FC5F35" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <h3>Résolutions conformes auto-générées</h3>
+    </div>
+    <div class="card-small">
+      <svg class="card-small-icon" viewBox="0 0 24 24" fill="none" stroke="#FC5F35" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <h3>Participation à distance intégrée</h3>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

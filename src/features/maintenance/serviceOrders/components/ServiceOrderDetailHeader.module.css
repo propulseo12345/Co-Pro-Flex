@@ -1,24 +1,24 @@
 .backLink {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary, #94A3B8);
+    gap: 8px;
+    color: #94a3b8;
     text-decoration: none;
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
+    font-size: 14px;
+    margin-bottom: 24px;
     transition: color 0.2s;
 }
 
 .backLink:hover {
-    color: var(--primary, #34D399);
+    color: #3b82f6;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: 24px;
+    margin-bottom: 32px;
 }
 
 .headerLeft {
@@ -26,37 +26,78 @@
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 28px;
     font-weight: 700;
-    color: var(--text-main, #F1F5F9);
-    margin: 0 0 0.75rem;
+    color: #e2e8f0;
+    margin: 0 0 12px;
 }
 
 .headerMeta {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
 .type {
-    font-size: 0.875rem;
-    color: var(--text-secondary, #94A3B8);
-    padding: 0.25rem 0.75rem;
-    background: var(--bg-secondary, #1A1F2E);
-    border-radius: var(--radius-sm, 4px);
+    font-size: 14px;
+    color: #94a3b8;
+    padding: 4px 12px;
+    background: #131620;
+    border-radius: 6px;
 }
 
 .id {
-    font-size: 0.875rem;
-    color: var(--text-tertiary, #64748B);
+    font-size: 14px;
+    color: #64748b;
     font-family: monospace;
 }
 
 .headerActions {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
     flex-wrap: wrap;
+}
+
+.btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btnSecondary:hover {
+    background: rgba(148, 163, 184, 0.1);
+    color: #e2e8f0;
+}
+
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: white;
+    background: #3b82f6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.btnPrimary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 @media (max-width: 768px) {

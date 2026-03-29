@@ -104,12 +104,32 @@ export default function NewServiceOrderPage() {
                 />
 
                 <div className={styles.actions}>
-                    <button type="button" className="btn btn-secondary" onClick={handleSaveDraft}>
-                        <Save size={16} aria-hidden="true" />
+                    <button
+                        type="button"
+                        onClick={handleSaveDraft}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '10px 20px', borderRadius: 8,
+                            background: '#131620', border: '1px solid rgba(148,163,184,0.08)',
+                            color: '#e2e8f0', fontSize: 14, fontWeight: 500, cursor: 'pointer',
+                            fontFamily: 'inherit',
+                        }}
+                    >
+                        <Save size={15} aria-hidden="true" />
                         Enregistrer en brouillon
                     </button>
-                    <button type="button" className="btn btn-primary" onClick={handleSend}>
-                        <Send size={16} aria-hidden="true" />
+                    <button
+                        type="button"
+                        onClick={handleSend}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '10px 20px', borderRadius: 8,
+                            background: '#3b82f6', border: 'none',
+                            color: 'white', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                            fontFamily: 'inherit',
+                        }}
+                    >
+                        <Send size={15} aria-hidden="true" />
                         Générer et envoyer
                     </button>
                 </div>

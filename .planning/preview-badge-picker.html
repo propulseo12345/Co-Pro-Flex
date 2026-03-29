@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Badge Hero — 10 styles</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  .picker {
+    width: 380px; min-width: 380px; background: #131620;
+    border-right: 1px solid rgba(148,163,184,0.08);
+    padding: 24px; overflow-y: auto; max-height: 100vh;
+    position: sticky; top: 0;
+  }
+  .picker h1 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .picker .subtitle { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+
+  .pick-option {
+    padding: 16px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08);
+    background: #1a1d2e; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .pick-option:hover { border-color: rgba(59,130,246,0.3); background: #252b3b; }
+  .pick-option.selected { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+  .pick-option.selected::after { content: '✓'; position: absolute; top: 14px; right: 14px; color: #3b82f6; font-weight: 700; }
+
+  .pick-option-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 8px; }
+
+  .copy-bar { position: sticky; bottom: 0; background: #131620; border-top: 1px solid rgba(148,163,184,0.08); padding: 16px 24px; margin: 0 -24px; }
+  .copy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: #2563eb; }
+  .copy-btn.copied { background: #22c55e; }
+
+  .preview-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: #FEF5E4; }
+
+  .preview-zone {
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .preview-badge-wrap { margin-bottom: 24px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+
+  .preview-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 46px;
+    color: #052641;
+    line-height: 1.12;
+    max-width: 700px;
+  }
+  .preview-title em { font-style: italic; font-family: 'Instrument Serif', serif; color: #807E7A; font-weight: 400; }
+
+  /* ── Badge Styles ── */
+  .badge { display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; }
+
+  /* 1 — Pill bleu subtle (actuel) */
+  .badge-1 {
+    padding: 6px 18px; border-radius: 99px;
+    background: rgba(48, 121, 255, 0.08); border: 1px solid rgba(48, 121, 255, 0.15);
+    font-size: 13px; font-weight: 500; color: #3079FF;
+  }
+  .badge-1 .dot { width: 6px; height: 6px; border-radius: 50%; background: #3079FF; }
+
+  /* 2 — Pill outline dark */
+  .badge-2 {
+    padding: 6px 18px; border-radius: 99px;
+    background: transparent; border: 1px solid #052641;
+    font-size: 13px; font-weight: 500; color: #052641;
+  }
+
+  /* 3 — Tag uppercase petit */
+  .badge-3 {
+    padding: 4px 14px; border-radius: 4px;
+    background: #052641;
+    font-size: 10px; font-weight: 700; color: #FEF5E4;
+    text-transform: uppercase; letter-spacing: 1.5px;
+  }
+
+  /* 4 — Pill gradient */
+  .badge-4 {
+    padding: 6px 20px; border-radius: 99px;
+    background: linear-gradient(135deg, #3079FF 0%, #55AC63 100%);
+    font-size: 12px; font-weight: 600; color: white;
+    letter-spacing: 0.3px;
+  }
+
+  /* 5 — Texte simple avec ligne */
+  .badge-5 {
+    font-size: 13px; font-weight: 500; color: #807E7A;
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .badge-5::before, .badge-5::after {
+    content: ''; width: 32px; height: 1px; background: #E2DFD8;
+  }
+
+  /* 6 — Pill orange warm */
+  .badge-6 {
+    padding: 6px 18px; border-radius: 99px;
+    background: rgba(252, 95, 53, 0.08); border: 1px solid rgba(252, 95, 53, 0.2);
+    font-size: 13px; font-weight: 500; color: #FC5F35;
+  }
+  .badge-6 .dot { width: 6px; height: 6px; border-radius: 50%; background: #FC5F35; }
+
+  /* 7 — Pill vert confiance */
+  .badge-7 {
+    padding: 6px 18px; border-radius: 99px;
+    background: rgba(85, 172, 99, 0.08); border: 1px solid rgba(85, 172, 99, 0.2);
+    font-size: 13px; font-weight: 500; color: #55AC63;
+  }
+  .badge-7 .dot { width: 6px; height: 6px; border-radius: 50%; background: #55AC63; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* 8 — Chip sombre élégant */
+  .badge-8 {
+    padding: 8px 20px; border-radius: 8px;
+    background: #052641;
+    font-size: 12px; font-weight: 500; color: rgba(254, 245, 228, 0.9);
+    letter-spacing: 0.2px;
+  }
+
+  /* 9 — Pill cream border fine */
+  .badge-9 {
+    padding: 6px 18px; border-radius: 99px;
+    background: white; border: 1px solid #E2DFD8;
+    font-size: 13px; font-weight: 500; color: #052641;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* 10 — Emoji + texte sans fond */
+  .badge-10 {
+    font-size: 14px; font-weight: 500; color: #052641;
+  }
+  .badge-10 .emoji { font-size: 18px; }
+
+  /* Badge inside picker preview */
+  .pick-badge-preview {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    background: #FEF5E4;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="picker">
+    <h1>Style du badge</h1>
+    <p class="subtitle">Clique pour voir le rendu en contexte.</p>
+
+    <div class="pick-option selected" data-style="1">
+      <div class="pick-option-tag">1 — Pill bleu subtle (actuel)</div>
+      <div class="pick-badge-preview"><span class="badge badge-1"><span class="dot"></span> La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="2">
+      <div class="pick-option-tag">2 — Pill outline dark</div>
+      <div class="pick-badge-preview"><span class="badge badge-2">La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="3">
+      <div class="pick-option-tag">3 — Tag uppercase compact</div>
+      <div class="pick-badge-preview"><span class="badge badge-3">Nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="4">
+      <div class="pick-option-tag">4 — Pill gradient bleu→vert</div>
+      <div class="pick-badge-preview"><span class="badge badge-4">La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="5">
+      <div class="pick-option-tag">5 — Texte simple avec lignes</div>
+      <div class="pick-badge-preview"><span class="badge badge-5">La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="6">
+      <div class="pick-option-tag">6 — Pill orange warm</div>
+      <div class="pick-badge-preview"><span class="badge badge-6"><span class="dot"></span> La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="7">
+      <div class="pick-option-tag">7 — Pill vert confiance (dot animé)</div>
+      <div class="pick-badge-preview"><span class="badge badge-7"><span class="dot"></span> La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="8">
+      <div class="pick-option-tag">8 — Chip sombre élégant</div>
+      <div class="pick-badge-preview"><span class="badge badge-8">La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="9">
+      <div class="pick-option-tag">9 — Pill cream border fine</div>
+      <div class="pick-badge-preview"><span class="badge badge-9">La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="pick-option" data-style="10">
+      <div class="pick-option-tag">10 — Emoji + texte nu</div>
+      <div class="pick-badge-preview"><span class="badge badge-10"><span class="emoji">🏢</span> La gestion de copropriété nouvelle génération</span></div>
+    </div>
+
+    <div class="copy-bar">
+      <button class="copy-btn" id="copyBtn">Copier la sélection</button>
+    </div>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-zone">
+      <div class="preview-badge-wrap" id="preview-badge">
+        <span class="badge badge-1"><span class="dot"></span> La gestion de copropriété nouvelle génération</span>
+      </div>
+      <h1 class="preview-title">Le logiciel de copropriété que les gestionnaires <em>adorent utiliser</em></h1>
+    </div>
+  </div>
+</div>
+
+<script>
+  const badgeHTML = {
+    '1': '<span class="badge badge-1"><span class="dot"></span> La gestion de copropriété nouvelle génération</span>',
+    '2': '<span class="badge badge-2">La gestion de copropriété nouvelle génération</span>',
+    '3': '<span class="badge badge-3">Nouvelle génération</span>',
+    '4': '<span class="badge badge-4">La gestion de copropriété nouvelle génération</span>',
+    '5': '<span class="badge badge-5">La gestion de copropriété nouvelle génération</span>',
+    '6': '<span class="badge badge-6"><span class="dot"></span> La gestion de copropriété nouvelle génération</span>',
+    '7': '<span class="badge badge-7"><span class="dot"></span> La gestion de copropriété nouvelle génération</span>',
+    '8': '<span class="badge badge-8">La gestion de copropriété nouvelle génération</span>',
+    '9': '<span class="badge badge-9">La gestion de copropriété nouvelle génération</span>',
+    '10': '<span class="badge badge-10"><span class="emoji">🏢</span> La gestion de copropriété nouvelle génération</span>',
+  };
+
+  const preview = document.getElementById('preview-badge');
+  let selected = '1';
+
+  document.querySelectorAll('.pick-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.pick-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selected = opt.dataset.style;
+      preview.innerHTML = badgeHTML[selected];
+    });
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const label = document.querySelector('.pick-option.selected .pick-option-tag').textContent;
+    navigator.clipboard.writeText('Badge: ' + label).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copié !'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copier la sélection'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+</script>
+
+</body>
+</html>

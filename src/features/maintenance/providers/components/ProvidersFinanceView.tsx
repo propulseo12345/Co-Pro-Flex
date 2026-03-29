@@ -88,7 +88,28 @@ export function ProvidersFinanceView({
     return list;
   }, [activeTab, searchTerm, allProviders, prestairesCopro, prestairesSyndic, prestairesCoproFlex]);
 
-  const selected = filtered.find(p => p.id === selectedId) || filtered[0] || null;
+  // Filtre par domaine dans la sidebar
+  const [domainFilter, setDomainFilter] = useState<string>('tous');
+
+  // Domaines disponibles (comptage sur tous les domaines de chaque prestataire)
+  const availableDomains = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach(p => {
+      const domains = p.domaines?.length ? p.domaines : ['autre'];
+      domains.forEach(d => {
+        counts[d] = (counts[d] || 0) + 1;
+      });
+    });
+    return Object.entries(counts).sort(([, a], [, b]) => b - a);
+  }, [filtered]);
+
+  const domainFiltered = useMemo(() => {
+    if (domainFilter === 'tous') return filtered;
+    return filtered.filter(p => (p.domaines || []).includes(domainFilter));
+  }, [filtered, domainFilter]);
+
+  const selected = domainFiltered.find(p => p.id === selectedId) || domainFiltered[0] || null;
+
   const totalInterventions = allProviders.reduce((s, p) => s + (p.nombreInterventions || 0), 0);
   const actifsCount = allProviders.filter(p => p.actif).length;
   const avgRating = allProviders.filter(p => p.noteMoyenne).length > 0
@@ -196,68 +217,123 @@ export function ProvidersFinanceView({
         {/* List */}
         <div style={{
           background: '#1a1d2e', border: '1px solid rgba(148,163,184,0.08)',
-          borderRadius: 12, padding: 8, maxHeight: 560, overflowY: 'auto',
+          borderRadius: 12, maxHeight: 560, overflowY: 'auto', display: 'flex', flexDirection: 'column',
         }}>
-          {filtered.map(p => {
-            const isActive = selected?.id === p.id;
-            const mainDomain = p.domaines?.[0] || 'autre';
-            const domColor = DOMAINE_COLORS[mainDomain] || '#64748b';
-            return (
-              <div
-                key={p.id}
-                onClick={() => setSelectedId(p.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: 12, borderRadius: 8, cursor: 'pointer',
-                  transition: 'all 0.15s',
-                  border: isActive ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-                  background: isActive ? 'rgba(59,130,246,0.08)' : 'transparent',
-                }}
-              >
-                {/* Avatar */}
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                  background: `linear-gradient(135deg, ${domColor}, ${domColor}cc)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 700, color: 'white',
-                }}>
-                  {(p.nom || '?').substring(0, 2).toUpperCase()}
-                </div>
+          {/* Domain pills */}
+          <div style={{
+            display: 'flex', gap: 6, padding: '10px 10px', overflowX: 'auto',
+            borderBottom: '1px solid rgba(148,163,184,0.06)', flexShrink: 0, flexWrap: 'nowrap',
+          }}>
+            <button
+              onClick={() => setDomainFilter('tous')}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'inherit', border: 'none',
+                background: domainFilter === 'tous' ? 'rgba(59,130,246,0.12)' : 'transparent',
+                color: domainFilter === 'tous' ? '#3b82f6' : '#64748b',
+              }}
+            >
+              Tous
+              <span style={{
+                fontSize: 10, fontWeight: 600, padding: '0 5px', borderRadius: 8,
+                background: domainFilter === 'tous' ? 'rgba(59,130,246,0.2)' : 'rgba(148,163,184,0.08)',
+                color: domainFilter === 'tous' ? '#60a5fa' : '#64748b',
+              }}>
+                {filtered.length}
+              </span>
+            </button>
+            {availableDomains.map(([domain, count]) => {
+              const domColor = DOMAINE_COLORS[domain] || '#64748b';
+              const isActive = domainFilter === domain;
+              return (
+                <button
+                  key={domain}
+                  onClick={() => setDomainFilter(isActive ? 'tous' : domain)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 500,
+                    whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'inherit', border: 'none',
+                    background: isActive ? `${domColor}1f` : 'transparent',
+                    color: isActive ? domColor : '#94a3b8',
+                  }}
+                >
+                  <span style={{
+                    width: 6, height: 6, borderRadius: '50%', background: domColor, flexShrink: 0,
+                  }} />
+                  {DOMAIN_LABELS[domain] || domain}
+                  {isActive && (
+                    <span style={{ fontSize: 10, color: `${domColor}99` }}>{count}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Provider list */}
+          <div style={{ padding: 8, flex: 1, overflowY: 'auto' }}>
+            {domainFiltered.map(p => {
+              const isActive = selected?.id === p.id;
+              const mainDomain = p.domaines?.[0] || 'autre';
+              const domColor = DOMAINE_COLORS[mainDomain] || '#64748b';
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => setSelectedId(p.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: 12, borderRadius: 8, cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    border: isActive ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+                    background: isActive ? 'rgba(59,130,246,0.08)' : 'transparent',
+                  }}
+                >
                   <div style={{
-                    fontSize: 13, fontWeight: 600, color: '#e2e8f0',
-                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                    background: `linear-gradient(135deg, ${domColor}, ${domColor}cc)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 13, fontWeight: 700, color: 'white',
                   }}>
-                    {p.nom}
+                    {(p.nom || '?').substring(0, 2).toUpperCase()}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2, flexWrap: 'wrap' }}>
-                    {p.domaines?.map(d => (
-                      <span key={d} style={{
-                        display: 'inline-flex', padding: '2px 8px', borderRadius: 4,
-                        fontSize: 11, fontWeight: 500,
-                        background: `${DOMAINE_COLORS[d] || '#64748b'}1f`,
-                        color: DOMAINE_COLORS[d] || '#64748b',
-                      }}>
-                        {DOMAIN_LABELS[d] || d}
-                      </span>
-                    ))}
-                    {p.noteMoyenne != null && p.noteMoyenne > 0 && (
-                      <span style={{ color: '#fbbf24', marginLeft: 8, fontSize: 11 }}>
-                        ★ {p.noteMoyenne.toFixed(1)}
-                      </span>
-                    )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: 13, fontWeight: 600, color: '#e2e8f0',
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>
+                      {p.nom}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
+                      {p.domaines?.map(d => (
+                        <span key={d} style={{
+                          display: 'inline-flex', padding: '2px 8px', borderRadius: 4,
+                          fontSize: 10, fontWeight: 500,
+                          background: `${DOMAINE_COLORS[d] || '#64748b'}1f`,
+                          color: DOMAINE_COLORS[d] || '#64748b',
+                        }}>
+                          {DOMAIN_LABELS[d] || d}
+                        </span>
+                      ))}
+                      {p.noteMoyenne != null && p.noteMoyenne > 0 && (
+                        <span style={{ color: '#fbbf24', fontSize: 11, marginLeft: 4 }}>
+                          ★ {p.noteMoyenne.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <span style={{
+                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+                    background: p.actif ? '#22c55e' : '#64748b',
+                  }} />
                 </div>
+              );
+            })}
+            {domainFiltered.length === 0 && (
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b', fontSize: 14 }}>
+                Aucun prestataire trouvé.
               </div>
-            );
-          })}
-          {filtered.length === 0 && (
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b', fontSize: 14 }}>
-              Aucun prestataire trouvé.
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Detail Panel */}
@@ -386,7 +462,9 @@ export function ProvidersFinanceView({
               <button className={topBarStyles.btnGhost} onClick={() => selected.email && window.open(`mailto:${selected.email}`)}>
                 <Mail size={14} aria-hidden="true" /> Email
               </button>
-              <button className={topBarStyles.btnPrimary} onClick={() => onGoToPrestataire(selected)}>
+              <button className={topBarStyles.btnPrimary} onClick={() => {
+                if (selected?.id) onGoToPrestataire({ id: selected.id });
+              }}>
                 Voir fiche complète
               </button>
             </div>

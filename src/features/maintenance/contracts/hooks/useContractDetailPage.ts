@@ -145,8 +145,8 @@ export function useContractDetailPage(id: string) {
   );
 
   const delaiAlerte = contract?.notice_months ? contract.notice_months * 30 : 60;
-  const alerteRenouvellement = joursRestants > 0 && joursRestants <= delaiAlerte + 30;
-  const alerteUrgente = joursRestants > 0 && joursRestants <= delaiAlerte;
+  const alerteRenouvellement = joursRestants <= delaiAlerte + 30;
+  const alerteUrgente = joursRestants <= delaiAlerte;
 
   const typeLabel = useMemo(() =>
     CONTRACT_TYPE_LABELS[contract?.contract_type as ContractType] || contract?.contract_type || '',

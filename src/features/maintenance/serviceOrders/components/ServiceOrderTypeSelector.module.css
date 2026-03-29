@@ -1,47 +1,52 @@
 .section {
-    background: var(--surface, #1E293B);
-    border: 1px solid var(--color-border, #e5e7eb);
-    border-radius: var(--radius-lg, 8px);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    background: #1a1d2e;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
 }
 
 .sectionTitle {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-main, #F1F5F9);
-    margin: 0 0 1rem;
+    font-size: 16px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0 0 16px;
 }
 
 .radioCards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
 .radioCard {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1rem;
-    border: 2px solid var(--color-border, #e5e7eb);
-    border-radius: var(--radius-md, 6px);
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 10px;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    transition: all 0.2s;
+    background: #131620;
 }
 
 .radioCard:hover {
-    border-color: var(--primary, #34D399);
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.04);
 }
 
 .radioCardSelected {
-    border-color: var(--primary, #34D399);
-    background: rgba(52, 211, 153, 0.1);
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.08);
 }
 
 .radioInput {
-    margin-top: 0.25rem;
-    accent-color: var(--color-primary, #3b82f6);
+    margin-top: 3px;
+    accent-color: #3b82f6;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
 
 .radioCardContent {
@@ -49,15 +54,21 @@
 }
 
 .radioCardTitle {
-    font-size: 0.9375rem;
+    font-size: 14px;
     font-weight: 600;
-    color: var(--text-main, #F1F5F9);
-    margin: 0 0 0.25rem;
+    color: #e2e8f0;
+    margin: 0 0 4px;
 }
 
 .radioCardDescription {
-    font-size: 0.8125rem;
-    color: var(--text-secondary, #94A3B8);
+    font-size: 13px;
+    color: #64748b;
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+    .radioCards {
+        grid-template-columns: 1fr;
+    }
 }

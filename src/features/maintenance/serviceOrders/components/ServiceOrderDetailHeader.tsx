@@ -45,30 +45,30 @@ export function ServiceOrderDetailHeader({
                 <div className={styles.headerActions}>
                     {!editMode ? (
                         <>
-                            <button className="btn btn-secondary" onClick={onEdit}>
+                            <button className={styles.btnSecondary} onClick={onEdit}>
                                 <Edit size={16} aria-hidden="true" />
                                 Modifier
                             </button>
-                            <button className="btn btn-secondary" onClick={onShowStatusModal}>
+                            <button className={styles.btnSecondary} onClick={onShowStatusModal}>
                                 <RefreshCw size={16} aria-hidden="true" />
                                 Changer le statut
                             </button>
-                            <button className="btn btn-secondary" onClick={onShowEmailModal}>
+                            <button className={styles.btnSecondary} onClick={onShowEmailModal}>
                                 <Mail size={16} aria-hidden="true" />
-                                Voir l'email
+                                Voir l&apos;email
                             </button>
-                            <button className="btn btn-secondary" onClick={() => generatePdfDownload(ordreService)}>
+                            <button className={styles.btnSecondary} onClick={() => generatePdfDownload(ordreService)}>
                                 <FileText size={16} aria-hidden="true" />
                                 Générer PDF
                             </button>
                         </>
                     ) : (
                         <>
-                            <button className="btn btn-secondary" onClick={onCancelEdit}>
+                            <button className={styles.btnSecondary} onClick={onCancelEdit}>
                                 <X size={16} aria-hidden="true" />
                                 Annuler
                             </button>
-                            <button className="btn btn-primary" onClick={onSaveEdit}>
+                            <button className={styles.btnPrimary} onClick={onSaveEdit}>
                                 <Save size={16} aria-hidden="true" />
                                 Enregistrer
                             </button>

@@ -4,6 +4,7 @@ import { Search, Download, Plus, FileText } from 'lucide-react';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import type { ContratDetaille } from '@/types';
 import type { ContratSyndic } from '@/types/legacy';
+import type { PendingRenewal } from '../hooks/useContractsPage';
 import styles from '@/app/(dashboard)/maintenance/maintenance.module.css';
 
 const STATUT_BADGE: Record<string, { label: string; badgeClass: string }> = {
@@ -45,6 +46,9 @@ interface ContractsFinanceViewProps {
   onEditSyndic: () => void;
   onVoirDetails: (contrat: { id: string }) => void;
   onOpenDecisionModal: (contrat: ContratDetaille) => void;
+  pendingRenewals?: Record<string, PendingRenewal>;
+  onConfirmerRenouvellement?: (contratId: string) => void;
+  onAnnulerRenouvellement?: (contratId: string) => void;
 }
 
 export function ContractsFinanceView({
@@ -60,8 +64,12 @@ export function ContractsFinanceView({
   onEditSyndic,
   onVoirDetails,
   onOpenDecisionModal,
+  pendingRenewals = {},
+  onConfirmerRenouvellement,
+  onAnnulerRenouvellement,
 }: ContractsFinanceViewProps) {
   const actifs = contrats.filter(c => c.statut === 'ACTIF').length;
+  const expires = contrats.filter(c => c.statut === 'EXPIRE').length;
   const expirentBientot = contrats.filter(c => c.statut === 'A_RENOUVELER').length;
   const coutTotal = contrats.reduce((sum, c) => sum + (c.coutAnnuel || 0), 0);
   const prestatairesCount = new Set(contrats.map(c => c.fournisseur)).size;
@@ -102,6 +110,7 @@ export function ContractsFinanceView({
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         {[
           { label: 'CONTRATS ACTIFS', value: String(actifs), color: undefined },
+          { label: 'EXPIRÉS', value: String(expires), color: expires > 0 ? '#ef4444' : undefined },
           { label: 'EXPIRENT < 90J', value: String(expirentBientot), color: expirentBientot > 0 ? '#f59e0b' : undefined },
           { label: 'COÛT ANNUEL TOTAL', value: `${coutTotal.toLocaleString('fr-FR')} €`, color: undefined, mono: true },
           { label: 'PRESTATAIRES LIÉS', value: String(prestatairesCount), color: undefined },
@@ -208,9 +217,11 @@ export function ContractsFinanceView({
             {filteredContrats.map(contrat => {
               const statut = STATUT_BADGE[contrat.statut] || { label: contrat.statut, badgeClass: 'badgeGray' };
               const isExpiring = contrat.statut === 'A_RENOUVELER' || contrat.statut === 'EXPIRE';
+              const isPending = !!pendingRenewals[contrat.id];
               const domain = contrat.type || 'AUTRE';
               const domainColor = DOMAINE_COLORS[domain] || '#64748b';
-              const dotColor = contrat.statut === 'ACTIF' ? '#22c55e'
+              const dotColor = isPending ? '#3b82f6'
+                : contrat.statut === 'ACTIF' ? '#22c55e'
                 : contrat.statut === 'A_RENOUVELER' ? '#f59e0b'
                 : contrat.statut === 'EXPIRE' ? '#ef4444' : '#64748b';
 
@@ -238,12 +249,35 @@ export function ContractsFinanceView({
                     {contrat.coutAnnuel?.toLocaleString('fr-FR')} €
                   </td>
                   <td>
-                    <span className={`${styles.badge} ${styles[statut.badgeClass]}`}>
-                      {statut.label}
-                    </span>
+                    {isPending ? (
+                      <span className={`${styles.badge}`} style={{
+                        background: 'rgba(59,130,246,0.1)', color: '#60a5fa',
+                      }}>
+                        En attente
+                      </span>
+                    ) : (
+                      <span className={`${styles.badge} ${styles[statut.badgeClass]}`}>
+                        {statut.label}
+                      </span>
+                    )}
                   </td>
                   <td>
-                    {isExpiring ? (
+                    {isPending ? (
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className={styles.actionLink} style={{ color: '#22c55e' }} onClick={(e) => {
+                          e.stopPropagation();
+                          onConfirmerRenouvellement?.(contrat.id);
+                        }}>
+                          Activer
+                        </button>
+                        <button className={styles.actionLink} style={{ color: '#64748b' }} onClick={(e) => {
+                          e.stopPropagation();
+                          onAnnulerRenouvellement?.(contrat.id);
+                        }}>
+                          Annuler
+                        </button>
+                      </div>
+                    ) : isExpiring ? (
                       <button className={styles.actionLink} onClick={(e) => {
                         e.stopPropagation();
                         onOpenDecisionModal(contrat);

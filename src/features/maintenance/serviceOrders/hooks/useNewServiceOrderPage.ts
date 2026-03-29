@@ -20,6 +20,8 @@ import {
     filtrerPrestatairesParCategorie,
     getAlerteIncoherence
 } from '@/lib/utils/intervention-coherence';
+import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
+import type { ServiceOrderInsert } from '@/types/supabase';
 
 export interface ServiceOrderFormData {
     typeOrdre: TypeOrdreService;
@@ -69,6 +71,7 @@ const initialFormData: ServiceOrderFormData = {
 
 export function useNewServiceOrderPage() {
     const router = useRouter();
+    const { createOrder } = useServiceOrders({ autoFetch: false });
     const [formData, setFormData] = useState<ServiceOrderFormData>(initialFormData);
     const [errors, setErrors] = useState<Partial<Record<keyof ServiceOrderFormData, string>>>({});
     const [contactSearchTerm, setContactSearchTerm] = useState('');
@@ -253,27 +256,57 @@ export function useNewServiceOrderPage() {
         localStorage.setItem('newOrdresService', JSON.stringify(existingOS));
     }, []);
 
-    const handleSaveDraft = useCallback(() => {
+    const buildSupabaseInsert = useCallback((status: 'draft' | 'sent'): ServiceOrderInsert => {
+        return {
+            copro_id: '', // Rempli par le hook createOrder
+            provider_id: formData.fournisseurId || null,
+            contract_id: formData.typeOrdre === 'CONTRACTUEL' ? formData.contratId : null,
+            subject: formData.titre,
+            description: formData.description || null,
+            urgency: formData.priorite === 'URGENT' ? 'urgent' : formData.priorite === 'HIGH' ? 'high' : formData.priorite === 'LOW' ? 'low' : 'normal',
+            order_type: formData.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
+            origin: 'manual',
+            status,
+            estimated_amount: formData.montantEstime ? parseFloat(formData.montantEstime) : null,
+            is_art18_emergency: false,
+        } as unknown as ServiceOrderInsert;
+    }, [formData]);
+
+    const handleSaveDraft = useCallback(async () => {
         if (!formData.titre.trim()) {
             alert('Le titre est obligatoire pour sauvegarder un brouillon');
             return;
         }
-        const os = createOrdreService('BROUILLON');
-        saveToLocalStorage(os);
-        alert('✓ Brouillon sauvegardé avec succès !');
-        router.push('/maintenance/service-orders');
-    }, [formData.titre, createOrdreService, saveToLocalStorage, router]);
+        try {
+            await createOrder(buildSupabaseInsert('draft'));
+            alert('✓ Brouillon sauvegardé avec succès !');
+            router.push('/maintenance/service-orders');
+        } catch {
+            // Fallback localStorage si Supabase échoue
+            const os = createOrdreService('BROUILLON');
+            saveToLocalStorage(os);
+            alert('✓ Brouillon sauvegardé localement (hors-ligne)');
+            router.push('/maintenance/service-orders');
+        }
+    }, [formData.titre, createOrder, buildSupabaseInsert, createOrdreService, saveToLocalStorage, router]);
 
-    const handleSend = useCallback(() => {
+    const handleSend = useCallback(async () => {
         if (!validate()) {
             alert('Veuillez remplir tous les champs obligatoires');
             return;
         }
-        const os = createOrdreService('ENVOYE');
-        saveToLocalStorage(os);
-        alert(`✓ Ordre de service envoyé à ${formData.fournisseurNom} (${formData.fournisseurEmail}) !`);
-        router.push('/maintenance/service-orders');
-    }, [validate, createOrdreService, saveToLocalStorage, formData.fournisseurNom, formData.fournisseurEmail, router]);
+        try {
+            await createOrder(buildSupabaseInsert('sent'));
+            alert(`✓ Ordre de service envoyé à ${formData.fournisseurNom} !`);
+            router.push('/maintenance/service-orders');
+        } catch {
+            // Fallback localStorage si Supabase échoue
+            const os = createOrdreService('ENVOYE');
+            saveToLocalStorage(os);
+            alert(`✓ Ordre de service sauvegardé localement (hors-ligne)`);
+            router.push('/maintenance/service-orders');
+        }
+    }, [validate, createOrder, buildSupabaseInsert, createOrdreService, saveToLocalStorage, formData.fournisseurNom, router]);
 
     return {
         formData,

@@ -10,7 +10,10 @@ import {
     Building2,
     FileText,
     CheckCircle,
-    Clock
+    Clock,
+    Mail,
+    Send,
+    ArrowRight,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { ContratDetaille } from '@/types';
@@ -21,6 +24,7 @@ import styles from './ContratDecisionModal.module.css';
 interface ContratDecisionModalProps {
     contrat: ContratDetaille;
     joursDepasses: number;
+    prestataireEmail?: string;
     onClose: () => void;
     onRenouveler: (contrat: ContratDetaille, nouvelleDateFin: string) => void;
     onResilier: (contrat: ContratDetaille, raison: string, archiver: boolean) => void;
@@ -39,15 +43,21 @@ const RAISONS_RESILIATION = [
 export default function ContratDecisionModal({
     contrat,
     joursDepasses,
+    prestataireEmail,
     onClose,
     onRenouveler,
     onResilier
 }: ContratDecisionModalProps) {
-    const [mode, setMode] = useState<'choix' | 'renouveler' | 'resilier'>('choix');
+    const [mode, setMode] = useState<'choix' | 'renouveler' | 'email' | 'resilier'>('choix');
     const [nouvelleDateFin, setNouvelleDateFin] = useState('');
     const [raisonResiliation, setRaisonResiliation] = useState('');
     const [raisonPersonnalisee, setRaisonPersonnalisee] = useState('');
     const [archiver, setArchiver] = useState(true);
+
+    // Email state
+    const [emailDestinataire, setEmailDestinataire] = useState(prestataireEmail || '');
+    const [emailObjet, setEmailObjet] = useState('');
+    const [emailCorps, setEmailCorps] = useState('');
 
     const titleId = useId();
     const focusTrapRef = useFocusTrap<HTMLDivElement>({
@@ -56,7 +66,9 @@ export default function ContratDecisionModal({
         onEscape: onClose
     });
 
-    const niveau = getNiveauEscalade(joursDepasses);
+    const isExpired = joursDepasses > 0;
+    const joursAbs = Math.abs(joursDepasses);
+    const niveau = isExpired ? getNiveauEscalade(joursDepasses) : 'standard' as NiveauEscalade;
     const actions = ACTIONS_CONTRAT_EXPIRE[niveau];
 
     // Calculer la date de fin suggérée (1 an à partir d'aujourd'hui)
@@ -66,11 +78,33 @@ export default function ContratDecisionModal({
         return date.toISOString().split('T')[0];
     };
 
-    const handleRenouveler = () => {
+    const prepareEmail = () => {
         if (!nouvelleDateFin) {
             alert('Veuillez sélectionner une nouvelle date de fin');
             return;
         }
+        const dateFinFormatted = new Date(nouvelleDateFin).toLocaleDateString('fr-FR');
+        setEmailDestinataire(prestataireEmail || '');
+        setEmailObjet(`Renouvellement du contrat ${contrat.nom}${contrat.numeroContrat ? ` — N° ${contrat.numeroContrat}` : ''}`);
+        setEmailCorps(
+`Bonjour,
+
+Nous souhaitons vous informer de notre intention de renouveler le contrat suivant :
+
+  - Contrat : ${contrat.nom}${contrat.numeroContrat ? `\n  - Référence : ${contrat.numeroContrat}` : ''}
+  - Prestataire : ${contrat.fournisseur}
+  - Nouvelle date de fin : ${dateFinFormatted}
+
+Nous vous remercions de bien vouloir nous confirmer votre accord pour le renouvellement aux mêmes conditions.
+
+Dans l'attente de votre retour, veuillez agréer nos salutations distinguées.
+
+Le syndic de copropriété`
+        );
+        setMode('email');
+    };
+
+    const handleRenouveler = () => {
         onRenouveler(contrat, nouvelleDateFin);
     };
 
@@ -114,15 +148,18 @@ export default function ContratDecisionModal({
                 aria-labelledby={titleId}
             >
                 {/* Header */}
-                <div className={clsx(styles.header, getNiveauClassName(niveau))}>
+                <div className={clsx(styles.header, isExpired ? getNiveauClassName(niveau) : styles.relance)}>
                     <div className={styles.headerContent}>
-                        <AlertTriangle size={24} aria-hidden="true" />
+                        {isExpired ? <AlertTriangle size={24} aria-hidden="true" /> : <RefreshCw size={24} aria-hidden="true" />}
                         <div>
                             <h2 id={titleId} className={styles.title}>
-                                Décision requise : Contrat expiré
+                                {isExpired ? 'Décision requise : Contrat expiré' : 'Renouvellement de contrat'}
                             </h2>
                             <p className={styles.subtitle}>
-                                Niveau d&apos;alerte : <strong>{getNiveauLabel(niveau)}</strong> (J+{joursDepasses})
+                                {isExpired
+                                    ? <>Niveau d&apos;alerte : <strong>{getNiveauLabel(niveau)}</strong> (J+{joursDepasses})</>
+                                    : <>Échéance dans <strong>{joursAbs} jours</strong> — {new Date(contrat.dateFin).toLocaleDateString('fr-FR')}</>
+                                }
                             </p>
                         </div>
                     </div>
@@ -141,8 +178,17 @@ export default function ContratDecisionModal({
                         </div>
                     </div>
                     <div className={styles.contratMeta}>
-                        <span><Calendar size={14} /> Expiré le {new Date(contrat.dateFin).toLocaleDateString('fr-FR')}</span>
-                        <span><Clock size={14} /> Il y a {joursDepasses} jours</span>
+                        <span>
+                            <Calendar size={14} />
+                            {isExpired
+                                ? `Expiré le ${new Date(contrat.dateFin).toLocaleDateString('fr-FR')}`
+                                : `Échéance le ${new Date(contrat.dateFin).toLocaleDateString('fr-FR')}`
+                            }
+                        </span>
+                        <span>
+                            <Clock size={14} />
+                            {isExpired ? `Il y a ${joursDepasses} jours` : `Dans ${joursAbs} jours`}
+                        </span>
                     </div>
                 </div>
 
@@ -150,8 +196,11 @@ export default function ContratDecisionModal({
                 {mode === 'choix' && (
                     <div className={styles.choixContainer}>
                         <p className={styles.choixIntro}>
-                            Ce contrat est expiré depuis <strong>{joursDepasses} jours</strong>.
-                            Quelle action souhaitez-vous effectuer ?
+                            {isExpired
+                                ? <>Ce contrat est expiré depuis <strong>{joursDepasses} jours</strong>.</>
+                                : <>Ce contrat arrive à échéance dans <strong>{joursAbs} jours</strong>.</>
+                            }
+                            {' '}Quelle action souhaitez-vous effectuer ?
                         </p>
 
                         <div className={styles.actionsGrid}>
@@ -187,8 +236,8 @@ export default function ContratDecisionModal({
                             </button>
                         </div>
 
-                        {/* Actions suggérées selon le niveau */}
-                        {niveau !== 'standard' && (
+                        {/* Actions suggérées selon le niveau (expirés uniquement) */}
+                        {isExpired && niveau !== 'standard' && (
                             <div className={styles.suggestionBox}>
                                 <h4><AlertTriangle size={16} /> Actions recommandées :</h4>
                                 <ul>
@@ -241,8 +290,78 @@ export default function ContratDecisionModal({
                             <button className="btn btn-secondary" onClick={() => setMode('choix')}>
                                 Annuler
                             </button>
-                            <button className="btn btn-primary" onClick={handleRenouveler}>
-                                <CheckCircle size={16} /> Confirmer le renouvellement
+                            <button className="btn btn-primary" onClick={prepareEmail}>
+                                <ArrowRight size={16} /> Suivant — Notifier le prestataire
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {mode === 'email' && (
+                    <div className={styles.formContainer}>
+                        <button className={styles.backBtn} onClick={() => setMode('renouveler')}>
+                            ← Retour
+                        </button>
+
+                        <h3 className={styles.formTitle}>
+                            <Mail size={20} /> Notification au prestataire
+                        </h3>
+
+                        <div className={styles.formGroup}>
+                            <label htmlFor="emailDestinataire">Destinataire *</label>
+                            <input
+                                type="email"
+                                id="emailDestinataire"
+                                value={emailDestinataire}
+                                onChange={e => setEmailDestinataire(e.target.value)}
+                                placeholder="email@prestataire.fr"
+                                className={styles.input}
+                            />
+                            {!prestataireEmail && (
+                                <p className={styles.hint}>
+                                    <AlertTriangle size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                                    Aucun email enregistré pour ce prestataire — saisissez l&apos;adresse manuellement
+                                </p>
+                            )}
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label htmlFor="emailObjet">Objet</label>
+                            <input
+                                type="text"
+                                id="emailObjet"
+                                value={emailObjet}
+                                onChange={e => setEmailObjet(e.target.value)}
+                                className={styles.input}
+                            />
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label htmlFor="emailCorps">Message</label>
+                            <textarea
+                                id="emailCorps"
+                                value={emailCorps}
+                                onChange={e => setEmailCorps(e.target.value)}
+                                className={styles.textarea}
+                                rows={10}
+                            />
+                        </div>
+
+                        <div className={styles.formActions}>
+                            <button className="btn btn-secondary" onClick={handleRenouveler}>
+                                Confirmer sans envoyer
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => {
+                                    // Ouvrir le client mail avec le contenu pré-rempli
+                                    const mailtoUrl = `mailto:${encodeURIComponent(emailDestinataire)}?subject=${encodeURIComponent(emailObjet)}&body=${encodeURIComponent(emailCorps)}`;
+                                    window.open(mailtoUrl, '_blank');
+                                    handleRenouveler();
+                                }}
+                                disabled={!emailDestinataire}
+                            >
+                                <Send size={16} /> Envoyer et confirmer
                             </button>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
 import { generatePdfDownload } from '@/lib/utils/service-order';
@@ -72,6 +72,53 @@ export function useServiceOrdersListPage() {
     cancelOrder,
   } = useServiceOrders();
 
+  // Fusionner les ordres localStorage (fallback hors-ligne) avec Supabase
+  const [localOrders, setLocalOrders] = useState<ServiceOrderOverview[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('newOrdresService');
+      if (!stored) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parsed: any[] = JSON.parse(stored);
+      const adapted: ServiceOrderOverview[] = parsed.map(os => ({
+        id: os.id,
+        copro_id: null,
+        order_number: os.numero || `OS-${os.id?.slice(-6)?.toUpperCase()}`,
+        subject: os.titre,
+        description: os.description || null,
+        status: (os.statut === 'ENVOYE' ? 'sent' : 'draft') as ServiceOrderStatus,
+        urgency: os.priorite === 'URGENT' ? 'urgent' : 'normal',
+        order_type: os.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
+        origin: 'manual',
+        provider_id: os.fournisseurId || null,
+        provider_name: os.fournisseurNom || null,
+        provider_email: os.fournisseurEmail || null,
+        provider_phone: os.fournisseurTelephone || null,
+        contract_id: os.contratId || null,
+        estimated_amount: os.montantEstime || 0,
+        quoted_amount: null,
+        actual_amount: null,
+        is_art18_emergency: false,
+        planned_intervention_date: os.dateIntervention || null,
+        sent_at: os.dateEnvoi || null,
+        accepted_at: null,
+        closed_at: null,
+        created_at: os.dateCreation || os.date,
+        building_name: null,
+        lot_ref: null,
+        events_count: 0,
+        documents_count: 0,
+      } as unknown as ServiceOrderOverview));
+      // Ne garder que ceux non présents dans Supabase
+      const supabaseIds = new Set(orders.map(o => o.id));
+      setLocalOrders(adapted.filter(o => !supabaseIds.has(o.id)));
+    } catch { setLocalOrders([]); }
+  }, [orders]);
+
+  // Tous les ordres = Supabase + localStorage
+  const allOrders = useMemo(() => [...orders, ...localOrders], [orders, localOrders]);
+
   // Local filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [statutFilter, setStatutFilter] = useState<ServiceOrderStatus | 'TOUS'>('TOUS');
@@ -81,7 +128,7 @@ export function useServiceOrdersListPage() {
 
   // Filter orders locally (client-side for instant feedback)
   const filteredOS = useMemo(() => {
-    return orders.filter((os) => {
+    return allOrders.filter((os) => {
       const matchesSearch =
         (os.subject ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (os.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,7 +141,7 @@ export function useServiceOrdersListPage() {
 
       return matchesSearch && matchesStatut && matchesType && matchesFournisseur;
     });
-  }, [orders, searchTerm, statutFilter, typeFilter, fournisseurFilter]);
+  }, [allOrders, searchTerm, statutFilter, typeFilter, fournisseurFilter]);
 
   // Sort by date descending
   const sortedOS = useMemo(() => {
@@ -110,18 +157,18 @@ export function useServiceOrdersListPage() {
 
   // Stats - use Supabase stats
   const stats = useMemo(() => ({
-    total: supabaseStats.total,
-    brouillons: supabaseStats.drafts,
+    total: supabaseStats.total + localOrders.length,
+    brouillons: supabaseStats.drafts + localOrders.filter(o => o.status === 'draft').length,
     enAttentePrestataire: supabaseStats.pending,
-    interventionProgrammee: orders.filter(os => os.status === 'scheduled').length,
-    interventionRealisee: orders.filter(os => os.status === 'completed').length,
-    clotures: orders.filter(os => os.status === 'closed' || os.status === 'cancelled').length,
-  }), [supabaseStats, orders]);
+    interventionProgrammee: allOrders.filter(os => os.status === 'scheduled').length,
+    interventionRealisee: allOrders.filter(os => os.status === 'completed').length,
+    clotures: allOrders.filter(os => os.status === 'closed' || os.status === 'cancelled').length,
+  }), [supabaseStats, allOrders]);
 
   // Get unique providers for filter dropdown
   const fournisseurs = useMemo(() => {
     const uniqueProviders = new Map<string, { id: string; nom: string }>();
-    orders.forEach(os => {
+    allOrders.forEach(os => {
       const providerId = os.provider_id ?? '';
       const providerName = os.provider_name ?? '';
       if (providerId && !uniqueProviders.has(providerId)) {
@@ -129,7 +176,7 @@ export function useServiceOrdersListPage() {
       }
     });
     return Array.from(uniqueProviders.values());
-  }, [orders]);
+  }, [allOrders]);
 
   const handleClearFilters = useCallback(() => {
     setSearchTerm('');
@@ -150,19 +197,19 @@ export function useServiceOrdersListPage() {
   }, [cancelOrder]);
 
   const handleViewPdf = useCallback((osId: string) => {
-    const os = orders.find(o => o.id === osId);
+    const os = allOrders.find(o => o.id === osId);
     if (os) {
       const legacyOs = adaptToLegacyFormat(os);
       generatePdfDownload(legacyOs as never);
     }
-  }, [orders]);
+  }, [allOrders]);
 
   const handleEmailPreview = useCallback((osId: string) => {
-    const os = orders.find(o => o.id === osId);
+    const os = allOrders.find(o => o.id === osId);
     if (os) {
       setEmailPreviewOS(os);
     }
-  }, [orders]);
+  }, [allOrders]);
 
   const handleEmailSend = useCallback(async () => {
     if (!emailPreviewOS || !emailPreviewOS.id) return;

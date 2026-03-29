@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prestataires — V2 Card Grid</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: Inter, system-ui, sans-serif; padding: 24px; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; background: #161822; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px 24px; margin-bottom: 16px; }
+  .topbar h1 { font-size: 20px; font-weight: 700; }
+  .topbar p { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08); background: rgba(148,163,184,0.06); color: #94a3b8; font-size: 13px; cursor: pointer; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .kpi-strip { display: flex; gap: 12px; margin-bottom: 16px; }
+  .kpi-card { flex: 1; padding: 16px 20px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; }
+  .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .filters { display: flex; gap: 8px; margin-bottom: 20px; align-items: center; }
+  .search-box { flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; }
+  .search-box input { flex: 1; border: none; background: transparent; color: #e2e8f0; outline: none; font-size: 13px; font-family: inherit; }
+  .filter-btn { padding: 8px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; color: #94a3b8; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .filter-btn.active { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.4); color: #3b82f6; font-weight: 600; }
+  .view-toggle { display: flex; gap: 0; background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 3px; }
+  .view-btn { padding: 6px 12px; border: none; background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer; border-radius: 6px; font-family: inherit; }
+  .view-btn.active { background: #1a1d2e; color: #e2e8f0; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .provider-card { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 20px; border-left: 3px solid transparent; transition: all 0.2s; cursor: pointer; }
+  .provider-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-1px); }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .avatar { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
+  .card-name { font-size: 15px; font-weight: 700; color: #e2e8f0; }
+  .card-contact { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+  .domain-tag { display: inline-flex; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+  .card-stats { display: flex; gap: 16px; padding-top: 12px; border-top: 1px solid rgba(148,163,184,0.06); margin-bottom: 14px; }
+  .card-stat { text-align: center; flex: 1; }
+  .card-stat-value { font-size: 16px; font-weight: 700; }
+  .card-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 2px; }
+  .card-actions { display: flex; gap: 6px; }
+  .card-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 7px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .card-btn-ghost { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; }
+  .card-btn-primary { background: #3b82f6; border: none; color: white; font-weight: 600; }
+  .card-btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .add-card { background: transparent; border: 2px dashed rgba(148,163,184,0.12); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; cursor: pointer; transition: all 0.2s; min-height: 220px; }
+  .add-card:hover { border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.04); }
+  .add-icon { width: 48px; height: 48px; border-radius: 50%; background: rgba(59,130,246,0.1); display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 24px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div>
+      <h1>Annuaire prestataires</h1>
+      <p>Coordonnées et suivi des professionnels</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-ghost">↓ Exporter</button>
+      <button class="btn-primary">+ Prestataire</button>
+    </div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-card"><div class="kpi-label">TOTAL</div><div class="kpi-value">12</div></div>
+    <div class="kpi-card"><div class="kpi-label">ACTIFS</div><div class="kpi-value" style="color:#22c55e">9</div></div>
+    <div class="kpi-card"><div class="kpi-label">INTERVENTIONS</div><div class="kpi-value">47</div></div>
+    <div class="kpi-card"><div class="kpi-label">NOTE MOYENNE</div><div class="kpi-value" style="color:#fbbf24">4.2 ★</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="search-box">🔍 <input placeholder="Rechercher par nom, domaine..."></div>
+    <button class="filter-btn active">Tous (12)</button>
+    <button class="filter-btn">Copropriété</button>
+    <button class="filter-btn">Syndic</button>
+    <div class="view-toggle">
+      <button class="view-btn active">Cartes</button>
+      <button class="view-btn">Tableau</button>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <!-- Card 1 -->
+    <div class="provider-card" style="border-left-color:#5b8def">
+      <div class="card-header">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8);border-radius:10px">SC</div>
+        <div style="flex:1">
+          <div class="card-name">Schindler Ascenseurs</div>
+          <div class="card-contact">Marc Dupont · 04 78 12 34 56</div>
+        </div>
+        <div class="status-dot" style="background:#22c55e"></div>
+      </div>
+      <div class="card-tags">
+        <span class="domain-tag" style="background:rgba(91,141,239,0.12);color:#5b8def">Ascenseur</span>
+      </div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-value" style="color:#60a5fa">8</div><div class="card-stat-label">Interventions</div></div>
+        <div class="card-stat"><div class="card-stat-value" style="color:#fbbf24">4.5 ★</div><div class="card-stat-label">Note</div></div>
+        <div class="card-stat"><div class="card-stat-value">2</div><div class="card-stat-label">Contrats</div></div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn card-btn-ghost">📞</button>
+        <button class="card-btn card-btn-ghost">✉</button>
+        <button class="card-btn card-btn-primary">Fiche</button>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="provider-card" style="border-left-color:#3ecf8e">
+      <div class="card-header">
+        <div class="avatar" style="background:linear-gradient(135deg,#3ecf8e,#2db87a);border-radius:10px">NP</div>
+        <div style="flex:1">
+          <div class="card-name">NettoyePro Services</div>
+          <div class="card-contact">Sophie Martin · 04 72 98 76 54</div>
+        </div>
+        <div class="status-dot" style="background:#22c55e"></div>
+      </div>
+      <div class="card-tags">
+        <span class="domain-tag" style="background:rgba(62,207,142,0.12);color:#3ecf8e">Ménage</span>
+      </div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-value" style="color:#60a5fa">12</div><div class="card-stat-label">Interventions</div></div>
+        <div class="card-stat"><div class="card-stat-value" style="color:#fbbf24">4.2 ★</div><div class="card-stat-label">Note</div></div>
+        <div class="card-stat"><div class="card-stat-value">1</div><div class="card-stat-label">Contrats</div></div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn card-btn-ghost">📞</button>
+        <button class="card-btn card-btn-ghost">✉</button>
+        <button class="card-btn card-btn-primary">Fiche</button>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="provider-card" style="border-left-color:#e5a63e">
+      <div class="card-header">
+        <div class="avatar" style="background:linear-gradient(135deg,#e5a63e,#d49530);border-radius:10px">CP</div>
+        <div style="flex:1">
+          <div class="card-name">ChauffagePro Rhône</div>
+          <div class="card-contact">Jean Petit · 04 78 45 67 89</div>
+        </div>
+        <div class="status-dot" style="background:#22c55e"></div>
+      </div>
+      <div class="card-tags">
+        <span class="domain-tag" style="background:rgba(229,166,62,0.12);color:#e5a63e">Chauffage</span>
+      </div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-value" style="color:#60a5fa">5</div><div class="card-stat-label">Interventions</div></div>
+        <div class="card-stat"><div class="card-stat-value" style="color:#fbbf24">3.8 ★</div><div class="card-stat-label">Note</div></div>
+        <div class="card-stat"><div class="card-stat-value">1</div><div class="card-stat-label">Contrats</div></div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn card-btn-ghost">📞</button>
+        <button class="card-btn card-btn-ghost">✉</button>
+        <button class="card-btn card-btn-primary">Fiche</button>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="provider-card" style="border-left-color:#34D399">
+      <div class="card-header">
+        <div class="avatar" style="background:linear-gradient(135deg,#34D399,#28b886);border-radius:10px">VJ</div>
+        <div style="flex:1">
+          <div class="card-name">VertJardin</div>
+          <div class="card-contact">Luc Verdier · 06 12 34 56 78</div>
+        </div>
+        <div class="status-dot" style="background:#f59e0b"></div>
+      </div>
+      <div class="card-tags">
+        <span class="domain-tag" style="background:rgba(52,211,153,0.12);color:#34D399">Espaces verts</span>
+      </div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-value" style="color:#60a5fa">3</div><div class="card-stat-label">Interventions</div></div>
+        <div class="card-stat"><div class="card-stat-value" style="color:#fbbf24">4.0 ★</div><div class="card-stat-label">Note</div></div>
+        <div class="card-stat"><div class="card-stat-value">1</div><div class="card-stat-label">Contrats</div></div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn card-btn-ghost">📞</button>
+        <button class="card-btn card-btn-ghost">✉</button>
+        <button class="card-btn card-btn-primary">Fiche</button>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="provider-card" style="border-left-color:#FBBF24">
+      <div class="card-header">
+        <div class="avatar" style="background:linear-gradient(135deg,#FBBF24,#e5a912);border-radius:10px">EN</div>
+        <div style="flex:1">
+          <div class="card-name">Engie</div>
+          <div class="card-contact">Claire Bernard · 04 78 90 12 34</div>
+        </div>
+        <div class="status-dot" style="background:#22c55e"></div>
+      </div>
+      <div class="card-tags">
+        <span class="domain-tag" style="background:rgba(251,191,36,0.12);color:#FBBF24">Électricité</span>
+      </div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-value" style="color:#60a5fa">6</div><div class="card-stat-label">Interventions</div></div>
+        <div class="card-stat"><div class="card-stat-value" style="color:#fbbf24">4.3 ★</div><div class="card-stat-label">Note</div></div>
+        <div class="card-stat"><div class="card-stat-value">1</div><div class="card-stat-label">Contrats</div></div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn card-btn-ghost">📞</button>
+        <button class="card-btn card-btn-ghost">✉</button>
+        <button class="card-btn card-btn-primary">Fiche</button>
+      </div>
+    </div>
+
+    <!-- Add card -->
+    <div class="add-card">
+      <div class="add-icon">+</div>
+      <div style="font-size:14px;font-weight:600;color:#94a3b8">Ajouter un prestataire</div>
+    </div>
+  </div>
+
+  <p style="margin-top:32px;text-align:center;color:#475569;font-size:12px">V2 — Card Grid avec border-left colorée par domaine + stats inline</p>
+</body>
+</html>

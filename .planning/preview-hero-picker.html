@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Nouveau Hero (3 options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  .picker {
+    width: 420px; min-width: 420px; background: #131620;
+    border-right: 1px solid rgba(148,163,184,0.08);
+    padding: 24px; overflow-y: auto; max-height: 100vh;
+    position: sticky; top: 0;
+  }
+  .picker h1 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .picker .subtitle { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+
+  .pick-group { margin-bottom: 24px; }
+  .pick-group-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #3b82f6; margin-bottom: 10px; }
+
+  .pick-option {
+    padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08);
+    background: #1a1d2e; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .pick-option:hover { border-color: rgba(59,130,246,0.3); background: #252b3b; }
+  .pick-option.selected { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+  .pick-option.selected::after { content: '✓'; position: absolute; top: 10px; right: 12px; color: #3b82f6; font-weight: 700; font-size: 14px; }
+
+  .pick-option-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px; }
+  .pick-option-text { font-size: 13px; color: #e2e8f0; line-height: 1.5; }
+
+  .copy-bar { position: sticky; bottom: 0; background: #131620; border-top: 1px solid rgba(148,163,184,0.08); padding: 16px 24px; margin: 0 -24px; }
+  .copy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { background: #2563eb; transform: translateY(-1px); }
+  .copy-btn.copied { background: #22c55e; }
+
+  .preview-wrap { flex: 1; overflow-y: auto; }
+
+  /* ─── HERO SECTION ─── */
+  .hero-section {
+    background: #f5f3ee;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a1a1a;
+  }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: #666; text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: #1a1a1a; }
+  .nav-links a.active { color: #1a1a1a; font-weight: 600; }
+  .nav-cta {
+    padding: 8px 20px; border-radius: 99px; border: 1px solid rgba(0,0,0,0.12);
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(12px);
+    font-size: 14px; font-weight: 500; color: #1a1a1a; cursor: pointer;
+  }
+
+  /* Hero content */
+  .hero-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px 0;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 16px; border-radius: 99px;
+    background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15);
+    font-size: 13px; font-weight: 500; color: #3b82f6;
+    margin-bottom: 24px;
+  }
+  .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .hero-title em {
+    font-style: italic;
+    font-family: 'Instrument Serif', serif;
+    color: #475569;
+    font-weight: 400;
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: #666;
+    line-height: 1.6;
+    max-width: 620px;
+    margin: 0 auto 32px;
+  }
+
+  .hero-cta {
+    display: inline-flex; padding: 14px 32px; border-radius: 99px;
+    background: #3b82f6; color: white; border: none;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  }
+  .hero-cta:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.35); }
+
+  .hero-social {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 20px; font-size: 14px; color: #666;
+  }
+  .hero-stars { color: #f59e0b; font-size: 16px; letter-spacing: 2px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin: 48px auto 40px; background: rgba(226,223,216,0.45);
+    border: 1px solid rgba(226,223,216,0.6); border-radius: 28px;
+    padding: 6px 8px; max-width: fit-content;
+  }
+  .tab {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 20px; font-size: 14px;
+    cursor: pointer; color: #666; background: transparent;
+    border: 1px solid transparent; transition: all 0.2s;
+  }
+  .tab:hover { color: #1a1a1a; }
+  .tab.active { color: #3b82f6; font-weight: 600; background: white; border-color: rgba(226,223,216,0.6); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .tab-icon { width: 16px; height: 16px; }
+
+  .arrow-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid rgba(226,223,216,0.6); background: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #666; flex-shrink: 0;
+  }
+
+  /* Screenshot frame */
+  .screenshot-frame {
+    max-width: 960px; margin: 0 auto; border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    overflow: hidden; height: 520px; background: #131620;
+    position: relative;
+  }
+  .frame-placeholder {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #64748b; font-size: 14px; gap: 8px;
+  }
+  .frame-placeholder-icon { font-size: 32px; opacity: 0.5; }
+
+  /* Demo inside frame */
+  .demo-sidebar {
+    position: absolute; top: 0; left: 0; width: 220px; height: 100%;
+    background: #0f1117; border-right: 1px solid rgba(148,163,184,0.06);
+    padding: 16px;
+  }
+  .demo-sidebar-logo { color: #e2e8f0; font-size: 15px; font-weight: 700; margin-bottom: 20px; }
+  .demo-sidebar-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border-radius: 6px; font-size: 12px; color: #64748b; margin-bottom: 2px;
+  }
+  .demo-sidebar-item.active { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .demo-sidebar-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+
+  .demo-main {
+    position: absolute; top: 0; left: 220px; right: 0; height: 100%;
+    padding: 20px; overflow: hidden;
+  }
+  .demo-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .demo-topbar-title { color: #e2e8f0; font-size: 18px; font-weight: 700; }
+  .demo-topbar-actions { display: flex; gap: 8px; }
+  .demo-topbar-btn {
+    padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 500;
+    border: 1px solid rgba(148,163,184,0.08); background: #1a1d2e; color: #94a3b8;
+  }
+  .demo-topbar-btn.primary { background: #3b82f6; color: white; border-color: transparent; }
+
+  .demo-kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .demo-kpi {
+    background: #1a1d2e; border-radius: 8px; padding: 12px;
+    border: 1px solid rgba(148,163,184,0.06);
+  }
+  .demo-kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px; }
+  .demo-kpi-value { font-size: 18px; font-weight: 700; color: #e2e8f0; font-family: 'SF Mono', monospace; }
+  .demo-kpi-value.green { color: #22c55e; }
+  .demo-kpi-value.red { color: #ef4444; }
+  .demo-kpi-value.blue { color: #3b82f6; }
+
+  .demo-table { width: 100%; }
+  .demo-table-header {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    padding: 8px 12px; font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #64748b; background: rgba(148,163,184,0.04);
+    border-radius: 6px; margin-bottom: 4px;
+  }
+  .demo-table-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    padding: 10px 12px; font-size: 12px; color: #e2e8f0;
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+    align-items: center;
+  }
+  .demo-badge-sm {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 500;
+  }
+  .demo-badge-sm.green { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .demo-badge-sm.orange { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .demo-badge-sm.red { background: rgba(239,68,68,0.1); color: #f87171; }
+  .demo-badge-sm.blue { background: rgba(59,130,246,0.1); color: #60a5fa; }
+
+  @keyframes flash { 0% { outline: 2px solid #3b82f6; outline-offset: 2px; } 100% { outline: 2px solid transparent; outline-offset: 2px; } }
+  .flash { animation: flash 0.6s ease-out; }
+
+  /* Separator between options */
+  .option-sep {
+    height: 3px;
+    background: repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 8px, transparent 8px, transparent 16px);
+    max-width: 200px;
+    margin: 0 auto;
+    opacity: 0.3;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="picker">
+    <h1>Nouveau Hero</h1>
+    <p class="subtitle">Clique sur tes choix — la preview se met à jour en direct.</p>
+
+    <!-- BADGE -->
+    <div class="pick-group">
+      <div class="pick-group-label">Badge (au-dessus du titre)</div>
+      <div class="pick-option selected" data-target="badge" data-value="La gestion de copropriété nouvelle génération">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">La gestion de copropriété nouvelle génération</div>
+      </div>
+      <div class="pick-option" data-target="badge" data-value="Syndics professionnels & bénévoles — même plateforme">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Syndics professionnels & bénévoles — même plateforme</div>
+      </div>
+      <div class="pick-option" data-target="badge" data-value="Déjà adopté par 150+ copropriétés en France">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Déjà adopté par 150+ copropriétés en France</div>
+      </div>
+    </div>
+
+    <!-- TITRE -->
+    <div class="pick-group">
+      <div class="pick-group-label">Titre</div>
+      <div class="pick-option selected" data-target="title" data-value="Le logiciel de copropriété que les gestionnaires <em>adorent utiliser</em>">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Le logiciel de copropriété que les gestionnaires <em>adorent utiliser</em></div>
+      </div>
+      <div class="pick-option" data-target="title" data-value="Gérez votre copropriété <em>sans y penser</em>">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Gérez votre copropriété <em>sans y penser</em></div>
+      </div>
+      <div class="pick-option" data-target="title" data-value="Où la gestion de copropriété devient <em>une évidence</em>">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Où la gestion de copropriété devient <em>une évidence</em></div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="pick-group">
+      <div class="pick-group-label">Description</div>
+      <div class="pick-option selected" data-target="desc" data-value="CoProFlex est la plateforme tout-en-un qui simplifie les AG, la comptabilité, la maintenance et les documents pour les syndics et les copropriétaires.">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">CoProFlex est la plateforme tout-en-un qui simplifie les AG, la comptabilité, la maintenance et les documents pour les syndics et les copropriétaires.</div>
+      </div>
+      <div class="pick-option" data-target="desc" data-value="AG en quelques clics, finances en temps réel, documents centralisés — une seule plateforme pour le gestionnaire et les copropriétaires. Fini les appels, les mails perdus et les ressaisies.">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">AG en quelques clics, finances en temps réel, documents centralisés — une seule plateforme pour le gestionnaire et les copropriétaires. Fini les appels, les mails perdus et les ressaisies.</div>
+      </div>
+      <div class="pick-option" data-target="desc" data-value="Nous concevons l'outil qui simplifie la copropriété pour les syndics exigeants, les gestionnaires débordés et les copropriétaires impliqués.">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Nous concevons l'outil qui simplifie la copropriété pour les syndics exigeants, les gestionnaires débordés et les copropriétaires impliqués.</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="pick-group">
+      <div class="pick-group-label">Bouton CTA</div>
+      <div class="pick-option selected" data-target="cta" data-value="Demander une démo gratuite">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">Demander une démo gratuite</div>
+      </div>
+      <div class="pick-option" data-target="cta" data-value="Découvrir CoProFlex">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Découvrir CoProFlex</div>
+      </div>
+      <div class="pick-option" data-target="cta" data-value="Essayer gratuitement">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">Essayer gratuitement</div>
+      </div>
+    </div>
+
+    <!-- SOCIAL PROOF -->
+    <div class="pick-group">
+      <div class="pick-group-label">Social proof</div>
+      <div class="pick-option selected" data-target="social" data-value="★★★★★ <strong>4.9/5</strong> sur 200+ avis de gestionnaires">
+        <div class="pick-option-tag">Option A</div>
+        <div class="pick-option-text">★★★★★ 4.9/5 sur 200+ avis de gestionnaires</div>
+      </div>
+      <div class="pick-option" data-target="social" data-value="Utilisé par <strong>150+ copropriétés</strong> en France">
+        <div class="pick-option-tag">Option B</div>
+        <div class="pick-option-text">Utilisé par 150+ copropriétés en France</div>
+      </div>
+      <div class="pick-option" data-target="social" data-value="<strong>30% de temps gagné</strong> en moyenne par nos gestionnaires">
+        <div class="pick-option-tag">Option C</div>
+        <div class="pick-option-text">30% de temps gagné en moyenne par nos gestionnaires</div>
+      </div>
+    </div>
+
+    <div class="copy-bar">
+      <button class="copy-btn" id="copyBtn">Copier la sélection</button>
+    </div>
+  </div>
+
+  <!-- ─── LIVE PREVIEW ─── -->
+  <div class="preview-wrap">
+
+    <div class="hero-section">
+      <!-- Nav -->
+      <nav class="nav">
+        <div class="logo">CoProFlex</div>
+        <div class="nav-links">
+          <a href="#" class="active">Home</a>
+          <a href="#">Copropriétés</a>
+          <a href="#">Fonctionnalités</a>
+          <a href="#">Tarifs</a>
+          <a href="#">Contact</a>
+        </div>
+        <button class="nav-cta">Commencer</button>
+      </nav>
+
+      <!-- Hero Content -->
+      <div class="hero-content">
+        <div class="hero-badge" id="preview-badge">
+          <span class="hero-badge-dot"></span>
+          La gestion de copropriété nouvelle génération
+        </div>
+
+        <h1 class="hero-title" id="preview-title">Le logiciel de copropriété que les gestionnaires <em>adorent utiliser</em></h1>
+
+        <p class="hero-desc" id="preview-desc">CoProFlex est la plateforme tout-en-un qui simplifie les AG, la comptabilité, la maintenance et les documents pour les syndics et les copropriétaires.</p>
+
+        <button class="hero-cta" id="preview-cta">Demander une démo gratuite</button>
+
+        <div class="hero-social" id="preview-social">
+          <span>★★★★★</span>
+          <span><strong>4.9/5</strong> sur 200+ avis de gestionnaires</span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="arrow-btn">‹</button>
+        <button class="tab active"><span>📊</span> Dashboard</button>
+        <button class="tab"><span>🗳</span> AG</button>
+        <button class="tab"><span>💰</span> Finance</button>
+        <button class="tab"><span>🔧</span> Maintenance</button>
+        <button class="tab"><span>📁</span> Documents</button>
+        <button class="tab"><span>💬</span> Communication</button>
+        <button class="arrow-btn">›</button>
+      </div>
+
+      <!-- Screenshot Frame with fake demo -->
+      <div class="screenshot-frame">
+        <div class="demo-sidebar">
+          <div class="demo-sidebar-logo">CoProFlex</div>
+          <div class="demo-sidebar-item active"><span class="demo-sidebar-dot"></span> Dashboard</div>
+          <div class="demo-sidebar-item"><span class="demo-sidebar-dot"></span> Assemblées</div>
+          <div class="demo-sidebar-item"><span class="demo-sidebar-dot"></span> Finance</div>
+          <div class="demo-sidebar-item"><span class="demo-sidebar-dot"></span> Maintenance</div>
+          <div class="demo-sidebar-item"><span class="demo-sidebar-dot"></span> Documents</div>
+          <div class="demo-sidebar-item"><span class="demo-sidebar-dot"></span> Copropriétaires</div>
+          <div class="demo-sidebar-item"><span class="demo-sidebar-dot"></span> Communication</div>
+        </div>
+        <div class="demo-main">
+          <div class="demo-topbar">
+            <div class="demo-topbar-title">Dashboard</div>
+            <div class="demo-topbar-actions">
+              <button class="demo-topbar-btn">Exporter</button>
+              <button class="demo-topbar-btn primary">+ Nouvelle action</button>
+            </div>
+          </div>
+          <div class="demo-kpi-strip">
+            <div class="demo-kpi"><div class="demo-kpi-label">Solde global</div><div class="demo-kpi-value green">183 200 €</div></div>
+            <div class="demo-kpi"><div class="demo-kpi-label">Impayés</div><div class="demo-kpi-value red">4 280 €</div></div>
+            <div class="demo-kpi"><div class="demo-kpi-label">Prochaine AG</div><div class="demo-kpi-value">15 avril</div></div>
+            <div class="demo-kpi"><div class="demo-kpi-label">Interventions</div><div class="demo-kpi-value blue">3 en cours</div></div>
+          </div>
+          <div class="demo-table">
+            <div class="demo-table-header">
+              <span>Copropriété</span><span>Lots</span><span>Solde</span><span>Impayés</span><span>Statut</span>
+            </div>
+            <div class="demo-table-row">
+              <span>Résidence Les Tilleuls</span><span>48</span><span style="color:#22c55e">86 400 €</span><span style="color:#ef4444">1 200 €</span><span class="demo-badge-sm green">À jour</span>
+            </div>
+            <div class="demo-table-row">
+              <span>Le Clos des Vignes</span><span>32</span><span style="color:#22c55e">54 800 €</span><span style="color:#f59e0b">2 340 €</span><span class="demo-badge-sm orange">Relance</span>
+            </div>
+            <div class="demo-table-row">
+              <span>Haussmann Étoile</span><span>24</span><span style="color:#22c55e">42 000 €</span><span style="color:#ef4444">740 €</span><span class="demo-badge-sm green">À jour</span>
+            </div>
+            <div class="demo-table-row">
+              <span>Villa Montmartre</span><span>16</span><span style="color:#22c55e">28 600 €</span><span>0 €</span><span class="demo-badge-sm blue">AG prévue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const targets = {
+    badge: document.getElementById('preview-badge'),
+    title: document.getElementById('preview-title'),
+    desc: document.getElementById('preview-desc'),
+    cta: document.getElementById('preview-cta'),
+    social: document.getElementById('preview-social'),
+  };
+
+  document.querySelectorAll('.pick-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const target = opt.dataset.target;
+      opt.parentElement.querySelectorAll('.pick-option').forEach(s => s.classList.remove('selected'));
+      opt.classList.add('selected');
+
+      const el = targets[target];
+      if (!el) return;
+
+      if (target === 'badge') {
+        el.innerHTML = '<span class="hero-badge-dot"></span> ' + opt.dataset.value;
+      } else if (target === 'title') {
+        el.innerHTML = opt.dataset.value;
+      } else if (target === 'desc') {
+        el.textContent = opt.dataset.value;
+      } else if (target === 'cta') {
+        el.textContent = opt.dataset.value;
+      } else if (target === 'social') {
+        el.innerHTML = opt.dataset.value;
+      }
+
+      el.classList.remove('flash');
+      void el.offsetWidth;
+      el.classList.add('flash');
+    });
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const selections = {};
+    document.querySelectorAll('.pick-option.selected').forEach(opt => {
+      const target = opt.dataset.target;
+      const tag = opt.querySelector('.pick-option-tag').textContent;
+      selections[target] = tag + ': ' + opt.querySelector('.pick-option-text').textContent;
+    });
+
+    const text = `HERO SECTION — Sélection
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Badge: ${selections.badge || ''}
+Titre: ${selections.title || ''}
+Description: ${selections.desc || ''}
+CTA: ${selections.cta || ''}
+Social proof: ${selections.social || ''}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copié !';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copier la sélection'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+</script>
+
+</body>
+</html>

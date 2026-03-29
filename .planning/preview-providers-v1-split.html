@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prestataires — V1 Split Master-Detail</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: Inter, system-ui, sans-serif; padding: 24px; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; background: #161822; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px 24px; margin-bottom: 16px; }
+  .topbar h1 { font-size: 20px; font-weight: 700; }
+  .topbar p { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08); background: rgba(148,163,184,0.06); color: #94a3b8; font-size: 13px; cursor: pointer; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  .kpi-strip { display: flex; gap: 12px; margin-bottom: 16px; }
+  .kpi-card { flex: 1; padding: 16px 20px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; }
+  .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .filters { display: flex; gap: 8px; margin-bottom: 16px; }
+  .search-box { flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; color: #64748b; font-size: 13px; }
+  .search-box input { flex: 1; border: none; background: transparent; color: #e2e8f0; outline: none; font-size: 13px; font-family: inherit; }
+  .filter-btn { padding: 8px 14px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; color: #94a3b8; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .filter-btn.active { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.4); color: #3b82f6; font-weight: 600; }
+
+  .split { display: grid; grid-template-columns: 340px 1fr; gap: 16px; }
+  .list-panel { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 8px; max-height: 520px; overflow-y: auto; }
+  .list-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+  .list-item:hover { background: rgba(148,163,184,0.03); }
+  .list-item.active { border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.08); }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+  .list-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .domain-tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .rating { color: #fbbf24; font-size: 11px; margin-left: 8px; }
+
+  .detail-panel { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 24px; }
+  .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .detail-name { font-size: 20px; font-weight: 700; }
+  .detail-domain { font-size: 13px; color: #64748b; margin-top: 4px; }
+  .status-badge { display: inline-flex; padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; }
+
+  /* Tabs in detail */
+  .detail-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .detail-tab { padding: 10px 16px; font-size: 13px; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; font-family: inherit; background: none; border-top: none; border-left: none; border-right: none; }
+  .detail-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: #131620; border: 1px solid rgba(148,163,184,0.06); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-value { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 4px; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .info-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 4px; font-weight: 600; }
+  .info-value { font-size: 14px; color: #e2e8f0; font-weight: 500; }
+  .info-value.blue { color: #60a5fa; }
+
+  .actions { display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div>
+      <h1>Annuaire prestataires</h1>
+      <p>Coordonnées et suivi des professionnels</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost">↓ Exporter</button>
+      <button class="btn-primary">+ Prestataire</button>
+    </div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-card"><div class="kpi-label">TOTAL</div><div class="kpi-value">12</div></div>
+    <div class="kpi-card"><div class="kpi-label">ACTIFS</div><div class="kpi-value" style="color:#22c55e">9</div></div>
+    <div class="kpi-card"><div class="kpi-label">INTERVENTIONS</div><div class="kpi-value">47</div></div>
+    <div class="kpi-card"><div class="kpi-label">NOTE MOYENNE</div><div class="kpi-value" style="color:#fbbf24">4.2 ★</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="search-box">🔍 <input placeholder="Rechercher par nom, domaine..."></div>
+    <button class="filter-btn active">Tous (12)</button>
+    <button class="filter-btn">Copropriété</button>
+    <button class="filter-btn">Syndic</button>
+    <button class="filter-btn">CoproFlex</button>
+  </div>
+
+  <div class="split">
+    <div class="list-panel">
+      <div class="list-item active">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#5b8defcc)">SC</div>
+        <div>
+          <div class="list-name">Schindler Ascenseurs</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+            <span class="domain-tag" style="background:rgba(91,141,239,0.12);color:#5b8def">Ascenseur</span>
+            <span class="rating">★ 4.5</span>
+          </div>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:linear-gradient(135deg,#3ecf8e,#3ecf8ecc)">NP</div>
+        <div>
+          <div class="list-name">NettoyePro Services</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+            <span class="domain-tag" style="background:rgba(62,207,142,0.12);color:#3ecf8e">Ménage</span>
+            <span class="rating">★ 4.2</span>
+          </div>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:linear-gradient(135deg,#e5a63e,#e5a63ecc)">CP</div>
+        <div>
+          <div class="list-name">ChauffagePro Rhône</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+            <span class="domain-tag" style="background:rgba(229,166,62,0.12);color:#e5a63e">Chauffage</span>
+            <span class="rating">★ 3.8</span>
+          </div>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:linear-gradient(135deg,#34D399,#34D399cc)">VJ</div>
+        <div>
+          <div class="list-name">VertJardin</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+            <span class="domain-tag" style="background:rgba(52,211,153,0.12);color:#34D399">Espaces verts</span>
+            <span class="rating">★ 4.0</span>
+          </div>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:linear-gradient(135deg,#FBBF24,#FBBF24cc)">EN</div>
+        <div>
+          <div class="list-name">Engie</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+            <span class="domain-tag" style="background:rgba(251,191,36,0.12);color:#FBBF24">Électricité</span>
+            <span class="rating">★ 4.3</span>
+          </div>
+        </div>
+      </div>
+      <div class="list-item">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#F87171cc)">AX</div>
+        <div>
+          <div class="list-name">AXA Assurances</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+            <span class="domain-tag" style="background:rgba(248,113,113,0.12);color:#F87171">Assurance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div>
+          <div class="detail-name">Schindler Ascenseurs</div>
+          <div class="detail-domain">Ascenseur</div>
+        </div>
+        <span class="status-badge" style="background:rgba(34,197,94,0.1);color:#4ade80">Actif</span>
+      </div>
+
+      <div class="detail-tabs">
+        <button class="detail-tab active">Informations</button>
+        <button class="detail-tab">Contrats (2)</button>
+        <button class="detail-tab">Interventions (8)</button>
+        <button class="detail-tab">Évaluations</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" style="color:#60a5fa">8</div>
+          <div class="stat-label">Interventions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:#fbbf24">4.5 ★</div>
+          <div class="stat-label">Note moyenne</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">2</div>
+          <div class="stat-label">Contrats</div>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div><div class="info-label">CONTACT</div><div class="info-value">Marc Dupont</div></div>
+        <div><div class="info-label">FONCTION</div><div class="info-value">Responsable technique</div></div>
+        <div><div class="info-label">TÉLÉPHONE</div><div class="info-value">04 78 12 34 56</div></div>
+        <div><div class="info-label">EMAIL</div><div class="info-value blue">contact@schindler.fr</div></div>
+        <div><div class="info-label">ADRESSE</div><div class="info-value">45 rue de la Mécanique, 69003 Lyon</div></div>
+        <div><div class="info-label">SIRET</div><div class="info-value" style="color:#94a3b8">542 065 410 00134</div></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost">📞 Appeler</button>
+        <button class="btn-ghost">✉ Email</button>
+        <button class="btn-primary">Voir fiche complète</button>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:32px;text-align:center;color:#475569;font-size:12px">V1 — Split Master-Detail avec tabs dans le panneau détail</p>
+</body>
+</html>

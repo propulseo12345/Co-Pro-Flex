@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTA + Footer — Sélecteur interactif</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  .picker {
+    width: 400px; min-width: 400px; background: #131620;
+    border-right: 1px solid rgba(148,163,184,0.08);
+    padding: 24px; overflow-y: auto; max-height: 100vh;
+    position: sticky; top: 0;
+  }
+  .picker h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .picker h2 { font-size: 14px; font-weight: 600; color: #64748b; margin: 24px 0 12px; padding-top: 16px; border-top: 1px solid rgba(148,163,184,0.08); }
+  .picker .subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
+
+  .pick-option {
+    padding: 14px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.08);
+    background: #1a1d2e; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .pick-option:hover { border-color: rgba(59,130,246,0.3); background: #252b3b; }
+  .pick-option.selected { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+  .pick-option.selected::after { content: '✓'; position: absolute; top: 12px; right: 14px; color: #3b82f6; font-weight: 700; }
+
+  .pick-option-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px; }
+  .pick-option-text { font-size: 12px; color: #e2e8f0; line-height: 1.5; }
+
+  .copy-bar { position: sticky; bottom: 0; background: #131620; border-top: 1px solid rgba(148,163,184,0.08); padding: 16px 24px; margin: 0 -24px; }
+  .copy-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: #2563eb; }
+  .copy-btn.copied { background: #22c55e; }
+
+  .preview-wrap { flex: 1; overflow-y: auto; background: #FEF5E4; }
+
+  /* ═══ SHARED ═══ */
+  .accent { color: #3079FF; }
+  .pg-text { color: #052641; }
+  .pg-text-sec { color: #807E7A; }
+  .pg-border { border-color: #E2DFD8; }
+
+  /* ═══ CTA SECTIONS ═══ */
+  .cta-section { padding: 80px 24px; max-width: 1200px; margin: 0 auto; }
+
+  /* CTA A — Card centrée */
+  .cta-a { text-align: center; }
+  .cta-a .card {
+    background: white; border: 1px solid #E2DFD8; border-radius: 16px;
+    padding: 64px 48px; max-width: 800px; margin: 0 auto 40px;
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  .cta-a .title { font-family: 'DM Serif Display', serif; font-size: 36px; color: #052641; }
+  .cta-a .desc { font-size: 16px; color: #807E7A; max-width: 480px; line-height: 1.6; }
+  .cta-a .btn {
+    background: #3079FF; color: white; border: none; border-radius: 99px;
+    padding: 14px 40px; font-size: 16px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(48,121,255,0.3);
+  }
+  .cta-a .features {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+    max-width: 900px; margin: 0 auto; text-align: center;
+  }
+  .cta-a .feat-icon { font-size: 28px; margin-bottom: 8px; }
+  .cta-a .feat-title { font-size: 14px; font-weight: 600; color: #052641; margin-bottom: 4px; }
+  .cta-a .feat-desc { font-size: 12px; color: #807E7A; line-height: 1.4; }
+
+  /* CTA B — Split gauche/droite */
+  .cta-b { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
+  .cta-b .left { display: flex; flex-direction: column; gap: 20px; }
+  .cta-b .title { font-family: 'DM Serif Display', serif; font-size: 40px; color: #052641; line-height: 1.15; }
+  .cta-b .desc { font-size: 16px; color: #807E7A; line-height: 1.6; }
+  .cta-b .btn {
+    align-self: flex-start; background: #3079FF; color: white; border: none; border-radius: 99px;
+    padding: 14px 36px; font-size: 16px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(48,121,255,0.3);
+  }
+  .cta-b .trust { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+  .cta-b .trust-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #807E7A; }
+  .cta-b .trust-icon { width: 20px; height: 20px; color: #55AC63; flex-shrink: 0; }
+  .cta-b .right {
+    background: white; border: 1px solid #E2DFD8; border-radius: 16px;
+    padding: 40px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .cta-b .input-label { font-size: 13px; font-weight: 500; color: #052641; }
+  .cta-b .input {
+    width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #E2DFD8;
+    font-size: 14px; color: #052641; background: #FAFAF7;
+  }
+  .cta-b .form-btn {
+    background: #3079FF; color: white; border: none; border-radius: 8px;
+    padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
+  }
+
+  /* CTA C — Banner pleine largeur */
+  .cta-c {
+    background: #052641; border-radius: 20px; max-width: 1100px; margin: 0 auto;
+    padding: 60px 48px; display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  }
+  .cta-c .left { flex: 1; }
+  .cta-c .title { font-family: 'DM Serif Display', serif; font-size: 34px; color: white; line-height: 1.2; margin-bottom: 12px; }
+  .cta-c .desc { font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+  .cta-c .right { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+  .cta-c .btn-primary {
+    background: white; color: #052641; border: none; border-radius: 99px;
+    padding: 14px 36px; font-size: 16px; font-weight: 600; cursor: pointer;
+    white-space: nowrap;
+  }
+  .cta-c .btn-secondary {
+    background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 99px;
+    padding: 14px 36px; font-size: 16px; font-weight: 500; cursor: pointer;
+    white-space: nowrap; text-align: center;
+  }
+
+  /* ═══ FOOTER STYLES ═══ */
+  .footer { padding: 48px 24px 24px; max-width: 1200px; margin: 0 auto; }
+
+  /* Footer 1 — Classic 4 colonnes */
+  .f1 { border-top: 1px solid #E2DFD8; }
+  .f1 .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-bottom: 40px; }
+  .f1 .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: #052641; }
+  .f1 .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .f1 .col-head { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #807E7A; margin-bottom: 12px; }
+  .f1 .col-link { font-size: 13px; color: #807E7A; margin-bottom: 8px; cursor: pointer; }
+  .f1 .col-link:hover { color: #052641; }
+  .f1 .bottom { border-top: 1px solid #E2DFD8; padding-top: 20px; display: flex; justify-content: space-between; font-size: 12px; color: #AAAAAA; }
+
+  /* Footer 2 — Minimal centré */
+  .f2 { text-align: center; border-top: 1px solid #E2DFD8; padding-top: 40px; }
+  .f2 .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: #052641; margin-bottom: 20px; }
+  .f2 .links { display: flex; justify-content: center; gap: 28px; margin-bottom: 24px; flex-wrap: wrap; }
+  .f2 .link { font-size: 14px; color: #807E7A; cursor: pointer; }
+  .f2 .link:hover { color: #052641; }
+  .f2 .copy { font-size: 12px; color: #AAAAAA; }
+
+  /* Footer 3 — Logo + description + colonnes */
+  .f3 { border-top: 1px solid #E2DFD8; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
+  .f3 .brand .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: #052641; margin-bottom: 12px; }
+  .f3 .brand .desc { font-size: 13px; color: #807E7A; line-height: 1.6; max-width: 260px; }
+  .f3 .col-head { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #807E7A; margin-bottom: 12px; }
+  .f3 .col-link { font-size: 13px; color: #807E7A; margin-bottom: 8px; cursor: pointer; }
+  .f3 .col-link:hover { color: #052641; }
+
+  /* Footer 4 — Dark compact */
+  .f4-wrap { background: #052641; border-radius: 16px; padding: 40px; margin: 0 24px; }
+  .f4 { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; }
+  .f4 .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: white; }
+  .f4 .links { display: flex; gap: 24px; }
+  .f4 .link { font-size: 13px; color: rgba(255,255,255,0.6); cursor: pointer; }
+  .f4 .link:hover { color: white; }
+  .f4 .copy { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  /* Footer 5 — Split logo/newsletter + colonnes */
+  .f5 { border-top: 1px solid #E2DFD8; }
+  .f5 .top { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; margin-bottom: 32px; }
+  .f5 .brand .logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: #052641; margin-bottom: 12px; }
+  .f5 .brand .desc { font-size: 13px; color: #807E7A; line-height: 1.6; margin-bottom: 16px; }
+  .f5 .newsletter { display: flex; gap: 8px; }
+  .f5 .nl-input { flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid #E2DFD8; font-size: 13px; background: white; }
+  .f5 .nl-btn { background: #3079FF; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .f5 .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .f5 .col-head { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #807E7A; margin-bottom: 12px; }
+  .f5 .col-link { font-size: 13px; color: #807E7A; margin-bottom: 8px; cursor: pointer; }
+  .f5 .bottom { border-top: 1px solid #E2DFD8; padding-top: 20px; display: flex; justify-content: space-between; font-size: 12px; color: #AAAAAA; }
+
+  /* Footer 6 — Ultra minimal une ligne */
+  .f6 { border-top: 1px solid #E2DFD8; display: flex; align-items: center; justify-content: space-between; padding-top: 24px; }
+  .f6 .logo { font-family: 'DM Serif Display', serif; font-size: 20px; color: #052641; }
+  .f6 .links { display: flex; gap: 20px; }
+  .f6 .link { font-size: 13px; color: #807E7A; cursor: pointer; }
+  .f6 .copy { font-size: 12px; color: #AAAAAA; }
+
+  /* Separator */
+  .sep { height: 2px; background: repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 6px, transparent 6px, transparent 12px); max-width: 120px; margin: 60px auto; opacity: 0.2; }
+
+  @keyframes flash { 0% { outline: 2px solid #3b82f6; outline-offset: 4px; } 100% { outline: 2px solid transparent; outline-offset: 4px; } }
+  .flash { animation: flash 0.6s ease-out; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="picker">
+    <h1>CTA + Footer</h1>
+    <p class="subtitle">Clique pour prévisualiser chaque version.</p>
+
+    <h2>Section CTA (3 versions)</h2>
+    <div class="pick-option selected" data-target="cta" data-value="a">
+      <div class="pick-option-tag">CTA A — Card centrée + features</div>
+      <div class="pick-option-text">Card blanche centrée avec titre, description, bouton pill. 4 features en dessous (icônes + texte).</div>
+    </div>
+    <div class="pick-option" data-target="cta" data-value="b">
+      <div class="pick-option-tag">CTA B — Split formulaire</div>
+      <div class="pick-option-text">Gauche : titre + description + trust signals. Droite : formulaire de démo (nom, email, téléphone).</div>
+    </div>
+    <div class="pick-option" data-target="cta" data-value="c">
+      <div class="pick-option-tag">CTA C — Banner dark arrondi</div>
+      <div class="pick-option-text">Bannière navy arrondie pleine largeur. Titre + desc à gauche, 2 boutons à droite (primary + secondary).</div>
+    </div>
+
+    <h2>Footer (6 versions)</h2>
+    <div class="pick-option selected" data-target="footer" data-value="1">
+      <div class="pick-option-tag">Footer 1 — Classic 4 colonnes</div>
+      <div class="pick-option-text">Logo en haut à gauche, 4 colonnes de liens, barre copyright en bas.</div>
+    </div>
+    <div class="pick-option" data-target="footer" data-value="2">
+      <div class="pick-option-tag">Footer 2 — Minimal centré</div>
+      <div class="pick-option-text">Logo centré, liens en ligne horizontale, copyright. Ultra épuré.</div>
+    </div>
+    <div class="pick-option" data-target="footer" data-value="3">
+      <div class="pick-option-tag">Footer 3 — Brand + colonnes</div>
+      <div class="pick-option-text">Logo + description à gauche (plus large), 3 colonnes de liens à droite.</div>
+    </div>
+    <div class="pick-option" data-target="footer" data-value="4">
+      <div class="pick-option-tag">Footer 4 — Dark compact arrondi</div>
+      <div class="pick-option-text">Bannière navy arrondie. Logo, liens et copyright sur une ligne.</div>
+    </div>
+    <div class="pick-option" data-target="footer" data-value="5">
+      <div class="pick-option-tag">Footer 5 — Newsletter + colonnes</div>
+      <div class="pick-option-text">Brand + newsletter en haut, 4 colonnes de liens en dessous, copyright.</div>
+    </div>
+    <div class="pick-option" data-target="footer" data-value="6">
+      <div class="pick-option-tag">Footer 6 — Ultra minimal une ligne</div>
+      <div class="pick-option-text">Logo | liens | copyright — tout sur une seule ligne.</div>
+    </div>
+
+    <div class="copy-bar">
+      <button class="copy-btn" id="copyBtn">Copier la sélection</button>
+    </div>
+  </div>
+
+  <div class="preview-wrap">
+    <!-- CTA Preview -->
+    <div id="cta-preview">
+      <div class="cta-section cta-a">
+        <div class="card">
+          <h2 class="title">Prêt à simplifier votre gestion ?</h2>
+          <p class="desc">Découvrez CoProFlex en 30 minutes avec un expert dédié. Sans engagement, sans carte bancaire.</p>
+          <button class="btn">Demander une démo gratuite</button>
+        </div>
+        <div class="features">
+          <div><div class="feat-icon">🔓</div><div class="feat-title">Sans engagement</div><div class="feat-desc">Testez sans risque, résiliez quand vous voulez</div></div>
+          <div><div class="feat-icon">📘</div><div class="feat-title">Onboarding inclus</div><div class="feat-desc">Formation et migration de données incluses</div></div>
+          <div><div class="feat-icon">🛡️</div><div class="feat-title">Données sécurisées</div><div class="feat-desc">Hébergement France, chiffrement bout-en-bout</div></div>
+          <div><div class="feat-icon">🎧</div><div class="feat-title">Support dédié</div><div class="feat-desc">Une équipe d'experts à votre écoute</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Footer Preview -->
+    <div id="footer-preview" style="background: white; padding-bottom: 40px;">
+      <div class="footer f1">
+        <div class="top">
+          <div class="logo">CoProFlex</div>
+          <div class="cols">
+            <div><div class="col-head">Produit</div><div class="col-link">Fonctionnalités</div><div class="col-link">Tarifs</div><div class="col-link">Intégrations</div><div class="col-link">Sécurité</div></div>
+            <div><div class="col-head">Ressources</div><div class="col-link">Blog</div><div class="col-link">Guides</div><div class="col-link">Webinaires</div><div class="col-link">Centre d'aide</div></div>
+            <div><div class="col-head">Entreprise</div><div class="col-link">À propos</div><div class="col-link">Contact</div><div class="col-link">Carrières</div><div class="col-link">Presse</div></div>
+            <div><div class="col-head">Légal</div><div class="col-link">CGU</div><div class="col-link">Confidentialité</div><div class="col-link">Cookies</div><div class="col-link">Mentions légales</div></div>
+          </div>
+        </div>
+        <div class="bottom"><span>© 2026 CoProFlex. Tous droits réservés.</span><span>contact@coproflex.fr · +33 1 23 45 67 89</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ctaHTML = {
+    a: `<div class="cta-section cta-a">
+      <div class="card">
+        <h2 class="title">Prêt à simplifier votre gestion ?</h2>
+        <p class="desc">Découvrez CoProFlex en 30 minutes avec un expert dédié. Sans engagement, sans carte bancaire.</p>
+        <button class="btn">Demander une démo gratuite</button>
+      </div>
+      <div class="features">
+        <div><div class="feat-icon">🔓</div><div class="feat-title">Sans engagement</div><div class="feat-desc">Testez sans risque, résiliez quand vous voulez</div></div>
+        <div><div class="feat-icon">📘</div><div class="feat-title">Onboarding inclus</div><div class="feat-desc">Formation et migration de données incluses</div></div>
+        <div><div class="feat-icon">🛡️</div><div class="feat-title">Données sécurisées</div><div class="feat-desc">Hébergement France, chiffrement bout-en-bout</div></div>
+        <div><div class="feat-icon">🎧</div><div class="feat-title">Support dédié</div><div class="feat-desc">Une équipe d'experts à votre écoute</div></div>
+      </div>
+    </div>`,
+    b: `<div class="cta-b">
+      <div class="left">
+        <h2 class="title">Simplifiez votre copropriété dès aujourd'hui</h2>
+        <p class="desc">Remplissez ce formulaire et un expert vous contacte sous 24h pour une démo personnalisée de 30 minutes.</p>
+        <div class="trust">
+          <div class="trust-item"><svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="#55AC63" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Sans engagement, résiliez à tout moment</div>
+          <div class="trust-item"><svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="#55AC63" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Migration de données incluse</div>
+          <div class="trust-item"><svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="#55AC63" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Hébergement en France, RGPD</div>
+          <div class="trust-item"><svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="#55AC63" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Support dédié < 2h</div>
+        </div>
+      </div>
+      <div class="right">
+        <div><div class="input-label">Nom complet</div><input class="input" placeholder="Jean Dupont" /></div>
+        <div><div class="input-label">Email professionnel</div><input class="input" placeholder="jean@syndic.fr" /></div>
+        <div><div class="input-label">Téléphone</div><input class="input" placeholder="+33 6 12 34 56 78" /></div>
+        <div><div class="input-label">Nombre de lots gérés</div><input class="input" placeholder="ex: 150" /></div>
+        <button class="form-btn">Demander ma démo gratuite</button>
+      </div>
+    </div>`,
+    c: `<div style="padding: 80px 24px;"><div class="cta-c">
+      <div class="left">
+        <h2 class="title">Prêt à transformer la gestion de vos copropriétés ?</h2>
+        <p class="desc">Rejoignez les gestionnaires qui ont déjà gagné 30% de temps. Démo gratuite en 30 minutes, sans engagement.</p>
+      </div>
+      <div class="right">
+        <button class="btn-primary">Demander une démo</button>
+        <button class="btn-secondary">Voir les tarifs</button>
+      </div>
+    </div></div>`,
+  };
+
+  const footerHTML = {
+    '1': `<div class="footer f1">
+      <div class="top"><div class="logo">CoProFlex</div>
+        <div class="cols">
+          <div><div class="col-head">Produit</div><div class="col-link">Fonctionnalités</div><div class="col-link">Tarifs</div><div class="col-link">Intégrations</div><div class="col-link">Sécurité</div></div>
+          <div><div class="col-head">Ressources</div><div class="col-link">Blog</div><div class="col-link">Guides</div><div class="col-link">Webinaires</div><div class="col-link">Centre d'aide</div></div>
+          <div><div class="col-head">Entreprise</div><div class="col-link">À propos</div><div class="col-link">Contact</div><div class="col-link">Carrières</div><div class="col-link">Presse</div></div>
+          <div><div class="col-head">Légal</div><div class="col-link">CGU</div><div class="col-link">Confidentialité</div><div class="col-link">Cookies</div><div class="col-link">Mentions légales</div></div>
+        </div>
+      </div>
+      <div class="bottom"><span>© 2026 CoProFlex. Tous droits réservés.</span><span>contact@coproflex.fr · +33 1 23 45 67 89</span></div>
+    </div>`,
+    '2': `<div class="footer f2">
+      <div class="logo">CoProFlex</div>
+      <div class="links"><span class="link">Fonctionnalités</span><span class="link">Tarifs</span><span class="link">Blog</span><span class="link">Centre d'aide</span><span class="link">Contact</span><span class="link">CGU</span><span class="link">Confidentialité</span></div>
+      <div class="copy">© 2026 CoProFlex. Tous droits réservés. · contact@coproflex.fr</div>
+    </div>`,
+    '3': `<div class="footer f3">
+      <div class="brand"><div class="logo">CoProFlex</div><p class="desc">La plateforme tout-en-un qui simplifie la copropriété pour les syndics et les copropriétaires.</p></div>
+      <div><div class="col-head">Produit</div><div class="col-link">Fonctionnalités</div><div class="col-link">Tarifs</div><div class="col-link">Sécurité</div><div class="col-link">Roadmap</div></div>
+      <div><div class="col-head">Ressources</div><div class="col-link">Blog</div><div class="col-link">Guides</div><div class="col-link">Centre d'aide</div><div class="col-link">API</div></div>
+      <div><div class="col-head">Entreprise</div><div class="col-link">À propos</div><div class="col-link">Contact</div><div class="col-link">CGU</div><div class="col-link">Confidentialité</div></div>
+    </div>`,
+    '4': `<div class="f4-wrap"><div class="f4">
+      <div class="logo">CoProFlex</div>
+      <div class="links"><span class="link">Fonctionnalités</span><span class="link">Tarifs</span><span class="link">Blog</span><span class="link">Contact</span><span class="link">CGU</span></div>
+      <div class="copy">© 2026 CoProFlex</div>
+    </div></div>`,
+    '5': `<div class="footer f5">
+      <div class="top">
+        <div class="brand"><div class="logo">CoProFlex</div><p class="desc">Simplifiez la gestion de vos copropriétés.</p>
+          <div class="newsletter"><input class="nl-input" placeholder="Votre email" /><button class="nl-btn">S'inscrire</button></div>
+        </div>
+        <div class="cols">
+          <div><div class="col-head">Produit</div><div class="col-link">Fonctionnalités</div><div class="col-link">Tarifs</div><div class="col-link">Sécurité</div></div>
+          <div><div class="col-head">Ressources</div><div class="col-link">Blog</div><div class="col-link">Guides</div><div class="col-link">Centre d'aide</div></div>
+          <div><div class="col-head">Entreprise</div><div class="col-link">À propos</div><div class="col-link">Contact</div><div class="col-link">Carrières</div></div>
+          <div><div class="col-head">Légal</div><div class="col-link">CGU</div><div class="col-link">Confidentialité</div><div class="col-link">Cookies</div></div>
+        </div>
+      </div>
+      <div class="bottom"><span>© 2026 CoProFlex. Tous droits réservés.</span><span>contact@coproflex.fr</span></div>
+    </div>`,
+    '6': `<div class="footer f6">
+      <div class="logo">CoProFlex</div>
+      <div class="links"><span class="link">Produit</span><span class="link">Tarifs</span><span class="link">Blog</span><span class="link">Contact</span><span class="link">CGU</span></div>
+      <div class="copy">© 2026 CoProFlex</div>
+    </div>`,
+  };
+
+  let selectedCta = 'a', selectedFooter = '1';
+
+  document.querySelectorAll('.pick-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const target = opt.dataset.target;
+      opt.parentElement ? null : null;
+      // Deselect siblings of same target
+      document.querySelectorAll(`.pick-option[data-target="${target}"]`).forEach(s => s.classList.remove('selected'));
+      opt.classList.add('selected');
+
+      if (target === 'cta') {
+        selectedCta = opt.dataset.value;
+        document.getElementById('cta-preview').innerHTML = ctaHTML[selectedCta];
+      } else {
+        selectedFooter = opt.dataset.value;
+        document.getElementById('footer-preview').innerHTML = footerHTML[selectedFooter];
+      }
+    });
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const ctaLabel = document.querySelector('.pick-option.selected[data-target="cta"] .pick-option-tag').textContent;
+    const footerLabel = document.querySelector('.pick-option.selected[data-target="footer"] .pick-option-tag').textContent;
+
+    const text = `CTA + FOOTER — Sélection
+━━━━━━━━━━━━━━━━━━━━━━━━━
+CTA: ${ctaLabel}
+Footer: ${footerLabel}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copié !'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copier la sélection'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+</script>
+
+</body>
+</html>

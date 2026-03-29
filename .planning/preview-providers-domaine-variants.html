@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prestataires — 5 variantes tri par domaine</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: Inter, system-ui, sans-serif; padding: 24px; }
+
+  .section { margin-bottom: 56px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .section-number { width: 32px; height: 32px; border-radius: 8px; background: rgba(59,130,246,0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .section-title { font-size: 18px; font-weight: 700; }
+  .section-desc { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+
+  .columns { display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+  .sidebar { width: 100%; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 8px; max-height: 480px; overflow-y: auto; }
+
+  /* Shared */
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+  .name { font-size: 13px; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 500; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .stars { color: #fbbf24; font-size: 11px; }
+  .badge { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; background: rgba(148,163,184,0.08); color: #64748b; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+  .item:hover { background: rgba(148,163,184,0.03); }
+  .item.active { border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.08); }
+
+  .pros-cons { padding: 20px; color: #94a3b8; font-size: 13px; line-height: 1.8; }
+  .pros-cons strong { color: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- V1 — Collapsible classique (accordéon) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div>
+      <div class="section-title">Accordéon collapsible</div>
+      <div class="section-desc">Headers de section cliquables — ouvrir/fermer chaque domaine. Chevron + dot couleur + label + count.</div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="sidebar">
+      <!-- Ascenseur OUVERT -->
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer">
+        <span style="font-size:10px;color:#64748b">▼</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#5b8def"></span>
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#5b8def;flex:1">Ascenseur</span>
+        <span class="badge">2</span>
+      </div>
+      <div class="item active" style="padding-left:32px">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">SC</div>
+        <div style="flex:1;min-width:0"><div class="name">Schindler Ascenseurs</div><div class="meta">8 interv. · <span class="stars">★ 4.5</span></div></div>
+        <span class="dot" style="background:#22c55e"></span>
+      </div>
+      <div class="item" style="padding-left:32px">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">OT</div>
+        <div style="flex:1;min-width:0"><div class="name">Otis Élévateurs</div><div class="meta">3 interv. · <span class="stars">★ 4.0</span></div></div>
+        <span class="dot" style="background:#22c55e"></span>
+      </div>
+      <!-- Ménage OUVERT -->
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer">
+        <span style="font-size:10px;color:#64748b">▼</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#3ecf8e"></span>
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#3ecf8e;flex:1">Ménage</span>
+        <span class="badge">1</span>
+      </div>
+      <div class="item" style="padding-left:32px">
+        <div class="avatar" style="background:linear-gradient(135deg,#3ecf8e,#2db87a)">NP</div>
+        <div style="flex:1;min-width:0"><div class="name">NettoyePro Services</div><div class="meta">12 interv. · <span class="stars">★ 4.2</span></div></div>
+        <span class="dot" style="background:#22c55e"></span>
+      </div>
+      <!-- FERMÉS -->
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer">
+        <span style="font-size:10px;color:#64748b">▶</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#e5a63e"></span>
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#e5a63e;flex:1">Chauffage</span>
+        <span class="badge">1</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer">
+        <span style="font-size:10px;color:#64748b">▶</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#F87171"></span>
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#F87171;flex:1">Assurance</span>
+        <span class="badge">3</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer">
+        <span style="font-size:10px;color:#64748b">▶</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#34D399"></span>
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#34D399;flex:1">Espaces verts</span>
+        <span class="badge">1</span>
+      </div>
+    </div>
+    <div class="pros-cons">
+      <strong>Comportement :</strong> Clic sur header = toggle open/close<br><br>
+      <strong>+ :</strong> Compact, on ne voit que ce qu'on veut. Bon pour 15+ prestataires.<br>
+      <strong>- :</strong> Faut cliquer pour explorer. Headers prennent de la place quand beaucoup de domaines.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- V2 — Tabs domaine horizontaux en haut de sidebar -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div>
+      <div class="section-title">Pills domaine en haut de sidebar</div>
+      <div class="section-desc">Rangée de pills colorées scrollable en haut — clic pour filtrer. "Tous" par défaut.</div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="sidebar" style="padding-top:0">
+      <!-- Pills -->
+      <div style="display:flex;gap:6px;padding:10px 8px;overflow-x:auto;border-bottom:1px solid rgba(148,163,184,0.06);margin-bottom:4px;flex-wrap:nowrap">
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(59,130,246,0.12);color:#3b82f6;white-space:nowrap;cursor:pointer;border:1px solid rgba(59,130,246,0.3)">Tous <span class="badge" style="background:rgba(59,130,246,0.2);color:#60a5fa">9</span></span>
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;background:rgba(91,141,239,0.08);color:#5b8def;white-space:nowrap;cursor:pointer;border:1px solid transparent">
+          <span style="width:6px;height:6px;border-radius:50%;background:#5b8def"></span> Ascenseur
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;background:rgba(62,207,142,0.08);color:#3ecf8e;white-space:nowrap;cursor:pointer;border:1px solid transparent">
+          <span style="width:6px;height:6px;border-radius:50%;background:#3ecf8e"></span> Ménage
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;background:rgba(229,166,62,0.08);color:#e5a63e;white-space:nowrap;cursor:pointer;border:1px solid transparent">
+          <span style="width:6px;height:6px;border-radius:50%;background:#e5a63e"></span> Chauffage
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;background:rgba(248,113,113,0.08);color:#F87171;white-space:nowrap;cursor:pointer;border:1px solid transparent">
+          <span style="width:6px;height:6px;border-radius:50%;background:#F87171"></span> Assurance
+        </span>
+      </div>
+      <!-- Liste plate filtrée -->
+      <div class="item active">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">SC</div>
+        <div style="flex:1;min-width:0"><div class="name">Schindler Ascenseurs</div><div class="meta"><span class="tag" style="background:rgba(91,141,239,0.12);color:#5b8def">Ascenseur</span> · <span class="stars">★ 4.5</span></div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#3ecf8e,#2db87a)">NP</div>
+        <div style="flex:1;min-width:0"><div class="name">NettoyePro Services</div><div class="meta"><span class="tag" style="background:rgba(62,207,142,0.12);color:#3ecf8e">Ménage</span> · <span class="stars">★ 4.2</span></div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#FBBF24,#e5a912)">EN</div>
+        <div style="flex:1;min-width:0"><div class="name">Engie</div><div class="meta"><span class="tag" style="background:rgba(251,191,36,0.12);color:#FBBF24">Électricité</span> · <span class="stars">★ 4.3</span></div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#e5a63e,#d49530)">CP</div>
+        <div style="flex:1;min-width:0"><div class="name">ChauffagePro Rhône</div><div class="meta"><span class="tag" style="background:rgba(229,166,62,0.12);color:#e5a63e">Chauffage</span> · <span class="stars">★ 3.8</span></div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">AX</div>
+        <div style="flex:1;min-width:0"><div class="name">AXA Assurances</div><div class="meta"><span class="tag" style="background:rgba(248,113,113,0.12);color:#F87171">Assurance</span></div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#34D399,#28b886)">VJ</div>
+        <div style="flex:1;min-width:0"><div class="name">VertJardin</div><div class="meta"><span class="tag" style="background:rgba(52,211,153,0.12);color:#34D399">Espaces verts</span> · <span class="stars">★ 4.0</span></div></div>
+      </div>
+    </div>
+    <div class="pros-cons">
+      <strong>Comportement :</strong> Clic sur une pill = filtre la liste. "Tous" = tout afficher.<br><br>
+      <strong>+ :</strong> Liste toujours plate = simple. Filtre rapide sans scroll. Voit le domaine en couleur sur chaque item.<br>
+      <strong>- :</strong> Pills scrollables si beaucoup de domaines. Pas de vue d'ensemble simultanée.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- V3 — Border-left colorée par domaine (liste plate triée) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div>
+      <div class="section-title">Border-left colorée + séparateurs légers</div>
+      <div class="section-desc">Liste plate triée par domaine — border-left colorée par métier. Ligne séparatrice fine entre groupes.</div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="sidebar">
+      <!-- Ascenseur group -->
+      <div class="item active" style="border-left:3px solid #5b8def;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">SC</div>
+        <div style="flex:1;min-width:0"><div class="name">Schindler Ascenseurs</div><div class="meta">8 interv. · <span class="stars">★ 4.5</span></div></div>
+      </div>
+      <div class="item" style="border-left:3px solid #5b8def;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">OT</div>
+        <div style="flex:1;min-width:0"><div class="name">Otis Élévateurs</div><div class="meta">3 interv. · <span class="stars">★ 4.0</span></div></div>
+      </div>
+      <!-- Separator -->
+      <div style="height:1px;background:rgba(148,163,184,0.06);margin:6px 12px"></div>
+      <!-- Assurance group -->
+      <div class="item" style="border-left:3px solid #F87171;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">AX</div>
+        <div style="flex:1;min-width:0"><div class="name">AXA Assurances</div><div class="meta">3 contrats</div></div>
+      </div>
+      <div class="item" style="border-left:3px solid #F87171;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">MA</div>
+        <div style="flex:1;min-width:0"><div class="name">MAIF</div><div class="meta">1 contrat</div></div>
+      </div>
+      <div class="item" style="border-left:3px solid #F87171;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">SM</div>
+        <div style="flex:1;min-width:0"><div class="name">SMABTP</div><div class="meta">2 contrats</div></div>
+      </div>
+      <!-- Separator -->
+      <div style="height:1px;background:rgba(148,163,184,0.06);margin:6px 12px"></div>
+      <!-- Ménage -->
+      <div class="item" style="border-left:3px solid #3ecf8e;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#3ecf8e,#2db87a)">NP</div>
+        <div style="flex:1;min-width:0"><div class="name">NettoyePro Services</div><div class="meta">12 interv. · <span class="stars">★ 4.2</span></div></div>
+      </div>
+      <!-- Separator -->
+      <div style="height:1px;background:rgba(148,163,184,0.06);margin:6px 12px"></div>
+      <!-- Chauffage -->
+      <div class="item" style="border-left:3px solid #e5a63e;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#e5a63e,#d49530)">CP</div>
+        <div style="flex:1;min-width:0"><div class="name">ChauffagePro Rhône</div><div class="meta">5 interv. · <span class="stars">★ 3.8</span></div></div>
+      </div>
+      <!-- Separator -->
+      <div style="height:1px;background:rgba(148,163,184,0.06);margin:6px 12px"></div>
+      <!-- Espaces verts -->
+      <div class="item" style="border-left:3px solid #34D399;border-radius:0 8px 8px 0;margin-bottom:2px">
+        <div class="avatar" style="background:linear-gradient(135deg,#34D399,#28b886)">VJ</div>
+        <div style="flex:1;min-width:0"><div class="name">VertJardin</div><div class="meta">3 interv. · <span class="stars">★ 4.0</span></div></div>
+      </div>
+    </div>
+    <div class="pros-cons">
+      <strong>Comportement :</strong> Pas de clic, tout visible. La couleur de la border-left suffit à identifier le domaine.<br><br>
+      <strong>+ :</strong> Ultra-clean, pas de headers qui prennent de la place. Repérage visuel immédiat par couleur. Tout visible d'un coup.<br>
+      <strong>- :</strong> Pas de label domaine explicite (faut connaître les couleurs). Séparateurs subtils.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- V4 — Sticky domain header (scroll) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div>
+      <div class="section-title">Headers domaine sticky au scroll</div>
+      <div class="section-desc">Headers de domaine avec fond coloré translucide — restent visibles en haut pendant le scroll de leur section.</div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="sidebar">
+      <!-- Ascenseur header -->
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(91,141,239,0.08);border-radius:6px;margin-bottom:4px;position:sticky;top:0;z-index:1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#5b8def"></span>
+        <span style="font-size:12px;font-weight:700;color:#5b8def;flex:1">Ascenseur</span>
+        <span style="font-size:11px;color:rgba(91,141,239,0.6)">2</span>
+      </div>
+      <div class="item active">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">SC</div>
+        <div style="flex:1;min-width:0"><div class="name">Schindler Ascenseurs</div><div class="meta">8 interv. · <span class="stars">★ 4.5</span> · 2 contrats</div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">OT</div>
+        <div style="flex:1;min-width:0"><div class="name">Otis Élévateurs</div><div class="meta">3 interv. · <span class="stars">★ 4.0</span> · 1 contrat</div></div>
+      </div>
+
+      <!-- Assurance header -->
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(248,113,113,0.08);border-radius:6px;margin:8px 0 4px;position:sticky;top:0;z-index:1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#F87171"></span>
+        <span style="font-size:12px;font-weight:700;color:#F87171;flex:1">Assurance</span>
+        <span style="font-size:11px;color:rgba(248,113,113,0.6)">3</span>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">AX</div>
+        <div style="flex:1;min-width:0"><div class="name">AXA Assurances</div><div class="meta">3 contrats · Multirisque</div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">MA</div>
+        <div style="flex:1;min-width:0"><div class="name">MAIF</div><div class="meta">1 contrat · RC Syndicat</div></div>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#F87171,#e55d5d)">SM</div>
+        <div style="flex:1;min-width:0"><div class="name">SMABTP</div><div class="meta">2 contrats · Dommages-Ouvrage</div></div>
+      </div>
+
+      <!-- Ménage header -->
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(62,207,142,0.08);border-radius:6px;margin:8px 0 4px;position:sticky;top:0;z-index:1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#3ecf8e"></span>
+        <span style="font-size:12px;font-weight:700;color:#3ecf8e;flex:1">Ménage</span>
+        <span style="font-size:11px;color:rgba(62,207,142,0.6)">1</span>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#3ecf8e,#2db87a)">NP</div>
+        <div style="flex:1;min-width:0"><div class="name">NettoyePro Services</div><div class="meta">12 interv. · <span class="stars">★ 4.2</span></div></div>
+      </div>
+
+      <!-- Électricité header -->
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(251,191,36,0.08);border-radius:6px;margin:8px 0 4px;position:sticky;top:0;z-index:1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#FBBF24"></span>
+        <span style="font-size:12px;font-weight:700;color:#FBBF24;flex:1">Électricité</span>
+        <span style="font-size:11px;color:rgba(251,191,36,0.6)">1</span>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#FBBF24,#e5a912)">EN</div>
+        <div style="flex:1;min-width:0"><div class="name">Engie</div><div class="meta">6 interv. · <span class="stars">★ 4.3</span></div></div>
+      </div>
+
+      <!-- Chauffage -->
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(229,166,62,0.08);border-radius:6px;margin:8px 0 4px;position:sticky;top:0;z-index:1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#e5a63e"></span>
+        <span style="font-size:12px;font-weight:700;color:#e5a63e;flex:1">Chauffage</span>
+        <span style="font-size:11px;color:rgba(229,166,62,0.6)">1</span>
+      </div>
+      <div class="item">
+        <div class="avatar" style="background:linear-gradient(135deg,#e5a63e,#d49530)">CP</div>
+        <div style="flex:1;min-width:0"><div class="name">ChauffagePro Rhône</div><div class="meta">5 interv. · <span class="stars">★ 3.8</span></div></div>
+      </div>
+    </div>
+    <div class="pros-cons">
+      <strong>Comportement :</strong> Tout ouvert, pas de collapse. Headers sticky = toujours visible pendant le scroll.<br><br>
+      <strong>+ :</strong> Fond coloré translucide = identification domaine élégante. Headers sticky = on sait toujours dans quel domaine on scrolle. Tout visible.<br>
+      <strong>- :</strong> Prend plus de place verticalement. Les sticky se chevauchent si beaucoup de domaines.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- V5 — Sidebar à 2 niveaux (domaines → prestataires) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div>
+      <div class="section-title">Double sidebar (domaines → prestataires)</div>
+      <div class="section-desc">Colonne étroite de domaines à gauche (icônes) — clic sur un domaine filtre la liste à droite.</div>
+    </div>
+  </div>
+  <div class="columns">
+    <div style="display:flex;gap:8px;width:100%">
+      <!-- Domain column -->
+      <div style="width:52px;background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;gap:4px;align-items:center">
+        <div title="Tous" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:700;color:#64748b;background:rgba(148,163,184,0.06)">All</div>
+        <div title="Ascenseur" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3)">
+          <span style="width:10px;height:10px;border-radius:50%;background:#5b8def"></span>
+        </div>
+        <div title="Assurance" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent">
+          <span style="width:10px;height:10px;border-radius:50%;background:#F87171"></span>
+        </div>
+        <div title="Ménage" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent">
+          <span style="width:10px;height:10px;border-radius:50%;background:#3ecf8e"></span>
+        </div>
+        <div title="Électricité" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent">
+          <span style="width:10px;height:10px;border-radius:50%;background:#FBBF24"></span>
+        </div>
+        <div title="Chauffage" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent">
+          <span style="width:10px;height:10px;border-radius:50%;background:#e5a63e"></span>
+        </div>
+        <div title="Espaces verts" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent">
+          <span style="width:10px;height:10px;border-radius:50%;background:#34D399"></span>
+        </div>
+      </div>
+      <!-- Filtered list -->
+      <div style="flex:1;background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:12px;padding:8px">
+        <div style="padding:6px 12px;margin-bottom:4px;font-size:12px;font-weight:700;color:#5b8def">
+          Ascenseur <span style="color:#64748b;font-weight:400">— 2 prestataires</span>
+        </div>
+        <div class="item active">
+          <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">SC</div>
+          <div style="flex:1;min-width:0">
+            <div class="name">Schindler Ascenseurs</div>
+            <div class="meta">8 interv. · <span class="stars">★ 4.5</span> · 2 contrats</div>
+          </div>
+          <span class="dot" style="background:#22c55e"></span>
+        </div>
+        <div class="item">
+          <div class="avatar" style="background:linear-gradient(135deg,#5b8def,#4a7ad8)">OT</div>
+          <div style="flex:1;min-width:0">
+            <div class="name">Otis Élévateurs</div>
+            <div class="meta">3 interv. · <span class="stars">★ 4.0</span> · 1 contrat</div>
+          </div>
+          <span class="dot" style="background:#22c55e"></span>
+        </div>
+      </div>
+    </div>
+    <div class="pros-cons">
+      <strong>Comportement :</strong> Colonne de dots colorées = navigation par domaine. Clic = filtre la liste à droite.<br><br>
+      <strong>+ :</strong> Ultra-compact pour la navigation. Pas de scroll horizontal. On voit tous les domaines d'un coup. Le plus élégant.<br>
+      <strong>- :</strong> Les dots sans label demandent un tooltip/hover. Prend de la largeur en plus (52px).
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:32px;text-align:center;color:#475569;font-size:12px;padding-bottom:24px">5 variantes de tri par domaine — toutes dans le format split master-detail existant</p>
+</body>
+</html>
