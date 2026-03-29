@@ -1,5 +1,5 @@
 # Design Spec — E2E Tests All Modules
-**Date**: 2026-03-29
+**Date**: 2026-03-30 (mis à jour avec vrais noms de tables Supabase)
 **Fichier cible** : `e2e/all-modules.spec.ts`
 
 ---
@@ -126,17 +126,17 @@ Après chaque action UI critique, vérifier l'état en DB via `getAdminClient()`
 | # | Test | Vérification DB |
 |---|------|-----------------|
 | 1 | `/finance/appels-fonds` charge → liste visible | — |
-| 2 | Générer échéancier trimestriel (4 appels) | 4 rows dans `appels_fonds` |
-| 3 | Enregistrer paiement sur 1er appel | `appels_fonds.status = 'paid'` ou équivalent |
+| 2 | Générer échéancier trimestriel (4 appels) | 4 rows dans `call_for_funds` |
+| 3 | Enregistrer paiement sur 1er appel | `call_for_funds_lines.status = 'paid'` |
 
 ### Finance — Factures
 
 | # | Test | Vérification DB |
 |---|------|-----------------|
 | 1 | `/finance/factures` charge → liste visible | — |
-| 2 | Créer facture (fournisseur + montant + date échéance) | Row dans `factures` |
-| 3 | Approuver la facture | `factures.status = 'approved'` |
-| 4 | Marquer comme payée | `factures.status = 'paid'` |
+| 2 | Créer facture (fournisseur + montant + date échéance) | Row dans `supplier_invoices` |
+| 3 | Approuver la facture | `supplier_invoices.status = 'approved'` |
+| 4 | Marquer comme payée | `supplier_invoices.status = 'paid'` |
 
 ### Finance — Mouvements bancaires
 
@@ -144,7 +144,7 @@ Après chaque action UI critique, vérifier l'état en DB via `getAdminClient()`
 |---|------|-----------------|
 | 1 | `/finance/mouvements-bancaires` charge → liste visible | — |
 | 2 | Filtrer par compte (CC vs FT) → liste filtrée | — |
-| 3 | Catégoriser un mouvement → badge catégorie visible | `bank_movements.category` mis à jour |
+| 3 | Catégoriser un mouvement → badge catégorie visible | `bank_movements.account_category` mis à jour |
 
 ### Maintenance — Contrats
 
@@ -196,7 +196,7 @@ Après chaque action UI critique, vérifier l'état en DB via `getAdminClient()`
 |---|------|-----------------|
 | 1 | `/communication/mur` charge → posts visibles | — |
 | 2 | Publier nouveau post (titre + contenu) | Row dans `wall_posts`, visible en tête de liste |
-| 3 | Liker un post → compteur incrémenté | `wall_posts.likes_count` + 1 |
+| 3 | Liker un post → compteur incrémenté | Row créée dans `wall_likes` |
 
 ### Communication — Événements
 
@@ -218,8 +218,8 @@ Après chaque action UI critique, vérifier l'état en DB via `getAdminClient()`
 | # | Test | Vérification DB |
 |---|------|-----------------|
 | 1 | `/ventes-impayes/ventes` charge → liste visible | — |
-| 2 | Créer nouvelle vente (lot + acquéreur) | Row dans `ventes` |
-| 3 | Faire avancer workflow (étape 1 → 2) | `ventes.current_step` = 2 |
+| 2 | Créer nouvelle vente (lot + acquéreur) | Row dans `mutations` |
+| 3 | Faire avancer workflow (étape 1 → 2) | `mutations.status` mis à jour + row dans `mutation_steps` |
 | 4 | `/ventes-impayes/impayes` charge → liste impayés visible | — |
 
 ---
