@@ -149,16 +149,18 @@
 
 /* Body */
 .body {
-  max-width: 680px;
-  margin: 24px;
-  background: #1a1d2e;
+  max-width: 640px;
+  margin: 20px 24px;
+  background: #1e2138;
+  border: 1px solid rgba(148, 163, 184, 0.06);
   border-radius: 12px;
-  padding: 24px;
+  padding: 24px 28px;
   font-size: 14px;
   line-height: 1.8;
   color: #e2e8f0;
   white-space: pre-wrap;
   word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 /* Attachments */

@@ -8,7 +8,7 @@ export default function MurCoproPage() {
   const mur = useMur();
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${mur.selectedPostId ? styles.pageWithComments : ''}`}>
       {/* Sidebar */}
       <div className={styles.sidebarArea}>
         <MurSidebar
@@ -32,16 +32,18 @@ export default function MurCoproPage() {
             onTogglePin={mur.togglePin}
             onOpenEditor={mur.openEditor}
           />
-
-          {/* Comments section — shown under feed when a post is selected */}
-          {mur.selectedPostId && (
-            <PostComments
-              comments={mur.comments}
-              postId={mur.selectedPostId}
-              onAddComment={mur.addComment}
-            />
-          )}
         </div>
+      </div>
+
+      {/* Comments panel — right column */}
+      <div className={mur.selectedPostId ? styles.commentsArea : styles.commentsAreaHidden}>
+        {mur.selectedPostId && (
+          <PostComments
+            comments={mur.comments}
+            postId={mur.selectedPostId}
+            onAddComment={mur.addComment}
+          />
+        )}
       </div>
 
       {/* Editor modal */}

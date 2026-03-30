@@ -63,24 +63,28 @@
   gap: 12px;
   padding: 9px 14px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-left: 3px solid transparent;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .mailItem:hover {
   background: rgba(148, 163, 184, 0.03);
+  border-left-color: rgba(148, 163, 184, 0.15);
 }
 
 .mailItemSelected {
   background: rgba(59, 130, 246, 0.06);
+  border-left-color: #3b82f6;
 }
 
 .mailItemSelected:hover {
   background: rgba(59, 130, 246, 0.08);
+  border-left-color: #3b82f6;
 }
 
 .mailItemUnread {
-  border-left: 3px solid #3b82f6;
+  border-left-color: #3b82f6;
 }
 
 /* Avatar */

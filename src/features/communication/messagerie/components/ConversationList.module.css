@@ -153,6 +153,11 @@
 .itemActive {
   background: rgba(59, 130, 246, 0.06);
   border-left-color: #3b82f6;
+  border-left-width: 3px;
+}
+
+.itemActive:hover {
+  background: rgba(59, 130, 246, 0.08);
 }
 
 /* -- Avatar -- */

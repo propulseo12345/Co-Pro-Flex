@@ -1,36 +1,62 @@
 .page {
   display: grid;
   grid-template-columns: 200px 1fr;
-  gap: 16px;
-  min-height: calc(100vh - 80px);
-  padding: 16px;
+  gap: 0;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.pageWithComments {
+  grid-template-columns: 200px 1fr 340px;
 }
 
 .sidebarArea {
-  position: sticky;
-  top: 16px;
-  height: fit-content;
+  padding: 16px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .feedArea {
   display: flex;
   flex-direction: column;
-  align-items: center;
   min-width: 0;
+  overflow-y: auto;
+  padding: 16px;
 }
 
 .feedInner {
   width: 100%;
-  max-width: 720px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.commentsArea {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-left: 1px solid rgba(148, 163, 184, 0.08);
+  background: #131620;
+}
+
+.commentsAreaHidden {
+  display: none;
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
   .page {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
   .sidebarArea {
-    position: static;
+    border-right: none;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  .commentsArea {
+    border-left: none;
+    border-top: 1px solid rgba(148, 163, 184, 0.08);
   }
 }

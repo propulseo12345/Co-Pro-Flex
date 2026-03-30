@@ -1,26 +1,21 @@
-# Session State — 2026-03-30 18:00
+# Session State — 2026-03-31 01:15
 
 ## Branch
 v2
 
 ## Completed This Session
-- Audit complet plateforme : modules, backend, mocks, UI, infra
-- Migration AG : useAGContext, useGlobalVariables, useResolutionVariables → Supabase
-- Création useSyndicContract + syndic-contract.api.ts (requête contrat syndic)
-- Migration Maintenance : useContracts (constantes), suppression ContractsProvider (code mort)
-- Migration useLogbook : 4 mocks → 3 nouvelles tables Supabase + CoproContext
-- Création migration SQL : technical_documents, planned_works, insurance_policies + colonnes copros
-- Audit JSONB : 6 risques identifiés (vote_details AG = critique)
-- Ajout règle CLAUDE.md : explications en français simple obligatoires
+- Messagerie: bulles gradient bleu, dot statut animé, reply area polish, conversation active barre latérale
+- Mail: folder actif barre latérale 3px, MailList hover/selected border-left, MailReader body "feuille blanche"
+- Mur: layout 3 colonnes (sidebar|feed|commentaires), épingles barre jaune gauche, PostCard selected glow
+- Messagerie spacing: gap 16px, padding 20px, max-width 65%
 
 ## Next Task
-Phase 2 audit : modules non retravaillés (Communication, Ventes, Recouvrement, Social, Documents, Copropriétaires) — à retravailler avant de migrer leurs mocks
+Vérifier visuellement les 3 modules avec screenshots utilisateur et ajuster si besoin
 
 ## Blockers
 None
 
 ## Key Context
-- Modules retravaillés (AG, Finance, Maintenance) : mocks purgés sauf useBudget (type only)
-- Modules NON retravaillés : Communication, Ventes, Recouvrement, Social — garder mocks jusqu'à refonte
-- Tables vides : technical_documents, planned_works, insurance_policies — à peupler via UI
-- JSONB P1 : ag_resolutions.vote_details nécessite CHECK constraint (données légales)
+- Linter a modifié ChatPanel.module.css (bubble inline-flex, fit-content) — intégré dans nos edits
+- Erreur TS pré-existante dans useLogbookPage.ts (equipementsPrincipaux) — pas lié à nos changements
+- Mur page.tsx modifié : commentaires déplacés dans panneau droit, class pageWithComments conditionnel
