@@ -1,0 +1,291 @@
+/* ============================================================================
+   ConversationList — Liste latérale des conversations
+   ============================================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #131620;
+  border-right: 1px solid rgba(148, 163, 184, 0.08);
+  overflow: hidden;
+}
+
+/* -- Header (search + filters) -- */
+
+.header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+.unreadBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* -- Search -- */
+
+.searchWrapper {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 8px;
+  background: #1a1d2e;
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput::placeholder {
+  color: #64748b;
+}
+
+.searchInput:focus {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+/* -- Filter tabs -- */
+
+.filterTabs {
+  display: flex;
+  gap: 4px;
+  background: #0f1117;
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.filterTab {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.filterTab:hover {
+  color: #e2e8f0;
+}
+
+.filterTabActive {
+  background: #1a1d2e;
+  color: #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* -- Conversation list -- */
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 4px;
+}
+
+/* -- Conversation item -- */
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+
+.item:hover {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.itemActive {
+  background: rgba(59, 130, 246, 0.06);
+  border-left-color: #3b82f6;
+}
+
+/* -- Avatar -- */
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* -- Content -- */
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.timeUnread {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.preview {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.previewUnread {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.tagDirect {
+  background: rgba(139, 92, 246, 0.1);
+  color: #a78bfa;
+}
+
+.tagGroup {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.tagPrestataire {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+}
+
+.itemUnreadBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* -- Empty state -- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 8px;
+}
+
+.emptyIcon {
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}

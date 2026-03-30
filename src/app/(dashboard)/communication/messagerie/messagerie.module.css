@@ -1,0 +1,11 @@
+/* ============================================================================
+   Messagerie — Page layout (2-column grid)
+   ============================================================================ */
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+  background: #0f1117;
+}
