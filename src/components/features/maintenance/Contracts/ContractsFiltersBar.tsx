@@ -1,7 +1,7 @@
 'use client';
 
 import { StatutContrat, TypeContrat } from '@/types';
-import { MOCK_TYPES_CONTRAT, MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
+import { TYPES_CONTRAT, CATEGORIES_CONTRAT, type CategorieContrat } from '@/lib/constants/categories-contrat';
 import { Search } from 'lucide-react';
 import styles from './Contracts.module.css';
 
@@ -34,8 +34,8 @@ export default function ContractsFiltersBar({
 }: ContractsFiltersBarProps) {
     // Filtrer les types selon la catégorie sélectionnée
     const filteredTypes = categorieFilter === 'TOUS'
-        ? MOCK_TYPES_CONTRAT
-        : MOCK_TYPES_CONTRAT.filter(t => t.categorie === categorieFilter);
+        ? TYPES_CONTRAT
+        : TYPES_CONTRAT.filter(t => t.categorie === categorieFilter);
 
     return (
         <div className={styles.filtersBar}>
@@ -73,7 +73,7 @@ export default function ContractsFiltersBar({
                     className={styles.filterSelect}
                 >
                     <option value="TOUS">Toutes les catégories</option>
-                    {MOCK_CATEGORIES_CONTRAT.map(cat => (
+                    {CATEGORIES_CONTRAT.map(cat => (
                         <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                 </select>

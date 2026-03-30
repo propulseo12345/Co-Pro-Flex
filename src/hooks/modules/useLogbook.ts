@@ -1,12 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useSyncExternalStore } from 'react';
-import {
-    MOCK_INFORMATIONS_COPROPRIETE,
-    MOCK_TRAVAUX_PREVISIONNELS,
-    MOCK_DOCUMENTS_TECHNIQUES,
-    MOCK_ASSURANCES_COPROPRIETE
-} from '@/data/mock';
+import { useState, useEffect, useMemo, useCallback, useSyncExternalStore } from 'react';
 import {
     getAllContrats,
     subscribeToContracts,
@@ -15,6 +9,9 @@ import {
     useLogbook as useLogbookSupabase,
     useProviders,
 } from '@/hooks/modules/useMaintenanceData';
+import { useCopro } from '@/providers/CoproContext';
+import { useSyndicContract } from '@/hooks/useSyndicContract';
+import { createClient } from '@/lib/supabase/client';
 import type { LogbookOverview, LogbookAlert, LogbookEntryInsert } from '@/types/supabase';
 import type {
     Intervention,
@@ -112,6 +109,10 @@ const LABELS_FILTRES_KPI: Record<Exclude<FiltreKpi, null>, string> = {
 };
 
 export function useLogbook() {
+    // === CONTEXTE COPRO + SYNDIC ===
+    const { currentCopro, currentCoproId } = useCopro();
+    const { syndicInfo } = useSyndicContract(currentCoproId);
+
     // Synchroniser avec le service partagé des contrats
     const contrats = useSyncExternalStore(
         subscribeToContracts,
@@ -134,6 +135,85 @@ export function useLogbook() {
         providers: dbProviders,
         createProvider,
     } = useProviders();
+
+    // === SUPABASE: documents techniques, travaux, assurances ===
+    const [technicalDocs, setTechnicalDocs] = useState<DocumentTechnique[]>([]);
+    const [plannedWorks, setPlannedWorks] = useState<Array<{ id: string; titre: string; description: string; type: string; datePrevisionnelle: string; dateVote?: string; montantEstime: number; montantVote?: number; statut: string; priorite: string; issuPPT: boolean; observations?: string }>>([]);
+    const [insurancePolicies, setInsurancePolicies] = useState<ContratAssurance[]>([]);
+
+    useEffect(() => {
+        if (!currentCoproId) return;
+        const supabase = createClient();
+
+        // Charger les documents techniques
+        supabase
+            .from('technical_documents')
+            .select('*')
+            .eq('copro_id', currentCoproId)
+            .order('doc_type')
+            .then(({ data }) => {
+                if (data) {
+                    setTechnicalDocs(data.map((d: Record<string, unknown>) => ({
+                        id: d.id as string,
+                        nom: d.name as string,
+                        type: (d.doc_type as string).toUpperCase(),
+                        dateAjout: d.added_date as string,
+                        dateValidite: d.validity_date as string | undefined,
+                        url: d.storage_path as string || '#',
+                        observations: d.observations as string | undefined,
+                    })));
+                }
+            });
+
+        // Charger les travaux prévisionnels
+        supabase
+            .from('planned_works')
+            .select('*')
+            .eq('copro_id', currentCoproId)
+            .order('planned_date')
+            .then(({ data }) => {
+                if (data) {
+                    setPlannedWorks(data.map((w: Record<string, unknown>) => ({
+                        id: w.id as string,
+                        titre: w.title as string,
+                        description: (w.description as string) || '',
+                        type: (w.work_type as string).toUpperCase(),
+                        datePrevisionnelle: w.planned_date as string || '',
+                        dateVote: w.vote_date as string | undefined,
+                        montantEstime: Number(w.estimated_amount) || 0,
+                        montantVote: w.voted_amount ? Number(w.voted_amount) : undefined,
+                        statut: (w.status as string).toUpperCase(),
+                        priorite: (w.priority as string).toUpperCase(),
+                        issuPPT: w.from_ppt as boolean,
+                        observations: w.observations as string | undefined,
+                    })));
+                }
+            });
+
+        // Charger les assurances
+        supabase
+            .from('insurance_policies')
+            .select('*')
+            .eq('copro_id', currentCoproId)
+            .then(({ data }) => {
+                if (data) {
+                    setInsurancePolicies(data.map((p: Record<string, unknown>) => ({
+                        id: p.id as string,
+                        type: 'ASSURANCE' as const,
+                        sousType: (p.sub_type as string).toUpperCase(),
+                        nom: p.insurer_name as string,
+                        assureur: p.insurer_name as string,
+                        numeroPolice: p.policy_number as string,
+                        dateDebut: (p.created_at as string).split('T')[0],
+                        dateFin: '',
+                        primeAnnuelle: Number(p.annual_premium) || 0,
+                        franchise: p.deductible ? Number(p.deductible) : undefined,
+                        garanties: (p.guarantees as string[]) || [],
+                        observations: p.observations as string | undefined,
+                    })));
+                }
+            });
+    }, [currentCoproId]);
 
     // Mapper les entrées DB vers le type front
     const interventions = useMemo<Intervention[]>(
@@ -191,17 +271,34 @@ export function useLogbook() {
     // États formulaires
     const [newInterventionForm, setNewInterventionForm] = useState<InterventionFormData>(getInitialInterventionForm());
     const [formData, setFormData] = useState<CoproprieteFormData>({
-        nom: MOCK_INFORMATIONS_COPROPRIETE.nom,
-        adresse: MOCK_INFORMATIONS_COPROPRIETE.adresse,
-        codePostal: MOCK_INFORMATIONS_COPROPRIETE.codePostal,
-        ville: MOCK_INFORMATIONS_COPROPRIETE.ville,
-        anneeConstruction: MOCK_INFORMATIONS_COPROPRIETE.anneeConstruction,
-        nombreBatiments: MOCK_INFORMATIONS_COPROPRIETE.nombreBatiments,
-        nombreLots: MOCK_INFORMATIONS_COPROPRIETE.nombreLots,
-        syndicNom: MOCK_INFORMATIONS_COPROPRIETE.syndic.nom,
-        syndicTelephone: MOCK_INFORMATIONS_COPROPRIETE.syndic.telephone,
-        syndicEmail: MOCK_INFORMATIONS_COPROPRIETE.syndic.email || '',
+        nom: '',
+        adresse: '',
+        codePostal: '',
+        ville: '',
+        anneeConstruction: 0,
+        nombreBatiments: 1,
+        nombreLots: 0,
+        syndicNom: '',
+        syndicTelephone: '',
+        syndicEmail: '',
     });
+
+    // Synchroniser formData avec les données Supabase (CoproContext + SyndicContract)
+    useEffect(() => {
+        if (!currentCopro) return;
+        setFormData({
+            nom: currentCopro.name || '',
+            adresse: currentCopro.address || '',
+            codePostal: currentCopro.postal_code || '',
+            ville: currentCopro.city || '',
+            anneeConstruction: (currentCopro as Record<string, unknown>).construction_year as number || 0,
+            nombreBatiments: (currentCopro as Record<string, unknown>).buildings_count as number || 1,
+            nombreLots: (currentCopro as Record<string, unknown>).lots_count as number || 0,
+            syndicNom: syndicInfo.nom || '',
+            syndicTelephone: syndicInfo.telephone || '',
+            syndicEmail: syndicInfo.email || '',
+        });
+    }, [currentCopro, syndicInfo]);
 
     // Données — prestataires depuis Supabase
     const allPrestataires = useMemo(() => {
@@ -243,7 +340,7 @@ export function useLogbook() {
 
     const getDocumentsForEquipement = useCallback((equipement: string) => {
         const keywords = equipement.toLowerCase().split(' ');
-        return MOCK_DOCUMENTS_TECHNIQUES.filter(d => {
+        return technicalDocs.filter(d => {
             const docText = `${d.nom} ${d.type}`.toLowerCase();
             return keywords.some(keyword => docText.includes(keyword)) ||
                 (d.type === 'CONTROLE_ASCENSEUR' && equipement.toLowerCase().includes('ascenseur')) ||
@@ -324,7 +421,7 @@ export function useLogbook() {
 
     // Filtrage documents
     const filteredDocuments = useMemo(() => {
-        return MOCK_DOCUMENTS_TECHNIQUES.filter(doc => {
+        return technicalDocs.filter(doc => {
             const matchesSearch = searchDocuments === '' ||
                 doc.nom.toLowerCase().includes(searchDocuments.toLowerCase());
 
@@ -354,10 +451,10 @@ export function useLogbook() {
     }, [filteredDocuments]);
 
     const documentStats = useMemo<DocumentStats>(() => {
-        const total = MOCK_DOCUMENTS_TECHNIQUES.length;
-        const expired = MOCK_DOCUMENTS_TECHNIQUES.filter(d => isDocumentExpired(d.dateValidite)).length;
-        const expiring = MOCK_DOCUMENTS_TECHNIQUES.filter(d => isDocumentExpiringSoon(d.dateValidite)).length;
-        const valid = MOCK_DOCUMENTS_TECHNIQUES.filter(d => !d.dateValidite || (!isDocumentExpired(d.dateValidite) && !isDocumentExpiringSoon(d.dateValidite))).length;
+        const total = technicalDocs.length;
+        const expired = technicalDocs.filter(d => isDocumentExpired(d.dateValidite)).length;
+        const expiring = technicalDocs.filter(d => isDocumentExpiringSoon(d.dateValidite)).length;
+        const valid = technicalDocs.filter(d => !d.dateValidite || (!isDocumentExpired(d.dateValidite) && !isDocumentExpiringSoon(d.dateValidite))).length;
         return { total, expired, expiring, valid };
     }, []);
 
@@ -365,8 +462,8 @@ export function useLogbook() {
     const kpis = useMemo<LogbookKpis>(() => ({
         enCours: interventions.filter(i => i.statut === 'EN_COURS').length,
         planifiees: interventions.filter(i => i.statut === 'PLANIFIEE').length,
-        travauxPrevus: MOCK_TRAVAUX_PREVISIONNELS.length,
-        travauxVotes: MOCK_TRAVAUX_PREVISIONNELS.filter(t => t.statut === 'VOTE').length,
+        travauxPrevus: plannedWorks.length,
+        travauxVotes: plannedWorks.filter(t => t.statut === 'VOTE').length,
         coutAnnee: interventions
             .filter(i => new Date(i.date).getFullYear() === new Date().getFullYear())
             .reduce((sum, i) => sum + (i.cout || 0), 0),
@@ -376,26 +473,26 @@ export function useLogbook() {
     }), [interventions]);
 
     // Handlers
-    const handleSaveInfo = useCallback(() => {
-        // Mise à jour des informations de la copropriété
-        // Note: En production, cela sera persisté via Supabase
-        Object.assign(MOCK_INFORMATIONS_COPROPRIETE, {
-            nom: formData.nom,
-            adresse: formData.adresse,
-            codePostal: formData.codePostal,
-            ville: formData.ville,
-            anneeConstruction: formData.anneeConstruction,
-            nombreBatiments: formData.nombreBatiments,
-            nombreLots: formData.nombreLots,
-            syndic: {
-                ...MOCK_INFORMATIONS_COPROPRIETE.syndic,
-                nom: formData.syndicNom,
-                telephone: formData.syndicTelephone,
-                email: formData.syndicEmail,
-            },
-        });
+    const handleSaveInfo = useCallback(async () => {
+        if (!currentCoproId) return;
+        const supabase = createClient();
+
+        // Sauvegarder les infos copropriété dans Supabase
+        await supabase
+            .from('copros')
+            .update({
+                name: formData.nom,
+                address: formData.adresse,
+                postal_code: formData.codePostal,
+                city: formData.ville,
+                construction_year: formData.anneeConstruction || null,
+                buildings_count: formData.nombreBatiments || null,
+                lots_count: formData.nombreLots || null,
+            })
+            .eq('id', currentCoproId);
+
         setIsEditing(false);
-    }, [formData]);
+    }, [formData, currentCoproId]);
 
     /** Vérifie si une intervention est visible avec le filtre KPI actuel */
     const estVisibleAvecFiltreKpi = useCallback((intervention: Intervention, filtre: FiltreKpi): boolean => {
@@ -736,11 +833,24 @@ export function useLogbook() {
 
     return {
         // Données — interventions depuis Supabase
-        coproprieteInfo: MOCK_INFORMATIONS_COPROPRIETE,
+        coproprieteInfo: {
+            nom: formData.nom,
+            adresse: formData.adresse,
+            codePostal: formData.codePostal,
+            ville: formData.ville,
+            anneeConstruction: formData.anneeConstruction,
+            nombreBatiments: formData.nombreBatiments,
+            nombreLots: formData.nombreLots,
+            syndic: {
+                nom: formData.syndicNom,
+                telephone: formData.syndicTelephone,
+                email: formData.syndicEmail,
+            },
+        },
         contrats,
-        travaux: MOCK_TRAVAUX_PREVISIONNELS,
-        documents: MOCK_DOCUMENTS_TECHNIQUES,
-        assurances: MOCK_ASSURANCES_COPROPRIETE,
+        travaux: plannedWorks,
+        documents: technicalDocs,
+        assurances: insurancePolicies,
         allPrestataires,
         prestatairesOptions,
         interventionAlerts,

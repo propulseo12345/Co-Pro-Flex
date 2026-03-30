@@ -25,6 +25,16 @@ Seules les lectures (Read, Grep, Glob) sont exemptées.
 
 ---
 
+## EXPLICATION EN FRANÇAIS SIMPLE (OBLIGATOIRE)
+
+Toute explication technique DOIT être formulée en français accessible, comme si on parlait à quelqu'un qui ne code pas. Concrètement :
+- **Éviter le jargon** ou le traduire immédiatement (ex: « une migration = un script qui modifie la structure de la base de données »)
+- **Expliquer le pourquoi** avant le comment : quel problème on résout, quel risque si on ne le fait pas
+- **Utiliser des analogies** quand c'est possible (ex: « JSONB c'est comme un tiroir fourre-tout vs une armoire avec des tiroirs étiquetés »)
+- Les blocs de code restent techniques, mais le texte autour doit être compréhensible par tous
+
+---
+
 ## FORMAT DE RETOUR (OBLIGATOIRE)
 
 À chaque fix ou modification :

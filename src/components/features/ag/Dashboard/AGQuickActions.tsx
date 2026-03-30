@@ -11,6 +11,7 @@
 
 import Link from 'next/link';
 import { useAGContext, type QuickAction } from '@/hooks/modules/useAGContext';
+import { useCopro } from '@/providers/CoproContext';
 import { AlertTriangle, Info, AlertCircle, CheckCircle } from 'lucide-react';
 import styles from './AGQuickActions.module.css';
 import clsx from 'clsx';
@@ -20,7 +21,8 @@ import clsx from 'clsx';
 // ============================================
 
 export function AGQuickActions() {
-  const { state, stateLabel, actionsRecommandees, joursAvantProchaine, alertes } = useAGContext();
+  const { currentCoproId } = useCopro();
+  const { state, stateLabel, actionsRecommandees, joursAvantProchaine, alertes, isLoading } = useAGContext(currentCoproId);
 
   return (
     <div className={styles.container}>

@@ -8,6 +8,8 @@ import type { AGData, Resolution, VoteData, Signataire, PresenceData } from '../
 import { INITIAL_SIGNATAIRES, LOAD_TIMEOUT_MS } from '../domain/constants';
 import { generatePVText, generatePDFDocument, getResolutionResult, calculatePVStats } from '../domain/utils';
 import { useGlobalVariables } from '@/hooks/useGlobalVariables';
+import { useCopro } from '@/providers/CoproContext';
+import { useSyndicContract } from '@/hooks/useSyndicContract';
 import { parseFullName, type ExtractedSignataire } from '@/lib/utils/variable-resolution';
 import type { ModeSignature } from '@/types/models/pv-signature';
 import { LABELS_MODE_SIGNATURE } from '@/types/models/pv-signature';
@@ -15,7 +17,6 @@ import { saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import { logger } from '@/lib/utils/logger';
 import { updateAgCurrentStep } from '@/lib/ag/api';
 import { updateAgStatus } from '@/lib/ag/api/meetings.api';
-import { useCopro } from '@/providers/CoproContext';
 import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 
 interface UsePVPageProps {
@@ -80,7 +81,8 @@ interface PVBundleResponse {
 
 export function usePVPage({ agId }: UsePVPageProps) {
   const router = useRouter();
-  const { currentCoproId } = useCopro();
+  const { currentCoproId, currentCopro } = useCopro();
+  const { contratSyndic } = useSyndicContract(currentCoproId);
 
   // Data state
   const [agData, setAgData] = useState<AGData | null>(null);
@@ -134,6 +136,9 @@ export function usePVPage({ agId }: UsePVPageProps) {
   // Global variables hook
   const { mergeVariables } = useGlobalVariables({
     agId,
+    contratSyndic,
+    nomCopropriete: currentCopro?.name || '',
+    adresseCopropriete: [currentCopro?.address, currentCopro?.postal_code, currentCopro?.city].filter(Boolean).join(' '),
     userVariables: variableValues,
   });
 

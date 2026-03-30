@@ -1,7 +1,7 @@
 'use client';
 
 import { ContratDetaille, StatutContrat, TypeContrat } from '@/types';
-import type { CategorieContrat } from '@/data/mock';
+import type { CategorieContrat } from '@/lib/constants/categories-contrat';
 import { ContractsFiltersBar, ContractsTable } from '@/components/features/maintenance/Contracts';
 import styles from '@/app/(dashboard)/maintenance/contracts/contracts.module.css';
 

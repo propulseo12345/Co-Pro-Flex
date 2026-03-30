@@ -12,7 +12,6 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { MOCK_CONTRAT_SYNDIC, MOCK_PARAMETRES } from '@/data/mock';
 import {
     parseVariables,
     extractVariableNames,
@@ -59,6 +58,17 @@ export interface UseResolutionVariablesOptions {
         budgetPrevisionnel?: number;
         fondsTravaux?: number;
     };
+    /** Infos syndic pour pré-remplissage */
+    syndicInfo?: {
+        nom?: string;
+        adresse?: string;
+        telephone?: string;
+        email?: string;
+    };
+    /** Nom de la copropriété */
+    nomCopropriete?: string;
+    /** Adresse de la copropriété */
+    adresseCopropriete?: string;
 }
 
 export interface UseResolutionVariablesReturn {
@@ -105,7 +115,7 @@ function generateSuggestions(
     const exercice = options.exercice || (new Date().getFullYear() + 1);
 
     for (const name of variableNames) {
-        const suggestion = getSuggestionForVariable(name, exercice, options.financeData);
+        const suggestion = getSuggestionForVariable(name, exercice, options.financeData, options.syndicInfo, options.nomCopropriete, options.adresseCopropriete);
         if (suggestion) {
             suggestions[name] = suggestion;
         }
@@ -120,7 +130,10 @@ function generateSuggestions(
 function getSuggestionForVariable(
     name: string,
     exercice: string | number,
-    financeData?: UseResolutionVariablesOptions['financeData']
+    financeData?: UseResolutionVariablesOptions['financeData'],
+    syndicInfo?: UseResolutionVariablesOptions['syndicInfo'],
+    nomCopropriete?: string,
+    adresseCopropriete?: string
 ): string | null {
     const lowerName = name.toLowerCase();
 
@@ -140,24 +153,24 @@ function getSuggestionForVariable(
 
     // === SYNDIC ===
     if (lowerName === 'nom_syndic' || lowerName === 'syndic') {
-        return MOCK_CONTRAT_SYNDIC.cabinetNom || MOCK_CONTRAT_SYNDIC.nomSyndic || '';
+        return syndicInfo?.nom || '';
     }
     if (lowerName === 'adresse_syndic') {
-        return MOCK_CONTRAT_SYNDIC.adresse || '';
+        return syndicInfo?.adresse || '';
     }
     if (lowerName === 'telephone_syndic' || lowerName === 'tel_syndic') {
-        return MOCK_CONTRAT_SYNDIC.telephone || '';
+        return syndicInfo?.telephone || '';
     }
     if (lowerName === 'email_syndic') {
-        return MOCK_CONTRAT_SYNDIC.email || '';
+        return syndicInfo?.email || '';
     }
 
     // === COPROPRIÉTÉ ===
     if (lowerName === 'nom_copropriete' || lowerName === 'copropriete') {
-        return MOCK_PARAMETRES.informationsCopro?.nom || 'Résidence Les Jardins';
+        return nomCopropriete || '';
     }
     if (lowerName === 'adresse_copropriete' || lowerName === 'adresse') {
-        return MOCK_PARAMETRES.informationsCopro?.adresse || '';
+        return adresseCopropriete || '';
     }
 
     // === FINANCE ===
@@ -177,11 +190,6 @@ function getSuggestionForVariable(
                 return formatMontant(financeData.fondsTravaux);
             }
         }
-    }
-
-    // Valeur mock par défaut pour certaines variables courantes
-    if (lowerName === 'solde' || lowerName === 'solde_compte') {
-        return '45 230,00'; // Valeur mock
     }
 
     return null;

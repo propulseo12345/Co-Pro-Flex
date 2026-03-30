@@ -3,6 +3,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { Coproprietaire, EditingVariable, Resolution } from '../types';
 import { useGlobalVariables } from '@/hooks/useGlobalVariables';
+import { useCopro } from '@/providers/CoproContext';
+import { useSyndicContract } from '@/hooks/useSyndicContract';
 import { validateResolutionVariables } from '@/components/features/ag/Session/utils';
 import { saveDraft } from '@/lib/ag/draft-persistence';
 import type { FinancingSchedule } from '@/components/features/ag/FinancingScheduleEditor/FinancingScheduleEditor';
@@ -49,6 +51,8 @@ export function useSessionVariables({
   agId,
   coproprietaires,
 }: UseSessionVariablesParams): UseSessionVariablesReturn {
+  const { currentCopro, currentCoproId } = useCopro();
+  const { contratSyndic } = useSyndicContract(currentCoproId);
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
   const [editingVariable, setEditingVariable] = useState<EditingVariable | null>(null);
   const [showVariableModal, setShowVariableModal] = useState(false);
@@ -61,6 +65,9 @@ export function useSessionVariables({
 
   const { prefillVariables, mergeVariables } = useGlobalVariables({
     agId,
+    contratSyndic,
+    nomCopropriete: currentCopro?.name || '',
+    adresseCopropriete: [currentCopro?.address, currentCopro?.postal_code, currentCopro?.city].filter(Boolean).join(' '),
     userVariables: variableValues
   });
 

@@ -1,18 +1,26 @@
-# Session State — 2026-03-30 02:30
+# Session State — 2026-03-30 18:00
 
 ## Branch
 v2
 
 ## Completed This Session
-- Code review complète AG, Finance, Maintenance (3 agents parallèles)
-- 9 fix appliqués : Art. 25-1, 'urgent'→'high', 'pending_renewal'→'to_renew', toast delete provider, catch échéancier, statusOrder mort, DEV_COPRO_ID, useEffect provider, useMemo AG
+- Audit complet plateforme : modules, backend, mocks, UI, infra
+- Migration AG : useAGContext, useGlobalVariables, useResolutionVariables → Supabase
+- Création useSyndicContract + syndic-contract.api.ts (requête contrat syndic)
+- Migration Maintenance : useContracts (constantes), suppression ContractsProvider (code mort)
+- Migration useLogbook : 4 mocks → 3 nouvelles tables Supabase + CoproContext
+- Création migration SQL : technical_documents, planned_works, insurance_policies + colonnes copros
+- Audit JSONB : 6 risques identifiés (vote_details AG = critique)
+- Ajout règle CLAUDE.md : explications en français simple obligatoires
 
 ## Next Task
-- Chantiers restants review : `as any` Supabase (typage), inline styles → CSS Modules, console.error → logger, alert/confirm → toast, localStorage minutes → Supabase
+Phase 2 audit : modules non retravaillés (Communication, Ventes, Recouvrement, Social, Documents, Copropriétaires) — à retravailler avant de migrer leurs mocks
 
 ## Blockers
 None
 
 ## Key Context
-- Le rapport complet de review est dans l'historique conversation (10 critiques, 10 importants, 5 conventions récurrentes)
-- Les fix "risque modéré" (#5 DEV_COPRO_ID, #19 useEffect, #4 useMemo) sont faits et build OK
+- Modules retravaillés (AG, Finance, Maintenance) : mocks purgés sauf useBudget (type only)
+- Modules NON retravaillés : Communication, Ventes, Recouvrement, Social — garder mocks jusqu'à refonte
+- Tables vides : technical_documents, planned_works, insurance_policies — à peupler via UI
+- JSONB P1 : ag_resolutions.vote_details nécessite CHECK constraint (données légales)

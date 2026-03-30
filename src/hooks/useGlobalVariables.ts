@@ -10,7 +10,6 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { MOCK_CONTRAT_SYNDIC, MOCK_PARAMETRES } from '@/data/mock';
 import type { ContratSyndic } from '@/types';
 import {
     resolveGlobalVariables,
@@ -21,8 +20,12 @@ import {
 interface UseGlobalVariablesOptions {
     /** ID de l'AG pour charger les données spécifiques */
     agId?: string;
-    /** Contrat syndic (optionnel, utilise le mock par défaut) */
+    /** Contrat syndic (optionnel) */
     contratSyndic?: ContratSyndic;
+    /** Nom de la copropriété */
+    nomCopropriete?: string;
+    /** Adresse de la copropriété */
+    adresseCopropriete?: string;
     /** Exercice comptable (année) */
     exercice?: number | string;
     /** Variables spécifiques saisies par l'utilisateur */
@@ -57,21 +60,22 @@ interface UseGlobalVariablesReturn {
  */
 export function useGlobalVariables(options: UseGlobalVariablesOptions = {}): UseGlobalVariablesReturn {
     const {
-        contratSyndic = MOCK_CONTRAT_SYNDIC,
+        contratSyndic,
+        nomCopropriete = '',
+        adresseCopropriete = '',
         exercice = new Date().getFullYear() + 1,
         userVariables = {}
     } = options;
 
     // Construire le contexte global
     const globalContext = useMemo<GlobalVariablesContext>(() => ({
-        contratSyndic,
-        nomCopropriete: MOCK_PARAMETRES.informationsCopro?.nom || 'Résidence Les Jardins',
-        adresseCopropriete: MOCK_PARAMETRES.informationsCopro?.adresse || '',
-        // Les modalités peuvent être chargées depuis les données AG si disponibles
+        contratSyndic: contratSyndic || { id: '', nomSyndic: '', cabinetNom: '' } as ContratSyndic,
+        nomCopropriete,
+        adresseCopropriete,
         modalitePaiementBudget: userVariables['modalites_paiement_budget'] || 'trimestriel',
         modalitePaiementFonds: userVariables['modalites_paiement_fonds'] || 'trimestriel',
         exercice
-    }), [contratSyndic, exercice, userVariables]);
+    }), [contratSyndic, nomCopropriete, adresseCopropriete, exercice, userVariables]);
 
     // Variables pré-remplies depuis le contexte global
     const prefillVariables = useMemo(() => {
@@ -133,13 +137,15 @@ export function useGlobalVariables(options: UseGlobalVariablesOptions = {}): Use
  * Utile pour l'initialisation côté serveur ou hors composant
  */
 export function getPrefillVariables(
-    contratSyndic: ContratSyndic = MOCK_CONTRAT_SYNDIC,
-    exercice: number | string = new Date().getFullYear() + 1
+    contratSyndic?: ContratSyndic,
+    exercice: number | string = new Date().getFullYear() + 1,
+    nomCopropriete = '',
+    adresseCopropriete = ''
 ): Record<string, string> {
     const context: GlobalVariablesContext = {
-        contratSyndic,
-        nomCopropriete: MOCK_PARAMETRES.informationsCopro?.nom || '',
-        adresseCopropriete: MOCK_PARAMETRES.informationsCopro?.adresse || '',
+        contratSyndic: contratSyndic || { id: '', nomSyndic: '', cabinetNom: '' } as ContratSyndic,
+        nomCopropriete,
+        adresseCopropriete,
         exercice
     };
 
@@ -149,8 +155,8 @@ export function getPrefillVariables(
 /**
  * Obtient le nom du syndic correctement formaté
  */
-export function getSyndicName(contratSyndic: ContratSyndic = MOCK_CONTRAT_SYNDIC): string {
-    // Priorité : cabinetNom (raison sociale) > nomSyndic
+export function getSyndicName(contratSyndic?: ContratSyndic): string {
+    if (!contratSyndic) return '';
     return contratSyndic.cabinetNom || contratSyndic.nomSyndic || '';
 }
 

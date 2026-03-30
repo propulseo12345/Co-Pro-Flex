@@ -5,13 +5,12 @@
  *              et génère des actions recommandées contextuelles.
  *
  * @created 2026-01-19 (Bug #75)
+ * @updated 2026-03-30 — Migration mock → Supabase (listAgMeetings)
  */
 
-import {
-  getProchaineAssemblee,
-  getAssembleesPassees,
-  type AssembleeGenerale,
-} from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
+import { listAgMeetings } from '@/lib/ag/api/meetings.api';
+import type { AgOverview } from '@/lib/ag/types';
 import type { LucideIcon } from 'lucide-react';
 import {
   Plus,
@@ -69,12 +68,14 @@ export interface AGAlert {
 export interface AGContextInfo {
   state: AGContextState;
   stateLabel: string;
-  prochaineAG: AssembleeGenerale | null;
-  derniereAG: AssembleeGenerale | null;
+  prochaineAG: AgOverview | null;
+  derniereAG: AgOverview | null;
   joursAvantProchaine: number | null;
   joursApresDerniere: number | null;
   alertes: AGAlert[];
   actionsRecommandees: QuickAction[];
+  isLoading: boolean;
+  error: string | null;
 }
 
 // ============================================
@@ -99,8 +100,8 @@ function formatDateFR(dateString: string): string {
 // ============================================
 
 function determineAGState(
-  prochaineAG: AssembleeGenerale | null,
-  derniereAG: AssembleeGenerale | null,
+  prochaineAG: AgOverview | null,
+  derniereAG: AgOverview | null,
   joursAvant: number | null,
   joursApres: number | null
 ): AGContextState {
@@ -126,7 +127,7 @@ function determineAGState(
 
   // Post-AG (PV à rédiger)
   if (!prochaineAG && derniereAG && joursApres !== null && joursApres <= 30) {
-    const pvDiffuse = derniereAG.statut === 'pv_diffuse';
+    const pvDiffuse = derniereAG.status === 'pv_sent';
     if (!pvDiffuse) {
       return 'ag_post';
     }
@@ -167,8 +168,8 @@ function getStateLabel(state: AGContextState, joursAvant: number | null): string
 
 function generateAlertes(
   state: AGContextState,
-  prochaineAG: AssembleeGenerale | null,
-  derniereAG: AssembleeGenerale | null,
+  prochaineAG: AgOverview | null,
+  derniereAG: AgOverview | null,
   joursAvant: number | null,
   joursApres: number | null
 ): AGAlert[] {
@@ -192,7 +193,7 @@ function generateAlertes(
     alertes.push({
       type: 'info',
       title: 'AG aujourd\'hui',
-      message: `L'Assemblée Générale se tient aujourd'hui à ${prochaineAG?.heure_debut || '18h00'}.`,
+      message: `L'Assemblée Générale se tient aujourd'hui à 18h00.`,
       action: {
         label: 'Démarrer la session',
         href: `/ag/${prochaineAG?.id}/session`,
@@ -236,8 +237,8 @@ function generateAlertes(
 
 function generateQuickActions(
   state: AGContextState,
-  prochaineAG: AssembleeGenerale | null,
-  derniereAG: AssembleeGenerale | null
+  prochaineAG: AgOverview | null,
+  derniereAG: AgOverview | null
 ): QuickAction[] {
   switch (state) {
     // ═══════════════════════════════════════════
@@ -280,7 +281,7 @@ function generateQuickActions(
         {
           id: 'ordre_du_jour',
           label: 'Préparer l\'ordre du jour',
-          description: `AG du ${formatDateFR(prochaineAG!.date_ag)}`,
+          description: `AG du ${formatDateFR(prochaineAG!.meeting_date)}`,
           icon: ClipboardList,
           href: `/ag/${prochaineAG!.id}/agenda`,
           priority: 'high',
@@ -315,7 +316,7 @@ function generateQuickActions(
     // PHASE CONVOCATION (15-45 jours)
     // ═══════════════════════════════════════════
     case 'ag_convocation': {
-      const convocationEnvoyee = prochaineAG?.statut === 'convoquee';
+      const convocationEnvoyee = prochaineAG?.status === 'convoked';
       return [
         {
           id: 'envoyer_convocations',
@@ -435,7 +436,7 @@ function generateQuickActions(
         {
           id: 'rediger_pv',
           label: 'Rédiger le procès-verbal',
-          description: `AG du ${formatDateFR(derniereAG!.date_ag)}`,
+          description: `AG du ${formatDateFR(derniereAG!.meeting_date)}`,
           icon: Edit,
           href: `/ag/${derniereAG!.id}/pv`,
           priority: 'high',
@@ -504,19 +505,69 @@ function generateQuickActions(
 // HOOK PRINCIPAL
 // ============================================
 
-export function useAGContext(): AGContextInfo {
+const EMPTY_CONTEXT: AGContextInfo = {
+  state: 'no_ag_planned',
+  stateLabel: 'Chargement…',
+  prochaineAG: null,
+  derniereAG: null,
+  joursAvantProchaine: null,
+  joursApresDerniere: null,
+  alertes: [],
+  actionsRecommandees: [],
+  isLoading: true,
+  error: null,
+};
+
+export function useAGContext(coproId: string | null): AGContextInfo {
+  const [meetings, setMeetings] = useState<AgOverview[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!coproId) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+
+    listAgMeetings(coproId)
+      .then((data) => {
+        if (!cancelled) setMeetings(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Erreur chargement AG');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [coproId]);
+
+  if (isLoading || !coproId) return EMPTY_CONTEXT;
+
   const now = new Date();
-  const prochaineAG = getProchaineAssemblee() || null;
-  const agPassees = getAssembleesPassees();
-  const derniereAG = agPassees[0] || null;
+  const today = now.toISOString().split('T')[0];
+
+  // Séparer futur/passé (même logique que les anciennes fonctions mock)
+  const prochaineAG = meetings
+    .filter((m) => m.meeting_date >= today && m.status !== 'finalized')
+    .sort((a, b) => a.meeting_date.localeCompare(b.meeting_date))[0] || null;
+
+  const derniereAG = meetings
+    .filter((m) => m.meeting_date < today)
+    .sort((a, b) => b.meeting_date.localeCompare(a.meeting_date))[0] || null;
 
   // Calcul des jours
   const joursAvantProchaine = prochaineAG
-    ? differenceInDays(new Date(prochaineAG.date_ag), now)
+    ? differenceInDays(new Date(prochaineAG.meeting_date), now)
     : null;
 
   const joursApresDerniere = derniereAG
-    ? differenceInDays(now, new Date(derniereAG.date_ag))
+    ? differenceInDays(now, new Date(derniereAG.meeting_date))
     : null;
 
   // Déterminer l'état
@@ -527,10 +578,8 @@ export function useAGContext(): AGContextInfo {
     joursApresDerniere
   );
 
-  // Label de l'état
   const stateLabel = getStateLabel(state, joursAvantProchaine);
 
-  // Générer alertes
   const alertes = generateAlertes(
     state,
     prochaineAG,
@@ -539,7 +588,6 @@ export function useAGContext(): AGContextInfo {
     joursApresDerniere
   );
 
-  // Générer actions recommandées
   const actionsRecommandees = generateQuickActions(state, prochaineAG, derniereAG);
 
   return {
@@ -551,5 +599,7 @@ export function useAGContext(): AGContextInfo {
     joursApresDerniere,
     alertes,
     actionsRecommandees,
+    isLoading,
+    error,
   };
 }

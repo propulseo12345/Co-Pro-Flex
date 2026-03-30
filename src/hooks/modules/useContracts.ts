@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation, Prestataire } from '@/types';
 import type { ContractInsert } from '@/types/supabase';
-import { MOCK_CATEGORIES_CONTRAT, type CategorieContrat } from '@/data/mock';
+import { CATEGORIES_CONTRAT, type CategorieContrat } from '@/lib/constants/categories-contrat';
 import { getUniquePrestataires, formatMontant } from '@/components/features/maintenance/Contracts/utils';
 import type { ExportFormat } from '@/components/features/maintenance/Contracts/types';
 import { useCopro } from '@/providers/CoproContext';
@@ -99,7 +99,7 @@ export function useContracts() {
             const matchesStatut = statutFilter === 'TOUS' || c.statut === statutFilter;
             // Filtre par catégorie : trouver si le type du contrat appartient à la catégorie sélectionnée
             const matchesCategorie = categorieFilter === 'TOUS' ||
-                MOCK_CATEGORIES_CONTRAT.find(cat => cat.value === categorieFilter)?.types.includes(c.type);
+                CATEGORIES_CONTRAT.find(cat => cat.value === categorieFilter)?.types.includes(c.type);
             const matchesType = typeFilter === 'TOUS' || c.type === typeFilter;
             const matchesPrestataire = prestataireFilter === 'TOUS' || c.fournisseur === prestataireFilter;
             return matchesSearch && matchesStatut && matchesCategorie && matchesType && matchesPrestataire;

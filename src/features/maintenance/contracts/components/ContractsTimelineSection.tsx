@@ -3,7 +3,7 @@
 import { FileText, Shield, RefreshCw, AlertTriangle, Search } from 'lucide-react';
 import clsx from 'clsx';
 import type { ContratDetaille, StatutContrat, TypeContrat } from '@/types';
-import type { CategorieContrat } from '@/data/mock';
+import type { CategorieContrat } from '@/lib/constants/categories-contrat';
 import ActionsDropdown from '@/components/features/maintenance/Contracts/ActionsDropdown';
 import styles from '@/app/(dashboard)/maintenance/contracts/contracts.module.css';
 
