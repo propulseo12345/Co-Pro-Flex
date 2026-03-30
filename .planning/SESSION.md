@@ -1,21 +1,22 @@
-# Session State — 2026-03-31 01:15
+# Session State — 2026-03-31 01:50
 
 ## Branch
 v2
 
 ## Completed This Session
-- Messagerie: bulles gradient bleu, dot statut animé, reply area polish, conversation active barre latérale
-- Mail: folder actif barre latérale 3px, MailList hover/selected border-left, MailReader body "feuille blanche"
-- Mur: layout 3 colonnes (sidebar|feed|commentaires), épingles barre jaune gauche, PostCard selected glow
-- Messagerie spacing: gap 16px, padding 20px, max-width 65%
+- Fix "Inconnu" sender names: fallbacks corrigés dans useMessagerie, useMur, mock-data + UPDATE Supabase (3 messages avec sender_name NULL)
+- Fix ConversationList: couleurs avatar basées sur lastSenderRole au lieu du type de conversation
+- Fix responsive CSS: breakpoints tablette/mobile ajoutés pour messagerie, mail, mur
+- Fix mail body: rendu en paragraphes, typographie améliorée, distinction unread dans MailList
+- Fix espacement: padding/gap normalisés (24px cards, 16px gap) sur ChatPanel, PostFeed, PostCard, PostComments
+- Fix bulles envoyées: margin-left auto pour coller au bord droit
 
 ## Next Task
-Vérifier visuellement les 3 modules avec screenshots utilisateur et ajuster si besoin
+Vérifier visuellement les corrections Communication (screenshot messagerie, mail, mur après refresh)
 
 ## Blockers
 None
 
 ## Key Context
-- Linter a modifié ChatPanel.module.css (bubble inline-flex, fit-content) — intégré dans nos edits
-- Erreur TS pré-existante dans useLogbookPage.ts (equipementsPrincipaux) — pas lié à nos changements
-- Mur page.tsx modifié : commentaires déplacés dans panneau droit, class pageWithComments conditionnel
+- Le trigger `trg_updated_at_messages` sur table messages référence un champ `updated_at` absent — contourné via DISABLE/ENABLE
+- 16 fichiers modifiés, pas encore commités

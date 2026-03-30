@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import type {
   IConversationPreview,
   ConversationFilter,
+  UserRole,
 } from '@/features/communication/messagerie/domain/types';
 import { ROLE_COLORS } from '@/features/communication/messagerie/domain/constants';
 import { getInitials } from '@/features/communication/shared/utils';
@@ -35,8 +36,9 @@ const TAG_STYLES: Record<IConversationPreview['type'], string> = {
   prestataire: styles.tagPrestataire,
 };
 
-// Avatar color: use first role color based on conversation type
-function getAvatarColor(type: IConversationPreview['type']): string {
+// Avatar color: prioritize last sender role, fallback to conversation type
+function getAvatarColor(type: IConversationPreview['type'], role?: UserRole): string {
+  if (role) return ROLE_COLORS[role];
   if (type === 'group') return ROLE_COLORS.conseil;
   if (type === 'prestataire') return ROLE_COLORS.prestataire;
   return ROLE_COLORS.copro;
@@ -151,7 +153,7 @@ export function ConversationList({
               {/* Avatar */}
               <div
                 className={styles.avatar}
-                style={{ '--avatar-bg': getAvatarColor(conv.type) } as React.CSSProperties}
+                style={{ '--avatar-bg': getAvatarColor(conv.type, conv.lastSenderRole) } as React.CSSProperties}
               >
                 {getInitials(conv.title)}
               </div>

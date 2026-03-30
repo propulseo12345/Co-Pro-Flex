@@ -9,3 +9,18 @@
   overflow: hidden;
   background: #0f1117;
 }
+
+/* Responsive — Tablet */
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 280px 1fr;
+  }
+}
+
+/* Responsive — Mobile */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}

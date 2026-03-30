@@ -1,7 +1,7 @@
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .newPostBtn {
@@ -64,7 +64,7 @@
 .pinnedSection {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .sectionLabel {
@@ -82,7 +82,7 @@
 .postsList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .emptyState {

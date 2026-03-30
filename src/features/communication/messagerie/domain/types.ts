@@ -77,6 +77,7 @@ export interface IConversationPreview {
   lastMessage: string;
   lastMessageAt: string;
   lastSenderName: string;
+  lastSenderRole?: UserRole;
   unreadCount: number;
   memberCount: number;
   isArchived: boolean;

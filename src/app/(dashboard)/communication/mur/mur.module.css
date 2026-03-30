@@ -42,17 +42,31 @@
   display: none;
 }
 
-/* Responsive */
+/* Responsive — Tablet */
 @media (max-width: 1024px) {
+  .page {
+    grid-template-columns: 180px 1fr;
+  }
+
+  .pageWithComments {
+    grid-template-columns: 180px 1fr 300px;
+  }
+}
+
+/* Responsive — Mobile */
+@media (max-width: 768px) {
   .page {
     grid-template-columns: 1fr;
     height: auto;
     overflow: visible;
   }
 
+  .pageWithComments {
+    grid-template-columns: 1fr;
+  }
+
   .sidebarArea {
-    border-right: none;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    display: none;
   }
 
   .commentsArea {

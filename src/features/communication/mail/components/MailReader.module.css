@@ -134,33 +134,41 @@
 }
 
 .senderDate {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   flex-shrink: 0;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* Recipients */
 .recipients {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   padding-left: 52px;
+  letter-spacing: 0.3px;
 }
 
 /* Body */
 .body {
   max-width: 640px;
   margin: 20px 24px;
-  background: #1e2138;
+  background: #1a1d2e;
   border: 1px solid rgba(148, 163, 184, 0.06);
   border-radius: 12px;
   padding: 24px 28px;
-  font-size: 14px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.6;
   color: #e2e8f0;
-  white-space: pre-wrap;
   word-wrap: break-word;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.bodyParagraph {
+  margin: 0 0 12px;
+}
+
+.bodyParagraph:last-child {
+  margin-bottom: 0;
 }
 
 /* Attachments */

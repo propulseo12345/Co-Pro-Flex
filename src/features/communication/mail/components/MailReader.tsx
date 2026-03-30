@@ -134,7 +134,13 @@ export function MailReader({
       </div>
 
       {/* Body */}
-      <div className={styles.body}>{mail.body}</div>
+      <div className={styles.body}>
+        {mail.body.split('\n').map((paragraph, index) => (
+          paragraph.trim() === ''
+            ? <br key={index} />
+            : <p key={index} className={styles.bodyParagraph}>{paragraph}</p>
+        ))}
+      </div>
 
       {/* Attachments */}
       {mail.hasAttachments && mail.attachments.length > 0 && (

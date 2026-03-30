@@ -145,7 +145,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -196,12 +196,12 @@
 .messageRowMine {
   align-self: flex-end;
   flex-direction: row-reverse;
-  margin-right: 0;
+  margin-left: auto;
 }
 
 .messageRowOther {
   align-self: flex-start;
-  margin-left: 0;
+  margin-right: auto;
 }
 
 /* -- System message -- */
@@ -283,7 +283,7 @@
 
 @media (max-width: 640px) {
   .messagesArea {
-    padding: 12px 14px;
+    padding: 16px;
     gap: 12px;
   }
 
@@ -362,7 +362,7 @@
 /* -- Reply area -- */
 
 .replyArea {
-  padding: 12px 20px 16px;
+  padding: 16px 24px;
   border-top: 1px solid rgba(148, 163, 184, 0.08);
   background: #131620;
   flex-shrink: 0;

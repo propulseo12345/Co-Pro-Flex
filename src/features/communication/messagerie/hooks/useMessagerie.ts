@@ -53,7 +53,8 @@ function mapConversationPreview(row: any): IConversationPreview {
     avatar: null,
     lastMessage: row.last_message_preview ?? '',
     lastMessageAt: row.last_message_at ?? row.created_at,
-    lastSenderName: '',
+    lastSenderName: row.last_sender_name ?? 'Admin CoProFlex',
+    lastSenderRole: (row.last_sender_role as UserRole) ?? undefined,
     unreadCount: row.unread_count ?? 0,
     memberCount: 2,
     isArchived: row.is_archived ?? false,
@@ -212,6 +213,7 @@ export function useMessagerie(): UseMessagerieReturn {
                     lastMessage: newMsg.content,
                     lastMessageAt: newMsg.createdAt,
                     lastSenderName: newMsg.senderName,
+                    lastSenderRole: newMsg.senderRole,
                   }
                 : p
             )
@@ -326,7 +328,7 @@ export function useMessagerie(): UseMessagerieReturn {
       setPreviews((prev) =>
         prev.map((p) =>
           p.id === convId
-            ? { ...p, lastMessage: content.trim(), lastMessageAt: now, lastSenderName: CURRENT_USER_NAME }
+            ? { ...p, lastMessage: content.trim(), lastMessageAt: now, lastSenderName: CURRENT_USER_NAME, lastSenderRole: 'syndic' as UserRole }
             : p
         )
       );

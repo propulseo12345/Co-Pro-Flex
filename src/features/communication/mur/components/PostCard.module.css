@@ -2,7 +2,7 @@
   background: #1a1d2e;
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
-  padding: 16px;
+  padding: 24px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -28,7 +28,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .authorInfo {
@@ -113,7 +113,7 @@
   font-size: 15px;
   font-weight: 700;
   color: #e2e8f0;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   line-height: 1.4;
 }
 
@@ -121,7 +121,7 @@
   font-size: 13px;
   color: #94a3b8;
   line-height: 1.6;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -137,7 +137,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .readMore:hover {
@@ -149,7 +149,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .attachment {
@@ -169,7 +169,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid rgba(148, 163, 184, 0.04);
 }
 
