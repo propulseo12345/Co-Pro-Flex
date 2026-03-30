@@ -2,6 +2,7 @@
 
 import { Search, Paperclip, Star, Inbox } from 'lucide-react';
 import type { IMail } from '@/features/communication/mail/domain/types';
+import { getInitials, getAvatarColor, formatRelativeDate } from '@/features/communication/shared/utils';
 import styles from './MailList.module.css';
 
 // ----------------------------------------------------------------------------
@@ -15,50 +16,6 @@ interface MailListProps {
   onSelectMail: (id: string) => void;
   onSearchChange: (term: string) => void;
   onToggleStar: (id: string) => void;
-}
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-/** Couleur d'avatar déterministe à partir du nom */
-function getAvatarColor(name: string): string {
-  const colors = [
-    '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
-    '#22c55e', '#06b6d4', '#ef4444', '#6366f1',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
-
-/** Initiales depuis un nom */
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-}
-
-/** Formatage de date relative */
-function formatRelativeDate(dateStr: string | null): string {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {
-    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  }
-  if (diffDays === 1) return 'Hier';
-  if (diffDays < 7) {
-    return date.toLocaleDateString('fr-FR', { weekday: 'short' });
-  }
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
 // ----------------------------------------------------------------------------
@@ -103,7 +60,7 @@ export function MailList({
           </div>
         ) : (
           mails.map((mail) => {
-            const isUnread = mail.status === 'unread';
+            const isUnread = !mail.isRead;
             const isSelected = mail.id === selectedMailId;
 
             return (
@@ -125,7 +82,7 @@ export function MailList({
                 {/* Avatar */}
                 <div
                   className={styles.avatar}
-                  style={{ backgroundColor: getAvatarColor(mail.from.name) }}
+                  style={{ '--avatar-bg': getAvatarColor(mail.from.name) } as React.CSSProperties}
                 >
                   {getInitials(mail.from.name)}
                 </div>
@@ -143,7 +100,7 @@ export function MailList({
                         <Paperclip size={12} className={styles.attachmentIcon} />
                       )}
                       <span className={styles.mailDate}>
-                        {formatRelativeDate(mail.sentAt || mail.createdAt)}
+                        {formatRelativeDate(mail.sentAt ?? mail.createdAt)}
                       </span>
                     </div>
                   </div>

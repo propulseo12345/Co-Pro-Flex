@@ -5,6 +5,7 @@ import {
   FileText, Image, FileSpreadsheet, File, Mail,
 } from 'lucide-react';
 import type { IMail, IMailAttachment } from '@/features/communication/mail/domain/types';
+import { getInitials, getAvatarColor } from '@/features/communication/shared/utils';
 import styles from './MailReader.module.css';
 
 // ----------------------------------------------------------------------------
@@ -17,30 +18,6 @@ interface MailReaderProps {
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleStar: (id: string) => void;
-}
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-function getAvatarColor(name: string): string {
-  const colors = [
-    '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
-    '#22c55e', '#06b6d4', '#ef4444', '#6366f1',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
 }
 
 function formatFullDate(dateStr: string | null): string {
@@ -136,7 +113,7 @@ export function MailReader({
         <div className={styles.senderRow}>
           <div
             className={styles.senderAvatar}
-            style={{ backgroundColor: getAvatarColor(mail.from.name) }}
+            style={{ '--avatar-bg': getAvatarColor(mail.from.name) } as React.CSSProperties}
           >
             {getInitials(mail.from.name)}
           </div>

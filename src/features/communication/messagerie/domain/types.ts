@@ -12,7 +12,7 @@ export type UserRole = 'syndic' | 'copro' | 'conseil' | 'prestataire' | 'gardien
 export type MessageType = 'text' | 'image' | 'file' | 'system';
 
 /** Filtres de la liste de conversations */
-export type ConversationFilter = 'all' | 'unread' | 'direct' | 'group' | 'prestataire';
+export type ConversationFilter = 'all' | 'unread' | 'archived' | 'direct' | 'group' | 'prestataire';
 
 /** Pièce jointe d'un message */
 export interface IMessageAttachment {

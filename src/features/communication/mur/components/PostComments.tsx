@@ -5,6 +5,7 @@ import { MessageCircle, Send } from 'lucide-react';
 import clsx from 'clsx';
 import type { IWallComment } from '@/features/communication/mur/domain/types';
 import { ROLE_BADGE } from '@/features/communication/mur/domain/constants';
+import { getInitials } from '@/features/communication/shared/utils';
 import styles from './PostComments.module.css';
 
 // ----------------------------------------------------------------------------
@@ -15,19 +16,6 @@ interface PostCommentsProps {
   comments: IWallComment[];
   postId: string;
   onAddComment: (postId: string, content: string) => void;
-}
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 function formatDate(dateStr: string): string {
@@ -88,9 +76,9 @@ export function PostComments({ comments, postId, onAddComment }: PostCommentsPro
                     <span
                       className={styles.commentRole}
                       style={{
-                        background: `${roleBadge.color}18`,
-                        color: roleBadge.color,
-                      }}
+                        '--badge-bg': `${roleBadge.color}18`,
+                        '--badge-color': roleBadge.color,
+                      } as React.CSSProperties}
                     >
                       {roleBadge.label}
                     </span>

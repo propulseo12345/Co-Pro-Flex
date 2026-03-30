@@ -8,20 +8,8 @@ import type {
   ConversationFilter,
 } from '@/features/communication/messagerie/domain/types';
 import { ROLE_COLORS } from '@/features/communication/messagerie/domain/constants';
+import { getInitials } from '@/features/communication/shared/utils';
 import styles from './ConversationList.module.css';
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -66,6 +54,7 @@ interface FilterDef {
 const FILTERS: FilterDef[] = [
   { value: 'all', label: 'Toutes' },
   { value: 'unread', label: 'Non lues' },
+  { value: 'archived', label: 'Archivees' },
   { value: 'direct', label: 'Direct' },
   { value: 'group', label: 'Groupes' },
   { value: 'prestataire', label: 'Prestas' },
@@ -162,7 +151,7 @@ export function ConversationList({
               {/* Avatar */}
               <div
                 className={styles.avatar}
-                style={{ backgroundColor: getAvatarColor(conv.type) }}
+                style={{ '--avatar-bg': getAvatarColor(conv.type) } as React.CSSProperties}
               >
                 {getInitials(conv.title)}
               </div>

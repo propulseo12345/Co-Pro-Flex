@@ -114,6 +114,7 @@
   font-weight: 600;
   color: #ffffff;
   flex-shrink: 0;
+  background-color: var(--avatar-bg, #3b82f6);
 }
 
 .senderInfo {

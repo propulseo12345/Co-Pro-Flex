@@ -96,6 +96,7 @@
   color: #ffffff;
   flex-shrink: 0;
   margin-top: 2px;
+  background-color: var(--avatar-bg, #3b82f6);
 }
 
 /* Content */

@@ -134,7 +134,7 @@ export function useMur(): UseMurReturn {
       title: data.title,
       content: data.content,
       category: data.category,
-      isPinned: false,
+      isPinned: data.isPinned,
       isLocked: false,
       attachments: data.attachments || [],
       likesCount: 0,

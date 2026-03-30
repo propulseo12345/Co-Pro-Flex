@@ -34,13 +34,14 @@ export function PostEditor({ isOpen, onClose, onSubmit }: PostEditorProps) {
       title: title.trim(),
       content: content.trim(),
       category,
+      isPinned,
     });
     // Reset form
     setTitle('');
     setContent('');
     setCategory('information');
     setIsPinned(false);
-  }, [title, content, category, canSubmit, onSubmit]);
+  }, [title, content, category, isPinned, canSubmit, onSubmit]);
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {

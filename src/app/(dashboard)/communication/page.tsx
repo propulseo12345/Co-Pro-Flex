@@ -11,9 +11,12 @@ import styles from './communication-hub.module.css';
 
 // ── KPI computations ──────────────────────────────────────────────────────────
 
+// NOTE: Les KPIs sont calculés à partir des données mockées statiques importées directement.
+// En production (Supabase), ces calculs seront remplacés par un hook dédié (ex: useCommunicationKPIs)
+// ou intégrés dans les hooks existants (useMailbox, useMessagerie, useMur).
 function getUnreadMailCount(): number {
   return MOCK_MAILS.filter(
-    (m) => m.status === 'unread' && !m.isDraft,
+    (m) => m.status === 'received' && !m.isRead && !m.isArchived && !m.isDeleted,
   ).length;
 }
 
@@ -30,7 +33,7 @@ function getRecentPostCount(): number {
 
 function getLastMailSubjects(count: number): string[] {
   return MOCK_MAILS
-    .filter((m) => m.status === 'unread' && !m.isDraft)
+    .filter((m) => m.status === 'received' && !m.isRead && !m.isDeleted)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, count)
     .map((m) => m.subject);

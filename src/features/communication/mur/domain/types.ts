@@ -57,5 +57,6 @@ export interface INewPostData {
   title: string;
   content: string;
   category: PostCategory;
+  isPinned: boolean;
   attachments?: IPostAttachment[];
 }

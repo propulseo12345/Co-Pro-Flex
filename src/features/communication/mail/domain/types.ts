@@ -2,8 +2,8 @@
 // Mail — Types du domaine
 // ============================================================================
 
-/** Statut de lecture d'un mail */
-export type MailStatus = 'unread' | 'read' | 'archived' | 'trash';
+/** Statut d'un mail (aligné sur le schéma SQL) */
+export type MailStatus = 'draft' | 'sent' | 'received';
 
 /** Types de dossiers système */
 export type SystemFolderType = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash' | 'spam';
@@ -35,8 +35,11 @@ export interface IMail {
   body: string;
   bodyPreview: string;
   status: MailStatus;
+  isRead: boolean;
+  isArchived: boolean;
+  isDeleted: boolean;
+  deletedAt: string | null;
   isStarred: boolean;
-  isDraft: boolean;
   hasAttachments: boolean;
   attachments: IMailAttachment[];
   labelIds: string[];
@@ -62,7 +65,7 @@ export interface IMailFolder {
   coproprieteId: string;
   userId: string;
   name: string;
-  folderType: SystemFolderType;
+  folderType: SystemFolderType | null;
   icon: string;
   isSystem: boolean;
   sortOrder: number;

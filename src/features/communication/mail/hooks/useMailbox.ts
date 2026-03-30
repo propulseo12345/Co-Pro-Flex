@@ -73,7 +73,9 @@ export function useMailbox(): UseMailboxReturn {
   const folderByType = useMemo(() => {
     const map: Record<string, IMailFolder> = {};
     for (const f of folders) {
-      map[f.folderType] = f;
+      if (f.folderType) {
+        map[f.folderType] = f;
+      }
     }
     return map;
   }, [folders]);
@@ -86,46 +88,50 @@ export function useMailbox(): UseMailboxReturn {
       case 'inbox':
         result = allMails.filter(
           (m) =>
-            m.folderId === folderByType.inbox?.id &&
-            !m.isDraft &&
-            m.status !== 'archived' &&
-            m.status !== 'trash'
+            m.status === 'received' &&
+            !m.isArchived &&
+            !m.isDeleted
         );
         break;
       case 'sent':
         result = allMails.filter(
           (m) =>
-            m.folderId === folderByType.sent?.id &&
-            m.status !== 'trash'
+            m.status === 'sent' &&
+            !m.isDeleted
         );
         break;
       case 'drafts':
         result = allMails.filter(
-          (m) => m.isDraft && m.status !== 'trash'
+          (m) => m.status === 'draft' && !m.isDeleted
         );
         break;
       case 'archive':
         result = allMails.filter(
-          (m) => m.status === 'archived'
+          (m) => m.isArchived && !m.isDeleted
         );
         break;
       case 'trash':
         result = allMails.filter(
-          (m) => m.status === 'trash'
+          (m) => m.isDeleted
         );
         break;
       case 'spam':
         result = allMails.filter(
-          (m) => m.folderId === folderByType.spam?.id && m.status !== 'trash'
+          (m) => m.folderId === folderByType.spam?.id && !m.isDeleted
         );
         break;
       case 'starred':
         result = allMails.filter(
-          (m) => m.isStarred && m.status !== 'trash'
+          (m) => m.isStarred && !m.isDeleted
         );
         break;
-      default:
-        result = [];
+      default: {
+        // Custom folder: filter by folderId match
+        const customFolderId = currentFolder;
+        result = allMails.filter(
+          (m) => m.folderId === customFolderId && !m.isDeleted
+        );
+      }
     }
 
     // Filtre par recherche
@@ -158,11 +164,12 @@ export function useMailbox(): UseMailboxReturn {
     () =>
       allMails.filter(
         (m) =>
-          m.folderId === folderByType.inbox?.id &&
-          !m.isDraft &&
-          m.status === 'unread'
+          m.status === 'received' &&
+          !m.isRead &&
+          !m.isArchived &&
+          !m.isDeleted
       ).length,
-    [allMails, folderByType]
+    [allMails]
   );
 
   // -- Actions --
@@ -173,7 +180,7 @@ export function useMailbox(): UseMailboxReturn {
       // Marquer comme lu
       setAllMails((prev) =>
         prev.map((m) =>
-          m.id === id && m.status === 'unread' ? { ...m, status: 'read' as const, updatedAt: nowISO() } : m
+          m.id === id && !m.isRead ? { ...m, isRead: true, updatedAt: nowISO() } : m
         )
       );
     },
@@ -203,9 +210,12 @@ export function useMailbox(): UseMailboxReturn {
         subject: draft.subject,
         body: draft.body,
         bodyPreview: draft.body.slice(0, 100) + '...',
-        status: 'read',
+        status: 'sent',
+        isRead: true,
+        isArchived: false,
+        isDeleted: false,
+        deletedAt: null,
         isStarred: false,
-        isDraft: false,
         hasAttachments: (draft.attachments?.length ?? 0) > 0,
         attachments: draft.attachments ?? [],
         labelIds: draft.labelIds ?? [],
@@ -235,9 +245,12 @@ export function useMailbox(): UseMailboxReturn {
         subject: draft.subject,
         body: draft.body,
         bodyPreview: draft.body.slice(0, 100) + '...',
-        status: 'read',
+        status: 'draft',
+        isRead: true,
+        isArchived: false,
+        isDeleted: false,
+        deletedAt: null,
         isStarred: false,
-        isDraft: true,
         hasAttachments: (draft.attachments?.length ?? 0) > 0,
         attachments: draft.attachments ?? [],
         labelIds: draft.labelIds ?? [],
@@ -252,9 +265,10 @@ export function useMailbox(): UseMailboxReturn {
   );
 
   const deleteMail = useCallback((id: string) => {
+    const now = nowISO();
     setAllMails((prev) =>
       prev.map((m) =>
-        m.id === id ? { ...m, status: 'trash' as const, updatedAt: nowISO() } : m
+        m.id === id ? { ...m, isDeleted: true, deletedAt: now, updatedAt: now } : m
       )
     );
     setSelectedMailId((prev) => (prev === id ? null : prev));
@@ -263,7 +277,7 @@ export function useMailbox(): UseMailboxReturn {
   const archiveMail = useCallback((id: string) => {
     setAllMails((prev) =>
       prev.map((m) =>
-        m.id === id ? { ...m, status: 'archived' as const, updatedAt: nowISO() } : m
+        m.id === id ? { ...m, isArchived: true, updatedAt: nowISO() } : m
       )
     );
     setSelectedMailId((prev) => (prev === id ? null : prev));
@@ -281,8 +295,7 @@ export function useMailbox(): UseMailboxReturn {
     setAllMails((prev) =>
       prev.map((m) => {
         if (m.id !== id) return m;
-        const newStatus = m.status === 'unread' ? 'read' as const : 'unread' as const;
-        return { ...m, status: newStatus, updatedAt: nowISO() };
+        return { ...m, isRead: !m.isRead, updatedAt: nowISO() };
       })
     );
   }, []);
@@ -332,7 +345,7 @@ export function useMailbox(): UseMailboxReturn {
       coproprieteId: 'c1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
       userId: 'u1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
       name,
-      folderType: 'inbox', // custom folders default type
+      folderType: null, // custom folders have no system type
       icon: 'Folder',
       isSystem: false,
       sortOrder: folders.length,

@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Pin, Paperclip, Clock } from 'lucide-react';
 import clsx from 'clsx';
 import type { IWallPost } from '@/features/communication/mur/domain/types';
 import { CATEGORY_CONFIG, ROLE_BADGE } from '@/features/communication/mur/domain/constants';
+import { getInitials } from '@/features/communication/shared/utils';
 import styles from './PostCard.module.css';
 
 // ----------------------------------------------------------------------------
@@ -16,19 +17,6 @@ interface PostCardProps {
   onSelect: (id: string) => void;
   onToggleLike: (id: string) => void;
   onTogglePin: (id: string) => void;
-}
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 function formatDate(dateStr: string): string {
@@ -77,9 +65,9 @@ export function PostCard({ post, isSelected, onSelect, onToggleLike, onTogglePin
               <span
                 className={styles.roleBadge}
                 style={{
-                  background: `${roleBadge.color}18`,
-                  color: roleBadge.color,
-                }}
+                  '--badge-bg': `${roleBadge.color}18`,
+                  '--badge-color': roleBadge.color,
+                } as React.CSSProperties}
               >
                 {roleBadge.label}
               </span>
@@ -90,9 +78,9 @@ export function PostCard({ post, isSelected, onSelect, onToggleLike, onTogglePin
               <span
                 className={styles.categoryBadge}
                 style={{
-                  background: `${catConfig.color}18`,
-                  color: catConfig.color,
-                }}
+                  '--badge-bg': `${catConfig.color}18`,
+                  '--badge-color': catConfig.color,
+                } as React.CSSProperties}
               >
                 {catConfig.label}
               </span>

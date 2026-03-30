@@ -168,6 +168,7 @@
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
+  background-color: var(--avatar-bg, #3b82f6);
 }
 
 /* -- Content -- */

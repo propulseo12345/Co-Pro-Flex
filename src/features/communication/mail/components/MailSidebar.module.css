@@ -144,6 +144,7 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  background-color: var(--label-color, #3b82f6);
 }
 
 /* Add label link */

@@ -66,6 +66,8 @@ export function useMessagerie(): UseMessagerieReturn {
     // Filter by type / status
     if (filter === 'unread') {
       list = list.filter((c) => c.unreadCount > 0);
+    } else if (filter === 'archived') {
+      list = list.filter((c) => c.isArchived);
     } else if (filter === 'direct' || filter === 'group' || filter === 'prestataire') {
       list = list.filter((c) => c.type === filter);
     }

@@ -71,7 +71,7 @@ export function MailSidebar({
             className={`${styles.folderItem} ${
               currentFolder === folder.folderType ? styles.folderItemActive : ''
             }`}
-            onClick={() => onFolderChange(folder.folderType)}
+            onClick={() => onFolderChange(folder.folderType ?? folder.id)}
           >
             <FolderIcon icon={folder.icon} />
             <span className={styles.folderName}>{folder.name}</span>
@@ -107,7 +107,7 @@ export function MailSidebar({
           >
             <span
               className={styles.labelDot}
-              style={{ backgroundColor: label.color }}
+              style={{ '--label-color': label.color } as React.CSSProperties}
             />
             <span className={styles.folderName}>{label.name}</span>
           </button>

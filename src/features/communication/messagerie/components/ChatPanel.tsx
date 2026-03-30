@@ -22,20 +22,8 @@ import type {
   IMessageAttachment,
 } from '@/features/communication/messagerie/domain/types';
 import { ROLE_COLORS } from '@/features/communication/messagerie/domain/constants';
+import { getInitials } from '@/features/communication/shared/utils';
 import styles from './ChatPanel.module.css';
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -173,7 +161,7 @@ export function ChatPanel({
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <div className={styles.headerAvatar} style={{ backgroundColor: avatarColor }}>
+          <div className={styles.headerAvatar} style={{ '--avatar-bg': avatarColor } as React.CSSProperties}>
             {getInitials(title)}
           </div>
           <div className={styles.headerInfo}>
@@ -234,7 +222,7 @@ export function ChatPanel({
                   {!isMine && (
                     <div
                       className={styles.messageAvatar}
-                      style={{ backgroundColor: ROLE_COLORS[msg.senderRole] }}
+                      style={{ '--avatar-bg': ROLE_COLORS[msg.senderRole] } as React.CSSProperties}
                     >
                       {getInitials(msg.senderName)}
                     </div>
@@ -243,7 +231,7 @@ export function ChatPanel({
                   {/* Bubble */}
                   <div className={clsx(styles.bubble, isMine ? styles.bubbleMine : styles.bubbleOther)}>
                     {!isMine && (
-                      <p className={styles.bubbleSender} style={{ color: ROLE_COLORS[msg.senderRole] }}>
+                      <p className={styles.bubbleSender} style={{ '--sender-color': ROLE_COLORS[msg.senderRole] } as React.CSSProperties}>
                         {msg.senderName}
                       </p>
                     )}
