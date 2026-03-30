@@ -1,0 +1,234 @@
+/* ============================================================================
+   ComposeModal — Fenêtre de rédaction (bottom-right)
+   ============================================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.modal {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 520px;
+  max-height: 600px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #131620;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px 12px 0 0;
+}
+
+.headerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.closeButton:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+}
+
+/* Form body */
+.formBody {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Field row */
+.fieldRow {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.fieldInput {
+  flex: 1;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.fieldInput::placeholder {
+  color: #475569;
+}
+
+.fieldInput:focus {
+  outline: none;
+}
+
+.ccToggle {
+  font-size: 11px;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.ccToggle:hover {
+  color: #3b82f6;
+}
+
+/* Subject field */
+.subjectField {
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.subjectInput {
+  width: 100%;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.subjectInput::placeholder {
+  color: #475569;
+}
+
+.subjectInput:focus {
+  outline: none;
+}
+
+/* Body textarea */
+.bodyWrapper {
+  flex: 1;
+  padding: 12px 20px;
+  min-height: 200px;
+}
+
+.bodyTextarea {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #e2e8f0;
+  resize: none;
+  font-family: inherit;
+}
+
+.bodyTextarea::placeholder {
+  color: #475569;
+}
+
+.bodyTextarea:focus {
+  outline: none;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.footerLeft {
+  display: flex;
+  gap: 4px;
+}
+
+.footerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.footerButton:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+}
+
+.sendButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.sendButton:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}

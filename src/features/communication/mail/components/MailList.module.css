@@ -1,0 +1,231 @@
+/* ============================================================================
+   MailList — Liste des mails (colonne centrale)
+   ============================================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #131620;
+  border-right: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+/* Search bar */
+.searchBar {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.searchWrapper {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #e2e8f0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchInput::placeholder {
+  color: #64748b;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Mail list */
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Mail item */
+.mailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.mailItem:hover {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.mailItemSelected {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.mailItemSelected:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.mailItemUnread {
+  border-left: 3px solid #3b82f6;
+}
+
+/* Avatar */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Content */
+.mailContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.mailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.mailFrom {
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailFromUnread {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.mailMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mailDate {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.attachmentIcon {
+  color: #64748b;
+}
+
+.mailSubject {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e8f0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailSubjectUnread {
+  font-weight: 700;
+}
+
+.mailPreview {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Star button */
+.starButton {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #475569;
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.starButton:hover {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+
+.starButtonActive {
+  color: #f59e0b;
+}
+
+/* Labels row */
+.labelsRow {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.labelBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: #64748b;
+  text-align: center;
+  gap: 12px;
+}
+
+.emptyIcon {
+  opacity: 0.3;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.emptyText {
+  font-size: 12px;
+}
