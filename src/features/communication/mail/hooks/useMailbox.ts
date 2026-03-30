@@ -1,8 +1,18 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useCopro } from '@/providers/CoproContext';
 import type { IMail, IMailFolder, IMailLabel, IDraftData } from '@/features/communication/mail/domain/types';
-import { MOCK_MAILS, MOCK_FOLDERS, MOCK_LABELS } from '@/features/communication/mail/domain/mock-data';
+import { MOCK_FOLDERS, MOCK_LABELS } from '@/features/communication/mail/domain/mock-data';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
+
+// ID propriétaire par défaut (syndic) — remplacé par auth.uid() quand l'auth sera active
+const DEFAULT_OWNER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
+const SYNDIC_EMAIL = 'copro.haussmann@coproflex.fr';
+const SYNDIC_NAME = 'Syndic — Résidence Haussmann';
 
 // ----------------------------------------------------------------------------
 // Types du hook
@@ -11,7 +21,6 @@ import { MOCK_MAILS, MOCK_FOLDERS, MOCK_LABELS } from '@/features/communication/
 export type MailboxFolder = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash' | 'spam' | 'starred';
 
 export interface UseMailboxReturn {
-  // State
   mails: IMail[];
   selectedMail: IMail | null;
   currentFolder: MailboxFolder;
@@ -22,13 +31,11 @@ export interface UseMailboxReturn {
   unreadCount: number;
   isComposeOpen: boolean;
   replyTo: IMail | null;
-
-  // Actions
   selectMail: (id: string) => void;
   setFolder: (folder: string) => void;
   setSearchTerm: (term: string) => void;
-  sendMail: (draft: IDraftData) => void;
-  saveDraft: (draft: IDraftData) => void;
+  sendMail: (draft: IDraftData) => Promise<void>;
+  saveDraft: (draft: IDraftData) => Promise<void>;
   deleteMail: (id: string) => void;
   archiveMail: (id: string) => void;
   toggleStar: (id: string) => void;
@@ -44,15 +51,36 @@ export interface UseMailboxReturn {
 }
 
 // ----------------------------------------------------------------------------
-// Helpers
+// Mapper ligne DB → IMail
 // ----------------------------------------------------------------------------
 
-function generateId(): string {
-  return `m${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-function nowISO(): string {
-  return new Date().toISOString();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapRow(row: any): IMail {
+  return {
+    id: row.id,
+    coproprieteId: row.copro_id,
+    folderId: row.status === 'sent' ? 'sent' : row.status === 'draft' ? 'drafts' : 'inbox',
+    from: { name: row.from_name, email: row.from_email },
+    to: row.to_emails ?? [],
+    cc: row.cc_emails ?? [],
+    subject: row.subject,
+    body: row.body,
+    bodyPreview: (row.body as string).slice(0, 120),
+    status: row.status,
+    isRead: row.is_read,
+    isArchived: row.is_archived,
+    isDeleted: row.is_deleted,
+    deletedAt: row.deleted_at ?? null,
+    isStarred: row.is_starred,
+    hasAttachments: Array.isArray(row.attachments) && row.attachments.length > 0,
+    attachments: row.attachments ?? [],
+    labelIds: row.label_ids ?? [],
+    replyToId: row.in_reply_to ?? undefined,
+    threadId: row.thread_id ?? undefined,
+    sentAt: row.sent_at ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 // ----------------------------------------------------------------------------
@@ -60,81 +88,103 @@ function nowISO(): string {
 // ----------------------------------------------------------------------------
 
 export function useMailbox(): UseMailboxReturn {
-  const [allMails, setAllMails] = useState<IMail[]>(MOCK_MAILS);
+  const { currentCoproId } = useCopro();
+  const supabase = useMemo(() => createUntypedClient(), []);
+
+  const [allMails, setAllMails] = useState<IMail[]>([]);
   const [folders, setFolders] = useState<IMailFolder[]>(MOCK_FOLDERS);
   const [labels, setLabels] = useState<IMailLabel[]>(MOCK_LABELS);
   const [selectedMailId, setSelectedMailId] = useState<string | null>(null);
   const [currentFolder, setCurrentFolder] = useState<MailboxFolder>('inbox');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [replyTo, setReplyTo] = useState<IMail | null>(null);
 
-  // -- Dossiers système (lookup par folderType) --
-  const folderByType = useMemo(() => {
-    const map: Record<string, IMailFolder> = {};
-    for (const f of folders) {
-      if (f.folderType) {
-        map[f.folderType] = f;
-      }
-    }
-    return map;
-  }, [folders]);
+  // Ref pour éviter les boucles infinies
+  const fetchRef = useRef<(() => Promise<void>) | null>(null);
 
-  // -- Filtrage des mails selon le dossier courant --
+  // ── Chargement initial ──────────────────────────────────────────────────────
+
+  const fetchMails = useCallback(async () => {
+    if (!currentCoproId) return;
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('mails')
+        .select('*')
+        .eq('copro_id', currentCoproId)
+        .eq('owner_id', DEFAULT_OWNER_ID)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setAllMails(data.map(mapRow));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentCoproId, supabase]);
+
+  fetchRef.current = fetchMails;
+
+  useEffect(() => {
+    fetchRef.current?.();
+  }, [currentCoproId]);
+
+  // ── Realtime : nouveaux emails reçus ───────────────────────────────────────
+
+  useEffect(() => {
+    if (!currentCoproId) return;
+
+    const channel = supabase
+      .channel('mails-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'mails',
+          filter: `owner_id=eq.${DEFAULT_OWNER_ID}`,
+        },
+        (payload: { new: unknown }) => {
+          setAllMails((prev) => [mapRow(payload.new), ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentCoproId, supabase]);
+
+  // ── Filtrage ────────────────────────────────────────────────────────────────
+
   const filteredMails = useMemo(() => {
     let result: IMail[];
 
     switch (currentFolder) {
       case 'inbox':
-        result = allMails.filter(
-          (m) =>
-            m.status === 'received' &&
-            !m.isArchived &&
-            !m.isDeleted
-        );
+        result = allMails.filter((m) => m.status === 'received' && !m.isArchived && !m.isDeleted);
         break;
       case 'sent':
-        result = allMails.filter(
-          (m) =>
-            m.status === 'sent' &&
-            !m.isDeleted
-        );
+        result = allMails.filter((m) => m.status === 'sent' && !m.isDeleted);
         break;
       case 'drafts':
-        result = allMails.filter(
-          (m) => m.status === 'draft' && !m.isDeleted
-        );
+        result = allMails.filter((m) => m.status === 'draft' && !m.isDeleted);
         break;
       case 'archive':
-        result = allMails.filter(
-          (m) => m.isArchived && !m.isDeleted
-        );
+        result = allMails.filter((m) => m.isArchived && !m.isDeleted);
         break;
       case 'trash':
-        result = allMails.filter(
-          (m) => m.isDeleted
-        );
-        break;
-      case 'spam':
-        result = allMails.filter(
-          (m) => m.folderId === folderByType.spam?.id && !m.isDeleted
-        );
+        result = allMails.filter((m) => m.isDeleted);
         break;
       case 'starred':
-        result = allMails.filter(
-          (m) => m.isStarred && !m.isDeleted
-        );
+        result = allMails.filter((m) => m.isStarred && !m.isDeleted);
         break;
-      default: {
-        // Custom folder: filter by folderId match
-        const customFolderId = currentFolder;
-        result = allMails.filter(
-          (m) => m.folderId === customFolderId && !m.isDeleted
-        );
-      }
+      default:
+        result = allMails.filter((m) => !m.isDeleted);
     }
 
-    // Filtre par recherche
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       result = result.filter(
@@ -145,47 +195,30 @@ export function useMailbox(): UseMailboxReturn {
       );
     }
 
-    // Tri par date décroissante
     return result.sort((a, b) => {
       const da = a.sentAt || a.createdAt;
       const db = b.sentAt || b.createdAt;
       return new Date(db).getTime() - new Date(da).getTime();
     });
-  }, [allMails, currentFolder, searchTerm, folderByType]);
+  }, [allMails, currentFolder, searchTerm]);
 
-  // -- Mail sélectionné --
   const selectedMail = useMemo(
     () => filteredMails.find((m) => m.id === selectedMailId) ?? null,
     [filteredMails, selectedMailId]
   );
 
-  // -- Nombre de non-lus (inbox) --
   const unreadCount = useMemo(
-    () =>
-      allMails.filter(
-        (m) =>
-          m.status === 'received' &&
-          !m.isRead &&
-          !m.isArchived &&
-          !m.isDeleted
-      ).length,
+    () => allMails.filter((m) => m.status === 'received' && !m.isRead && !m.isArchived && !m.isDeleted).length,
     [allMails]
   );
 
-  // -- Actions --
+  // ── Mutations ───────────────────────────────────────────────────────────────
 
-  const selectMail = useCallback(
-    (id: string) => {
-      setSelectedMailId(id);
-      // Marquer comme lu
-      setAllMails((prev) =>
-        prev.map((m) =>
-          m.id === id && !m.isRead ? { ...m, isRead: true, updatedAt: nowISO() } : m
-        )
-      );
-    },
-    []
-  );
+  const selectMail = useCallback(async (id: string) => {
+    setSelectedMailId(id);
+    setAllMails((prev) => prev.map((m) => (m.id === id && !m.isRead ? { ...m, isRead: true } : m)));
+    await supabase.from('mails').update({ is_read: true }).eq('id', id);
+  }, [supabase]);
 
   const setFolder = useCallback((folder: string) => {
     setCurrentFolder(folder as MailboxFolder);
@@ -196,115 +229,109 @@ export function useMailbox(): UseMailboxReturn {
     setSearchTerm(term);
   }, []);
 
-  const sendMail = useCallback(
-    (draft: IDraftData) => {
-      const sentFolder = folderByType.sent;
-      const now = nowISO();
-      const newMail: IMail = {
-        id: generateId(),
-        coproprieteId: 'c1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
-        folderId: sentFolder?.id ?? '',
-        from: { name: 'Syndic — Résidence Haussmann', email: 'copro.haussmann@coproflex.fr' },
-        to: draft.to,
-        cc: draft.cc,
-        subject: draft.subject,
-        body: draft.body,
-        bodyPreview: draft.body.slice(0, 100) + '...',
-        status: 'sent',
-        isRead: true,
-        isArchived: false,
-        isDeleted: false,
-        deletedAt: null,
-        isStarred: false,
-        hasAttachments: (draft.attachments?.length ?? 0) > 0,
-        attachments: draft.attachments ?? [],
-        labelIds: draft.labelIds ?? [],
-        replyToId: draft.replyToId,
-        sentAt: now,
-        createdAt: now,
-        updatedAt: now,
-      };
-      setAllMails((prev) => [newMail, ...prev]);
-      setIsComposeOpen(false);
-      setReplyTo(null);
-    },
-    [folderByType]
-  );
+  const sendMail = useCallback(async (draft: IDraftData) => {
+    if (!currentCoproId) return;
 
-  const saveDraft = useCallback(
-    (draft: IDraftData) => {
-      const draftsFolder = folderByType.drafts;
-      const now = nowISO();
-      const newDraft: IMail = {
-        id: generateId(),
-        coproprieteId: 'c1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
-        folderId: draftsFolder?.id ?? '',
-        from: { name: 'Syndic — Résidence Haussmann', email: 'copro.haussmann@coproflex.fr' },
+    const res = await fetch('/api/mail/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         to: draft.to,
         cc: draft.cc,
         subject: draft.subject,
         body: draft.body,
-        bodyPreview: draft.body.slice(0, 100) + '...',
+        coproId: currentCoproId,
+        replyToId: draft.replyToId,
+      }),
+    });
+
+    if (res.ok) {
+      const { id } = await res.json();
+      // Recharger le mail envoyé depuis la DB pour avoir les données exactes
+      const { data } = await supabase.from('mails').select('*').eq('id', id).single();
+      if (data) {
+        setAllMails((prev) => [mapRow(data), ...prev]);
+      }
+    }
+
+    setIsComposeOpen(false);
+    setReplyTo(null);
+  }, [currentCoproId, supabase]);
+
+  const saveDraft = useCallback(async (draft: IDraftData) => {
+    if (!currentCoproId) return;
+
+    const now = new Date().toISOString();
+    const { data } = await supabase
+      .from('mails')
+      .insert({
+        copro_id: currentCoproId,
+        owner_id: DEFAULT_OWNER_ID,
+        from_email: SYNDIC_EMAIL,
+        from_name: SYNDIC_NAME,
+        to_emails: draft.to,
+        cc_emails: draft.cc ?? [],
+        subject: draft.subject,
+        body: draft.body,
+        body_html: null,
+        attachments: null,
         status: 'draft',
-        isRead: true,
-        isArchived: false,
-        isDeleted: false,
-        deletedAt: null,
-        isStarred: false,
-        hasAttachments: (draft.attachments?.length ?? 0) > 0,
-        attachments: draft.attachments ?? [],
-        labelIds: draft.labelIds ?? [],
-        replyToId: draft.replyToId,
-        sentAt: null,
-        createdAt: now,
-        updatedAt: now,
-      };
-      setAllMails((prev) => [newDraft, ...prev]);
-    },
-    [folderByType]
-  );
-
-  const deleteMail = useCallback((id: string) => {
-    const now = nowISO();
-    setAllMails((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, isDeleted: true, deletedAt: now, updatedAt: now } : m
-      )
-    );
-    setSelectedMailId((prev) => (prev === id ? null : prev));
-  }, []);
-
-  const archiveMail = useCallback((id: string) => {
-    setAllMails((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, isArchived: true, updatedAt: nowISO() } : m
-      )
-    );
-    setSelectedMailId((prev) => (prev === id ? null : prev));
-  }, []);
-
-  const toggleStar = useCallback((id: string) => {
-    setAllMails((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, isStarred: !m.isStarred, updatedAt: nowISO() } : m
-      )
-    );
-  }, []);
-
-  const toggleRead = useCallback((id: string) => {
-    setAllMails((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m;
-        return { ...m, isRead: !m.isRead, updatedAt: nowISO() };
+        is_read: true,
+        is_starred: false,
+        is_archived: false,
+        is_deleted: false,
+        label_ids: null,
+        in_reply_to: draft.replyToId ?? null,
+        thread_id: null,
+        resend_id: null,
+        sent_at: null,
+        received_at: null,
+        deleted_at: null,
+        created_at: now,
+        updated_at: now,
       })
-    );
-  }, []);
+      .select()
+      .single();
+
+    if (data) {
+      setAllMails((prev) => [mapRow(data), ...prev]);
+    }
+  }, [currentCoproId, supabase]);
+
+  const deleteMail = useCallback(async (id: string) => {
+    const now = new Date().toISOString();
+    setAllMails((prev) => prev.map((m) => (m.id === id ? { ...m, isDeleted: true, deletedAt: now } : m)));
+    setSelectedMailId((prev) => (prev === id ? null : prev));
+    await supabase.from('mails').update({ is_deleted: true, deleted_at: now }).eq('id', id);
+  }, [supabase]);
+
+  const archiveMail = useCallback(async (id: string) => {
+    setAllMails((prev) => prev.map((m) => (m.id === id ? { ...m, isArchived: true } : m)));
+    setSelectedMailId((prev) => (prev === id ? null : prev));
+    await supabase.from('mails').update({ is_archived: true }).eq('id', id);
+  }, [supabase]);
+
+  const toggleStar = useCallback(async (id: string) => {
+    const mail = allMails.find((m) => m.id === id);
+    if (!mail) return;
+    const newVal = !mail.isStarred;
+    setAllMails((prev) => prev.map((m) => (m.id === id ? { ...m, isStarred: newVal } : m)));
+    await supabase.from('mails').update({ is_starred: newVal }).eq('id', id);
+  }, [allMails, supabase]);
+
+  const toggleRead = useCallback(async (id: string) => {
+    const mail = allMails.find((m) => m.id === id);
+    if (!mail) return;
+    const newVal = !mail.isRead;
+    setAllMails((prev) => prev.map((m) => (m.id === id ? { ...m, isRead: newVal } : m)));
+    await supabase.from('mails').update({ is_read: newVal }).eq('id', id);
+  }, [allMails, supabase]);
 
   const addLabel = useCallback((mailId: string, labelId: string) => {
     setAllMails((prev) =>
       prev.map((m) =>
         m.id === mailId && !m.labelIds.includes(labelId)
-          ? { ...m, labelIds: [...m.labelIds, labelId], updatedAt: nowISO() }
+          ? { ...m, labelIds: [...m.labelIds, labelId] }
           : m
       )
     );
@@ -313,46 +340,42 @@ export function useMailbox(): UseMailboxReturn {
   const removeLabel = useCallback((mailId: string, labelId: string) => {
     setAllMails((prev) =>
       prev.map((m) =>
-        m.id === mailId
-          ? { ...m, labelIds: m.labelIds.filter((l) => l !== labelId), updatedAt: nowISO() }
-          : m
+        m.id === mailId ? { ...m, labelIds: m.labelIds.filter((l) => l !== labelId) } : m
       )
     );
   }, []);
 
   const moveToFolder = useCallback((mailId: string, folderId: string) => {
     setAllMails((prev) =>
-      prev.map((m) =>
-        m.id === mailId ? { ...m, folderId, updatedAt: nowISO() } : m
-      )
+      prev.map((m) => (m.id === mailId ? { ...m, folderId } : m))
     );
   }, []);
 
   const createLabel = useCallback((name: string, color: string) => {
     const newLabel: IMailLabel = {
       id: `l${Date.now()}`,
-      coproprieteId: 'c1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
+      coproprieteId: currentCoproId ?? '',
       name,
       color,
       sortOrder: labels.length,
     };
     setLabels((prev) => [...prev, newLabel]);
-  }, [labels.length]);
+  }, [currentCoproId, labels.length]);
 
   const createFolder = useCallback((name: string) => {
     const newFolder: IMailFolder = {
       id: `f${Date.now()}`,
-      coproprieteId: 'c1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
-      userId: 'u1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
+      coproprieteId: currentCoproId ?? '',
+      userId: DEFAULT_OWNER_ID,
       name,
-      folderType: null, // custom folders have no system type
+      folderType: null,
       icon: 'Folder',
       isSystem: false,
       sortOrder: folders.length,
       unreadCount: 0,
     };
     setFolders((prev) => [...prev, newFolder]);
-  }, [folders.length]);
+  }, [currentCoproId, folders.length]);
 
   const openCompose = useCallback(() => {
     setIsComposeOpen(true);
@@ -376,7 +399,7 @@ export function useMailbox(): UseMailboxReturn {
     labels,
     folders,
     searchTerm,
-    isLoading: false,
+    isLoading,
     unreadCount,
     isComposeOpen,
     replyTo,
