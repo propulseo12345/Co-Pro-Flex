@@ -1,14 +1,14 @@
 .page {
   display: grid;
   grid-template-columns: 200px 1fr;
-  gap: 24px;
+  gap: 16px;
   min-height: calc(100vh - 80px);
-  padding: 24px;
+  padding: 16px;
 }
 
 .sidebarArea {
   position: sticky;
-  top: 24px;
+  top: 16px;
   height: fit-content;
 }
 

@@ -61,7 +61,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 9px 14px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.04);
   cursor: pointer;
   transition: background 0.15s;
