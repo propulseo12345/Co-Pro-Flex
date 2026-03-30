@@ -1,1 +1,0 @@
-export { PublicationCard } from './PublicationCard';

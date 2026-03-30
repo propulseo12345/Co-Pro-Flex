@@ -1,11 +1,4 @@
-export { useEventsPage, CATEGORIES } from './useEventsPage';
-export { useEventDetailPage } from './useEventDetailPage';
-export { useEventEditorPage, CATEGORIES as EVENT_CATEGORIES, ORGANISATEURS } from './useEventEditorPage';
-export { useWallPage, WALL_CATEGORIES } from './useWallPage';
-export { useWallDetailPage } from './useWallDetailPage';
-export { useWallEditorPage, WALL_CATEGORIES as WALL_EDITOR_CATEGORIES, POPULAR_TAGS, VISIBILITY_OPTIONS, ETAGES_BATIMENTS } from './useWallEditorPage';
-export { useConversationsPage } from './useConversationsPage';
-export { useConversationDetailPage } from './useConversationDetailPage';
-export { useForumPage, FORUM_CATEGORIES } from './useForumPage';
-export { useForumDetailPage } from './useForumDetailPage';
-export { useMailPage } from './useMailPage';
+// Communication hooks — each module exports from its own barrel
+// mail:       @/features/communication/mail/hooks
+// messagerie: @/features/communication/messagerie/hooks
+// mur:        @/features/communication/mur/hooks

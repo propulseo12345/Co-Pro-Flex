@@ -91,10 +91,11 @@ export const MODULES: ModuleConfig[] = [
     id: 'communication',
     label: 'Communication',
     icon: MessageSquare,
-    href: '/communication/mur',
+    href: '/communication',
     subPages: [
-      { label: 'Mur', href: '/communication/mur', icon: MessageSquare },
-      { label: 'Calendrier', href: '/communication/evenements', icon: Calendar },
+      { label: 'Mail', href: '/communication/mail', icon: Mail },
+      { label: 'Messagerie', href: '/communication/messagerie', icon: MessageSquare },
+      { label: 'Mur', href: '/communication/mur', icon: Users },
     ],
   },
   {

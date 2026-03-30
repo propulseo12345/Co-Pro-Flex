@@ -1,1 +1,0 @@
-export { useMailDetailPage } from './useMailDetailPage';
