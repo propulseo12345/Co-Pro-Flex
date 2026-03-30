@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview C — Hub Unifié Intelligent</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; height: 100vh; overflow: hidden; }
+
+  .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
+
+  /* Topbar */
+  .topbar { background: #161822; border-bottom: 1px solid rgba(148,163,184,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-size: 20px; font-weight: 700; }
+  .topbar-pills { display: flex; gap: 6px; }
+  .top-pill { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .top-pill.active { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .top-pill.inactive { background: rgba(148,163,184,0.06); color: #94a3b8; }
+  .topbar-actions { display: flex; gap: 12px; align-items: center; }
+  .cmd-k { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 8px 16px; color: #64748b; font-size: 13px; width: 260px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .cmd-k kbd { background: rgba(148,163,184,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  .btn-primary { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-ghost { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+
+  .main { display: grid; grid-template-columns: 220px 1fr; height: calc(100vh - 56px); }
+
+  /* Sidebar */
+  .sidebar { background: #131620; border-right: 1px solid rgba(148,163,184,0.08); padding: 16px 12px; overflow-y: auto; }
+  .sidebar-section { margin-bottom: 20px; }
+  .sidebar-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; padding: 0 8px; }
+  .sidebar-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #94a3b8; cursor: pointer; transition: all 0.15s; }
+  .sidebar-item:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+  .sidebar-item.active { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .sidebar-item .icon { margin-right: 8px; }
+  .badge { background: #3b82f6; color: white; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+  .badge-red { background: #ef4444; }
+  .tag-dot { width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; display: inline-block; }
+
+  /* KPI strip */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px 24px; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .kpi-card { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px; padding: 14px 16px; }
+  .kpi-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  /* Feed */
+  .feed-wrapper { overflow-y: auto; }
+  .feed { padding: 20px 24px; max-width: 900px; }
+
+  /* Date separator */
+  .date-sep { display: flex; align-items: center; gap: 12px; margin: 20px 0 16px; }
+  .date-sep-line { flex: 1; height: 1px; background: rgba(148,163,184,0.08); }
+  .date-sep-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+
+  /* Feed item */
+  .feed-item { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; transition: all 0.15s; cursor: pointer; }
+  .feed-item:hover { border-color: rgba(59,130,246,0.2); transform: translateY(-1px); }
+  .feed-item.unread { border-left: 3px solid #3b82f6; }
+  .feed-item.system { background: #131620; border-left: 3px solid rgba(148,163,184,0.2); }
+  .feed-item.system:hover { border-color: rgba(148,163,184,0.3); border-left-color: rgba(148,163,184,0.3); }
+  .feed-item.urgent { border-left: 3px solid #ef4444; }
+
+  .feed-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .feed-left { display: flex; gap: 12px; align-items: flex-start; flex: 1; }
+  .feed-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .feed-icon.mail { background: rgba(59,130,246,0.12); }
+  .feed-icon.notif { background: rgba(245,158,11,0.12); }
+  .feed-icon.system { background: rgba(148,163,184,0.08); }
+  .feed-icon.auto { background: rgba(34,197,94,0.12); }
+  .feed-icon.alert { background: rgba(239,68,68,0.12); }
+
+  .feed-info { flex: 1; min-width: 0; }
+  .feed-sender { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .feed-subject { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
+  .feed-preview { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .feed-time { font-size: 11px; color: #64748b; white-space: nowrap; }
+  .feed-meta { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .feed-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 600; }
+  .feed-tag.maintenance { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .feed-tag.finance { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .feed-tag.ag { background: rgba(139,92,246,0.1); color: #a78bfa; }
+  .feed-tag.relance { background: rgba(239,68,68,0.1); color: #f87171; }
+  .feed-tag.general { background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .feed-tag.sinistre { background: rgba(56,189,248,0.1); color: #38bdf8; }
+
+  .feed-link { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: #60a5fa; background: rgba(59,130,246,0.08); padding: 2px 8px; border-radius: 5px; font-weight: 500; }
+  .feed-copro { font-size: 10px; color: #64748b; }
+  .feed-sla { font-size: 10px; font-weight: 600; }
+  .feed-sla.ok { color: #4ade80; }
+  .feed-sla.warn { color: #fbbf24; }
+  .feed-sla.danger { color: #f87171; }
+  .feed-stats { font-size: 10px; color: #64748b; display: flex; align-items: center; gap: 4px; }
+  .feed-stats .green { color: #4ade80; }
+  .feed-stats .red { color: #f87171; }
+
+  .feed-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+  /* System event */
+  .sys-text { font-size: 12px; color: #94a3b8; }
+  .sys-text strong { color: #e2e8f0; }
+
+  /* Assignee */
+  .assignee { display: flex; align-items: center; gap: 4px; }
+  .assignee-dot { width: 18px; height: 18px; border-radius: 50%; font-size: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .assignee-name { font-size: 10px; color: #64748b; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Centre de communication</span>
+      <div class="topbar-pills">
+        <span class="top-pill active">Tout</span>
+        <span class="top-pill inactive">Mails</span>
+        <span class="top-pill inactive">Notifications</span>
+        <span class="top-pill inactive">Système</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="cmd-k"><span>Rechercher...</span><kbd>Ctrl K</kbd></div>
+      <button class="btn-primary">+ Action rapide</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Flux</div>
+        <div class="sidebar-item active"><span class="icon">📥</span>Tout<span class="badge">18</span></div>
+        <div class="sidebar-item"><span class="icon">📩</span>Mails<span class="badge">12</span></div>
+        <div class="sidebar-item"><span class="icon">🔔</span>Notifications<span class="badge">4</span></div>
+        <div class="sidebar-item"><span class="icon">⚙️</span>Système<span class="badge" style="background:rgba(148,163,184,0.1);color:#94a3b8;">2</span></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Copropriétés</div>
+        <div class="sidebar-item"><span class="icon">🏢</span>Haussmann<span class="badge">8</span></div>
+        <div class="sidebar-item"><span class="icon">🏢</span>Voltaire<span class="badge">6</span></div>
+        <div class="sidebar-item"><span class="icon">🏢</span>République<span class="badge">4</span></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Canaux</div>
+        <div class="sidebar-item"><span class="icon">📩</span>Email</div>
+        <div class="sidebar-item"><span class="icon">📱</span>SMS</div>
+        <div class="sidebar-item"><span class="icon">🔔</span>In-app</div>
+        <div class="sidebar-item"><span class="icon">📋</span>Mur communautaire</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Filtres</div>
+        <div class="sidebar-item"><span class="icon">⏳</span>Non traités<span class="badge badge-red">12</span></div>
+        <div class="sidebar-item"><span class="icon">🚨</span>Urgents<span class="badge badge-red">2</span></div>
+        <div class="sidebar-item"><span class="icon">⏱</span>SLA dépassés<span class="badge badge-red">3</span></div>
+        <div class="sidebar-item"><span class="icon">👤</span>Mes assignations<span class="badge">4</span></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div style="background:#1a1d2e;border:1px solid rgba(148,163,184,0.08);border-radius:8px;padding:12px;">
+          <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Résumé du jour</div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="font-size:11px;color:#64748b;">Non traités</span><span style="font-size:13px;font-weight:700;color:#f87171;">12</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="font-size:11px;color:#64748b;">SLA en retard</span><span style="font-size:13px;font-weight:700;color:#fbbf24;">3</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="font-size:11px;color:#64748b;">Résolus</span><span style="font-size:13px;font-weight:700;color:#4ade80;">6</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="font-size:11px;color:#64748b;">Temps moyen</span><span style="font-size:13px;font-weight:700;">3h20</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed-wrapper">
+      <!-- KPI strip -->
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">Non traités</div>
+          <div class="kpi-value" style="color:#f87171;">12</div>
+          <div class="kpi-sub">+3 depuis hier</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SLA dépassés</div>
+          <div class="kpi-value" style="color:#fbbf24;">3</div>
+          <div class="kpi-sub">Voltaire (2), Haussmann (1)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Envoyés aujourd'hui</div>
+          <div class="kpi-value" style="color:#4ade80;">8</div>
+          <div class="kpi-sub">dont 3 automatiques</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Taux ouverture</div>
+          <div class="kpi-value">84%</div>
+          <div class="kpi-sub">sur 7 derniers jours</div>
+        </div>
+      </div>
+
+      <div class="feed">
+        <!-- Today -->
+        <div class="date-sep">
+          <div class="date-sep-line"></div>
+          <div class="date-sep-label">Aujourd'hui</div>
+          <div class="date-sep-line"></div>
+        </div>
+
+        <!-- Urgent mail -->
+        <div class="feed-item unread urgent">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon mail">📩</div>
+              <div class="feed-info">
+                <div class="feed-sender">M. Dupont → Syndic</div>
+                <div class="feed-subject">Fuite salle de bain — urgence</div>
+                <div class="feed-preview">Bonjour, je constate une infiltration d'eau depuis ce matin dans ma salle de bain...</div>
+              </div>
+            </div>
+            <span class="feed-time">14:30</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag maintenance">🔧 Maintenance</span>
+            <span class="feed-copro">Résidence Haussmann</span>
+            <span class="feed-link">→ Lié à: OS-2025-042</span>
+            <div class="assignee">
+              <div class="assignee-dot" style="background:rgba(168,85,247,0.15);color:#a78bfa;">MC</div>
+              <span class="assignee-name">Marie C.</span>
+            </div>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-ghost btn-sm">↩ Répondre</button>
+            <button class="btn-ghost btn-sm">👤 Assigner</button>
+            <button class="btn-ghost btn-sm">🔧 Créer OS</button>
+            <button class="btn-ghost btn-sm">✅ Résolu</button>
+          </div>
+        </div>
+
+        <!-- Auto notification -->
+        <div class="feed-item system">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon auto">🤖</div>
+              <div class="feed-info">
+                <div class="sys-text">📊 <strong>Appel de fonds T2 2025</strong> généré automatiquement pour <strong>Résidence Haussmann</strong></div>
+                <div class="feed-preview" style="margin-top:4px;">12 copropriétaires concernés — Montant total: 18 450,00 EUR</div>
+              </div>
+            </div>
+            <span class="feed-time">13:00</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag finance">💰 Finance</span>
+            <span class="feed-copro">Résidence Haussmann</span>
+            <span class="feed-link">→ Appel T2-2025</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-primary btn-sm">📨 Envoyer les notifications</button>
+            <button class="btn-ghost btn-sm">👁 Voir détail</button>
+            <button class="btn-ghost btn-sm">✏️ Modifier</button>
+          </div>
+        </div>
+
+        <!-- Mail with SLA warning -->
+        <div class="feed-item unread">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon mail">📩</div>
+              <div class="feed-info">
+                <div class="feed-sender">Mme Garcia → Syndic</div>
+                <div class="feed-subject">Question charges T1 2025</div>
+                <div class="feed-preview">Pourriez-vous me détailler la répartition des charges du premier trimestre...</div>
+              </div>
+            </div>
+            <span class="feed-time">11:15</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag finance">💰 Finance</span>
+            <span class="feed-copro">Résidence Voltaire</span>
+            <span class="feed-link">→ Lié à: Budget 2025</span>
+            <span class="feed-sla warn">⏱ En attente depuis 3j (SLA: 5j)</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-ghost btn-sm">↩ Répondre</button>
+            <button class="btn-ghost btn-sm">👤 Assigner</button>
+          </div>
+        </div>
+
+        <!-- Convocation stats -->
+        <div class="feed-item">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon mail">📩</div>
+              <div class="feed-info">
+                <div class="feed-sender">Syndic → Tous les copropriétaires</div>
+                <div class="feed-subject">Convocation AG Ordinaire 2025</div>
+                <div class="feed-preview">Mesdames, Messieurs, nous avons l'honneur de vous convoquer à l'AG...</div>
+              </div>
+            </div>
+            <span class="feed-time">09:00</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag ag">⚖️ AG</span>
+            <span class="feed-copro">Résidence Haussmann</span>
+            <span class="feed-link">→ AG-2025-001</span>
+            <span class="feed-stats"><span class="green">✓ 38 ouverts</span> · <span class="red">7 non ouverts</span> · 45 envoyés</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-ghost btn-sm">📊 Voir détail envoi</button>
+            <button class="btn-ghost btn-sm">📨 Relancer les non-ouverts</button>
+          </div>
+        </div>
+
+        <!-- Yesterday -->
+        <div class="date-sep">
+          <div class="date-sep-line"></div>
+          <div class="date-sep-label">Hier</div>
+          <div class="date-sep-line"></div>
+        </div>
+
+        <!-- System event -->
+        <div class="feed-item system">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon system">⚙️</div>
+              <div class="feed-info">
+                <div class="sys-text">✅ <strong>OS-2025-041</strong> clôturé — Réparation porte hall entrée</div>
+                <div class="feed-preview" style="margin-top:4px;">Notification automatique envoyée à M. Martin (copropriétaire demandeur)</div>
+              </div>
+            </div>
+            <span class="feed-time">17:00</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag maintenance">🔧 Maintenance</span>
+            <span class="feed-copro">Résidence Voltaire</span>
+            <span class="feed-link">→ OS-2025-041</span>
+          </div>
+        </div>
+
+        <!-- Relance impayé -->
+        <div class="feed-item">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon alert">🚨</div>
+              <div class="feed-info">
+                <div class="feed-sender">Syndic → M. Bernard</div>
+                <div class="feed-subject">Relance impayé — 2ème rappel (J+32)</div>
+                <div class="feed-preview">Monsieur, malgré notre précédent courrier du 15 février, nous constatons que...</div>
+              </div>
+            </div>
+            <span class="feed-time">15:30</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag relance">🚨 Relance</span>
+            <span class="feed-copro">Résidence Voltaire</span>
+            <span class="feed-link">→ Impayé IMP-2025-009</span>
+            <span class="feed-sla danger">⏱ 5j sans réponse — SLA dépassé</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-ghost btn-sm">📞 Programmer appel</button>
+            <button class="btn-ghost btn-sm">📄 Mise en demeure</button>
+            <button class="btn-ghost btn-sm">⚖️ Transmettre avocat</button>
+          </div>
+        </div>
+
+        <!-- Contrat auto-renewal -->
+        <div class="feed-item system">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon notif">🔔</div>
+              <div class="feed-info">
+                <div class="sys-text">⚠️ <strong>Contrat CT-2025-007</strong> (OTIS Ascenseur) arrive à échéance dans <strong>45 jours</strong></div>
+                <div class="feed-preview" style="margin-top:4px;">Tacite reconduction — délai de résiliation: 90 jours. Action requise avant le 15/04/2025.</div>
+              </div>
+            </div>
+            <span class="feed-time">10:00</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag maintenance">🔧 Maintenance</span>
+            <span class="feed-copro">Résidence République</span>
+            <span class="feed-link">→ Contrat CT-2025-007</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-ghost btn-sm">📄 Voir contrat</button>
+            <button class="btn-ghost btn-sm">📨 Demander devis alternatif</button>
+            <button class="btn-ghost btn-sm">✅ Reconduire</button>
+          </div>
+        </div>
+
+        <!-- Insurance auto -->
+        <div class="feed-item">
+          <div class="feed-header">
+            <div class="feed-left">
+              <div class="feed-icon mail">📩</div>
+              <div class="feed-info">
+                <div class="feed-sender">AXA Assurance → Syndic</div>
+                <div class="feed-subject">Attestation assurance 2025-2026</div>
+                <div class="feed-preview">Veuillez trouver ci-joint l'attestation d'assurance renouvelée pour votre copropriété...</div>
+              </div>
+            </div>
+            <span class="feed-time">09:15</span>
+          </div>
+          <div class="feed-meta">
+            <span class="feed-tag general">📄 Général</span>
+            <span class="feed-copro">Résidence République</span>
+            <span style="font-size:10px;color:#64748b;">📎 1 PJ</span>
+          </div>
+          <div class="feed-actions">
+            <button class="btn-ghost btn-sm">📁 Archiver en GED</button>
+            <button class="btn-ghost btn-sm">🔗 Lier au contrat</button>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:20px;">
+          <button class="btn-ghost" style="margin:0 auto;">Charger plus ancien...</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

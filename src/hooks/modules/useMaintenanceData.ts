@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
 import type {
@@ -120,6 +120,9 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
     }
   }, [currentCoproId, supabase]);
 
+  const fetchProvidersRef = useRef(fetchProviders);
+  fetchProvidersRef.current = fetchProviders;
+
   const createProvider = useCallback(async (provider: ProviderInsert) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
@@ -131,9 +134,9 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
 
     if (insertError) throw insertError;
 
-    await fetchProviders();
+    await fetchProvidersRef.current();
     return data as Provider;
-  }, [currentCoproId, supabase, fetchProviders]);
+  }, [currentCoproId, supabase]);
 
   const updateProvider = useCallback(async (id: string, updates: Partial<Provider>) => {
     const { data, error: updateError } = await supabase
@@ -145,9 +148,9 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
 
     if (updateError) throw updateError;
 
-    await fetchProviders();
+    await fetchProvidersRef.current();
     return data as Provider;
-  }, [supabase, fetchProviders]);
+  }, [supabase]);
 
   const deleteProvider = useCallback(async (id: string) => {
     const { error: deleteError } = await supabase
@@ -157,14 +160,14 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
 
     if (deleteError) throw deleteError;
 
-    await fetchProviders();
-  }, [supabase, fetchProviders]);
+    await fetchProvidersRef.current();
+  }, [supabase]);
 
   useEffect(() => {
     if (autoFetch && currentCoproId) {
-      fetchProviders();
+      fetchProvidersRef.current();
     }
-  }, [autoFetch, currentCoproId, fetchProviders]);
+  }, [autoFetch, currentCoproId]);
 
   // Stats par catégorie
   const stats = useMemo(() => ({
@@ -250,6 +253,9 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
     }
   }, [currentCoproId, supabase]);
 
+  const fetchContractsRef = useRef(fetchContracts);
+  fetchContractsRef.current = fetchContracts;
+
   const createContract = useCallback(async (contract: ContractInsert) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
@@ -261,9 +267,9 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
 
     if (insertError) throw insertError;
 
-    await fetchContracts();
+    await fetchContractsRef.current();
     return data as Contract;
-  }, [currentCoproId, supabase, fetchContracts]);
+  }, [currentCoproId, supabase]);
 
   const updateContract = useCallback(async (id: string, updates: Partial<Contract>) => {
     const { data, error: updateError } = await supabase
@@ -275,9 +281,9 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
 
     if (updateError) throw updateError;
 
-    await fetchContracts();
+    await fetchContractsRef.current();
     return data as Contract;
-  }, [supabase, fetchContracts]);
+  }, [supabase]);
 
   const terminateContract = useCallback(async (id: string, reason: string) => {
     const { data, error: updateError } = await supabase
@@ -294,15 +300,15 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
 
     if (updateError) throw updateError;
 
-    await fetchContracts();
+    await fetchContractsRef.current();
     return data as Contract;
-  }, [supabase, fetchContracts]);
+  }, [supabase]);
 
   useEffect(() => {
     if (autoFetch && currentCoproId) {
-      fetchContracts();
+      fetchContractsRef.current();
     }
-  }, [autoFetch, currentCoproId, fetchContracts]);
+  }, [autoFetch, currentCoproId]);
 
   const stats = useMemo(() => ({
     total: contracts.length,
@@ -383,6 +389,9 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
     }
   }, [currentCoproId, supabase]);
 
+  const fetchOrdersRef = useRef(fetchOrders);
+  fetchOrdersRef.current = fetchOrders;
+
   const createOrder = useCallback(async (order: ServiceOrderInsert) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
@@ -418,9 +427,9 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
 
     if (insertError) throw new Error(insertError.message || 'Erreur lors de la création');
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return data as ServiceOrder;
-  }, [currentCoproId, supabase, fetchOrders]);
+  }, [currentCoproId, supabase]);
 
   const updateOrderStatus = useCallback(async (
     orderId: string,
@@ -433,7 +442,6 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
       invoiceId?: string;
     }
   ) => {
-    // Appel direct à la RPC Supabase (pas besoin d'auth JWT)
     const { data, error: rpcError } = await supabase.rpc('update_service_order_status', {
       p_order_id: orderId,
       p_new_status: newStatus,
@@ -444,7 +452,6 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
       throw new Error(rpcError.message || 'Erreur lors de la mise à jour du statut');
     }
 
-    // Mettre à jour les montants si fournis (la RPC ne gère que le statut)
     if (options?.quotedAmount || options?.actualAmount) {
       const updates: Record<string, unknown> = {};
       if (options.quotedAmount) updates.quoted_amount = options.quotedAmount;
@@ -458,25 +465,24 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
         .eq('id', orderId);
     }
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return data as ServiceOrder;
-  }, [supabase, fetchOrders]);
+  }, [supabase]);
 
   const sendOrderEmail = useCallback(async (
     orderId: string,
     templateType: 'classique' | 'contractuel',
     customMessage?: string
   ) => {
-    // Marquer comme envoyé via RPC
     await supabase.rpc('update_service_order_status', {
       p_order_id: orderId,
       p_new_status: 'sent' as ServiceOrderStatus,
       p_comment: customMessage || `Email ${templateType} envoyé`,
     });
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return { success: true };
-  }, [supabase, fetchOrders]);
+  }, [supabase]);
 
   const linkInvoice = useCallback(async (orderId: string, invoiceId: string, actualAmount: number) => {
     const { error: updateError } = await supabase
@@ -490,24 +496,22 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
 
     if (updateError) throw new Error(updateError.message);
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return { success: true };
-  }, [supabase, fetchOrders]);
+  }, [supabase]);
 
   const completeAndLog = useCallback(async (orderId: string) => {
-    // Passer en closed via RPC
     await supabase.rpc('update_service_order_status', {
       p_order_id: orderId,
       p_new_status: 'closed' as ServiceOrderStatus,
       p_comment: 'Clôture et archivage',
     });
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return { success: true };
-  }, [supabase, fetchOrders]);
+  }, [supabase]);
 
   const cancelOrder = useCallback(async (orderId: string, reason: string) => {
-    // Annuler via RPC
     const { error: rpcError } = await supabase.rpc('update_service_order_status', {
       p_order_id: orderId,
       p_new_status: 'cancelled' as ServiceOrderStatus,
@@ -516,9 +520,9 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
 
     if (rpcError) throw new Error(rpcError.message);
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return { success: true };
-  }, [supabase, fetchOrders]);
+  }, [supabase]);
 
   const deleteOrder = useCallback(async (orderId: string) => {
     const { error: rpcError } = await supabase.rpc('delete_service_order', {
@@ -527,9 +531,9 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
 
     if (rpcError) throw new Error(rpcError.message || 'Erreur lors de la suppression');
 
-    await fetchOrders();
+    await fetchOrdersRef.current();
     return { success: true };
-  }, [supabase, fetchOrders]);
+  }, [supabase]);
 
   const getOrderEvents = useCallback(async (orderId: string): Promise<ServiceOrderEvent[]> => {
     const { data, error: fetchError } = await supabase
@@ -545,9 +549,9 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
 
   useEffect(() => {
     if (autoFetch && currentCoproId) {
-      fetchOrders();
+      fetchOrdersRef.current();
     }
-  }, [autoFetch, currentCoproId, fetchOrders]);
+  }, [autoFetch, currentCoproId]);
 
   const stats = useMemo(() => ({
     total: orders.length,
@@ -647,6 +651,9 @@ export function useLogbook(options: UseMaintenanceDataOptions = {}) {
     }
   }, [currentCoproId, supabase]);
 
+  const fetchEntriesRef = useRef(fetchEntries);
+  fetchEntriesRef.current = fetchEntries;
+
   const createEntry = useCallback(async (entry: LogbookEntryInsert) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
@@ -658,9 +665,9 @@ export function useLogbook(options: UseMaintenanceDataOptions = {}) {
 
     if (insertError) throw insertError;
 
-    await fetchEntries();
+    await fetchEntriesRef.current();
     return data as LogbookEntry;
-  }, [currentCoproId, supabase, fetchEntries]);
+  }, [currentCoproId, supabase]);
 
   const updateEntry = useCallback(async (id: string, updates: Partial<LogbookEntry>) => {
     const { data, error: updateError } = await supabase
@@ -672,9 +679,9 @@ export function useLogbook(options: UseMaintenanceDataOptions = {}) {
 
     if (updateError) throw updateError;
 
-    await fetchEntries();
+    await fetchEntriesRef.current();
     return data as LogbookEntry;
-  }, [supabase, fetchEntries]);
+  }, [supabase]);
 
   const completeEntry = useCallback(async (id: string, cost?: number) => {
     return updateEntry(id, {
@@ -692,14 +699,14 @@ export function useLogbook(options: UseMaintenanceDataOptions = {}) {
 
     if (deleteError) throw deleteError;
 
-    await fetchEntries();
-  }, [supabase, fetchEntries]);
+    await fetchEntriesRef.current();
+  }, [supabase]);
 
   useEffect(() => {
     if (autoFetch && currentCoproId) {
-      fetchEntries();
+      fetchEntriesRef.current();
     }
-  }, [autoFetch, currentCoproId, fetchEntries]);
+  }, [autoFetch, currentCoproId]);
 
   const stats = useMemo(() => ({
     total: entries.length,
@@ -759,11 +766,14 @@ export function useMaintenanceStats() {
     }
   }, [currentCoproId, supabase]);
 
+  const fetchStatsRef = useRef(fetchStats);
+  fetchStatsRef.current = fetchStats;
+
   useEffect(() => {
     if (currentCoproId) {
-      fetchStats();
+      fetchStatsRef.current();
     }
-  }, [currentCoproId, fetchStats]);
+  }, [currentCoproId]);
 
   return {
     stats,

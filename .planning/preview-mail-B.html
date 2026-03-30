@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mail B — Style Gmail/Outlook</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;height:100vh;overflow:hidden}
+  .app{display:grid;grid-template-rows:52px 1fr;height:100vh}
+  .topbar{background:#161822;border-bottom:1px solid rgba(148,163,184,.06);display:flex;align-items:center;padding:0 16px;gap:12px}
+  .tb-logo{font-size:18px;font-weight:800;color:#e2e8f0;margin-right:8px}
+  .tb-search{flex:1;max-width:600px;background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:10px;padding:10px 16px;color:#e2e8f0;font-size:13px;outline:none}
+  .tb-search:focus{border-color:#3b82f6;background:#131620}
+  .tb-search::placeholder{color:#475569}
+  .tb-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .tb-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;font-size:16px;transition:all .12s}
+  .tb-icon:hover{background:rgba(148,163,184,.08)}
+  .tb-avatar{width:32px;height:32px;border-radius:50%;background:rgba(59,130,246,.12);color:#60a5fa;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+
+  .main{display:grid;grid-template-columns:64px 340px 1fr}
+
+  /* Rail sidebar (icons only) */
+  .rail{background:#131620;border-right:1px solid rgba(148,163,184,.06);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px}
+  .rail-btn{width:48px;height:48px;border-radius:14px;background:#3b82f6;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;margin-bottom:12px;transition:all .15s}
+  .rail-btn:hover{background:#2563eb;transform:scale(1.05)}
+  .rail-item{width:48px;height:44px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#64748b;font-size:16px;transition:all .12s;position:relative}
+  .rail-item:hover{background:rgba(148,163,184,.06);color:#94a3b8}
+  .rail-item.on{background:rgba(59,130,246,.08);color:#60a5fa}
+  .rail-item .r-label{font-size:8px;font-weight:600;margin-top:1px}
+  .rail-badge{position:absolute;top:4px;right:6px;background:#3b82f6;color:#fff;font-size:8px;font-weight:700;padding:1px 4px;border-radius:8px;min-width:14px;text-align:center}
+  .rail-sep{width:32px;height:1px;background:rgba(148,163,184,.06);margin:8px 0}
+
+  /* Mail list */
+  .ml{border-right:1px solid rgba(148,163,184,.06);display:flex;flex-direction:column;overflow:hidden}
+  .ml-tabs{display:flex;border-bottom:1px solid rgba(148,163,184,.06)}
+  .ml-tab{flex:1;text-align:center;padding:12px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+  .ml-tab:hover{color:#94a3b8}
+  .ml-tab.on{color:#e2e8f0;border-bottom-color:#3b82f6}
+  .ml-items{flex:1;overflow-y:auto}
+
+  .mi{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(148,163,184,.03);cursor:pointer;transition:all .1s;position:relative}
+  .mi:hover{background:rgba(148,163,184,.03)}
+  .mi:hover .mi-actions{opacity:1}
+  .mi.on{background:rgba(59,130,246,.06)}
+  .mi.unread .mi-from{font-weight:700;color:#e2e8f0}
+  .mi.unread .mi-subj{font-weight:600;color:#e2e8f0}
+  .mi.unread::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#3b82f6;border-radius:0 2px 2px 0}
+  .mi-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .mi-body{flex:1;min-width:0}
+  .mi-row1{display:flex;justify-content:space-between;margin-bottom:1px}
+  .mi-from{font-size:13px;font-weight:500;color:#94a3b8}
+  .mi-time{font-size:10px;color:#475569;font-variant-numeric:tabular-nums}
+  .mi-subj{font-size:12px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+  .mi-prev{font-size:11px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mi-tags{display:flex;gap:4px;margin-top:3px}
+  .mi-tag{padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}
+  .mi-pj{font-size:10px;color:#475569}
+  /* Hover actions */
+  .mi-actions{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .15s}
+  .mi-act{width:28px;height:28px;border-radius:6px;background:#1a1d2e;border:1px solid rgba(148,163,184,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
+  .mi-act:hover{background:rgba(59,130,246,.1);color:#60a5fa;border-color:rgba(59,130,246,.2)}
+
+  /* Reading pane */
+  .rp{display:flex;flex-direction:column;overflow:hidden}
+  .rp-hdr{padding:20px 28px 16px;border-bottom:1px solid rgba(148,163,184,.06)}
+  .rp-subj{font-size:20px;font-weight:700;margin-bottom:16px}
+  .rp-thread-info{font-size:11px;color:#64748b;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+  .rp-msg{padding:16px 0;border-bottom:1px solid rgba(148,163,184,.04)}
+  .rp-msg:last-child{border-bottom:none}
+  .rp-msg-hdr{display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer}
+  .rp-msg-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .rp-msg-info{flex:1}
+  .rp-msg-name{font-size:13px;font-weight:600}
+  .rp-msg-to{font-size:11px;color:#64748b}
+  .rp-msg-date{font-size:11px;color:#64748b}
+  .rp-msg-acts{display:flex;gap:4px}
+  .rp-msg-body{font-size:14px;line-height:1.8;color:#cbd5e1;padding-left:48px}
+  .rp-msg-body p{margin-bottom:10px}
+  .rp-msg.collapsed .rp-msg-body{display:none}
+  .rp-msg.collapsed .rp-msg-preview{display:block}
+  .rp-msg-preview{display:none;font-size:12px;color:#64748b;padding-left:48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rp-msg-pj{padding-left:48px;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .pj-chip{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:8px 12px;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .pj-chip:hover{border-color:rgba(59,130,246,.2)}
+
+  .rp-body{flex:1;overflow-y:auto;padding:0 28px}
+
+  .rp-reply{padding:16px 28px;border-top:1px solid rgba(148,163,184,.06);display:flex;flex-direction:column;gap:10px}
+  .rp-reply-box{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:12px;padding:14px;cursor:text;transition:border-color .15s}
+  .rp-reply-box:hover{border-color:rgba(148,163,184,.12)}
+  .rp-reply-placeholder{font-size:13px;color:#475569}
+  .rp-reply-btns{display:flex;gap:8px}
+  .rb{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .12s;display:flex;align-items:center;gap:4px}
+  .rb-p{background:#3b82f6;color:#fff}.rb-p:hover{background:#2563eb}
+  .rb-g{background:rgba(148,163,184,.05);border:1px solid rgba(148,163,184,.06);color:#94a3b8}.rb-g:hover{color:#e2e8f0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <span class="tb-logo">CoProFlex</span>
+    <input class="tb-search" placeholder="🔍 Rechercher dans les messages... (from:, has:attachment, label:)">
+    <div class="tb-right">
+      <div class="tb-icon">⚙️</div>
+      <div class="tb-icon">❓</div>
+      <div class="tb-avatar">MC</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Rail sidebar -->
+    <div class="rail">
+      <button class="rail-btn">✏️</button>
+      <div class="rail-item on"><span>📥</span><span class="r-label">Inbox</span><span class="rail-badge">5</span></div>
+      <div class="rail-item"><span>⭐</span><span class="r-label">Favoris</span></div>
+      <div class="rail-item"><span>📤</span><span class="r-label">Envoyés</span></div>
+      <div class="rail-item"><span>📝</span><span class="r-label">Brouill.</span></div>
+      <div class="rail-sep"></div>
+      <div class="rail-item"><span>📁</span><span class="r-label">Archives</span></div>
+      <div class="rail-item"><span>🗑️</span><span class="r-label">Corbeille</span></div>
+      <div class="rail-sep"></div>
+      <div class="rail-item"><span>🏷️</span><span class="r-label">Labels</span></div>
+      <div class="rail-item"><span>📂</span><span class="r-label">Dossiers</span></div>
+    </div>
+
+    <!-- Mail list -->
+    <div class="ml">
+      <div class="ml-tabs">
+        <div class="ml-tab on">Principal</div>
+        <div class="ml-tab">Prestataires</div>
+        <div class="ml-tab">Notifications</div>
+      </div>
+      <div class="ml-items">
+        <div class="mi on unread">
+          <div class="mi-avatar" style="background:rgba(59,130,246,.1);color:#60a5fa">JD</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">Jean Dupont</span><span class="mi-time">14:30</span></div>
+            <div class="mi-subj">Fuite salle de bain — urgence</div>
+            <div class="mi-prev">Bonjour, je constate une infiltration d'eau depuis ce matin...</div>
+            <div class="mi-tags"><span class="mi-pj">📎 2</span></div>
+          </div>
+          <div class="mi-actions">
+            <div class="mi-act" title="Archiver">📁</div>
+            <div class="mi-act" title="Supprimer">🗑</div>
+            <div class="mi-act" title="Marquer lu">📖</div>
+            <div class="mi-act" title="Reporter">⏰</div>
+          </div>
+        </div>
+
+        <div class="mi unread">
+          <div class="mi-avatar" style="background:rgba(34,197,94,.1);color:#4ade80">MG</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">Marie Garcia</span><span class="mi-time">11:15</span></div>
+            <div class="mi-subj">Question charges T1 2025</div>
+            <div class="mi-prev">Pourriez-vous me détailler la répartition des charges...</div>
+            <div class="mi-tags"><span class="mi-tag" style="background:rgba(34,197,94,.1);color:#4ade80">Finance</span></div>
+          </div>
+          <div class="mi-actions"><div class="mi-act">📁</div><div class="mi-act">🗑</div><div class="mi-act">📖</div></div>
+        </div>
+
+        <div class="mi unread">
+          <div class="mi-avatar" style="background:rgba(148,163,184,.1);color:#94a3b8">PE</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">Plomberie Express</span><span class="mi-time">10:05</span></div>
+            <div class="mi-subj">RE: Devis intervention urgence — PLB-003</div>
+            <div class="mi-prev">Suite à votre demande, veuillez trouver ci-joint...</div>
+            <div class="mi-tags"><span class="mi-pj">📎 1</span><span class="mi-tag" style="background:rgba(245,158,11,.1);color:#fbbf24">Maintenance</span></div>
+          </div>
+          <div class="mi-actions"><div class="mi-act">📁</div><div class="mi-act">🗑</div></div>
+        </div>
+
+        <div class="mi">
+          <div class="mi-avatar" style="background:rgba(139,92,246,.1);color:#a78bfa">PL</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">Paul Lefebvre</span><span class="mi-time">Hier</span></div>
+            <div class="mi-subj">Place de parking — lot 6C</div>
+            <div class="mi-prev">Bonjour, je souhaitais savoir si la place n°12 est disponible...</div>
+          </div>
+          <div class="mi-actions"><div class="mi-act">📁</div><div class="mi-act">🗑</div></div>
+        </div>
+
+        <div class="mi">
+          <div class="mi-avatar" style="background:rgba(239,68,68,.1);color:#f87171">AX</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">AXA Assurance</span><span class="mi-time">28/03</span></div>
+            <div class="mi-subj">Attestation assurance MRI 2025-2026</div>
+            <div class="mi-prev">Veuillez trouver ci-joint l'attestation d'assurance...</div>
+            <div class="mi-tags"><span class="mi-pj">📎 1</span></div>
+          </div>
+          <div class="mi-actions"><div class="mi-act">📁</div><div class="mi-act">🗑</div></div>
+        </div>
+
+        <div class="mi">
+          <div class="mi-avatar" style="background:rgba(56,189,248,.1);color:#38bdf8">SR</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">Sophie Rousseau <span style="color:#475569;font-weight:400">(3)</span></span><span class="mi-time">27/03</span></div>
+            <div class="mi-subj">Demande de travaux privatifs — salle de bain</div>
+            <div class="mi-prev">D'accord, je vous envoie les photos demain matin.</div>
+          </div>
+          <div class="mi-actions"><div class="mi-act">📁</div><div class="mi-act">🗑</div></div>
+        </div>
+
+        <div class="mi">
+          <div class="mi-avatar" style="background:rgba(245,158,11,.1);color:#fbbf24">OT</div>
+          <div class="mi-body">
+            <div class="mi-row1"><span class="mi-from">OTIS Ascenseurs</span><span class="mi-time">24/03</span></div>
+            <div class="mi-subj">Rapport d'intervention — visite trimestrielle</div>
+            <div class="mi-prev">Veuillez trouver ci-joint le rapport de la visite...</div>
+            <div class="mi-tags"><span class="mi-pj">📎 1</span><span class="mi-tag" style="background:rgba(245,158,11,.1);color:#fbbf24">Maintenance</span></div>
+          </div>
+          <div class="mi-actions"><div class="mi-act">📁</div><div class="mi-act">🗑</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading pane with thread -->
+    <div class="rp">
+      <div class="rp-hdr">
+        <div class="rp-subj">Fuite salle de bain — urgence</div>
+        <div class="rp-thread-info">
+          <span>💬 2 messages dans cette conversation</span>
+          <span>·</span>
+          <span>📎 2 pièces jointes</span>
+        </div>
+      </div>
+
+      <div class="rp-body">
+        <!-- Message 1 -->
+        <div class="rp-msg">
+          <div class="rp-msg-hdr">
+            <div class="rp-msg-avatar" style="background:rgba(59,130,246,.1);color:#60a5fa">JD</div>
+            <div class="rp-msg-info">
+              <div class="rp-msg-name">Jean Dupont</div>
+              <div class="rp-msg-to">à moi</div>
+            </div>
+            <div class="rp-msg-date">Aujourd'hui, 14:30</div>
+            <div class="rp-msg-acts">
+              <div class="mi-act" style="width:24px;height:24px;font-size:11px">↩</div>
+              <div class="mi-act" style="width:24px;height:24px;font-size:11px">⋯</div>
+            </div>
+          </div>
+          <div class="rp-msg-body">
+            <p>Bonjour,</p>
+            <p>Je vous écris pour vous signaler une <strong>infiltration d'eau</strong> dans ma salle de bain (lot 4B, bâtiment A) constatée ce matin vers 8h30.</p>
+            <p>L'eau s'écoule le long du mur derrière la baignoire et provient du plafond — probablement du lot 5B (Mme Rousseau).</p>
+            <p>• Tache d'humidité ~1m²<br>• Peinture qui cloque<br>• Écoulement continu qui s'accélère</p>
+            <p>Merci d'organiser une intervention rapide.</p>
+            <p>Cordialement,<br>Jean Dupont</p>
+          </div>
+          <div class="rp-msg-pj">
+            <div class="pj-chip">🖼️ photo-fuite-mur.jpg <span style="color:#475569">2.4 Mo</span></div>
+            <div class="pj-chip">🖼️ photo-fuite-plafond.jpg <span style="color:#475569">1.8 Mo</span></div>
+          </div>
+        </div>
+
+        <!-- Message 2 (my reply) - collapsed -->
+        <div class="rp-msg collapsed">
+          <div class="rp-msg-hdr">
+            <div class="rp-msg-avatar" style="background:rgba(34,197,94,.1);color:#4ade80">MC</div>
+            <div class="rp-msg-info">
+              <div class="rp-msg-name">Moi (Marie C.)</div>
+              <div class="rp-msg-to">à Jean Dupont</div>
+            </div>
+            <div class="rp-msg-date">Aujourd'hui, 15:25</div>
+          </div>
+          <div class="rp-msg-preview">Un plombier de Plomberie Express interviendra demain matin entre 8h et 10h...</div>
+          <div class="rp-msg-body">
+            <p>Bonjour Monsieur Dupont,</p>
+            <p>Merci pour le signalement rapide et les photos. J'ai contacté Plomberie Express (contrat n°CT-2025-003).</p>
+            <p>Un plombier interviendra <strong>demain matin entre 8h et 10h</strong>. Merci d'être présent.</p>
+            <p>En attendant, si possible, coupez l'arrivée d'eau de la salle de bain.</p>
+            <p>Cordialement,<br>Marie Carpentier — Gestionnaire</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick reply -->
+      <div class="rp-reply">
+        <div class="rp-reply-box">
+          <div class="rp-reply-placeholder">↩ Cliquer ici pour répondre...</div>
+        </div>
+        <div class="rp-reply-btns">
+          <button class="rb rb-p">↩ Répondre</button>
+          <button class="rb rb-g">↗ Transférer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

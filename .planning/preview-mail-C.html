@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mail C — Style HEY (3 flux)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;height:100vh;overflow:hidden}
+  .app{display:grid;grid-template-rows:56px 1fr;height:100vh}
+  .topbar{background:#161822;border-bottom:1px solid rgba(148,163,184,.06);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+  .topbar-left{display:flex;align-items:center;gap:20px}
+  .topbar-title{font-size:20px;font-weight:800}
+  .flux-tabs{display:flex;gap:4px;background:#131620;border-radius:10px;padding:3px}
+  .flux-tab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;transition:all .12s;position:relative}
+  .flux-tab:hover{color:#94a3b8}
+  .flux-tab.on{background:#1a1d2e;color:#e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .flux-tab .cnt{font-size:9px;background:#3b82f6;color:#fff;padding:1px 5px;border-radius:8px;margin-left:4px}
+  .topbar-right{display:flex;gap:10px;align-items:center}
+  .btn{border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.25)}
+  .btn-g{background:rgba(148,163,184,.05);border:1px solid rgba(148,163,184,.06);color:#94a3b8;padding:8px 14px}.btn-g:hover{background:rgba(148,163,184,.08);color:#e2e8f0}
+  .search-btn{background:rgba(148,163,184,.05);border:1px solid rgba(148,163,184,.06);border-radius:10px;padding:8px 16px;color:#475569;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;width:220px}
+  .search-btn kbd{background:rgba(148,163,184,.08);padding:2px 5px;border-radius:3px;font-size:10px;font-family:inherit;margin-left:auto}
+
+  .main{display:flex;overflow:hidden}
+
+  /* Sidebar light */
+  .sb{width:200px;background:#131620;border-right:1px solid rgba(148,163,184,.06);padding:16px 10px;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+  .sb-sec{margin-bottom:16px}
+  .sb-lbl{font-size:9px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.8px;padding:6px 10px}
+  .sb-item{padding:7px 10px;border-radius:8px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:8px}
+  .sb-item:hover{background:rgba(148,163,184,.06);color:#94a3b8}
+  .sb-item.on{background:rgba(59,130,246,.08);color:#60a5fa;font-weight:600}
+  .sb-badge{font-size:9px;background:#3b82f6;color:#fff;padding:1px 5px;border-radius:8px;margin-left:auto}
+
+  /* Feed content */
+  .feed{flex:1;overflow-y:auto;padding:28px 40px}
+  .feed-inner{max-width:720px;margin:0 auto}
+
+  /* Set aside / reply later */
+  .aside-section{margin-bottom:28px}
+  .aside-title{font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+  .aside-row{display:flex;gap:8px;flex-wrap:wrap}
+  .aside-card{display:flex;align-items:center;gap:8px;background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:10px;padding:8px 14px;cursor:pointer;transition:all .12s}
+  .aside-card:hover{border-color:rgba(59,130,246,.2);transform:translateY(-1px)}
+  .aside-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+  .aside-info{min-width:0}
+  .aside-name{font-size:11px;font-weight:600}
+  .aside-subj{font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+
+  /* Mail cards */
+  .mail-card{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:14px;padding:20px 24px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+  .mail-card:hover{border-color:rgba(148,163,184,.12);transform:translateY(-1px)}
+  .mail-card.unread{border-left:3px solid #3b82f6}
+  .mc-hdr{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .mc-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .mc-info{flex:1}
+  .mc-name{font-size:14px;font-weight:600}
+  .mc-date{font-size:11px;color:#475569;font-variant-numeric:tabular-nums}
+  .mc-subj{font-size:15px;font-weight:600;margin-bottom:6px}
+  .mc-prev{font-size:13px;color:#94a3b8;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .mc-footer{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .mc-pj{font-size:11px;color:#475569;display:flex;align-items:center;gap:4px}
+  .mc-tag{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
+  .mc-actions{margin-left:auto;display:flex;gap:4px;opacity:0;transition:opacity .15s}
+  .mail-card:hover .mc-actions{opacity:1}
+  .mc-act{width:28px;height:28px;border-radius:6px;background:rgba(148,163,184,.06);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;border:none}
+  .mc-act:hover{background:rgba(59,130,246,.1);color:#60a5fa}
+
+  /* Screener banner */
+  .screener{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.12);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+  .screener-text{font-size:13px;color:#fbbf24;font-weight:600}
+  .screener-text span{color:#94a3b8;font-weight:400}
+  .screener-actions{display:flex;gap:8px}
+  .scr-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .12s}
+  .scr-yes{background:rgba(34,197,94,.1);color:#4ade80}.scr-yes:hover{background:rgba(34,197,94,.2)}
+  .scr-no{background:rgba(239,68,68,.1);color:#f87171}.scr-no:hover{background:rgba(239,68,68,.2)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Mail</span>
+      <div class="flux-tabs">
+        <div class="flux-tab on">📥 Important<span class="cnt">5</span></div>
+        <div class="flux-tab">📰 Newsletters</div>
+        <div class="flux-tab">🧾 Automatiques</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-btn">🔍 Rechercher...<kbd>⌘K</kbd></div>
+      <button class="btn btn-p">✏️ Écrire</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sb">
+      <div class="sb-sec">
+        <div class="sb-item on"><span>📥</span>Important<span class="sb-badge">5</span></div>
+        <div class="sb-item"><span>📰</span>Newsletters</div>
+        <div class="sb-item"><span>🧾</span>Automatiques</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">En cours</div>
+        <div class="sb-item"><span>↩</span>Répondre plus tard<span class="sb-badge" style="background:rgba(245,158,11,.15);color:#fbbf24">3</span></div>
+        <div class="sb-item"><span>📌</span>Mis de côté<span class="sb-badge" style="background:rgba(148,163,184,.1);color:#94a3b8">2</span></div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">Dossiers</div>
+        <div class="sb-item"><span>📤</span>Envoyés</div>
+        <div class="sb-item"><span>📝</span>Brouillons</div>
+        <div class="sb-item"><span>📁</span>Archives</div>
+        <div class="sb-item"><span>🗑️</span>Corbeille</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">Labels</div>
+        <div class="sb-item"><span style="color:#a78bfa">●</span>AG</div>
+        <div class="sb-item"><span style="color:#4ade80">●</span>Finance</div>
+        <div class="sb-item"><span style="color:#fbbf24">●</span>Maintenance</div>
+        <div class="sb-item"><span style="color:#f87171">●</span>Relances</div>
+      </div>
+    </div>
+
+    <div class="feed">
+      <div class="feed-inner">
+        <!-- Screener -->
+        <div class="screener">
+          <div class="screener-text">🛡 Nouvel expéditeur : <span>cabinet-expertise@diag-immo.fr veut vous écrire</span></div>
+          <div class="screener-actions">
+            <button class="scr-btn scr-yes">✓ Accepter</button>
+            <button class="scr-btn scr-no">✕ Bloquer</button>
+          </div>
+        </div>
+
+        <!-- Set aside -->
+        <div class="aside-section">
+          <div class="aside-title">📌 Mis de côté</div>
+          <div class="aside-row">
+            <div class="aside-card">
+              <div class="aside-av" style="background:rgba(239,68,68,.1);color:#f87171">AX</div>
+              <div class="aside-info"><div class="aside-name">AXA Assurance</div><div class="aside-subj">Attestation MRI 2025</div></div>
+            </div>
+            <div class="aside-card">
+              <div class="aside-av" style="background:rgba(245,158,11,.1);color:#fbbf24">OT</div>
+              <div class="aside-info"><div class="aside-name">OTIS Ascenseurs</div><div class="aside-subj">Rapport intervention</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reply later -->
+        <div class="aside-section">
+          <div class="aside-title">↩ Répondre plus tard</div>
+          <div class="aside-row">
+            <div class="aside-card">
+              <div class="aside-av" style="background:rgba(34,197,94,.1);color:#4ade80">MG</div>
+              <div class="aside-info"><div class="aside-name">Marie Garcia</div><div class="aside-subj">Question charges T1</div></div>
+            </div>
+            <div class="aside-card">
+              <div class="aside-av" style="background:rgba(139,92,246,.1);color:#a78bfa">PL</div>
+              <div class="aside-info"><div class="aside-name">Paul Lefebvre</div><div class="aside-subj">Place de parking</div></div>
+            </div>
+            <div class="aside-card">
+              <div class="aside-av" style="background:rgba(56,189,248,.1);color:#38bdf8">SR</div>
+              <div class="aside-info"><div class="aside-name">Sophie Rousseau</div><div class="aside-subj">Travaux privatifs</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mail cards -->
+        <div class="mail-card unread">
+          <div class="mc-hdr">
+            <div class="mc-avatar" style="background:rgba(59,130,246,.1);color:#60a5fa">JD</div>
+            <div class="mc-info"><div class="mc-name">Jean Dupont</div></div>
+            <span class="mc-date">Aujourd'hui, 14:30</span>
+          </div>
+          <div class="mc-subj">Fuite salle de bain — urgence</div>
+          <div class="mc-prev">Bonjour, je vous écris pour vous signaler une infiltration d'eau dans ma salle de bain (lot 4B) constatée ce matin. L'eau s'écoule le long du mur et semble venir du lot 5B au-dessus.</div>
+          <div class="mc-footer">
+            <span class="mc-pj">📎 2 pièces jointes</span>
+            <span class="mc-tag" style="background:rgba(245,158,11,.1);color:#fbbf24">Maintenance</span>
+            <div class="mc-actions">
+              <button class="mc-act" title="Répondre plus tard">↩</button>
+              <button class="mc-act" title="Mettre de côté">📌</button>
+              <button class="mc-act" title="Archiver">📁</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mail-card unread">
+          <div class="mc-hdr">
+            <div class="mc-avatar" style="background:rgba(148,163,184,.1);color:#94a3b8">PE</div>
+            <div class="mc-info"><div class="mc-name">Plomberie Express</div></div>
+            <span class="mc-date">Aujourd'hui, 10:05</span>
+          </div>
+          <div class="mc-subj">RE: Devis intervention urgence — PLB-003</div>
+          <div class="mc-prev">Suite à votre demande, veuillez trouver ci-joint notre devis pour l'intervention d'urgence au 10 rue Haussmann, lot 4B. Montant : 380,00 EUR HT.</div>
+          <div class="mc-footer">
+            <span class="mc-pj">📎 1 pièce jointe</span>
+            <span class="mc-tag" style="background:rgba(245,158,11,.1);color:#fbbf24">Maintenance</span>
+            <div class="mc-actions">
+              <button class="mc-act">↩</button>
+              <button class="mc-act">📌</button>
+              <button class="mc-act">📁</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mail-card">
+          <div class="mc-hdr">
+            <div class="mc-avatar" style="background:rgba(139,92,246,.1);color:#a78bfa">MB</div>
+            <div class="mc-info"><div class="mc-name">Marc Bernard</div></div>
+            <span class="mc-date">Hier, 16:40</span>
+          </div>
+          <div class="mc-subj">RE: Relance impayé — 2ème rappel</div>
+          <div class="mc-prev">Monsieur, je conteste le montant indiqué. J'ai effectué un virement de 850 EUR le 20 février mais il ne semble pas avoir été pris en compte dans vos relevés.</div>
+          <div class="mc-footer">
+            <span class="mc-tag" style="background:rgba(239,68,68,.1);color:#f87171">Relance</span>
+            <div class="mc-actions">
+              <button class="mc-act">↩</button>
+              <button class="mc-act">📌</button>
+              <button class="mc-act">📁</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mail-card">
+          <div class="mc-hdr">
+            <div class="mc-avatar" style="background:rgba(34,197,94,.1);color:#4ade80">EV</div>
+            <div class="mc-info"><div class="mc-name">EDF Pro</div></div>
+            <span class="mc-date">27/03</span>
+          </div>
+          <div class="mc-subj">Facture électricité — Mars 2025</div>
+          <div class="mc-prev">Votre facture du mois de mars est disponible. Montant : 1 234,56 EUR TTC. Prélèvement automatique le 10 avril 2025.</div>
+          <div class="mc-footer">
+            <span class="mc-pj">📎 1 pièce jointe</span>
+            <span class="mc-tag" style="background:rgba(34,197,94,.1);color:#4ade80">Finance</span>
+            <div class="mc-actions">
+              <button class="mc-act">↩</button>
+              <button class="mc-act">📌</button>
+              <button class="mc-act">📁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

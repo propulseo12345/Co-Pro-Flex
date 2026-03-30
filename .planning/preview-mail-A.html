@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mail A — Style Proton Mail</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;height:100vh;overflow:hidden}
+  .app{display:grid;grid-template-rows:1fr;height:100vh}
+  .main{display:grid;grid-template-columns:220px 340px 1fr}
+
+  /* Sidebar */
+  .sb{background:#131620;border-right:1px solid rgba(148,163,184,.06);padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+  .compose-btn{background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+  .compose-btn:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.25)}
+  .sb-sec{margin-bottom:16px}
+  .sb-lbl{font-size:9px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.8px;padding:8px 12px 4px}
+  .sb-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#94a3b8;cursor:pointer;transition:all .12s}
+  .sb-item:hover{background:rgba(148,163,184,.06);color:#e2e8f0}
+  .sb-item.on{background:rgba(59,130,246,.08);color:#60a5fa;font-weight:600}
+  .sb-item .ic{width:20px;margin-right:10px;text-align:center;font-size:15px}
+  .badge{background:#3b82f6;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:22px;text-align:center}
+  .badge-muted{background:rgba(148,163,184,.1);color:#64748b}
+  .label-dot{width:8px;height:8px;border-radius:50%;margin-right:10px;flex-shrink:0}
+  .sb-divider{height:1px;background:rgba(148,163,184,.06);margin:8px 0}
+  .sb-bottom{margin-top:auto;padding:12px;background:#1a1d2e;border-radius:10px;border:1px solid rgba(148,163,184,.06)}
+  .storage-bar{height:4px;background:rgba(148,163,184,.1);border-radius:2px;margin-top:6px;overflow:hidden}
+  .storage-fill{height:100%;background:#3b82f6;border-radius:2px;width:35%}
+  .storage-text{font-size:10px;color:#64748b;margin-top:4px}
+
+  /* Mail list */
+  .ml{border-right:1px solid rgba(148,163,184,.06);display:flex;flex-direction:column;overflow:hidden}
+  .ml-hdr{padding:14px 16px;border-bottom:1px solid rgba(148,163,184,.06);display:flex;align-items:center;gap:10px}
+  .ml-search{flex:1;background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:9px 14px;color:#e2e8f0;font-size:13px;outline:none}
+  .ml-search:focus{border-color:#3b82f6}
+  .ml-search::placeholder{color:#475569}
+  .ml-toolbar{padding:8px 16px;border-bottom:1px solid rgba(148,163,184,.04);display:flex;align-items:center;gap:8px}
+  .ml-check{width:16px;height:16px;accent-color:#3b82f6;cursor:pointer}
+  .ml-sort{font-size:11px;color:#64748b;margin-left:auto;cursor:pointer}
+  .ml-items{flex:1;overflow-y:auto}
+
+  .mi{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(148,163,184,.03);cursor:pointer;transition:background .1s}
+  .mi:hover{background:rgba(148,163,184,.03)}
+  .mi.on{background:rgba(59,130,246,.06)}
+  .mi.unread{border-left:3px solid #3b82f6}
+  .mi.unread .mi-from{font-weight:700;color:#e2e8f0}
+  .mi.unread .mi-subj{font-weight:600;color:#e2e8f0}
+  .mi-check{margin-top:2px}
+  .mi-star{color:#475569;cursor:pointer;font-size:14px;margin-top:1px}
+  .mi-star.on{color:#fbbf24}
+  .mi-content{flex:1;min-width:0}
+  .mi-top{display:flex;justify-content:space-between;margin-bottom:2px}
+  .mi-from{font-size:13px;font-weight:500;color:#94a3b8}
+  .mi-time{font-size:11px;color:#475569;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .mi-subj{font-size:13px;color:#94a3b8;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mi-prev{font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mi-icons{display:flex;gap:6px;margin-top:4px;align-items:center}
+  .mi-icon{font-size:11px;color:#475569}
+
+  /* Reading pane */
+  .rp{display:flex;flex-direction:column;overflow:hidden}
+  .rp-hdr{padding:20px 28px;border-bottom:1px solid rgba(148,163,184,.06)}
+  .rp-subj{font-size:20px;font-weight:700;margin-bottom:14px;line-height:1.3}
+  .rp-meta{display:flex;align-items:center;gap:14px}
+  .rp-avatar{width:40px;height:40px;border-radius:50%;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#60a5fa;flex-shrink:0}
+  .rp-sender{flex:1}
+  .rp-name{font-size:14px;font-weight:600}
+  .rp-email{font-size:11px;color:#64748b}
+  .rp-date{font-size:11px;color:#64748b;text-align:right}
+  .rp-actions-top{display:flex;gap:6px;margin-top:4px}
+  .rp-act{width:32px;height:32px;border-radius:8px;background:rgba(148,163,184,.05);border:1px solid rgba(148,163,184,.06);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .12s}
+  .rp-act:hover{background:rgba(148,163,184,.1);color:#e2e8f0;border-color:rgba(148,163,184,.12)}
+  .rp-body{flex:1;overflow-y:auto;padding:28px}
+  .rp-text{max-width:680px;font-size:14px;line-height:1.8;color:#cbd5e1}
+  .rp-text p{margin-bottom:14px}
+  .rp-pj{margin-top:24px;padding-top:20px;border-top:1px solid rgba(148,163,184,.06)}
+  .pj-title{font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+  .pj-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .pj-card{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .12s;min-width:200px}
+  .pj-card:hover{border-color:rgba(59,130,246,.2)}
+  .pj-icon{font-size:22px}
+  .pj-info{flex:1}
+  .pj-name{font-size:12px;font-weight:600}
+  .pj-size{font-size:10px;color:#64748b}
+  .pj-dl{color:#3b82f6;font-size:16px;cursor:pointer}
+
+  .rp-reply{padding:16px 28px;border-top:1px solid rgba(148,163,184,.06);display:flex;gap:10px}
+  .reply-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s}
+  .reply-btn.primary{background:#3b82f6;color:#fff;border:none}.reply-btn.primary:hover{background:#2563eb}
+  .reply-btn.ghost{background:rgba(148,163,184,.05);border:1px solid rgba(148,163,184,.06);color:#94a3b8}.reply-btn.ghost:hover{background:rgba(148,163,184,.08);color:#e2e8f0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sb">
+      <button class="compose-btn">✏️ Nouveau message</button>
+
+      <div class="sb-item on"><span class="ic">📥</span>Boîte de réception<span class="badge">5</span></div>
+      <div class="sb-item"><span class="ic">⭐</span>Favoris</div>
+      <div class="sb-item"><span class="ic">📝</span>Brouillons<span class="badge badge-muted">2</span></div>
+      <div class="sb-item"><span class="ic">📤</span>Envoyés</div>
+      <div class="sb-item"><span class="ic">📁</span>Archives</div>
+      <div class="sb-item"><span class="ic">🗑️</span>Corbeille</div>
+      <div class="sb-item"><span class="ic">⚠️</span>Spam</div>
+
+      <div class="sb-divider"></div>
+
+      <div class="sb-lbl">Labels</div>
+      <div class="sb-item"><span class="label-dot" style="background:#a78bfa"></span>AG / Convocations</div>
+      <div class="sb-item"><span class="label-dot" style="background:#4ade80"></span>Finance</div>
+      <div class="sb-item"><span class="label-dot" style="background:#fbbf24"></span>Maintenance</div>
+      <div class="sb-item"><span class="label-dot" style="background:#f87171"></span>Relances</div>
+      <div class="sb-item"><span class="label-dot" style="background:#38bdf8"></span>Sinistres</div>
+      <div class="sb-item" style="color:#3b82f6;font-size:12px"><span class="ic">+</span>Ajouter un label</div>
+
+      <div class="sb-divider"></div>
+
+      <div class="sb-lbl">Dossiers</div>
+      <div class="sb-item"><span class="ic">📂</span>AG 2025</div>
+      <div class="sb-item"><span class="ic">📂</span>Sinistre Dupont</div>
+      <div class="sb-item" style="color:#3b82f6;font-size:12px"><span class="ic">+</span>Nouveau dossier</div>
+
+      <div class="sb-bottom">
+        <div style="font-size:11px;color:#64748b">copro.haussmann@coproflex.fr</div>
+        <div class="storage-bar"><div class="storage-fill"></div></div>
+        <div class="storage-text">1.2 Go / 5 Go utilisés</div>
+      </div>
+    </div>
+
+    <!-- Mail list -->
+    <div class="ml">
+      <div class="ml-hdr">
+        <input class="ml-search" placeholder="🔍 Rechercher des messages...">
+      </div>
+      <div class="ml-toolbar">
+        <input type="checkbox" class="ml-check">
+        <span style="font-size:11px;color:#64748b">Boîte de réception</span>
+        <span class="ml-sort">Date ↓</span>
+      </div>
+      <div class="ml-items">
+        <div class="mi on unread">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star">☆</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">Jean Dupont</span><span class="mi-time">14:30</span></div>
+            <div class="mi-subj">Fuite salle de bain — urgence</div>
+            <div class="mi-prev">Bonjour, je constate une infiltration d'eau depuis ce matin dans ma salle de bain, provenant...</div>
+            <div class="mi-icons"><span class="mi-icon">📎 2</span></div>
+          </div>
+        </div>
+
+        <div class="mi unread">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star">☆</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">Marie Garcia</span><span class="mi-time">11:15</span></div>
+            <div class="mi-subj">Question charges T1 2025</div>
+            <div class="mi-prev">Pourriez-vous me détailler la répartition des charges du premier trimestre ? J'ai remarqué...</div>
+          </div>
+        </div>
+
+        <div class="mi unread">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star on">★</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">Plomberie Express</span><span class="mi-time">10:05</span></div>
+            <div class="mi-subj">RE: Devis intervention urgence — PLB-003</div>
+            <div class="mi-prev">Suite à votre demande, veuillez trouver ci-joint notre devis pour l'intervention...</div>
+            <div class="mi-icons"><span class="mi-icon">📎 1</span></div>
+          </div>
+        </div>
+
+        <div class="mi">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star">☆</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">Paul Lefebvre</span><span class="mi-time">Hier</span></div>
+            <div class="mi-subj">Place de parking — lot 6C</div>
+            <div class="mi-prev">Bonjour, je souhaitais savoir si la place de parking n°12 est disponible à la location...</div>
+          </div>
+        </div>
+
+        <div class="mi">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star on">★</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">AXA Assurance</span><span class="mi-time">28/03</span></div>
+            <div class="mi-subj">Attestation assurance MRI 2025-2026</div>
+            <div class="mi-prev">Veuillez trouver ci-joint l'attestation d'assurance multirisque immeuble renouvelée...</div>
+            <div class="mi-icons"><span class="mi-icon">📎 1</span></div>
+          </div>
+        </div>
+
+        <div class="mi">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star">☆</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">Sophie Rousseau</span><span class="mi-time">27/03</span></div>
+            <div class="mi-subj">Demande de travaux privatifs — salle de bain</div>
+            <div class="mi-prev">Madame, Monsieur, je souhaite effectuer des travaux dans ma salle de bain (lot 5B)...</div>
+          </div>
+        </div>
+
+        <div class="mi">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star">☆</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">Moi → Marc Bernard</span><span class="mi-time">25/03</span></div>
+            <div class="mi-subj">Relance impayé — 2ème rappel</div>
+            <div class="mi-prev">Monsieur, malgré notre précédent courrier du 15 février 2025, nous constatons que votre...</div>
+          </div>
+        </div>
+
+        <div class="mi">
+          <input type="checkbox" class="ml-check mi-check">
+          <span class="mi-star">☆</span>
+          <div class="mi-content">
+            <div class="mi-top"><span class="mi-from">OTIS Ascenseurs</span><span class="mi-time">24/03</span></div>
+            <div class="mi-subj">Rapport d'intervention — visite trimestrielle</div>
+            <div class="mi-prev">Veuillez trouver ci-joint le rapport de la visite trimestrielle de vos installations...</div>
+            <div class="mi-icons"><span class="mi-icon">📎 1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading pane -->
+    <div class="rp">
+      <div class="rp-hdr">
+        <div class="rp-subj">Fuite salle de bain — urgence</div>
+        <div class="rp-meta">
+          <div class="rp-avatar">JD</div>
+          <div class="rp-sender">
+            <div class="rp-name">Jean Dupont</div>
+            <div class="rp-email">j.dupont@email.fr → copro.haussmann@coproflex.fr</div>
+          </div>
+          <div>
+            <div class="rp-date">Aujourd'hui à 14:30</div>
+            <div class="rp-actions-top">
+              <div class="rp-act" title="Répondre">↩</div>
+              <div class="rp-act" title="Transférer">↗</div>
+              <div class="rp-act" title="Archiver">📁</div>
+              <div class="rp-act" title="Label">🏷</div>
+              <div class="rp-act" title="Déplacer">📂</div>
+              <div class="rp-act" title="Supprimer" style="color:#f87171">🗑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rp-body">
+        <div class="rp-text">
+          <p>Bonjour,</p>
+          <p>Je vous écris pour vous signaler une <strong>infiltration d'eau</strong> dans ma salle de bain (lot 4B, bâtiment A, 4ème étage) constatée ce matin vers 8h30.</p>
+          <p>L'eau s'écoule le long du mur derrière la baignoire et provient visiblement du plafond — donc probablement du lot 5B situé au-dessus (Mme Rousseau).</p>
+          <p>Les dégâts à ce stade :</p>
+          <p>• Tache d'humidité d'environ 1m² sur le mur<br>• Peinture qui commence à cloquer<br>• Léger écoulement continu</p>
+          <p>Le débit semble s'accélérer depuis la fin de matinée. Pourriez-vous organiser une intervention rapide ?</p>
+          <p>Je joins des photos pour que vous puissiez constater l'étendue du problème.</p>
+          <p>Merci d'avance pour votre réactivité.</p>
+          <p>Cordialement,<br><strong>Jean Dupont</strong><br>Copropriétaire — Lot 4B<br>06 12 34 56 78</p>
+        </div>
+
+        <div class="rp-pj">
+          <div class="pj-title">Pièces jointes (2)</div>
+          <div class="pj-grid">
+            <div class="pj-card">
+              <span class="pj-icon">🖼️</span>
+              <div class="pj-info"><div class="pj-name">photo-fuite-mur.jpg</div><div class="pj-size">2.4 Mo</div></div>
+              <span class="pj-dl">⬇</span>
+            </div>
+            <div class="pj-card">
+              <span class="pj-icon">🖼️</span>
+              <div class="pj-info"><div class="pj-name">photo-fuite-plafond.jpg</div><div class="pj-size">1.8 Mo</div></div>
+              <span class="pj-dl">⬇</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rp-reply">
+        <button class="reply-btn primary">↩ Répondre</button>
+        <button class="reply-btn ghost">↩↩ Répondre à tous</button>
+        <button class="reply-btn ghost">↗ Transférer</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

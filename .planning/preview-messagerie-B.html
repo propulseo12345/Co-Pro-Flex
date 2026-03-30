@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview B — Front pour Syndics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; height: 100vh; overflow: hidden; }
+
+  .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
+  .topbar { background: #161822; border-bottom: 1px solid rgba(148,163,184,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .topbar-title { font-size: 20px; font-weight: 700; }
+  .topbar-actions { display: flex; gap: 12px; align-items: center; }
+  .cmd-k { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 8px 16px; color: #64748b; font-size: 13px; width: 280px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .cmd-k:hover { border-color: rgba(148,163,184,0.2); }
+  .cmd-k kbd { background: rgba(148,163,184,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  .btn-primary { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-ghost { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+
+  .main { display: grid; grid-template-columns: 200px 320px 1fr 280px; height: calc(100vh - 56px); }
+
+  /* Sidebar */
+  .sidebar { background: #131620; border-right: 1px solid rgba(148,163,184,0.08); padding: 16px 12px; overflow-y: auto; }
+  .sidebar-section { margin-bottom: 20px; }
+  .sidebar-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; padding: 0 8px; }
+  .sidebar-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #94a3b8; cursor: pointer; transition: all 0.15s; }
+  .sidebar-item:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+  .sidebar-item.active { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .sidebar-item .icon { margin-right: 8px; }
+  .badge { background: #3b82f6; color: white; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+  .badge-red { background: #ef4444; }
+  .tag-dot { width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; display: inline-block; }
+
+  /* Sidebar stats */
+  .sidebar-stats { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 12px; }
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  .stat-label { font-size: 11px; color: #64748b; }
+  .stat-value { font-size: 13px; font-weight: 700; }
+  .stat-value.red { color: #f87171; }
+  .stat-value.orange { color: #fbbf24; }
+  .stat-value.green { color: #4ade80; }
+
+  /* Conversation list */
+  .conv-list { border-right: 1px solid rgba(148,163,184,0.08); overflow-y: auto; }
+  .conv-list-header { padding: 12px 16px; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .conv-list-header select { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 6px; padding: 6px 10px; color: #e2e8f0; font-size: 12px; font-weight: 600; width: 100%; }
+
+  .conv-item { padding: 14px 16px; border-bottom: 1px solid rgba(148,163,184,0.04); cursor: pointer; transition: all 0.15s; position: relative; }
+  .conv-item:hover { background: rgba(148,163,184,0.03); }
+  .conv-item.active { background: rgba(59,130,246,0.08); border-left: 3px solid #3b82f6; }
+  .conv-item.unread { border-left: 3px solid #3b82f6; }
+  .conv-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .conv-sender { font-size: 13px; font-weight: 600; }
+  .conv-time { font-size: 10px; color: #64748b; }
+  .conv-subject { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 4px; }
+  .conv-preview { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .conv-assignee { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
+  .conv-assignee-avatar { width: 18px; height: 18px; border-radius: 50%; font-size: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .conv-tag { padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; }
+  .conv-sla { font-size: 10px; font-weight: 600; }
+  .sla-ok { color: #4ade80; }
+  .sla-warn { color: #fbbf24; }
+  .sla-danger { color: #f87171; }
+
+  /* Thread panel */
+  .thread { overflow-y: auto; padding: 24px; display: flex; flex-direction: column; }
+  .thread-header { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(148,163,184,0.08); }
+  .thread-subject { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .thread-meta-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .message { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  .message.internal { background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.15); }
+  .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .message-author { display: flex; align-items: center; gap: 10px; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .msg-name { font-size: 13px; font-weight: 600; }
+  .msg-role { font-size: 10px; color: #64748b; }
+  .msg-time { font-size: 11px; color: #64748b; }
+  .message-body { font-size: 13px; line-height: 1.7; color: #cbd5e1; }
+  .message-body p { margin-bottom: 8px; }
+  .internal-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: #fbbf24; background: rgba(245,158,11,0.1); padding: 2px 8px; border-radius: 4px; }
+  .message-attachments { display: flex; gap: 8px; margin-top: 10px; }
+  .mini-attach { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 6px; padding: 6px 10px; font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+
+  .thread-spacer { flex: 1; }
+
+  /* Reply area */
+  .reply-area { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px; margin-top: auto; }
+  .reply-tabs { display: flex; gap: 0; margin-bottom: 12px; }
+  .reply-tab { padding: 6px 14px; font-size: 12px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; }
+  .reply-tab.active { color: #e2e8f0; border-bottom-color: #3b82f6; }
+  .reply-tab.internal { color: #fbbf24; }
+  .reply-textarea { width: 100%; background: transparent; border: none; color: #e2e8f0; font-size: 13px; font-family: inherit; resize: none; outline: none; min-height: 60px; }
+  .reply-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .reply-tools { display: flex; gap: 8px; }
+  .reply-tool { color: #64748b; cursor: pointer; font-size: 16px; }
+  .template-btn { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+  /* Context panel */
+  .context { background: #131620; border-left: 1px solid rgba(148,163,184,0.08); padding: 20px 16px; overflow-y: auto; }
+  .context-section { margin-bottom: 20px; }
+  .context-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .context-card { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 12px; }
+  .context-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .context-sub { font-size: 11px; color: #64748b; margin-bottom: 2px; }
+  .context-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(148,163,184,0.04); }
+  .context-row:last-child { border-bottom: none; }
+  .context-key { font-size: 11px; color: #64748b; }
+  .context-val { font-size: 12px; font-weight: 600; }
+  .context-val.green { color: #4ade80; }
+  .context-val.red { color: #f87171; }
+  .linked-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 6px; margin-bottom: 6px; cursor: pointer; }
+  .linked-item:hover { border-color: rgba(59,130,246,0.3); }
+  .linked-icon { font-size: 16px; }
+  .linked-info { font-size: 11px; }
+  .linked-title { font-weight: 600; color: #e2e8f0; }
+  .linked-sub { color: #64748b; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="topbar-title">Messagerie</span>
+      <div style="display:flex;gap:6px;">
+        <span style="font-size:11px;background:rgba(239,68,68,0.1);color:#f87171;padding:3px 10px;border-radius:6px;font-weight:600;">3 SLA en retard</span>
+        <span style="font-size:11px;background:rgba(59,130,246,0.1);color:#60a5fa;padding:3px 10px;border-radius:6px;font-weight:600;">12 non traités</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="cmd-k"><span>Rechercher...</span><kbd>Ctrl K</kbd></div>
+      <button class="btn-primary">+ Nouveau</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Vues</div>
+        <div class="sidebar-item active"><span class="icon">📥</span>À traiter<span class="badge">12</span></div>
+        <div class="sidebar-item"><span class="icon">👤</span>Assignés à moi<span class="badge">4</span></div>
+        <div class="sidebar-item"><span class="icon">📨</span>Tous</div>
+        <div class="sidebar-item"><span class="icon">📤</span>Envoyés</div>
+        <div class="sidebar-item"><span class="icon">✅</span>Résolus</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Copropriétés</div>
+        <div class="sidebar-item"><span class="icon">🏢</span>Haussmann<span class="badge">5</span></div>
+        <div class="sidebar-item"><span class="icon">🏢</span>Voltaire<span class="badge">4</span></div>
+        <div class="sidebar-item"><span class="icon">🏢</span>République<span class="badge">3</span></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Tags</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#fbbf24;"></span>Maintenance</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#4ade80;"></span>Finance</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#a78bfa;"></span>AG</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#f87171;"></span>Relance</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#38bdf8;"></span>Sinistre</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Statistiques</div>
+        <div class="sidebar-stats">
+          <div class="stat-row"><span class="stat-label">Temps moyen réponse</span><span class="stat-value green">4h</span></div>
+          <div class="stat-row"><span class="stat-label">SLA dépassés</span><span class="stat-value red">3</span></div>
+          <div class="stat-row"><span class="stat-label">Résolus cette semaine</span><span class="stat-value">28</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversation list -->
+    <div class="conv-list">
+      <div class="conv-list-header">
+        <select><option>Non traités — les plus récents</option></select>
+      </div>
+
+      <div class="conv-item active unread">
+        <div class="conv-top">
+          <span class="conv-sender">M. Dupont (Lot 4B)</span>
+          <span class="conv-time">14:30</span>
+        </div>
+        <div class="conv-subject">Fuite salle de bain — urgence</div>
+        <div class="conv-preview">Bonjour, je constate une infiltration d'eau depuis ce matin...</div>
+        <div class="conv-meta">
+          <div class="conv-assignee">
+            <div class="conv-assignee-avatar" style="background:rgba(168,85,247,0.15);color:#a78bfa;">MC</div>
+            Marie C.
+          </div>
+          <span class="conv-tag" style="background:rgba(245,158,11,0.1);color:#fbbf24;">Maintenance</span>
+          <span class="conv-sla sla-ok">⏱ 2h</span>
+        </div>
+      </div>
+
+      <div class="conv-item unread">
+        <div class="conv-top">
+          <span class="conv-sender">Mme Garcia (Lot 2A)</span>
+          <span class="conv-time">11:15</span>
+        </div>
+        <div class="conv-subject">Question charges T1 2025</div>
+        <div class="conv-preview">Pourriez-vous me détailler la répartition des charges...</div>
+        <div class="conv-meta">
+          <div class="conv-assignee">
+            <div class="conv-assignee-avatar" style="background:rgba(59,130,246,0.15);color:#60a5fa;">TL</div>
+            Thomas L.
+          </div>
+          <span class="conv-tag" style="background:rgba(34,197,94,0.1);color:#4ade80;">Finance</span>
+          <span class="conv-sla sla-warn">⏱ 3j</span>
+        </div>
+      </div>
+
+      <div class="conv-item unread">
+        <div class="conv-top">
+          <span class="conv-sender">M. Lefebvre (Lot 6C)</span>
+          <span class="conv-time">09:45</span>
+        </div>
+        <div class="conv-subject">Contestation appel de fonds travaux</div>
+        <div class="conv-preview">Je souhaite contester le montant de l'appel de fonds...</div>
+        <div class="conv-meta">
+          <span style="font-size:10px;color:#f87171;font-weight:600;">⚠ Non assigné</span>
+          <span class="conv-tag" style="background:rgba(34,197,94,0.1);color:#4ade80;">Finance</span>
+          <span class="conv-tag" style="background:rgba(139,92,246,0.1);color:#a78bfa;">AG</span>
+        </div>
+      </div>
+
+      <div class="conv-item">
+        <div class="conv-top">
+          <span class="conv-sender" style="color:#94a3b8;">M. Bernard</span>
+          <span class="conv-time">Hier</span>
+        </div>
+        <div class="conv-subject">Relance impayé — 2ème rappel</div>
+        <div class="conv-preview">Envoyé — en attente de réponse</div>
+        <div class="conv-meta">
+          <div class="conv-assignee">
+            <div class="conv-assignee-avatar" style="background:rgba(59,130,246,0.15);color:#60a5fa;">TL</div>
+            Thomas L.
+          </div>
+          <span class="conv-tag" style="background:rgba(239,68,68,0.1);color:#f87171;">Relance</span>
+          <span class="conv-sla sla-danger">⏱ 5j — SLA dépassé</span>
+        </div>
+      </div>
+
+      <div class="conv-item">
+        <div class="conv-top">
+          <span class="conv-sender" style="color:#94a3b8;">Tous → Résidence Haussmann</span>
+          <span class="conv-time">27/03</span>
+        </div>
+        <div class="conv-subject">Convocation AG Ordinaire 2025</div>
+        <div class="conv-preview">38/45 ouverts — 7 non ouverts</div>
+        <div class="conv-meta">
+          <div class="conv-assignee">
+            <div class="conv-assignee-avatar" style="background:rgba(168,85,247,0.15);color:#a78bfa;">MC</div>
+            Marie C.
+          </div>
+          <span class="conv-tag" style="background:rgba(139,92,246,0.1);color:#a78bfa;">AG</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thread -->
+    <div class="thread">
+      <div class="thread-header">
+        <div class="thread-subject">Fuite salle de bain — urgence</div>
+        <div class="thread-meta-row">
+          <span class="conv-tag" style="background:rgba(245,158,11,0.1);color:#fbbf24;">🔧 Maintenance</span>
+          <span style="font-size:11px;color:#64748b;">Résidence Haussmann</span>
+          <span style="font-size:11px;color:#64748b;">·</span>
+          <span style="font-size:11px;color:#64748b;">Assigné à Marie C.</span>
+          <span style="font-size:11px;color:#4ade80;">· Ouvert il y a 2h</span>
+        </div>
+      </div>
+
+      <!-- Message 1 - Copro -->
+      <div class="message">
+        <div class="message-header">
+          <div class="message-author">
+            <div class="msg-avatar" style="background:rgba(59,130,246,0.15);color:#60a5fa;">JD</div>
+            <div>
+              <div class="msg-name">Jean Dupont <span class="msg-role">· Copropriétaire — Lot 4B</span></div>
+            </div>
+          </div>
+          <span class="msg-time">Aujourd'hui, 14:30</span>
+        </div>
+        <div class="message-body">
+          <p>Bonjour,</p>
+          <p>Je constate depuis ce matin une <strong>infiltration d'eau</strong> dans ma salle de bain, provenant visiblement du plafond (appartement du dessus, lot 5B). L'eau s'écoule le long du mur derrière la baignoire.</p>
+          <p>Pourriez-vous intervenir rapidement ?</p>
+        </div>
+        <div class="message-attachments">
+          <div class="mini-attach">🖼️ photo-fuite-1.jpg (2.4 Mo)</div>
+          <div class="mini-attach">🖼️ photo-fuite-2.jpg (1.8 Mo)</div>
+        </div>
+      </div>
+
+      <!-- Internal note -->
+      <div class="message internal">
+        <div class="message-header">
+          <div class="message-author">
+            <div class="msg-avatar" style="background:rgba(168,85,247,0.15);color:#a78bfa;">MC</div>
+            <div>
+              <div class="msg-name">Marie C. <span class="internal-badge">💬 Note interne</span></div>
+            </div>
+          </div>
+          <span class="msg-time">Aujourd'hui, 15:10</span>
+        </div>
+        <div class="message-body">
+          <p>J'ai contacté Plomberie Express (contrat n°CT-2025-003), ils peuvent passer demain matin entre 8h et 10h. Je confirme au copropriétaire ?</p>
+          <p>NB : Le lot 5B (Mme Rousseau) n'a pas de fuite signalée de son côté — à vérifier sur place.</p>
+        </div>
+      </div>
+
+      <!-- Reply from syndic -->
+      <div class="message">
+        <div class="message-header">
+          <div class="message-author">
+            <div class="msg-avatar" style="background:rgba(34,197,94,0.15);color:#4ade80;">MC</div>
+            <div>
+              <div class="msg-name">Marie C. <span class="msg-role">· Syndic — Gestionnaire</span></div>
+            </div>
+          </div>
+          <span class="msg-time">Aujourd'hui, 15:25</span>
+        </div>
+        <div class="message-body">
+          <p>Bonjour Monsieur Dupont,</p>
+          <p>Nous avons bien pris en compte votre signalement. Un plombier de Plomberie Express interviendra <strong>demain matin entre 8h et 10h</strong> à votre domicile.</p>
+          <p>Merci de vous assurer d'être présent ou de nous communiquer un créneau alternatif.</p>
+          <p>Cordialement,<br>Marie Carpentier — Gestionnaire</p>
+        </div>
+      </div>
+
+      <div class="thread-spacer"></div>
+
+      <!-- Reply area -->
+      <div class="reply-area">
+        <div class="reply-tabs">
+          <div class="reply-tab active">↩ Répondre</div>
+          <div class="reply-tab internal">💬 Note interne</div>
+        </div>
+        <textarea class="reply-textarea" placeholder="Rédiger une réponse..."></textarea>
+        <div class="reply-footer">
+          <div class="reply-tools">
+            <span class="reply-tool">📎</span>
+            <span class="reply-tool">😀</span>
+            <div class="template-btn">📋 Templates</div>
+          </div>
+          <button class="btn-primary" style="padding:6px 16px;font-size:12px;">Envoyer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Context panel -->
+    <div class="context">
+      <div class="context-section">
+        <div class="context-label">Contact</div>
+        <div class="context-card">
+          <div class="context-name">Jean Dupont</div>
+          <div class="context-sub">j.dupont@email.fr · 06 12 34 56 78</div>
+          <div style="margin-top:8px;">
+            <div class="context-row"><span class="context-key">Lot</span><span class="context-val">4B — Bât A, 4ème étage</span></div>
+            <div class="context-row"><span class="context-key">Tantièmes</span><span class="context-val">45 / 1000</span></div>
+            <div class="context-row"><span class="context-key">Résident depuis</span><span class="context-val">2019</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Paiements</div>
+        <div class="context-card">
+          <div class="context-row"><span class="context-key">Statut</span><span class="context-val green">✅ À jour</span></div>
+          <div class="context-row"><span class="context-key">Dernier paiement</span><span class="context-val">15/03/2025</span></div>
+          <div class="context-row"><span class="context-key">Solde</span><span class="context-val green">0,00 EUR</span></div>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Entités liées</div>
+        <div class="linked-item">
+          <span class="linked-icon">🔧</span>
+          <div class="linked-info">
+            <div class="linked-title">OS-2025-042</div>
+            <div class="linked-sub">Fuite plomberie — Plomberie Express</div>
+          </div>
+        </div>
+        <div class="linked-item">
+          <span class="linked-icon">📋</span>
+          <div class="linked-info">
+            <div class="linked-title">Devis PLB-003</div>
+            <div class="linked-sub">Intervention urgence — 380,00 EUR</div>
+          </div>
+        </div>
+        <div class="linked-item">
+          <span class="linked-icon">📄</span>
+          <div class="linked-info">
+            <div class="linked-title">Contrat CT-2025-003</div>
+            <div class="linked-sub">Plomberie Express — actif</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Historique</div>
+        <div class="context-card">
+          <div class="context-row"><span class="context-key">Conversations</span><span class="context-val">8</span></div>
+          <div class="context-row"><span class="context-key">Depuis</span><span class="context-val">Mars 2019</span></div>
+          <div class="context-row"><span class="context-key">Dernier échange</span><span class="context-val">Aujourd'hui</span></div>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Actions rapides</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="btn-ghost" style="width:100%;justify-content:center;font-size:11px;padding:6px;">🔧 Créer un ordre de service</button>
+          <button class="btn-ghost" style="width:100%;justify-content:center;font-size:11px;padding:6px;">📄 Lier un document</button>
+          <button class="btn-ghost" style="width:100%;justify-content:center;font-size:11px;padding:6px;">👤 Voir fiche copropriétaire</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

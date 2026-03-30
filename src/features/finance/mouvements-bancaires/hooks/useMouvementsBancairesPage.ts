@@ -21,6 +21,7 @@ import type {
 import {
   MOCK_COMPTE_COURANT,
   MOCK_COMPTE_TRAVAUX,
+  MOCK_ECRITURES_COMPTABLES,
   PLAN_COMPTABLE_ESSENTIEL,
 } from '../domain/constants';
 import { genererSuggestionsBatch, genererRapprochementsBatch } from '../domain/matching-engine';
@@ -119,7 +120,7 @@ export function useMouvementsBancairesPage() {
   const [showSlideOver, setShowSlideOver] = useState(false);
 
   // Initialize with empty array - will be populated from Supabase ledger entries
-  const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>([]);
+  const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>(MOCK_ECRITURES_COMPTABLES);
   const [selectedMouvementRapprochement, setSelectedMouvementRapprochement] = useState<MouvementBancaire | null>(null);
   const [suggestionsRapprochement, setSuggestionsRapprochement] = useState<SuggestionRapprochement[]>([]);
   const [showRapprochementModal, setShowRapprochementModal] = useState(false);

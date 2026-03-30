@@ -5,6 +5,7 @@ export { MovementFilters } from './MovementFilters';
 export { UnifiedMovementsTable } from './UnifiedMovementsTable';
 export { EntityDetailModal } from './EntityDetailModal';
 export { CategorisationModal } from './CategorisationModal';
+export { RapprochementModal } from './RapprochementModal';
 export { NewMovementsNotification } from './NewMovementsNotification';
 
 // Nouveaux — workflow

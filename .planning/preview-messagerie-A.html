@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview A — Gmail Pro Copro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; height: 100vh; overflow: hidden; }
+
+  /* Layout */
+  .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
+  .topbar { background: #161822; border-bottom: 1px solid rgba(148,163,184,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .topbar-title { font-size: 20px; font-weight: 700; }
+  .topbar-actions { display: flex; gap: 12px; align-items: center; }
+  .search-bar { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 8px 16px; color: #94a3b8; font-size: 13px; width: 320px; outline: none; }
+  .search-bar:focus { border-color: #3b82f6; }
+  .btn-primary { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+  .main { display: grid; grid-template-columns: 220px 340px 1fr; height: calc(100vh - 56px); }
+
+  /* Sidebar */
+  .sidebar { background: #131620; border-right: 1px solid rgba(148,163,184,0.08); padding: 20px 16px; overflow-y: auto; }
+  .sidebar-section { margin-bottom: 24px; }
+  .sidebar-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .sidebar-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #94a3b8; cursor: pointer; transition: all 0.15s; }
+  .sidebar-item:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+  .sidebar-item.active { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .sidebar-item .icon { margin-right: 10px; font-size: 15px; }
+  .badge { background: #3b82f6; color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center; }
+  .badge-warn { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .tag-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; display: inline-block; }
+
+  /* Mail list */
+  .mail-list { border-right: 1px solid rgba(148,163,184,0.08); overflow-y: auto; }
+  .mail-list-header { padding: 16px 20px; border-bottom: 1px solid rgba(148,163,184,0.08); display: flex; align-items: center; gap: 8px; }
+  .filter-pill { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 600; color: #94a3b8; cursor: pointer; }
+  .filter-pill.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+  .mail-item { padding: 14px 20px; border-bottom: 1px solid rgba(148,163,184,0.04); cursor: pointer; transition: all 0.15s; display: flex; gap: 12px; }
+  .mail-item:hover { background: rgba(148,163,184,0.03); }
+  .mail-item.active { background: rgba(59,130,246,0.08); border-left: 3px solid #3b82f6; }
+  .mail-item.unread .mail-sender { font-weight: 700; color: #e2e8f0; }
+  .mail-item.unread .mail-subject { color: #e2e8f0; }
+  .mail-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; margin-top: 6px; flex-shrink: 0; }
+  .mail-unread-dot.read { background: transparent; }
+  .mail-content { flex: 1; min-width: 0; }
+  .mail-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .mail-sender { font-size: 13px; font-weight: 600; color: #94a3b8; }
+  .mail-time { font-size: 11px; color: #64748b; }
+  .mail-subject { font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mail-preview { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mail-tags { display: flex; gap: 6px; margin-top: 6px; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+  .tag-maintenance { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .tag-finance { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .tag-ag { background: rgba(139,92,246,0.1); color: #a78bfa; }
+  .tag-relance { background: rgba(239,68,68,0.1); color: #f87171; }
+  .tag-general { background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .mail-copro { font-size: 10px; color: #64748b; font-weight: 500; margin-bottom: 2px; }
+  .mail-attach { color: #64748b; font-size: 11px; }
+
+  /* Detail panel */
+  .detail { padding: 32px; overflow-y: auto; }
+  .detail-header { margin-bottom: 24px; }
+  .detail-subject { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  .detail-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #60a5fa; flex-shrink: 0; }
+  .detail-sender-info { flex: 1; }
+  .detail-sender-name { font-size: 14px; font-weight: 600; }
+  .detail-sender-email { font-size: 12px; color: #64748b; }
+  .detail-date { font-size: 12px; color: #64748b; }
+  .detail-status { display: flex; gap: 8px; align-items: center; }
+  .status-pill { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+  .status-opened { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .detail-body { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 24px; margin-bottom: 24px; line-height: 1.7; font-size: 14px; color: #cbd5e1; }
+  .detail-body p { margin-bottom: 12px; }
+  .detail-attachments { background: #131620; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+  .attachment-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .attachment-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #1a1d2e; border-radius: 8px; margin-bottom: 8px; }
+  .attachment-icon { font-size: 20px; }
+  .attachment-info { flex: 1; }
+  .attachment-name { font-size: 13px; font-weight: 500; }
+  .attachment-size { font-size: 11px; color: #64748b; }
+  .attachment-dl { color: #3b82f6; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .detail-actions { display: flex; gap: 10px; }
+  .btn-ghost { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+
+  /* Bulk bar */
+  .bulk-bar { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1d2e; border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 10px 20px; display: flex; gap: 12px; align-items: center; box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 100; }
+  .bulk-count { font-size: 13px; font-weight: 600; color: #60a5fa; }
+  .bulk-btn { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="topbar-title">Messagerie</span>
+      <span style="font-size:12px;color:#64748b;">Résidence Haussmann</span>
+    </div>
+    <div class="topbar-actions">
+      <input class="search-bar" placeholder="Rechercher par nom, objet, contenu..." />
+      <button class="btn-primary">+ Nouveau mail</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Boîtes</div>
+        <div class="sidebar-item active"><span class="icon">📥</span>Boîte de réception<span class="badge">5</span></div>
+        <div class="sidebar-item"><span class="icon">📤</span>Envoyés</div>
+        <div class="sidebar-item"><span class="icon">📝</span>Brouillons<span class="badge" style="background:rgba(148,163,184,0.1);color:#94a3b8;">2</span></div>
+        <div class="sidebar-item"><span class="icon">📁</span>Archivés</div>
+        <div class="sidebar-item"><span class="icon">🗑️</span>Corbeille</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Tags</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#a78bfa;"></span>Assemblée Générale</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#fbbf24;"></span>Maintenance</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#4ade80;"></span>Finance</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#f87171;"></span>Relance</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#60a5fa;"></span>Sinistre</div>
+        <div class="sidebar-item"><span class="tag-dot" style="background:#94a3b8;"></span>Général</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Dossiers</div>
+        <div class="sidebar-item"><span class="icon">📂</span>Relances impayés</div>
+        <div class="sidebar-item"><span class="icon">📂</span>Sinistres 2025</div>
+        <div class="sidebar-item"><span class="icon">📂</span>AG 2025</div>
+        <div class="sidebar-item" style="color:#3b82f6;font-size:12px;"><span class="icon">+</span>Nouveau dossier</div>
+      </div>
+    </div>
+
+    <!-- Mail list -->
+    <div class="mail-list">
+      <div class="mail-list-header">
+        <span class="filter-pill active">Tous (12)</span>
+        <span class="filter-pill">Non lus (5)</span>
+        <span class="filter-pill">Avec PJ</span>
+      </div>
+
+      <div class="mail-item unread active">
+        <div class="mail-unread-dot"></div>
+        <div class="mail-content">
+          <div class="mail-copro">Résidence Haussmann</div>
+          <div class="mail-top">
+            <span class="mail-sender">M. Dupont (Lot 4B)</span>
+            <span class="mail-time">14:30</span>
+          </div>
+          <div class="mail-subject">Fuite salle de bain — urgence</div>
+          <div class="mail-preview">Bonjour, je constate une infiltration d'eau depuis ce matin dans ma salle...</div>
+          <div class="mail-tags">
+            <span class="tag tag-maintenance">🔧 Maintenance</span>
+            <span class="mail-attach">📎 2</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mail-item unread">
+        <div class="mail-unread-dot"></div>
+        <div class="mail-content">
+          <div class="mail-copro">Résidence Voltaire</div>
+          <div class="mail-top">
+            <span class="mail-sender">Mme Garcia (Lot 2A)</span>
+            <span class="mail-time">11:15</span>
+          </div>
+          <div class="mail-subject">Question charges T1 2025</div>
+          <div class="mail-preview">Pourriez-vous me détailler la répartition des charges du premier trimestre...</div>
+          <div class="mail-tags">
+            <span class="tag tag-finance">💰 Finance</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mail-item unread">
+        <div class="mail-unread-dot"></div>
+        <div class="mail-content">
+          <div class="mail-copro">Résidence Haussmann</div>
+          <div class="mail-top">
+            <span class="mail-sender">M. Lefebvre (Lot 6C)</span>
+            <span class="mail-time">09:45</span>
+          </div>
+          <div class="mail-subject">Contestation appel de fonds travaux</div>
+          <div class="mail-preview">Je souhaite contester le montant de l'appel de fonds travaux voté...</div>
+          <div class="mail-tags">
+            <span class="tag tag-finance">💰 Finance</span>
+            <span class="tag tag-ag">⚖️ AG</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mail-item">
+        <div class="mail-unread-dot read"></div>
+        <div class="mail-content">
+          <div class="mail-copro">Résidence Haussmann</div>
+          <div class="mail-top">
+            <span class="mail-sender">Syndic → Tous</span>
+            <span class="mail-time">Hier</span>
+          </div>
+          <div class="mail-subject">Convocation AG Ordinaire 2025</div>
+          <div class="mail-preview">Mesdames, Messieurs, nous avons l'honneur de vous convoquer...</div>
+          <div class="mail-tags">
+            <span class="tag tag-ag">⚖️ AG</span>
+            <span class="mail-attach">📎 3</span>
+            <span style="font-size:10px;color:#4ade80;">✓ 38/45 ouverts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mail-item">
+        <div class="mail-unread-dot read"></div>
+        <div class="mail-content">
+          <div class="mail-copro">Résidence Voltaire</div>
+          <div class="mail-top">
+            <span class="mail-sender">Syndic → M. Bernard</span>
+            <span class="mail-time">Hier</span>
+          </div>
+          <div class="mail-subject">Relance impayé — 2ème rappel</div>
+          <div class="mail-preview">Monsieur, malgré notre précédent courrier du 15 février...</div>
+          <div class="mail-tags">
+            <span class="tag tag-relance">🚨 Relance</span>
+            <span style="font-size:10px;color:#fbbf24;">⏱ J+32</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mail-item">
+        <div class="mail-unread-dot read"></div>
+        <div class="mail-content">
+          <div class="mail-copro">Résidence République</div>
+          <div class="mail-top">
+            <span class="mail-sender">AXA Assurance</span>
+            <span class="mail-time">28/03</span>
+          </div>
+          <div class="mail-subject">Attestation assurance 2025-2026</div>
+          <div class="mail-preview">Veuillez trouver ci-joint l'attestation d'assurance renouvelée...</div>
+          <div class="mail-tags">
+            <span class="tag tag-general">📄 Général</span>
+            <span class="mail-attach">📎 1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="detail">
+      <div class="detail-header">
+        <div class="detail-subject">Fuite salle de bain — urgence</div>
+        <div class="detail-meta">
+          <div class="avatar">JD</div>
+          <div class="detail-sender-info">
+            <div class="detail-sender-name">Jean Dupont <span style="font-size:11px;color:#64748b;font-weight:400;">— Lot 4B, Bât A</span></div>
+            <div class="detail-sender-email">j.dupont@email.fr → copro.haussmann@coproflex.fr</div>
+          </div>
+          <div>
+            <div class="detail-date">Aujourd'hui, 14:30</div>
+            <div class="detail-status">
+              <span class="status-pill status-opened">✓ Ouvert</span>
+            </div>
+          </div>
+        </div>
+        <div class="mail-tags" style="margin-bottom:0;">
+          <span class="tag tag-maintenance">🔧 Maintenance</span>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <p>Bonjour,</p>
+        <p>Je constate depuis ce matin une <strong>infiltration d'eau</strong> dans ma salle de bain, provenant visiblement du plafond (appartement du dessus, lot 5B).</p>
+        <p>L'eau s'écoule le long du mur derrière la baignoire et a déjà causé des taches d'humidité sur environ 1m². Le débit semble s'accélérer.</p>
+        <p>Pourriez-vous intervenir rapidement ? Je joins des photos pour constater les dégâts.</p>
+        <p>Cordialement,<br>Jean Dupont</p>
+      </div>
+
+      <div class="detail-attachments">
+        <div class="attachment-title">Pièces jointes (2)</div>
+        <div class="attachment-item">
+          <span class="attachment-icon">🖼️</span>
+          <div class="attachment-info">
+            <div class="attachment-name">photo-fuite-1.jpg</div>
+            <div class="attachment-size">2.4 Mo</div>
+          </div>
+          <span class="attachment-dl">Télécharger</span>
+        </div>
+        <div class="attachment-item">
+          <span class="attachment-icon">🖼️</span>
+          <div class="attachment-info">
+            <div class="attachment-name">photo-fuite-2.jpg</div>
+            <div class="attachment-size">1.8 Mo</div>
+          </div>
+          <span class="attachment-dl">Télécharger</span>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn-primary">↩ Répondre</button>
+        <button class="btn-ghost">↗ Transférer</button>
+        <button class="btn-ghost">📁 Archiver</button>
+        <button class="btn-ghost">🏷 Taguer</button>
+        <button class="btn-ghost" style="color:#f87171;">🗑 Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk bar (shown when items selected) -->
+<div class="bulk-bar">
+  <span class="bulk-count">3 sélectionnés</span>
+  <button class="bulk-btn">✓ Marquer lu</button>
+  <button class="bulk-btn">🏷 Taguer</button>
+  <button class="bulk-btn">📁 Déplacer</button>
+  <button class="bulk-btn">📁 Archiver</button>
+  <button class="bulk-btn" style="color:#f87171;">🗑 Supprimer</button>
+</div>
+</body>
+</html>

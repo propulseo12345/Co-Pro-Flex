@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messagerie — 3 Previews</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;height:100vh;overflow:hidden}
+  .app{display:grid;grid-template-rows:52px 1fr;height:100vh}
+  .nav{background:#161822;border-bottom:1px solid rgba(148,163,184,.08);display:flex;align-items:center;padding:0 24px;gap:24px}
+  .nav-title{font-size:14px;font-weight:700;color:#64748b}
+  .nav-tabs{display:flex;gap:4px;background:#131620;border-radius:10px;padding:3px}
+  .nav-tab{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;transition:all .15s;user-select:none}
+  .nav-tab:hover{color:#94a3b8}
+  .nav-tab.on{background:#1a1d2e;color:#e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .nav-hint{font-size:11px;color:#475569;margin-left:auto}
+  .panel{display:none;height:100%;overflow:hidden}
+  .panel.on{display:grid}
+
+  /* Shared */
+  .btn{border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb}
+  .btn-g{background:rgba(148,163,184,.05);border:1px solid rgba(148,163,184,.06);color:#94a3b8}.btn-g:hover{background:rgba(148,163,184,.08);color:#e2e8f0}
+  .btn-sm{padding:5px 12px;font-size:11px}
+  .badge{background:#3b82f6;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px}
+  .badge-r{background:#ef4444}
+  .tag{padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600}
+  .t-mnt{background:rgba(245,158,11,.1);color:#fbbf24}
+  .t-fin{background:rgba(34,197,94,.1);color:#4ade80}
+  .t-gen{background:rgba(148,163,184,.1);color:#94a3b8}
+  .sb{background:#131620;border-right:1px solid rgba(148,163,184,.06);padding:14px 10px;overflow-y:auto}
+  .sb-sec{margin-bottom:16px}
+  .sb-lbl{font-size:9px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.8px;padding:6px 10px}
+  .sb-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;transition:all .12s}
+  .sb-item:hover{background:rgba(148,163,184,.06);color:#e2e8f0}
+  .sb-item.on{background:rgba(59,130,246,.08);color:#60a5fa}
+  .sb-item .ic{margin-right:6px;font-size:13px}
+  .dot{width:6px;height:6px;border-radius:50%;margin-right:6px}
+
+  /* ========== A: CHAT SIMPLE ========== */
+  #panelA{grid-template-columns:320px 1fr}
+  .cl{border-right:1px solid rgba(148,163,184,.06);display:flex;flex-direction:column;overflow:hidden}
+  .cl-search{padding:12px;border-bottom:1px solid rgba(148,163,184,.06)}
+  .cl-search input{width:100%;background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:10px 14px;color:#e2e8f0;font-size:13px;outline:none}
+  .cl-search input:focus{border-color:#3b82f6}
+  .cl-tabs{display:flex;border-bottom:1px solid rgba(148,163,184,.06);padding:0 12px}
+  .cl-tab{flex:1;text-align:center;padding:10px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent}
+  .cl-tab.on{color:#e2e8f0;border-bottom-color:#3b82f6}
+  .cl-items{flex:1;overflow-y:auto}
+  .cv{display:flex;gap:12px;padding:14px 16px;cursor:pointer;transition:all .15s;border-bottom:1px solid rgba(148,163,184,.04)}
+  .cv:hover{background:rgba(148,163,184,.03)}
+  .cv.on{background:rgba(59,130,246,.08);border-left:3px solid #3b82f6}
+  .cv.unread .cv-name{font-weight:700;color:#e2e8f0}
+  .cv-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .cv-info{flex:1;min-width:0}
+  .cv-top{display:flex;justify-content:space-between;margin-bottom:2px}
+  .cv-name{font-size:13px;font-weight:600;color:#94a3b8}
+  .cv-time{font-size:10px;color:#64748b}
+  .cv-last{font-size:12px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cv-meta{display:flex;gap:6px;margin-top:4px;align-items:center}
+  .cv-copro{font-size:10px;color:#64748b}
+  .cv-badge{width:18px;height:18px;border-radius:50%;background:#3b82f6;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  .chat{display:flex;flex-direction:column;height:100%}
+  .chat-hdr{padding:16px 24px;border-bottom:1px solid rgba(148,163,184,.06);display:flex;justify-content:space-between;align-items:center}
+  .chat-hdr-info{display:flex;align-items:center;gap:12px}
+  .chat-nm{font-size:15px;font-weight:700}
+  .chat-sub{font-size:11px;color:#64748b}
+  .chat-msgs{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:70%;display:flex;gap:10px}
+  .msg.them{align-self:flex-start}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .msg-body{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:12px;padding:12px 16px}
+  .msg.me .msg-body{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.15)}
+  .msg-author{font-size:11px;font-weight:600;margin-bottom:4px}
+  .msg-text{font-size:13px;line-height:1.6;color:#cbd5e1}
+  .msg-text p{margin-bottom:6px}
+  .msg-time{font-size:10px;color:#64748b;margin-top:4px}
+  .msg-att{display:flex;gap:6px;margin-top:8px}
+  .mini-pj{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:6px;padding:6px 10px;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:4px}
+  .sys-msg{text-align:center;font-size:11px;color:#64748b;padding:8px 0}
+  .sys-msg strong{color:#94a3b8}
+  .chat-reply{padding:16px 24px;border-top:1px solid rgba(148,163,184,.06);background:#131620}
+  .reply-box{display:flex;gap:12px;align-items:flex-end}
+  .reply-in{flex:1;background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:12px;padding:12px 16px;color:#e2e8f0;font-size:13px;font-family:inherit;resize:none;outline:none;min-height:44px}
+  .reply-in:focus{border-color:#3b82f6}
+  .reply-tools{display:flex;gap:6px;margin-bottom:4px}
+  .reply-tool{width:32px;height:32px;border-radius:8px;background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+  .send-btn{width:40px;height:40px;border-radius:10px;background:#3b82f6;border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+  /* ========== B: INBOX COLLABORATIVE ========== */
+  #panelB{grid-template-columns:180px 300px 1fr 260px}
+  .th{display:flex;flex-direction:column;overflow:hidden}
+  .th-hdr{padding:14px 20px;border-bottom:1px solid rgba(148,163,184,.06)}
+  .th-subj{font-size:16px;font-weight:700;margin-bottom:4px}
+  .th-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:#64748b;flex-wrap:wrap}
+  .th-msgs{flex:1;overflow-y:auto;padding:20px}
+  .tmsg{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:14px;margin-bottom:10px}
+  .tmsg.int{background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.12)}
+  .tmsg-hdr{display:flex;justify-content:space-between;margin-bottom:8px}
+  .tmsg-author{display:flex;align-items:center;gap:8px}
+  .tmsg-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+  .tmsg-nm{font-size:12px;font-weight:600}
+  .tmsg-role{font-size:10px;color:#64748b}
+  .tmsg-time{font-size:10px;color:#64748b}
+  .tmsg-text{font-size:13px;line-height:1.6;color:#cbd5e1}
+  .tmsg-text p{margin-bottom:6px}
+  .int-badge{font-size:9px;font-weight:600;color:#fbbf24;background:rgba(245,158,11,.1);padding:2px 6px;border-radius:3px}
+  .th-reply{padding:14px 20px;border-top:1px solid rgba(148,163,184,.06);background:#131620}
+  .rtabs{display:flex;margin-bottom:10px}
+  .rtab{padding:5px 12px;font-size:11px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent}
+  .rtab.on{color:#e2e8f0;border-bottom-color:#3b82f6}
+  .rtab.int-tab{color:#fbbf24}
+  .th-reply-area{display:flex;gap:10px;align-items:flex-end}
+  .th-input{flex:1;background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:12px;font-family:inherit;resize:none;outline:none;min-height:40px}
+  .th-input:focus{border-color:#3b82f6}
+  .th-send{width:36px;height:36px;border-radius:8px;background:#3b82f6;border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+  /* Context */
+  .ctx{background:#131620;border-left:1px solid rgba(148,163,184,.06);padding:16px 14px;overflow-y:auto}
+  .ctx-sec{margin-bottom:16px}
+  .ctx-lbl{font-size:9px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .ctx-card{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:10px}
+  .ctx-nm{font-size:13px;font-weight:700;margin-bottom:2px}
+  .ctx-sub{font-size:10px;color:#64748b;margin-bottom:2px}
+  .ctx-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+  .ctx-k{color:#64748b}
+  .ctx-v{font-weight:600}
+  .linked{display:flex;align-items:center;gap:6px;padding:6px 8px;background:#131620;border:1px solid rgba(148,163,184,.06);border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:10px}
+  .linked:hover{border-color:rgba(59,130,246,.3)}
+  .linked-t{font-weight:600;color:#e2e8f0}
+  .linked-s{color:#64748b}
+  .sla{font-size:9px;font-weight:600}
+  .sla-ok{color:#4ade80}
+  .sla-w{color:#fbbf24}
+  .sla-d{color:#f87171}
+  .c-assign{display:flex;align-items:center;gap:3px}
+  .c-aav{width:16px;height:16px;border-radius:50%;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  /* ========== C: HUB TEMPS RÉEL ========== */
+  #panelC{grid-template-columns:200px 1fr}
+  .content-c{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;overflow-y:auto}
+  .channel{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 72px)}
+  .ch-hdr{padding:14px 18px;border-bottom:1px solid rgba(148,163,184,.06);display:flex;justify-content:space-between;align-items:center}
+  .ch-title{font-size:14px;font-weight:700}
+  .ch-sub{font-size:10px;color:#64748b}
+  .ch-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+  .cm{display:flex;gap:8px}
+  .cm-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+  .cm-body{flex:1}
+  .cm-top{display:flex;gap:6px;align-items:center;margin-bottom:2px}
+  .cm-nm{font-size:11px;font-weight:600}
+  .cm-role{font-size:9px;color:#64748b}
+  .cm-time{font-size:9px;color:#64748b}
+  .cm-text{font-size:12px;line-height:1.5;color:#cbd5e1}
+  .cm-att{display:flex;gap:4px;margin-top:4px}
+  .cm-pj{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:4px;padding:3px 6px;font-size:9px;color:#94a3b8}
+  .cm-sys{text-align:center;font-size:10px;color:#64748b;padding:4px 0}
+  .cm-sys strong{color:#94a3b8}
+  .cm-typing{font-size:10px;color:#60a5fa;padding:4px 18px;font-style:italic}
+  .ch-reply{padding:10px 18px;border-top:1px solid rgba(148,163,184,.06);display:flex;gap:8px;align-items:center}
+  .ch-input{flex:1;background:#131620;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:12px;outline:none;font-family:inherit}
+  .ch-input:focus{border-color:#3b82f6}
+  .ch-send{width:32px;height:32px;border-radius:8px;background:#3b82f6;border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .online-sec{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:10px}
+  .online-title{font-size:9px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .online-user{display:flex;align-items:center;gap:6px;padding:3px 0}
+  .online-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
+  .online-nm{font-size:11px;color:#94a3b8}
+  .qa{background:#1a1d2e;border:1px solid rgba(148,163,184,.06);border-radius:12px;padding:16px;grid-column:span 2}
+  .qa-title{font-size:12px;font-weight:700;margin-bottom:10px}
+  .qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .qa-card{background:#131620;border:1px solid rgba(148,163,184,.06);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
+  .qa-card:hover{border-color:rgba(59,130,246,.2);transform:translateY(-1px)}
+  .qa-icon{font-size:20px;margin-bottom:6px}
+  .qa-label{font-size:11px;font-weight:600}
+  .qa-desc{font-size:9px;color:#64748b;margin-top:2px}
+
+  /* Conv list shared for B */
+  .cvl{border-right:1px solid rgba(148,163,184,.06);overflow-y:auto}
+  .cvl-hdr{padding:10px 14px;border-bottom:1px solid rgba(148,163,184,.06)}
+  .cvl-hdr select{width:100%;background:#131620;border:1px solid rgba(148,163,184,.06);border-radius:6px;padding:6px 10px;color:#e2e8f0;font-size:11px;font-weight:600}
+  .cvi{padding:12px 14px;border-bottom:1px solid rgba(148,163,184,.04);cursor:pointer;transition:all .15s}
+  .cvi:hover{background:rgba(148,163,184,.03)}
+  .cvi.on{background:rgba(59,130,246,.08);border-left:3px solid #3b82f6}
+  .cvi.unread{border-left:3px solid #3b82f6}
+  .cvi-top{display:flex;justify-content:space-between;margin-bottom:2px}
+  .cvi-nm{font-size:12px;font-weight:600}
+  .cvi-time{font-size:10px;color:#64748b}
+  .cvi-subj{font-size:11px;color:#94a3b8;margin-bottom:3px}
+  .cvi-prev{font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cvi-meta{display:flex;gap:6px;margin-top:5px;align-items:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="nav">
+    <span class="nav-title">MESSAGERIE PREVIEW</span>
+    <div class="nav-tabs">
+      <div class="nav-tab on" onclick="show('A')">A — Chat simple</div>
+      <div class="nav-tab" onclick="show('B')">B — Inbox collaborative</div>
+      <div class="nav-tab" onclick="show('C')">C — Hub temps réel</div>
+    </div>
+    <span class="nav-hint">Cliquer pour naviguer entre les 3 concepts</span>
+  </div>
+
+  <!-- ==================== A: CHAT SIMPLE ==================== -->
+  <div id="panelA" class="panel on">
+    <div class="cl">
+      <div class="cl-search"><input placeholder="Rechercher une conversation..."></div>
+      <div class="cl-tabs"><div class="cl-tab on">Toutes (8)</div><div class="cl-tab">Non lues (3)</div><div class="cl-tab">Archivées</div></div>
+      <div class="cl-items">
+        <div class="cv on unread"><div class="cv-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div class="cv-info"><div class="cv-top"><span class="cv-name">M. Dupont</span><span class="cv-time">14:30</span></div><div class="cv-last">Bonjour, j'ai constaté une infiltration d'eau...</div><div class="cv-meta"><span class="cv-copro">Haussmann · Lot 4B</span><span class="tag t-mnt">Maintenance</span><span class="cv-badge">2</span></div></div></div>
+        <div class="cv unread"><div class="cv-av" style="background:rgba(34,197,94,.12);color:#4ade80">MG</div><div class="cv-info"><div class="cv-top"><span class="cv-name">Mme Garcia</span><span class="cv-time">11:15</span></div><div class="cv-last">Pourriez-vous m'expliquer les charges du T1 ?</div><div class="cv-meta"><span class="cv-copro">Voltaire · Lot 2A</span><span class="tag t-fin">Finance</span></div></div></div>
+        <div class="cv unread"><div class="cv-av" style="background:rgba(245,158,11,.12);color:#fbbf24">CS</div><div class="cv-info"><div class="cv-top"><span class="cv-name">Conseil Syndical</span><span class="cv-time">09:30</span></div><div class="cv-last">Thomas: On valide le devis d'OTIS ?</div><div class="cv-meta"><span class="cv-copro">Haussmann · Groupe</span></div></div></div>
+        <div class="cv"><div class="cv-av" style="background:rgba(148,163,184,.12);color:#94a3b8">PE</div><div class="cv-info"><div class="cv-top"><span class="cv-name">Plomberie Express</span><span class="cv-time">Hier</span></div><div class="cv-last">Intervention confirmée demain 8h-10h</div><div class="cv-meta"><span class="cv-copro">Prestataire</span></div></div></div>
+        <div class="cv"><div class="cv-av" style="background:rgba(139,92,246,.12);color:#a78bfa">ML</div><div class="cv-info"><div class="cv-top"><span class="cv-name">M. Lefebvre</span><span class="cv-time">27/03</span></div><div class="cv-last">Merci pour votre réponse rapide.</div><div class="cv-meta"><span class="cv-copro">Haussmann · Lot 6C</span></div></div></div>
+      </div>
+    </div>
+    <div class="chat">
+      <div class="chat-hdr"><div class="chat-hdr-info"><div class="cv-av" style="background:rgba(59,130,246,.12);color:#60a5fa;width:36px;height:36px;font-size:13px">JD</div><div><div class="chat-nm">M. Dupont <span style="font-size:11px;color:#64748b;font-weight:400">· Lot 4B, Haussmann</span></div><div class="chat-sub">Sujet: Fuite salle de bain · 🟢 En ligne</div></div></div><div style="display:flex;gap:8px"><button class="btn btn-g btn-sm">🔧 Créer OS</button><button class="btn btn-g btn-sm">👤 Fiche</button></div></div>
+      <div class="chat-msgs">
+        <div class="sys-msg"><strong>Conversation démarrée</strong> · Aujourd'hui à 14:30</div>
+        <div class="msg them"><div class="msg-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div class="msg-body"><div class="msg-author" style="color:#60a5fa">Jean Dupont</div><div class="msg-text"><p>Bonjour, infiltration d'eau dans ma salle de bain depuis ce matin. Ça vient du lot 5B au-dessus. C'est urgent.</p></div><div class="msg-att"><div class="mini-pj">🖼️ photo-1.jpg</div><div class="mini-pj">🖼️ photo-2.jpg</div></div><div class="msg-time">14:30 · ✓ Lu</div></div></div>
+        <div class="msg me"><div class="msg-av" style="background:rgba(34,197,94,.12);color:#4ade80">MC</div><div class="msg-body"><div class="msg-author" style="color:#4ade80">Marie C. · Syndic</div><div class="msg-text"><p>Plomberie Express passera <strong>demain 8h-10h</strong>. Coupez l'arrivée d'eau si possible.</p></div><div class="msg-time">15:25 · ✓✓ Lu à 15:26</div></div></div>
+        <div class="msg them"><div class="msg-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div class="msg-body"><div class="msg-author" style="color:#60a5fa">Jean Dupont</div><div class="msg-text"><p>Parfait, je serai là. Merci ! 👍</p></div><div class="msg-time">15:28</div></div></div>
+        <div class="sys-msg">🔧 <strong>OS-2025-042</strong> créé et lié</div>
+      </div>
+      <div class="chat-reply"><div class="reply-box"><div class="reply-tools"><div class="reply-tool">📎</div><div class="reply-tool">📋</div><div class="reply-tool">😀</div></div><textarea class="reply-in" placeholder="Écrire un message..." rows="1"></textarea><button class="send-btn">➤</button></div></div>
+    </div>
+  </div>
+
+  <!-- ==================== B: INBOX COLLABORATIVE ==================== -->
+  <div id="panelB" class="panel">
+    <div class="sb">
+      <div class="sb-sec"><div class="sb-lbl">Vues</div><div class="sb-item on"><span class="ic">📥</span>À traiter<span class="badge">8</span></div><div class="sb-item"><span class="ic">👤</span>Mes assignés<span class="badge">3</span></div><div class="sb-item"><span class="ic">💬</span>Tous</div><div class="sb-item"><span class="ic">✅</span>Résolus</div></div>
+      <div class="sb-sec"><div class="sb-lbl">Copropriétés</div><div class="sb-item"><span class="ic">🏢</span>Haussmann<span class="badge">4</span></div><div class="sb-item"><span class="ic">🏢</span>Voltaire<span class="badge">3</span></div><div class="sb-item"><span class="ic">🏢</span>République<span class="badge">1</span></div></div>
+      <div class="sb-sec"><div class="sb-lbl">Tags</div><div class="sb-item"><span class="dot" style="background:#fbbf24"></span>Maintenance</div><div class="sb-item"><span class="dot" style="background:#4ade80"></span>Finance</div><div class="sb-item"><span class="dot" style="background:#f87171"></span>Urgence</div></div>
+    </div>
+    <div class="cvl">
+      <div class="cvl-hdr"><select><option>Non traités — récents</option></select></div>
+      <div class="cvi on unread"><div class="cvi-top"><span class="cvi-nm">M. Dupont (Lot 4B)</span><span class="cvi-time">14:30</span></div><div class="cvi-subj">Fuite salle de bain — urgence</div><div class="cvi-prev">Bonjour, j'ai constaté une infiltration...</div><div class="cvi-meta"><div class="c-assign"><div class="c-aav" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><span style="font-size:9px;color:#64748b">Marie</span></div><span class="tag t-mnt" style="font-size:9px;padding:1px 5px">Maintenance</span><span class="sla sla-ok">⏱ 2h</span></div></div>
+      <div class="cvi unread"><div class="cvi-top"><span class="cvi-nm">Mme Garcia (Lot 2A)</span><span class="cvi-time">11:15</span></div><div class="cvi-subj">Question charges T1</div><div class="cvi-prev">Pourriez-vous détailler...</div><div class="cvi-meta"><div class="c-assign"><div class="c-aav" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div><span style="font-size:9px;color:#64748b">Thomas</span></div><span class="tag t-fin" style="font-size:9px;padding:1px 5px">Finance</span><span class="sla sla-w">⏱ 3j</span></div></div>
+      <div class="cvi unread"><div class="cvi-top"><span class="cvi-nm">Conseil Syndical</span><span class="cvi-time">09:30</span></div><div class="cvi-subj">Devis OTIS ascenseur</div><div class="cvi-prev">On valide le devis ?</div><div class="cvi-meta"><span style="font-size:9px;color:#f87171;font-weight:600">⚠ Non assigné</span></div></div>
+      <div class="cvi"><div class="cvi-top"><span class="cvi-nm" style="color:#94a3b8">Plomberie Express</span><span class="cvi-time">Hier</span></div><div class="cvi-subj">Confirmation intervention</div><div class="cvi-prev">RDV confirmé demain 8h-10h</div></div>
+    </div>
+    <div class="th">
+      <div class="th-hdr"><div class="th-subj">Fuite salle de bain — urgence</div><div class="th-meta"><span class="tag t-mnt">🔧 Maintenance</span><span>Haussmann</span><span>·</span><span>Marie C.</span><span>·</span><span style="color:#4ade80">2h</span></div></div>
+      <div class="th-msgs">
+        <div class="tmsg"><div class="tmsg-hdr"><div class="tmsg-author"><div class="tmsg-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div><span class="tmsg-nm">Jean Dupont</span> <span class="tmsg-role">Lot 4B</span></div></div><span class="tmsg-time">14:30</span></div><div class="tmsg-text"><p>Infiltration d'eau dans ma salle de bain. Ça vient du lot 5B. C'est urgent.</p></div></div>
+        <div class="tmsg int"><div class="tmsg-hdr"><div class="tmsg-author"><div class="tmsg-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><div><span class="tmsg-nm">Marie C.</span> <span class="int-badge">💬 Note interne</span></div></div><span class="tmsg-time">15:10</span></div><div class="tmsg-text"><p>Plomberie Express dispo demain 8h-10h. Je confirme au copro ?</p></div></div>
+        <div class="tmsg int"><div class="tmsg-hdr"><div class="tmsg-author"><div class="tmsg-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div><div><span class="tmsg-nm">Thomas L.</span> <span class="int-badge">💬 Note interne</span></div></div><span class="tmsg-time">15:18</span></div><div class="tmsg-text"><p>Oui confirme. J'appelle Rousseau (5B) pour vérifier.</p></div></div>
+        <div class="tmsg"><div class="tmsg-hdr"><div class="tmsg-author"><div class="tmsg-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><div><span class="tmsg-nm">Marie C.</span> <span class="tmsg-role">Syndic</span></div></div><span class="tmsg-time">15:25</span></div><div class="tmsg-text"><p>Plombier prévu <strong>demain 8h-10h</strong>. Coupez l'eau si possible.</p></div></div>
+      </div>
+      <div class="th-reply"><div class="rtabs"><div class="rtab on">↩ Répondre</div><div class="rtab int-tab">💬 Note interne</div></div><div class="th-reply-area"><textarea class="th-input" placeholder="Écrire..." rows="1"></textarea><button class="th-send">➤</button></div></div>
+    </div>
+    <div class="ctx">
+      <div class="ctx-sec"><div class="ctx-lbl">Contact</div><div class="ctx-card"><div class="ctx-nm">Jean Dupont</div><div class="ctx-sub">06 12 34 56 78</div><div class="ctx-row"><span class="ctx-k">Lot</span><span class="ctx-v">4B · Bât A</span></div><div class="ctx-row"><span class="ctx-k">Tantièmes</span><span class="ctx-v">45/1000</span></div><div class="ctx-row"><span class="ctx-k">Paiements</span><span class="ctx-v" style="color:#4ade80">À jour</span></div></div></div>
+      <div class="ctx-sec"><div class="ctx-lbl">Entités liées</div><div class="linked"><span>🔧</span><div><div class="linked-t">OS-2025-042</div><div class="linked-s">Fuite — Plomberie Express</div></div></div><div class="linked"><span>📋</span><div><div class="linked-t">Devis PLB-003</div><div class="linked-s">380 EUR</div></div></div></div>
+      <div class="ctx-sec"><div class="ctx-lbl">Actions</div><div style="display:flex;flex-direction:column;gap:4px"><button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">🔧 Créer OS</button><button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">👤 Fiche copro</button><button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">✅ Résolu</button></div></div>
+    </div>
+  </div>
+
+  <!-- ==================== C: HUB TEMPS RÉEL ==================== -->
+  <div id="panelC" class="panel">
+    <div class="sb">
+      <div class="sb-sec"><div class="sb-lbl">Conversations</div><div class="sb-item on"><span class="ic">💬</span>Toutes<span class="badge">8</span></div><div class="sb-item"><span class="ic">🔴</span>Urgentes<span class="badge badge-r">2</span></div><div class="sb-item"><span class="ic">👤</span>Mes assignés<span class="badge">3</span></div></div>
+      <div class="sb-sec"><div class="sb-lbl">Canaux</div><div class="sb-item"><span class="ic">#</span>Général Haussmann</div><div class="sb-item"><span class="ic">#</span>Conseil Syndical<span class="badge">2</span></div><div class="sb-item"><span class="ic">#</span>Travaux 2025</div></div>
+      <div class="sb-sec"><div class="sb-lbl">Copropriétés</div><div class="sb-item"><span class="ic">🏢</span>Haussmann<span class="badge">4</span></div><div class="sb-item"><span class="ic">🏢</span>Voltaire<span class="badge">3</span></div></div>
+      <div class="sb-sec"><div class="online-sec"><div class="online-title">En ligne (4)</div><div class="online-user"><div class="online-dot"></div><span class="online-nm">Marie C.</span></div><div class="online-user"><div class="online-dot"></div><span class="online-nm">Thomas L.</span></div><div class="online-user"><div class="online-dot"></div><span class="online-nm">M. Dupont</span></div><div class="online-user"><div class="online-dot" style="background:#fbbf24"></div><span class="online-nm">Mme Garcia</span></div></div></div>
+    </div>
+    <div class="content-c">
+      <div class="channel" style="border-left:3px solid #ef4444"><div class="ch-hdr"><div><div class="ch-title">🚨 M. Dupont — Fuite urgente</div><div class="ch-sub">Haussmann · Lot 4B · Marie C. · <span style="color:#4ade80">🟢 En ligne</span></div></div><button class="btn btn-g btn-sm">🔧 OS</button></div><div class="ch-msgs"><div class="cm"><div class="cm-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div class="cm-body"><div class="cm-top"><span class="cm-nm">Jean Dupont</span><span class="cm-time">14:30</span></div><div class="cm-text">Infiltration d'eau salle de bain. Vient du lot 5B. Urgent.</div><div class="cm-att"><span class="cm-pj">🖼️ photo-1.jpg</span><span class="cm-pj">🖼️ photo-2.jpg</span></div></div></div><div class="cm"><div class="cm-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><div class="cm-body"><div class="cm-top"><span class="cm-nm">Marie C.</span><span class="cm-role">Syndic</span><span class="cm-time">15:25</span></div><div class="cm-text">Plombier <strong>demain 8h-10h</strong>. Coupez l'eau si possible.</div></div></div><div class="cm"><div class="cm-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div class="cm-body"><div class="cm-top"><span class="cm-nm">Jean Dupont</span><span class="cm-time">15:28</span></div><div class="cm-text">Parfait, merci ! 👍</div></div></div><div class="cm-sys">🔧 <strong>OS-2025-042</strong> créé</div></div><div class="cm-typing">Jean Dupont écrit...</div><div class="ch-reply"><input class="ch-input" placeholder="Répondre..."><button class="ch-send">➤</button></div></div>
+      <div class="channel"><div class="ch-hdr"><div><div class="ch-title"># Conseil Syndical</div><div class="ch-sub">Haussmann · 5 membres · <span style="color:#4ade80">3 en ligne</span></div></div><button class="btn btn-g btn-sm">👥</button></div><div class="ch-msgs"><div class="cm-sys">📌 <strong>Vote budget 2025</strong> — adopté</div><div class="cm"><div class="cm-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div><div class="cm-body"><div class="cm-top"><span class="cm-nm">Thomas L.</span><span class="cm-role">Syndic</span><span class="cm-time">09:30</span></div><div class="cm-text">Devis OTIS ascenseur: <strong>42 300 EUR HT</strong>. 15% sous budget AG.</div><div class="cm-att"><span class="cm-pj">📄 Devis_OTIS.pdf</span></div></div></div><div class="cm"><div class="cm-av" style="background:rgba(34,197,94,.12);color:#4ade80">PD</div><div class="cm-body"><div class="cm-top"><span class="cm-nm">Pierre D.</span><span class="cm-role">Président CS</span><span class="cm-time">10:15</span></div><div class="cm-text">Par rapport au concurrent Schindler (48k) ?</div></div></div><div class="cm"><div class="cm-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div><div class="cm-body"><div class="cm-top"><span class="cm-nm">Thomas L.</span><span class="cm-time">10:22</span></div><div class="cm-text">OTIS -12% + garantie 5 ans (vs 3). Je recommande.</div></div></div><div class="cm-sys">📊 Sondage — "Valider OTIS ?" — 3/5 ✅</div></div><div class="ch-reply"><input class="ch-input" placeholder="Écrire dans #Conseil..."><button class="ch-send">➤</button></div></div>
+      <div class="qa"><div class="qa-title">Actions rapides</div><div class="qa-grid"><div class="qa-card"><div class="qa-icon">💬</div><div class="qa-label">Nouvelle conversation</div><div class="qa-desc">Copro ou prestataire</div></div><div class="qa-card"><div class="qa-icon">#</div><div class="qa-label">Nouveau canal</div><div class="qa-desc">Groupe thématique</div></div><div class="qa-card"><div class="qa-icon">📊</div><div class="qa-label">Sondage</div><div class="qa-desc">Vote rapide</div></div><div class="qa-card"><div class="qa-icon">📢</div><div class="qa-label">Annonce</div><div class="qa-desc">Diffusion copro</div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('panel' + id).classList.add('on');
+  event.target.classList.add('on');
+}
+</script>
+</body>
+</html>

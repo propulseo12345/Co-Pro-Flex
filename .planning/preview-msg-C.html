@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messagerie C — Hub Temps Réel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;height:100vh;overflow:hidden}
+  .app{display:grid;grid-template-rows:56px 1fr;height:100vh}
+  .topbar{background:#161822;border-bottom:1px solid rgba(148,163,184,.08);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+  .topbar-title{font-size:20px;font-weight:700}
+  .btn{border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb}
+  .btn-g{background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.08);color:#94a3b8}.btn-g:hover{background:rgba(148,163,184,.1);color:#e2e8f0}
+  .btn-sm{padding:5px 12px;font-size:11px}
+  .topbar-actions{display:flex;gap:12px;align-items:center}
+  .cmd-k{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:8px;padding:8px 16px;color:#64748b;font-size:13px;width:260px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+  .cmd-k kbd{background:rgba(148,163,184,.1);padding:2px 6px;border-radius:4px;font-size:11px}
+  .pill-bar{display:flex;gap:4px;margin-left:16px}
+  .pill{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}
+  .pill.on{background:rgba(59,130,246,.1);color:#60a5fa}
+  .pill.off{background:rgba(148,163,184,.04);color:#94a3b8}
+
+  .main{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 56px)}
+
+  /* Sidebar */
+  .sb{background:#131620;border-right:1px solid rgba(148,163,184,.08);padding:14px 10px;overflow-y:auto}
+  .sb-sec{margin-bottom:16px}
+  .sb-lbl{font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;padding:0 8px}
+  .sb-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;transition:all .15s}
+  .sb-item:hover{background:rgba(148,163,184,.06);color:#e2e8f0}
+  .sb-item.on{background:rgba(59,130,246,.1);color:#60a5fa}
+  .sb-item .ic{margin-right:6px;font-size:13px}
+  .badge{background:#3b82f6;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px}
+  .badge-r{background:#ef4444}
+  .dot{width:6px;height:6px;border-radius:50%;margin-right:6px}
+
+  /* Online users */
+  .online-sec{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:8px;padding:10px}
+  .online-title{font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .online-user{display:flex;align-items:center;gap:6px;padding:3px 0}
+  .online-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
+  .online-name{font-size:11px;color:#94a3b8}
+  .online-away{background:#fbbf24}
+
+  /* Content */
+  .content{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;overflow-y:auto}
+  .content.single{grid-template-columns:1fr}
+
+  /* Channel card = a room/channel */
+  .channel{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 96px)}
+  .ch-hdr{padding:14px 18px;border-bottom:1px solid rgba(148,163,184,.08);display:flex;justify-content:space-between;align-items:center}
+  .ch-title{font-size:14px;font-weight:700}
+  .ch-sub{font-size:10px;color:#64748b}
+  .ch-tag{padding:2px 8px;border-radius:5px;font-size:9px;font-weight:600}
+  .ch-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+
+  .m{display:flex;gap:8px}
+  .m-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+  .m-body{flex:1}
+  .m-top{display:flex;gap:6px;align-items:center;margin-bottom:2px}
+  .m-name{font-size:11px;font-weight:600}
+  .m-role{font-size:9px;color:#64748b}
+  .m-time{font-size:9px;color:#64748b}
+  .m-text{font-size:12px;line-height:1.5;color:#cbd5e1}
+  .m-att{display:flex;gap:4px;margin-top:4px}
+  .m-pj{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:4px;padding:3px 6px;font-size:9px;color:#94a3b8}
+  .m-sys{text-align:center;font-size:10px;color:#64748b;padding:4px 0}
+  .m-typing{font-size:10px;color:#60a5fa;padding:4px 18px;font-style:italic}
+
+  /* Reply in channel */
+  .ch-reply{padding:10px 18px;border-top:1px solid rgba(148,163,184,.08);display:flex;gap:8px;align-items:center}
+  .ch-input{flex:1;background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:12px;outline:none;font-family:inherit}
+  .ch-input:focus{border-color:#3b82f6}
+  .ch-send{width:32px;height:32px;border-radius:8px;background:#3b82f6;border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+  /* Quick actions panel */
+  .qa{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:12px;padding:16px;grid-column:span 2}
+  .qa-title{font-size:12px;font-weight:700;margin-bottom:10px}
+  .qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .qa-card{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
+  .qa-card:hover{border-color:rgba(59,130,246,.2);transform:translateY(-1px)}
+  .qa-icon{font-size:20px;margin-bottom:6px}
+  .qa-label{font-size:11px;font-weight:600}
+  .qa-desc{font-size:9px;color:#64748b;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center">
+      <span class="topbar-title">Messagerie</span>
+      <div class="pill-bar">
+        <span class="pill on">Conversations</span>
+        <span class="pill off">Canaux</span>
+        <span class="pill off">Notifications</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="cmd-k"><span>Rechercher ou sauter vers...</span><kbd>⌘K</kbd></div>
+      <button class="btn btn-p">+ Nouveau</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sb">
+      <div class="sb-sec">
+        <div class="sb-lbl">Conversations</div>
+        <div class="sb-item on"><span class="ic">💬</span>Toutes<span class="badge">8</span></div>
+        <div class="sb-item"><span class="ic">🔴</span>Urgentes<span class="badge badge-r">2</span></div>
+        <div class="sb-item"><span class="ic">👤</span>Mes assignés<span class="badge">3</span></div>
+        <div class="sb-item"><span class="ic">✅</span>Résolues</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">Canaux</div>
+        <div class="sb-item"><span class="ic">#</span>Général Haussmann</div>
+        <div class="sb-item"><span class="ic">#</span>Conseil Syndical<span class="badge">2</span></div>
+        <div class="sb-item"><span class="ic">#</span>Travaux 2025</div>
+        <div class="sb-item"><span class="ic">#</span>Général Voltaire</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">Copropriétés</div>
+        <div class="sb-item"><span class="ic">🏢</span>Haussmann<span class="badge">4</span></div>
+        <div class="sb-item"><span class="ic">🏢</span>Voltaire<span class="badge">3</span></div>
+        <div class="sb-item"><span class="ic">🏢</span>République<span class="badge">1</span></div>
+      </div>
+      <div class="sb-sec">
+        <div class="online-sec">
+          <div class="online-title">En ligne (4)</div>
+          <div class="online-user"><div class="online-dot"></div><span class="online-name">Marie C. (syndic)</span></div>
+          <div class="online-user"><div class="online-dot"></div><span class="online-name">Thomas L. (syndic)</span></div>
+          <div class="online-user"><div class="online-dot"></div><span class="online-name">M. Dupont (4B)</span></div>
+          <div class="online-user"><div class="online-dot online-away"></div><span class="online-name">Mme Garcia (2A)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Conversation 1 - Urgence -->
+      <div class="channel" style="border-left:3px solid #ef4444">
+        <div class="ch-hdr">
+          <div>
+            <div class="ch-title">🚨 M. Dupont — Fuite urgente</div>
+            <div class="ch-sub">Haussmann · Lot 4B · Assigné: Marie C. · <span style="color:#4ade80">🟢 En ligne</span></div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <span class="ch-tag" style="background:rgba(245,158,11,.1);color:#fbbf24">Maintenance</span>
+            <button class="btn btn-g btn-sm">🔧 OS</button>
+          </div>
+        </div>
+        <div class="ch-msgs">
+          <div class="m">
+            <div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Jean Dupont</span><span class="m-time">14:30</span></div>
+              <div class="m-text">Bonjour, infiltration d'eau dans ma salle de bain depuis ce matin. Ça vient du lot 5B au-dessus. C'est urgent, ça s'aggrave.</div>
+              <div class="m-att"><span class="m-pj">🖼️ photo-1.jpg</span><span class="m-pj">🖼️ photo-2.jpg</span></div>
+            </div>
+          </div>
+          <div class="m-sys">💬 <strong>Marie C.</strong> a ajouté une note interne</div>
+          <div class="m">
+            <div class="m-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Marie C.</span><span class="m-role">Syndic</span><span class="m-time">15:25</span></div>
+              <div class="m-text">Un plombier passera <strong>demain 8h-10h</strong>. En attendant, coupez l'arrivée d'eau de la salle de bain si possible.</div>
+            </div>
+          </div>
+          <div class="m">
+            <div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Jean Dupont</span><span class="m-time">15:28</span></div>
+              <div class="m-text">Parfait, merci ! Je serai là. 👍</div>
+            </div>
+          </div>
+          <div class="m-sys">🔧 <strong>OS-2025-042</strong> créé et lié</div>
+        </div>
+        <div class="m-typing">Jean Dupont est en train d'écrire...</div>
+        <div class="ch-reply">
+          <input class="ch-input" placeholder="Répondre à M. Dupont...">
+          <button class="ch-send">➤</button>
+        </div>
+      </div>
+
+      <!-- Conversation 2 - Canal Conseil Syndical -->
+      <div class="channel">
+        <div class="ch-hdr">
+          <div>
+            <div class="ch-title"># Conseil Syndical</div>
+            <div class="ch-sub">Haussmann · 5 membres · <span style="color:#4ade80">3 en ligne</span></div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-g btn-sm">👥 Membres</button>
+            <button class="btn btn-g btn-sm">📌 Épinglés</button>
+          </div>
+        </div>
+        <div class="ch-msgs">
+          <div class="m-sys">📌 <strong>Vote du budget 2025</strong> — Résolution adoptée (32/45 voix)</div>
+          <div class="m">
+            <div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Thomas L.</span><span class="m-role">Syndic</span><span class="m-time">09:30</span></div>
+              <div class="m-text">J'ai reçu le devis d'OTIS pour la modernisation de l'ascenseur : <strong>42 300 EUR HT</strong>. C'est 15% en dessous du budget voté en AG.</div>
+              <div class="m-att"><span class="m-pj">📄 Devis_OTIS_2025.pdf</span></div>
+            </div>
+          </div>
+          <div class="m">
+            <div class="m-av" style="background:rgba(34,197,94,.12);color:#4ade80">PD</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Pierre D.</span><span class="m-role">Président CS</span><span class="m-time">10:15</span></div>
+              <div class="m-text">C'est correct par rapport au devis concurrent ? On avait Schindler à 48 000 EUR.</div>
+            </div>
+          </div>
+          <div class="m">
+            <div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Thomas L.</span><span class="m-role">Syndic</span><span class="m-time">10:22</span></div>
+              <div class="m-text">Oui, OTIS est 12% moins cher que Schindler et propose une garantie 5 ans (vs 3 ans). Je recommande de valider.</div>
+            </div>
+          </div>
+          <div class="m">
+            <div class="m-av" style="background:rgba(245,158,11,.12);color:#fbbf24">SL</div>
+            <div class="m-body">
+              <div class="m-top"><span class="m-name">Sophie L.</span><span class="m-role">Membre CS</span><span class="m-time">11:05</span></div>
+              <div class="m-text">✅ OK pour moi. On vote formellement ou le président peut valider directement (mandat AG) ?</div>
+            </div>
+          </div>
+          <div class="m-sys">📊 <strong>Sondage rapide</strong> — "Valider le devis OTIS ?" — 3/5 ont voté ✅</div>
+        </div>
+        <div class="ch-reply">
+          <input class="ch-input" placeholder="Écrire dans #Conseil Syndical...">
+          <button class="ch-send">➤</button>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="qa">
+        <div class="qa-title">Actions rapides</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-icon">💬</div>
+            <div class="qa-label">Nouvelle conversation</div>
+            <div class="qa-desc">Contacter un copro ou prestataire</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-icon">#</div>
+            <div class="qa-label">Nouveau canal</div>
+            <div class="qa-desc">Groupe thématique ou projet</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-icon">📊</div>
+            <div class="qa-label">Sondage rapide</div>
+            <div class="qa-desc">Vote dans un canal</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-icon">📢</div>
+            <div class="qa-label">Annonce</div>
+            <div class="qa-desc">Diffusion à toute la copro</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

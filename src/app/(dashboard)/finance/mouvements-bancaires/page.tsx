@@ -11,6 +11,7 @@ import {
   UnifiedMovementsTable,
   EntityDetailModal,
   CategorisationModal,
+  RapprochementModal,
   NewMovementsNotification,
   WorkflowModeSwitcher,
   WorkflowSummaryBar,
@@ -206,6 +207,16 @@ export default function MouvementsBancairesPage() {
         onCategorieChange={hook.handleCategorieChange}
         onCompteChange={hook.handleCompteChange}
         onSave={hook.handleSaveCategorie}
+      />
+
+      <RapprochementModal
+        isOpen={hook.showSlideOver}
+        mouvement={hook.selectedMouvementRapprochement}
+        suggestions={hook.suggestionsRapprochement}
+        ecritures={hook.ecrituresComptables}
+        onClose={() => hook.setShowSlideOver(false)}
+        onRapprocher={hook.handleRapprocher}
+        isMutating={hook.isMutating}
       />
 
       <EntityDetailModal

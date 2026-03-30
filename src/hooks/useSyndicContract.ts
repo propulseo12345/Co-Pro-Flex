@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { fetchSyndicContract, type SyndicContractData } from '@/lib/ag/api/syndic-contract.api';
 import type { ContratSyndic } from '@/types';
 
@@ -71,12 +71,12 @@ export function useSyndicContract(coproId: string | null): UseSyndicContractRetu
       }
     : undefined;
 
-  const syndicInfo = {
+  const syndicInfo = useMemo(() => ({
     nom: data?.providerName || '',
     adresse: fullAddress,
     telephone: data?.phone || '',
     email: data?.email || '',
-  };
+  }), [data, fullAddress]);
 
   return { contratSyndic, syndicInfo, raw: data, isLoading };
 }

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messagerie B — Inbox Collaborative</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;height:100vh;overflow:hidden}
+  .app{display:grid;grid-template-rows:56px 1fr;height:100vh}
+  .topbar{background:#161822;border-bottom:1px solid rgba(148,163,184,.08);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+  .topbar-title{font-size:20px;font-weight:700}
+  .btn{border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb}
+  .btn-g{background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.08);color:#94a3b8}.btn-g:hover{background:rgba(148,163,184,.1);color:#e2e8f0}
+  .btn-sm{padding:5px 12px;font-size:11px}
+  .topbar-actions{display:flex;gap:12px;align-items:center}
+  .cmd-k{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:8px;padding:8px 16px;color:#64748b;font-size:13px;width:260px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+  .cmd-k kbd{background:rgba(148,163,184,.1);padding:2px 6px;border-radius:4px;font-size:11px}
+
+  .main{display:grid;grid-template-columns:180px 320px 1fr 260px;height:calc(100vh - 56px)}
+
+  /* Sidebar */
+  .sb{background:#131620;border-right:1px solid rgba(148,163,184,.08);padding:14px 10px;overflow-y:auto}
+  .sb-sec{margin-bottom:16px}
+  .sb-lbl{font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;padding:0 8px}
+  .sb-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;transition:all .15s}
+  .sb-item:hover{background:rgba(148,163,184,.06);color:#e2e8f0}
+  .sb-item.on{background:rgba(59,130,246,.1);color:#60a5fa}
+  .sb-item .ic{margin-right:6px;font-size:13px}
+  .badge{background:#3b82f6;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px}
+  .badge-r{background:#ef4444}
+  .dot{width:6px;height:6px;border-radius:50%;margin-right:6px}
+
+  /* Conv list */
+  .cl{border-right:1px solid rgba(148,163,184,.08);overflow-y:auto}
+  .cl-hdr{padding:10px 14px;border-bottom:1px solid rgba(148,163,184,.08)}
+  .cl-hdr select{width:100%;background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:6px;padding:6px 10px;color:#e2e8f0;font-size:11px;font-weight:600}
+  .conv{padding:12px 14px;border-bottom:1px solid rgba(148,163,184,.04);cursor:pointer;transition:all .15s}
+  .conv:hover{background:rgba(148,163,184,.03)}
+  .conv.act{background:rgba(59,130,246,.08);border-left:3px solid #3b82f6}
+  .conv.unread{border-left:3px solid #3b82f6}
+  .c-top{display:flex;justify-content:space-between;margin-bottom:2px}
+  .c-name{font-size:12px;font-weight:600}
+  .c-time{font-size:10px;color:#64748b}
+  .c-subj{font-size:11px;color:#94a3b8;margin-bottom:3px}
+  .c-prev{font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .c-meta{display:flex;gap:6px;margin-top:5px;align-items:center}
+  .c-assign{display:flex;align-items:center;gap:3px}
+  .c-av{width:16px;height:16px;border-radius:50%;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tag{padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}
+  .t-mnt{background:rgba(245,158,11,.1);color:#fbbf24}
+  .t-fin{background:rgba(34,197,94,.1);color:#4ade80}
+  .t-gen{background:rgba(148,163,184,.1);color:#94a3b8}
+  .sla{font-size:9px;font-weight:600}
+  .sla-ok{color:#4ade80}
+  .sla-w{color:#fbbf24}
+  .sla-d{color:#f87171}
+
+  /* Thread */
+  .thread{display:flex;flex-direction:column;overflow:hidden}
+  .th-hdr{padding:14px 20px;border-bottom:1px solid rgba(148,163,184,.08)}
+  .th-subj{font-size:16px;font-weight:700;margin-bottom:4px}
+  .th-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:#64748b;flex-wrap:wrap}
+  .th-msgs{flex:1;overflow-y:auto;padding:20px}
+
+  .msg{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:14px;margin-bottom:10px}
+  .msg.int{background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.12)}
+  .msg-hdr{display:flex;justify-content:space-between;margin-bottom:8px}
+  .msg-author{display:flex;align-items:center;gap:8px}
+  .m-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+  .m-name{font-size:12px;font-weight:600}
+  .m-role{font-size:10px;color:#64748b}
+  .m-time{font-size:10px;color:#64748b}
+  .msg-text{font-size:13px;line-height:1.6;color:#cbd5e1}
+  .msg-text p{margin-bottom:6px}
+  .int-badge{font-size:9px;font-weight:600;color:#fbbf24;background:rgba(245,158,11,.1);padding:2px 6px;border-radius:3px}
+  .msg-att{display:flex;gap:6px;margin-top:8px}
+  .mini-pj{background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:5px;padding:4px 8px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:3px}
+
+  /* Reply */
+  .th-reply{padding:14px 20px;border-top:1px solid rgba(148,163,184,.08);background:#131620}
+  .reply-tabs{display:flex;gap:0;margin-bottom:10px}
+  .rtab{padding:5px 12px;font-size:11px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent}
+  .rtab.on{color:#e2e8f0;border-bottom-color:#3b82f6}
+  .rtab.int-tab{color:#fbbf24}
+  .reply-area{display:flex;gap:10px;align-items:flex-end}
+  .reply-in{flex:1;background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:12px;font-family:inherit;resize:none;outline:none;min-height:40px}
+  .reply-in:focus{border-color:#3b82f6}
+  .reply-tools{display:flex;gap:4px}
+  .rt{width:28px;height:28px;border-radius:6px;background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
+  .send{width:36px;height:36px;border-radius:8px;background:#3b82f6;border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+  /* Context */
+  .ctx{background:#131620;border-left:1px solid rgba(148,163,184,.08);padding:16px 14px;overflow-y:auto}
+  .ctx-sec{margin-bottom:16px}
+  .ctx-lbl{font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .ctx-card{background:#1a1d2e;border:1px solid rgba(148,163,184,.08);border-radius:8px;padding:10px}
+  .ctx-name{font-size:13px;font-weight:700;margin-bottom:2px}
+  .ctx-sub{font-size:10px;color:#64748b;margin-bottom:2px}
+  .ctx-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+  .ctx-k{color:#64748b}
+  .ctx-v{font-weight:600}
+  .linked{display:flex;align-items:center;gap:6px;padding:6px 8px;background:#131620;border:1px solid rgba(148,163,184,.08);border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:10px}
+  .linked:hover{border-color:rgba(59,130,246,.3)}
+  .linked-t{font-weight:600;color:#e2e8f0}
+  .linked-s{color:#64748b}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="topbar-title">Messagerie</span>
+      <span style="font-size:10px;background:rgba(239,68,68,.1);color:#f87171;padding:3px 8px;border-radius:5px;font-weight:600">2 SLA dépassés</span>
+      <span style="font-size:10px;background:rgba(59,130,246,.1);color:#60a5fa;padding:3px 8px;border-radius:5px;font-weight:600">8 non traités</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="cmd-k"><span>Rechercher...</span><kbd>⌘K</kbd></div>
+      <button class="btn btn-p">+ Nouveau</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sb">
+      <div class="sb-sec">
+        <div class="sb-lbl">Vues</div>
+        <div class="sb-item on"><span class="ic">📥</span>À traiter<span class="badge">8</span></div>
+        <div class="sb-item"><span class="ic">👤</span>Mes assignés<span class="badge">3</span></div>
+        <div class="sb-item"><span class="ic">💬</span>Tous</div>
+        <div class="sb-item"><span class="ic">✅</span>Résolus</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">Copropriétés</div>
+        <div class="sb-item"><span class="ic">🏢</span>Haussmann<span class="badge">4</span></div>
+        <div class="sb-item"><span class="ic">🏢</span>Voltaire<span class="badge">3</span></div>
+        <div class="sb-item"><span class="ic">🏢</span>République<span class="badge">1</span></div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-lbl">Tags</div>
+        <div class="sb-item"><span class="dot" style="background:#fbbf24"></span>Maintenance</div>
+        <div class="sb-item"><span class="dot" style="background:#4ade80"></span>Finance</div>
+        <div class="sb-item"><span class="dot" style="background:#f87171"></span>Urgence</div>
+        <div class="sb-item"><span class="dot" style="background:#94a3b8"></span>Général</div>
+      </div>
+    </div>
+
+    <div class="cl">
+      <div class="cl-hdr"><select><option>Non traités — récents</option></select></div>
+      <div class="conv act unread">
+        <div class="c-top"><span class="c-name">M. Dupont (Lot 4B)</span><span class="c-time">14:30</span></div>
+        <div class="c-subj">Fuite salle de bain — urgence</div>
+        <div class="c-prev">Bonjour, j'ai constaté une infiltration...</div>
+        <div class="c-meta">
+          <div class="c-assign"><div class="c-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><span style="font-size:9px;color:#64748b">Marie</span></div>
+          <span class="tag t-mnt">Maintenance</span>
+          <span class="sla sla-ok">⏱ 2h</span>
+        </div>
+      </div>
+      <div class="conv unread">
+        <div class="c-top"><span class="c-name">Mme Garcia (Lot 2A)</span><span class="c-time">11:15</span></div>
+        <div class="c-subj">Question charges T1</div>
+        <div class="c-prev">Pourriez-vous détailler la répartition...</div>
+        <div class="c-meta">
+          <div class="c-assign"><div class="c-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div><span style="font-size:9px;color:#64748b">Thomas</span></div>
+          <span class="tag t-fin">Finance</span>
+          <span class="sla sla-w">⏱ 3j</span>
+        </div>
+      </div>
+      <div class="conv unread">
+        <div class="c-top"><span class="c-name">Conseil Syndical</span><span class="c-time">09:30</span></div>
+        <div class="c-subj">Devis OTIS ascenseur</div>
+        <div class="c-prev">Thomas: On valide le devis ?</div>
+        <div class="c-meta">
+          <span style="font-size:9px;color:#f87171;font-weight:600">⚠ Non assigné</span>
+          <span class="tag t-mnt">Maintenance</span>
+        </div>
+      </div>
+      <div class="conv">
+        <div class="c-top"><span class="c-name" style="color:#94a3b8">Plomberie Express</span><span class="c-time">Hier</span></div>
+        <div class="c-subj">Confirmation intervention</div>
+        <div class="c-prev">RDV confirmé demain 8h-10h</div>
+        <div class="c-meta">
+          <div class="c-assign"><div class="c-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><span style="font-size:9px;color:#64748b">Marie</span></div>
+          <span class="tag t-gen">Général</span>
+        </div>
+      </div>
+      <div class="conv">
+        <div class="c-top"><span class="c-name" style="color:#94a3b8">M. Lefebvre</span><span class="c-time">27/03</span></div>
+        <div class="c-subj">Place de parking</div>
+        <div class="c-prev">Merci pour votre réponse rapide.</div>
+        <div class="c-meta">
+          <span style="font-size:9px;color:#4ade80">✅ Résolu</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="thread">
+      <div class="th-hdr">
+        <div class="th-subj">Fuite salle de bain — urgence</div>
+        <div class="th-meta">
+          <span class="tag t-mnt">🔧 Maintenance</span>
+          <span>Haussmann</span>
+          <span>·</span>
+          <span>Assigné: Marie C.</span>
+          <span>·</span>
+          <span style="color:#4ade80">Ouvert · 2h</span>
+        </div>
+      </div>
+
+      <div class="th-msgs">
+        <div class="msg">
+          <div class="msg-hdr">
+            <div class="msg-author"><div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div><span class="m-name">Jean Dupont</span> <span class="m-role">Copropriétaire · Lot 4B</span></div></div>
+            <span class="m-time">14:30</span>
+          </div>
+          <div class="msg-text"><p>Bonjour, je constate une infiltration d'eau dans ma salle de bain depuis ce matin. L'eau coule le long du mur, ça vient du lot 5B. C'est urgent.</p></div>
+          <div class="msg-att"><div class="mini-pj">🖼️ photo-fuite-1.jpg</div><div class="mini-pj">🖼️ photo-fuite-2.jpg</div></div>
+        </div>
+
+        <div class="msg int">
+          <div class="msg-hdr">
+            <div class="msg-author"><div class="m-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><div><span class="m-name">Marie C.</span> <span class="int-badge">💬 Note interne</span></div></div>
+            <span class="m-time">15:10</span>
+          </div>
+          <div class="msg-text"><p>Plomberie Express peut passer demain 8h-10h (contrat CT-2025-003). Lot 5B (Rousseau) rien signalé — à vérifier sur place. Je confirme au copro ?</p></div>
+        </div>
+
+        <div class="msg int">
+          <div class="msg-hdr">
+            <div class="msg-author"><div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">TL</div><div><span class="m-name">Thomas L.</span> <span class="int-badge">💬 Note interne</span></div></div>
+            <span class="m-time">15:18</span>
+          </div>
+          <div class="msg-text"><p>Oui confirme. J'appelle Mme Rousseau (5B) pour vérifier de son côté.</p></div>
+        </div>
+
+        <div class="msg">
+          <div class="msg-hdr">
+            <div class="msg-author"><div class="m-av" style="background:rgba(168,85,247,.12);color:#a78bfa">MC</div><div><span class="m-name">Marie C.</span> <span class="m-role">Syndic</span></div></div>
+            <span class="m-time">15:25</span>
+          </div>
+          <div class="msg-text"><p>Bonjour Monsieur Dupont, un plombier de Plomberie Express interviendra <strong>demain matin entre 8h et 10h</strong>. Merci d'être présent. En attendant, si possible, coupez l'arrivée d'eau de la salle de bain.</p></div>
+        </div>
+
+        <div class="msg">
+          <div class="msg-hdr">
+            <div class="msg-author"><div class="m-av" style="background:rgba(59,130,246,.12);color:#60a5fa">JD</div><div><span class="m-name">Jean Dupont</span></div></div>
+            <span class="m-time">15:28</span>
+          </div>
+          <div class="msg-text"><p>Parfait, je serai là. Merci pour la réactivité ! Est-ce que je dois couper l'eau en attendant ?</p></div>
+        </div>
+      </div>
+
+      <div class="th-reply">
+        <div class="reply-tabs">
+          <div class="rtab on">↩ Répondre</div>
+          <div class="rtab int-tab">💬 Note interne</div>
+        </div>
+        <div class="reply-area">
+          <div class="reply-tools"><div class="rt">📎</div><div class="rt">📋</div><div class="rt">😀</div></div>
+          <textarea class="reply-in" placeholder="Écrire un message..." rows="1"></textarea>
+          <button class="send">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctx">
+      <div class="ctx-sec">
+        <div class="ctx-lbl">Contact</div>
+        <div class="ctx-card">
+          <div class="ctx-name">Jean Dupont</div>
+          <div class="ctx-sub">j.dupont@email.fr · 06 12 34 56 78</div>
+          <div class="ctx-row"><span class="ctx-k">Lot</span><span class="ctx-v">4B · Bât A</span></div>
+          <div class="ctx-row"><span class="ctx-k">Tantièmes</span><span class="ctx-v">45/1000</span></div>
+          <div class="ctx-row"><span class="ctx-k">Paiements</span><span class="ctx-v" style="color:#4ade80">À jour</span></div>
+        </div>
+      </div>
+      <div class="ctx-sec">
+        <div class="ctx-lbl">Entités liées</div>
+        <div class="linked"><span>🔧</span><div><div class="linked-t">OS-2025-042</div><div class="linked-s">Fuite — Plomberie Express</div></div></div>
+        <div class="linked"><span>📋</span><div><div class="linked-t">Devis PLB-003</div><div class="linked-s">380 EUR — en attente</div></div></div>
+      </div>
+      <div class="ctx-sec">
+        <div class="ctx-lbl">Historique</div>
+        <div class="ctx-card">
+          <div class="ctx-row"><span class="ctx-k">Conversations</span><span class="ctx-v">8</span></div>
+          <div class="ctx-row"><span class="ctx-k">Dernière</span><span class="ctx-v">Aujourd'hui</span></div>
+        </div>
+      </div>
+      <div class="ctx-sec">
+        <div class="ctx-lbl">Actions</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">🔧 Créer un ordre de service</button>
+          <button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">📄 Lier un document</button>
+          <button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">👤 Fiche copropriétaire</button>
+          <button class="btn btn-g" style="width:100%;justify-content:center;font-size:10px;padding:5px">✅ Marquer résolu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
