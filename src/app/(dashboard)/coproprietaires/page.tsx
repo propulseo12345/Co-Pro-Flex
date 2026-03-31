@@ -17,55 +17,90 @@ export default function CoproprietairesPage() {
     isLoading, error, refresh, isSaving,
   } = useCoproprietairesPage();
 
-  // Mode Single Copro: si pas encore chargé, afficher loading
   if (!currentCoproId) {
-    return (
-      <div className="container">
-        <div className={styles.header}><h1 className={styles.title}>Mes copropriétaires</h1></div>
-        <LoadingState message="Chargement de la copropriété..." />
-      </div>
-    );
+    return <LoadingState message="Chargement de la copropriété..." />;
   }
+
+  // KPI calculations
+  const allCopros = getDataForTab();
+  const totalCopros = allCopros.length;
+  const soldeGlobal = allCopros.reduce((s, c) => s + c.solde, 0);
+  const nbImpayes = allCopros.filter(c => c.solde < 0).length;
 
   return (
     <div className="container">
-      <div className={styles.header}>
-        <h1 className={styles.title}>Mes copropriétaires</h1>
-        <button
-          className="btn btn-secondary"
-          onClick={() => refresh()}
-          disabled={isLoading}
-          title="Rafraîchir"
-        >
-          <RefreshCw size={16} className={isLoading ? styles.spinning : ''} aria-hidden="true" />
+      {/* TopBar */}
+      <div className={styles.topBar}>
+        <div className={styles.topBarLeft}>
+          <h1>Copropriétaires</h1>
+          <p>Annuaire et suivi des copropriétaires</p>
+        </div>
+        <div className={styles.topBarActions}>
+          <button className={styles.refreshBtn} onClick={() => refresh()} disabled={isLoading}>
+            <RefreshCw size={16} className={isLoading ? styles.spinning : ''} />
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Strip */}
+      <div className={styles.kpiStrip}>
+        <div className={styles.kpiCard}>
+          <span className={styles.kpiLabel}>Copropriétaires</span>
+          <span className={styles.kpiValue}>{totalCopros}</span>
+        </div>
+        <div className={styles.kpiCard}>
+          <span className={styles.kpiLabel}>Solde global</span>
+          <span className={soldeGlobal >= 0 ? styles.kpiValueSuccess : styles.kpiValueDanger}>
+            {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(soldeGlobal)}
+          </span>
+        </div>
+        <div className={styles.kpiCard}>
+          <span className={styles.kpiLabel}>Avec impayés</span>
+          <span className={nbImpayes > 0 ? styles.kpiValueDanger : styles.kpiValue}>{nbImpayes}</span>
+        </div>
+        <div className={styles.kpiCard}>
+          <span className={styles.kpiLabel}>À jour</span>
+          <span className={styles.kpiValueSuccess}>{totalCopros - nbImpayes}</span>
+        </div>
+      </div>
+
+      {/* Segmented Tabs */}
+      <div className={styles.tabs}>
+        <button className={`${styles.tab} ${activeTab === 'COPROPRIETAIRE' ? styles.tabActive : ''}`} onClick={() => handleTabChange('COPROPRIETAIRE')}>
+          Copropriétaires
+        </button>
+        <button className={`${styles.tab} ${activeTab === 'LOCATAIRE' ? styles.tabActive : ''}`} onClick={() => handleTabChange('LOCATAIRE')}>
+          Locataires
+        </button>
+        <button className={`${styles.tab} ${activeTab === 'ANCIEN' ? styles.tabActive : ''}`} onClick={() => handleTabChange('ANCIEN')}>
+          Anciens
         </button>
       </div>
 
-      <div className={styles.tabs}>
-        <button className={`${styles.tab} ${activeTab === 'COPROPRIETAIRE' ? styles.tabActive : ''}`} onClick={() => handleTabChange('COPROPRIETAIRE')}>Copropriétaires</button>
-        <button className={`${styles.tab} ${activeTab === 'LOCATAIRE' ? styles.tabActive : ''}`} onClick={() => handleTabChange('LOCATAIRE')}>Locataires</button>
-        <button className={`${styles.tab} ${activeTab === 'ANCIEN' ? styles.tabActive : ''}`} onClick={() => handleTabChange('ANCIEN')}>Anciens copropriétaires</button>
-      </div>
-
+      {/* Actions Bar */}
       <div className={styles.actionsBar}>
         <div className={styles.searchContainer}>
-          <Search size={18} className={styles.searchIcon} aria-hidden="true" />
-          <input type="text" placeholder="Rechercher" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={styles.searchInput} />
-          {searchQuery && <button onClick={() => setSearchQuery('')} className={styles.clearButton} aria-label="Effacer la recherche">×</button>}
+          <Search size={16} className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Rechercher un copropriétaire..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+          {searchQuery && <button onClick={() => setSearchQuery('')} className={styles.clearButton}>×</button>}
         </div>
         <div className={styles.actionButtons}>
-          <button className="btn btn-secondary">Plus d'actions<ChevronDown size={16} aria-hidden="true" /></button>
-          <button className="btn btn-primary">Charges récupérables</button>
+          <button className={styles.ghostBtn}>
+            <ChevronDown size={16} />
+            Plus d&apos;actions
+          </button>
         </div>
       </div>
 
-      {/* Loading state */}
+      {/* Content */}
       {isLoading && <LoadingState message="Chargement des copropriétaires..." />}
-
-      {/* Error state */}
       {error && !isLoading && <ErrorState message={error} onRetry={refresh} />}
-
-      {/* Empty state */}
       {!isLoading && !error && filteredData.length === 0 && (
         <EmptyState
           title={activeTab === 'LOCATAIRE' ? 'Aucun locataire' : `Aucun ${activeTab === 'ANCIEN' ? 'ancien copropriétaire' : 'copropriétaire'}`}
@@ -78,12 +113,11 @@ export default function CoproprietairesPage() {
           }
         />
       )}
-
-      {/* Data table */}
       {!isLoading && !error && filteredData.length > 0 && (
         <CoproprietairesTable data={filteredData} buttonRefs={buttonRefs} openMenuId={openMenuId} onToggleMenu={setOpenMenuId} />
       )}
 
+      {/* Context Menu */}
       {openMenuId && menuPosition && (
         <div ref={menuRef} className={styles.actionMenu} style={{ top: `${menuPosition.top}px`, right: `${menuPosition.right}px` }}>
           {(() => {
@@ -91,14 +125,15 @@ export default function CoproprietairesPage() {
             if (!copro) return null;
             return (
               <>
-                <button className={styles.actionMenuItem} onClick={() => handleEdit(copro)}><Edit size={16} aria-hidden="true" />Modifier</button>
-                <button className={`${styles.actionMenuItem} ${styles.actionMenuItemDanger}`} onClick={() => handleDelete(copro.id)}><Trash2 size={16} aria-hidden="true" />Archiver</button>
+                <button className={styles.actionMenuItem} onClick={() => handleEdit(copro)}><Edit size={16} />Modifier</button>
+                <button className={`${styles.actionMenuItem} ${styles.actionMenuItemDanger}`} onClick={() => handleDelete(copro.id)}><Trash2 size={16} />Archiver</button>
               </>
             );
           })()}
         </div>
       )}
 
+      {/* Edit Modal */}
       <CoproprietaireEditModal
         copro={editingCopro}
         form={editForm}
