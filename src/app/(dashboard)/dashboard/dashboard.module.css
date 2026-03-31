@@ -1,396 +1,553 @@
 /* ================================================
-   Dashboard UX Simplifié
-   - 1 colonne principale
-   - Espaces blancs assumés
-   - Couleur = alerte uniquement
-   - Lisible en 30 secondes
+   Dashboard — Bento Action Board
+   Dark theme, 4-column grid, action-oriented
    ================================================ */
 
-/* Container - utilise toute la largeur disponible */
+/* Container */
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 24px;
 }
 
-/* Header */
-.header {
-  margin-bottom: var(--space-2xl);
-}
-
-.title {
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: var(--space-xs);
-}
-
-.subtitle {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-/* ================================================
-   Métriques clés - cards compactes (auto-fit)
-   ================================================ */
-.metricsRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
-  margin-bottom: var(--space-2xl);
-}
-
-@media (min-width: 1200px) {
-  .metricsRow:has(:nth-child(4)) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .metricsRow {
-    grid-template-columns: 1fr;
-  }
-}
-
-.metricCard {
+/* ── Top Bar ── */
+.topbar {
+  background: #161822;
+  border-radius: 12px;
+  padding: 20px 28px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  text-decoration: none;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.topbarTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.topbarSub {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.topbarActions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ── Bento Grid ── */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.card {
+  background: #1a1d2e;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  display: flex;
+  flex-direction: column;
   transition: border-color 0.15s ease;
 }
 
-.metricCard:hover {
-  border-color: var(--primary);
+.card:hover {
+  border-color: rgba(148, 163, 184, 0.15);
 }
 
-.metricIcon {
-  display: flex;
+.span2 {
+  grid-column: span 2;
+}
+
+/* ── Labels ── */
+.label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+}
+
+.btnPill {
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.btnPrimary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btnPrimary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btnGhost {
+  background: rgba(148, 163, 184, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.btnGhost:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+}
+
+.btnFull {
+  width: 100%;
+}
+
+.btnOutlineRed {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.btnOutlineRed:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btnOutlineAmber {
+  background: transparent;
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+}
+
+.btnOutlineAmber:hover {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.btnOutlineBlue {
+  background: transparent;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.btnOutlineBlue:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ── Mini-card ── */
+.miniCard {
+  background: #131620;
+  border: 1px solid rgba(148, 163, 184, 0.04);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+/* ── Monospace numbers ── */
+.mono {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Badge ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgeBlue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.badgeRed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.badgeAmber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+}
+
+.badgeGray {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+/* ── Dot ── */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.metricContent {
+.dotRed { background: #ef4444; }
+.dotBlue { background: #3b82f6; }
+.dotGray { background: #64748b; }
+.dotGreen { background: #22c55e; }
+.dotAmber { background: #f59e0b; }
+
+/* ── Action link ── */
+.actionLink {
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.actionLink:hover {
+  opacity: 0.8;
+}
+
+.actionLinkRed { color: #ef4444; }
+.actionLinkBlue { color: #3b82f6; }
+.actionLinkGray { color: #94a3b8; }
+
+/* ── Block: Trésorerie ── */
+.tresorerieInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.tresorerieValue {
+  font-size: 32px;
+  font-weight: 800;
+  color: #22c55e;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+
+.tresorerieDetail {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.tresorerieActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Block: AG ── */
+.agDate {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.agSub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.agCountdown {
+  margin-bottom: 16px;
+}
+
+/* ── Block: Budget ── */
+.budgetPct {
+  font-size: 28px;
+  font-weight: 700;
+  color: #3b82f6;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 10px;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.budgetDetail {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+/* ── Block: ODS ── */
+.odsHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.odsRows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.odsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.odsRowText {
   flex: 1;
   min-width: 0;
 }
 
-.metricLabel {
-  display: block;
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  margin-bottom: 2px;
-}
-
-.metricValue {
-  display: block;
-  font-size: var(--text-lg);
+.odsRowTitle {
+  font-size: 13px;
   font-weight: 600;
-  color: var(--text-main);
+  color: #e2e8f0;
 }
 
-/* Statut danger - couleur uniquement si anomalie */
-.metricDanger {
-  border-color: var(--danger);
+.odsRowSub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.metricDanger .metricIcon {
-  background: var(--danger-light);
-  color: var(--danger);
-}
-
-.metricDanger .metricValue {
-  color: var(--danger);
-}
-
-/* Statut warning */
-.metricWarning {
-  border-color: var(--warning);
-}
-
-.metricWarning .metricIcon {
-  background: var(--warning-light);
-  color: var(--warning);
-}
-
-/* ================================================
-   Layout 2 colonnes pour Priorités + Activité
-   ================================================ */
-.mainGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-xl);
-  margin-bottom: var(--space-2xl);
-}
-
-/* ================================================
-   Section Priorités - "À faire maintenant"
-   ================================================ */
-.prioritiesSection {
-  margin-bottom: 0;
-}
-
-.sectionTitle {
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: var(--space-md);
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--border);
-}
-
-.prioritiesList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* ── Block: Priorités ── */
+.priorityItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .priorityItem {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-sm);
-  text-decoration: none;
-  transition: background 0.15s ease;
+  gap: 14px;
 }
 
-.priorityItem:hover {
-  background: var(--bg-secondary);
-}
-
-.priorityIcon {
-  font-size: var(--text-base);
-  line-height: 1;
-}
-
-.priorityLabel {
-  flex: 1;
-  font-size: var(--text-sm);
-  color: var(--text-main);
-}
-
-.priorityArrow {
-  color: var(--text-tertiary);
+.priorityBar {
+  width: 3px;
+  align-self: stretch;
+  border-radius: 3px;
   flex-shrink: 0;
 }
 
-/* État sans priorités */
-.noPriorities {
+.priorityBarRed { background: #ef4444; }
+.priorityBarAmber { background: #f59e0b; }
+.priorityBarBlue { background: #3b82f6; }
+
+.priorityContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.priorityTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.prioritySub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.priorityRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Block: Activité ── */
+.activityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.activityLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.activityLink:hover {
+  opacity: 0.8;
+}
+
+.activityItems {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2xl);
-  background: rgba(34, 197, 94, 0.1);
-  border-radius: var(--radius-lg);
-  text-align: center;
-}
-
-.checkIcon {
-  color: var(--success);
-  margin-bottom: var(--space-md);
-}
-
-.noPriorities p {
-  font-size: var(--text-sm);
-  color: var(--success);
-  margin: 0;
-}
-
-/* Lien "Voir tout" */
-.viewAllLink {
-  display: block;
-  text-align: center;
-  padding: var(--space-sm) var(--space-md);
-  font-size: var(--text-sm);
-  color: var(--primary);
-  text-decoration: none;
-  margin-top: var(--space-sm);
-}
-
-.viewAllLink:hover {
-  text-decoration: underline;
-}
-
-/* ================================================
-   Section Activité récente
-   ================================================ */
-.activitySection {
-  margin-bottom: 0;
-}
-
-.activityList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
 }
 
 .activityItem {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
-.activityItem:last-child {
-  border-bottom: none;
+.activityItem:hover {
+  background: rgba(148, 163, 184, 0.03);
 }
 
-.activityAction {
-  font-size: var(--text-sm);
-  color: var(--text-main);
-}
-
-.activitySubject {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-main);
+.activityText {
+  flex: 1;
+  font-size: 13px;
+  color: #e2e8f0;
 }
 
 .activityTime {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  margin-left: auto;
+  font-size: 12px;
+  color: #64748b;
   flex-shrink: 0;
 }
 
-/* ================================================
-   Section Raccourcis
-   ================================================ */
-.shortcutsSection {
-  margin-bottom: var(--space-2xl);
+/* ── States: Loading ── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.shortcutsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
+.skeleton {
+  background: linear-gradient(90deg, #131620 25%, #1a1d2e 50%, #131620 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 12px;
 }
 
-.shortcutBtn {
+.skeletonTopbar {
+  height: 72px;
+  margin-bottom: 16px;
+}
+
+.skeletonCard {
+  border-radius: 12px;
+  min-height: 120px;
+}
+
+.skeletonCardTall {
+  min-height: 280px;
+}
+
+/* ── States: Error ── */
+.errorState {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  background: var(--surface);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-main);
-  text-decoration: none;
-  transition: all 0.15s ease;
+  padding: 48px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 12px;
+  text-align: center;
 }
 
-.shortcutBtn:hover {
-  background: var(--primary);
-  color: var(--text-inverse);
+.errorIcon {
+  color: #ef4444;
+  margin-bottom: 16px;
 }
 
-/* ================================================
-   Responsive
-   ================================================ */
-@media (max-width: 1024px) {
-  .mainGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
-  }
-
-  .prioritiesSection,
-  .activitySection {
-    margin-bottom: 0;
-  }
+.errorText {
+  font-size: 14px;
+  color: #ef4444;
+  margin: 0 0 16px;
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: var(--space-md);
-  }
-
-  .metricsRow {
-    grid-template-columns: 1fr;
-  }
-
-  .shortcutsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .title {
-    font-size: var(--text-xl);
-  }
-
-  .metricCard {
-    padding: var(--space-sm) var(--space-md);
-  }
-
-  .metricValue {
-    font-size: var(--text-base);
-  }
-
-  .shortcutsGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ================================================
-   Loading & Refresh States
-   ================================================ */
-.headerActions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.headerLeft {
-  flex: 1;
-}
-
-.refreshBtn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+.retryBtn {
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-.refreshBtn:hover:not(:disabled) {
-  background: var(--surface);
-  border-color: var(--primary);
-  color: var(--primary);
+.retryBtn:hover {
+  opacity: 0.9;
 }
 
-.refreshBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* ── States: Empty ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  text-align: center;
 }
 
+.emptyIcon {
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.emptySubtitle {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ── Spinning ── */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -400,112 +557,57 @@
   animation: spin 1s linear infinite;
 }
 
-/* Skeleton loaders */
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--surface) 50%, var(--bg-secondary) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: var(--radius-md);
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .span2 {
+    grid-column: span 2;
+  }
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
 
-.skeletonMetric {
-  height: 72px;
-}
+  .bento {
+    grid-template-columns: 1fr;
+  }
 
-.skeletonPriority {
-  height: 52px;
-  margin-bottom: var(--space-sm);
-}
+  .span2 {
+    grid-column: span 1;
+  }
 
-.skeletonActivity {
-  height: 48px;
-  margin-bottom: 1px;
-}
+  .topbar {
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
 
-/* Empty state */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3xl);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  text-align: center;
-}
+  .topbarActions {
+    flex-wrap: wrap;
+  }
 
-.emptyIcon {
-  color: var(--text-tertiary);
-  margin-bottom: var(--space-md);
-}
+  .tresorerieInner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
 
-.emptyTitle {
-  font-size: var(--text-lg);
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: var(--space-sm);
-}
+  .tresorerieActions {
+    flex-direction: row;
+  }
 
-.emptySubtitle {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  margin: 0;
-}
+  .priorityItem {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-/* Error state */
-.errorState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2xl);
-  background: var(--danger-light);
-  border-radius: var(--radius-lg);
-  text-align: center;
-}
-
-.errorIcon {
-  color: var(--danger);
-  margin-bottom: var(--space-md);
-}
-
-.errorText {
-  font-size: var(--text-sm);
-  color: var(--danger);
-  margin: 0;
-}
-
-.retryBtn {
-  margin-top: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--danger);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  cursor: pointer;
-}
-
-.retryBtn:hover {
-  opacity: 0.9;
-}
-
-/* Activity empty state (smaller) */
-.activityEmpty {
-  padding: var(--space-xl);
-  text-align: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-.activityEmpty p {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  margin: 0;
+  .priorityRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
