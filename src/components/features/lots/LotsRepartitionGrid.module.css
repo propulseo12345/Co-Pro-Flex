@@ -1,0 +1,290 @@
+.grid {
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gridScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Headers */
+.table th {
+  padding: 10px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  text-align: left;
+  white-space: nowrap;
+  background: rgba(148, 163, 184, 0.03);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.colTantiemes {
+  text-align: right !important;
+  border-right: 2px solid rgba(148, 163, 184, 0.06) !important;
+  padding-right: 20px !important;
+}
+
+/* Key header */
+.keyHeader {
+  text-align: center !important;
+  border-left: 1px solid rgba(148, 163, 184, 0.05) !important;
+  padding: 8px 12px !important;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.keyHeader:hover {
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+.keyHeaderContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.keyDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.keyHeaderName {
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.keyHeaderEdit {
+  opacity: 0;
+  color: #64748b;
+  font-size: 10px;
+  transition: opacity 0.15s;
+}
+
+.keyHeader:hover .keyHeaderEdit {
+  opacity: 1;
+}
+
+.keyHeaderStatus {
+  display: block;
+  font-size: 9px;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+.statusOk {
+  color: #22c55e;
+}
+
+.statusWarn {
+  color: #f59e0b;
+}
+
+/* Body cells */
+.table td {
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.table tbody tr {
+  transition: background 0.1s;
+}
+
+.table tbody tr:hover td {
+  background: rgba(148, 163, 184, 0.025);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cellRef {
+  font-weight: 600;
+  color: #3b82f6;
+  cursor: pointer;
+}
+
+.cellRef:hover {
+  text-decoration: underline;
+}
+
+.badge {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+.badgeBlue {
+  composes: badge;
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.badgeDim {
+  composes: badge;
+  background: rgba(148, 163, 184, 0.06);
+  color: #64748b;
+}
+
+.cellOwner {
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.cellOwnerSub {
+  font-size: 10px;
+  color: #475569;
+  margin-top: 1px;
+}
+
+.cellTantiemes {
+  text-align: right;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 14px;
+  color: #e2e8f0;
+  border-right: 2px solid rgba(148, 163, 184, 0.06);
+  padding-right: 20px !important;
+}
+
+/* Key cells */
+.keyCell {
+  text-align: center;
+  border-left: 1px solid rgba(148, 163, 184, 0.03);
+  padding: 8px 10px !important;
+}
+
+.keyValueWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.weightInput {
+  width: 60px;
+  padding: 4px 6px;
+  text-align: right;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.weightInput:hover {
+  background: rgba(148, 163, 184, 0.04);
+  border-color: rgba(148, 163, 184, 0.1);
+}
+
+.weightInput:focus {
+  background: #131620;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.weightInputZero {
+  composes: weightInput;
+  color: #334155;
+}
+
+.weightInputZero:hover,
+.weightInputZero:focus {
+  color: #e2e8f0;
+}
+
+.weightPct {
+  font-size: 10px;
+  color: #475569;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  margin-top: 1px;
+}
+
+.emptyDash {
+  composes: weightPct;
+  color: #1e293b;
+}
+
+/* Row edit */
+.rowActions {
+  opacity: 0;
+  transition: opacity 0.15s;
+  text-align: center;
+}
+
+.table tbody tr:hover .rowActions {
+  opacity: 1;
+}
+
+.rowEditBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  display: inline-flex;
+}
+
+.rowEditBtn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+/* Total row */
+.totalRow td {
+  background: rgba(148, 163, 184, 0.03) !important;
+  border-top: 2px solid rgba(148, 163, 184, 0.08);
+  padding: 14px 16px !important;
+  font-weight: 700;
+}
+
+.totalRow:hover td {
+  background: rgba(148, 163, 184, 0.03) !important;
+}
+
+.totalLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.totalNum {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.totalSub {
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+}
