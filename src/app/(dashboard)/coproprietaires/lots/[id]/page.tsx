@@ -31,7 +31,6 @@ export default function LotDetailPage({ params }: { params: Promise<{ id: string
           <div className={styles.topBarMeta}>
             {lot.type && <span className={styles.metaBadge}>{LOT_TYPE_LABELS[lot.type] || lot.type}</span>}
             {lot.floor != null && <span className={styles.metaBadge}>Étage {lot.floor}</span>}
-            {lot.surface != null && <span className={styles.metaBadge}>{lot.surface} m²</span>}
             <span className={styles.metaBadge}>{lot.tantiemes_generaux} tantièmes</span>
           </div>
         </div>

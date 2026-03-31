@@ -28,14 +28,12 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating }: Create
   const [ref, setRef] = useState('');
   const [type, setType] = useState<LotType>('appartement');
   const [floor, setFloor] = useState('');
-  const [surface, setSurface] = useState('');
   const [tantiemes, setTantiemes] = useState('');
 
   const resetForm = useCallback(() => {
     setRef('');
     setType('appartement');
     setFloor('');
-    setSurface('');
     setTantiemes('');
   }, []);
 
@@ -46,7 +44,6 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating }: Create
       ref: ref.trim(),
       type,
       floor: floor ? parseInt(floor, 10) : null,
-      surface: surface ? parseFloat(surface) : null,
       tantiemes_generaux: parseInt(tantiemes, 10),
     };
 
@@ -90,26 +87,14 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating }: Create
             </div>
           </div>
 
-          <div className={styles.fieldRow}>
-            <div className={styles.fieldGroup}>
-              <label>Étage</label>
-              <input
-                type="number"
-                value={floor}
-                onChange={e => setFloor(e.target.value)}
-                placeholder="ex: 3"
-              />
-            </div>
-            <div className={styles.fieldGroup}>
-              <label>Surface (m²)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={surface}
-                onChange={e => setSurface(e.target.value)}
-                placeholder="ex: 65.5"
-              />
-            </div>
+          <div className={styles.fieldGroup}>
+            <label>Étage</label>
+            <input
+              type="number"
+              value={floor}
+              onChange={e => setFloor(e.target.value)}
+              placeholder="ex: 3"
+            />
           </div>
 
           <div className={styles.fieldGroup}>

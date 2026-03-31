@@ -5,7 +5,7 @@ import { useLots } from '@/hooks/modules/useLotsData';
 import type { LotWithOwner, LotType } from '@/lib/lots/api';
 
 export type LotFilterType = LotType | 'ALL';
-export type LotSortField = 'ref' | 'type' | 'floor' | 'surface' | 'tantiemes_generaux' | 'owner_display_name';
+export type LotSortField = 'ref' | 'type' | 'floor' | 'tantiemes_generaux' | 'owner_display_name';
 export type SortDirection = 'asc' | 'desc';
 
 export interface UseLotsPageReturn {

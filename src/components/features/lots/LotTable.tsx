@@ -49,7 +49,6 @@ export function LotTable({ lots, sortField, sortDirection, onSort, onEdit }: Lot
             <th onClick={() => onSort('ref')}>Réf <SortIcon field="ref" /></th>
             <th onClick={() => onSort('type')}>Type <SortIcon field="type" /></th>
             <th onClick={() => onSort('floor')}>Étage <SortIcon field="floor" /></th>
-            <th onClick={() => onSort('surface')}>Surface <SortIcon field="surface" /></th>
             <th onClick={() => onSort('tantiemes_generaux')}>Tantièmes <SortIcon field="tantiemes_generaux" /></th>
             <th onClick={() => onSort('owner_display_name')}>Propriétaire <SortIcon field="owner_display_name" /></th>
             <th></th>
@@ -72,9 +71,6 @@ export function LotTable({ lots, sortField, sortDirection, onSort, onEdit }: Lot
                 </span>
               </td>
               <td>{lot.floor != null ? `${lot.floor}` : '-'}</td>
-              <td className={styles.surface}>
-                {lot.surface != null ? `${lot.surface} m²` : '-'}
-              </td>
               <td className={styles.tantiemes}>{lot.tantiemes_generaux}</td>
               <td>
                 {lot.owner_display_name ? (

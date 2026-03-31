@@ -7,7 +7,6 @@ import styles from './CreateLotModal.module.css';
 
 const BASIS_OPTIONS: { value: RepartitionBasis; label: string; description: string }[] = [
   { value: 'tantiemes', label: 'Tantièmes', description: 'Basé sur les tantièmes généraux de chaque lot' },
-  { value: 'surface', label: 'Surface', description: 'Basé sur la surface de chaque lot' },
   { value: 'custom', label: 'Personnalisé', description: 'Poids définis manuellement pour chaque lot' },
 ];
 

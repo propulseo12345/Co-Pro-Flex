@@ -29,7 +29,6 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
   const [ref, setRef] = useState('');
   const [type, setType] = useState<LotType>('appartement');
   const [floor, setFloor] = useState('');
-  const [surface, setSurface] = useState('');
   const [tantiemes, setTantiemes] = useState('');
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
       setRef(lot.ref);
       setType((lot.type as LotType) || 'appartement');
       setFloor(lot.floor != null ? String(lot.floor) : '');
-      setSurface(lot.surface != null ? String(lot.surface) : '');
       setTantiemes(String(lot.tantiemes_generaux));
     }
   }, [lot]);
@@ -49,7 +47,6 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
       ref: ref.trim(),
       type,
       floor: floor ? parseInt(floor, 10) : null,
-      surface: surface ? parseFloat(surface) : null,
       tantiemes_generaux: parseInt(tantiemes, 10),
     };
 
@@ -92,15 +89,9 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
             </div>
           </div>
 
-          <div className={styles.fieldRow}>
-            <div className={styles.fieldGroup}>
-              <label>Étage</label>
-              <input type="number" value={floor} onChange={e => setFloor(e.target.value)} />
-            </div>
-            <div className={styles.fieldGroup}>
-              <label>Surface (m²)</label>
-              <input type="number" step="0.01" value={surface} onChange={e => setSurface(e.target.value)} />
-            </div>
+          <div className={styles.fieldGroup}>
+            <label>Étage</label>
+            <input type="number" value={floor} onChange={e => setFloor(e.target.value)} />
           </div>
 
           <div className={styles.fieldGroup}>
