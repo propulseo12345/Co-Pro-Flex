@@ -297,6 +297,7 @@ export async function listRepartitionKeys(
     .from('v_repartition_key_totals')
     .select('*')
     .eq('copro_id', coproId)
+    .eq('is_active', true)
     .order('name', { ascending: true });
 
   if (error) {
@@ -387,21 +388,11 @@ export async function deleteRepartitionKey(
 ): Promise<{ success: boolean; error: Error | null }> {
   const supabase = createUntypedClient();
 
-  // D'abord supprimer les lignes
-  const { error: linesError } = await supabase
-    .from('repartition_key_lines')
-    .delete()
-    .eq('copro_id', coproId)
-    .eq('key_id', keyId);
-
-  if (linesError) {
-    return { success: false, error: new Error(linesError.message) };
-  }
-
-  // Puis supprimer la clé
+  // Soft delete : désactiver la clé au lieu de la supprimer
+  // Les budget_lines peuvent référencer cette clé, un hard delete casserait la contrainte FK
   const { error } = await supabase
     .from('repartition_keys')
-    .delete()
+    .update({ is_active: false })
     .eq('copro_id', coproId)
     .eq('id', keyId);
 
