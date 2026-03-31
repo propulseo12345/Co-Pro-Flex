@@ -46,8 +46,8 @@ export const MODULES: ModuleConfig[] = [
     href: '/coproprietaires',
     subPages: [
       { label: 'Copropriétaires', href: '/coproprietaires', icon: Users },
-      { label: 'Tantièmes', href: '/finance/tantiemes', icon: BarChart3 },
-      { label: 'Lots', href: '/settings/info', icon: Building2 },
+      { label: 'Lots & Tantièmes', href: '/coproprietaires/lots', icon: Building2 },
+      { label: 'Clés de répartition', href: '/coproprietaires/repartition', icon: BarChart3 },
     ],
   },
   {
