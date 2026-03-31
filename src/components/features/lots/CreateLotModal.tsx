@@ -22,19 +22,23 @@ interface CreateLotModalProps {
   onClose: () => void;
   onCreate: (payload: Omit<LotCreate, 'copro_id'>) => Promise<{ id: string } | null>;
   isMutating: boolean;
+  owners?: Array<{ id: string; display_name: string }>;
+  onAssignOwner?: (lotId: string, ownerId: string | null) => Promise<void>;
 }
 
-export function CreateLotModal({ isOpen, onClose, onCreate, isMutating }: CreateLotModalProps) {
+export function CreateLotModal({ isOpen, onClose, onCreate, isMutating, owners = [], onAssignOwner }: CreateLotModalProps) {
   const [ref, setRef] = useState('');
   const [type, setType] = useState<LotType>('appartement');
   const [floor, setFloor] = useState('');
   const [tantiemes, setTantiemes] = useState('');
+  const [ownerId, setOwnerId] = useState<string>('');
 
   const resetForm = useCallback(() => {
     setRef('');
     setType('appartement');
     setFloor('');
     setTantiemes('');
+    setOwnerId('');
   }, []);
 
   const handleSubmit = async () => {
@@ -49,6 +53,9 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating }: Create
 
     const result = await onCreate(payload);
     if (result) {
+      if (ownerId && onAssignOwner) {
+        await onAssignOwner(result.id, ownerId);
+      }
       resetForm();
       onClose();
     }
@@ -105,6 +112,16 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating }: Create
               onChange={e => setTantiemes(e.target.value)}
               placeholder="ex: 500"
             />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label>Propriétaire</label>
+            <select value={ownerId} onChange={e => setOwnerId(e.target.value)}>
+              <option value="">— Aucun —</option>
+              {owners.map(o => (
+                <option key={o.id} value={o.id}>{o.display_name}</option>
+              ))}
+            </select>
           </div>
         </div>
 

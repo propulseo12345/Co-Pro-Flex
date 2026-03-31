@@ -23,13 +23,17 @@ interface EditLotModalProps {
   onUpdate: (lotId: string, updates: LotUpdate) => Promise<boolean>;
   onDelete: (lotId: string) => Promise<boolean>;
   isMutating: boolean;
+  owners?: Array<{ id: string; display_name: string }>;
+  onAssignOwner?: (lotId: string, ownerId: string | null) => Promise<void>;
+  currentOwnerId?: string | null;
 }
 
-export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: EditLotModalProps) {
+export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating, owners = [], onAssignOwner, currentOwnerId }: EditLotModalProps) {
   const [ref, setRef] = useState('');
   const [type, setType] = useState<LotType>('appartement');
   const [floor, setFloor] = useState('');
   const [tantiemes, setTantiemes] = useState('');
+  const [ownerId, setOwnerId] = useState<string>('');
 
   useEffect(() => {
     if (lot) {
@@ -37,8 +41,9 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
       setType((lot.type as LotType) || 'appartement');
       setFloor(lot.floor != null ? String(lot.floor) : '');
       setTantiemes(String(lot.tantiemes_generaux));
+      setOwnerId(currentOwnerId || '');
     }
-  }, [lot]);
+  }, [lot, currentOwnerId]);
 
   const handleSave = async () => {
     if (!lot || !ref.trim() || !tantiemes.trim()) return;
@@ -51,7 +56,12 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
     };
 
     const success = await onUpdate(lot.id, updates);
-    if (success) onClose();
+    if (success) {
+      if (onAssignOwner && ownerId !== (currentOwnerId || '')) {
+        await onAssignOwner(lot.id, ownerId || null);
+      }
+      onClose();
+    }
   };
 
   const handleDelete = async () => {
@@ -97,6 +107,16 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating }: E
           <div className={styles.fieldGroup}>
             <label>Tantièmes généraux *</label>
             <input type="number" value={tantiemes} onChange={e => setTantiemes(e.target.value)} />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label>Propriétaire</label>
+            <select value={ownerId} onChange={e => setOwnerId(e.target.value)}>
+              <option value="">— Aucun —</option>
+              {owners.map(o => (
+                <option key={o.id} value={o.id}>{o.display_name}</option>
+              ))}
+            </select>
           </div>
         </div>
 

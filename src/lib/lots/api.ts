@@ -562,6 +562,55 @@ export async function initializeRepartitionKeyLines(
   return { success: true, error: null };
 }
 
+/**
+ * Assigne un propriétaire à un lot
+ * Termine l'ownership précédent (end_date = today) et crée le nouveau
+ */
+export async function assignOwnerToLot(
+  coproId: string,
+  lotId: string,
+  coproprietaireId: string | null
+): Promise<{ success: boolean; error: Error | null }> {
+  const supabase = createUntypedClient();
+
+  // Clôturer l'ownership actuel
+  const { error: endError } = await supabase
+    .from('lot_owners')
+    .update({ end_date: new Date().toISOString().split('T')[0] })
+    .eq('copro_id', coproId)
+    .eq('lot_id', lotId)
+    .is('end_date', null);
+
+  if (endError) {
+    return { success: false, error: new Error(endError.message) };
+  }
+
+  // Si pas de nouveau proprio, on s'arrête là
+  if (!coproprietaireId) {
+    return { success: true, error: null };
+  }
+
+  // Créer le nouvel ownership
+  const { error: insertError } = await supabase
+    .from('lot_owners')
+    .insert({
+      copro_id: coproId,
+      lot_id: lotId,
+      coproprietaire_id: coproprietaireId,
+      share_percent: 100,
+      is_primary: true,
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: null,
+      created_at: new Date().toISOString(),
+    });
+
+  if (insertError) {
+    return { success: false, error: new Error(insertError.message) };
+  }
+
+  return { success: true, error: null };
+}
+
 // ============================================================================
 // VALIDATION HELPERS
 // ============================================================================

@@ -16,7 +16,10 @@ export default function LotsPage() {
     createLot, updateLot, deleteLot, editingLot, setEditingLot, showCreateLotModal, setShowCreateLotModal,
     createKey, updateKey, deleteKey, editingKey, setEditingKey, showCreateKeyModal, setShowCreateKeyModal,
     updateWeight, refresh,
+    owners, assignOwner,
   } = useLotsRepartitionGrid();
+
+  const ownerOptions = owners.map(o => ({ id: o.id, display_name: o.display_name }));
 
   if (!currentCoproId) {
     return <LoadingState message="Chargement de la copropriété..." />;
@@ -115,6 +118,8 @@ export default function LotsPage() {
         onClose={() => setShowCreateLotModal(false)}
         onCreate={createLot}
         isMutating={isMutating}
+        owners={ownerOptions}
+        onAssignOwner={assignOwner}
       />
       <EditLotModal
         lot={editingLot}
@@ -122,6 +127,9 @@ export default function LotsPage() {
         onUpdate={updateLot}
         onDelete={deleteLot}
         isMutating={isMutating}
+        owners={ownerOptions}
+        onAssignOwner={assignOwner}
+        currentOwnerId={editingLot?.coproprietaire_id}
       />
       <CreateKeyModal
         isOpen={showCreateKeyModal}

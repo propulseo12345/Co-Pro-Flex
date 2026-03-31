@@ -7,6 +7,7 @@ import { useCopro } from '@/providers/CoproContext';
 import { createClient } from '@/lib/supabase/client';
 import type { LotWithOwner, RepartitionKeyWithTotals, RepartitionKeyLineDetailed } from '@/lib/lots/api';
 import * as lotsApi from '@/lib/lots/api';
+import { listCoproprietaires, type CoproprietaireOverview } from '@/lib/owners/api';
 
 export interface GridKeyColumn {
   key_id: string;
@@ -33,11 +34,19 @@ export function useLotsRepartitionGrid() {
 
   const [allLines, setAllLines] = useState<RepartitionKeyLineDetailed[]>([]);
   const [linesLoading, setLinesLoading] = useState(true);
+  const [owners, setOwners] = useState<CoproprietaireOverview[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateLotModal, setShowCreateLotModal] = useState(false);
   const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
   const [editingLot, setEditingLot] = useState<LotWithOwner | null>(null);
   const [editingKey, setEditingKey] = useState<RepartitionKeyWithTotals | null>(null);
+
+  // Fetch owners list
+  const loadOwners = useCallback(async () => {
+    if (!currentCoproId) return;
+    const { data } = await listCoproprietaires(currentCoproId, { type: 'COPROPRIETAIRE' });
+    if (data) setOwners(data);
+  }, [currentCoproId]);
 
   // Fetch all key lines at once
   const fetchAllLines = useCallback(async () => {
@@ -62,7 +71,8 @@ export function useLotsRepartitionGrid() {
 
   useEffect(() => {
     fetchAllLines();
-  }, [fetchAllLines]);
+    loadOwners();
+  }, [fetchAllLines, loadOwners]);
 
   // Key columns (exclude the "charges générales" if it matches tantièmes)
   const keyColumns = useMemo((): GridKeyColumn[] => {
@@ -118,6 +128,12 @@ export function useLotsRepartitionGrid() {
     await Promise.all([fetchAllLines(), refreshKeys()]);
   }, [currentCoproId, fetchAllLines, refreshKeys]);
 
+  const assignOwner = useCallback(async (lotId: string, coproprietaireId: string | null) => {
+    if (!currentCoproId) return;
+    await lotsApi.assignOwnerToLot(currentCoproId, lotId, coproprietaireId);
+    await refreshLots();
+  }, [currentCoproId, refreshLots]);
+
   const refreshAll = useCallback(async () => {
     await Promise.all([refreshLots(), refreshKeys(), fetchAllLines()]);
   }, [refreshLots, refreshKeys, fetchAllLines]);
@@ -159,6 +175,10 @@ export function useLotsRepartitionGrid() {
 
     // Weight edit
     updateWeight,
+
+    // Owners
+    owners,
+    assignOwner,
 
     // Refresh
     refresh: refreshAll,
