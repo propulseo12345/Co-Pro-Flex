@@ -95,9 +95,9 @@ export interface EtatDateSnapshot {
   document_id: string | null;
 }
 
-// Payload JSON conforme Art. 20
-export interface EtatDatePayload {
-  version: string;
+// Payload JSON conforme Art. 20 (V1 — legacy)
+export interface EtatDatePayloadV1 {
+  version?: '1.0';
   legal_reference: string;
   snapshot_type: SnapshotType;
   generated_at: string;
@@ -172,6 +172,118 @@ export interface EtatDatePayload {
     signature_date: string | null;
     notary_name: string | null;
   };
+}
+
+// Payload V2 — conforme Décret 67-223 du 17 mars 1967, Art. 5 et 5-1
+export interface EtatDatePayloadV2 {
+  version: '2.0';
+  legal_reference: 'Décret 67-223 du 17 mars 1967, Art. 5 et 5-1';
+  snapshot_type: SnapshotType;
+  generated_at: string;
+  snapshot_date: string;
+
+  copro: {
+    id: string;
+    name: string;
+    address: string;
+    siret: string | null;
+    syndic_name: string;
+    syndic_address: string;
+  };
+
+  lot: {
+    id: string;
+    ref: string;
+    type: string;
+    building: string | null;
+    floor: number | null;
+    surface: number | null;
+    tantiemes_generaux: number;
+    total_tantiemes: number;
+    repartition_keys: Array<{
+      key_name: string;
+      tantiemes: number;
+      total: number;
+    }>;
+  };
+
+  seller: {
+    id: string;
+    name: string;
+    email: string | null;
+    address: string | null;
+    is_company: boolean;
+  };
+
+  mutation: {
+    id: string;
+    type: MutationType;
+    requested_at: string;
+    signature_date: string | null;
+    notary_name: string | null;
+    notary_email: string | null;
+  };
+
+  partie1_vendeur_doit: {
+    provisions_budget: {
+      amount: number;
+      detail: Array<{ label: string; due_date: string; amount_due: number; amount_paid: number; remaining: number; }>;
+    };
+    provisions_travaux: {
+      amount: number;
+      detail: Array<{ label: string; due_date: string; amount_due: number; amount_paid: number; remaining: number; }>;
+    };
+    arrieres: {
+      amount: number;
+      detail: Array<{ period_label: string; amount: number; }>;
+    };
+    emprunts_collectifs: {
+      amount: number;
+      detail: Array<{ label: string; lender: string; total_loan: number; seller_share: number; remaining: number; }>;
+    };
+    avances_exigibles: {
+      amount: number;
+      detail: Array<{ label: string; amount_due: number; amount_paid: number; }>;
+    };
+    total: number;
+  };
+
+  partie2_syndicat_doit: {
+    avances_versees: {
+      amount: number;
+      detail: Array<{ label: string; type: string; amount: number; }>;
+    };
+    provisions_post_mutation: { amount: number; note: string; };
+    trop_percus: { amount: number; note: string; };
+    total: number;
+  };
+
+  partie3_acquereur: {
+    reconstitution_avances: {
+      amount: number;
+      detail: Array<{ label: string; amount: number; }>;
+    };
+    provisions_non_exigibles: { amount: number; note: string; };
+    travaux_votes_non_appeles: {
+      amount: number;
+      detail: Array<{ label: string; ag_date: string; total_vote: number; lot_share: number; }>;
+    };
+    fonds_travaux_alur: { balance: number; note: string; };
+    total: number;
+  };
+
+  annexe: {
+    historique_charges: Array<{ period_label: string; budget_previsionnel: number; hors_budget: number; total: number; }>;
+    procedures_judiciaires: Array<{ title: string; nature: string; opposing_party: string; amount_at_stake: number; status: string; court: string; }>;
+    solde_compte: number;
+    recent_transactions: Array<{ line_date: string; line_type: 'call' | 'payment'; label: string; debit: number; credit: number; running_balance: number; }>;
+  };
+}
+
+export type EtatDatePayload = EtatDatePayloadV1 | EtatDatePayloadV2;
+
+export function isPayloadV2(payload: EtatDatePayload): payload is EtatDatePayloadV2 {
+  return payload.version === '2.0';
 }
 
 // ============================================================================

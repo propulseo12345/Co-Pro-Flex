@@ -15,7 +15,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { getDocumentSignedUrl } from '../api/mutationsApi';
-import type { EtatDateSnapshot, EtatDatePayload } from '../domain/types';
+import type { EtatDateSnapshot, EtatDatePayloadV1 } from '../domain/types';
 import styles from './EtatDateViewer.module.css';
 
 interface EtatDateViewerProps {
@@ -27,7 +27,7 @@ export function EtatDateViewer({ snapshot, onViewDocument }: EtatDateViewerProps
   const [showJson, setShowJson] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const payload = snapshot.payload;
+  const payload = snapshot.payload as EtatDatePayloadV1;
 
   const handleDownloadPDF = async () => {
     if (!snapshot.document_id) return;
