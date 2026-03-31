@@ -16,9 +16,10 @@ interface RepartitionKeyCardProps {
   isSelected: boolean;
   onSelect: () => void;
   detail: UseRepartitionKeyDetailReturn | null;
+  onDelete?: () => void;
 }
 
-export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail }: RepartitionKeyCardProps) {
+export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDelete }: RepartitionKeyCardProps) {
   const completePct = keyData.lots_count > 0
     ? (keyData.lots_with_weight_count / keyData.lots_count) * 100
     : 0;
@@ -69,7 +70,29 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail }: Re
                 <tr key={line.line_id}>
                   <td style={{ fontWeight: 600, color: '#3b82f6' }}>{line.lot_ref}</td>
                   <td>{line.lot_type || '-'}</td>
-                  <td style={{ fontFamily: "'SF Mono', monospace" }}>{line.weight}</td>
+                  <td>
+                    <input
+                      type="number"
+                      defaultValue={line.weight}
+                      onBlur={(e) => {
+                        const newWeight = parseInt(e.target.value, 10);
+                        if (!isNaN(newWeight) && newWeight !== line.weight && detail) {
+                          detail.updateLineWeight(line.lot_id, newWeight);
+                        }
+                      }}
+                      style={{
+                        width: '80px',
+                        padding: '4px 8px',
+                        background: '#131620',
+                        border: '1px solid rgba(148, 163, 184, 0.08)',
+                        borderRadius: '6px',
+                        color: '#e2e8f0',
+                        fontSize: '12px',
+                        fontFamily: "'SF Mono', 'Fira Code', monospace",
+                        textAlign: 'right',
+                      }}
+                    />
+                  </td>
                   <td style={{ fontFamily: "'SF Mono', monospace", color: '#94a3b8' }}>
                     {line.share_pct.toFixed(2)}%
                   </td>
@@ -82,6 +105,31 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail }: Re
             <div className={styles.warning} style={{ marginTop: 12 }}>
               <AlertTriangle size={12} />
               {detail.validation.warnings.join(' · ')}
+            </div>
+          )}
+
+          {isSelected && detail && (
+            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm(`Supprimer la clé "${keyData.name}" ?`)) {
+                    onDelete?.();
+                  }
+                }}
+                style={{
+                  padding: '6px 12px',
+                  background: 'transparent',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '8px',
+                  color: '#ef4444',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                Supprimer cette clé
+              </button>
             </div>
           )}
         </div>
