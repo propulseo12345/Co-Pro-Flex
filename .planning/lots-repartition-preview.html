@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lots & Répartition — V3 simplifiée</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  .page { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* TopBar */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 20px 24px; background: #161822;
+    border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; margin-bottom: 24px;
+  }
+  .topbar h1 { font-size: 24px; font-weight: 700; }
+  .topbar p { margin-top: 4px; font-size: 14px; color: #94a3b8; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-primary { background: #3b82f6; color: white; }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .btn-outline { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa; }
+  .btn-outline:hover { background: rgba(59,130,246,0.15); }
+  .btn-ghost { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); color: #94a3b8; padding: 8px; }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+
+  /* KPIs — 3 only */
+  .kpi-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { padding: 16px 20px; background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; }
+  .kpi-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px; }
+  .kpi-value { display: block; font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  /* Search — simple */
+  .toolbar { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+  .search-box { position: relative; width: 280px; }
+  .search-box input {
+    width: 100%; padding: 8px 12px 8px 34px; background: #131620;
+    border: 1px solid rgba(148,163,184,0.08); border-radius: 8px;
+    color: #e2e8f0; font-size: 13px; outline: none;
+  }
+  .search-box input:focus { border-color: rgba(59,130,246,0.4); }
+  .search-box input::placeholder { color: #475569; }
+  .search-box svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #475569; }
+  .toolbar-badge {
+    margin-left: auto; padding: 6px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  }
+  .toolbar-badge.ok { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #4ade80; }
+  .toolbar-badge.warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+
+  /* ─── Grid ─── */
+  .grid {
+    background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px; overflow: hidden;
+  }
+  .grid-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+
+  /* Headers */
+  th {
+    padding: 10px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #64748b; text-align: left; white-space: nowrap;
+    background: rgba(148,163,184,0.03); border-bottom: 1px solid rgba(148,163,184,0.08);
+  }
+  th.right { text-align: right; }
+
+  /* Key column headers — special styling */
+  th.key-header {
+    text-align: center; border-left: 1px solid rgba(148,163,184,0.05);
+    padding: 8px 12px; cursor: pointer; transition: background 0.15s;
+  }
+  th.key-header:hover { background: rgba(59,130,246,0.04); }
+  .key-header-content { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .key-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .key-header-name { font-size: 11px; font-weight: 600; color: #e2e8f0; text-transform: none; letter-spacing: 0; }
+  .key-header-edit { opacity: 0; color: #64748b; font-size: 10px; transition: opacity 0.15s; }
+  th.key-header:hover .key-header-edit { opacity: 1; }
+  .key-header-status { display: block; font-size: 9px; margin-top: 3px; font-weight: 500; }
+  .key-header-status.ok { color: #22c55e; }
+  .key-header-status.warn { color: #f59e0b; }
+
+  /* Body */
+  td {
+    padding: 11px 16px; font-size: 13px; font-weight: 500; color: #e2e8f0;
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+  }
+  tbody tr { transition: background 0.1s; }
+  tbody tr:hover td { background: rgba(148,163,184,0.025); }
+  tr:last-child td { border-bottom: none; }
+
+  .cell-ref { font-weight: 600; color: #3b82f6; cursor: pointer; }
+  .cell-ref:hover { text-decoration: underline; }
+  .badge { display: inline-flex; padding: 2px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .cell-owner { font-size: 13px; }
+  .cell-owner-sub { font-size: 10px; color: #475569; margin-top: 1px; }
+
+  /* Tantièmes — the main column, IS charges générales */
+  td.cell-tantiemes {
+    text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 14px;
+    border-right: 2px solid rgba(148,163,184,0.06); padding-right: 20px;
+  }
+  th.col-tantiemes { text-align: right; border-right: 2px solid rgba(148,163,184,0.06); padding-right: 20px; }
+
+  /* Key value cells — clean inputs */
+  td.key-cell {
+    text-align: center; border-left: 1px solid rgba(148,163,184,0.03); padding: 8px 10px;
+  }
+  .key-value-wrap { display: flex; flex-direction: column; align-items: center; }
+  .weight-input {
+    width: 60px; padding: 4px 6px; text-align: right;
+    background: transparent; border: 1px solid transparent; border-radius: 5px;
+    color: #e2e8f0; font-size: 13px; font-family: 'JetBrains Mono', monospace;
+    font-weight: 500; outline: none; transition: all 0.15s;
+  }
+  .weight-input:hover { background: rgba(148,163,184,0.04); border-color: rgba(148,163,184,0.1); }
+  .weight-input:focus { background: #131620; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+  .weight-input.zero { color: #334155; }
+  .weight-input.zero:hover, .weight-input.zero:focus { color: #e2e8f0; }
+  .weight-pct { font-size: 10px; color: #475569; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+
+  /* Row edit button */
+  .row-actions { opacity: 0; transition: opacity 0.15s; text-align: center; }
+  tr:hover .row-actions { opacity: 1; }
+  .row-edit-btn {
+    background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;
+    border-radius: 6px; transition: all 0.15s; display: inline-flex;
+  }
+  .row-edit-btn:hover { background: rgba(59,130,246,0.1); color: #3b82f6; }
+
+  /* Total row */
+  .total-row td {
+    background: rgba(148,163,184,0.03) !important;
+    border-top: 2px solid rgba(148,163,184,0.08); padding: 14px 16px; font-weight: 700;
+  }
+  .total-row:hover td { background: rgba(148,163,184,0.03) !important; }
+  .total-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+  .total-num { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; }
+  .total-sub { font-size: 10px; font-weight: 500; margin-top: 2px; }
+
+  /* Empty key indicator */
+  .empty-dash { color: #1e293b; font-size: 12px; }
+
+  @media (max-width: 1024px) {
+    .kpi-strip { grid-template-columns: 1fr 1fr 1fr; }
+    .page { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <div>
+      <h1>Lots & Répartition</h1>
+      <p>Tantièmes et clés de répartition des charges</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" title="Rafraîchir">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+      </button>
+      <button class="btn btn-outline">+ Clé</button>
+      <button class="btn btn-primary">+ Lot</button>
+    </div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <span class="kpi-label">Lots</span>
+      <span class="kpi-value">6</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Tantièmes généraux</span>
+      <span class="kpi-value" style="color: #22c55e;">1 000</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Clés spéciales</span>
+      <span class="kpi-value" style="color: #3b82f6;">3</span>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input placeholder="Rechercher...">
+    </div>
+    <span class="toolbar-badge ok">✓ 1 000 tantièmes</span>
+  </div>
+
+  <div class="grid">
+    <div class="grid-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px;">Réf</th>
+            <th style="width: 100px;">Type</th>
+            <th style="width: 160px;">Propriétaire</th>
+            <th class="right col-tantiemes">Tantièmes</th>
+
+            <th class="key-header">
+              <div class="key-header-content">
+                <span class="key-dot" style="background: #8b5cf6;"></span>
+                <span class="key-header-name">Ascenseur A</span>
+                <span class="key-header-edit">✏</span>
+              </div>
+              <span class="key-header-status warn">4/6 lots</span>
+            </th>
+            <th class="key-header">
+              <div class="key-header-content">
+                <span class="key-dot" style="background: #f59e0b;"></span>
+                <span class="key-header-name">Chauffage</span>
+                <span class="key-header-edit">✏</span>
+              </div>
+              <span class="key-header-status warn">4/6 lots</span>
+            </th>
+            <th class="key-header">
+              <div class="key-header-content">
+                <span class="key-dot" style="background: #06b6d4;"></span>
+                <span class="key-header-name">Eau froide</span>
+                <span class="key-header-edit">✏</span>
+              </div>
+              <span class="key-header-status ok">6/6 lots</span>
+            </th>
+
+            <th style="width: 40px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cell-ref">001</span></td>
+            <td><span class="badge">Appart.</span></td>
+            <td><div class="cell-owner">Emma Robert</div><div class="cell-owner-sub">Président du CS</div></td>
+            <td class="cell-tantiemes">180</td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="180"><span class="weight-pct">24.3%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="200"><span class="weight-pct">24.4%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="180"><span class="weight-pct">18.0%</span></div></td>
+            <td class="row-actions"><button class="row-edit-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          </tr>
+
+          <tr>
+            <td><span class="cell-ref">101</span></td>
+            <td><span class="badge">Appart.</span></td>
+            <td><div class="cell-owner">Jean Dupont</div></td>
+            <td class="cell-tantiemes">200</td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="200"><span class="weight-pct">27.0%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="220"><span class="weight-pct">26.8%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="200"><span class="weight-pct">20.0%</span></div></td>
+            <td class="row-actions"><button class="row-edit-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          </tr>
+
+          <tr>
+            <td><span class="cell-ref">102</span></td>
+            <td><span class="badge">Appart.</span></td>
+            <td><div class="cell-owner">J-P. Acheteur</div></td>
+            <td class="cell-tantiemes">155</td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="155"><span class="weight-pct">20.9%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="160"><span class="weight-pct">19.5%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="155"><span class="weight-pct">15.5%</span></div></td>
+            <td class="row-actions"><button class="row-edit-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          </tr>
+
+          <tr>
+            <td><span class="cell-ref">201</span></td>
+            <td><span class="badge">Appart.</span></td>
+            <td><div class="cell-owner">Lucas Petit</div></td>
+            <td class="cell-tantiemes">205</td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="205"><span class="weight-pct">27.7%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="240"><span class="weight-pct">29.3%</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="205"><span class="weight-pct">20.5%</span></div></td>
+            <td class="row-actions"><button class="row-edit-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          </tr>
+
+          <!-- Parking — 0 on ascenseur & chauffage -->
+          <tr>
+            <td><span class="cell-ref">202</span></td>
+            <td><span class="badge" style="background: rgba(59,130,246,0.1); color: #60a5fa;">Parking</span></td>
+            <td><div class="cell-owner">Marie Martin</div></td>
+            <td class="cell-tantiemes">160</td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input zero" value="0"><span class="weight-pct empty-dash">—</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input zero" value="0"><span class="weight-pct empty-dash">—</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="160"><span class="weight-pct">16.0%</span></div></td>
+            <td class="row-actions"><button class="row-edit-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          </tr>
+
+          <!-- Cave -->
+          <tr>
+            <td><span class="cell-ref">301</span></td>
+            <td><span class="badge" style="background: rgba(148,163,184,0.06); color: #64748b;">Cave</span></td>
+            <td><div class="cell-owner">Pierre Durand</div><div class="cell-owner-sub">Membre du CS</div></td>
+            <td class="cell-tantiemes">100</td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input zero" value="0"><span class="weight-pct empty-dash">—</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input zero" value="0"><span class="weight-pct empty-dash">—</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><input class="weight-input" value="100"><span class="weight-pct">10.0%</span></div></td>
+            <td class="row-actions"><button class="row-edit-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          </tr>
+
+          <!-- Total -->
+          <tr class="total-row">
+            <td class="total-label" colspan="3">Total</td>
+            <td class="cell-tantiemes" style="font-size: 15px; color: #22c55e;">1 000</td>
+            <td class="key-cell"><div class="key-value-wrap"><span class="total-num" style="color: #f59e0b;">740</span><span class="total-sub" style="color: #f59e0b;">4/6</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><span class="total-num" style="color: #f59e0b;">820</span><span class="total-sub" style="color: #f59e0b;">4/6</span></div></td>
+            <td class="key-cell"><div class="key-value-wrap"><span class="total-num" style="color: #22c55e;">1 000</span><span class="total-sub" style="color: #22c55e;">6/6 ✓</span></div></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
