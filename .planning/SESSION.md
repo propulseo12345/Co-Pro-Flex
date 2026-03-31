@@ -1,22 +1,22 @@
-# Session State — 2026-03-31 01:50
+# Session State — 2026-03-31 14:30
 
 ## Branch
 v2
 
 ## Completed This Session
-- Fix "Inconnu" sender names: fallbacks corrigés dans useMessagerie, useMur, mock-data + UPDATE Supabase (3 messages avec sender_name NULL)
-- Fix ConversationList: couleurs avatar basées sur lastSenderRole au lieu du type de conversation
-- Fix responsive CSS: breakpoints tablette/mobile ajoutés pour messagerie, mail, mur
-- Fix mail body: rendu en paragraphes, typographie améliorée, distinction unread dans MailList
-- Fix espacement: padding/gap normalisés (24px cards, 16px gap) sur ChatPanel, PostFeed, PostCard, PostComments
-- Fix bulles envoyées: margin-left auto pour coller au bord droit
+- Recherche états datés : conformité décret 1967, outils existants, 3 parties réglementaires
+- Analyse code existant : diagnostic forces/faiblesses du module ventes/mutations
+- Design complet 5 phases : SQL → UI lots → payload V2 → PDF → Edge Function + Viewer
+- Spec rédigée et committée : docs/superpowers/specs/2026-03-31-etats-dates-lots-tantiemes-design.md
 
 ## Next Task
-Vérifier visuellement les corrections Communication (screenshot messagerie, mail, mur après refresh)
+Invoquer le skill writing-plans pour créer le plan d'implémentation détaillé à partir de la spec
 
 ## Blockers
 None
 
 ## Key Context
-- Le trigger `trg_updated_at_messages` sur table messages référence un champ `updated_at` absent — contourné via DISABLE/ENABLE
-- 16 fichiers modifiés, pas encore commités
+- Approche bottom-up (A) choisie : fondations SQL d'abord, puis UI lots, puis états datés
+- Option B conformité complète choisie : tables emprunts/avances/procédures incluses
+- PDF côté client (jsPDF, option B) : pas de génération serveur
+- La migration SQL des tables fondamentales (lots, copros) n'est PAS dans le repo — créées directement en Supabase
