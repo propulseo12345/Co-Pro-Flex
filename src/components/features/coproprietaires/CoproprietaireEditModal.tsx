@@ -4,6 +4,11 @@ import { X, Save } from 'lucide-react';
 import type { Coproprietaire } from '@/hooks/modules/useCoproprietairesPage';
 import styles from '../../../app/(dashboard)/coproprietaires/coproprietaires.module.css';
 
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 10);
+  return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+}
+
 interface CoproprietaireEditModalProps {
   copro: Coproprietaire | null;
   form: Partial<Coproprietaire>;
@@ -39,7 +44,7 @@ export function CoproprietaireEditModal({ copro, form, onFormChange, onClose, on
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="edit-telephone">Téléphone</label>
-              <input id="edit-telephone" type="tel" value={form.telephone || ''} onChange={(e) => onFormChange({ ...form, telephone: e.target.value })} />
+              <input id="edit-telephone" type="tel" value={form.telephone || ''} onChange={(e) => onFormChange({ ...form, telephone: formatPhone(e.target.value) })} placeholder="06 12 34 56 78" />
             </div>
             <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
               <label htmlFor="edit-email">Email *</label>
