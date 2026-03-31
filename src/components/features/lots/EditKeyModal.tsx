@@ -14,10 +14,11 @@ interface EditKeyModalProps {
   keyData: RepartitionKeyWithTotals | null;
   onClose: () => void;
   onUpdate: (keyId: string, updates: RepartitionKeyUpdate) => Promise<boolean>;
+  onDelete?: (keyId: string) => Promise<boolean>;
   isMutating: boolean;
 }
 
-export function EditKeyModal({ keyData, onClose, onUpdate, isMutating }: EditKeyModalProps) {
+export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating }: EditKeyModalProps) {
   const [name, setName] = useState('');
   const [basis, setBasis] = useState<RepartitionBasis>('tantiemes');
   const [description, setDescription] = useState('');
@@ -106,6 +107,21 @@ export function EditKeyModal({ keyData, onClose, onUpdate, isMutating }: EditKey
         </div>
 
         <div className={styles.footer}>
+          {onDelete && (
+            <button
+              className={styles.cancelBtn}
+              style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+              onClick={() => {
+                if (keyData && window.confirm(`Supprimer la clé "${keyData.name}" ? Cette action est irréversible.`)) {
+                  onDelete(keyData.key_id).then(success => { if (success) onClose(); });
+                }
+              }}
+              disabled={isMutating}
+            >
+              Supprimer
+            </button>
+          )}
+          <div style={{ flex: 1 }} />
           <button className={styles.cancelBtn} onClick={onClose}>Annuler</button>
           <button
             className={styles.submitBtn}

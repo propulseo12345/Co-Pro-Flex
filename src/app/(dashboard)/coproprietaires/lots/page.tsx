@@ -133,6 +133,7 @@ export default function LotsPage() {
         keyData={editingKeyData}
         onClose={() => setEditingKey(null)}
         onUpdate={updateKey}
+        onDelete={deleteKey}
         isMutating={isMutating}
       />
     </div>
