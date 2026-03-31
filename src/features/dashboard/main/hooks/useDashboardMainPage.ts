@@ -1,15 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import {
-  Wallet,
-  AlertTriangle,
-  Calendar,
-  DollarSign,
-  FileText,
-  Wrench,
-  Users,
-} from 'lucide-react';
 import { getCurrentBusinessYear, formatDateFR } from '@/lib/time/period';
 import { useDashboardData, type DashboardTodo, type DashboardActivity } from '@/hooks/modules/useDashboardData';
 import { DASHBOARD_MAX_PRIORITIES, DASHBOARD_MAX_ACTIVITIES } from '@/lib/features/flags';
@@ -17,12 +8,6 @@ import { DASHBOARD_MAX_PRIORITIES, DASHBOARD_MAX_ACTIVITIES } from '@/lib/featur
 // ============================================================================
 // TYPES
 // ============================================================================
-
-export interface QuickAction {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ size?: number }>;
-}
 
 export interface KpisData {
   current_balance: number;
@@ -36,6 +21,12 @@ export interface KpisData {
   provisions_travaux?: number;
   travaux_en_cours?: number;
   nb_travaux_ouverts?: number;
+  ods_urgents?: number;
+  ods_en_cours?: number;
+  ods_programmes?: number;
+  ods_urgent_names?: string;
+  ods_en_cours_names?: string;
+  ods_programmes_names?: string;
 }
 
 export interface ComputedDashboardData {
@@ -56,7 +47,7 @@ export interface UseDashboardMainPageResult {
   isEmpty: boolean;
   refresh: () => void;
   businessYear: number;
-  quickActions: QuickAction[];
+  coproName: string;
 }
 
 // ============================================================================
@@ -65,40 +56,9 @@ export interface UseDashboardMainPageResult {
 
 export const BUSINESS_YEAR = getCurrentBusinessYear();
 
-export const QUICK_ACTIONS: QuickAction[] = [
-  { label: 'Créer AG', href: '/ag/new', icon: Users },
-  { label: 'Appel de fonds', href: '/finance/calls', icon: DollarSign },
-  { label: 'Ajouter facture', href: '/finance/invoices', icon: FileText },
-  { label: 'Ordre de service', href: '/maintenance/service-orders', icon: Wrench },
-];
-
-// Export icons for components
-export const ICONS = {
-  Wallet,
-  AlertTriangle,
-  Calendar,
-  DollarSign,
-  FileText,
-  Wrench,
-  Users,
-};
-
 // ============================================================================
 // HELPERS
 // ============================================================================
-
-export function getPriorityIcon(priority: number): string {
-  switch (priority) {
-    case 1:
-      return '🔴';
-    case 2:
-      return '🟠';
-    case 3:
-      return '🟡';
-    default:
-      return '🔵';
-  }
-}
 
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -127,6 +87,8 @@ export function formatRelativeTime(dateStr: string): string {
 
 export function useDashboardMainPage(): UseDashboardMainPageResult {
   const { data, isLoading, isRefreshing, error, isEmpty, refresh } = useDashboardData();
+
+  const coproName = 'Résidence Les Lilas';
 
   const computedData = useMemo((): ComputedDashboardData | null => {
     if (!data) return null;
@@ -158,7 +120,7 @@ export function useDashboardMainPage(): UseDashboardMainPageResult {
     isEmpty: isEmpty || !data,
     refresh,
     businessYear: BUSINESS_YEAR,
-    quickActions: QUICK_ACTIONS,
+    coproName,
   };
 }
 

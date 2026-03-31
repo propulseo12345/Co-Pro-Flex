@@ -2,14 +2,16 @@
 
 import {
   useDashboardMainPage,
-  DashboardHeader,
   DashboardLoadingState,
   DashboardErrorState,
   DashboardEmptyState,
-  KpiCards,
-  PrioritiesSection,
-  ActivitySection,
-  QuickActionsSection,
+  DashboardTopBar,
+  BentoTresorerie,
+  BentoAG,
+  BentoBudget,
+  BentoODS,
+  BentoPriorites,
+  BentoActivite,
 } from '@/features/dashboard/main';
 import styles from './dashboard.module.css';
 
@@ -22,58 +24,77 @@ export default function DashboardPage() {
     isEmpty,
     refresh,
     businessYear,
-    quickActions,
+    coproName,
   } = useDashboardMainPage();
 
-  // Loading state
   if (isLoading) {
     return <DashboardLoadingState />;
   }
 
-  // Error state
   if (error) {
     return <DashboardErrorState error={error} onRetry={refresh} />;
   }
 
-  // Empty state
   if (isEmpty || !data) {
     return (
       <DashboardEmptyState
         businessYear={businessYear}
         isRefreshing={isRefreshing}
         onRefresh={refresh}
-      >
-        <QuickActionsSection quickActions={quickActions} />
-      </DashboardEmptyState>
+      />
     );
   }
 
-  // Normal render with data
+  const { kpis } = data;
+
   return (
     <div className={styles.container}>
-      <DashboardHeader
+      <DashboardTopBar
+        coproName={coproName}
         businessYear={businessYear}
         isRefreshing={isRefreshing}
-        showDate={true}
         onRefresh={refresh}
       />
 
-      <KpiCards kpis={data.kpis} />
+      <div className={styles.bento}>
+        <BentoTresorerie
+          balance={kpis.current_balance}
+          compteCourant={kpis.tresorerie ?? kpis.current_balance}
+          fondsTravaux={kpis.provisions_travaux ?? 0}
+        />
 
-      <div className={styles.mainGrid}>
-        <PrioritiesSection
+        <BentoAG
+          nextAgDate={kpis.next_ag_date}
+          nextAgId={kpis.next_ag_id}
+        />
+
+        <BentoBudget
+          budgetPct={kpis.budget_pct}
+          budgetVote={kpis.budget_vote}
+          budgetRealise={kpis.budget_realise}
+        />
+
+        <BentoODS
+          urgents={kpis.ods_urgents ?? 0}
+          enCours={kpis.ods_en_cours ?? 0}
+          programmes={kpis.ods_programmes ?? 0}
+          urgentNames={kpis.ods_urgent_names}
+          enCoursNames={kpis.ods_en_cours_names}
+          programmesNames={kpis.ods_programmes_names}
+        />
+
+        <BentoPriorites
           todos={data.displayedTodos}
           hasTodos={data.hasTodos}
           hasMoreTodos={data.hasMoreTodos}
           todosCount={data.todosCount}
         />
-        <ActivitySection
+
+        <BentoActivite
           activities={data.displayedActivities}
           hasActivities={data.hasActivities}
         />
       </div>
-
-      <QuickActionsSection quickActions={quickActions} />
     </div>
   );
 }

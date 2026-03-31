@@ -1,7 +1,8 @@
-export { MetricsSkeleton, PrioritiesSkeleton, ActivitySkeleton } from './DashboardSkeletons';
-export { DashboardHeader } from './DashboardHeader';
-export { KpiCards } from './KpiCards';
-export { PrioritiesSection } from './PrioritiesSection';
-export { ActivitySection } from './ActivitySection';
-export { QuickActionsSection } from './QuickActionsSection';
+export { DashboardTopBar } from './DashboardTopBar';
+export { BentoTresorerie } from './BentoTresorerie';
+export { BentoAG } from './BentoAG';
+export { BentoBudget } from './BentoBudget';
+export { BentoODS } from './BentoODS';
+export { BentoPriorites } from './BentoPriorites';
+export { BentoActivite } from './BentoActivite';
 export { DashboardLoadingState, DashboardErrorState, DashboardEmptyState } from './DashboardStates';

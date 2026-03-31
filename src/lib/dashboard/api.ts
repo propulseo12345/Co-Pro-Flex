@@ -58,6 +58,9 @@ export interface DashboardTodo {
   deep_link: string;
   due_date: string | null;
   todo_type: TodoType;
+  context?: string;
+  deadline?: string;
+  action_label?: string;
 }
 
 // ============================================================================
