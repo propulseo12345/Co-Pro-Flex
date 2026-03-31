@@ -1,0 +1,119 @@
+.card {
+  padding: 20px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.cardActive {
+  composes: card;
+  border-color: #3b82f6;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+.basis {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.metaItem {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.metaValue {
+  font-weight: 600;
+  color: #94a3b8;
+  margin-left: 4px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.progressBar {
+  height: 4px;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressComplete {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  background: #22c55e;
+}
+
+.progressIncomplete {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  background: #f59e0b;
+}
+
+.warning {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detailPanel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.detailTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detailTable th {
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  text-align: left;
+  background: rgba(148, 163, 184, 0.04);
+}
+
+.detailTable td {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
