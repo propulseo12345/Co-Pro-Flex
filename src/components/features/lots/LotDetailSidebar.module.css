@@ -1,0 +1,91 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  padding: 20px;
+  background: #1a1d2e;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 12px;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.cardTitle svg { color: #64748b; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.field:last-child { margin-bottom: 0; }
+
+.fieldLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.fieldValue {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.fieldValueMono {
+  composes: fieldValue;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.fieldValueSuccess {
+  composes: fieldValueMono;
+  color: #22c55e;
+}
+
+.fieldValueDanger {
+  composes: fieldValueMono;
+  color: #ef4444;
+}
+
+.emptyNote {
+  font-size: 12px;
+  color: #475569;
+  font-style: italic;
+}
+
+.loanItem {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.loanItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.loanLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.loanMeta {
+  font-size: 11px;
+  color: #64748b;
+}
