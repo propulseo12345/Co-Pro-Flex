@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useRepartitionPage } from '@/hooks/modules/useRepartitionPage';
-import { RepartitionKeyCard, CreateKeyModal } from '@/components/features/lots';
+import { RepartitionKeyCard, CreateKeyModal, EditKeyModal } from '@/components/features/lots';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
+import type { RepartitionKeyWithTotals } from '@/lib/lots/api';
 import { Plus } from 'lucide-react';
 import styles from './repartition.module.css';
 
@@ -12,9 +14,11 @@ export default function RepartitionPage() {
   const {
     keys, isLoading, error, refresh,
     selectedKeyId, handleSelectKey, detail,
-    createKey, deleteKey, isMutating,
+    createKey, updateKey, deleteKey, isMutating,
     showCreateModal, setShowCreateModal,
   } = useRepartitionPage();
+
+  const [editingKey, setEditingKey] = useState<RepartitionKeyWithTotals | null>(null);
 
   if (!currentCoproId) return <LoadingState message="Chargement..." />;
 
@@ -47,6 +51,7 @@ export default function RepartitionPage() {
               onSelect={() => handleSelectKey(k.key_id)}
               detail={selectedKeyId === k.key_id ? detail : null}
               onDelete={() => deleteKey(k.key_id)}
+              onEdit={() => setEditingKey(k)}
             />
           ))}
         </div>
@@ -56,6 +61,13 @@ export default function RepartitionPage() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onCreate={createKey}
+        isMutating={isMutating}
+      />
+
+      <EditKeyModal
+        keyData={editingKey}
+        onClose={() => setEditingKey(null)}
+        onUpdate={updateKey}
         isMutating={isMutating}
       />
     </div>

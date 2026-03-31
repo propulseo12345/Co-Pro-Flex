@@ -5,7 +5,7 @@ import { useRepartitionKeys, useRepartitionKeyDetail } from '@/hooks/modules/use
 import { useLots } from '@/hooks/modules/useLotsData';
 
 export function useRepartitionPage() {
-  const { keys, isLoading, error, refresh, createKey, deleteKey, isMutating } = useRepartitionKeys();
+  const { keys, isLoading, error, refresh, createKey, updateKey, deleteKey, isMutating } = useRepartitionKeys();
   const { lots } = useLots();
   const [selectedKeyId, setSelectedKeyId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -18,7 +18,7 @@ export function useRepartitionPage() {
 
   return {
     keys, isLoading, error, refresh,
-    createKey, deleteKey, isMutating,
+    createKey, updateKey, deleteKey, isMutating,
     lots,
     selectedKeyId, handleSelectKey,
     detail,

@@ -17,9 +17,10 @@ interface RepartitionKeyCardProps {
   onSelect: () => void;
   detail: UseRepartitionKeyDetailReturn | null;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
-export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDelete }: RepartitionKeyCardProps) {
+export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDelete, onEdit }: RepartitionKeyCardProps) {
   const completePct = keyData.lots_count > 0
     ? (keyData.lots_with_weight_count / keyData.lots_count) * 100
     : 0;
@@ -109,7 +110,25 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDe
           )}
 
           {isSelected && detail && (
-            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.();
+                }}
+                style={{
+                  padding: '6px 12px',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '8px',
+                  color: '#3b82f6',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                Modifier la clé
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
