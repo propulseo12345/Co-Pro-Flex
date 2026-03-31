@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Edit } from 'lucide-react';
 import type { LotWithOwner } from '@/lib/lots/api';
 import type { LotSortField, SortDirection } from '@/hooks/modules/useLotsPage';
 import styles from './LotTable.module.css';
@@ -27,9 +27,10 @@ interface LotTableProps {
   sortField: LotSortField;
   sortDirection: SortDirection;
   onSort: (field: LotSortField) => void;
+  onEdit: (lot: LotWithOwner) => void;
 }
 
-export function LotTable({ lots, sortField, sortDirection, onSort }: LotTableProps) {
+export function LotTable({ lots, sortField, sortDirection, onSort, onEdit }: LotTableProps) {
   const router = useRouter();
 
   const SortIcon = ({ field }: { field: LotSortField }) => {
@@ -51,6 +52,7 @@ export function LotTable({ lots, sortField, sortDirection, onSort }: LotTablePro
             <th onClick={() => onSort('surface')}>Surface <SortIcon field="surface" /></th>
             <th onClick={() => onSort('tantiemes_generaux')}>Tantièmes <SortIcon field="tantiemes_generaux" /></th>
             <th onClick={() => onSort('owner_display_name')}>Propriétaire <SortIcon field="owner_display_name" /></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -80,6 +82,25 @@ export function LotTable({ lots, sortField, sortDirection, onSort }: LotTablePro
                 ) : (
                   <span className={styles.noOwner}>Non attribué</span>
                 )}
+              </td>
+              <td>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEdit(lot); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#3b82f6',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.15s',
+                  }}
+                  title="Modifier ce lot"
+                >
+                  <Edit size={15} />
+                </button>
               </td>
             </tr>
           ))}

@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { Search, Plus, RefreshCw } from 'lucide-react';
 import { useLotsPage } from '@/hooks/modules/useLotsPage';
-import { LotTable, CreateLotModal } from '@/components/features/lots';
+import { LotTable, CreateLotModal, EditLotModal } from '@/components/features/lots';
+import type { LotWithOwner } from '@/lib/lots/api';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
 import styles from './lots.module.css';
@@ -24,8 +26,10 @@ export default function LotsPage() {
     filteredLots, isLoading, error, searchQuery, setSearchQuery,
     filterType, setFilterType, sortField, sortDirection, handleSort,
     stats, showCreateModal, setShowCreateModal,
-    createLot, isMutating, refresh,
+    createLot, updateLot, deleteLot, isMutating, refresh,
   } = useLotsPage();
+
+  const [editingLot, setEditingLot] = useState<LotWithOwner | null>(null);
 
   if (!currentCoproId) {
     return <LoadingState message="Chargement de la copropriété..." />;
@@ -106,6 +110,7 @@ export default function LotsPage() {
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}
+          onEdit={setEditingLot}
         />
       )}
 
@@ -113,6 +118,14 @@ export default function LotsPage() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onCreate={createLot}
+        isMutating={isMutating}
+      />
+
+      <EditLotModal
+        lot={editingLot}
+        onClose={() => setEditingLot(null)}
+        onUpdate={updateLot}
+        onDelete={deleteLot}
         isMutating={isMutating}
       />
     </div>
