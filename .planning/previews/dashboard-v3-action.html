@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview 3/5 — Bento Action Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Floating label ── */
+  .preview-label {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(59,130,246,0.15);
+    color: #60a5fa;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(59,130,246,0.25);
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    background: #161822;
+    border-radius: 12px;
+    padding: 20px 28px;
+    border: 1px solid rgba(148,163,184,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .topbar-title { font-size: 24px; font-weight: 700; color: #e2e8f0; }
+  .topbar-sub { font-size: 14px; color: #94a3b8; margin-top: 2px; }
+  .topbar-actions { display: flex; gap: 10px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    white-space: nowrap;
+  }
+  .btn-pill { border-radius: 20px; padding: 8px 16px; font-size: 13px; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .btn-ghost {
+    background: rgba(148,163,184,0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+  .btn-full { width: 100%; }
+
+  .btn-outline-red { background: transparent; color: #ef4444; border: 1px solid #ef4444; }
+  .btn-outline-red:hover { background: rgba(239,68,68,0.1); }
+  .btn-outline-amber { background: transparent; color: #f59e0b; border: 1px solid #f59e0b; }
+  .btn-outline-amber:hover { background: rgba(245,158,11,0.1); }
+  .btn-outline-blue { background: transparent; color: #3b82f6; border: 1px solid #3b82f6; }
+  .btn-outline-blue:hover { background: rgba(59,130,246,0.1); }
+
+  /* ── Bento Grid ── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .card {
+    background: #1a1d2e;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(148,163,184,0.08);
+    display: flex;
+    flex-direction: column;
+  }
+  .span-2 { grid-column: span 2; }
+
+  /* ── Labels ── */
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  /* ── Mini-cards ── */
+  .mini-card {
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.04);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+
+  /* ── Monospace numbers ── */
+  .mono {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-blue { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .badge-red { background: rgba(239,68,68,0.1); color: #f87171; }
+  .badge-amber { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .badge-gray { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+  /* ── Dot ── */
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-red { background: #ef4444; }
+  .dot-blue { background: #3b82f6; }
+  .dot-gray { background: #64748b; }
+  .dot-green { background: #22c55e; }
+  .dot-amber { background: #f59e0b; }
+
+  /* ── Action link ── */
+  .action-link {
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; transition: opacity 0.2s;
+    background: none; border: none; font-family: 'Inter', sans-serif;
+  }
+  .action-link:hover { opacity: 0.8; }
+  .action-link-red { color: #ef4444; }
+  .action-link-blue { color: #3b82f6; }
+  .action-link-gray { color: #94a3b8; }
+
+  /* ── Block 1: Tresorerie ── */
+  .tresorerie-inner {
+    display: flex; align-items: center; justify-content: space-between; flex: 1;
+  }
+  .tresorerie-value {
+    font-size: 32px; font-weight: 800; color: #22c55e;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+  .tresorerie-detail { font-size: 13px; color: #94a3b8; }
+  .tresorerie-actions { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── Block 2: AG ── */
+  .ag-date { font-size: 22px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .ag-sub { font-size: 13px; color: #94a3b8; margin-bottom: 12px; }
+  .ag-countdown { margin-bottom: 16px; }
+
+  /* ── Block 3: Budget ── */
+  .budget-pct { font-size: 28px; font-weight: 700; color: #3b82f6; margin-bottom: 10px; }
+  .progress-track {
+    width: 100%; height: 4px; background: rgba(148,163,184,0.1);
+    border-radius: 4px; margin-bottom: 8px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; background: #3b82f6; border-radius: 4px; }
+  .budget-detail { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+
+  /* ── Block 4: ODS ── */
+  .ods-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .ods-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .ods-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  }
+  .ods-row-text { flex: 1; min-width: 0; }
+  .ods-row-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .ods-row-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── Block 5: Priorites ── */
+  .priority-items { display: flex; flex-direction: column; gap: 8px; }
+  .priority-item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+  }
+  .priority-bar {
+    width: 3px; align-self: stretch; border-radius: 3px; flex-shrink: 0;
+  }
+  .priority-bar-red { background: #ef4444; }
+  .priority-bar-amber { background: #f59e0b; }
+  .priority-bar-blue { background: #3b82f6; }
+  .priority-content { flex: 1; min-width: 0; }
+  .priority-title { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+  .priority-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .priority-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  /* ── Block 6: Activite ── */
+  .activity-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .activity-link {
+    font-size: 12px; font-weight: 600; color: #3b82f6;
+    cursor: pointer; background: none; border: none; font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+  }
+  .activity-link:hover { opacity: 0.8; }
+  .activity-items { display: flex; flex-direction: column; }
+  .activity-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    cursor: default;
+  }
+  .activity-item:hover { background: rgba(148,163,184,0.03); }
+  .activity-text { flex: 1; font-size: 13px; color: #e2e8f0; }
+  .activity-time { font-size: 12px; color: #64748b; flex-shrink: 0; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1200px) {
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    .span-2 { grid-column: span 2; }
+  }
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .bento { grid-template-columns: 1fr; }
+    .span-2 { grid-column: span 1; }
+    .topbar { flex-direction: column; gap: 14px; align-items: flex-start; }
+    .tresorerie-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .tresorerie-actions { flex-direction: row; }
+  }
+</style>
+</head>
+<body>
+
+<div class="preview-label">Preview 3/5 — Bento Action Board</div>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-sub">Résidence Les Lilas · Exercice 2026</div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-pill btn-primary">Créer ODS</button>
+    <button class="btn btn-pill btn-ghost">Appel de fonds</button>
+    <button class="btn btn-pill btn-ghost">Nouvelle facture</button>
+  </div>
+</div>
+
+<!-- ══════════ BENTO GRID ══════════ -->
+<div class="bento">
+
+  <!-- ── Block 1: Trésorerie (span 2) ── -->
+  <div class="card span-2">
+    <div class="label">Trésorerie</div>
+    <div class="tresorerie-inner">
+      <div>
+        <div class="tresorerie-value mono">847 291 &euro;</div>
+        <div class="tresorerie-detail">Compte courant <span class="mono">612 450 &euro;</span> · Fonds travaux <span class="mono">234 841 &euro;</span></div>
+      </div>
+      <div class="tresorerie-actions">
+        <button class="btn btn-ghost">Voir les comptes</button>
+        <button class="btn btn-ghost">Rapprocher</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Block 2: Prochaine AG ── -->
+  <div class="card">
+    <div class="label">Prochaine AG</div>
+    <div class="ag-date">12 avril 2026</div>
+    <div class="ag-sub">AG ordinaire · 14 résolutions</div>
+    <div class="ag-countdown"><span class="badge badge-blue">dans 12 jours</span></div>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary btn-full">Préparer l'AG</button>
+  </div>
+
+  <!-- ── Block 3: Budget ── -->
+  <div class="card">
+    <div class="label">Budget 2026</div>
+    <div class="budget-pct mono">68 %</div>
+    <div class="progress-track"><div class="progress-fill" style="width:68%"></div></div>
+    <div class="budget-detail"><span class="mono">184 500 &euro;</span> consommés sur <span class="mono">271 320 &euro;</span></div>
+    <div style="flex:1"></div>
+    <button class="btn btn-ghost btn-full">Voir le budget</button>
+  </div>
+
+  <!-- ── Block 4: Ordres de Service (span 2) ── -->
+  <div class="card span-2">
+    <div class="ods-header">
+      <div class="label" style="margin-bottom:0">Ordres de service</div>
+      <span class="badge badge-blue">7 ouverts</span>
+    </div>
+    <div class="ods-rows">
+      <div class="mini-card ods-row">
+        <span class="dot dot-red"></span>
+        <div class="ods-row-text">
+          <div class="ods-row-title">2 urgents</div>
+          <div class="ods-row-sub">Fuite toiture, Panne ascenseur</div>
+        </div>
+        <button class="action-link action-link-red">Traiter &rarr;</button>
+      </div>
+      <div class="mini-card ods-row">
+        <span class="dot dot-blue"></span>
+        <div class="ods-row-text">
+          <div class="ods-row-title">3 en cours</div>
+          <div class="ods-row-sub">Plomberie, Peinture, Serrurerie</div>
+        </div>
+        <button class="action-link action-link-blue">Suivre &rarr;</button>
+      </div>
+      <div class="mini-card ods-row">
+        <span class="dot dot-gray"></span>
+        <div class="ods-row-text">
+          <div class="ods-row-title">2 programmés</div>
+          <div class="ods-row-sub">Ravalement, Élagage</div>
+        </div>
+        <button class="action-link action-link-gray">Planifier &rarr;</button>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full">Créer un ordre de service</button>
+  </div>
+
+  <!-- ── Block 5: Priorités (span 2) ── -->
+  <div class="card span-2">
+    <div class="label">À traiter maintenant</div>
+    <div class="priority-items">
+      <div class="mini-card priority-item">
+        <div class="priority-bar priority-bar-red"></div>
+        <div class="priority-content">
+          <div class="priority-title">Relance impayés lot 3B</div>
+          <div class="priority-sub">M. Bernard — <span class="mono">4 580 &euro;</span></div>
+        </div>
+        <div class="priority-right">
+          <span class="badge badge-red">J+92</span>
+          <button class="btn btn-outline-red">Relancer</button>
+        </div>
+      </div>
+      <div class="mini-card priority-item">
+        <div class="priority-bar priority-bar-red"></div>
+        <div class="priority-content">
+          <div class="priority-title">Fuite toiture bât. C</div>
+          <div class="priority-sub">Signalée par Mme Petit</div>
+        </div>
+        <div class="priority-right">
+          <span class="badge badge-red">Urgent</span>
+          <button class="btn btn-outline-red">Créer ODS</button>
+        </div>
+      </div>
+      <div class="mini-card priority-item">
+        <div class="priority-bar priority-bar-amber"></div>
+        <div class="priority-content">
+          <div class="priority-title">Voter devis ravalement</div>
+          <div class="priority-sub">3 devis reçus — <span class="mono">45 000 à 67 000 &euro;</span></div>
+        </div>
+        <div class="priority-right">
+          <span class="badge badge-amber">AG 12/04</span>
+          <button class="btn btn-outline-amber">Comparer</button>
+        </div>
+      </div>
+      <div class="mini-card priority-item">
+        <div class="priority-bar priority-bar-amber"></div>
+        <div class="priority-content">
+          <div class="priority-title">Contrat ascenseur</div>
+          <div class="priority-sub">Fournisseur: Otis — <span class="mono">2 400 &euro;/an</span></div>
+        </div>
+        <div class="priority-right">
+          <span class="badge badge-amber">15/04</span>
+          <button class="btn btn-outline-amber">Renouveler</button>
+        </div>
+      </div>
+      <div class="mini-card priority-item">
+        <div class="priority-bar priority-bar-blue"></div>
+        <div class="priority-content">
+          <div class="priority-title">Appel de fonds T2</div>
+          <div class="priority-sub">Montant estimé: <span class="mono">67 830 &euro;</span></div>
+        </div>
+        <div class="priority-right">
+          <span class="badge badge-blue">01/04</span>
+          <button class="btn btn-outline-blue">Préparer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Block 6: Activité récente (span 2) ── -->
+  <div class="card span-2">
+    <div class="activity-header">
+      <div class="label" style="margin-bottom:0">Activité récente</div>
+      <button class="activity-link">Tout voir &rarr;</button>
+    </div>
+    <div class="activity-items">
+      <div class="activity-item">
+        <span class="dot dot-green"></span>
+        <span class="activity-text">Paiement reçu — M. Dupont, <span class="mono">1 250 &euro;</span></span>
+        <span class="activity-time">2h</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot dot-blue"></span>
+        <span class="activity-text">ODS plomberie créé — Bât. A, RDC</span>
+        <span class="activity-time">5h</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot dot-amber"></span>
+        <span class="activity-text">Facture EDF validée — <span class="mono">3 420 &euro;</span></span>
+        <span class="activity-time">Hier</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot dot-green"></span>
+        <span class="activity-text">ODS peinture clôturé — Bât. B</span>
+        <span class="activity-time">Hier</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot dot-blue"></span>
+        <span class="activity-text">Convocation AG envoyée — 47 copropriétaires</span>
+        <span class="activity-time">2j</span>
+      </div>
+      <div class="activity-item">
+        <span class="dot dot-red"></span>
+        <span class="activity-text">Relance J+60 envoyée — Lot 7A</span>
+        <span class="activity-time">3j</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bento -->
+
+</body>
+</html>

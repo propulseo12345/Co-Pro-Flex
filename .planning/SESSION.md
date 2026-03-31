@@ -1,27 +1,23 @@
-# Session State — 2026-03-31 17:00
+# Session State — 2026-03-31 21:10
 
 ## Branch
 v2
 
 ## Completed This Session
-- Plan implémentation états datés + lots/tantièmes (23 tasks, 5 phases)
-- Phase 1 SQL : 4 tables créées via MCP Supabase (collective_loans, loan_shares, treasury_advances, legal_proceedings) + seed data
-- Phase 2 UI : pages lots (liste, détail, répartition) → fusionnées en grille lots×clés spreadsheet
-- Phase 3 : types EtatDatePayloadV2 conforme décret 67-223
-- Phase 4 : génération PDF côté client (jsPDF, 5 sections)
-- Phase 5 : refonte EtatDateViewer (legacy V1 + V2 sous-composants)
-- Refonte UI copropriétaires (TopBar, KPIs, segmented tabs, design system)
-- CRUD lots (create/edit/delete + sélection propriétaire via lot_owners)
-- CRUD clés répartition (create/edit/soft delete + édition poids inline)
-- Fix formatage téléphone auto, fix soft delete FK constraint
+- Deep research dashboards SaaS (117 sources, tendances 2026, concurrents)
+- 5 previews HTML (Command Center, Zen, Action Board, Status Wall, Split View)
+- Dashboard Action Board implémenté : CSS bento grid, 7 composants, page reécrite
+- Nettoyage 8 anciens fichiers dashboard
+- Build OK (erreur TS préexistante lots/page.tsx non liée)
 
 ## Next Task
-Tester visuellement la grille lots×clés sur données réelles, vérifier les calculs de pourcentages
+Brainstorm migration mock→Supabase : modélisation DB unifiée pour éviter la duplication de données entre modules (ex: montant contrat = dépense budget = ligne comptable). L'utilisateur veut réfléchir aux liens entre entités avant de coder.
 
 ## Blockers
 None
 
 ## Key Context
-- Fonds ALUR = budget (type 'alur'), PAS une clé de répartition ni treasury_advance
-- deleteRepartitionKey fait un soft delete (is_active=false) pour éviter FK violation avec budget_lines
-- treasury_advances type 'work_fund' est redondant avec le système budgétaire ALUR existant
+- 117 fichiers utilisent encore des mock data (maintenance, finance, ventes, AG, communication)
+- Dashboard fonctionne sur Supabase (v_dashboard_kpis, v_dashboard_todos, v_dashboard_recent_activity)
+- Montants à 0 = normal, pas de données financières saisies dans Supabase encore
+- L'utilisateur veut une source unique de vérité par donnée (pas de duplication contrat↔budget↔compta)

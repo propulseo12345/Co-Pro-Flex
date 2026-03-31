@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard v2 — Bento Zen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .topbar-left h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1.2;
+  }
+  .topbar-left p {
+    font-size: 15px;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 4px;
+  }
+  .topbar-date {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .btn-ghost {
+    background: rgba(148,163,184,0.06);
+    border: 1px solid rgba(148,163,184,0.08);
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover {
+    background: rgba(148,163,184,0.1);
+    color: #e2e8f0;
+  }
+
+  /* ── Grid ── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  /* ── Card base ── */
+  .card {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 32px;
+    transition: border-color 0.25s ease;
+  }
+  .card:hover {
+    border-color: rgba(148,163,184,0.15);
+  }
+
+  /* ── Spans ── */
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+
+  /* ── Labels ── */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+
+  /* ── Action links ── */
+  .action {
+    font-size: 13px;
+    font-weight: 500;
+    color: #3b82f6;
+    text-decoration: none;
+    cursor: pointer;
+    transition: text-decoration 0.15s;
+  }
+  .action:hover { text-decoration: underline; }
+
+  /* ── Mono numbers ── */
+  .mono {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Hero: Tresorerie ── */
+  .hero-amount {
+    font-size: 48px;
+    font-weight: 800;
+    color: #e2e8f0;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .hero-sub {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 28px;
+  }
+  .hero-sub .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #64748b;
+  }
+
+  /* ── AG block ── */
+  .ag-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .ag-day {
+    font-size: 56px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1;
+  }
+  .ag-month {
+    font-size: 18px;
+    color: #94a3b8;
+    margin-top: 4px;
+    margin-bottom: 20px;
+  }
+  .ag-divider {
+    width: 48px;
+    height: 1px;
+    background: rgba(148,163,184,0.12);
+    margin-bottom: 20px;
+  }
+  .ag-detail {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+  .ag-detail.muted {
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+
+  /* ── Budget ── */
+  .big-num {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .big-num.primary { color: #3b82f6; }
+  .big-num.white { color: #e2e8f0; }
+  .sub-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+  .budget-detail {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+  }
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(148,163,184,0.08);
+    margin-bottom: 24px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: #3b82f6;
+  }
+
+  /* ── ODS ── */
+  .ods-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .ods-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  .dot-red { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+  .dot-blue { width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; }
+  .dot-gray { width: 7px; height: 7px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
+
+  /* ── Resume rapide ── */
+  .mini-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .mini-stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .mini-stat-label {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  /* ── Bottom full-width card ── */
+  .bottom-split {
+    display: flex;
+    gap: 32px;
+  }
+  .bottom-half {
+    flex: 1;
+    min-width: 0;
+  }
+  .bottom-divider {
+    width: 1px;
+    background: rgba(148,163,184,0.06);
+    flex-shrink: 0;
+  }
+
+  /* Priority items */
+  .priority-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .priority-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    padding-left: 16px;
+    border-left: 3px solid transparent;
+  }
+  .priority-item:not(:last-child) {
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+  }
+  .priority-item.red { border-left-color: #ef4444; }
+  .priority-item.orange { border-left-color: #f59e0b; }
+
+  .priority-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+  }
+  .priority-text {
+    font-size: 14px;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-red {
+    background: rgba(239,68,68,0.1);
+    color: #f87171;
+  }
+  .badge-amber {
+    background: rgba(245,158,11,0.1);
+    color: #fbbf24;
+  }
+  .priority-action {
+    margin-left: 16px;
+    flex-shrink: 0;
+  }
+
+  /* Activity items */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .activity-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    gap: 16px;
+  }
+  .activity-item:not(:last-child) {
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+  }
+  .activity-text {
+    font-size: 14px;
+    color: #94a3b8;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .activity-time {
+    font-size: 13px;
+    color: #64748b;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  /* ── Floating label ── */
+  .preview-label {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .bento {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 2; }
+    .bottom-split { flex-direction: column; }
+    .bottom-divider {
+      width: 100%;
+      height: 1px;
+    }
+  }
+  @media (max-width: 768px) {
+    .shell { padding: 24px 16px 80px; }
+    .bento {
+      grid-template-columns: 1fr;
+    }
+    .span-2, .span-3 { grid-column: span 1; }
+    .hero-amount { font-size: 36px; }
+    .ag-day { font-size: 44px; }
+    .big-num { font-size: 32px; }
+    .topbar { flex-direction: column; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p>Résidence Les Lilas &middot; Exercice 2026</p>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date">31 mars 2026</span>
+      <button class="btn-ghost">Rafraîchir</button>
+    </div>
+  </header>
+
+  <!-- Bento Grid -->
+  <div class="bento">
+
+    <!-- Row 1: Hero Tresorerie -->
+    <div class="card span-2">
+      <div class="label">Trésorerie globale</div>
+      <div class="hero-amount mono">847 291 &euro;</div>
+      <div class="hero-sub">
+        <span class="mono">CC 612 450 &euro;</span>
+        <span class="dot"></span>
+        <span class="mono">FT 234 841 &euro;</span>
+      </div>
+      <a class="action">Voir les comptes &rarr;</a>
+    </div>
+
+    <!-- Row 1: Prochaine AG -->
+    <div class="card">
+      <div class="ag-center">
+        <div class="label" style="margin-bottom:24px;">Prochaine AG</div>
+        <div class="ag-day">12</div>
+        <div class="ag-month">avril 2026</div>
+        <div class="ag-divider"></div>
+        <div class="ag-detail">AG ordinaire</div>
+        <div class="ag-detail muted">14 résolutions</div>
+        <a class="action">Préparer &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Row 2: Budget -->
+    <div class="card">
+      <div class="label">Budget</div>
+      <div class="big-num primary mono">68 %</div>
+      <div class="sub-label">consommé</div>
+      <div class="budget-detail mono">184 500 &euro; sur 271 320 &euro;</div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:68%"></div>
+      </div>
+      <a class="action">Détails &rarr;</a>
+    </div>
+
+    <!-- Row 2: Ordres de service -->
+    <div class="card">
+      <div class="label">Ordres de service</div>
+      <div class="big-num white">7</div>
+      <div class="sub-label">ordres de service ouverts</div>
+      <div class="ods-lines">
+        <div class="ods-line"><span class="dot-red"></span> 2 urgents</div>
+        <div class="ods-line"><span class="dot-blue"></span> 3 en cours</div>
+        <div class="ods-line"><span class="dot-gray"></span> 2 programmés</div>
+      </div>
+      <a class="action">Nouveau ODS &rarr;</a>
+    </div>
+
+    <!-- Row 2: Resume rapide -->
+    <div class="card">
+      <div class="label">Résumé rapide</div>
+      <div class="mini-stats">
+        <div>
+          <div class="mini-stat-num">12j</div>
+          <div class="mini-stat-label">avant la prochaine AG</div>
+        </div>
+        <div>
+          <div class="mini-stat-num">94%</div>
+          <div class="mini-stat-label">taux de recouvrement</div>
+        </div>
+        <div>
+          <div class="mini-stat-num">3</div>
+          <div class="mini-stat-label">devis en attente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Full width split card -->
+    <div class="card span-3">
+      <div class="bottom-split">
+
+        <!-- Left: A traiter -->
+        <div class="bottom-half">
+          <div class="label">À traiter</div>
+          <div class="priority-list">
+            <div class="priority-item red">
+              <div class="priority-content">
+                <span class="priority-text">Relance impayés lot 3B</span>
+                <span class="badge badge-red">J+92</span>
+              </div>
+              <a class="action priority-action">Relancer &rarr;</a>
+            </div>
+            <div class="priority-item red">
+              <div class="priority-content">
+                <span class="priority-text">Fuite toiture bât. C</span>
+                <span class="badge badge-red">Urgent</span>
+              </div>
+              <a class="action priority-action">Créer ODS &rarr;</a>
+            </div>
+            <div class="priority-item orange">
+              <div class="priority-content">
+                <span class="priority-text">Devis ravalement à voter</span>
+                <span class="badge badge-amber">AG 12/04</span>
+              </div>
+              <a class="action priority-action">Voir &rarr;</a>
+            </div>
+            <div class="priority-item orange">
+              <div class="priority-content">
+                <span class="priority-text">Contrat ascenseur</span>
+                <span class="badge badge-amber">Expire 15/04</span>
+              </div>
+              <a class="action priority-action">Renouveler &rarr;</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-divider"></div>
+
+        <!-- Right: Activite recente -->
+        <div class="bottom-half">
+          <div class="label">Activité récente</div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <span class="activity-text">Paiement reçu — M. Dupont, 1 250 &euro;</span>
+              <span class="activity-time">2h</span>
+            </div>
+            <div class="activity-item">
+              <span class="activity-text">ODS plomberie créé — Bât. A</span>
+              <span class="activity-time">5h</span>
+            </div>
+            <div class="activity-item">
+              <span class="activity-text">Facture EDF validée — 3 420 &euro;</span>
+              <span class="activity-time">Hier</span>
+            </div>
+            <div class="activity-item">
+              <span class="activity-text">Convocation AG envoyée</span>
+              <span class="activity-time">2j</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /bento -->
+</div><!-- /shell -->
+
+<div class="preview-label">Preview 2/5 — Bento Zen</div>
+
+</body>
+</html>

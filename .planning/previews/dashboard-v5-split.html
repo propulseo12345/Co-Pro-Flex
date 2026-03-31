@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard v5 — Bento Split View</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 32px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .dashboard {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+  .topbar-left h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+  }
+  .topbar-left p {
+    font-size: 14px;
+    font-weight: 400;
+    color: #94a3b8;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 4px;
+  }
+  .topbar-date {
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+  .btn-ghost {
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .btn-ghost:hover {
+    background: rgba(148, 163, 184, 0.1);
+    color: #e2e8f0;
+  }
+
+  /* ── Zone Label ── */
+  .zone-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .zone-label span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #64748b;
+    white-space: nowrap;
+  }
+  .zone-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(148, 163, 184, 0.06);
+  }
+
+  /* ── Situation Grid ── */
+  .situation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  /* ── KPI Card ── */
+  .kpi-card {
+    background: #1a1d2e;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-top: none;
+    position: relative;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 12px 12px 0 0;
+  }
+  .kpi-card.green::before  { background: #22c55e; }
+  .kpi-card.amber::before  { background: #f59e0b; }
+  .kpi-card.blue::before   { background: #3b82f6; }
+  .kpi-card.red::before    { background: #ef4444; }
+
+  .kpi-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+  .kpi-value.green { color: #22c55e; }
+  .kpi-value.amber { color: #f59e0b; }
+  .kpi-value.blue  { color: #e2e8f0; }
+  .kpi-value.red   { color: #e2e8f0; }
+
+  .kpi-detail {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(148, 163, 184, 0.08);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .progress-bar .fill {
+    height: 100%;
+    border-radius: 2px;
+    background: #f59e0b;
+    width: 68%;
+    transition: width 0.6s ease;
+  }
+
+  .kpi-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .kpi-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .kpi-status.green .dot  { background: #22c55e; }
+  .kpi-status.green       { color: #4ade80; }
+  .kpi-status.amber .dot  { background: #f59e0b; }
+  .kpi-status.amber       { color: #fbbf24; }
+  .kpi-status.blue .dot   { background: #3b82f6; }
+  .kpi-status.blue        { color: #60a5fa; }
+  .kpi-status.red .dot    { background: #ef4444; }
+  .kpi-status.red         { color: #f87171; }
+
+  /* ── Zone Separator ── */
+  .zone-separator {
+    height: 32px;
+    display: flex;
+    align-items: center;
+  }
+  .zone-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(148, 163, 184, 0.06);
+  }
+
+  /* ── Actions Grid ── */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .action-card {
+    background: #1e2233;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+  }
+  .action-card.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .action-header {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .action-header.red   { color: #f87171; }
+  .action-header.amber { color: #fbbf24; }
+  .action-header.blue  { color: #60a5fa; }
+
+  /* ── Mini Cards ── */
+  .mini-card {
+    background: #161822;
+    border: 1px solid rgba(148, 163, 184, 0.04);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .mini-card:last-child {
+    margin-bottom: 0;
+  }
+  .mini-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+  }
+  .mini-card-detail {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  .btn-outline {
+    display: block;
+    width: 100%;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 0;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .btn-outline.red {
+    border: 1px solid #ef4444;
+    color: #ef4444;
+  }
+  .btn-outline.red:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+  .btn-outline.amber {
+    border: 1px solid #f59e0b;
+    color: #f59e0b;
+  }
+  .btn-outline.amber:hover {
+    background: rgba(245, 158, 11, 0.1);
+  }
+  .btn-outline.blue {
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+  }
+  .btn-outline.blue:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  /* ── Activity Row ── */
+  .activity-card {
+    background: #1e2233;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    grid-column: 1 / -1;
+  }
+  .activity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .activity-header-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .activity-header-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: #3b82f6;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .activity-header-link:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+  }
+
+  .chips-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+  }
+  .chips-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #161822;
+    border: 1px solid rgba(148, 163, 184, 0.06);
+    border-radius: 20px;
+    padding: 8px 16px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 12px;
+    transition: border-color 0.15s ease;
+  }
+  .chip:hover {
+    border-color: rgba(148, 163, 184, 0.15);
+  }
+  .chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .chip-dot.green { background: #22c55e; }
+  .chip-dot.blue  { background: #3b82f6; }
+  .chip-dot.amber { background: #f59e0b; }
+  .chip-dot.red   { background: #ef4444; }
+  .chip-text {
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+  .chip-time {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  /* ── Floating Label ── */
+  .floating-label {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(30, 34, 51, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 20px;
+    z-index: 100;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1200px) {
+    .situation-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .actions-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .action-card.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    .topbar { flex-direction: column; gap: 12px; }
+    .situation-grid {
+      grid-template-columns: 1fr;
+    }
+    .actions-grid {
+      grid-template-columns: 1fr;
+    }
+    .chips-scroll {
+      flex-direction: column;
+    }
+    .chip {
+      white-space: normal;
+    }
+    .kpi-value { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p>Residence Les Lilas &middot; Exercice 2026</p>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date">31 mars 2026</span>
+      <button class="btn-ghost">Rafraichir</button>
+    </div>
+  </div>
+
+  <!-- ════════ ZONE 1 : SITUATION ════════ -->
+  <div class="zone-label"><span>SITUATION</span></div>
+
+  <div class="situation-grid">
+
+    <!-- Tresorerie -->
+    <div class="kpi-card green">
+      <div class="kpi-label">Tresorerie</div>
+      <div class="kpi-value green">847 291 &euro;</div>
+      <div class="kpi-detail">CC 612 450 &euro; &middot; FT 234 841 &euro;</div>
+      <div class="kpi-status green">
+        <span class="dot"></span> Excedentaire
+      </div>
+    </div>
+
+    <!-- Budget -->
+    <div class="kpi-card amber">
+      <div class="kpi-label">Budget 2026</div>
+      <div class="kpi-value amber">68 %</div>
+      <div class="kpi-detail">184 500 &euro; / 271 320 &euro;</div>
+      <div class="progress-bar"><div class="fill"></div></div>
+      <div class="kpi-status amber">
+        <span class="dot"></span> En avance +18%
+      </div>
+    </div>
+
+    <!-- Prochaine AG -->
+    <div class="kpi-card blue">
+      <div class="kpi-label">Prochaine AG</div>
+      <div class="kpi-value blue">12 avril</div>
+      <div class="kpi-detail" style="font-family: 'Inter', sans-serif;">AG ordinaire &middot; 14 resolutions</div>
+      <div class="kpi-status blue">
+        <span class="dot"></span> Dans 12 jours
+      </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="kpi-card red">
+      <div class="kpi-label">Maintenance</div>
+      <div class="kpi-value red">7 ODS</div>
+      <div class="kpi-detail" style="font-family: 'Inter', sans-serif;">2 urgents &middot; 3 en cours &middot; 2 programmes</div>
+      <div class="kpi-status red">
+        <span class="dot"></span> 2 urgences actives
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Zone Separator -->
+  <div class="zone-separator"></div>
+
+  <!-- ════════ ZONE 2 : ACTIONS ════════ -->
+  <div class="zone-label"><span>ACTIONS</span></div>
+
+  <div class="actions-grid">
+
+    <!-- Card A: Priorites critiques -->
+    <div class="action-card">
+      <div class="action-header red">&#x1F534; Critiques</div>
+      <div class="mini-card">
+        <div class="mini-card-title">Relance impayes lot 3B</div>
+        <div class="mini-card-detail">M. Bernard &mdash; 4 580 &euro; &middot; J+92</div>
+        <button class="btn-outline red">Relancer</button>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">Fuite toiture bat. C</div>
+        <div class="mini-card-detail">Signalement Mme Petit</div>
+        <button class="btn-outline red">Creer ODS</button>
+      </div>
+    </div>
+
+    <!-- Card B: A planifier -->
+    <div class="action-card">
+      <div class="action-header amber">&#x1F7E0; A planifier</div>
+      <div class="mini-card">
+        <div class="mini-card-title">Voter devis ravalement</div>
+        <div class="mini-card-detail">3 devis recus &middot; AG du 12/04</div>
+        <button class="btn-outline amber">Voir devis</button>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">Contrat ascenseur</div>
+        <div class="mini-card-detail">Expire le 15/04 &middot; Otis</div>
+        <button class="btn-outline amber">Renouveler</button>
+      </div>
+    </div>
+
+    <!-- Card C: En attente -->
+    <div class="action-card">
+      <div class="action-header blue">&#x1F535; En attente</div>
+      <div class="mini-card">
+        <div class="mini-card-title">PV AG 2025</div>
+        <div class="mini-card-detail">Finalise &middot; 47 destinataires</div>
+        <button class="btn-outline blue">Envoyer</button>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">Appel de fonds T2</div>
+        <div class="mini-card-detail">67 830 &euro; &middot; Echeance 01/04</div>
+        <button class="btn-outline blue">Preparer</button>
+      </div>
+    </div>
+
+    <!-- Card D: Activite recente -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <span class="activity-header-label">Activite recente</span>
+        <a class="activity-header-link" href="#">Voir tout &rarr;</a>
+      </div>
+      <div class="chips-scroll">
+        <div class="chip">
+          <span class="chip-dot green"></span>
+          <span class="chip-text">&#x1F4B0; Dupont +1 250 &euro;</span>
+          <span class="chip-time">2h</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot blue"></span>
+          <span class="chip-text">&#x1F527; ODS plomberie</span>
+          <span class="chip-time">5h</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot amber"></span>
+          <span class="chip-text">&#x1F4C4; Facture EDF</span>
+          <span class="chip-time">Hier</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot green"></span>
+          <span class="chip-text">&#x2705; ODS peinture cloture</span>
+          <span class="chip-time">Hier</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot blue"></span>
+          <span class="chip-text">&#x1F4E8; Convocation AG</span>
+          <span class="chip-time">2j</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot green"></span>
+          <span class="chip-text">&#x1F4B0; Martin +890 &euro;</span>
+          <span class="chip-time">2j</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot amber"></span>
+          <span class="chip-text">&#x1F4CB; Devis ravalement</span>
+          <span class="chip-time">3j</span>
+        </div>
+        <div class="chip">
+          <span class="chip-dot red"></span>
+          <span class="chip-text">&#x26A0;&#xFE0F; Relance J+60</span>
+          <span class="chip-time">3j</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Floating Label -->
+<div class="floating-label">Preview 5/5 &mdash; Bento Split View</div>
+
+</body>
+</html>

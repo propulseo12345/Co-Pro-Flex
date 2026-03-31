@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard v4 — Bento Status Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 32px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Top Bar */
+  .topbar {
+    background: #161822;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .topbar-left h1 { font-size: 24px; font-weight: 700; color: #e2e8f0; }
+  .topbar-left p { font-size: 14px; font-weight: 400; color: #94a3b8; margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-date { font-size: 13px; color: #94a3b8; font-weight: 500; }
+  .btn-ghost {
+    background: rgba(148,163,184,0.06);
+    border: 1px solid rgba(148,163,184,0.08);
+    color: #94a3b8;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+
+  /* Grid */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  /* Card base */
+  .card {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status headers */
+  .status-header {
+    height: 44px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .status-header.green  { background: rgba(34,197,94,0.08); }
+  .status-header.amber  { background: rgba(245,158,11,0.08); }
+  .status-header.red    { background: rgba(239,68,68,0.08); }
+  .status-header.blue   { background: rgba(59,130,246,0.08); }
+  .status-header.gradient {
+    background: linear-gradient(90deg, rgba(34,197,94,0.08), rgba(245,158,11,0.08), rgba(239,68,68,0.08), rgba(59,130,246,0.08));
+  }
+
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .status-dot.green  { background: #22c55e; }
+  .status-dot.amber  { background: #f59e0b; }
+  .status-dot.red    { background: #ef4444; }
+  .status-dot.blue   { background: #3b82f6; }
+
+  .status-label {
+    font-size: 12px; font-weight: 600;
+  }
+  .status-label.green  { color: #4ade80; }
+  .status-label.amber  { color: #fbbf24; }
+  .status-label.red    { color: #f87171; }
+  .status-label.blue   { color: #60a5fa; }
+
+  .status-header .card-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #94a3b8; margin-left: auto;
+  }
+
+  /* Card body */
+  .card-body { padding: 20px 24px 24px; flex: 1; display: flex; flex-direction: column; }
+
+  /* Spans */
+  .span-2    { grid-column: span 2; }
+  .row-span-2 { grid-row: span 2; }
+
+  /* Monospace financial */
+  .mono {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Action links */
+  .action-link {
+    color: #3b82f6; font-size: 13px; font-weight: 500;
+    text-decoration: none; cursor: pointer; transition: color 0.15s;
+  }
+  .action-link:hover { color: #60a5fa; text-decoration: underline; }
+
+  /* Separator */
+  .separator {
+    border: none; border-top: 1px solid rgba(148,163,184,0.08);
+    margin: 16px 0;
+  }
+
+  /* ===== BLOCK 1: Trésorerie ===== */
+  .tresorerie-amount { font-size: 36px; font-weight: 800; color: #22c55e; margin-bottom: 16px; }
+  .tresorerie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tresorerie-item-label { font-size: 12px; color: #94a3b8; margin-bottom: 2px; }
+  .tresorerie-item-value { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+  .tresorerie-last { font-size: 12px; color: #64748b; margin-top: 4px; }
+  .tresorerie-last span { color: #4ade80; font-weight: 500; }
+
+  /* ===== BLOCK 2: AG ===== */
+  .ag-date { font-size: 24px; font-weight: 700; color: #e2e8f0; margin-bottom: 16px; }
+  .ag-details { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .ag-detail { font-size: 13px; color: #94a3b8; }
+  .ag-detail .value { color: #e2e8f0; font-weight: 500; }
+  .ag-detail .check { color: #4ade80; }
+
+  /* ===== BLOCK 3: Budget ===== */
+  .budget-pct { font-size: 28px; font-weight: 700; color: #f59e0b; margin-bottom: 4px; }
+  .budget-detail { font-size: 13px; color: #94a3b8; margin-bottom: 12px; }
+  .progress-bar { height: 4px; background: rgba(148,163,184,0.1); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+  .progress-fill { height: 100%; border-radius: 2px; }
+  .progress-fill.amber { background: #f59e0b; }
+  .budget-warning { font-size: 12px; color: #f59e0b; line-height: 1.4; }
+
+  /* ===== BLOCK 4: ODS ===== */
+  .ods-group { margin-bottom: 14px; }
+  .ods-group:last-of-type { margin-bottom: 0; }
+  .ods-group-title {
+    font-size: 12px; font-weight: 600; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ods-group-title.urgent { color: #f87171; }
+  .ods-group-title.en-cours { color: #60a5fa; }
+  .ods-group-title.programme { color: #94a3b8; }
+  .ods-list { display: flex; flex-direction: column; gap: 6px; padding-left: 22px; }
+  .ods-item {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: #e2e8f0;
+  }
+  .ods-item .action-link { font-size: 12px; }
+
+  /* ===== BLOCK 5: Santé Globale ===== */
+  .sante-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .sante-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px; background: rgba(148,163,184,0.03); border-radius: 8px;
+  }
+  .sante-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .sante-dot.green { background: #22c55e; }
+  .sante-dot.red { background: #ef4444; }
+  .sante-dot.amber { background: #f59e0b; }
+  .sante-name { font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
+  .sante-status { font-size: 12px; color: #94a3b8; }
+
+  /* ===== BLOCK 6: Priorités ===== */
+  .priority-list { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .priority-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s;
+  }
+  .priority-item:hover { background: rgba(148,163,184,0.03); }
+  .priority-item.critique { border-left-color: #ef4444; }
+  .priority-item.attention { border-left-color: #f59e0b; }
+  .priority-item.normal { border-left-color: #3b82f6; }
+  .priority-icon { font-size: 14px; flex-shrink: 0; width: 20px; text-align: center; }
+  .priority-content { flex: 1; min-width: 0; }
+  .priority-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .priority-context { font-size: 12px; color: #64748b; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .priority-badge {
+    font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .priority-badge.critique { background: rgba(239,68,68,0.1); color: #f87171; }
+  .priority-badge.attention { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .priority-badge.normal { background: rgba(59,130,246,0.1); color: #60a5fa; }
+  .priority-action { flex-shrink: 0; }
+  .priority-action .action-link { font-size: 12px; }
+
+  /* ===== BLOCK 7: Activité ===== */
+  .activity-list { display: flex; flex-direction: column; gap: 0; flex: 1; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid rgba(148,163,184,0.04);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .activity-dot.green { background: #22c55e; }
+  .activity-dot.blue { background: #3b82f6; }
+  .activity-dot.amber { background: #f59e0b; }
+  .activity-dot.red { background: #ef4444; }
+  .activity-dot.gray { background: #64748b; }
+  .activity-text { font-size: 13px; color: #e2e8f0; flex: 1; }
+  .activity-time { font-size: 11px; color: #64748b; flex-shrink: 0; white-space: nowrap; }
+
+  /* Floating label */
+  .floating-label {
+    position: fixed; bottom: 24px; right: 24px;
+    background: rgba(26,29,46,0.95); border: 1px solid rgba(148,163,184,0.12);
+    padding: 10px 18px; border-radius: 10px;
+    font-size: 12px; font-weight: 600; color: #94a3b8;
+    backdrop-filter: blur(12px); z-index: 100;
+  }
+
+  /* Card footer */
+  .card-footer { margin-top: auto; padding-top: 16px; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .bento-grid { grid-template-columns: repeat(2, 1fr); }
+    .span-2 { grid-column: span 2; }
+  }
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    .bento-grid { grid-template-columns: 1fr; }
+    .span-2 { grid-column: span 1; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>Dashboard</h1>
+    <p>Résidence Les Lilas · Exercice 2026</p>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-date">31 mars 2026</span>
+    <button class="btn-ghost">Rafraîchir</button>
+  </div>
+</div>
+
+<!-- Bento Grid -->
+<div class="bento-grid">
+
+  <!-- Block 1: Trésorerie (span 2, row-span 2) -->
+  <div class="card span-2 row-span-2">
+    <div class="status-header green">
+      <span class="status-dot green"></span>
+      <span class="status-label green">Sain</span>
+      <span class="card-title">Trésorerie</span>
+    </div>
+    <div class="card-body">
+      <div class="tresorerie-amount mono">847 291 €</div>
+      <div class="tresorerie-grid">
+        <div>
+          <div class="tresorerie-item-label">Compte courant</div>
+          <div class="tresorerie-item-value mono">612 450 €</div>
+        </div>
+        <div>
+          <div class="tresorerie-item-label">Fonds travaux</div>
+          <div class="tresorerie-item-value mono">234 841 €</div>
+        </div>
+      </div>
+      <hr class="separator">
+      <div class="tresorerie-last">Dernier mouvement : Paiement Dupont <span>+1 250 €</span> (il y a 2h)</div>
+      <div class="card-footer">
+        <a class="action-link">Voir les comptes →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 2: Prochaine AG -->
+  <div class="card">
+    <div class="status-header blue">
+      <span class="status-dot blue"></span>
+      <span class="status-label blue">Planifié</span>
+      <span class="card-title">Prochaine AG</span>
+    </div>
+    <div class="card-body">
+      <div class="ag-date">12 avril 2026</div>
+      <div class="ag-details">
+        <div class="ag-detail">Type : <span class="value">AG ordinaire</span></div>
+        <div class="ag-detail">Résolutions : <span class="value">14</span></div>
+        <div class="ag-detail">Délai : <span class="value">12 jours</span></div>
+        <div class="ag-detail">Convocations : <span class="check">Envoyées ✓</span></div>
+      </div>
+      <div class="card-footer">
+        <a class="action-link">Préparer l'AG →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 3: Budget -->
+  <div class="card">
+    <div class="status-header amber">
+      <span class="status-dot amber"></span>
+      <span class="status-label amber">Attention</span>
+      <span class="card-title">Budget 2026</span>
+    </div>
+    <div class="card-body">
+      <div class="budget-pct mono">68 %</div>
+      <div class="budget-detail mono">184 500 € / 271 320 €</div>
+      <div class="progress-bar">
+        <div class="progress-fill amber" style="width: 68%"></div>
+      </div>
+      <div class="budget-warning">⚠ Consommation en avance de 18% sur le prévisionnel</div>
+      <div class="card-footer">
+        <a class="action-link">Analyser →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 4: Ordres de Service (span 2) -->
+  <div class="card span-2">
+    <div class="status-header red">
+      <span class="status-dot red"></span>
+      <span class="status-label red">2 urgents</span>
+      <span class="card-title">Ordres de service</span>
+    </div>
+    <div class="card-body">
+      <div class="ods-group">
+        <div class="ods-group-title urgent">🔴 Urgents (2)</div>
+        <div class="ods-list">
+          <div class="ods-item"><span>Fuite toiture bât. C</span> <a class="action-link">Traiter</a></div>
+          <div class="ods-item"><span>Panne ascenseur bât. A</span> <a class="action-link">Traiter</a></div>
+        </div>
+      </div>
+      <div class="ods-group">
+        <div class="ods-group-title en-cours">🔵 En cours (3)</div>
+        <div class="ods-list">
+          <div class="ods-item"><span>Plomberie RDC · Peinture cage B · Serrurerie</span> <a class="action-link">Suivre</a></div>
+        </div>
+      </div>
+      <div class="ods-group">
+        <div class="ods-group-title programme">⚪ Programmés (2)</div>
+        <div class="ods-list">
+          <div class="ods-item"><span>Ravalement façade · Élagage</span> <a class="action-link">Planifier</a></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="action-link">Créer un ODS →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 5: Santé Globale (span 2) -->
+  <div class="card span-2">
+    <div class="status-header gradient">
+      <span class="status-dot green"></span>
+      <span class="status-label green">Vue d'ensemble</span>
+      <span class="card-title">Santé globale</span>
+    </div>
+    <div class="card-body">
+      <div class="sante-grid">
+        <div class="sante-item">
+          <span class="sante-dot green"></span>
+          <div>
+            <div class="sante-name">Trésorerie</div>
+            <div class="sante-status">Excédentaire +3.2%</div>
+          </div>
+        </div>
+        <div class="sante-item">
+          <span class="sante-dot red"></span>
+          <div>
+            <div class="sante-name">Impayés</div>
+            <div class="sante-status">5 copropriétaires en retard</div>
+          </div>
+        </div>
+        <div class="sante-item">
+          <span class="sante-dot amber"></span>
+          <div>
+            <div class="sante-name">Budget</div>
+            <div class="sante-status">Consommation en avance</div>
+          </div>
+        </div>
+        <div class="sante-item">
+          <span class="sante-dot green"></span>
+          <div>
+            <div class="sante-name">Maintenance</div>
+            <div class="sante-status">2 urgences, 3 en cours</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 6: Priorités (span 2, row-span 2) -->
+  <div class="card span-2 row-span-2">
+    <div class="status-header red">
+      <span class="status-dot red"></span>
+      <span class="status-label red">6 actions requises</span>
+      <span class="card-title">Priorités</span>
+    </div>
+    <div class="card-body">
+      <div class="priority-list">
+        <div class="priority-item critique">
+          <span class="priority-icon">🔴</span>
+          <div class="priority-content">
+            <div class="priority-name">Relance impayés lot 3B</div>
+            <div class="priority-context">M. Bernard — 4 580 € · Procédure recommandée</div>
+          </div>
+          <span class="priority-badge critique">J+92</span>
+          <div class="priority-action"><a class="action-link">Relancer</a></div>
+        </div>
+        <div class="priority-item critique">
+          <span class="priority-icon">🔴</span>
+          <div class="priority-content">
+            <div class="priority-name">Fuite toiture bât. C</div>
+            <div class="priority-context">Signalement Mme Petit · Dégât potentiel</div>
+          </div>
+          <span class="priority-badge critique">Urgent</span>
+          <div class="priority-action"><a class="action-link">Créer ODS</a></div>
+        </div>
+        <div class="priority-item attention">
+          <span class="priority-icon">🟠</span>
+          <div class="priority-content">
+            <div class="priority-name">Voter devis ravalement</div>
+            <div class="priority-context">3 devis : 45k-67k € · À l'ordre du jour AG</div>
+          </div>
+          <span class="priority-badge attention">AG 12/04</span>
+          <div class="priority-action"><a class="action-link">Voir devis</a></div>
+        </div>
+        <div class="priority-item attention">
+          <span class="priority-icon">🟠</span>
+          <div class="priority-content">
+            <div class="priority-name">Renouveler contrat ascenseur</div>
+            <div class="priority-context">Otis · 2 400 €/an · En négociation</div>
+          </div>
+          <span class="priority-badge attention">15/04</span>
+          <div class="priority-action"><a class="action-link">Renouveler</a></div>
+        </div>
+        <div class="priority-item normal">
+          <span class="priority-icon">🔵</span>
+          <div class="priority-content">
+            <div class="priority-name">Envoyer PV AG 2025</div>
+            <div class="priority-context">Finalisé · 47 destinataires</div>
+          </div>
+          <span class="priority-badge normal">En attente</span>
+          <div class="priority-action"><a class="action-link">Envoyer</a></div>
+        </div>
+        <div class="priority-item normal">
+          <span class="priority-icon">🔵</span>
+          <div class="priority-content">
+            <div class="priority-name">Préparer appel T2</div>
+            <div class="priority-context">67 830 € estimés · 52 lots</div>
+          </div>
+          <span class="priority-badge normal">01/04</span>
+          <div class="priority-action"><a class="action-link">Préparer</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 7: Activité (span 2, row-span 2) -->
+  <div class="card span-2 row-span-2">
+    <div class="status-header green">
+      <span class="status-dot green"></span>
+      <span class="status-label green">8 événements</span>
+      <span class="card-title">Activité récente</span>
+    </div>
+    <div class="card-body">
+      <div class="activity-list">
+        <div class="activity-item">
+          <span class="activity-dot green"></span>
+          <span class="activity-text">Paiement reçu — M. Dupont, lot 2A (+1 250 €)</span>
+          <span class="activity-time">Il y a 2h</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot blue"></span>
+          <span class="activity-text">Convocations AG envoyées — 47 copropriétaires</span>
+          <span class="activity-time">Il y a 4h</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot red"></span>
+          <span class="activity-text">Signalement urgent — Fuite toiture bât. C (Mme Petit)</span>
+          <span class="activity-time">Hier 18h</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot amber"></span>
+          <span class="activity-text">Relance automatique J+90 — M. Bernard, lot 3B</span>
+          <span class="activity-time">Hier 14h</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot blue"></span>
+          <span class="activity-text">Devis reçu — Ravalement façade, Ets Martin (52 400 €)</span>
+          <span class="activity-time">Hier 10h</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot green"></span>
+          <span class="activity-text">Intervention terminée — Plomberie RDC, résolu</span>
+          <span class="activity-time">28 mars</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot gray"></span>
+          <span class="activity-text">Document ajouté — PV AG 2025 (version finale)</span>
+          <span class="activity-time">27 mars</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot green"></span>
+          <span class="activity-text">Paiement reçu — Mme Leroy, lot 1C (+890 €)</span>
+          <span class="activity-time">27 mars</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="action-link">Voir tout l'historique →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Floating Label -->
+<div class="floating-label">Preview 4/5 — Bento Status Wall</div>
+
+</body>
+</html>
