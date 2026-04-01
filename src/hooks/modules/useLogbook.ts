@@ -32,7 +32,7 @@ import type {
     ToastType
 } from '@/components/features/maintenance/Logbook/types';
 import { isDocumentExpired, isDocumentExpiringSoon, isEcheanceProche, isGarantieEnCours, getInitialInterventionForm } from '@/components/features/maintenance/Logbook/utils';
-import { DocumentTechnique, ContratAssurance, CategoriePrestataire } from '@/types';
+import { DocumentTechnique, ContratAssurance, CategoriePrestataire, TypeDocumentTechnique, SousTypeAssurance, TravauxPrevisionnel } from '@/types';
 import type { Prestataire } from '@/types';
 
 // ============================================================================
@@ -138,7 +138,7 @@ export function useLogbook() {
 
     // === SUPABASE: documents techniques, travaux, assurances ===
     const [technicalDocs, setTechnicalDocs] = useState<DocumentTechnique[]>([]);
-    const [plannedWorks, setPlannedWorks] = useState<Array<{ id: string; titre: string; description: string; type: string; datePrevisionnelle: string; dateVote?: string; montantEstime: number; montantVote?: number; statut: string; priorite: string; issuPPT: boolean; observations?: string }>>([]);
+    const [plannedWorks, setPlannedWorks] = useState<TravauxPrevisionnel[]>([]);
     const [insurancePolicies, setInsurancePolicies] = useState<ContratAssurance[]>([]);
 
     useEffect(() => {
@@ -156,7 +156,7 @@ export function useLogbook() {
                     setTechnicalDocs(data.map((d: Record<string, unknown>) => ({
                         id: d.id as string,
                         nom: d.name as string,
-                        type: (d.doc_type as string).toUpperCase(),
+                        type: (d.doc_type as string).toUpperCase() as TypeDocumentTechnique,
                         dateAjout: d.added_date as string,
                         dateValidite: d.validity_date as string | undefined,
                         url: d.storage_path as string || '#',
@@ -177,13 +177,13 @@ export function useLogbook() {
                         id: w.id as string,
                         titre: w.title as string,
                         description: (w.description as string) || '',
-                        type: (w.work_type as string).toUpperCase(),
+                        type: (w.work_type as string).toUpperCase() as TravauxPrevisionnel['type'],
                         datePrevisionnelle: w.planned_date as string || '',
                         dateVote: w.vote_date as string | undefined,
                         montantEstime: Number(w.estimated_amount) || 0,
                         montantVote: w.voted_amount ? Number(w.voted_amount) : undefined,
-                        statut: (w.status as string).toUpperCase(),
-                        priorite: (w.priority as string).toUpperCase(),
+                        statut: (w.status as string).toUpperCase() as TravauxPrevisionnel['statut'],
+                        priorite: (w.priority as string).toUpperCase() as TravauxPrevisionnel['priorite'],
                         issuPPT: w.from_ppt as boolean,
                         observations: w.observations as string | undefined,
                     })));
@@ -200,7 +200,7 @@ export function useLogbook() {
                     setInsurancePolicies(data.map((p: Record<string, unknown>) => ({
                         id: p.id as string,
                         type: 'ASSURANCE' as const,
-                        sousType: (p.sub_type as string).toUpperCase(),
+                        sousType: (p.sub_type as string).toUpperCase() as SousTypeAssurance,
                         nom: p.insurer_name as string,
                         assureur: p.insurer_name as string,
                         numeroPolice: p.policy_number as string,
@@ -291,9 +291,9 @@ export function useLogbook() {
             adresse: currentCopro.address || '',
             codePostal: currentCopro.postal_code || '',
             ville: currentCopro.city || '',
-            anneeConstruction: (currentCopro as Record<string, unknown>).construction_year as number || 0,
-            nombreBatiments: (currentCopro as Record<string, unknown>).buildings_count as number || 1,
-            nombreLots: (currentCopro as Record<string, unknown>).lots_count as number || 0,
+            anneeConstruction: (currentCopro as unknown as Record<string, unknown>).construction_year as number || 0,
+            nombreBatiments: (currentCopro as unknown as Record<string, unknown>).buildings_count as number || 1,
+            nombreLots: (currentCopro as unknown as Record<string, unknown>).lots_count as number || 0,
             syndicNom: syndicInfo.nom || '',
             syndicTelephone: syndicInfo.telephone || '',
             syndicEmail: syndicInfo.email || '',
@@ -841,6 +841,7 @@ export function useLogbook() {
             anneeConstruction: formData.anneeConstruction,
             nombreBatiments: formData.nombreBatiments,
             nombreLots: formData.nombreLots,
+            equipementsPrincipaux: [],
             syndic: {
                 nom: formData.syndicNom,
                 telephone: formData.syndicTelephone,

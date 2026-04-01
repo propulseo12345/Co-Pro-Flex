@@ -84,10 +84,10 @@ export function useGlobalVariables(options: UseGlobalVariablesOptions = {}): Use
 
     // Nom du syndic formaté (raison sociale ou nom complet)
     const nomSyndic = useMemo(() => {
-        if (contratSyndic.cabinetNom) {
+        if (contratSyndic?.cabinetNom) {
             return contratSyndic.cabinetNom;
         }
-        return contratSyndic.nomSyndic || '';
+        return contratSyndic?.nomSyndic || '';
     }, [contratSyndic]);
 
     // Modalités formatées

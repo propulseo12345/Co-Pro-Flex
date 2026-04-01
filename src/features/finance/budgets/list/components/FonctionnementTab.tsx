@@ -111,7 +111,7 @@ export function FonctionnementTab({
           libelle: d.libelle,
           date: d.date,
           montant: d.montant,
-          poste: d.poste,
+          poste: d.poste as PosteBudget | undefined,
           compteCharge: d.compteId || '',
           fournisseur: d.fournisseur || '',
           statut: d.statut || '',

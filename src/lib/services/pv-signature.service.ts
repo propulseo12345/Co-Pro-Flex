@@ -133,9 +133,9 @@ class PVSignatureService {
 
     // Président
     if (roles.presidentSeance?.nom) {
-      const copro = roles.presidentSeance.coproprietaireId
-        ? null
-        : null;
+      // TODO: lookup copro contact info from DB when available
+      const coproEmail: string | undefined = undefined;
+      const coproTelephone: string | undefined = undefined;
 
       const { prenom, nom } = this.parseFullName(roles.presidentSeance.nom);
 
@@ -147,8 +147,8 @@ class PVSignatureService {
         typePersonne: 'coproprietaire',
         nom,
         prenom,
-        email: copro?.email,
-        telephone: copro?.telephone,
+        email: coproEmail,
+        telephone: coproTelephone,
         statut: 'en_attente',
         signaturePhysique: false,
         sourceRoleAG: true,
@@ -159,9 +159,9 @@ class PVSignatureService {
 
     // Secrétaire
     if (roles.secretaireSeance?.nom) {
-      const copro = roles.secretaireSeance.coproprietaireId
-        ? null
-        : null;
+      // TODO: lookup copro contact info from DB when available
+      const coproEmail: string | undefined = undefined;
+      const coproTelephone: string | undefined = undefined;
 
       const { prenom, nom } = this.parseFullName(roles.secretaireSeance.nom);
       const isGestionnaire = roles.secretaireSeance.estGestionnaire;
@@ -174,8 +174,8 @@ class PVSignatureService {
         typePersonne: isGestionnaire ? 'gestionnaire' : 'coproprietaire',
         nom,
         prenom,
-        email: copro?.email,
-        telephone: copro?.telephone,
+        email: coproEmail,
+        telephone: coproTelephone,
         societe: isGestionnaire ? roles.secretaireSeance.representeSyndic : undefined,
         statut: 'en_attente',
         signaturePhysique: false,
@@ -187,9 +187,9 @@ class PVSignatureService {
 
     // Scrutateur
     if (roles.scrutateur?.nom) {
-      const copro = roles.scrutateur.coproprietaireId
-        ? null
-        : null;
+      // TODO: lookup copro contact info from DB when available
+      const coproEmail: string | undefined = undefined;
+      const coproTelephone: string | undefined = undefined;
 
       const { prenom, nom } = this.parseFullName(roles.scrutateur.nom);
 
@@ -201,8 +201,8 @@ class PVSignatureService {
         typePersonne: 'coproprietaire',
         nom,
         prenom,
-        email: copro?.email,
-        telephone: copro?.telephone,
+        email: coproEmail,
+        telephone: coproTelephone,
         statut: 'en_attente',
         signaturePhysique: false,
         sourceRoleAG: true,

@@ -141,17 +141,16 @@ ${SYNDIC_INFO.email} – ${SYNDIC_INFO.telephone}`;
     };
 
     const handleDownloadPDF = () => {
-        const copropriete = MOCK_INFORMATIONS_COPROPRIETE;
         const doc = generateResiliationPDF({
             contrat,
             dateEffet: dateResiliation,
             courrierTexte,
             syndicInfo: SYNDIC_INFO,
             copropriete: {
-                nom: copropriete.nom,
-                adresse: copropriete.adresse,
-                codePostal: copropriete.codePostal,
-                ville: copropriete.ville
+                nom: coproNom,
+                adresse: coproAdresse,
+                codePostal: coproCodePostal,
+                ville: coproVille
             }
         });
         const numeroContratSafe = (contrat.numeroContrat || contrat.id).replace(/[^a-zA-Z0-9]/g, '_');
@@ -187,14 +186,13 @@ ${SYNDIC_INFO.email} – ${SYNDIC_INFO.telephone}`;
         setModeEnvoi('RECOMMANDE_ELECTRONIQUE');
 
         try {
-            const copropriete = MOCK_INFORMATIONS_COPROPRIETE;
             const response = await recommandeService.envoyer({
                 destinataire: {
                     nom: contrat.fournisseur,
                     email: '', // À compléter avec l'email du prestataire
                 },
                 expediteur: {
-                    nom: copropriete.nom,
+                    nom: coproNom,
                     email: SYNDIC_INFO.email,
                 },
                 objet: `Résiliation du contrat n° ${contrat.numeroContrat || contrat.id}`,

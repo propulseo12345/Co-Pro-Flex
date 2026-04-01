@@ -37,6 +37,9 @@ export type Database = {
       }
       accounting_periods: {
         Row: {
+          approval_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
           closed_at: string | null
           closed_by: string | null
           copro_id: string
@@ -52,6 +55,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           closed_at?: string | null
           closed_by?: string | null
           copro_id: string
@@ -67,6 +73,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           closed_at?: string | null
           closed_by?: string | null
           copro_id?: string
@@ -296,6 +305,13 @@ export type Database = {
             columns: ["ag_id"]
             isOneToOne: false
             referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_attendance_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
             referencedColumns: ["ag_id"]
           },
           {
@@ -634,6 +650,13 @@ export type Database = {
             referencedColumns: ["ag_id"]
           },
           {
+            foreignKeyName: "ag_correspondence_votes_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
             foreignKeyName: "ag_correspondence_votes_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -719,6 +742,115 @@ export type Database = {
           },
         ]
       }
+      ag_envoi_tracking: {
+        Row: {
+          ag_id: string
+          coproprietaire_id: string
+          created_at: string | null
+          delivered_at: string | null
+          document_id: string | null
+          error_message: string | null
+          id: string
+          method: string
+          sent_at: string | null
+          status: string
+          tracking_ref: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ag_id: string
+          coproprietaire_id: string
+          created_at?: string | null
+          delivered_at?: string | null
+          document_id?: string | null
+          error_message?: string | null
+          id?: string
+          method: string
+          sent_at?: string | null
+          status?: string
+          tracking_ref?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ag_id?: string
+          coproprietaire_id?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          document_id?: string | null
+          error_message?: string | null
+          id?: string
+          method?: string
+          sent_at?: string | null
+          status?: string
+          tracking_ref?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ag_envoi_tracking_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "ag_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_correspondence_status"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_drafts_progress"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_coproprietaire_id_fkey"
+            columns: ["coproprietaire_id"]
+            isOneToOne: false
+            referencedRelation: "coproprietaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_coproprietaire_id_fkey"
+            columns: ["coproprietaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_coproprietaires_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_envoi_tracking_coproprietaire_id_fkey"
+            columns: ["coproprietaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_financial_summary"
+            referencedColumns: ["coproprietaire_id"]
+          },
+        ]
+      }
       ag_meetings: {
         Row: {
           closed_at: string | null
@@ -738,6 +870,8 @@ export type Database = {
           president_id: string | null
           president_name: string | null
           pv_document_id: string | null
+          pv_generated_at: string | null
+          pv_sent_at: string | null
           quorum_required: boolean
           remote_meeting_provider: string | null
           remote_meeting_url: string | null
@@ -773,6 +907,8 @@ export type Database = {
           president_id?: string | null
           president_name?: string | null
           pv_document_id?: string | null
+          pv_generated_at?: string | null
+          pv_sent_at?: string | null
           quorum_required?: boolean
           remote_meeting_provider?: string | null
           remote_meeting_url?: string | null
@@ -808,6 +944,8 @@ export type Database = {
           president_id?: string | null
           president_name?: string | null
           pv_document_id?: string | null
+          pv_generated_at?: string | null
+          pv_sent_at?: string | null
           quorum_required?: boolean
           remote_meeting_provider?: string | null
           remote_meeting_url?: string | null
@@ -1022,6 +1160,13 @@ export type Database = {
             referencedRelation: "v_ag_votes_detailed"
             referencedColumns: ["ag_id"]
           },
+          {
+            foreignKeyName: "ag_milestones_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
         ]
       }
       ag_notification_events: {
@@ -1181,6 +1326,13 @@ export type Database = {
             referencedColumns: ["ag_id"]
           },
           {
+            foreignKeyName: "ag_notifications_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
             foreignKeyName: "ag_notifications_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -1266,6 +1418,122 @@ export type Database = {
           },
         ]
       }
+      ag_pending_actions: {
+        Row: {
+          action_type: string
+          activated_at: string | null
+          ag_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          payload: Json
+          resolution_id: string
+          result_data: Json | null
+          status: string
+          target_id: string | null
+          target_table: string
+        }
+        Insert: {
+          action_type: string
+          activated_at?: string | null
+          ag_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          resolution_id: string
+          result_data?: Json | null
+          status?: string
+          target_id?: string | null
+          target_table: string
+        }
+        Update: {
+          action_type?: string
+          activated_at?: string | null
+          ag_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          resolution_id?: string
+          result_data?: Json | null
+          status?: string
+          target_id?: string | null
+          target_table?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ag_pending_actions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "ag_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_correspondence_status"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_drafts_progress"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_resolution_id_fkey"
+            columns: ["resolution_id"]
+            isOneToOne: false
+            referencedRelation: "ag_resolutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_resolution_id_fkey"
+            columns: ["resolution_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_resolution_vote_summary"
+            referencedColumns: ["resolution_id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_resolution_id_fkey"
+            columns: ["resolution_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_resolutions_results"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ag_pending_actions_resolution_id_fkey"
+            columns: ["resolution_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_vote_stats_by_resolution"
+            referencedColumns: ["resolution_id"]
+          },
+        ]
+      }
       ag_pouvoirs: {
         Row: {
           ag_id: string
@@ -1346,6 +1614,13 @@ export type Database = {
             referencedColumns: ["ag_id"]
           },
           {
+            foreignKeyName: "ag_pouvoirs_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
             foreignKeyName: "ag_pouvoirs_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -1412,6 +1687,7 @@ export type Database = {
       }
       ag_resolutions: {
         Row: {
+          action_type: string | null
           ag_id: string
           bridge_vote_id: string | null
           copro_id: string
@@ -1442,6 +1718,7 @@ export type Database = {
           voters_for: number | null
         }
         Insert: {
+          action_type?: string | null
           ag_id: string
           bridge_vote_id?: string | null
           copro_id: string
@@ -1472,6 +1749,7 @@ export type Database = {
           voters_for?: number | null
         }
         Update: {
+          action_type?: string | null
           ag_id?: string
           bridge_vote_id?: string | null
           copro_id?: string
@@ -1535,6 +1813,13 @@ export type Database = {
             columns: ["ag_id"]
             isOneToOne: false
             referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_resolutions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
             referencedColumns: ["ag_id"]
           },
           {
@@ -1729,6 +2014,13 @@ export type Database = {
             referencedColumns: ["ag_id"]
           },
           {
+            foreignKeyName: "ag_session_drafts_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
             foreignKeyName: "ag_session_drafts_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -1748,13 +2040,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_maintenance_stats"
             referencedColumns: ["copro_id"]
-          },
-          {
-            foreignKeyName: "ag_session_drafts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -2442,6 +2727,185 @@ export type Database = {
           },
         ]
       }
+      budget_payment_schedules: {
+        Row: {
+          amount: number
+          budget_id: string
+          copro_id: string
+          created_at: string
+          created_by: string | null
+          document_id: string | null
+          due_date: string | null
+          id: string
+          invoice_ref: string | null
+          is_retention: boolean
+          label: string
+          notes: string | null
+          paid_date: string | null
+          percentage: number
+          phase_number: number
+          retention_release_date: string | null
+          service_order_id: string | null
+          status: Database["public"]["Enums"]["payment_phase_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          budget_id: string
+          copro_id: string
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_ref?: string | null
+          is_retention?: boolean
+          label: string
+          notes?: string | null
+          paid_date?: string | null
+          percentage: number
+          phase_number: number
+          retention_release_date?: string | null
+          service_order_id?: string | null
+          status?: Database["public"]["Enums"]["payment_phase_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          budget_id?: string
+          copro_id?: string
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_ref?: string | null
+          is_retention?: boolean
+          label?: string
+          notes?: string | null
+          paid_date?: string | null
+          percentage?: number
+          phase_number?: number
+          retention_release_date?: string | null
+          service_order_id?: string | null
+          status?: Database["public"]["Enums"]["payment_phase_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_payment_schedules_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_fund_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_lot_contributions"
+            referencedColumns: ["alur_budget_id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budgets_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_accessible_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_documents_expiring"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_documents_with_folder"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_recent_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_service_orders_overview"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budgets: {
         Row: {
           budget_type: Database["public"]["Enums"]["budget_type"]
@@ -2452,6 +2916,7 @@ export type Database = {
           name: string | null
           notes: string | null
           period_id: string
+          source_ag_id: string | null
           status: Database["public"]["Enums"]["budget_status"]
           validated_at: string | null
           validated_by: string | null
@@ -2466,6 +2931,7 @@ export type Database = {
           name?: string | null
           notes?: string | null
           period_id: string
+          source_ag_id?: string | null
           status?: Database["public"]["Enums"]["budget_status"]
           validated_at?: string | null
           validated_by?: string | null
@@ -2480,6 +2946,7 @@ export type Database = {
           name?: string | null
           notes?: string | null
           period_id?: string
+          source_ag_id?: string | null
           status?: Database["public"]["Enums"]["budget_status"]
           validated_at?: string | null
           validated_by?: string | null
@@ -2527,6 +2994,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_accounting_periods"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_source_ag_id_fkey"
+            columns: ["source_ag_id"]
+            isOneToOne: false
+            referencedRelation: "ag_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_source_ag_id_fkey"
+            columns: ["source_ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_correspondence_status"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "budgets_source_ag_id_fkey"
+            columns: ["source_ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_drafts_progress"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "budgets_source_ag_id_fkey"
+            columns: ["source_ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_source_ag_id_fkey"
+            columns: ["source_ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "budgets_source_ag_id_fkey"
+            columns: ["source_ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
           },
           {
             foreignKeyName: "budgets_validated_by_fkey"
@@ -2598,6 +3107,7 @@ export type Database = {
           copro_id: string
           created_at: string
           created_by: string | null
+          description: string | null
           due_date: string
           id: string
           issue_date: string
@@ -2615,6 +3125,7 @@ export type Database = {
           copro_id: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           due_date: string
           id?: string
           issue_date: string
@@ -2632,6 +3143,7 @@ export type Database = {
           copro_id?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           due_date?: string
           id?: string
           issue_date?: string
@@ -2849,6 +3361,132 @@ export type Database = {
           },
         ]
       }
+      collective_loan_shares: {
+        Row: {
+          id: string
+          last_payment_date: string | null
+          loan_id: string
+          lot_id: string
+          remaining_amount: number
+          share_amount: number
+        }
+        Insert: {
+          id?: string
+          last_payment_date?: string | null
+          loan_id: string
+          lot_id: string
+          remaining_amount?: number
+          share_amount?: number
+        }
+        Update: {
+          id?: string
+          last_payment_date?: string | null
+          loan_id?: string
+          lot_id?: string
+          remaining_amount?: number
+          share_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collective_loan_shares_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "collective_loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_loan_shares_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_loan_shares_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_lot_contributions"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "collective_loan_shares_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "v_lots_with_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collective_loans: {
+        Row: {
+          annual_payment: number | null
+          copro_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          interest_rate: number | null
+          label: string
+          lender: string | null
+          remaining_amount: number
+          start_date: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          annual_payment?: number | null
+          copro_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          interest_rate?: number | null
+          label: string
+          lender?: string | null
+          remaining_amount?: number
+          start_date?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          annual_payment?: number | null
+          copro_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          interest_rate?: number | null
+          label?: string
+          lender?: string | null
+          remaining_amount?: number
+          start_date?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collective_loans_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_loans_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "collective_loans_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           annual_amount: number | null
@@ -2997,33 +3635,42 @@ export type Database = {
           copro_id: string
           id: string
           is_admin: boolean
+          is_muted: boolean
           joined_at: string
           last_read_at: string | null
           left_at: string | null
           unread_count: number
           user_id: string
+          user_name: string | null
+          user_role: string | null
         }
         Insert: {
           conversation_id: string
           copro_id: string
           id?: string
           is_admin?: boolean
+          is_muted?: boolean
           joined_at?: string
           last_read_at?: string | null
           left_at?: string | null
           unread_count?: number
           user_id: string
+          user_name?: string | null
+          user_role?: string | null
         }
         Update: {
           conversation_id?: string
           copro_id?: string
           id?: string
           is_admin?: boolean
+          is_muted?: boolean
           joined_at?: string
           last_read_at?: string | null
           left_at?: string | null
           unread_count?: number
           user_id?: string
+          user_name?: string | null
+          user_role?: string | null
         }
         Relationships: [
           {
@@ -3076,6 +3723,7 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          is_archived: boolean
           is_group: boolean
           last_message_at: string | null
           last_message_preview: string | null
@@ -3087,6 +3735,7 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          is_archived?: boolean
           is_group?: boolean
           last_message_at?: string | null
           last_message_preview?: string | null
@@ -3098,6 +3747,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          is_archived?: boolean
           is_group?: boolean
           last_message_at?: string | null
           last_message_preview?: string | null
@@ -3239,38 +3889,50 @@ export type Database = {
       copros: {
         Row: {
           address: string | null
+          buildings_count: number | null
           city: string | null
+          construction_year: number | null
           created_at: string
           date_reglement: string | null
           id: string
+          lots_count: number | null
           name: string
           num_immatriculation: string | null
           postal_code: string | null
           siret: string | null
+          total_tantiemes: number | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          buildings_count?: number | null
           city?: string | null
+          construction_year?: number | null
           created_at?: string
           date_reglement?: string | null
           id?: string
+          lots_count?: number | null
           name: string
           num_immatriculation?: string | null
           postal_code?: string | null
           siret?: string | null
+          total_tantiemes?: number | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          buildings_count?: number | null
           city?: string | null
+          construction_year?: number | null
           created_at?: string
           date_reglement?: string | null
           id?: string
+          lots_count?: number | null
           name?: string
           num_immatriculation?: string | null
           postal_code?: string | null
           siret?: string | null
+          total_tantiemes?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -4040,6 +4702,7 @@ export type Database = {
         Row: {
           ag_id: string | null
           archived_at: string | null
+          budget_id: string | null
           category: Database["public"]["Enums"]["document_category"] | null
           confidentiality:
             | Database["public"]["Enums"]["document_confidentiality"]
@@ -4063,6 +4726,7 @@ export type Database = {
           invoice_id: string | null
           is_archived: boolean | null
           is_current_version: boolean | null
+          is_starred: boolean
           lot_id: string | null
           mime_type: string | null
           mutation_id: string | null
@@ -4082,6 +4746,7 @@ export type Database = {
         Insert: {
           ag_id?: string | null
           archived_at?: string | null
+          budget_id?: string | null
           category?: Database["public"]["Enums"]["document_category"] | null
           confidentiality?:
             | Database["public"]["Enums"]["document_confidentiality"]
@@ -4105,6 +4770,7 @@ export type Database = {
           invoice_id?: string | null
           is_archived?: boolean | null
           is_current_version?: boolean | null
+          is_starred?: boolean
           lot_id?: string | null
           mime_type?: string | null
           mutation_id?: string | null
@@ -4124,6 +4790,7 @@ export type Database = {
         Update: {
           ag_id?: string | null
           archived_at?: string | null
+          budget_id?: string | null
           category?: Database["public"]["Enums"]["document_category"] | null
           confidentiality?:
             | Database["public"]["Enums"]["document_confidentiality"]
@@ -4147,6 +4814,7 @@ export type Database = {
           invoice_id?: string | null
           is_archived?: boolean | null
           is_current_version?: boolean | null
+          is_starred?: boolean
           lot_id?: string | null
           mime_type?: string | null
           mutation_id?: string | null
@@ -4164,6 +4832,41 @@ export type Database = {
           year?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_fund_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "documents_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_lot_contributions"
+            referencedColumns: ["alur_budget_id"]
+          },
+          {
+            foreignKeyName: "documents_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budgets_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
           {
             foreignKeyName: "documents_copro_id_fkey"
             columns: ["copro_id"]
@@ -4620,6 +5323,100 @@ export type Database = {
           },
         ]
       }
+      insurance_policies: {
+        Row: {
+          annual_premium: number
+          contract_id: string
+          copro_id: string
+          created_at: string
+          deductible: number | null
+          guarantees: string[]
+          id: string
+          insurer_name: string
+          observations: string | null
+          policy_number: string
+          related_works: string | null
+          sub_type: Database["public"]["Enums"]["insurance_sub_type"]
+          updated_at: string
+          works_reception_date: string | null
+        }
+        Insert: {
+          annual_premium: number
+          contract_id: string
+          copro_id: string
+          created_at?: string
+          deductible?: number | null
+          guarantees?: string[]
+          id?: string
+          insurer_name: string
+          observations?: string | null
+          policy_number: string
+          related_works?: string | null
+          sub_type: Database["public"]["Enums"]["insurance_sub_type"]
+          updated_at?: string
+          works_reception_date?: string | null
+        }
+        Update: {
+          annual_premium?: number
+          contract_id?: string
+          copro_id?: string
+          created_at?: string
+          deductible?: number | null
+          guarantees?: string[]
+          id?: string
+          insurer_name?: string
+          observations?: string | null
+          policy_number?: string
+          related_works?: string | null
+          sub_type?: Database["public"]["Enums"]["insurance_sub_type"]
+          updated_at?: string
+          works_reception_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_policies_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "v_contracts_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "v_contracts_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "insurance_policies_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+        ]
+      }
       ledger_entries: {
         Row: {
           account_id: string
@@ -4909,6 +5706,79 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_proceedings: {
+        Row: {
+          amount_at_stake: number | null
+          copro_id: string
+          court: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          lawyer: string | null
+          nature: string
+          notes: string | null
+          opposing_party: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount_at_stake?: number | null
+          copro_id: string
+          court?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          lawyer?: string | null
+          nature: string
+          notes?: string | null
+          opposing_party?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount_at_stake?: number | null
+          copro_id?: string
+          court?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          lawyer?: string | null
+          nature?: string
+          notes?: string | null
+          opposing_party?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_proceedings_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_proceedings_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "legal_proceedings_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
           },
         ]
       }
@@ -5702,6 +6572,65 @@ export type Database = {
           },
         ]
       }
+      mail_labels_v2: {
+        Row: {
+          color: string
+          copro_id: string
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string
+          copro_id: string
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string
+          copro_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mail_labels_v2_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mail_labels_v2_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "mail_labels_v2_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "mail_labels_v2_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mail_recipients: {
         Row: {
           bounced_at: string | null
@@ -5890,6 +6819,126 @@ export type Database = {
           },
         ]
       }
+      mails: {
+        Row: {
+          attachments: Json | null
+          body: string
+          body_html: string | null
+          cc_emails: Json | null
+          copro_id: string
+          created_at: string
+          deleted_at: string | null
+          from_email: string
+          from_name: string
+          id: string
+          in_reply_to: string | null
+          is_archived: boolean
+          is_deleted: boolean
+          is_read: boolean
+          is_starred: boolean
+          label_ids: string[] | null
+          owner_id: string
+          received_at: string | null
+          resend_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          thread_id: string | null
+          to_emails: Json
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json | null
+          body?: string
+          body_html?: string | null
+          cc_emails?: Json | null
+          copro_id: string
+          created_at?: string
+          deleted_at?: string | null
+          from_email: string
+          from_name: string
+          id?: string
+          in_reply_to?: string | null
+          is_archived?: boolean
+          is_deleted?: boolean
+          is_read?: boolean
+          is_starred?: boolean
+          label_ids?: string[] | null
+          owner_id: string
+          received_at?: string | null
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          thread_id?: string | null
+          to_emails?: Json
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json | null
+          body?: string
+          body_html?: string | null
+          cc_emails?: Json | null
+          copro_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          from_email?: string
+          from_name?: string
+          id?: string
+          in_reply_to?: string | null
+          is_archived?: boolean
+          is_deleted?: boolean
+          is_read?: boolean
+          is_starred?: boolean
+          label_ids?: string[] | null
+          owner_id?: string
+          received_at?: string | null
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          thread_id?: string | null
+          to_emails?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mails_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mails_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "mails_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "mails_in_reply_to_fkey"
+            columns: ["in_reply_to"]
+            isOneToOne: false
+            referencedRelation: "mails"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mails_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           copro_id: string
@@ -5946,6 +6995,7 @@ export type Database = {
       messages: {
         Row: {
           attachment_id: string | null
+          attachments: Json | null
           author_id: string
           content: string
           conversation_id: string
@@ -5953,10 +7003,15 @@ export type Database = {
           created_at: string
           edited_at: string | null
           id: string
+          is_edited: boolean
+          message_type: string
           read_by: string[]
+          reply_to_id: string | null
+          sender_name: string | null
         }
         Insert: {
           attachment_id?: string | null
+          attachments?: Json | null
           author_id: string
           content: string
           conversation_id: string
@@ -5964,10 +7019,15 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           id?: string
+          is_edited?: boolean
+          message_type?: string
           read_by?: string[]
+          reply_to_id?: string | null
+          sender_name?: string | null
         }
         Update: {
           attachment_id?: string | null
+          attachments?: Json | null
           author_id?: string
           content?: string
           conversation_id?: string
@@ -5975,7 +7035,11 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           id?: string
+          is_edited?: boolean
+          message_type?: string
           read_by?: string[]
+          reply_to_id?: string | null
+          sender_name?: string | null
         }
         Relationships: [
           {
@@ -6054,6 +7118,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_maintenance_stats"
             referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "v_conversation_messages"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6451,8 +7529,11 @@ export type Database = {
       }
       payment_reminders: {
         Row: {
+          call_id: string | null
+          call_line_id: string | null
           cancelled_at: string | null
           cancelled_reason: string | null
+          content: string | null
           copro_id: string
           created_at: string
           created_by: string | null
@@ -6473,8 +7554,11 @@ export type Database = {
           unpaid_amount: number
         }
         Insert: {
+          call_id?: string | null
+          call_line_id?: string | null
           cancelled_at?: string | null
           cancelled_reason?: string | null
+          content?: string | null
           copro_id: string
           created_at?: string
           created_by?: string | null
@@ -6497,8 +7581,11 @@ export type Database = {
           unpaid_amount: number
         }
         Update: {
+          call_id?: string | null
+          call_line_id?: string | null
           cancelled_at?: string | null
           cancelled_reason?: string | null
+          content?: string | null
           copro_id?: string
           created_at?: string
           created_by?: string | null
@@ -6521,6 +7608,48 @@ export type Database = {
           unpaid_amount?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "payment_reminders_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "call_for_funds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_total_mismatch"
+            referencedColumns: ["call_id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "v_calls_collection_stats"
+            referencedColumns: ["call_id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "v_calls_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_call_line_id_fkey"
+            columns: ["call_line_id"]
+            isOneToOne: false
+            referencedRelation: "call_for_funds_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_call_line_id_fkey"
+            columns: ["call_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_lines_detailed"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_reminders_copro_id_fkey"
             columns: ["copro_id"]
@@ -6705,6 +7834,131 @@ export type Database = {
             columns: ["period_id"]
             isOneToOne: false
             referencedRelation: "v_accounting_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planned_works: {
+        Row: {
+          actual_amount: number | null
+          ag_id: string | null
+          budget_line_id: string | null
+          completion_date: string | null
+          copro_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          estimated_amount: number | null
+          from_ppt: boolean
+          id: string
+          observations: string | null
+          planned_date: string | null
+          ppt_year: number | null
+          priority: Database["public"]["Enums"]["work_priority"]
+          resolution_id: string | null
+          status: Database["public"]["Enums"]["planned_work_status"]
+          title: string
+          updated_at: string
+          vote_date: string | null
+          voted_amount: number | null
+          work_type: Database["public"]["Enums"]["planned_work_type"]
+        }
+        Insert: {
+          actual_amount?: number | null
+          ag_id?: string | null
+          budget_line_id?: string | null
+          completion_date?: string | null
+          copro_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_amount?: number | null
+          from_ppt?: boolean
+          id?: string
+          observations?: string | null
+          planned_date?: string | null
+          ppt_year?: number | null
+          priority?: Database["public"]["Enums"]["work_priority"]
+          resolution_id?: string | null
+          status?: Database["public"]["Enums"]["planned_work_status"]
+          title: string
+          updated_at?: string
+          vote_date?: string | null
+          voted_amount?: number | null
+          work_type: Database["public"]["Enums"]["planned_work_type"]
+        }
+        Update: {
+          actual_amount?: number | null
+          ag_id?: string | null
+          budget_line_id?: string | null
+          completion_date?: string | null
+          copro_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_amount?: number | null
+          from_ppt?: boolean
+          id?: string
+          observations?: string | null
+          planned_date?: string | null
+          ppt_year?: number | null
+          priority?: Database["public"]["Enums"]["work_priority"]
+          resolution_id?: string | null
+          status?: Database["public"]["Enums"]["planned_work_status"]
+          title?: string
+          updated_at?: string
+          vote_date?: string | null
+          voted_amount?: number | null
+          work_type?: Database["public"]["Enums"]["planned_work_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planned_works_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_works_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_lines_detailed"
+            referencedColumns: ["line_id"]
+          },
+          {
+            foreignKeyName: "planned_works_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_lines_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_works_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_works_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "planned_works_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "planned_works_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -7841,9 +9095,222 @@ export type Database = {
           },
         ]
       }
+      technical_documents: {
+        Row: {
+          added_date: string
+          copro_id: string
+          created_at: string
+          created_by: string | null
+          doc_type: Database["public"]["Enums"]["technical_doc_type"]
+          document_id: string | null
+          id: string
+          name: string
+          observations: string | null
+          storage_path: string | null
+          updated_at: string
+          validity_date: string | null
+        }
+        Insert: {
+          added_date?: string
+          copro_id: string
+          created_at?: string
+          created_by?: string | null
+          doc_type: Database["public"]["Enums"]["technical_doc_type"]
+          document_id?: string | null
+          id?: string
+          name: string
+          observations?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          validity_date?: string | null
+        }
+        Update: {
+          added_date?: string
+          copro_id?: string
+          created_at?: string
+          created_by?: string | null
+          doc_type?: Database["public"]["Enums"]["technical_doc_type"]
+          document_id?: string | null
+          id?: string
+          name?: string
+          observations?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          validity_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_documents_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_documents_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "technical_documents_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "technical_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_accessible_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_documents_expiring"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_documents_with_folder"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "v_recent_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treasury_advances: {
+        Row: {
+          advance_type: string
+          amount_due: number
+          amount_paid: number
+          copro_id: string
+          created_at: string
+          id: string
+          label: string
+          lot_id: string
+          owner_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          advance_type: string
+          amount_due?: number
+          amount_paid?: number
+          copro_id: string
+          created_at?: string
+          id?: string
+          label: string
+          lot_id: string
+          owner_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          advance_type?: string
+          amount_due?: number
+          amount_paid?: number
+          copro_id?: string
+          created_at?: string
+          id?: string
+          label?: string
+          lot_id?: string
+          owner_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasury_advances_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_lot_contributions"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "v_lots_with_owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "coproprietaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "v_coproprietaires_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_advances_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_financial_summary"
+            referencedColumns: ["coproprietaire_id"]
+          },
+        ]
+      }
       wall_comments: {
         Row: {
           author_id: string
+          author_name: string | null
           content: string
           copro_id: string
           created_at: string
@@ -7854,6 +9321,7 @@ export type Database = {
         }
         Insert: {
           author_id: string
+          author_name?: string | null
           content: string
           copro_id: string
           created_at?: string
@@ -7864,6 +9332,7 @@ export type Database = {
         }
         Update: {
           author_id?: string
+          author_name?: string | null
           content?: string
           copro_id?: string
           created_at?: string
@@ -7995,16 +9464,20 @@ export type Database = {
         Row: {
           attachment_id: string | null
           author_id: string
+          author_name: string | null
+          author_role: string | null
           category: Database["public"]["Enums"]["wall_post_category"]
           comments_count: number
           content: string
           copro_id: string
           created_at: string
           id: string
+          is_locked: boolean
           is_pinned: boolean
           likes_count: number
           pinned_at: string | null
           pinned_by: string | null
+          tags: string[] | null
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["content_visibility"]
@@ -8012,16 +9485,20 @@ export type Database = {
         Insert: {
           attachment_id?: string | null
           author_id: string
+          author_name?: string | null
+          author_role?: string | null
           category?: Database["public"]["Enums"]["wall_post_category"]
           comments_count?: number
           content: string
           copro_id: string
           created_at?: string
           id?: string
+          is_locked?: boolean
           is_pinned?: boolean
           likes_count?: number
           pinned_at?: string | null
           pinned_by?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["content_visibility"]
@@ -8029,16 +9506,20 @@ export type Database = {
         Update: {
           attachment_id?: string | null
           author_id?: string
+          author_name?: string | null
+          author_role?: string | null
           category?: Database["public"]["Enums"]["wall_post_category"]
           comments_count?: number
           content?: string
           copro_id?: string
           created_at?: string
           id?: string
+          is_locked?: boolean
           is_pinned?: boolean
           likes_count?: number
           pinned_at?: string | null
           pinned_by?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["content_visibility"]
@@ -8459,6 +9940,13 @@ export type Database = {
             referencedColumns: ["ag_id"]
           },
           {
+            foreignKeyName: "ag_attendance_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
+          {
             foreignKeyName: "ag_attendance_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -8555,6 +10043,7 @@ export type Database = {
           has_votes: boolean | null
           last_activity_at: string | null
           location: string | null
+          max_step_reached: number | null
           meeting_date: string | null
           meeting_type: Database["public"]["Enums"]["ag_meeting_type"] | null
           resolutions_count: number | null
@@ -8601,8 +10090,10 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           created_by_name: string | null
+          current_step: number | null
           id: string | null
           location: string | null
+          max_step_reached: number | null
           meeting_date: string | null
           meeting_type: Database["public"]["Enums"]["ag_meeting_type"] | null
           present_count: number | null
@@ -8763,6 +10254,13 @@ export type Database = {
             referencedRelation: "v_ag_votes_detailed"
             referencedColumns: ["ag_id"]
           },
+          {
+            foreignKeyName: "ag_resolutions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
+            referencedColumns: ["ag_id"]
+          },
         ]
       }
       v_ag_resolutions_results: {
@@ -8830,6 +10328,13 @@ export type Database = {
             columns: ["ag_id"]
             isOneToOne: false
             referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_resolutions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
             referencedColumns: ["ag_id"]
           },
           {
@@ -8952,6 +10457,13 @@ export type Database = {
             columns: ["ag_id"]
             isOneToOne: false
             referencedRelation: "v_ag_votes_detailed"
+            referencedColumns: ["ag_id"]
+          },
+          {
+            foreignKeyName: "ag_resolutions_ag_id_fkey"
+            columns: ["ag_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_campaigns"
             referencedColumns: ["ag_id"]
           },
           {
@@ -9871,6 +11383,7 @@ export type Database = {
           total_spent: number | null
           validated_at: string | null
           validated_spent: number | null
+          version: number | null
         }
         Relationships: [
           {
@@ -9983,6 +11496,62 @@ export type Database = {
           },
         ]
       }
+      v_call_campaigns: {
+        Row: {
+          ag_id: string | null
+          ag_meeting_date: string | null
+          ag_title: string | null
+          copro_id: string | null
+          global_status: string | null
+          period_end: string | null
+          period_id: string | null
+          period_name: string | null
+          period_start: string | null
+          total_amount: number | null
+          total_calls: number | null
+          total_keys: number | null
+          total_paid: number | null
+          total_trimesters: number | null
+          trimesters_issued: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_for_funds_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_for_funds_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "call_for_funds_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "call_for_funds_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_for_funds_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "v_accounting_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_call_lines_detailed: {
         Row: {
           amount_due: number | null
@@ -9994,31 +11563,19 @@ export type Database = {
             | Database["public"]["Enums"]["call_for_funds_status"]
             | null
           copro_id: string | null
-          created_at: string | null
-          days_overdue: number | null
           due_date: string | null
           id: string | null
           issue_date: string | null
-          ledger_tx_id: string | null
+          key_total_weight: number | null
           lot_id: string | null
           lot_ref: string | null
           lot_type: Database["public"]["Enums"]["lot_type"] | null
-          owner_email: string | null
-          owner_id: string | null
+          lot_weight: number | null
           owner_name: string | null
-          period_id: string | null
           repartition_key_id: string | null
-          repartition_key_name: string | null
           status: Database["public"]["Enums"]["call_line_status"] | null
         }
         Relationships: [
-          {
-            foreignKeyName: "call_for_funds_ledger_tx_id_fkey"
-            columns: ["ledger_tx_id"]
-            isOneToOne: false
-            referencedRelation: "ledger_transactions"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "call_for_funds_lines_call_id_fkey"
             columns: ["call_id"]
@@ -10087,20 +11644,6 @@ export type Database = {
             columns: ["lot_id"]
             isOneToOne: false
             referencedRelation: "v_lots_with_owners"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "call_for_funds_period_id_fkey"
-            columns: ["period_id"]
-            isOneToOne: false
-            referencedRelation: "accounting_periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "call_for_funds_period_id_fkey"
-            columns: ["period_id"]
-            isOneToOne: false
-            referencedRelation: "v_accounting_periods"
             referencedColumns: ["id"]
           },
           {
@@ -13991,6 +15534,7 @@ export type Database = {
       }
     }
     Functions: {
+      activate_ag_decisions: { Args: { p_ag_id: string }; Returns: Json }
       allocate_payment: {
         Args: { p_call_line_ids?: string[]; p_payment_id: string }
         Returns: {
@@ -14166,6 +15710,14 @@ export type Database = {
         }
         Returns: string
       }
+      create_alur_fund_from_ag: {
+        Args: { p_ag_id: string; p_modalites?: string; p_montant: number }
+        Returns: Json
+      }
+      create_budget_from_ag: {
+        Args: { p_ag_id: string; p_exercice: number; p_postes: Json }
+        Returns: Json
+      }
       create_document_system_folders: {
         Args: { p_copro_id: string; p_user_id?: string }
         Returns: undefined
@@ -14228,10 +15780,65 @@ export type Database = {
       }
       delete_ag_draft: { Args: { p_ag_id: string }; Returns: Json }
       delete_ag_pouvoir: { Args: { p_pouvoir_id: string }; Returns: Json }
+      delete_service_order: { Args: { p_order_id: string }; Returns: undefined }
+      elect_council_from_ag: {
+        Args: { p_ag_id: string; p_membres: Json }
+        Returns: Json
+      }
       ensure_dev_membership: { Args: { p_copro_id?: string }; Returns: string }
+      finish_ag_session: { Args: { p_ag_id: string }; Returns: Json }
+      fn_annexe_1: {
+        Args: { p_copro_id: string; p_period_id: string }
+        Returns: Json
+      }
+      fn_annexe_1_detail_copros: {
+        Args: { p_copro_id: string; p_period_id: string }
+        Returns: Json
+      }
+      fn_annexe_2: {
+        Args: {
+          p_copro_id: string
+          p_next_period_id?: string
+          p_period_id: string
+        }
+        Returns: Json
+      }
+      fn_annexe_3: {
+        Args: {
+          p_copro_id: string
+          p_next_period_id?: string
+          p_period_id: string
+        }
+        Returns: Json
+      }
+      fn_annexe_4: {
+        Args: { p_copro_id: string; p_period_id: string }
+        Returns: Json
+      }
+      fn_annexe_5: {
+        Args: { p_copro_id: string; p_period_id: string }
+        Returns: Json
+      }
+      fn_dashboard_kpis: {
+        Args: { p_copro_id: string; p_period_id: string }
+        Returns: Json
+      }
+      generate_calls_from_ag_payload: {
+        Args: {
+          p_ag_id: string
+          p_copro_id: string
+          p_payload: Json
+          p_resolution_id: string
+        }
+        Returns: undefined
+      }
       generate_campaign_recipients: {
         Args: { p_campaign_id: string }
         Returns: number
+      }
+      generate_combined_calls_from_ag: {
+        Args: { p_ag_id: string; p_nb_appels?: number }
+        Returns: Json
       }
       generate_document_path:
         | {
@@ -14267,7 +15874,7 @@ export type Database = {
         Args: { p_ag_id: string }
         Returns: {
           draft_data: Json
-          draft_type: Database["public"]["Enums"]["ag_draft_type"]
+          draft_type: string
           id: string
           last_modified_at: string
           user_id: string
@@ -14275,8 +15882,10 @@ export type Database = {
         }[]
       }
       get_ag_envoi_choices: { Args: { p_ag_id: string }; Returns: Json }
+      get_ag_envoi_tracking: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_live_results: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_milestones: { Args: { p_ag_id: string }; Returns: Json }
+      get_ag_pending_actions: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_pouvoirs: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_recipients: {
         Args: {
@@ -14298,10 +15907,7 @@ export type Database = {
       }
       get_ag_sending_stats: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_session_draft: {
-        Args: {
-          p_ag_id: string
-          p_draft_type: Database["public"]["Enums"]["ag_draft_type"]
-        }
+        Args: { p_ag_id: string; p_draft_type: string }
         Returns: Json
       }
       get_ag_wizard_state: { Args: { p_ag_id: string }; Returns: Json }
@@ -14374,6 +15980,10 @@ export type Database = {
         Returns: boolean
       }
       lock_period: { Args: { p_period_id: string }; Returns: boolean }
+      mark_ag_action_activated: {
+        Args: { p_action_type: string; p_ag_id: string; p_result_data?: Json }
+        Returns: Json
+      }
       mark_conversation_read: {
         Args: { p_conversation_id: string }
         Returns: undefined
@@ -14399,6 +16009,7 @@ export type Database = {
         Returns: undefined
       }
       post_ledger_transaction: { Args: { p_tx_id: string }; Returns: Json }
+      prepare_ag_decisions: { Args: { p_ag_id: string }; Returns: Json }
       recalculate_all_call_statuses: {
         Args: { p_copro_id?: string }
         Returns: {
@@ -14434,6 +16045,10 @@ export type Database = {
         Args: { p_ag_id: string; p_closing_notes?: string }
         Returns: Json
       }
+      rpc_get_ag_convocation_bundle: {
+        Args: { p_ag_id: string }
+        Returns: Json
+      }
       rpc_get_ag_coproprietaires: {
         Args: { p_ag_id: string }
         Returns: {
@@ -14454,6 +16069,10 @@ export type Database = {
         Args: { p_ag_id: string; p_choices: Json }
         Returns: Json
       }
+      save_ag_envoi_tracking: {
+        Args: { p_ag_id: string; p_entries: Json }
+        Returns: undefined
+      }
       save_ag_milestone: {
         Args: {
           p_ag_id: string
@@ -14472,32 +16091,18 @@ export type Database = {
         Returns: Json
       }
       save_ag_session_draft: {
-        Args: {
-          p_ag_id: string
-          p_draft_data: Json
-          p_draft_type: Database["public"]["Enums"]["ag_draft_type"]
-        }
+        Args: { p_ag_id: string; p_draft_data: Json; p_draft_type: string }
         Returns: string
       }
-      save_ag_wizard_state:
-        | {
-            Args: {
-              p_ag_id: string
-              p_current_step?: number
-              p_step_data?: Json
-              p_wizard_mode?: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_ag_id: string
-              p_current_step: number
-              p_step_data?: Json
-              p_wizard_mode?: string
-            }
-            Returns: Json
-          }
+      save_ag_wizard_state: {
+        Args: {
+          p_ag_id: string
+          p_current_step: number
+          p_step_data?: Json
+          p_wizard_mode?: string
+        }
+        Returns: Json
+      }
       save_votes_correspondance: {
         Args: {
           p_ag_id: string
@@ -14618,6 +16223,7 @@ export type Database = {
         Args: { p_copro_id: string }
         Returns: boolean
       }
+      validate_ag_variables: { Args: { p_ag_id: string }; Returns: Json }
       validate_budget: { Args: { p_budget_id: string }; Returns: Json }
       validate_mutation: {
         Args: {
@@ -14645,19 +16251,26 @@ export type Database = {
         | "milestones"
         | "signataires"
         | "envoi"
+        | "resolution_vars"
+        | "resolutions_results"
       ag_meeting_type: "ordinary" | "extraordinary" | "mixed"
       ag_notification_type: "convocation" | "relance" | "pv" | "reminder"
       ag_status:
         | "draft"
         | "convoked"
         | "in_progress"
+        | "session_active"
         | "closed"
         | "pv_generated"
+        | "pv_signed"
+        | "pv_sent"
+        | "finalized"
       attendance_type: "present" | "proxy" | "correspondence"
       bank_match_target_type: "payment" | "supplier_payment" | "other"
       bank_movement_status: "unmatched" | "matched" | "ignored"
       budget_status:
         | "draft"
+        | "draft_from_ag"
         | "pending_approval"
         | "submitted"
         | "validated"
@@ -14765,6 +16378,14 @@ export type Database = {
         | "fete"
         | "autre"
       expense_status: "draft" | "pending_validation" | "validated" | "rejected"
+      insurance_sub_type:
+        | "mri"
+        | "rc_syndicat"
+        | "do"
+        | "pj"
+        | "rc_mandataires"
+        | "pno"
+        | "autre"
       intervention_category: "courante" | "travaux_importants"
       intervention_frequency:
         | "unique"
@@ -14831,8 +16452,31 @@ export type Database = {
         | "registered_postal"
         | "hand_delivery"
       payment_method: "bank_transfer" | "card" | "check" | "cash" | "other"
+      payment_phase_status: "pending" | "awaiting_invoice" | "paid"
       payment_status: "recorded" | "reconciled" | "reversed"
-      period_status: "open" | "locked" | "closed"
+      period_status: "open" | "locked" | "closed" | "approved" | "rejected"
+      planned_work_status:
+        | "identified"
+        | "planned"
+        | "voted"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+      planned_work_type:
+        | "facade"
+        | "toiture"
+        | "etancheite"
+        | "chauffage"
+        | "ascenseur"
+        | "electricite"
+        | "plomberie"
+        | "espaces_verts"
+        | "securite_incendie"
+        | "accessibilite"
+        | "isolation"
+        | "menuiserie"
+        | "parking"
+        | "autre"
       provider_category: "syndic" | "copropriete" | "coproflex"
       provider_domain:
         | "plomberie"
@@ -14902,6 +16546,26 @@ export type Database = {
         | "posted"
         | "paid"
         | "cancelled"
+      technical_doc_type:
+        | "dta"
+        | "dpe_collectif"
+        | "diagnostic_plomb"
+        | "diagnostic_electricite"
+        | "diagnostic_gaz"
+        | "carnet_entretien"
+        | "controle_ascenseur"
+        | "controle_chaufferie"
+        | "controle_incendie"
+        | "controle_jeux"
+        | "garantie_decennale"
+        | "garantie_biennale"
+        | "plan_copropriete"
+        | "reglement_copropriete"
+        | "etat_descriptif"
+        | "ppt"
+        | "dtg"
+        | "audit_energetique"
+        | "autre"
       transfer_destination: "compte_courant" | "budget_travaux"
       urgency_level: "low" | "normal" | "medium" | "high" | "critical"
       vote_direction: "for" | "against" | "abstention"
@@ -14912,6 +16576,7 @@ export type Database = {
         | "question"
         | "event"
         | "other"
+      work_priority: "urgent" | "high" | "medium" | "low"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -15050,15 +16715,28 @@ export const Constants = {
         "milestones",
         "signataires",
         "envoi",
+        "resolution_vars",
+        "resolutions_results",
       ],
       ag_meeting_type: ["ordinary", "extraordinary", "mixed"],
       ag_notification_type: ["convocation", "relance", "pv", "reminder"],
-      ag_status: ["draft", "convoked", "in_progress", "closed", "pv_generated"],
+      ag_status: [
+        "draft",
+        "convoked",
+        "in_progress",
+        "session_active",
+        "closed",
+        "pv_generated",
+        "pv_signed",
+        "pv_sent",
+        "finalized",
+      ],
       attendance_type: ["present", "proxy", "correspondence"],
       bank_match_target_type: ["payment", "supplier_payment", "other"],
       bank_movement_status: ["unmatched", "matched", "ignored"],
       budget_status: [
         "draft",
+        "draft_from_ag",
         "pending_approval",
         "submitted",
         "validated",
@@ -15177,6 +16855,15 @@ export const Constants = {
         "autre",
       ],
       expense_status: ["draft", "pending_validation", "validated", "rejected"],
+      insurance_sub_type: [
+        "mri",
+        "rc_syndicat",
+        "do",
+        "pj",
+        "rc_mandataires",
+        "pno",
+        "autre",
+      ],
       intervention_category: ["courante", "travaux_importants"],
       intervention_frequency: [
         "unique",
@@ -15252,8 +16939,33 @@ export const Constants = {
         "hand_delivery",
       ],
       payment_method: ["bank_transfer", "card", "check", "cash", "other"],
+      payment_phase_status: ["pending", "awaiting_invoice", "paid"],
       payment_status: ["recorded", "reconciled", "reversed"],
-      period_status: ["open", "locked", "closed"],
+      period_status: ["open", "locked", "closed", "approved", "rejected"],
+      planned_work_status: [
+        "identified",
+        "planned",
+        "voted",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      planned_work_type: [
+        "facade",
+        "toiture",
+        "etancheite",
+        "chauffage",
+        "ascenseur",
+        "electricite",
+        "plomberie",
+        "espaces_verts",
+        "securite_incendie",
+        "accessibilite",
+        "isolation",
+        "menuiserie",
+        "parking",
+        "autre",
+      ],
       provider_category: ["syndic", "copropriete", "coproflex"],
       provider_domain: [
         "plomberie",
@@ -15329,6 +17041,27 @@ export const Constants = {
         "paid",
         "cancelled",
       ],
+      technical_doc_type: [
+        "dta",
+        "dpe_collectif",
+        "diagnostic_plomb",
+        "diagnostic_electricite",
+        "diagnostic_gaz",
+        "carnet_entretien",
+        "controle_ascenseur",
+        "controle_chaufferie",
+        "controle_incendie",
+        "controle_jeux",
+        "garantie_decennale",
+        "garantie_biennale",
+        "plan_copropriete",
+        "reglement_copropriete",
+        "etat_descriptif",
+        "ppt",
+        "dtg",
+        "audit_energetique",
+        "autre",
+      ],
       transfer_destination: ["compte_courant", "budget_travaux"],
       urgency_level: ["low", "normal", "medium", "high", "critical"],
       vote_direction: ["for", "against", "abstention"],
@@ -15340,46 +17073,38 @@ export const Constants = {
         "event",
         "other",
       ],
+      work_priority: ["urgent", "high", "medium", "low"],
     },
   },
 } as const
 
+// ─── Derived type aliases for maintenance module ───────────────────────────────
+// These provide convenient aliases used across the codebase.
 
-// ============================================================================
-// Convenience Type Exports for backwards compatibility
-// ============================================================================
+// Table Row types
+export type Provider = Tables<'providers'>;
+export type Contract = Tables<'contracts'>;
+export type LogbookEntry = Tables<'logbook_entries'>;
+export type ServiceOrder = Tables<'service_orders'>;
+export type ServiceOrderEvent = Tables<'service_order_events'>;
 
-// Tables
-export type Provider = Database["public"]["Tables"]["providers"]["Row"]
-export type ProviderInsert = Database["public"]["Tables"]["providers"]["Insert"]
-export type Contract = Database["public"]["Tables"]["contracts"]["Row"]
-export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
-export type ServiceOrder = Database["public"]["Tables"]["service_orders"]["Row"]
-export type ServiceOrderInsert = Database["public"]["Tables"]["service_orders"]["Insert"]
-export type ServiceOrderEvent = Database["public"]["Tables"]["service_order_events"]["Row"]
-export type ServiceOrderEventInsert = Database["public"]["Tables"]["service_order_events"]["Insert"]
-export type LogbookEntry = Database["public"]["Tables"]["logbook_entries"]["Row"]
-export type LogbookEntryInsert = Database["public"]["Tables"]["logbook_entries"]["Insert"]
-export type Document = Database["public"]["Tables"]["documents"]["Row"]
-export type DocumentInsert = Database["public"]["Tables"]["documents"]["Insert"]
+// Table Insert types
+export type ProviderInsert = TablesInsert<'providers'>;
+export type ContractInsert = TablesInsert<'contracts'>;
+export type LogbookEntryInsert = TablesInsert<'logbook_entries'>;
+export type ServiceOrderInsert = TablesInsert<'service_orders'>;
 
-// Views
-export type ProviderOverview = Database["public"]["Views"]["v_providers_overview"]["Row"]
-export type ContractOverview = Database["public"]["Views"]["v_contracts_overview"]["Row"]
-export type ContractAlert = Database["public"]["Views"]["v_contracts_alerts"]["Row"]
-export type LogbookOverview = Database["public"]["Views"]["v_logbook_overview"]["Row"]
-export type LogbookAlert = Database["public"]["Views"]["v_logbook_alerts"]["Row"]
-export type ServiceOrderOverview = Database["public"]["Views"]["v_service_orders_overview"]["Row"]
-export type MaintenanceStats = Database["public"]["Views"]["v_maintenance_stats"]["Row"]
+// View types (overview / alerts)
+export type ProviderOverview = Tables<'v_providers_overview'>;
+export type ContractOverview = Tables<'v_contracts_overview'>;
+export type ContractAlert = Tables<'v_contracts_alerts'>;
+export type LogbookOverview = Tables<'v_logbook_overview'>;
+export type LogbookAlert = Tables<'v_logbook_alerts'>;
+export type ServiceOrderOverview = Tables<'v_service_orders_overview'>;
+export type MaintenanceStats = Tables<'v_maintenance_stats'>;
 
-// Enums (aliased for convenience)
-export type ContractType = Database["public"]["Enums"]["contract_type"]
-export type ContractStatus = Database["public"]["Enums"]["contract_status"]
-export type ProviderCategory = Database["public"]["Enums"]["provider_category"]
-export type ProviderDomain = Database["public"]["Enums"]["provider_domain"]
-export type ServiceOrderStatus = Database["public"]["Enums"]["service_order_status"]
-export type ServiceOrderType = Database["public"]["Enums"]["service_order_type"]
-export type UrgencyLevel = Database["public"]["Enums"]["urgency_level"]
-export type AgDraftType = Database["public"]["Enums"]["ag_draft_type"]
-export type InterventionCategory = Database["public"]["Enums"]["intervention_category"]
-export type LogbookEntryType = Database["public"]["Enums"]["logbook_entry_type"]
+// Enum types
+export type ContractType = Enums<'contract_type'>;
+export type ProviderCategory = Enums<'provider_category'>;
+export type ProviderDomain = Enums<'provider_domain'>;
+export type ServiceOrderStatus = Enums<'service_order_status'>;

@@ -133,7 +133,7 @@ export function generateMockCoproprietaires(
   }
 
   // Ajuster les tantièmes pour atteindre exactement le total
-  const currentTotal = coproprietaires.reduce((sum, c) => sum + c.tantiemes, 0);
+  const currentTotal = coproprietaires.reduce((sum, c) => sum + (c.tantiemes || 0), 0);
   const diff = totalTantiemes - currentTotal;
 
   if (diff !== 0) {
@@ -141,7 +141,8 @@ export function generateMockCoproprietaires(
     const abssDiff = Math.abs(diff);
     const sign = diff > 0 ? 1 : -1;
     for (let i = 0; i < abssDiff; i++) {
-      coproprietaires[i % coproprietaires.length].tantiemes += sign;
+      const target = coproprietaires[i % coproprietaires.length];
+      target.tantiemes = (target.tantiemes || 0) + sign;
     }
   }
 
@@ -177,7 +178,7 @@ export function getMockDatasetStats(coproprietaires: Coproprietaire[]): {
     return { count: 0, totalTantiemes: 0, avgTantiemes: 0, minTantiemes: 0, maxTantiemes: 0 };
   }
 
-  const tantiemes = coproprietaires.map(c => c.tantiemes);
+  const tantiemes = coproprietaires.map(c => c.tantiemes || 0);
   const total = tantiemes.reduce((a, b) => a + b, 0);
 
   return {

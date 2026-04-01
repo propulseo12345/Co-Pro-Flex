@@ -5,7 +5,7 @@ import { useLotsRepartitionGrid } from '@/hooks/modules/useLotsRepartitionGrid';
 import { LotsRepartitionGrid, CreateLotModal, EditLotModal, CreateKeyModal, EditKeyModal } from '@/components/features/lots';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
-import type { RepartitionKeyWithTotals } from '@/lib/lots/api';
+import type { RepartitionKeyWithTotals, RepartitionBasis } from '@/lib/lots/api';
 import styles from './lots.module.css';
 
 export default function LotsPage() {
@@ -107,7 +107,14 @@ export default function LotsPage() {
           rows={gridRows}
           keyColumns={keyColumns}
           onEditLot={setEditingLot}
-          onEditKey={setEditingKey}
+          onEditKey={({ color: _color, ...key }) => setEditingKey({
+            ...key,
+            basis: key.basis as RepartitionBasis,
+            copro_id: currentCoproId,
+            description: null,
+            coverage_mode: 'all_lots' as const,
+            is_active: true,
+          })}
           onUpdateWeight={updateWeight}
         />
       )}
