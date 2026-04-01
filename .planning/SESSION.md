@@ -1,22 +1,22 @@
-# Session State — 2026-04-01 23:59
+# Session State — 2026-04-01 21:30
 
 ## Branch
 v2
 
 ## Completed This Session
-- 5 phases migration mock→Supabase (onboarding, finance, maintenance, ventes, communication)
-- Wizard onboarding 10 étapes (7 principales + 3 optionnelles)
-- Nettoyage complet : 0 fichier mock, 0 import mock
-- Types Supabase régénérés depuis DB live (supabase gen types)
-- 201 erreurs TS corrigées → 0 erreur, build OK
+- Portefeuille gestionnaire : TopBar + KPIs agrégés + grille cartes copros triées par criticité (11 tasks)
+- Spec navigation à deux niveaux : layout gestionnaire vs layout copro, deux sidebars séparées
+- Score de criticité (impayés, recouvrement, rapprochement, factures, budget)
+- setActiveCopro() pour switch de copro au clic
+- Portefeuille ajouté dans sidebar (à déplacer vers layout gestionnaire)
 
 ## Next Task
-Tester le wizard /onboarding en conditions réelles. Puis modules v2 (assurances, diagnostics, mandat, extranet, reporting).
+Implémenter la spec navigation deux niveaux : créer layout (gestionnaire), GestionnaireSidebar, déplacer /portefeuille de (dashboard) vers (gestionnaire), 6 pages placeholder, bouton retour dans sidebar copro. Plan à écrire via writing-plans skill depuis la spec docs/superpowers/specs/2026-04-01-navigation-deux-niveaux-design.md
 
 ## Blockers
 None
 
 ## Key Context
-- src/lib/mock-data/ existe encore (entités enrichies) — vérifier si utilisé ou supprimable
-- Certains composants ont des TODO: Supabase (SalesModals dropdown vide, pv-signature lookup)
-- Budget 2025/2026/2027 en DB, build clean, 0 erreur TS
+- Le portefeuille est actuellement dans (dashboard)/portefeuille — doit être déplacé vers (gestionnaire)/portefeuille
+- L'entrée Portefeuille dans navigation.ts (ajoutée cette session) doit être retirée et remplacée par navigationGestionnaire.ts
+- Agents haiku demandent confirmation (CLAUDE.md) — utiliser sonnet avec "DO NOT ask for confirmation"
