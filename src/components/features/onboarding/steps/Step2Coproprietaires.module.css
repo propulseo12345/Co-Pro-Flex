@@ -1,0 +1,161 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.addRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.addRow input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.04);
+  color: var(--text-main, #e2e8f0);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.addRow input:focus {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.addRow input::placeholder {
+  color: var(--text-muted, #475569);
+}
+
+.btnAdd {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btnAdd:hover {
+  background: #2563eb;
+}
+
+.btnAdd:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary, #64748b);
+  padding: 8px 12px;
+  text-align: left;
+  background: rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.table td {
+  font-size: 13px;
+  padding: 10px 12px;
+  color: var(--text-main, #e2e8f0);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.table tr:hover td {
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.btnDelete {
+  background: none;
+  border: none;
+  color: var(--text-muted, #475569);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.btnDelete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.btnBack {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(148, 163, 184, 0.04);
+  color: var(--text-secondary, #94a3b8);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnBack:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-main, #e2e8f0);
+}
+
+.btnNext {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnNext:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btnNext:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
