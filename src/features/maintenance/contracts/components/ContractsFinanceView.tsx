@@ -20,7 +20,7 @@ const DOMAINE_COLORS: Record<string, string> = {
   MAINTENANCE: '#60A5FA', ELECTRICITE: '#FBBF24', INTERPHONE: '#A78BFA',
   ESPACES_VERTS: '#34D399', ASSURANCE: '#F87171', TOITURE: '#9b8afb',
   EAU: '#60A5FA', FACADE: '#60A5FA', PORTAIL: '#34D399',
-  SECURITE: '#EF4444', JURIDIQUE: '#A78BFA', AUTRE: '#64748b',
+  SECURITE: '#EF4444', JURIDIQUE: '#A78BFA', AUTRE: 'var(--text-tertiary)',
 };
 
 const DOMAINE_LABELS: Record<string, string> = {
@@ -116,14 +116,14 @@ export function ContractsFinanceView({
           { label: 'PRESTATAIRES LIÉS', value: String(prestatairesCount), color: undefined },
         ].map((kpi, i) => (
           <div key={i} style={{
-            flex: 1, padding: '16px 20px', background: '#1a1d2e',
+            flex: 1, padding: '16px 20px', background: 'var(--surface)',
             border: '1px solid rgba(148,163,184,0.08)', borderRadius: 12,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: 6 }}>
               {kpi.label}
             </div>
             <div style={{
-              fontSize: 22, fontWeight: 700, color: kpi.color || '#e2e8f0',
+              fontSize: 22, fontWeight: 700, color: kpi.color || 'var(--text-main)',
               fontVariantNumeric: 'tabular-nums',
               fontFamily: kpi.mono ? "'SF Mono', 'Fira Code', monospace" : 'inherit',
             }}>
@@ -160,7 +160,7 @@ export function ContractsFinanceView({
           </div>
           <div className={styles.costBarBreakdown}>
             {topCosts.map(([domain, cost]) => {
-              const color = DOMAINE_COLORS[domain] || '#94a3b8';
+              const color = DOMAINE_COLORS[domain] || 'var(--text-secondary)';
               return (
                 <div key={domain} style={{ textAlign: 'center' }}>
                   <div className={styles.costBarItemValue} style={{ color }}>{cost.toLocaleString('fr-FR')} €</div>
@@ -219,11 +219,11 @@ export function ContractsFinanceView({
               const isExpiring = contrat.statut === 'A_RENOUVELER' || contrat.statut === 'EXPIRE';
               const isPending = !!pendingRenewals[contrat.id];
               const domain = contrat.type || 'AUTRE';
-              const domainColor = DOMAINE_COLORS[domain] || '#64748b';
+              const domainColor = DOMAINE_COLORS[domain] || 'var(--text-tertiary)';
               const dotColor = isPending ? '#3b82f6'
                 : contrat.statut === 'ACTIF' ? '#22c55e'
                 : contrat.statut === 'A_RENOUVELER' ? '#f59e0b'
-                : contrat.statut === 'EXPIRE' ? '#ef4444' : '#64748b';
+                : contrat.statut === 'EXPIRE' ? '#ef4444' : 'var(--text-tertiary)';
 
               return (
                 <tr key={contrat.id} onClick={() => onVoirDetails(contrat)}>
@@ -238,13 +238,13 @@ export function ContractsFinanceView({
                       {DOMAINE_LABELS[domain] || domain}
                     </span>
                   </td>
-                  <td style={{ color: isExpiring ? '#f59e0b' : '#94a3b8' }}>
+                  <td style={{ color: isExpiring ? '#f59e0b' : 'var(--text-secondary)' }}>
                     {new Date(contrat.dateFin).toLocaleDateString('fr-FR')}
                   </td>
                   <td className={styles.tdRight} style={{
                     fontWeight: 600, fontVariantNumeric: 'tabular-nums',
                     fontFamily: "'SF Mono', 'Fira Code', monospace",
-                    color: '#e2e8f0',
+                    color: 'var(--text-main)',
                   }}>
                     {contrat.coutAnnuel?.toLocaleString('fr-FR')} €
                   </td>
@@ -270,7 +270,7 @@ export function ContractsFinanceView({
                         }}>
                           Activer
                         </button>
-                        <button className={styles.actionLink} style={{ color: '#64748b' }} onClick={(e) => {
+                        <button className={styles.actionLink} style={{ color: 'var(--text-tertiary)' }} onClick={(e) => {
                           e.stopPropagation();
                           onAnnulerRenouvellement?.(contrat.id);
                         }}>

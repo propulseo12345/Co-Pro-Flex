@@ -110,8 +110,8 @@ export default function NewServiceOrderPage() {
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: 6,
                             padding: '10px 20px', borderRadius: 8,
-                            background: '#131620', border: '1px solid rgba(148,163,184,0.08)',
-                            color: '#e2e8f0', fontSize: 14, fontWeight: 500, cursor: 'pointer',
+                            background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.08)',
+                            color: 'var(--text-main)', fontSize: 14, fontWeight: 500, cursor: 'pointer',
                             fontFamily: 'inherit',
                         }}
                     >

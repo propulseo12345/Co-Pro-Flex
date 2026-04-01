@@ -30,7 +30,7 @@ export function InterventionFormModal({
         alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem',
     };
     const modalStyle: React.CSSProperties = {
-        background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 600,
+        background: 'var(--surface)', borderRadius: 12, width: '100%', maxWidth: 600,
         maxHeight: '85vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
         border: '1px solid rgba(148, 163, 184, 0.08)',
@@ -40,11 +40,11 @@ export function InterventionFormModal({
         padding: '16px 24px', borderBottom: '1px solid rgba(148, 163, 184, 0.08)',
     };
     const titleStyle: React.CSSProperties = {
-        margin: 0, fontSize: 18, fontWeight: 700, color: '#e2e8f0',
+        margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-main)',
         display: 'flex', alignItems: 'center', gap: 10,
     };
     const closeStyle: React.CSSProperties = {
-        background: 'none', border: 'none', color: '#64748b', cursor: 'pointer',
+        background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer',
         padding: 6, borderRadius: 6, display: 'flex',
     };
     const contentStyle: React.CSSProperties = {
@@ -52,12 +52,12 @@ export function InterventionFormModal({
     };
     const labelStyle: React.CSSProperties = {
         display: 'block', marginBottom: 6, fontSize: 10, fontWeight: 600,
-        color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px',
+        color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px',
     };
     const inputStyle: React.CSSProperties = {
         width: '100%', padding: '10px 14px',
         border: '1px solid rgba(148, 163, 184, 0.08)', borderRadius: 8,
-        fontSize: 13, color: '#e2e8f0', background: '#131620',
+        fontSize: 13, color: 'var(--text-main)', background: 'var(--bg-secondary)',
         fontFamily: 'inherit', outline: 'none',
     };
     const textareaStyle: React.CSSProperties = {
@@ -72,9 +72,9 @@ export function InterventionFormModal({
         display: 'flex', justifyContent: 'flex-end', gap: 8,
     };
     const btnCancelStyle: React.CSSProperties = {
-        padding: '8px 16px', background: '#131620',
+        padding: '8px 16px', background: 'var(--bg-secondary)',
         border: '1px solid rgba(148, 163, 184, 0.08)', borderRadius: 8,
-        color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+        color: 'var(--text-main)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
         fontFamily: 'inherit',
     };
     const btnSubmitStyle: React.CSSProperties = {

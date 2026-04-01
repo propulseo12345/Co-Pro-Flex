@@ -486,7 +486,7 @@ export default function StatusUpdateModal({
                     {/* No available transitions */}
                     {availableNextSteps.length === 0 && (
                         <div className={styles.actionZone} style={{ textAlign: 'center', padding: 32 }}>
-                            <p style={{ color: '#94a3b8', fontSize: 14 }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
                                 Cet ordre de service est {getStatutLabel(currentStatus).toLowerCase()} — aucune transition disponible.
                             </p>
                         </div>
@@ -525,8 +525,8 @@ export default function StatusUpdateModal({
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: 6,
                             padding: '8px 20px', borderRadius: 8,
-                            background: '#131620', border: '1px solid rgba(148,163,184,0.08)',
-                            color: '#e2e8f0', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                            background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.08)',
+                            color: 'var(--text-main)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
                             fontFamily: 'inherit', opacity: isProcessing ? 0.5 : 1,
                         }}
                     >

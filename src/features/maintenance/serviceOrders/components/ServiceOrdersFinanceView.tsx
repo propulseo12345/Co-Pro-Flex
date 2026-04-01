@@ -7,7 +7,7 @@ import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import styles from '@/app/(dashboard)/maintenance/maintenance.module.css';
 
 const STATUT_CONFIG: Record<string, { label: string; color: string; badgeClass: string }> = {
-  BROUILLON: { label: 'Brouillon', color: '#64748b', badgeClass: 'badgeGray' },
+  BROUILLON: { label: 'Brouillon', color: 'var(--text-tertiary)', badgeClass: 'badgeGray' },
   A_ENVOYER: { label: 'À envoyer', color: '#A78BFA', badgeClass: 'badgePurple' },
   ENVOYE: { label: 'Envoyé', color: '#A78BFA', badgeClass: 'badgePurple' },
   EN_ATTENTE_PRESTATAIRE: { label: 'En attente', color: '#FBBF24', badgeClass: 'badgeAmber' },
@@ -105,7 +105,7 @@ export function ServiceOrdersFinanceView({
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         {[
           { label: 'TOTAL', value: String(stats.total), filter: 'TOUS' },
-          { label: 'BROUILLONS', value: String(stats.brouillons), color: '#64748b', filter: 'draft' },
+          { label: 'BROUILLONS', value: String(stats.brouillons), color: 'var(--text-tertiary)', filter: 'draft' },
           { label: 'EN ATTENTE', value: String(stats.enAttentePrestataire), color: '#fbbf24', filter: 'pending' },
           { label: 'PROGRAMMÉS', value: String(stats.interventionProgrammee), color: '#60a5fa', filter: 'scheduled' },
           { label: 'RÉALISÉS', value: String(stats.interventionRealisee), color: '#22c55e', filter: 'completed' },
@@ -118,15 +118,15 @@ export function ServiceOrdersFinanceView({
               onClick={() => setStatutFilter(kpi.filter === 'TOUS' ? 'TOUS' : kpi.filter)}
               style={{
                 flex: 1, padding: '16px 20px', textAlign: 'left', fontFamily: 'inherit',
-                background: isActive ? 'rgba(59,130,246,0.06)' : '#1a1d2e',
+                background: isActive ? 'rgba(59,130,246,0.06)' : 'var(--surface)',
                 border: isActive ? '1px solid #3b82f6' : '1px solid rgba(148,163,184,0.08)',
                 borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: 6 }}>
+              <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: 6 }}>
                 {kpi.label}
               </div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: kpi.color || '#e2e8f0', fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: kpi.color || 'var(--text-main)', fontVariantNumeric: 'tabular-nums' }}>
                 {kpi.value}
               </div>
             </button>
@@ -160,7 +160,7 @@ export function ServiceOrdersFinanceView({
         <div className={styles.splitList}>
           {sortedOS.map(os => {
             const isActive = selected?.id === os.id;
-            const cfg = STATUT_CONFIG[os.statut] || { label: os.statut, color: '#64748b', badgeClass: 'badgeGray' };
+            const cfg = STATUT_CONFIG[os.statut] || { label: os.statut, color: 'var(--text-tertiary)', badgeClass: 'badgeGray' };
             const avatarBg = os.urgence ? 'rgba(239,68,68,0.15)' : `${cfg.color}22`;
             const avatarColor = os.urgence ? '#f87171' : cfg.color;
             const avatarIcon = os.urgence ? '!' : os.statut === 'CLOTURE' ? '◉'
@@ -247,13 +247,13 @@ export function ServiceOrdersFinanceView({
                 <div className={styles.detailStatLabel}>Montant estimé</div>
               </div>
               <div className={styles.detailStatCard}>
-                <div className={styles.detailStatValue} style={{ color: STATUT_CONFIG[selected.statut]?.color || '#e2e8f0' }}>
+                <div className={styles.detailStatValue} style={{ color: STATUT_CONFIG[selected.statut]?.color || 'var(--text-main)' }}>
                   {STATUT_CONFIG[selected.statut]?.label || selected.statut}
                 </div>
                 <div className={styles.detailStatLabel}>Statut</div>
               </div>
               <div className={styles.detailStatCard}>
-                <div className={styles.detailStatValue} style={{ color: selected.urgence ? '#ef4444' : '#e2e8f0' }}>
+                <div className={styles.detailStatValue} style={{ color: selected.urgence ? '#ef4444' : 'var(--text-main)' }}>
                   {selected.urgence ? 'Urgent' : 'Normal'}
                 </div>
                 <div className={styles.detailStatLabel}>Priorité</div>

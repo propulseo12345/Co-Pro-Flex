@@ -99,7 +99,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
         alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem',
     };
     const modal: React.CSSProperties = {
-        background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 640,
+        background: 'var(--surface)', borderRadius: 12, width: '100%', maxWidth: 640,
         maxHeight: '85vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
         border: '1px solid rgba(148,163,184,0.08)',
@@ -110,12 +110,12 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
     };
     const label: React.CSSProperties = {
         display: 'block', marginBottom: 6, fontSize: 10, fontWeight: 600,
-        color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px',
+        color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px',
     };
     const input: React.CSSProperties = {
         width: '100%', padding: '10px 14px',
         border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
-        fontSize: 13, color: '#e2e8f0', background: '#131620',
+        fontSize: 13, color: 'var(--text-main)', background: 'var(--bg-secondary)',
         fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
     };
     const inputErr: React.CSSProperties = { ...input, borderColor: '#ef4444' };
@@ -128,9 +128,9 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
         display: 'flex', justifyContent: 'flex-end', gap: 8,
     };
     const btnCancel: React.CSSProperties = {
-        padding: '8px 16px', background: '#131620',
+        padding: '8px 16px', background: 'var(--bg-secondary)',
         border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
-        color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+        color: 'var(--text-main)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
     };
     const btnSubmit: React.CSSProperties = {
         padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
@@ -139,7 +139,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
     };
     const checkLabel: React.CSSProperties = {
         display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
-        color: '#e2e8f0', cursor: 'pointer', paddingTop: 22,
+        color: 'var(--text-main)', cursor: 'pointer', paddingTop: 22,
     };
 
     return (
@@ -148,9 +148,9 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                 <div style={header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <FileText size={18} style={{ color: '#3b82f6' }} />
-                        <span style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>Nouveau contrat</span>
+                        <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)' }}>Nouveau contrat</span>
                     </div>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
                         <X size={18} />
                     </button>
                 </div>
@@ -289,19 +289,19 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                         <div style={{
                             display: 'flex', alignItems: 'center', gap: 10,
                             padding: '10px 14px', borderRadius: 8,
-                            border: '1px dashed rgba(148,163,184,0.15)', background: '#131620',
+                            border: '1px dashed rgba(148,163,184,0.15)', background: 'var(--bg-secondary)',
                             cursor: 'pointer', position: 'relative',
                         }}>
                             <input type="file" accept=".pdf" id="contrat-pdf-upload"
                                 onChange={e => setFormData({ ...formData, fichierPDF: e.target.files?.[0]?.name || '' })}
                                 style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
-                            <Upload size={16} style={{ color: '#64748b' }} />
-                            <span style={{ fontSize: 13, color: formData.fichierPDF ? '#e2e8f0' : '#64748b' }}>
+                            <Upload size={16} style={{ color: 'var(--text-tertiary)' }} />
+                            <span style={{ fontSize: 13, color: formData.fichierPDF ? 'var(--text-main)' : 'var(--text-tertiary)' }}>
                                 {formData.fichierPDF || 'Choisir un fichier PDF'}
                             </span>
                             {formData.fichierPDF && (
                                 <button type="button" onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, fichierPDF: '' }); }}
-                                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 2 }}>
+                                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 2 }}>
                                     <X size={14} />
                                 </button>
                             )}

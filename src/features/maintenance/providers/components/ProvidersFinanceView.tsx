@@ -10,7 +10,7 @@ const DOMAINE_COLORS: Record<string, string> = {
   espaces_verts: '#34D399', assurance: '#F87171', toiture: '#9b8afb',
   facade: '#60A5FA', securite: '#EF4444', serrurerie: '#8892a4',
   peinture: '#e5a63e', juridique: '#A78BFA', architecture: '#5b8def',
-  climatisation: '#60A5FA', portail: '#34D399', autre: '#64748b',
+  climatisation: '#60A5FA', portail: '#34D399', autre: 'var(--text-tertiary)',
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -137,20 +137,20 @@ export function ProvidersFinanceView({
       {/* KPI Strip — inline forcé */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         {[
-          { label: 'TOTAL', value: String(allProviders.length), color: '#e2e8f0' },
+          { label: 'TOTAL', value: String(allProviders.length), color: 'var(--text-main)' },
           { label: 'ACTIFS', value: String(actifsCount), color: '#22c55e' },
-          { label: 'INTERVENTIONS TOTAL', value: String(totalInterventions), color: '#e2e8f0' },
+          { label: 'INTERVENTIONS TOTAL', value: String(totalInterventions), color: 'var(--text-main)' },
           { label: 'NOTE MOYENNE', value: `${avgRating} ★`, color: '#fbbf24' },
         ].map((kpi, i) => (
           <div key={i} style={{
             flex: 1, padding: '16px 20px',
-            background: '#1a1d2e',
+            background: 'var(--surface)',
             border: '1px solid rgba(148,163,184,0.08)',
             borderRadius: 12,
           }}>
             <div style={{
               fontSize: 11, fontWeight: 500, textTransform: 'uppercase',
-              letterSpacing: '0.05em', color: '#64748b', marginBottom: 6,
+              letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: 6,
             }}>
               {kpi.label}
             </div>
@@ -168,9 +168,9 @@ export function ProvidersFinanceView({
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <div style={{
           flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 14px', background: '#1a1d2e',
+          padding: '8px 14px', background: 'var(--surface)',
           border: '1px solid rgba(148,163,184,0.08)', borderRadius: 10,
-          color: '#64748b', fontSize: 13,
+          color: 'var(--text-tertiary)', fontSize: 13,
         }}>
           <Search size={16} aria-hidden="true" />
           <input
@@ -180,7 +180,7 @@ export function ProvidersFinanceView({
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               flex: 1, border: 'none', background: 'transparent',
-              color: '#e2e8f0', outline: 'none', fontSize: 13, fontFamily: 'inherit',
+              color: 'var(--text-main)', outline: 'none', fontSize: 13, fontFamily: 'inherit',
             }}
           />
         </div>
@@ -193,10 +193,10 @@ export function ProvidersFinanceView({
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '8px 14px',
-                background: isActive ? 'rgba(59,130,246,0.12)' : '#1a1d2e',
+                background: isActive ? 'rgba(59,130,246,0.12)' : 'var(--surface)',
                 border: isActive ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(148,163,184,0.08)',
                 borderRadius: 10,
-                color: isActive ? '#3b82f6' : '#94a3b8',
+                color: isActive ? '#3b82f6' : 'var(--text-secondary)',
                 fontSize: 13, fontWeight: isActive ? 600 : 400,
                 cursor: 'pointer', whiteSpace: 'nowrap',
                 fontFamily: 'inherit', transition: 'all 0.2s',
@@ -216,7 +216,7 @@ export function ProvidersFinanceView({
 
         {/* List */}
         <div style={{
-          background: '#1a1d2e', border: '1px solid rgba(148,163,184,0.08)',
+          background: 'var(--surface)', border: '1px solid rgba(148,163,184,0.08)',
           borderRadius: 12, maxHeight: 560, overflowY: 'auto', display: 'flex', flexDirection: 'column',
         }}>
           {/* Domain pills */}
@@ -231,20 +231,20 @@ export function ProvidersFinanceView({
                 padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
                 whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'inherit', border: 'none',
                 background: domainFilter === 'tous' ? 'rgba(59,130,246,0.12)' : 'transparent',
-                color: domainFilter === 'tous' ? '#3b82f6' : '#64748b',
+                color: domainFilter === 'tous' ? '#3b82f6' : 'var(--text-tertiary)',
               }}
             >
               Tous
               <span style={{
                 fontSize: 10, fontWeight: 600, padding: '0 5px', borderRadius: 8,
                 background: domainFilter === 'tous' ? 'rgba(59,130,246,0.2)' : 'rgba(148,163,184,0.08)',
-                color: domainFilter === 'tous' ? '#60a5fa' : '#64748b',
+                color: domainFilter === 'tous' ? '#60a5fa' : 'var(--text-tertiary)',
               }}>
                 {filtered.length}
               </span>
             </button>
             {availableDomains.map(([domain, count]) => {
-              const domColor = DOMAINE_COLORS[domain] || '#64748b';
+              const domColor = DOMAINE_COLORS[domain] || 'var(--text-tertiary)';
               const isActive = domainFilter === domain;
               return (
                 <button
@@ -255,7 +255,7 @@ export function ProvidersFinanceView({
                     padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 500,
                     whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'inherit', border: 'none',
                     background: isActive ? `${domColor}1f` : 'transparent',
-                    color: isActive ? domColor : '#94a3b8',
+                    color: isActive ? domColor : 'var(--text-secondary)',
                   }}
                 >
                   <span style={{
@@ -275,7 +275,7 @@ export function ProvidersFinanceView({
             {domainFiltered.map(p => {
               const isActive = selected?.id === p.id;
               const mainDomain = p.domaines?.[0] || 'autre';
-              const domColor = DOMAINE_COLORS[mainDomain] || '#64748b';
+              const domColor = DOMAINE_COLORS[mainDomain] || 'var(--text-tertiary)';
               return (
                 <div
                   key={p.id}
@@ -298,7 +298,7 @@ export function ProvidersFinanceView({
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
-                      fontSize: 13, fontWeight: 600, color: '#e2e8f0',
+                      fontSize: 13, fontWeight: 600, color: 'var(--text-main)',
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                     }}>
                       {p.nom}
@@ -308,8 +308,8 @@ export function ProvidersFinanceView({
                         <span key={d} style={{
                           display: 'inline-flex', padding: '2px 8px', borderRadius: 4,
                           fontSize: 10, fontWeight: 500,
-                          background: `${DOMAINE_COLORS[d] || '#64748b'}1f`,
-                          color: DOMAINE_COLORS[d] || '#64748b',
+                          background: `${DOMAINE_COLORS[d] || 'var(--text-tertiary)'}1f`,
+                          color: DOMAINE_COLORS[d] || 'var(--text-tertiary)',
                         }}>
                           {DOMAIN_LABELS[d] || d}
                         </span>
@@ -323,13 +323,13 @@ export function ProvidersFinanceView({
                   </div>
                   <span style={{
                     width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                    background: p.actif ? '#22c55e' : '#64748b',
+                    background: p.actif ? '#22c55e' : 'var(--text-tertiary)',
                   }} />
                 </div>
               );
             })}
             {domainFiltered.length === 0 && (
-              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b', fontSize: 14 }}>
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 14 }}>
                 Aucun prestataire trouvé.
               </div>
             )}
@@ -339,16 +339,16 @@ export function ProvidersFinanceView({
         {/* Detail Panel */}
         {selected ? (
           <div style={{
-            background: '#1a1d2e', border: '1px solid rgba(148,163,184,0.08)',
+            background: 'var(--surface)', border: '1px solid rgba(148,163,184,0.08)',
             borderRadius: 12, padding: 24,
           }}>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>
                   {selected.nom}
                 </div>
-                <div style={{ fontSize: 13, color: '#64748b' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
                   {selected.domaines?.map(d => DOMAIN_LABELS[d] || d).join(', ')}
                 </div>
               </div>
@@ -356,7 +356,7 @@ export function ProvidersFinanceView({
                 display: 'inline-flex', alignItems: 'center', padding: '2px 10px',
                 borderRadius: 8, fontSize: 11, fontWeight: 500,
                 background: selected.actif ? 'rgba(34,197,94,0.1)' : 'rgba(148,163,184,0.1)',
-                color: selected.actif ? '#4ade80' : '#94a3b8',
+                color: selected.actif ? '#4ade80' : 'var(--text-secondary)',
               }}>
                 {selected.actif ? 'Actif' : 'Inactif'}
               </span>
@@ -365,35 +365,35 @@ export function ProvidersFinanceView({
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
               <div style={{
-                background: '#131620', border: '1px solid rgba(148,163,184,0.06)',
+                background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)',
                 borderRadius: 8, padding: 12, textAlign: 'center',
               }}>
                 <div style={{ fontSize: 20, fontWeight: 700, color: '#60a5fa' }}>
                   {selected.nombreInterventions || 0}
                 </div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginTop: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>
                   Interventions
                 </div>
               </div>
               <div style={{
-                background: '#131620', border: '1px solid rgba(148,163,184,0.06)',
+                background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)',
                 borderRadius: 8, padding: 12, textAlign: 'center',
               }}>
                 <div style={{ fontSize: 20, fontWeight: 700, color: '#fbbf24' }}>
                   {selected.noteMoyenne ? `${selected.noteMoyenne.toFixed(1)} ★` : '—'}
                 </div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginTop: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>
                   Note moyenne
                 </div>
               </div>
               <div style={{
-                background: '#131620', border: '1px solid rgba(148,163,184,0.06)',
+                background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)',
                 borderRadius: 8, padding: 12, textAlign: 'center',
               }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-main)' }}>
                   {selected.contractsCount || 0}
                 </div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginTop: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>
                   Contrats
                 </div>
               </div>
@@ -402,15 +402,15 @@ export function ProvidersFinanceView({
             {/* Info Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   TÉLÉPHONE
                 </div>
-                <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                   {selected.telephone || '—'}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   EMAIL
                 </div>
                 <div style={{ fontSize: 13, color: '#60a5fa', fontWeight: 500 }}>
@@ -418,24 +418,24 @@ export function ProvidersFinanceView({
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   ADRESSE
                 </div>
-                <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                   {[selected.adresse, selected.ville].filter(Boolean).join(', ') || '—'}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4 }}>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   SIRET
                 </div>
-                <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 500 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>
                   {selected.siret || '—'}
                 </div>
               </div>
               {selected.domaines && selected.domaines.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4 }}>
+                  <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                     DOMAINES
                   </div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -443,8 +443,8 @@ export function ProvidersFinanceView({
                       <span key={d} style={{
                         display: 'inline-flex', padding: '2px 8px', borderRadius: 4,
                         fontSize: 11, fontWeight: 500,
-                        background: `${DOMAINE_COLORS[d] || '#64748b'}1f`,
-                        color: DOMAINE_COLORS[d] || '#64748b',
+                        background: `${DOMAINE_COLORS[d] || 'var(--text-tertiary)'}1f`,
+                        color: DOMAINE_COLORS[d] || 'var(--text-tertiary)',
                       }}>
                         {DOMAIN_LABELS[d] || d}
                       </span>
@@ -471,10 +471,10 @@ export function ProvidersFinanceView({
           </div>
         ) : (
           <div style={{
-            background: '#1a1d2e', border: '1px solid rgba(148,163,184,0.08)',
+            background: 'var(--surface)', border: '1px solid rgba(148,163,184,0.08)',
             borderRadius: 12, padding: 24,
           }}>
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b', fontSize: 14 }}>
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 14 }}>
               Sélectionnez un prestataire.
             </div>
           </div>

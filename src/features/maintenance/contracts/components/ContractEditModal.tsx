@@ -33,7 +33,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
         alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem',
     };
     const modal: React.CSSProperties = {
-        background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 640,
+        background: 'var(--surface)', borderRadius: 12, width: '100%', maxWidth: 640,
         maxHeight: '85vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
         border: '1px solid rgba(148,163,184,0.08)',
@@ -44,12 +44,12 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
     };
     const lbl: React.CSSProperties = {
         display: 'block', marginBottom: 6, fontSize: 10, fontWeight: 600,
-        color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px',
+        color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px',
     };
     const input: React.CSSProperties = {
         width: '100%', padding: '10px 14px',
         border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
-        fontSize: 13, color: '#e2e8f0', background: '#131620',
+        fontSize: 13, color: 'var(--text-main)', background: 'var(--bg-secondary)',
         fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
     };
     const textarea: React.CSSProperties = { ...input, minHeight: 70, resize: 'vertical' };
@@ -60,9 +60,9 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
         display: 'flex', justifyContent: 'flex-end', gap: 8,
     };
     const btnCancel: React.CSSProperties = {
-        padding: '8px 16px', background: '#131620',
+        padding: '8px 16px', background: 'var(--bg-secondary)',
         border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
-        color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+        color: 'var(--text-main)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
         display: 'inline-flex', alignItems: 'center', gap: 6,
     };
     const btnSubmit: React.CSSProperties = {
@@ -72,7 +72,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
     };
     const checkLabel: React.CSSProperties = {
         display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
-        color: '#e2e8f0', cursor: 'pointer', paddingTop: 22,
+        color: 'var(--text-main)', cursor: 'pointer', paddingTop: 22,
     };
 
     return (
@@ -81,9 +81,9 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
                 <div style={header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <FileText size={18} style={{ color: '#3b82f6' }} />
-                        <span style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>Modifier le contrat</span>
+                        <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)' }}>Modifier le contrat</span>
                     </div>
-                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
+                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
                         <X size={18} />
                     </button>
                 </div>

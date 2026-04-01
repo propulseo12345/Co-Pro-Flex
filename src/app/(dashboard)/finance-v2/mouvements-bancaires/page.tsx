@@ -88,8 +88,8 @@ export default function MouvementsBancairesV2Page() {
               fontWeight: 700,
               cursor: 'pointer',
               border: `1px solid ${hook.compteActif === acc ? 'rgba(173,198,255,0.2)' : 'rgba(148,163,184,0.08)'}`,
-              background: hook.compteActif === acc ? 'rgba(173,198,255,0.08)' : '#1a1d2e',
-              color: hook.compteActif === acc ? '#adc6ff' : '#94a3b8',
+              background: hook.compteActif === acc ? 'rgba(173,198,255,0.08)' : 'var(--surface)',
+              color: hook.compteActif === acc ? '#adc6ff' : 'var(--text-secondary)',
               transition: 'all 0.15s',
             }}
           >
@@ -115,7 +115,7 @@ export default function MouvementsBancairesV2Page() {
 
       {/* Movement rows */}
       {hook.filteredMouvements.length === 0 ? (
-        <div className={s.card} style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>
+        <div className={s.card} style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40 }}>
           Aucun mouvement bancaire{hook.hasData ? ' correspondant aux filtres' : ''}
         </div>
       ) : (
@@ -126,11 +126,11 @@ export default function MouvementsBancairesV2Page() {
             return (
               <div key={mv.id} style={{
                 display: 'flex', alignItems: 'center', gap: 16,
-                background: '#1a1d2e', borderRadius: 12, padding: '14px 20px',
+                background: 'var(--surface)', borderRadius: 12, padding: '14px 20px',
                 transition: 'background 0.15s',
                 borderLeft: !mv.categorise ? '3px solid #ffb786' : isRapproche ? '3px solid #34d399' : '3px solid transparent',
               }}>
-                <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, width: 70, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600, width: 70, flexShrink: 0 }}>
                   {new Date(mv.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
                 </span>
                 <span style={{ flex: 1, fontSize: 13, fontWeight: 600, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

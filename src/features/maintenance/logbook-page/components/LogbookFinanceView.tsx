@@ -62,7 +62,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
               {header.showExportMenu && (
                 <div style={{
                   position: 'absolute', top: '100%', right: 0, marginTop: 4,
-                  background: '#1a1d2e', border: '1px solid rgba(148,163,184,0.12)',
+                  background: 'var(--surface)', border: '1px solid rgba(148,163,184,0.12)',
                   borderRadius: 8, padding: 4, zIndex: 10, minWidth: 180,
                 }}>
                   <button
@@ -115,7 +115,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
               style={{
                 flex: 1,
                 padding: '16px 20px',
-                background: estActif ? 'rgba(59, 130, 246, 0.06)' : '#1a1d2e',
+                background: estActif ? 'rgba(59, 130, 246, 0.06)' : 'var(--surface)',
                 border: estActif ? '1px solid #3b82f6' : '1px solid rgba(148, 163, 184, 0.08)',
                 borderRadius: 12,
                 cursor: 'pointer',
@@ -126,12 +126,12 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
             >
               <div style={{
                 fontSize: 11, fontWeight: 500, textTransform: 'uppercase' as const,
-                letterSpacing: '0.05em', color: '#64748b', marginBottom: 6,
+                letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: 6,
               }}>
                 {tuile.label}
               </div>
               <div style={{
-                fontSize: 22, fontWeight: 700, color: tuile.color || '#e2e8f0',
+                fontSize: 22, fontWeight: 700, color: tuile.color || 'var(--text-main)',
                 fontVariantNumeric: 'tabular-nums',
                 fontFamily: tuile.format === 'currency' ? "'SF Mono', 'Fira Code', monospace" : 'inherit',
               }}>
@@ -331,7 +331,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
           >
             <div
               style={{
-                background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 560,
+                background: 'var(--surface)', borderRadius: 12, width: '100%', maxWidth: 560,
                 border: '1px solid rgba(148,163,184,0.08)',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
               }}
@@ -343,14 +343,14 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
                 padding: '16px 24px', borderBottom: '1px solid rgba(148,163,184,0.08)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <FileText size={18} style={{ color: '#64748b' }} aria-hidden="true" />
-                  <span style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>
+                  <FileText size={18} style={{ color: 'var(--text-tertiary)' }} aria-hidden="true" />
+                  <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)' }}>
                     Détail intervention
                   </span>
                 </div>
                 <button
                   onClick={() => setViewingIntervention(null)}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 6, borderRadius: 6, display: 'flex' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 6, borderRadius: 6, display: 'flex' }}
                   aria-label="Fermer"
                 >
                   <X size={18} aria-hidden="true" />
@@ -362,11 +362,11 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
                 {/* Titre + Statut */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                   <div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>
                       {v.titre}
                     </div>
                     {v.description && (
-                      <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                         {v.description}
                       </div>
                     )}
@@ -382,57 +382,57 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
 
                 {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
-                  <div style={{ background: '#131620', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                  <div style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
                     <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444', fontFamily: "'SF Mono', 'Fira Code', monospace", fontVariantNumeric: 'tabular-nums' }}>
                       {v.cout ? `${v.cout.toLocaleString('fr-FR')} €` : '—'}
                     </div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginTop: 4 }}>Coût</div>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>Coût</div>
                   </div>
-                  <div style={{ background: '#131620', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                  <div style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
                     <div style={{ fontSize: 20, fontWeight: 700, color: st.color }}>
                       {st.label}
                     </div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginTop: 4 }}>Statut</div>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>Statut</div>
                   </div>
-                  <div style={{ background: '#131620', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: '#e2e8f0' }}>
+                  <div style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-main)' }}>
                       {v.categorie === 'COURANTE' ? 'Courante' : 'Travaux'}
                     </div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginTop: 4 }}>Catégorie</div>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>Catégorie</div>
                   </div>
                 </div>
 
                 {/* Info Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
                   <div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Calendar size={10} aria-hidden="true" /> DATE
                     </div>
-                    <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                       {new Date(v.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <User size={10} aria-hidden="true" /> INTERVENANT
                     </div>
-                    <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                       {v.intervenant}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Wrench size={10} aria-hidden="true" /> ÉQUIPEMENT
                     </div>
-                    <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                       {v.equipementConcerne || '—'}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#64748b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Tag size={10} aria-hidden="true" /> TYPE
                     </div>
-                    <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                       {v.type === 'ENTRETIEN' ? 'Entretien' : v.type === 'REPARATION' ? 'Réparation' : 'Inspection'}
                     </div>
                   </div>
@@ -447,9 +447,9 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
                 <button
                   onClick={() => setViewingIntervention(null)}
                   style={{
-                    padding: '8px 16px', background: '#131620',
+                    padding: '8px 16px', background: 'var(--bg-secondary)',
                     border: '1px solid rgba(148,163,184,0.08)', borderRadius: 8,
-                    color: '#e2e8f0', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    color: 'var(--text-main)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                   }}
                 >
                   Fermer

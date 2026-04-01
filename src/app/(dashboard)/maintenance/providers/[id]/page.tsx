@@ -13,15 +13,15 @@ import { useProviderDetailPage } from '../../../../../features/maintenance/provi
 
 /* ─── Couleurs Finance ─── */
 const C = {
-  bg: '#0f1117',
-  card: '#1a1d2e',
-  cardSecondary: '#131620',
+  bg: 'var(--background)',
+  card: 'var(--surface)',
+  cardSecondary: 'var(--bg-secondary)',
   border: 'rgba(148,163,184,0.08)',
   borderLight: 'rgba(148,163,184,0.04)',
   borderDark: 'rgba(148,163,184,0.12)',
-  text: '#e2e8f0',
-  textSecondary: '#94a3b8',
-  textTertiary: '#64748b',
+  text: 'var(--text-main)',
+  textSecondary: 'var(--text-secondary)',
+  textTertiary: 'var(--text-tertiary)',
   primary: '#3b82f6',
   success: '#22c55e',
   danger: '#ef4444',
@@ -35,7 +35,7 @@ const DOMAINE_COLORS: Record<string, string> = {
   SERRURERIE: '#8892a4', PEINTURE: '#e5a63e', ASSURANCE: '#F87171',
   JURIDIQUE: '#A78BFA', ARCHITECTURE: '#5b8def', TOITURE: '#9b8afb',
   FACADE: '#60A5FA', CLIMATISATION: '#60A5FA', INTERPHONE: '#A78BFA',
-  PORTAIL: '#34D399', SECURITE: '#EF4444', AUTRE: '#64748b',
+  PORTAIL: '#34D399', SECURITE: '#EF4444', AUTRE: 'var(--text-tertiary)',
 };
 
 const DOMAINE_LABELS: Record<string, string> = {
@@ -85,7 +85,7 @@ function ProviderDetailContent({ id }: { id: string }) {
   }
 
   const mainDomain = prestataire.domaines?.[0] || 'AUTRE';
-  const mainColor = DOMAINE_COLORS[mainDomain] || '#64748b';
+  const mainColor = DOMAINE_COLORS[mainDomain] || 'var(--text-tertiary)';
 
   return (
     <>
@@ -242,7 +242,7 @@ function ProviderDetailContent({ id }: { id: string }) {
             <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 12 }}>Domaines d&apos;activité</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {(prestataire.domaines || []).map(d => {
-                const color = DOMAINE_COLORS[d] || '#64748b';
+                const color = DOMAINE_COLORS[d] || 'var(--text-tertiary)';
                 return (
                   <span key={d} style={{
                     display: 'inline-flex', padding: '5px 14px', borderRadius: 8,
@@ -420,7 +420,7 @@ function ProviderDetailContent({ id }: { id: string }) {
             style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1050, padding: '1rem' }}
             onClick={() => setSelectedIntervention(null)}
           >
-            <div onClick={e => e.stopPropagation()} style={{ background: '#1a1d2e', borderRadius: 12, width: '100%', maxWidth: 560, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: `1px solid ${C.border}` }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, width: '100%', maxWidth: 560, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: `1px solid ${C.border}` }}>
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: `1px solid ${C.border}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

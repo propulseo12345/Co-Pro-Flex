@@ -15,15 +15,15 @@ import type { DocumentContrat } from '../../../../../features/maintenance/contra
 
 /* ─── Couleurs Finance ─── */
 const C = {
-  bg: '#0f1117',
-  card: '#1a1d2e',
-  cardSecondary: '#131620',
+  bg: 'var(--background)',
+  card: 'var(--surface)',
+  cardSecondary: 'var(--bg-secondary)',
   border: 'rgba(148,163,184,0.08)',
   borderLight: 'rgba(148,163,184,0.04)',
   borderDark: 'rgba(148,163,184,0.12)',
-  text: '#e2e8f0',
-  textSecondary: '#94a3b8',
-  textTertiary: '#64748b',
+  text: 'var(--text-main)',
+  textSecondary: 'var(--text-secondary)',
+  textTertiary: 'var(--text-tertiary)',
   textMuted: '#475569',
   primary: '#3b82f6',
   primaryHover: '#2563eb',
@@ -55,7 +55,7 @@ const DOMAINE_COLORS: Record<string, string> = {
   maintenance: '#60A5FA', electricite: '#FBBF24', interphone: '#A78BFA',
   espaces_verts: '#34D399', assurance: '#F87171', toiture: '#9b8afb',
   eau: '#60A5FA', facade: '#60A5FA', portail: '#34D399',
-  securite: '#EF4444', juridique: '#A78BFA', syndic: '#3b82f6', autre: '#64748b',
+  securite: '#EF4444', juridique: '#A78BFA', syndic: '#3b82f6', autre: 'var(--text-tertiary)',
 };
 
 function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) {
@@ -137,7 +137,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
 
   const statutKey = contrat.statut as string || '';
   const statut = STATUT_BADGE[statutKey] || { label: statutKey, bg: 'rgba(148,163,184,0.1)', color: C.textSecondary };
-  const domainColor = DOMAINE_COLORS[(contrat.type as string) || 'autre'] || '#64748b';
+  const domainColor = DOMAINE_COLORS[(contrat.type as string) || 'autre'] || 'var(--text-tertiary)';
   const isExpiring = statutKey === 'to_renew' || statutKey === 'A_RENOUVELER'
     || statutKey === 'expired' || statutKey === 'EXPIRE';
 

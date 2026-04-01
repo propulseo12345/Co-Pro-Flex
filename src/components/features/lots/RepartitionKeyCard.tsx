@@ -84,17 +84,17 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDe
                       style={{
                         width: '80px',
                         padding: '4px 8px',
-                        background: '#131620',
+                        background: 'var(--bg-secondary)',
                         border: '1px solid rgba(148, 163, 184, 0.08)',
                         borderRadius: '6px',
-                        color: '#e2e8f0',
+                        color: 'var(--text-main)',
                         fontSize: '12px',
                         fontFamily: "'SF Mono', 'Fira Code', monospace",
                         textAlign: 'right',
                       }}
                     />
                   </td>
-                  <td style={{ fontFamily: "'SF Mono', monospace", color: '#94a3b8' }}>
+                  <td style={{ fontFamily: "'SF Mono', monospace", color: 'var(--text-secondary)' }}>
                     {line.share_pct.toFixed(2)}%
                   </td>
                 </tr>
