@@ -38,6 +38,10 @@ export interface ICoproprietePortefeuille {
   dernierRapprochement?: string;
   // Alertes
   alertes: IAlerteCopropriete[];
+  // AG
+  prochaineAG?: string; // date ISO
+  // Criticité (calculé côté client)
+  criticalityScore: number;
 }
 
 export interface IPortefeuilleKPIs {
