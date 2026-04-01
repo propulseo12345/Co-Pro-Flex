@@ -12,7 +12,7 @@
     align-items: center;
     gap: 16px;
     padding: 16px 20px;
-    background: #161822;
+    background: var(--bg-secondary);
     border: 1px solid var(--border-light);
     border-radius: 12px;
     margin-bottom: 16px;
