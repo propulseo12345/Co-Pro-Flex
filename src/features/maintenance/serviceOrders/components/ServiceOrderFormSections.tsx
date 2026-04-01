@@ -3,7 +3,7 @@
 import { ServiceOrderFormData } from '../hooks/useNewServiceOrderPage';
 import { CategorieIntervention, CATEGORIES_INTERVENTION } from '@/lib/utils/intervention-coherence';
 import { Prestataire, ContratDetaille, PieceJointeOS } from '@/types';
-import { MOCK_EMAIL_TEMPLATES_OS } from '@/data/mock';
+import { EMAIL_TEMPLATES_OS } from '@/lib/constants/email-templates-os';
 import { AlertTriangle } from 'lucide-react';
 import ProviderSelector from '@/components/features/maintenance/ProviderSelector';
 import ContractSelector from '../../../../app/(dashboard)/maintenance/service-orders/components/ContractSelector';
@@ -289,7 +289,7 @@ export function ServiceOrderEmailSection({ formData, onEmailChange }: EmailSecti
         <div className={styles.section}>
             <EmailEditor
                 typeOrdre={formData.typeOrdre}
-                templates={MOCK_EMAIL_TEMPLATES_OS}
+                templates={EMAIL_TEMPLATES_OS}
                 onEmailChange={onEmailChange}
                 formData={{
                     titre: formData.titre,

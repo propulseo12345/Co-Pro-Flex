@@ -1,7 +1,7 @@
 'use client';
 
 import { Edit2, Trash2, Plus, Star } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire } from '@/types';
 import styles from './ProviderDetailHeader.module.css';
 
@@ -25,7 +25,7 @@ export function ProviderDetailHeader({ prestataire, onEdit, onDelete, onAddInter
                     <div className={styles.domaines}>
                         {prestataire.domaines.map((d, i) => (
                             <span key={i} className={styles.badge}>
-                                {MOCK_DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
+                                {DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
                             </span>
                         ))}
                     </div>

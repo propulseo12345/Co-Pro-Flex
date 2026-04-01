@@ -2,12 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-    MOCK_PRESTATAIRES_SYNDIC,
-    MOCK_PRESTATAIRES_COPRO,
-    MOCK_PRESTATAIRES_COPROFLEX,
-    MOCK_AVIS_COPROFLEX
-} from '@/data/mock';
 import { Prestataire, InterventionDetaille, ContratDetaille, DomaineActivite } from '@/types';
 import type { Provider, LogbookOverview, ContractOverview } from '@/types/supabase';
 import { useToast } from '@/providers/ToastProvider';
@@ -23,10 +17,6 @@ export function useProviderDetailPage(id: string) {
 
     const [showAddIntervention, setShowAddIntervention] = useState(false);
     const [showEditModal, setShowEditModal] = useState(searchParams.get('edit') === 'true');
-
-    // Chercher d'abord dans les mocks, puis dans Supabase
-    const allPrestataires = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO, ...MOCK_PRESTATAIRES_COPROFLEX];
-    const foundMock = allPrestataires.find(p => p.id === id);
 
     // Adapter Supabase provider au format legacy Prestataire
     const supabaseProvider = supabaseProviders.find(p => p.id === id);
@@ -48,7 +38,7 @@ export function useProviderDetailPage(id: string) {
         noteMoyenne: supabaseProvider.rating_avg || undefined,
     } as Prestataire : undefined;
 
-    const foundPrestataire = foundMock || foundSupabase;
+    const foundPrestataire = foundSupabase;
     const [prestataire, setPrestataire] = useState<Prestataire | undefined>(foundPrestataire);
 
     // Mettre à jour quand les données Supabase arrivent (chargement async)
@@ -109,11 +99,9 @@ export function useProviderDetailPage(id: string) {
             }) as ContratDetaille);
     }, [dbContracts, id]);
 
-    const avis = useMemo(() =>
-        prestataire?.categorie === 'COPROFLEX'
-            ? MOCK_AVIS_COPROFLEX.filter(a => a.prestataireId === id)
-            : [],
-        [prestataire?.categorie, id]
+    // CoproFlex reviews will be fetched from Supabase in a future milestone
+    const avis = useMemo(() => [] as Array<{ id: string; prestataireId: string; auteur: string; note: number; commentaire: string; date: string }>,
+        []
     );
 
     const backLink = useMemo(() => {

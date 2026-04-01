@@ -3,33 +3,46 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MOCK_PRESTATAIRES_SYNDIC, MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
-import { Prestataire, DomaineActivite } from '@/types';
-import { getInterventionsCountByPrestataire, getDerniereInterventionByPrestataire } from '@/lib/services/interventions.service';
+import { DomaineActivite } from '@/types';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
+import { useProviders } from '@/hooks/modules/useMaintenanceData';
 import { Plus, Search, Phone, Mail, ArrowLeft, Eye, Edit2, Trash2, Users } from 'lucide-react';
 import { useToast } from '@/providers/ToastProvider';
 import styles from '../providers-list.module.css';
 import clsx from 'clsx';
 
-// Enrichir les prestataires avec les données calculées depuis le carnet d'entretien
-function enrichirPrestatairesAvecInterventions(prestataires: Prestataire[]): Prestataire[] {
-    const countMap = getInterventionsCountByPrestataire();
-    const dateMap = getDerniereInterventionByPrestataire();
-
-    return prestataires.map(p => ({
-        ...p,
-        nombreInterventions: countMap.get(p.id) || 0,
-        derniereIntervention: dateMap.get(p.id)
-    }));
+interface MappedPrestataire {
+    id: string;
+    nom: string;
+    domaines: string[];
+    telephone: string;
+    email: string;
+    ville: string;
+    nombreInterventions: number;
+    derniereIntervention?: string;
 }
 
 export default function ProvidersSyndicPage() {
     const router = useRouter();
     const { showToast } = useToast();
-    // Enrichir les prestataires avec les données d'interventions du carnet d'entretien
-    const [prestataires, setPrestataires] = useState<Prestataire[]>(() =>
-        enrichirPrestatairesAvecInterventions(MOCK_PRESTATAIRES_SYNDIC)
-    );
+    const { providers, isLoading, deleteProvider } = useProviders({ autoFetch: true });
+
+    // Map Supabase providers to local format — filter syndic category
+    const prestataires = useMemo<MappedPrestataire[]>(() =>
+        providers
+            .filter(p => p.category === 'syndic')
+            .map(p => ({
+                id: p.id as string,
+                nom: p.name as string,
+                domaines: ((p.domains as string[]) || []).map(d => d.toUpperCase()),
+                telephone: (p.phone as string) || '',
+                email: (p.email as string) || '',
+                ville: (p.city as string) || '',
+                nombreInterventions: (p.interventions_count as number) || 0,
+                derniereIntervention: (p.last_intervention_at as string) || undefined,
+            })),
+    [providers]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [domaineFilter, setDomaineFilter] = useState<DomaineActivite | 'TOUS'>('TOUS');
     const [sortBy, setSortBy] = useState<'nom' | 'interventions' | 'date'>('nom');
@@ -54,16 +67,20 @@ export default function ProvidersSyndicPage() {
             });
     }, [prestataires, searchTerm, domaineFilter, sortBy]);
 
-    const handleDelete = (prestataire: Prestataire) => {
+    const handleDelete = async (prestataire: MappedPrestataire) => {
         if (confirm(`Supprimer le prestataire "${prestataire.nom}" ?`)) {
-            setPrestataires(prev => prev.filter(p => p.id !== prestataire.id));
-            showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
+            try {
+                await deleteProvider(prestataire.id);
+                showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
+            } catch {
+                showToast({ type: 'error', message: 'Erreur lors de la suppression' });
+            }
         }
     };
 
     return (
         <div className="container">
-            {/* En-tête */}
+            {/* En-tete */}
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
                     <button className={styles.backButton} onClick={() => router.push('/maintenance/providers')}>
@@ -87,7 +104,7 @@ export default function ProvidersSyndicPage() {
             <div className={styles.filters}>
                 <div className={styles.searchBox}>
                     <Search size={18} aria-hidden="true" />
-                    <input type="text" placeholder="Rechercher par nom, email, téléphone..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                    <input type="text" placeholder="Rechercher par nom, email, telephone..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <select
@@ -96,7 +113,7 @@ export default function ProvidersSyndicPage() {
                     onChange={(e) => setDomaineFilter(e.target.value as DomaineActivite | 'TOUS')}
                 >
                     <option value="TOUS">Tous les domaines</option>
-                    {MOCK_DOMAINES_ACTIVITE.map(d => (
+                    {DOMAINES_ACTIVITE.map(d => (
                         <option key={d.value} value={d.value}>{d.label}</option>
                     ))}
                 </select>
@@ -105,9 +122,9 @@ export default function ProvidersSyndicPage() {
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'nom' | 'interventions' | 'date')}
                 >
-                    <option value="nom">Alphabétique</option>
+                    <option value="nom">Alphabetique</option>
                     <option value="interventions">Nb interventions</option>
-                    <option value="date">Dernière intervention</option>
+                    <option value="date">Derniere intervention</option>
                 </select>
             </div>
 
@@ -121,7 +138,7 @@ export default function ProvidersSyndicPage() {
                             <th>Contact</th>
                             <th>Ville</th>
                             <th>Interventions</th>
-                            <th>Dernière intervention</th>
+                            <th>Derniere intervention</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -138,7 +155,7 @@ export default function ProvidersSyndicPage() {
                                     <div className={styles.domaines}>
                                         {p.domaines.slice(0, 2).map((d, i) => (
                                             <span key={i} className={styles.domaineBadge}>
-                                                {MOCK_DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
+                                                {DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
                                             </span>
                                         ))}
                                         {p.domaines.length > 2 && <span className={styles.more}>+{p.domaines.length - 2}</span>}
@@ -176,7 +193,7 @@ export default function ProvidersSyndicPage() {
                 {filteredAndSortedPrestataires.length === 0 && (
                     <div className={styles.emptyState}>
                         <Users size={48} aria-hidden="true" />
-                        <p>Aucun prestataire trouvé</p>
+                        <p>Aucun prestataire trouve</p>
                         <span>Modifiez vos filtres ou ajoutez un nouveau prestataire</span>
                     </div>
                 )}

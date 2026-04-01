@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Building, User, Award, Wrench, FileText, Calendar, Plus, ExternalLink, Download, CheckCircle, Clock, Star } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire, InterventionDetaille, AvisPrestataire } from '@/types';
 import clsx from 'clsx';
 import styles from './ProviderInfoSections.module.css';
@@ -135,7 +135,7 @@ export function ContratsSection({ contrats }: ContratsSectionProps) {
                         <FileText size={20} aria-hidden="true" />
                         <div className={styles.contratInfo}>
                             <h4>{c.nom}</h4>
-                            <p>{MOCK_DOMAINES_ACTIVITE.find(d => d.value === c.type)?.label || c.type} - {c.coutAnnuel.toLocaleString()} €/an</p>
+                            <p>{DOMAINES_ACTIVITE.find(d => d.value === c.type)?.label || c.type} - {c.coutAnnuel.toLocaleString()} €/an</p>
                         </div>
                         <span className={clsx(
                             styles.contratStatus,
@@ -224,7 +224,7 @@ export function InterventionsList({ interventions, onAddIntervention }: Interven
                                     )}
                                     {intervention.domaine && (
                                         <span className={styles.interventionDomaine}>
-                                            {MOCK_DOMAINES_ACTIVITE.find(d => d.value === intervention.domaine)?.label || intervention.domaine}
+                                            {DOMAINES_ACTIVITE.find(d => d.value === intervention.domaine)?.label || intervention.domaine}
                                         </span>
                                     )}
                                 </div>

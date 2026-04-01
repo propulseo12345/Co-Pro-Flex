@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MOCK_ASSURANCES_COPROPRIETE } from '@/data/mock';
 import { ContratAssurance, SousTypeAssurance } from '@/types';
+import { createClient } from '@/lib/supabase/client';
+import { useCopro } from '@/providers/CoproContext';
 import { DocumentAssurance, SousTypeAssuranceLiteral } from '@/types/models/maintenance';
 import { updateAssurance } from '@/lib/services/assurances.service';
 
@@ -40,23 +41,74 @@ export interface AssuranceFormData {
 
 export function useAssuranceDetailPage(id: string) {
     const router = useRouter();
-    const assurance = MOCK_ASSURANCES_COPROPRIETE.find(a => a.id === id);
+    const { currentCoproId } = useCopro();
+    const [assurance, setAssurance] = useState<ContratAssurance | undefined>(undefined);
+
+    // Load insurance from Supabase
+    useEffect(() => {
+        if (!currentCoproId || !id) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const supabase = createClient() as any;
+        supabase
+            .from('insurance_policies')
+            .select('*')
+            .eq('id', id)
+            .single()
+            .then(({ data }: { data: Record<string, unknown> | null }) => {
+                if (data) {
+                    setAssurance({
+                        id: data.id as string,
+                        type: 'ASSURANCE',
+                        sousType: ((data.sub_type as string) || 'MRI').toUpperCase(),
+                        nom: (data.insurer_name as string) || '',
+                        assureur: (data.insurer_name as string) || '',
+                        numeroPolice: (data.policy_number as string) || '',
+                        dateDebut: ((data.created_at as string) || '').split('T')[0],
+                        dateFin: '',
+                        primeAnnuelle: Number(data.annual_premium) || 0,
+                        franchise: data.deductible ? Number(data.deductible) : undefined,
+                        garanties: (data.guarantees as string[]) || [],
+                        observations: (data.observations as string) || undefined,
+                    } as ContratAssurance);
+                }
+            });
+    }, [currentCoproId, id]);
 
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<AssuranceFormData>({
-        nom: assurance?.nom || '',
-        sousType: assurance?.sousType || 'MRI',
-        assureur: assurance?.assureur || '',
-        numeroPolice: assurance?.numeroPolice || '',
-        dateDebut: assurance?.dateDebut || '',
-        dateFin: assurance?.dateFin || '',
-        primeAnnuelle: assurance?.primeAnnuelle?.toString() || '0',
-        franchise: assurance?.franchise?.toString() || '',
-        garanties: assurance?.garanties || [],
-        travauxConcernes: assurance?.travauxConcernes || '',
-        dateReceptionTravaux: assurance?.dateReceptionTravaux || '',
-        observations: assurance?.observations || ''
+        nom: '',
+        sousType: 'MRI',
+        assureur: '',
+        numeroPolice: '',
+        dateDebut: '',
+        dateFin: '',
+        primeAnnuelle: '0',
+        franchise: '',
+        garanties: [],
+        travauxConcernes: '',
+        dateReceptionTravaux: '',
+        observations: ''
     });
+
+    // Sync form data when assurance is loaded
+    useEffect(() => {
+        if (assurance) {
+            setFormData({
+                nom: assurance.nom || '',
+                sousType: assurance.sousType || 'MRI',
+                assureur: assurance.assureur || '',
+                numeroPolice: assurance.numeroPolice || '',
+                dateDebut: assurance.dateDebut || '',
+                dateFin: assurance.dateFin || '',
+                primeAnnuelle: assurance.primeAnnuelle?.toString() || '0',
+                franchise: assurance.franchise?.toString() || '',
+                garanties: assurance.garanties || [],
+                travauxConcernes: assurance.travauxConcernes || '',
+                dateReceptionTravaux: assurance.dateReceptionTravaux || '',
+                observations: assurance.observations || '',
+            });
+        }
+    }, [assurance]);
 
     const [documents, setDocuments] = useState<DocumentAssurance[]>(assurance?.documents || []);
     const [showAddDocument, setShowAddDocument] = useState(false);

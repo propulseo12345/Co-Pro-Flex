@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Phone, Mail, Eye, Star, Award, MapPin, Clock, Euro, Calendar, Shield, Globe, ChevronDown, ChevronUp } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire, AvisPrestataire } from '@/types';
 import clsx from 'clsx';
 import styles from './CoproFlexProviderCard.module.css';
@@ -50,7 +50,7 @@ export function CoproFlexProviderCard({
                     <div className={styles.domaines}>
                         {prestataire.domaines.map((d, i) => (
                             <span key={i} className={styles.domaineBadge}>
-                                {MOCK_DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
+                                {DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
                             </span>
                         ))}
                     </div>

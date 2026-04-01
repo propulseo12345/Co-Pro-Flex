@@ -1,8 +1,16 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
+import { useCopro } from '@/providers/CoproContext';
+import { createClient } from '@/lib/supabase/client';
+
+interface CoproprietaireDB {
+    id: string;
+    nom: string;
+    email?: string;
+    telephone?: string;
+}
 import {
     TypeOrdreService,
     OrdreService,
@@ -104,6 +112,7 @@ const initialFormData: ServiceOrderFormData = {
 
 export function useNewServiceOrderPage() {
     const router = useRouter();
+    const { currentCoproId } = useCopro();
     const { createOrder } = useServiceOrders({ autoFetch: false });
     const { providers: supabaseProviders } = useProviders();
     const { contracts: supabaseContracts } = useContracts();
@@ -111,6 +120,29 @@ export function useNewServiceOrderPage() {
     const [errors, setErrors] = useState<Partial<Record<keyof ServiceOrderFormData, string>>>({});
     const [contactSearchTerm, setContactSearchTerm] = useState('');
     const [showContactDropdown, setShowContactDropdown] = useState(false);
+    const [coproprietaires, setCoproprietaires] = useState<CoproprietaireDB[]>([]);
+
+    // Load coproprietaires from Supabase
+    useEffect(() => {
+        if (!currentCoproId) return;
+        const supabase = createClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+            .from('coproprietaires')
+            .select('id, last_name, first_name, email, phone')
+            .eq('copro_id', currentCoproId)
+            .order('last_name')
+            .then(({ data }: { data: Array<{ id: string; last_name: string; first_name: string | null; email: string | null; phone: string | null }> | null }) => {
+                if (data) {
+                    setCoproprietaires(data.map(c => ({
+                        id: c.id,
+                        nom: [c.first_name, c.last_name].filter(Boolean).join(' '),
+                        email: c.email || undefined,
+                        telephone: c.phone || undefined,
+                    })));
+                }
+            });
+    }, [currentCoproId]);
 
     const allPrestataires: Prestataire[] = useMemo(() =>
         supabaseProviders.map(adaptProviderToLegacy),
@@ -134,11 +166,11 @@ export function useNewServiceOrderPage() {
     }, [formData.categorieIntervention, selectedPrestataire]);
 
     const filteredCoproprietaires = useMemo(() => {
-        return MOCK_COPROPRIETAIRES.filter(copro =>
+        return coproprietaires.filter(copro =>
             copro.nom.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
             (copro.email && copro.email.toLowerCase().includes(contactSearchTerm.toLowerCase()))
         ).slice(0, 5);
-    }, [contactSearchTerm]);
+    }, [contactSearchTerm, coproprietaires]);
 
     const validate = useCallback((): boolean => {
         const newErrors: Partial<Record<keyof ServiceOrderFormData, string>> = {};
@@ -217,7 +249,7 @@ export function useNewServiceOrderPage() {
         setFormData(prev => ({ ...prev, piecesJointes: attachments }));
     }, []);
 
-    const handleContactSelect = useCallback((copro: typeof MOCK_COPROPRIETAIRES[0]) => {
+    const handleContactSelect = useCallback((copro: CoproprietaireDB) => {
         setFormData(prev => ({
             ...prev,
             contactSurPlaceId: copro.id,

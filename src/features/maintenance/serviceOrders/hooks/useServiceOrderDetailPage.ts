@@ -2,8 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { MOCK_ORDRES_SERVICE } from '@/data/mock';
-import { MOCK_FACTURES } from '@/components/features/finance/Factures/data';
 import type { Facture } from '@/components/features/finance/Factures/types';
 import { OrdreService, PieceJointeOS, ModificationHistoriqueOS, StatutOrdreService } from '@/types';
 import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
@@ -111,12 +109,10 @@ function adaptOverviewToLegacy(
 }
 
 // ============================================================================
-// Fallback mock (OS de démo non présents en Supabase)
+// Fallback localStorage (OS créés localement mais pas encore persistés)
 // ============================================================================
 
-function getMockOrdreService(id: string): OrdreService | null {
-    const mockOS = MOCK_ORDRES_SERVICE.find(os => os.id === id);
-    if (mockOS) return mockOS;
+function getLocalOrdreService(id: string): OrdreService | null {
     if (typeof window !== 'undefined') {
         const storedOS = localStorage.getItem('newOrdresService');
         if (storedOS) {
@@ -131,8 +127,9 @@ function getMockOrdreService(id: string): OrdreService | null {
 // Exports utilitaires
 // ============================================================================
 
-export function getFactureLiee(ordreServiceId: string): Facture | undefined {
-    return MOCK_FACTURES.find(f => f.ordreServiceId === ordreServiceId);
+export function getFactureLiee(_ordreServiceId: string): Facture | undefined {
+    // Factures will be fetched from Supabase in a future migration
+    return undefined;
 }
 
 export function calculerEcart(montantEstime: number | undefined, montantFacture: number): { ecart: number; pourcentage: number; estAlerte: boolean } | null {
@@ -180,7 +177,7 @@ export function useServiceOrderDetailPage(id: string) {
 
             if (overviewErr || !overview) {
                 // Fallback mock
-                const mock = getMockOrdreService(id);
+                const mock = getLocalOrdreService(id);
                 setOrdreService(mock);
                 setIsMock(true);
                 return;
@@ -220,7 +217,7 @@ export function useServiceOrderDetailPage(id: string) {
             setIsMock(false);
         } catch {
             // Erreur réseau → fallback mock
-            const mock = getMockOrdreService(id);
+            const mock = getLocalOrdreService(id);
             setOrdreService(mock);
             setIsMock(true);
         } finally {

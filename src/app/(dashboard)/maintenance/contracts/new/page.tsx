@@ -1,17 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { MOCK_PRESTATAIRES_SYNDIC, MOCK_PRESTATAIRES_COPRO, MOCK_TYPES_CONTRAT } from '@/data/mock';
+import { useState, useMemo } from 'react';
+import { TYPES_CONTRAT } from '@/lib/constants/categories-contrat';
 import { TypeContrat, ContratDetaille } from '@/types';
 import ProviderSelector from '@/components/features/maintenance/ProviderSelector';
 import { ArrowLeft, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { addContrat } from '@/lib/services/contracts.service';
+import { useProviders } from '@/hooks/modules/useMaintenanceData';
 import styles from './new-contract.module.css';
 
 export default function NewContractPage() {
     const router = useRouter();
+    const { providers } = useProviders({ autoFetch: true });
     const [formData, setFormData] = useState({
         nom: '',
         numeroContrat: '',
@@ -27,7 +29,20 @@ export default function NewContractPage() {
         infosSupp: ''
     });
 
-    const allPrestataires = [...MOCK_PRESTATAIRES_SYNDIC, ...MOCK_PRESTATAIRES_COPRO];
+    // Map Supabase providers to the format expected by ProviderSelector
+    const allPrestataires = useMemo(() =>
+        providers.map(p => ({
+            id: p.id as string,
+            nom: p.name as string,
+            categorie: ((p.category as string) || 'copropriete').toUpperCase() as import('@/types').CategoriePrestataire,
+            domaines: ((p.domains as string[]) || []).map(d => d.toUpperCase()) as import('@/types').DomaineActivite[],
+            telephone: (p.phone as string) || '',
+            email: (p.email as string) || '',
+            adresse: (p.address as string) || '',
+            dateAjout: (p.created_at as string) || '',
+            nombreInterventions: (p.interventions_count as number) || 0,
+        })),
+    [providers]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -77,7 +92,7 @@ export default function NewContractPage() {
                     <div className={styles.grid}>
                         <div className={styles.formGroup}><label>Libellé du contrat *</label><input type="text" value={formData.nom} onChange={(e) => setFormData({...formData, nom: e.target.value})} required /></div>
                         <div className={styles.formGroup}><label>Numéro de contrat</label><input type="text" value={formData.numeroContrat} onChange={(e) => setFormData({...formData, numeroContrat: e.target.value})} /></div>
-                        <div className={styles.formGroup}><label>Type de contrat *</label><select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value as TypeContrat})} required><option value="">Sélectionner...</option>{MOCK_TYPES_CONTRAT.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
+                        <div className={styles.formGroup}><label>Type de contrat *</label><select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value as TypeContrat})} required><option value="">Sélectionner...</option>{TYPES_CONTRAT.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
                         <div className={styles.formGroup}><ProviderSelector value={formData.prestataireId} onChange={(id) => setFormData({...formData, prestataireId: id})} prestataires={allPrestataires} label="Prestataire *" required /></div>
                     </div>
                     <div className={styles.formGroup}><label>Description</label><textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} /></div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire, DomaineActivite, CategoriePrestataire } from '@/types';
 import clsx from 'clsx';
 import styles from './AddProviderModal.module.css';
@@ -137,7 +137,7 @@ export function AddProviderModal({ isOpen, onClose, onAdd }: AddProviderModalPro
                         <div className={clsx(styles.formGroup, styles.fullWidth)}>
                             <label>Domaines d'activité *</label>
                             <div className={styles.domainesGrid}>
-                                {MOCK_DOMAINES_ACTIVITE.map(d => (
+                                {DOMAINES_ACTIVITE.map(d => (
                                     <label key={d.value} className={styles.domaineCheckbox}>
                                         <input
                                             type="checkbox"

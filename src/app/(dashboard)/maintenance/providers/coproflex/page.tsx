@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, ArrowLeft, Star, Users, MapPin, CheckCircle, X, Send, Globe, Shield, Scale } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { DomaineActivite } from '@/types';
 import { DevisModal, CompareModal, CoproFlexProviderCard } from '../../../../../features/maintenance/providers/components';
 import { useCoproFlexPage } from '../../../../../features/maintenance/providers/hooks';
@@ -112,7 +112,7 @@ export default function ProvidersCoproFlexPage() {
                         onChange={e => setDomaineFilter(e.target.value as DomaineActivite | 'TOUS')}
                     >
                         <option value="TOUS">Tous les domaines</option>
-                        {MOCK_DOMAINES_ACTIVITE.map(d => (
+                        {DOMAINES_ACTIVITE.map(d => (
                             <option key={d.value} value={d.value}>{d.label}</option>
                         ))}
                     </select>

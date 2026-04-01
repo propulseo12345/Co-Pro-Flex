@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire, DomaineActivite, InterventionDetaille } from '@/types';
 import styles from './AddInterventionModal.module.css';
 
@@ -102,7 +102,7 @@ export function AddInterventionModal({ prestataire, onClose, onAdd }: AddInterve
                                 value={formData.domaine}
                                 onChange={e => setFormData({ ...formData, domaine: e.target.value as DomaineActivite })}
                             >
-                                {MOCK_DOMAINES_ACTIVITE.map(d => (
+                                {DOMAINES_ACTIVITE.map(d => (
                                     <option key={d.value} value={d.value}>{d.label}</option>
                                 ))}
                             </select>

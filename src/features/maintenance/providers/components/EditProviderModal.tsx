@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Save, X } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire, DomaineActivite } from '@/types';
 import styles from './EditProviderModal.module.css';
 
@@ -27,12 +27,12 @@ export function EditProviderModal({ prestataire, onClose, onSave }: EditProvider
         siteWeb: ''
     });
 
-    const toggleDomaine = (domaine: DomaineActivite) => {
+    const toggleDomaine = (domaine: string) => {
         setFormData(prev => ({
             ...prev,
-            domaines: prev.domaines.includes(domaine)
-                ? prev.domaines.filter(d => d !== domaine)
-                : [...prev.domaines, domaine]
+            domaines: (prev.domaines as string[]).includes(domaine)
+                ? prev.domaines.filter(d => d !== domaine) as DomaineActivite[]
+                : [...prev.domaines, domaine as DomaineActivite]
         }));
     };
 
@@ -121,11 +121,11 @@ export function EditProviderModal({ prestataire, onClose, onSave }: EditProvider
                     <div className={styles.formGroup}>
                         <label>Domaines d'intervention *</label>
                         <div className={styles.domainesGrid}>
-                            {MOCK_DOMAINES_ACTIVITE.map(d => (
+                            {DOMAINES_ACTIVITE.map(d => (
                                 <label key={d.value} className={styles.domaineCheckbox}>
                                     <input
                                         type="checkbox"
-                                        checked={formData.domaines.includes(d.value)}
+                                        checked={(formData.domaines as string[]).includes(d.value)}
                                         onChange={() => toggleDomaine(d.value)}
                                     />
                                     <span>{d.label}</span>

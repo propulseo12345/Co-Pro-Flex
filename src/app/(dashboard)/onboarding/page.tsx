@@ -11,6 +11,7 @@ import { Step4Comptes } from '@/components/features/onboarding/steps/Step4Compte
 import { Step5Budget } from '@/components/features/onboarding/steps/Step5Budget';
 import { Step6AgAppels } from '@/components/features/onboarding/steps/Step6AgAppels';
 import { Step7RepriseSoldes } from '@/components/features/onboarding/steps/Step7RepriseSoldes';
+import { StepContracts } from '@/components/features/onboarding/steps/StepContracts';
 import styles from './onboarding.module.css';
 
 export default function OnboardingPage() {
@@ -28,6 +29,9 @@ export default function OnboardingPage() {
   // State shared between steps 5-7
   const [budgetId, setBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
+
+  // Parallel step: contracts (optional, available from step 4+)
+  const [showContractsStep, setShowContractsStep] = useState(false);
 
   const handleStep1Complete = useCallback((coproId: string, coproName: string) => {
     setCoproCreated(coproId, coproName);
@@ -77,6 +81,35 @@ export default function OnboardingPage() {
         maxStepReached={maxStepReached}
         onStepClick={goToStep}
       />
+
+      {/* Parallel step: contracts — available from step 4+ */}
+      {state.coproId && currentStep >= 4 && !showContractsStep && (
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <button
+            onClick={() => setShowContractsStep(true)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: '1px solid rgba(148, 163, 184, 0.08)',
+              background: 'rgba(148, 163, 184, 0.04)',
+              color: '#94a3b8',
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+            }}
+          >
+            + Ajouter des contrats de maintenance (optionnel)
+          </button>
+        </div>
+      )}
+
+      {showContractsStep && state.coproId && (
+        <StepContracts
+          coproId={state.coproId}
+          onClose={() => setShowContractsStep(false)}
+        />
+      )}
 
       <div className={styles.stepContent}>
         {currentStep === 1 && (

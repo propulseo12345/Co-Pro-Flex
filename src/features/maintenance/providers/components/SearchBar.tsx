@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { Prestataire } from '@/types';
 import clsx from 'clsx';
 import styles from './SearchBar.module.css';
@@ -59,7 +59,7 @@ export function SearchBar({
                                 <span className={styles.resultName}>{p.nom}</span>
                                 <span className={styles.resultMeta}>
                                     {p.domaines.slice(0, 2).map(d =>
-                                        MOCK_DOMAINES_ACTIVITE.find(da => da.value === d)?.label
+                                        DOMAINES_ACTIVITE.find(da => da.value === d)?.label
                                     ).join(', ')}
                                     {p.ville && ` • ${p.ville}`}
                                 </span>

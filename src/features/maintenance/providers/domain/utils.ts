@@ -1,5 +1,5 @@
 import { Prestataire } from '@/types';
-import { MOCK_DOMAINES_ACTIVITE } from '@/data/mock';
+import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
 import { getInterventionsCountByPrestataire, getDerniereInterventionByPrestataire } from '@/lib/services/interventions.service';
 
 export function formatDate(dateStr: string): string {
@@ -42,7 +42,7 @@ export function getDomainesPrincipaux(prestataires: Prestataire[]): string[] {
     return Object.entries(domainesCount)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
-        .map(([domaine]) => MOCK_DOMAINES_ACTIVITE.find(d => d.value === domaine)?.label || domaine);
+        .map(([domaine]) => DOMAINES_ACTIVITE.find(d => d.value === domaine)?.label || domaine);
 }
 
 export function getDerniereIntervention(prestataires: Prestataire[]): string | null {
@@ -54,7 +54,7 @@ export function getDerniereIntervention(prestataires: Prestataire[]): string | n
 }
 
 export function getDomaineLabel(domaineValue: string): string {
-    return MOCK_DOMAINES_ACTIVITE.find(d => d.value === domaineValue)?.label || domaineValue;
+    return DOMAINES_ACTIVITE.find(d => d.value === domaineValue)?.label || domaineValue;
 }
 
 export function exportPrestatairesToCsv(prestataires: Prestataire[]): void {
