@@ -7,6 +7,7 @@ import { AnnexeProvider } from '@/providers/AnnexeContext';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { SidebarProvider } from '@/providers/SidebarContext';
 import { AppBody } from '@/components/layout/AppBody';
+import { OnboardingRedirect } from '@/components/layout/OnboardingRedirect';
 
 function LoadingFallback() {
   return (
@@ -24,6 +25,7 @@ export default function DashboardLayout({
   return (
     <ThemeProvider>
       <CoproProvider>
+        <OnboardingRedirect />
         <AnnexeProvider>
           <VentesProvider>
             <ToastProvider>
