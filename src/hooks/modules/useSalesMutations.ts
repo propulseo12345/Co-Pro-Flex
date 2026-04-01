@@ -282,7 +282,17 @@ export function useSalesMutations(
   );
 
   const validateSale = useCallback(
-    async (mutationId: string, effectiveDate: string): Promise<boolean> => {
+    async (
+      mutationId: string,
+      effectiveDate: string,
+      ledgerOptions?: {
+        periodId: string;
+        lotId: string;
+        alurFundAmount?: number;
+        sellerAccountId?: string;
+        buyerAccountId?: string;
+      }
+    ): Promise<boolean> => {
       const result = await withSaving(async () => {
         await salesApi.updateMutation(mutationId, { effective_date: effectiveDate });
         await salesApi.updateMutationStatus(mutationId, 'validated');
@@ -290,11 +300,32 @@ export function useSalesMutations(
           effective_date: effectiveDate,
           closed_at: new Date().toISOString(),
         });
+
+        // Create ledger entry for ALUR fund transfer if applicable
+        if (ledgerOptions && ledgerOptions.alurFundAmount && currentCoproId) {
+          try {
+            await salesApi.createSaleCompletionLedgerEntry(
+              currentCoproId,
+              mutationId,
+              {
+                periodId: ledgerOptions.periodId,
+                lotId: ledgerOptions.lotId,
+                alurFundAmount: ledgerOptions.alurFundAmount,
+                sellerAccountId: ledgerOptions.sellerAccountId,
+                buyerAccountId: ledgerOptions.buyerAccountId,
+              }
+            );
+          } catch (err) {
+            // Log but don't fail the sale validation
+            console.error('Failed to create ledger entry for sale:', err);
+          }
+        }
+
         return true;
       });
       return result === true;
     },
-    [withSaving]
+    [withSaving, currentCoproId]
   );
 
   const cancelSale = useCallback(

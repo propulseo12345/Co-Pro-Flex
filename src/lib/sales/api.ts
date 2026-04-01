@@ -613,3 +613,82 @@ export async function getSalesStats(coproId: string): Promise<SalesStats> {
 
   return stats;
 }
+
+// ============================================================================
+// LEDGER - Sale completion → journal entry
+// ============================================================================
+
+/**
+ * Create a ledger transaction for ALUR fund transfer when a sale is completed.
+ * The ALUR fund balance follows tantièmes généraux (Art. 14-2 II),
+ * so on sale, the seller's share is transferred to the buyer.
+ *
+ * This calls the DB function create_ledger_transaction which atomically
+ * creates a transaction + entries and optionally posts it.
+ */
+export async function createSaleCompletionLedgerEntry(
+  coproId: string,
+  mutationId: string,
+  options: {
+    periodId: string;
+    lotId: string;
+    alurFundAmount?: number;
+    sellerAccountId?: string;
+    buyerAccountId?: string;
+    alurAccountId?: string;
+  }
+): Promise<string | null> {
+  const supabase = createUntypedClient();
+
+  // Only create ledger entry if there's an ALUR fund amount to transfer
+  if (!options.alurFundAmount || options.alurFundAmount <= 0) {
+    return null;
+  }
+
+  // Build entries for the ALUR fund transfer
+  // Debit: ALUR fund (reduce seller's share)
+  // Credit: ALUR fund (add buyer's share)
+  // Net effect is just a relabeling of the owner, tracked via lot_owner change
+  const entries = [];
+
+  if (options.sellerAccountId && options.buyerAccountId) {
+    entries.push(
+      {
+        account_id: options.sellerAccountId,
+        lot_id: options.lotId,
+        direction: 'credit',
+        amount: options.alurFundAmount,
+        entry_label: 'Transfert fonds ALUR - Vente (vendeur)',
+      },
+      {
+        account_id: options.buyerAccountId,
+        lot_id: options.lotId,
+        direction: 'debit',
+        amount: options.alurFundAmount,
+        entry_label: 'Transfert fonds ALUR - Vente (acquéreur)',
+      }
+    );
+  }
+
+  if (entries.length === 0) {
+    return null;
+  }
+
+  const { data, error } = await supabase.rpc('create_ledger_transaction', {
+    p_copro_id: coproId,
+    p_period_id: options.periodId,
+    p_tx_date: new Date().toISOString().split('T')[0],
+    p_label: `Transfert fonds ALUR - Mutation ${mutationId.slice(0, 8)}`,
+    p_source_type: 'mutation',
+    p_source_id: mutationId,
+    p_entries: JSON.stringify(entries),
+    p_auto_post: true,
+  });
+
+  if (error) {
+    console.error('Error creating sale completion ledger entry:', error);
+    throw new Error(error.message);
+  }
+
+  return data?.tx_id || null;
+}

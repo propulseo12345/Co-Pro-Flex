@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { HistoriqueContenu, HistoriqueItemEnrichi } from '@/types/models/impaye';
 import {
   generateRelancePDF,
@@ -21,12 +21,150 @@ import {
 } from '../domain/utils';
 import { useCopro } from '@/providers/CoproContext';
 import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
+import * as impayesApi from '@/lib/impayes/api';
+import type { UnpaidWithReminders, PaymentReminderOverview } from '@/lib/impayes/api';
+
+// ============================================================================
+// Mapper: Supabase data -> local Impaye type
+// ============================================================================
+
+function mapDelayLevelToStatut(
+  daysOverdue: number,
+  lastReminderLevel: number | null,
+  totalRemindersSent: number
+): Impaye['statut'] {
+  // Map based on last reminder level and total reminders
+  if (lastReminderLevel !== null) {
+    if (lastReminderLevel >= 90) return 'contentieux';
+    if (lastReminderLevel >= 60) return 'mise_en_demeure';
+    if (lastReminderLevel >= 30) return 'relance_amiable_2';
+    if (lastReminderLevel >= 15) return 'relance_amiable_1';
+  }
+
+  // Fallback based on days overdue
+  if (daysOverdue >= 120) return 'contentieux';
+  if (daysOverdue >= 90) return 'mise_en_demeure';
+  if (daysOverdue >= 60) return 'relance_amiable_2';
+  if (daysOverdue >= 30) return 'relance_amiable_1';
+  return 'en_retard';
+}
+
+function mapUnpaidToImpaye(
+  unpaid: UnpaidWithReminders,
+  index: number,
+  reminders: PaymentReminderOverview[]
+): Impaye {
+  const lotReminders = reminders.filter(r => r.lot_id === unpaid.lot_id);
+  const statut = mapDelayLevelToStatut(
+    unpaid.days_overdue,
+    unpaid.last_reminder_level,
+    unpaid.total_reminders_sent
+  );
+
+  // Build historique from reminders
+  const historique: HistoriqueItem[] = [
+    {
+      id: 0,
+      date: unpaid.oldest_due_date,
+      type: 'creation',
+      description: `Impayé détecté - ${unpaid.unpaid_amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} en retard`,
+    },
+    ...lotReminders.map((r, i): HistoriqueItem => {
+      let type: HistoriqueItem['type'] = 'relance_amiable_1';
+      if (r.delay_level >= 90) type = 'contentieux';
+      else if (r.delay_level >= 60) type = 'mise_en_demeure';
+      else if (r.delay_level >= 30) type = 'relance_amiable_2';
+      else if (r.delay_level >= 15) type = 'relance_amiable_1';
+
+      return {
+        id: i + 1,
+        date: r.sent_at || r.scheduled_at || r.created_at,
+        type,
+        description: `${r.rule_label || 'Relance'} - ${r.status === 'sent' ? 'Envoyée' : r.status}`,
+        destinataire: r.recipient_email || undefined,
+        canal: (r.channel === 'email' ? 'email' : 'courrier') as HistoriqueItem['canal'],
+      };
+    }),
+  ];
+
+  return {
+    id: index + 1, // Numeric ID for backward compatibility
+    coproprietaire: {
+      nom: unpaid.owner_name || 'Inconnu',
+      email: unpaid.owner_email || '',
+      telephone: unpaid.owner_phone || '',
+      adresse: '', // Not available in the view
+    },
+    lot: unpaid.lot_ref || `Lot ${unpaid.lot_id.slice(-4)}`,
+    batiment: '', // Not available in the view
+    montant: unpaid.unpaid_amount,
+    montantInitial: unpaid.total_due,
+    periode: `Retard ${unpaid.days_overdue}j`,
+    type: 'charges',
+    statut,
+    dateEcheance: unpaid.oldest_due_date,
+    dateCreation: unpaid.oldest_due_date,
+    historique,
+  };
+}
 
 export function useImpayesPage() {
   const { currentCoproId } = useCopro();
 
-  // Main data
-  const [impayes, setImpayes] = useState<Impaye[]>(MOCK_IMPAYES);
+  // Main data - start empty, load from Supabase
+  const [impayes, setImpayes] = useState<Impaye[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Load data from Supabase
+  useEffect(() => {
+    if (!currentCoproId) {
+      // Fallback to mock data when no copro is selected (dev mode)
+      setImpayes(MOCK_IMPAYES);
+      setIsLoadingData(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadData() {
+      setIsLoadingData(true);
+      setLoadError(null);
+
+      try {
+        const [unpaidData, remindersData] = await Promise.all([
+          impayesApi.listUnpaidWithReminders(currentCoproId!),
+          impayesApi.listPaymentReminders(currentCoproId!),
+        ]);
+
+        if (cancelled) return;
+
+        if (unpaidData.length === 0) {
+          // Fall back to mock data if no real data
+          setImpayes(MOCK_IMPAYES);
+        } else {
+          const mapped = unpaidData.map((u, i) => mapUnpaidToImpaye(u, i, remindersData));
+          setImpayes(mapped);
+        }
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Error loading impayés from Supabase:', err);
+        setLoadError(err instanceof Error ? err.message : 'Erreur de chargement');
+        // Fallback to mock data on error
+        setImpayes(MOCK_IMPAYES);
+      } finally {
+        if (!cancelled) {
+          setIsLoadingData(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentCoproId]);
   const [selectedStatut, setSelectedStatut] = useState<string>('tous');
   const [selectedImpaye, setSelectedImpaye] = useState<Impaye | null>(null);
 

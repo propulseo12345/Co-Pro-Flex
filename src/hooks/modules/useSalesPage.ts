@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { MOCK_SALES, MOCK_COPROPRIETAIRES } from '@/data/mock';
 import type { Sale, SaleDocument, DocumentType, DocumentStatut } from '@/types';
+import { useVentesContext } from '@/providers/VentesProvider';
 
 export interface NewSaleForm {
   lotIds: string[];
@@ -55,7 +56,47 @@ export const STATUS_LABELS: Record<DocumentStatut, string> = {
 };
 
 export function useSalesPage() {
-  const [sales, setSales] = useState<Sale[]>(MOCK_SALES as Sale[]);
+  // Try to load from VentesContext (Supabase)
+  let contextVentes: Sale[] = [];
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const ventesCtx = useVentesContext();
+    contextVentes = ventesCtx.ventes.map(v => ({
+      id: v.id,
+      lotIds: v.lotIds,
+      lotTypes: v.lotTypes,
+      vendeur: v.vendeur,
+      vendeurId: v.vendeurId || '',
+      acquereur: v.acquereur,
+      notaire: v.notaire,
+      dateCompromis: v.dateCompromis,
+      dateActeAuthentique: v.dateActeAuthentique,
+      statut: v.statut,
+      documents: v.documents.map(d => ({
+        id: d.id || '',
+        nom: d.nom || '',
+        type: d.type as DocumentType,
+        dateUpload: d.dateUpload || '',
+        statut: (d.statut || 'DISPONIBLE') as DocumentStatut,
+        url: '',
+      })),
+      historique: v.historique.map(h => ({
+        id: h.id || '',
+        date: h.date || '',
+        action: h.action || '',
+        utilisateur: h.utilisateur || '',
+      })),
+      observations: v.observations,
+      dateCreation: v.dateCreation || '',
+      dateModification: v.dateModification || '',
+    }));
+  } catch {
+    // Not within VentesProvider - use mock data
+    contextVentes = [];
+  }
+
+  const initialSales = contextVentes.length > 0 ? contextVentes : MOCK_SALES as Sale[];
+  const [sales, setSales] = useState<Sale[]>(initialSales);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(sales[0] || null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
