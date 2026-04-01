@@ -4,12 +4,13 @@ import { useState, useMemo, useCallback } from 'react';
 import type {
   ICoproprietePortefeuille,
   IPortefeuilleKPIs,
-  IFiltresPortefeuille,
-  IAlerteCopropriete,
-  AlerteType,
 } from '@/types/models/portefeuille';
 
-const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
+// =============================================================================
+// MOCK DATA (sera remplacé par Supabase)
+// =============================================================================
+
+const MOCK_COPROPRIETES: Omit<ICoproprietePortefeuille, 'criticalityScore'>[] = [
   {
     id: 'copro-1',
     nom: 'Résidence Les Lilas',
@@ -28,25 +29,10 @@ const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
     budgetAlerteRisque: false,
     mouvementsNonRapproches: 3,
     dernierRapprochement: '2025-01-15',
+    prochaineAG: '2026-05-15',
     alertes: [
-      {
-        id: 'alert-1',
-        type: 'IMPAYE',
-        severite: 'critique',
-        titre: 'Impayés critiques',
-        description: '2 copropriétaires avec retard > 90 jours',
-        montant: 2845.50,
-        lien: '/finance/unpaid',
-      },
-      {
-        id: 'alert-2',
-        type: 'FACTURE',
-        severite: 'warning',
-        titre: 'Factures en attente',
-        description: '2 factures à échéance dépassée',
-        montant: 1250.00,
-        lien: '/finance/factures',
-      },
+      { id: 'alert-1', type: 'IMPAYE', severite: 'critique', titre: 'Impayés critiques', description: '2 copropriétaires avec retard > 90 jours', montant: 2845.50, lien: '/finance/unpaid' },
+      { id: 'alert-2', type: 'FACTURE', severite: 'warning', titre: 'Factures en attente', description: '2 factures à échéance dépassée', montant: 1250.00, lien: '/finance/factures' },
     ],
   },
   {
@@ -68,15 +54,7 @@ const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
     mouvementsNonRapproches: 0,
     dernierRapprochement: '2025-01-20',
     alertes: [
-      {
-        id: 'alert-3',
-        type: 'BUDGET',
-        severite: 'warning',
-        titre: 'Budget à risque',
-        description: 'Consommation à 76% avec 5 mois restants',
-        montant: 30000,
-        lien: '/finance/budgets',
-      },
+      { id: 'alert-3', type: 'BUDGET', severite: 'warning', titre: 'Budget à risque', description: 'Consommation à 76% avec 5 mois restants', montant: 30000, lien: '/finance/budgets' },
     ],
   },
   {
@@ -97,33 +75,11 @@ const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
     budgetAlerteRisque: false,
     mouvementsNonRapproches: 12,
     dernierRapprochement: '2024-12-28',
+    prochaineAG: '2026-04-20',
     alertes: [
-      {
-        id: 'alert-4',
-        type: 'IMPAYE',
-        severite: 'critique',
-        titre: 'Impayés importants',
-        description: '7 copropriétaires en situation d\'impayé',
-        montant: 8920.40,
-        lien: '/finance/unpaid',
-      },
-      {
-        id: 'alert-5',
-        type: 'RAPPROCHEMENT',
-        severite: 'critique',
-        titre: 'Rapprochement en retard',
-        description: '12 mouvements non rapprochés depuis 24 jours',
-        lien: '/finance/mouvements-bancaires',
-      },
-      {
-        id: 'alert-6',
-        type: 'FACTURE',
-        severite: 'warning',
-        titre: 'Factures en retard',
-        description: '5 factures à traiter',
-        montant: 4580.00,
-        lien: '/finance/factures',
-      },
+      { id: 'alert-4', type: 'IMPAYE', severite: 'critique', titre: 'Impayés importants', description: "7 copropriétaires en situation d'impayé", montant: 8920.40, lien: '/finance/unpaid' },
+      { id: 'alert-5', type: 'RAPPROCHEMENT', severite: 'critique', titre: 'Rapprochement en retard', description: '12 mouvements non rapprochés depuis 24 jours', lien: '/finance/mouvements-bancaires' },
+      { id: 'alert-6', type: 'FACTURE', severite: 'warning', titre: 'Factures en retard', description: '5 factures à traiter', montant: 4580.00, lien: '/finance/factures' },
     ],
   },
   {
@@ -145,15 +101,7 @@ const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
     mouvementsNonRapproches: 1,
     dernierRapprochement: '2025-01-18',
     alertes: [
-      {
-        id: 'alert-7',
-        type: 'CONTRAT',
-        severite: 'warning',
-        titre: 'Contrat à renouveler',
-        description: 'Assurance MRH expire dans 30 jours',
-        dateEcheance: '2025-02-21',
-        lien: '/maintenance/contracts',
-      },
+      { id: 'alert-7', type: 'CONTRAT', severite: 'warning', titre: 'Contrat à renouveler', description: 'Assurance MRH expire dans 30 jours', dateEcheance: '2025-02-21', lien: '/maintenance/contracts' },
     ],
   },
   {
@@ -178,6 +126,48 @@ const MOCK_COPROPRIETES: ICoproprietePortefeuille[] = [
   },
 ];
 
+// =============================================================================
+// CRITICALITY SCORE
+// =============================================================================
+
+function calculateCriticalityScore(copro: Omit<ICoproprietePortefeuille, 'criticalityScore'>): number {
+  let score = 0;
+
+  if (copro.totalImpayes > 0) {
+    score += 30;
+    score += Math.min(copro.totalImpayes / 1000, 20);
+  }
+
+  if (copro.tauxRecouvrement < 90) {
+    score += 20;
+    score += (90 - copro.tauxRecouvrement) / 2;
+  }
+
+  if (copro.mouvementsNonRapproches > 0) {
+    score += 15;
+    score += Math.min(copro.mouvementsNonRapproches, 10);
+  }
+
+  if (copro.facturesEnRetard > 0) {
+    score += 15;
+    score += Math.min(copro.facturesEnRetard * 3, 10);
+  }
+
+  const budgetPct = copro.budgetTotal > 0
+    ? (copro.budgetConsomme / copro.budgetTotal) * 100
+    : 0;
+  if (budgetPct > 80) {
+    score += 10;
+    score += Math.min((budgetPct - 80) / 2, 10);
+  }
+
+  return Math.round(score);
+}
+
+// =============================================================================
+// KPIs
+// =============================================================================
+
 function calculateKPIs(coproprietes: ICoproprietePortefeuille[]): IPortefeuilleKPIs {
   const totalCoproprietes = coproprietes.length;
   const totalLots = coproprietes.reduce((sum, c) => sum + c.nombreLots, 0);
@@ -192,10 +182,14 @@ function calculateKPIs(coproprietes: ICoproprietePortefeuille[]): IPortefeuilleK
   const mouvementsNonRapprochesTotal = coproprietes.reduce((sum, c) => sum + c.mouvementsNonRapproches, 0);
 
   const totalAppels = coproprietes.reduce((sum, c) => {
-    const appelTotal = c.totalImpayes / (1 - c.tauxRecouvrement / 100) || 0;
+    const appelTotal = c.tauxRecouvrement < 100
+      ? c.totalImpayes / (1 - c.tauxRecouvrement / 100)
+      : 0;
     return sum + appelTotal;
   }, 0);
-  const tauxRecouvrementGlobal = totalAppels > 0 ? ((totalAppels - totalImpayes) / totalAppels) * 100 : 100;
+  const tauxRecouvrementGlobal = totalAppels > 0
+    ? ((totalAppels - totalImpayes) / totalAppels) * 100
+    : 100;
 
   const allAlertes = coproprietes.flatMap(c => c.alertes);
   const alertesCritiques = allAlertes.filter(a => a.severite === 'critique').length;
@@ -219,105 +213,47 @@ function calculateKPIs(coproprietes: ICoproprietePortefeuille[]): IPortefeuilleK
   };
 }
 
+// =============================================================================
+// HOOK
+// =============================================================================
+
 export interface UsePortefeuilleReturn {
   coproprietes: ICoproprietePortefeuille[];
   filteredCoproprietes: ICoproprietePortefeuille[];
   kpis: IPortefeuilleKPIs;
-  filtres: IFiltresPortefeuille;
-  exercicesDisponibles: number[];
-  isLoading: boolean;
+  recherche: string;
   setRecherche: (value: string) => void;
-  setExercice: (value: number) => void;
-  setPeriode: (debut: string, fin: string) => void;
-  setAlertesSeulement: (value: boolean) => void;
-  setTypeAlerte: (value: AlerteType | undefined) => void;
-  resetFiltres: () => void;
+  isLoading: boolean;
 }
 
 export function usePortefeuille(): UsePortefeuilleReturn {
-  const currentYear = new Date().getFullYear();
-  const exercicesDisponibles = [currentYear, currentYear - 1, currentYear - 2];
-
-  const [filtres, setFiltres] = useState<IFiltresPortefeuille>({
-    exercice: currentYear,
-    recherche: '',
-    alertesSeulement: false,
-    typeAlerte: undefined,
-  });
-
+  const [recherche, setRecherche] = useState('');
   const [isLoading] = useState(false);
 
+  const coproprietes = useMemo(() => {
+    const enriched = MOCK_COPROPRIETES.map(c => ({
+      ...c,
+      criticalityScore: calculateCriticalityScore(c),
+    }));
+    return enriched.sort((a, b) => b.criticalityScore - a.criticalityScore);
+  }, []);
+
   const filteredCoproprietes = useMemo(() => {
-    let result = [...MOCK_COPROPRIETES];
+    if (!recherche) return coproprietes;
+    const search = recherche.toLowerCase();
+    return coproprietes.filter(
+      c => c.nom.toLowerCase().includes(search) || c.adresse.toLowerCase().includes(search)
+    );
+  }, [coproprietes, recherche]);
 
-    // Filtre par recherche
-    if (filtres.recherche) {
-      const search = filtres.recherche.toLowerCase();
-      result = result.filter(
-        c =>
-          c.nom.toLowerCase().includes(search) ||
-          c.adresse.toLowerCase().includes(search)
-      );
-    }
-
-    // Filtre alertes seulement
-    if (filtres.alertesSeulement) {
-      result = result.filter(c => c.alertes.length > 0);
-    }
-
-    // Filtre par type d'alerte
-    if (filtres.typeAlerte) {
-      result = result.filter(c =>
-        c.alertes.some(a => a.type === filtres.typeAlerte)
-      );
-    }
-
-    return result;
-  }, [filtres]);
-
-  const kpis = useMemo(() => calculateKPIs(filteredCoproprietes), [filteredCoproprietes]);
-
-  const setRecherche = useCallback((value: string) => {
-    setFiltres(prev => ({ ...prev, recherche: value }));
-  }, []);
-
-  const setExercice = useCallback((value: number) => {
-    setFiltres(prev => ({ ...prev, exercice: value }));
-  }, []);
-
-  const setPeriode = useCallback((debut: string, fin: string) => {
-    setFiltres(prev => ({ ...prev, periodeDebut: debut, periodeFin: fin }));
-  }, []);
-
-  const setAlertesSeulement = useCallback((value: boolean) => {
-    setFiltres(prev => ({ ...prev, alertesSeulement: value }));
-  }, []);
-
-  const setTypeAlerte = useCallback((value: AlerteType | undefined) => {
-    setFiltres(prev => ({ ...prev, typeAlerte: value }));
-  }, []);
-
-  const resetFiltres = useCallback(() => {
-    setFiltres({
-      exercice: currentYear,
-      recherche: '',
-      alertesSeulement: false,
-      typeAlerte: undefined,
-    });
-  }, [currentYear]);
+  const kpis = useMemo(() => calculateKPIs(coproprietes), [coproprietes]);
 
   return {
-    coproprietes: MOCK_COPROPRIETES,
+    coproprietes,
     filteredCoproprietes,
     kpis,
-    filtres,
-    exercicesDisponibles,
+    recherche,
+    setRecherche: useCallback((value: string) => setRecherche(value), []),
     isLoading,
-    setRecherche,
-    setExercice,
-    setPeriode,
-    setAlertesSeulement,
-    setTypeAlerte,
-    resetFiltres,
   };
 }
