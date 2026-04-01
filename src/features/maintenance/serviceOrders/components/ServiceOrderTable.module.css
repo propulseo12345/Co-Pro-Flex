@@ -16,7 +16,7 @@
     text-transform: uppercase;
     letter-spacing: 0.025em;
     color: var(--text-secondary, #94A3B8);
-    background: var(--bg-secondary, #1A1F2E);
+    background: var(--bg-secondary, var(--surface));
 }
 
 .row {

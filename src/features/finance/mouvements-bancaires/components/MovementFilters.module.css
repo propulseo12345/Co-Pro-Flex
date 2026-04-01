@@ -12,7 +12,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 10px;
   color: #64748b;
@@ -42,7 +42,7 @@
   align-items: center;
   gap: 4px;
   padding: 8px 14px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 10px;
   color: #94a3b8;

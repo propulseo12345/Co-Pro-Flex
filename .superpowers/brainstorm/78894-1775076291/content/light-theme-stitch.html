@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Light Theme Stitch — CoProFlex</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0c12; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  .page-title { text-align: center; padding: 20px 0 6px; font-size: 20px; color: #adc6ff; }
+  .page-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 24px; }
+
+  .app-shell {
+    display: flex; height: 580px;
+    max-width: 1280px; margin: 0 auto 32px;
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+
+  /* === SIDEBAR (dark, unchanged) === */
+  .sidebar {
+    width: 220px; background: #0f1219;
+    border-right: 1px solid rgba(148,163,184,0.06);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .logo-area {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 11px; color: white;
+  }
+  .logo-title { font-weight: 700; font-size: 14px; color: #e2e8f0; }
+  .logo-sub { font-size: 9px; color: #64748b; }
+  .copro-sel {
+    margin: 8px 10px 4px; background: rgba(148,163,184,0.04);
+    border: 1px solid rgba(148,163,184,0.08); border-radius: 7px; padding: 8px 10px;
+  }
+  .copro-name { font-size: 12px; font-weight: 500; color: #e2e8f0; }
+  .copro-addr { font-size: 9px; color: #64748b; margin-top: 1px; }
+  .nav { flex: 1; padding: 6px 0; }
+  .mod-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px; color: #8892a4; font-size: 12px;
+    border-left: 3px solid transparent;
+  }
+  .mod-item.active {
+    background: rgba(59,130,246,0.06);
+    border-left-color: #3b82f6; color: #60a5fa; font-weight: 500;
+  }
+  .sub-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 14px 5px 43px; color: #64748b; font-size: 11px;
+    border-left: 3px solid transparent;
+  }
+  .sub-item.active { color: #60a5fa; border-left-color: rgba(59,130,246,0.3); }
+  .sub-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(148,163,184,0.2); }
+  .sub-item.active .sub-dot { background: #3b82f6; }
+  .sidebar-footer {
+    margin-top: auto; padding: 8px 10px 10px;
+    border-top: 1px solid rgba(148,163,184,0.06);
+  }
+  .footer-item { display: flex; align-items: center; gap: 8px; padding: 6px; color: #64748b; font-size: 11px; }
+  .user-info { display: flex; align-items: center; gap: 8px; padding: 6px; }
+  .avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; color: white;
+  }
+  .user-name { font-size: 11px; color: #e2e8f0; }
+  .user-role { font-size: 9px; color: #64748b; }
+
+  /* === LIGHT CONTENT (Stitch pastels) === */
+  .main {
+    flex: 1; background: #f0f4fa; overflow: auto;
+  }
+  .header {
+    padding: 12px 20px; background: #ffffff;
+    border-bottom: 1px solid #dde4ef;
+    font-size: 11px; color: #64748b;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .header-notif {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: #f0f4fa; border: 1px solid #dde4ef;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #94a3b8; position: relative;
+  }
+  .header-notif-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: #ef4444; }
+  .header-avatar {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: #e0eaff; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #3b6fd4;
+  }
+
+  .page { padding: 20px; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .topbar h3 { font-size: 22px; font-weight: 800; color: #1e293b; }
+  .topbar-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    background: #e0eaff; color: #3b6fd4;
+  }
+  .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: #3b6fd4; }
+
+  .btn { padding: 7px 14px; border-radius: 8px; background: #3b82f6; color: white; font-size: 11px; font-weight: 700; border: none; cursor: pointer; }
+
+  /* KPIs — Stitch pastels on white */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi {
+    background: #ffffff; border-radius: 10px; padding: 14px;
+    position: relative; overflow: hidden;
+    border: 1px solid #e8edf5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi:nth-child(1)::before { background: #6b9fff; }
+  .kpi:nth-child(2)::before { background: #34d399; }
+  .kpi:nth-child(3)::before { background: #f87171; }
+  .kpi:nth-child(4)::before { background: #fbbf24; }
+
+  .kpi-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+  .kpi-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .kpi:nth-child(1) .kpi-icon { background: #e0eaff; color: #3b6fd4; }
+  .kpi:nth-child(2) .kpi-icon { background: #d1fae5; color: #16a34a; }
+  .kpi:nth-child(3) .kpi-icon { background: #fee2e2; color: #dc2626; }
+  .kpi:nth-child(4) .kpi-icon { background: #fef3c7; color: #d97706; }
+
+  .kpi-value { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .kpi:nth-child(1) .kpi-value { color: #2563eb; }
+  .kpi:nth-child(2) .kpi-value { color: #16a34a; }
+  .kpi:nth-child(3) .kpi-value { color: #dc2626; }
+  .kpi:nth-child(4) .kpi-value { color: #d97706; }
+
+  .kpi-sub { font-size: 10px; color: #94a3b8; margin-top: 3px; }
+
+  /* Table */
+  .tbl {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: #ffffff; border-radius: 10px; overflow: hidden;
+    border: 1px solid #e8edf5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tbl th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #94a3b8; text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid #e8edf5; background: #f8fafc;
+  }
+  .tbl td {
+    font-size: 12px; padding: 11px 14px; color: #475569;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .tbl tr:hover td { background: #f8fafc; }
+  .tbl .name { color: #1e293b; font-weight: 500; }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-variant-numeric: tabular-nums; }
+  .c-d { color: #dc2626; }
+  .c-c { color: #16a34a; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600;
+  }
+  .badge-ok { background: #d1fae5; color: #16a34a; }
+  .badge-ref { color: #94a3b8; font-size: 11px; }
+
+  /* Palette legend */
+  .palette {
+    max-width: 1280px; margin: 0 auto; padding: 0 20px 40px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .swatch {
+    border-radius: 8px; padding: 16px; text-align: center;
+  }
+  .swatch-label { font-size: 10px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .swatch-hex { font-size: 11px; font-family: monospace; }
+
+  .swatch-blue { background: #e0eaff; }
+  .swatch-blue .swatch-label { color: #3b6fd4; }
+  .swatch-blue .swatch-hex { color: #2563eb; }
+
+  .swatch-green { background: #d1fae5; }
+  .swatch-green .swatch-label { color: #16a34a; }
+  .swatch-green .swatch-hex { color: #16a34a; }
+
+  .swatch-red { background: #fee2e2; }
+  .swatch-red .swatch-label { color: #dc2626; }
+  .swatch-red .swatch-hex { color: #dc2626; }
+
+  .swatch-amber { background: #fef3c7; }
+  .swatch-amber .swatch-label { color: #d97706; }
+  .swatch-amber .swatch-hex { color: #d97706; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Light Theme — Couleurs Stitch pastels</div>
+<p class="page-sub">Sidebar sombre inchangée · Contenu light avec pastels Stitch (#e0eaff, #d1fae5, #fee2e2, #fef3c7)</p>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-area"><div class="logo-icon">CF</div><div><div class="logo-title">CoProFlex</div><div class="logo-sub">Gestion de copropriété</div></div></div>
+    <div class="copro-sel"><div class="copro-name">Résidence Les Lilas</div><div class="copro-addr">12 rue des Lilas, 75011</div></div>
+    <div class="nav">
+      <div class="mod-item">📊 Dashboard</div>
+      <div class="mod-item">👥 AG</div>
+      <div class="mod-item active">💰 Finance</div>
+      <div class="sub-item active"><span class="sub-dot"></span> Comptabilité</div>
+      <div class="sub-item"><span class="sub-dot"></span> Budgets</div>
+      <div class="sub-item"><span class="sub-dot"></span> Factures</div>
+      <div class="sub-item"><span class="sub-dot"></span> Appels de fonds</div>
+      <div class="sub-item"><span class="sub-dot"></span> Mouvements</div>
+      <div class="mod-item">🔧 Maintenance</div>
+      <div class="mod-item">📁 Documents</div>
+      <div class="mod-item">💬 Communication</div>
+      <div class="mod-item">⚖️ Contentieux</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="footer-item">☀️ Thème clair</div>
+      <div style="height:1px;background:rgba(148,163,184,0.06);margin:4px 0"></div>
+      <div class="user-info"><div class="avatar">JD</div><div><div class="user-name">Jean Dupont</div><div class="user-role">Syndic</div></div></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT — LIGHT STITCH -->
+  <div class="main">
+    <div class="header">
+      <div>Finance / <span style="color:#334155">Comptabilité</span></div>
+      <div class="header-actions">
+        <div class="header-notif">🔔<div class="header-notif-dot"></div></div>
+        <div class="header-avatar">LT</div>
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div>
+            <h3>Comptabilité</h3>
+            <div class="topbar-sub">Exercice en cours</div>
+          </div>
+          <span class="pill"><span class="pill-dot"></span>2026 — Ouvert</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" style="background:#f0f4fa;color:#64748b;border:1px solid #dde4ef">📥 Export</button>
+          <button class="btn">+ Écriture</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">Total Débit</span><div class="kpi-icon">📥</div></div>
+          <div class="kpi-value">30 790 €</div>
+          <div class="kpi-sub">10 écritures</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">Total Crédit</span><div class="kpi-icon">📤</div></div>
+          <div class="kpi-value">30 790 €</div>
+          <div class="kpi-sub">Balance équilibrée</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">En Retard</span><div class="kpi-icon">⚠️</div></div>
+          <div class="kpi-value">4 720 €</div>
+          <div class="kpi-sub">2 factures</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">Balance</span><div class="kpi-icon">✓</div></div>
+          <div class="kpi-value"><span class="badge badge-ok">Équilibrée</span></div>
+          <div class="kpi-sub">Débit = Crédit</div>
+        </div>
+      </div>
+
+      <table class="tbl">
+        <thead>
+          <tr><th>Date</th><th>N° Pièce</th><th>Libellé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>02/01</td><td class="badge-ref">EC-001</td><td class="name">Fournisseur Veolia — Facture eau T4</td><td class="mono c-d" style="text-align:right">2 450,00</td><td></td></tr>
+          <tr><td>02/01</td><td class="badge-ref">EC-001</td><td class="name">Charge eau — Répartition générale</td><td></td><td class="mono c-c" style="text-align:right">2 450,00</td></tr>
+          <tr><td>05/01</td><td class="badge-ref">EC-002</td><td class="name">EDF — Électricité parties communes</td><td class="mono c-d" style="text-align:right">1 890,00</td><td></td></tr>
+          <tr><td>10/01</td><td class="badge-ref">EC-003</td><td class="name">Banque — Encaissement appel T1</td><td></td><td class="mono c-c" style="text-align:right">18 750,00</td></tr>
+          <tr><td>15/01</td><td class="badge-ref">EC-004</td><td class="name">SecuriPlus — Contrat gardiennage</td><td class="mono c-d" style="text-align:right">3 200,00</td><td></td></tr>
+          <tr><td>20/01</td><td class="badge-ref">EC-005</td><td class="name">Honoraires syndic — Trimestre 1</td><td class="mono c-d" style="text-align:right">4 500,00</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Palette -->
+<div class="palette">
+  <div class="swatch swatch-blue">
+    <div class="swatch-label">Accent / Info</div>
+    <div class="swatch-hex">bg: #e0eaff · text: #2563eb</div>
+  </div>
+  <div class="swatch swatch-green">
+    <div class="swatch-label">Success / Crédit</div>
+    <div class="swatch-hex">bg: #d1fae5 · text: #16a34a</div>
+  </div>
+  <div class="swatch swatch-red">
+    <div class="swatch-label">Danger / Débit</div>
+    <div class="swatch-hex">bg: #fee2e2 · text: #dc2626</div>
+  </div>
+  <div class="swatch swatch-amber">
+    <div class="swatch-label">Warning / Alerte</div>
+    <div class="swatch-hex">bg: #fef3c7 · text: #d97706</div>
+  </div>
+</div>
+
+</body>
+</html>

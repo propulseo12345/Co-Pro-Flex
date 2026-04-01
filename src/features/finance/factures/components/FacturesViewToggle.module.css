@@ -1,7 +1,7 @@
 .toggle {
   display: flex;
   gap: 0;
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.1);
   overflow: hidden;

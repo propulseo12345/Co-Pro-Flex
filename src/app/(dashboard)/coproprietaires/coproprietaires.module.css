@@ -58,7 +58,7 @@
 .tabs {
   display: inline-flex;
   padding: 3px;
-  background: #131620;
+  background: var(--bg-secondary);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   margin-bottom: 24px;
@@ -82,7 +82,7 @@
 }
 
 .tabActive {
-  background: #1a1d2e;
+  background: var(--surface);
   color: #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   font-weight: 600;
@@ -98,7 +98,7 @@
 
 .kpiCard {
   padding: 16px 20px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
 }
@@ -156,7 +156,7 @@
 .searchInput {
   width: 100%;
   padding: 8px 12px 8px 36px;
-  background: #131620;
+  background: var(--bg-secondary);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   color: #e2e8f0;
@@ -246,7 +246,7 @@
 /* Table */
 .tableContainer {
   overflow-x: auto;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
 }
@@ -389,7 +389,7 @@
 /* Action Menu */
 .actionMenu {
   position: fixed;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -444,7 +444,7 @@
 }
 
 .modal {
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
   width: 100%;
@@ -529,7 +529,7 @@
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   font-size: 13px;
-  background: #131620;
+  background: var(--bg-secondary);
   color: #e2e8f0;
   transition: border-color 0.15s;
   outline: none;

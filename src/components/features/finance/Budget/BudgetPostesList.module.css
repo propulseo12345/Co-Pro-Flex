@@ -1,5 +1,5 @@
 .container {
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
   overflow: hidden;
@@ -208,7 +208,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.06);
   border-radius: 8px;
   transition: all 150ms;

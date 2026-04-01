@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 24px;
-  background: #131620;
+  background: var(--bg-secondary);
   height: 100%;
 }
 
@@ -100,7 +100,7 @@
 .newCommentInput {
   flex: 1;
   padding: 10px 14px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   font-size: 13px;

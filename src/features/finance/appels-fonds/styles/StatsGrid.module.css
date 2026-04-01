@@ -11,7 +11,7 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md) 20px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -74,7 +74,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-md);

@@ -7,7 +7,7 @@
   grid-template-columns: 220px 340px 1fr;
   height: calc(100vh - 64px);
   overflow: hidden;
-  background: #0f1117;
+  background: var(--background);
 }
 
 /* Colonne sidebar */

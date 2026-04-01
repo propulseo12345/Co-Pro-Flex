@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Light Theme Crème — CoProFlex</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0c12; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  .page-title { text-align: center; padding: 20px 0 6px; font-size: 20px; color: #adc6ff; }
+  .page-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 24px; }
+
+  .app-shell {
+    display: flex; height: 600px;
+    max-width: 1280px; margin: 0 auto 32px;
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+
+  /* === SIDEBAR (dark, unchanged) === */
+  .sidebar {
+    width: 220px; background: #0f1219;
+    border-right: 1px solid rgba(148,163,184,0.06);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .logo-area { padding: 14px 16px 12px; border-bottom: 1px solid rgba(148,163,184,0.06); display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; }
+  .logo-title { font-weight: 700; font-size: 14px; color: #e2e8f0; }
+  .logo-sub { font-size: 9px; color: #64748b; }
+  .copro-sel { margin: 8px 10px 4px; background: rgba(148,163,184,0.04); border: 1px solid rgba(148,163,184,0.08); border-radius: 7px; padding: 8px 10px; }
+  .copro-name { font-size: 12px; font-weight: 500; color: #e2e8f0; }
+  .copro-addr { font-size: 9px; color: #64748b; margin-top: 1px; }
+  .nav { flex: 1; padding: 6px 0; }
+  .mod-item { display: flex; align-items: center; gap: 8px; padding: 7px 14px; color: #8892a4; font-size: 12px; border-left: 3px solid transparent; }
+  .mod-item.active { background: rgba(59,130,246,0.06); border-left-color: #3b82f6; color: #60a5fa; font-weight: 500; }
+  .sub-item { display: flex; align-items: center; gap: 6px; padding: 5px 14px 5px 43px; color: #64748b; font-size: 11px; border-left: 3px solid transparent; }
+  .sub-item.active { color: #60a5fa; border-left-color: rgba(59,130,246,0.3); }
+  .sub-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(148,163,184,0.2); }
+  .sub-item.active .sub-dot { background: #3b82f6; }
+  .sidebar-footer { margin-top: auto; padding: 8px 10px 10px; border-top: 1px solid rgba(148,163,184,0.06); }
+  .footer-item { display: flex; align-items: center; gap: 8px; padding: 6px; color: #64748b; font-size: 11px; }
+  .user-info { display: flex; align-items: center; gap: 8px; padding: 6px; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: white; }
+  .user-name { font-size: 11px; color: #e2e8f0; }
+  .user-role { font-size: 9px; color: #64748b; }
+
+  /* === MAIN — CRÈME + PASTEL === */
+  .main {
+    flex: 1; background: #faf8f5; overflow: auto;
+  }
+
+  .header {
+    padding: 12px 20px; background: #fffefa;
+    border-bottom: 1px solid #ebe6dd;
+    font-size: 11px; color: #8c7e6a;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .header span { color: #5c4f3d; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .header-notif {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: #f5f0e8; border: 1px solid #ebe6dd;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #8c7e6a; position: relative;
+  }
+  .header-notif-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: #e87c7c; }
+  .header-avatar {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: #e8e0f5; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #7c5cbf;
+  }
+
+  .page { padding: 20px; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .topbar h3 { font-size: 22px; font-weight: 800; color: #3d3529; }
+  .topbar-sub { font-size: 12px; color: #a89b88; margin-top: 2px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    background: #e4f0e0; color: #4a7c3f;
+  }
+  .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: #4a7c3f; }
+
+  .btn-ghost {
+    padding: 7px 14px; border-radius: 8px;
+    background: #f5f0e8; color: #8c7e6a; font-size: 11px; font-weight: 600;
+    border: 1px solid #ebe6dd; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-primary {
+    padding: 7px 14px; border-radius: 8px;
+    background: #7c9cf5; color: white; font-size: 11px; font-weight: 700;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  /* KPIs — Pastel doux */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .kpi {
+    background: #fffefa; border-radius: 12px; padding: 16px;
+    position: relative; overflow: hidden;
+    border: 1px solid #ebe6dd;
+  }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi:nth-child(1)::before { background: #92b4f4; }
+  .kpi:nth-child(2)::before { background: #7dd3a8; }
+  .kpi:nth-child(3)::before { background: #f4a0a0; }
+  .kpi:nth-child(4)::before { background: #f4d080; }
+
+  .kpi-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a89b88; }
+  .kpi-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .kpi:nth-child(1) .kpi-icon { background: #dce6fa; color: #5a82d4; }
+  .kpi:nth-child(2) .kpi-icon { background: #d4f0e0; color: #3d8f5e; }
+  .kpi:nth-child(3) .kpi-icon { background: #fce0e0; color: #c45555; }
+  .kpi:nth-child(4) .kpi-icon { background: #faecd0; color: #b08930; }
+
+  .kpi-value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .kpi:nth-child(1) .kpi-value { color: #4a72c0; }
+  .kpi:nth-child(2) .kpi-value { color: #3d8f5e; }
+  .kpi:nth-child(3) .kpi-value { color: #c45555; }
+  .kpi:nth-child(4) .kpi-value { color: #b08930; }
+
+  .kpi-sub { font-size: 10px; color: #a89b88; margin-top: 3px; }
+
+  /* Table — crème */
+  .tbl {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: #fffefa; border-radius: 12px; overflow: hidden;
+    border: 1px solid #ebe6dd;
+  }
+  .tbl th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #a89b88; text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid #ebe6dd; background: #f8f4ee;
+  }
+  .tbl td {
+    font-size: 12px; padding: 11px 14px; color: #6b5e4e;
+    border-bottom: 1px solid #f3efe8;
+  }
+  .tbl tr:hover td { background: #f8f4ee; }
+  .tbl .name { color: #3d3529; font-weight: 500; }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-variant-numeric: tabular-nums; }
+  .c-d { color: #c45555; }
+  .c-c { color: #3d8f5e; }
+  .badge-ref { color: #a89b88; font-size: 11px; }
+  .badge-ok {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 600;
+    background: #d4f0e0; color: #3d8f5e;
+  }
+
+  /* Palette */
+  .palette {
+    max-width: 1280px; margin: 0 auto; padding: 0 20px 40px;
+  }
+  .palette-title { font-size: 13px; font-weight: 700; color: #adc6ff; margin-bottom: 12px; text-align: center; }
+  .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .sw {
+    border-radius: 10px; padding: 14px 10px; text-align: center;
+  }
+  .sw-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .sw-hex { font-size: 10px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Light Theme — Fond crème + Pastels doux</div>
+<p class="page-sub">Sidebar sombre inchangée · Fond crème #faf8f5 · Couleurs pastel douces</p>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-area"><div class="logo-icon">CF</div><div><div class="logo-title">CoProFlex</div><div class="logo-sub">Gestion de copropriété</div></div></div>
+    <div class="copro-sel"><div class="copro-name">Résidence Les Lilas</div><div class="copro-addr">12 rue des Lilas, 75011</div></div>
+    <div class="nav">
+      <div class="mod-item">📊 Dashboard</div>
+      <div class="mod-item">👥 AG</div>
+      <div class="mod-item active">💰 Finance</div>
+      <div class="sub-item active"><span class="sub-dot"></span> Comptabilité</div>
+      <div class="sub-item"><span class="sub-dot"></span> Budgets</div>
+      <div class="sub-item"><span class="sub-dot"></span> Factures</div>
+      <div class="sub-item"><span class="sub-dot"></span> Appels de fonds</div>
+      <div class="sub-item"><span class="sub-dot"></span> Mouvements</div>
+      <div class="mod-item">🔧 Maintenance</div>
+      <div class="mod-item">📁 Documents</div>
+      <div class="mod-item">💬 Communication</div>
+      <div class="mod-item">⚖️ Contentieux</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="footer-item">☀️ Thème clair</div>
+      <div style="height:1px;background:rgba(148,163,184,0.06);margin:4px 0"></div>
+      <div class="user-info"><div class="avatar">JD</div><div><div class="user-name">Jean Dupont</div><div class="user-role">Syndic</div></div></div>
+    </div>
+  </div>
+
+  <!-- MAIN — CRÈME -->
+  <div class="main">
+    <div class="header">
+      <div>Finance / <span>Comptabilité</span></div>
+      <div class="header-actions">
+        <div class="header-notif">🔔<div class="header-notif-dot"></div></div>
+        <div class="header-avatar">LT</div>
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div>
+            <h3>Comptabilité</h3>
+            <div class="topbar-sub">Exercice en cours</div>
+          </div>
+          <span class="pill"><span class="pill-dot"></span>2026 — Ouvert</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost">📥 Export</button>
+          <button class="btn-primary">+ Écriture</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">Total Débit</span><div class="kpi-icon">📥</div></div>
+          <div class="kpi-value">30 790 €</div>
+          <div class="kpi-sub">10 écritures</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">Total Crédit</span><div class="kpi-icon">📤</div></div>
+          <div class="kpi-value">30 790 €</div>
+          <div class="kpi-sub">Balance équilibrée</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">En Retard</span><div class="kpi-icon">⚠️</div></div>
+          <div class="kpi-value">4 720 €</div>
+          <div class="kpi-sub">2 factures</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-label">Balance</span><div class="kpi-icon">✓</div></div>
+          <div class="kpi-value"><span class="badge-ok">Équilibrée</span></div>
+          <div class="kpi-sub">Débit = Crédit</div>
+        </div>
+      </div>
+
+      <table class="tbl">
+        <thead>
+          <tr><th>Date</th><th>N° Pièce</th><th>Libellé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>02/01</td><td class="badge-ref">EC-001</td><td class="name">Fournisseur Veolia — Facture eau T4</td><td class="mono c-d" style="text-align:right">2 450,00</td><td></td></tr>
+          <tr><td>02/01</td><td class="badge-ref">EC-001</td><td class="name">Charge eau — Répartition générale</td><td></td><td class="mono c-c" style="text-align:right">2 450,00</td></tr>
+          <tr><td>05/01</td><td class="badge-ref">EC-002</td><td class="name">EDF — Électricité parties communes</td><td class="mono c-d" style="text-align:right">1 890,00</td><td></td></tr>
+          <tr><td>10/01</td><td class="badge-ref">EC-003</td><td class="name">Banque — Encaissement appel T1</td><td></td><td class="mono c-c" style="text-align:right">18 750,00</td></tr>
+          <tr><td>15/01</td><td class="badge-ref">EC-004</td><td class="name">SecuriPlus — Contrat gardiennage</td><td class="mono c-d" style="text-align:right">3 200,00</td><td></td></tr>
+          <tr><td>20/01</td><td class="badge-ref">EC-005</td><td class="name">Honoraires syndic — Trimestre 1</td><td class="mono c-d" style="text-align:right">4 500,00</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Palette -->
+<div class="palette">
+  <div class="palette-title">Palette Light — Crème + Pastels</div>
+  <div class="swatches">
+    <div class="sw" style="background:#faf8f5"><div class="sw-label" style="color:#8c7e6a">Fond page</div><div class="sw-hex" style="color:#6b5e4e">#faf8f5</div></div>
+    <div class="sw" style="background:#fffefa"><div class="sw-label" style="color:#8c7e6a">Cards / Table</div><div class="sw-hex" style="color:#6b5e4e">#fffefa</div></div>
+    <div class="sw" style="background:#dce6fa"><div class="sw-label" style="color:#4a72c0">Bleu pastel</div><div class="sw-hex" style="color:#4a72c0">#dce6fa</div></div>
+    <div class="sw" style="background:#d4f0e0"><div class="sw-label" style="color:#3d8f5e">Vert pastel</div><div class="sw-hex" style="color:#3d8f5e">#d4f0e0</div></div>
+    <div class="sw" style="background:#fce0e0"><div class="sw-label" style="color:#c45555">Rouge pastel</div><div class="sw-hex" style="color:#c45555">#fce0e0</div></div>
+    <div class="sw" style="background:#faecd0"><div class="sw-label" style="color:#b08930">Ambre pastel</div><div class="sw-hex" style="color:#b08930">#faecd0</div></div>
+  </div>
+</div>
+
+</body>
+</html>

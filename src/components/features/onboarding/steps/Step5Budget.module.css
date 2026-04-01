@@ -125,7 +125,7 @@
 }
 
 .select option {
-  background: #1a1d2e;
+  background: var(--surface);
   color: #e2e8f0;
 }
 

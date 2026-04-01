@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   height: var(--highbar-height, 48px);
-  background-color: var(--highbar-bg, #151821);
+  background-color: var(--highbar-bg, var(--bg-secondary));
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -166,7 +166,7 @@
 
 .searchResultItem:hover,
 .searchResultItem.selected {
-  background-color: var(--bg-secondary, #1a1f2e);
+  background-color: var(--bg-secondary, var(--surface));
 }
 
 .resultContent {
@@ -193,7 +193,7 @@
   font-size: 11px;
   color: var(--text-tertiary, #64748b);
   padding: 2px 8px;
-  background-color: var(--bg-secondary, #1a1f2e);
+  background-color: var(--bg-secondary, var(--surface));
   border-radius: 4px;
   white-space: nowrap;
   flex-shrink: 0;

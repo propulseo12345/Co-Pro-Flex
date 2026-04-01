@@ -28,7 +28,7 @@
 
 .yearSelect {
   padding: 6px 12px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 8px;
   color: #94a3b8;

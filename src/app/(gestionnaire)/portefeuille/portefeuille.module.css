@@ -67,7 +67,7 @@
 }
 
 .kpiCard {
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 12px;
   padding: 20px 24px;
   position: relative;
@@ -157,7 +157,7 @@
 
 /* --- Actions critiques --- */
 .actionsPanel {
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
 }
@@ -237,7 +237,7 @@
 
 /* --- Maintenance card --- */
 .maintenanceCard {
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
   position: relative;
@@ -272,7 +272,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 2px solid #1a1d2e;
+  border: 2px solid var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -299,7 +299,7 @@
 
 /* --- AG card --- */
 .agCard {
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
   border-left: 4px solid #adc6ff;
@@ -437,7 +437,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 8px;
   padding: 14px 24px;
   cursor: pointer;
@@ -455,7 +455,7 @@
   width: 40px;
   height: 40px;
   border-radius: 6px;
-  background: #131620;
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;

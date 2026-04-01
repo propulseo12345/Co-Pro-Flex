@@ -10,7 +10,7 @@
 }
 
 .modal {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -90,7 +90,7 @@
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
-    background: #131620;
+    background: var(--bg-secondary);
     color: #e2e8f0;
     transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -109,7 +109,7 @@
 }
 
 .formGroup select option {
-    background: #1a1d2e;
+    background: var(--surface);
     color: #e2e8f0;
 }
 

@@ -9,7 +9,7 @@
   display: flex;
   gap: 2px;
   padding: 3px;
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.08);
 }
@@ -47,7 +47,7 @@
   padding: 7px 12px;
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.12);
-  background: #1a1d2e;
+  background: var(--surface);
   color: #94a3b8;
   width: 220px;
 }
@@ -69,7 +69,7 @@
   padding: 7px 12px;
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.12);
-  background: #1a1d2e;
+  background: var(--surface);
   color: #94a3b8;
   font-size: 13px;
   cursor: pointer;

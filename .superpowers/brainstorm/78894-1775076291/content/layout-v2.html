@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Layout V2 — CoProFlex</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  h2 { text-align: center; padding: 24px 0 8px; font-size: 22px; color: #adc6ff; }
+  .subtitle { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 32px; }
+
+  .mockup-container {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+  }
+
+  /* === LAYOUT MOCKUP === */
+  .app-shell {
+    display: flex;
+    height: 600px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.08);
+    margin-bottom: 32px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #131620;
+    border-right: 1px solid rgba(148,163,184,0.06);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    padding: 20px 18px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #adc6ff;
+    letter-spacing: -0.02em;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+  }
+
+  .sidebar-section {
+    padding: 16px 12px 8px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #475569;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    margin: 2px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .sidebar-item:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+
+  .sidebar-item.active {
+    background: rgba(173,198,255,0.08);
+    color: #adc6ff;
+    font-weight: 600;
+  }
+
+  .sidebar-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .sidebar-item.active .sidebar-dot { opacity: 1; background: #adc6ff; }
+
+  .sidebar-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: rgba(173,198,255,0.12);
+    color: #adc6ff;
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid rgba(148,163,184,0.06);
+  }
+
+  .sidebar-copro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(148,163,184,0.04);
+  }
+
+  .sidebar-copro-avatar {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(173,198,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #adc6ff;
+  }
+
+  .sidebar-copro-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .sidebar-copro-lots {
+    font-size: 10px;
+    color: #64748b;
+  }
+
+  /* Main content */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #0f1117;
+    overflow: auto;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: #131620;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    flex-shrink: 0;
+  }
+
+  .header-breadcrumb {
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .header-breadcrumb span { color: #94a3b8; }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .header-search {
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: rgba(148,163,184,0.06);
+    border: 1px solid rgba(148,163,184,0.08);
+    color: #64748b;
+    font-size: 12px;
+    width: 200px;
+  }
+
+  .header-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: rgba(173,198,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #adc6ff;
+  }
+
+  .header-notif {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: rgba(148,163,184,0.06);
+    border: 1px solid rgba(148,163,184,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #64748b;
+    position: relative;
+  }
+
+  .header-notif-dot {
+    position: absolute; top: 5px; right: 5px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+  }
+
+  /* Page content preview */
+  .page-content {
+    padding: 24px;
+    flex: 1;
+  }
+
+  .topbar-mock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .topbar-mock h3 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #e2e2eb;
+  }
+
+  .topbar-mock-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  .mock-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #adc6ff, #4d8eff);
+    color: #00285d;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+  }
+
+  .kpi-mock {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .kpi-mock-card {
+    background: #1a1d2e;
+    border-radius: 10px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-mock-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kpi-mock-card:nth-child(1)::before { background: #adc6ff; }
+  .kpi-mock-card:nth-child(2)::before { background: #34d399; }
+  .kpi-mock-card:nth-child(3)::before { background: #ffb4ab; }
+  .kpi-mock-card:nth-child(4)::before { background: #ffb786; }
+
+  .kpi-mock-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+
+  .kpi-mock-value {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi-mock-card:nth-child(1) .kpi-mock-value { color: #adc6ff; }
+  .kpi-mock-card:nth-child(2) .kpi-mock-value { color: #34d399; }
+  .kpi-mock-card:nth-child(3) .kpi-mock-value { color: #ffb4ab; }
+  .kpi-mock-card:nth-child(4) .kpi-mock-value { color: #ffb786; }
+
+  .table-mock {
+    background: #1a1d2e;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .table-mock-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px 100px;
+    padding: 10px 16px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #475569;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+  }
+
+  .table-mock-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px 100px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(148,163,184,0.03);
+  }
+
+  .table-mock-row:hover { background: rgba(148,163,184,0.02); }
+
+  /* Description below */
+  .desc {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+    text-align: center;
+  }
+
+  .desc p {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .desc strong { color: #adc6ff; }
+</style>
+</head>
+<body>
+
+<h2>Layout V2 — CoProFlex</h2>
+<p class="subtitle">Sidebar Stitch + Header + Contenu de page — structure unifiée pour toutes les routes /v2/</p>
+
+<div class="mockup-container">
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-logo">CoProFlex</div>
+
+      <div class="sidebar-section">Copropriété</div>
+      <div class="sidebar-item active">
+        <span class="sidebar-dot"></span> Dashboard
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Assemblées Générales
+        <span class="sidebar-badge">2</span>
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Finance
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Maintenance
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Documents
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Communication
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Copropriétaires
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Ventes & Impayés
+      </div>
+
+      <div class="sidebar-section">Gestion</div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Conseil syndical
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Contentieux
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-dot"></span> Paramètres
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-copro">
+          <div class="sidebar-copro-avatar">RB</div>
+          <div>
+            <div class="sidebar-copro-name">Résidence Bellevue</div>
+            <div class="sidebar-copro-lots">42 lots · 28 copros</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-breadcrumb">
+          Finance / <span>Comptabilité</span>
+        </div>
+        <div class="header-actions">
+          <input class="header-search" placeholder="Rechercher..." />
+          <div class="header-notif">
+            🔔
+            <div class="header-notif-dot"></div>
+          </div>
+          <div class="header-avatar">LT</div>
+        </div>
+      </div>
+
+      <!-- PAGE -->
+      <div class="page-content">
+        <div class="topbar-mock">
+          <div>
+            <h3>Comptabilité</h3>
+            <div class="topbar-mock-sub">Exercice en cours — 2026</div>
+          </div>
+          <button class="mock-btn">+ Nouvelle écriture</button>
+        </div>
+
+        <div class="kpi-mock">
+          <div class="kpi-mock-card">
+            <div class="kpi-mock-label">Total Débit</div>
+            <div class="kpi-mock-value">30 790 €</div>
+          </div>
+          <div class="kpi-mock-card">
+            <div class="kpi-mock-label">Total Crédit</div>
+            <div class="kpi-mock-value">30 790 €</div>
+          </div>
+          <div class="kpi-mock-card">
+            <div class="kpi-mock-label">Écritures</div>
+            <div class="kpi-mock-value">10</div>
+          </div>
+          <div class="kpi-mock-card">
+            <div class="kpi-mock-label">Balance</div>
+            <div class="kpi-mock-value">Équilibrée</div>
+          </div>
+        </div>
+
+        <div class="table-mock">
+          <div class="table-mock-header">
+            <div>Date</div><div>Libellé</div><div>Débit</div><div>Crédit</div>
+          </div>
+          <div class="table-mock-row">
+            <div>02/01</div><div style="color:#e2e8f0">Fournisseur Veolia — Facture eau T4</div><div style="color:#ffb4ab">2 450,00</div><div></div>
+          </div>
+          <div class="table-mock-row">
+            <div>02/01</div><div style="color:#e2e8f0">Charge eau — Répartition générale</div><div></div><div style="color:#34d399">2 450,00</div>
+          </div>
+          <div class="table-mock-row">
+            <div>05/01</div><div style="color:#e2e8f0">EDF — Électricité parties communes</div><div style="color:#ffb4ab">1 890,00</div><div></div>
+          </div>
+          <div class="table-mock-row">
+            <div>10/01</div><div style="color:#e2e8f0">Banque — Encaissement appel T1</div><div style="color:#ffb4ab">18 750,00</div><div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="desc">
+  <p>
+    <strong>Sidebar</strong> : fond #131620, items avec dot + label, copropriété active en bas.<br>
+    <strong>Header</strong> : breadcrumb + recherche + notifications + avatar.<br>
+    <strong>Contenu</strong> : TopBar + KPIs + Table — même DA que les pages finance-v2 déjà créées.<br><br>
+    Ce layout enveloppe <strong>toutes les pages /v2/</strong>. Chaque module (AG, Finance, Maintenance...) partage cette coquille.
+  </p>
+</div>
+
+</body>
+</html>

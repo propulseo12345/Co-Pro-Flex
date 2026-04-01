@@ -43,7 +43,7 @@
 .searchInput {
   width: 100%;
   padding: 10px 14px 10px 40px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   font-size: 13px;
@@ -91,7 +91,7 @@
   align-items: center;
   gap: 12px;
   padding: 48px 24px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
   text-align: center;

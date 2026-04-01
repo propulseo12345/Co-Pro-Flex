@@ -478,7 +478,7 @@
 }
 
 .modalContent {
-    background: #1a1d2e;
+    background: var(--surface);
     border-radius: 12px;
     width: 100%;
     max-width: 600px;
@@ -540,7 +540,7 @@
     flex-direction: column;
     gap: var(--space-md);
     padding: var(--space-lg);
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 8px;
     margin-bottom: var(--space-xl);
@@ -587,7 +587,7 @@
     padding: var(--space-md);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 8px;
-    background: #131620;
+    background: var(--bg-secondary);
     color: #e2e8f0;
     font-size: 13px;
     transition: all var(--transition-base);
@@ -611,7 +611,7 @@
 /* Buttons */
 .cancelButton {
     padding: var(--space-md) var(--space-xl);
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 8px;
     color: #e2e8f0;
@@ -1039,7 +1039,7 @@
 
 .suggestionCard {
     padding: var(--space-md);
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 8px;
     cursor: pointer;

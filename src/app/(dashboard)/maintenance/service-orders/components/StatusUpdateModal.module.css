@@ -10,7 +10,7 @@
 }
 
 .modal {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -73,7 +73,7 @@
     align-items: center;
     gap: 0;
     padding: 6px;
-    background: #131620;
+    background: var(--bg-secondary);
     border-radius: 12px;
     overflow-x: auto;
 }
@@ -149,7 +149,7 @@
 /* ============================================================ */
 
 .actionZone {
-    background: #131620;
+    background: var(--bg-secondary);
     border-radius: 10px;
     padding: 20px;
 }
@@ -286,7 +286,7 @@
 .fieldInput {
     width: 100%;
     padding: 10px 12px;
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: 8px;
     color: #e2e8f0;
@@ -312,7 +312,7 @@
 .commentBox textarea {
     width: 100%;
     padding: 10px 12px;
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: 8px;
     color: #e2e8f0;

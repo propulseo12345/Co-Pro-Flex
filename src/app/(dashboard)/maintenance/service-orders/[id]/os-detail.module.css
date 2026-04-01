@@ -100,7 +100,7 @@
 /* Pipeline Zone                                                 */
 /* ============================================================ */
 .pipelineZone {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     margin-bottom: 16px;
@@ -112,7 +112,7 @@
     align-items: center;
     gap: 0;
     padding: 8px;
-    background: #131620;
+    background: var(--bg-secondary);
 }
 
 .pipelineStage {
@@ -207,7 +207,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.06);
     border-radius: 10px;
     cursor: pointer;
@@ -299,7 +299,7 @@
 .fieldInput {
     width: 100%;
     padding: 9px 12px;
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: 8px;
     color: #e2e8f0;
@@ -319,7 +319,7 @@
 .commentBox textarea {
     width: 100%;
     padding: 9px 12px;
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: 8px;
     color: #e2e8f0;
@@ -365,7 +365,7 @@
 .btnCancel {
     padding: 8px 16px;
     border-radius: 8px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.08);
     color: #e2e8f0;
     font-size: 13px;
@@ -424,7 +424,7 @@
 }
 
 .card {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     padding: 20px;
@@ -525,7 +525,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.04);
     border-radius: 8px;
     font-size: 13px;
@@ -562,7 +562,7 @@
 /* Email preview */
 .emailPreview {
     padding: 14px;
-    background: #131620;
+    background: var(--bg-secondary);
     border-radius: 8px;
 }
 
@@ -622,7 +622,7 @@
     margin-left: 36px;
     margin-bottom: 12px;
     padding: 12px 14px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.06);
     border-radius: 8px;
 }
@@ -680,12 +680,12 @@
     height: 10px;
     border-radius: 50%;
     border: 2px solid rgba(148, 163, 184, 0.15);
-    background: #131620;
+    background: var(--bg-secondary);
     flex-shrink: 0;
 }
 
 .timelineDotGreen { background: #22c55e; border-color: #22c55e; }
-.timelineDotBlue { background: #131620; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+.timelineDotBlue { background: var(--bg-secondary); border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
 
 .timelineLine {
     flex: 1;
@@ -716,7 +716,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.06);
     border-radius: 8px;
 }

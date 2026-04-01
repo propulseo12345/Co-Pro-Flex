@@ -10,7 +10,7 @@
 }
 
 .modal {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -98,7 +98,7 @@
 .formGroupFull input {
     width: 100%;
     padding: 10px 12px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.1);
     border-radius: 8px;
     color: #e2e8f0;
@@ -179,7 +179,7 @@
     gap: 6px;
     padding: 8px 18px;
     border-radius: 8px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.08);
     color: #e2e8f0;
     font-size: 13px;
@@ -189,7 +189,7 @@
 }
 
 .modalFooter button[type="button"]:hover {
-    background: #1a1d2e;
+    background: var(--surface);
 }
 
 .modalFooter button[type="submit"] {

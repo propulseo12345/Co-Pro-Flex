@@ -1,0 +1,8 @@
+{"type":"server-started","port":63069,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63069","screen_dir":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content","state_dir":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/state"}
+{"type":"screen-added","file":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content/layout-v2.html"}
+{"type":"screen-added","file":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content/layout-v2-real-sidebar.html"}
+{"type":"screen-added","file":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content/light-theme-preview.html"}
+{"type":"screen-added","file":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content/light-theme-stitch.html"}
+{"type":"screen-added","file":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content/light-theme-cream.html"}
+{"type":"screen-added","file":"/Users/trikilyes/Desktop/Privé/Flex/Co-Pro-Flex/.superpowers/brainstorm/78894-1775076291/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

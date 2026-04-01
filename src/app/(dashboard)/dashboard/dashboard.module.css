@@ -47,7 +47,7 @@
 }
 
 .card {
-  background: #1a1d2e;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
   border: 1px solid rgba(148, 163, 184, 0.08);
@@ -154,7 +154,7 @@
 
 /* ── Mini-card ── */
 .miniCard {
-  background: #131620;
+  background: var(--bg-secondary);
   border: 1px solid rgba(148, 163, 184, 0.04);
   border-radius: 8px;
   padding: 12px 16px;
@@ -457,7 +457,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #131620 25%, #1a1d2e 50%, #131620 75%);
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--surface) 50%, var(--bg-secondary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 12px;
@@ -523,7 +523,7 @@
   align-items: center;
   justify-content: center;
   padding: 64px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
   text-align: center;

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Layout V2 — Vraie sidebar CoProFlex</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0c12; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  .page-title { text-align: center; padding: 20px 0 6px; font-size: 20px; color: #adc6ff; }
+  .page-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 24px; }
+
+  /* === APP SHELL === */
+  .app-shell {
+    display: flex;
+    height: 640px;
+    max-width: 1280px;
+    margin: 0 auto 32px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+
+  /* ============================== */
+  /* SIDEBAR — même structure v1    */
+  /* couleurs Stitch                */
+  /* ============================== */
+  .sidebar {
+    width: 240px;
+    background: #0f1219;
+    border-right: 1px solid rgba(148,163,184,0.06);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    font-size: 13px;
+  }
+
+  /* Back link */
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    cursor: pointer;
+    transition: color 0.12s;
+  }
+  .back-link:hover { color: #e2e8f0; }
+
+  /* Logo */
+  .logo-area {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #adc6ff, #4d8eff);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px; color: #00285d;
+    flex-shrink: 0;
+  }
+  .logo-title { font-weight: 700; font-size: 15px; color: #e2e8f0; }
+  .logo-sub { font-size: 10px; color: #64748b; margin-top: 1px; }
+  .collapse-btn {
+    margin-left: auto;
+    background: none; border: none;
+    color: #64748b; cursor: pointer; padding: 4px; border-radius: 4px;
+    font-size: 14px;
+  }
+  .collapse-btn:hover { color: #e2e8f0; background: rgba(148,163,184,0.08); }
+
+  /* Copro selector */
+  .copro-sel {
+    margin: 10px 12px 6px;
+    background: rgba(148,163,184,0.04);
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .copro-sel:hover { border-color: rgba(173,198,255,0.2); }
+  .copro-name {
+    font-size: 13px; font-weight: 500; color: #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .copro-addr { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+  /* Search */
+  .search-wrap {
+    margin: 8px 12px 4px;
+    position: relative;
+  }
+  .search-input {
+    width: 100%;
+    background: rgba(148,163,184,0.04);
+    border: 1px solid rgba(148,163,184,0.08);
+    color: #e2e8f0;
+    padding: 7px 40px 7px 32px;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+  }
+  .search-input::placeholder { color: #475569; }
+  .search-input:focus { border-color: rgba(173,198,255,0.3); }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: #475569; font-size: 12px;
+  }
+  .search-shortcut {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: rgba(148,163,184,0.08);
+    color: #475569; padding: 1px 5px; border-radius: 3px;
+    font-size: 9px; font-family: monospace;
+    border: 1px solid rgba(148,163,184,0.1);
+  }
+
+  /* Nav */
+  .nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+
+  .mod-item {
+    display: flex; align-items: center;
+    padding: 9px 16px;
+    color: #8892a4;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.12s;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .mod-item:hover { background: rgba(148,163,184,0.04); color: #c8cfd8; }
+  .mod-item.active {
+    background: rgba(173,198,255,0.06);
+    border-left-color: #adc6ff;
+    color: #adc6ff;
+    font-weight: 500;
+  }
+  .mod-icon { flex-shrink: 0; font-size: 16px; width: 18px; text-align: center; }
+  .mod-expand {
+    margin-left: auto; color: #475569; font-size: 12px;
+    cursor: pointer; background: none; border: none; padding: 2px;
+  }
+
+  /* Sub pages */
+  .sub-pages { padding-bottom: 4px; }
+  .sub-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 16px 6px 49px;
+    color: #64748b; font-size: 12px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.12s;
+  }
+  .sub-item:hover { background: rgba(148,163,184,0.03); color: #94a3b8; }
+  .sub-item.active {
+    color: #adc6ff;
+    font-weight: 500;
+    background: rgba(173,198,255,0.04);
+    border-left-color: rgba(173,198,255,0.3);
+  }
+  .sub-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: rgba(148,163,184,0.2); flex-shrink: 0;
+  }
+  .sub-item.active .sub-dot { background: #adc6ff; }
+
+  /* Footer */
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 8px 12px 12px;
+    border-top: 1px solid rgba(148,163,184,0.06);
+  }
+  .footer-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; color: #64748b; font-size: 12px;
+    cursor: pointer; border-radius: 6px;
+    transition: all 0.12s;
+  }
+  .footer-item:hover { background: rgba(148,163,184,0.06); color: #94a3b8; }
+  .footer-divider { height: 1px; background: rgba(148,163,184,0.06); margin: 4px 0; }
+  .user-info {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; border-radius: 6px; cursor: pointer;
+  }
+  .user-info:hover { background: rgba(148,163,184,0.06); }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #adc6ff, #4d8eff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #00285d; flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: #e2e8f0; }
+  .user-role { font-size: 10px; color: #64748b; }
+
+  /* ============================== */
+  /* MAIN CONTENT                   */
+  /* ============================== */
+  .main {
+    flex: 1; display: flex; flex-direction: column;
+    background: #0f1117; overflow: auto;
+  }
+
+  /* Header (breadcrumb) */
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 24px;
+    background: #131620;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    flex-shrink: 0;
+  }
+  .breadcrumb { font-size: 12px; color: #64748b; }
+  .breadcrumb span { color: #94a3b8; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .header-notif {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #64748b; position: relative; cursor: pointer;
+  }
+  .header-notif-dot {
+    position: absolute; top: 5px; right: 5px;
+    width: 6px; height: 6px; border-radius: 50%; background: #ef4444;
+  }
+  .header-avatar {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(173,198,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #adc6ff;
+  }
+
+  /* Page content */
+  .page { padding: 24px; flex: 1; }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .topbar h3 { font-size: 24px; font-weight: 800; color: #e2e2eb; }
+  .topbar-sub { font-size: 13px; color: #64748b; margin-top: 2px; }
+  .btn-primary {
+    padding: 8px 16px; border-radius: 10px;
+    background: linear-gradient(135deg, #adc6ff, #4d8eff);
+    color: #00285d; font-size: 12px; font-weight: 700; border: none;
+    cursor: pointer;
+  }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi {
+    background: #1a1d2e; border-radius: 10px; padding: 16px;
+    position: relative; overflow: hidden;
+  }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi:nth-child(1)::before { background: #adc6ff; }
+  .kpi:nth-child(2)::before { background: #34d399; }
+  .kpi:nth-child(3)::before { background: #ffb4ab; }
+  .kpi:nth-child(4)::before { background: #ffb786; }
+  .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; margin-bottom: 8px; }
+  .kpi-value { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .kpi:nth-child(1) .kpi-value { color: #adc6ff; }
+  .kpi:nth-child(2) .kpi-value { color: #34d399; }
+  .kpi:nth-child(3) .kpi-value { color: #ffb4ab; }
+  .kpi:nth-child(4) .kpi-value { color: #ffb786; }
+
+  .tbl { width: 100%; background: #1a1d2e; border-radius: 10px; overflow: hidden; border-collapse: collapse; }
+  .tbl th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #475569; text-align: left; padding: 10px 16px;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+  }
+  .tbl td {
+    font-size: 12px; padding: 12px 16px; color: #94a3b8;
+    border-bottom: 1px solid rgba(148,163,184,0.03);
+  }
+  .tbl tr:hover td { background: rgba(148,163,184,0.02); }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-variant-numeric: tabular-nums; }
+  .c-debit { color: #ffb4ab; }
+  .c-credit { color: #34d399; }
+
+  /* Legend */
+  .legend {
+    max-width: 1280px; margin: 0 auto; padding: 0 20px 40px;
+  }
+  .legend-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .legend-card {
+    background: #131620; border-radius: 10px; padding: 20px;
+    border: 1px solid rgba(148,163,184,0.06);
+  }
+  .legend-card h4 { font-size: 13px; font-weight: 700; color: #adc6ff; margin-bottom: 10px; }
+  .legend-card p { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+  .legend-card code {
+    background: rgba(173,198,255,0.08); color: #adc6ff;
+    padding: 1px 5px; border-radius: 3px; font-size: 11px;
+  }
+
+  .color-swatch {
+    display: inline-block; width: 12px; height: 12px; border-radius: 3px;
+    vertical-align: middle; margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">Layout V2 — Sidebar identique à v1, couleurs Stitch</div>
+<p class="page-sub">Même structure (logo, copro selector, recherche, modules + sous-pages, footer user) — seules les couleurs changent</p>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Back link -->
+    <div class="back-link">← Portefeuille</div>
+
+    <!-- Logo -->
+    <div class="logo-area">
+      <div class="logo-icon">CF</div>
+      <div>
+        <div class="logo-title">CoProFlex</div>
+        <div class="logo-sub">Gestion de copropriété</div>
+      </div>
+      <button class="collapse-btn" title="Réduire">◁</button>
+    </div>
+
+    <!-- Copro selector -->
+    <div class="copro-sel">
+      <div class="copro-name">Résidence Les Lilas <span style="color:#475569;font-size:11px">▾</span></div>
+      <div class="copro-addr">12 rue des Lilas, 75011 Paris</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" placeholder="Rechercher..." />
+      <span class="search-shortcut">⌘K</span>
+    </div>
+
+    <!-- Nav modules -->
+    <div class="nav">
+      <div class="mod-item">
+        <span class="mod-icon">📊</span> Dashboard
+      </div>
+
+      <div class="mod-item" style="position:relative">
+        <span class="mod-icon">👥</span> AG
+        <button class="mod-expand">▸</button>
+      </div>
+
+      <div class="mod-item">
+        <span class="mod-icon">🏢</span> Copropriété
+        <button class="mod-expand">▸</button>
+      </div>
+
+      <div class="mod-item active">
+        <span class="mod-icon">💰</span> Finance
+        <button class="mod-expand">▾</button>
+      </div>
+      <div class="sub-pages">
+        <div class="sub-item active"><span class="sub-dot"></span> Comptabilité</div>
+        <div class="sub-item"><span class="sub-dot"></span> Budgets</div>
+        <div class="sub-item"><span class="sub-dot"></span> Factures</div>
+        <div class="sub-item"><span class="sub-dot"></span> Appels de fonds</div>
+        <div class="sub-item"><span class="sub-dot"></span> Mouvements bancaires</div>
+      </div>
+
+      <div class="mod-item">
+        <span class="mod-icon">🔧</span> Maintenance
+        <button class="mod-expand">▸</button>
+      </div>
+
+      <div class="mod-item">
+        <span class="mod-icon">📁</span> Documents
+        <button class="mod-expand">▸</button>
+      </div>
+
+      <div class="mod-item">
+        <span class="mod-icon">💬</span> Communication
+        <button class="mod-expand">▸</button>
+      </div>
+
+      <div class="mod-item">
+        <span class="mod-icon">⚖️</span> Contentieux
+        <button class="mod-expand">▸</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="footer-item">☀️ Thème clair</div>
+      <div class="footer-item">🌐 Landing Page</div>
+      <div class="footer-item">⚙️ Paramètres</div>
+      <div class="footer-divider"></div>
+      <div class="user-info">
+        <div class="avatar">JD</div>
+        <div>
+          <div class="user-name">Jean Dupont</div>
+          <div class="user-role">Syndic professionnel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="header">
+      <div class="breadcrumb">Finance / <span>Comptabilité</span></div>
+      <div class="header-actions">
+        <div class="header-notif">🔔<div class="header-notif-dot"></div></div>
+        <div class="header-avatar">LT</div>
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="topbar">
+        <div>
+          <h3>Comptabilité</h3>
+          <div class="topbar-sub">Exercice en cours — 2026</div>
+        </div>
+        <button class="btn-primary">+ Nouvelle écriture</button>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">Total Débit</div><div class="kpi-value">30 790 €</div></div>
+        <div class="kpi"><div class="kpi-label">Total Crédit</div><div class="kpi-value">30 790 €</div></div>
+        <div class="kpi"><div class="kpi-label">Écritures</div><div class="kpi-value">10</div></div>
+        <div class="kpi"><div class="kpi-label">Balance</div><div class="kpi-value">Équilibrée</div></div>
+      </div>
+
+      <table class="tbl">
+        <thead>
+          <tr><th>Date</th><th>Libellé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>02/01</td><td style="color:#e2e8f0">Fournisseur Veolia — Facture eau T4</td><td class="mono c-debit" style="text-align:right">2 450,00</td><td></td></tr>
+          <tr><td>02/01</td><td style="color:#e2e8f0">Charge eau — Répartition générale</td><td></td><td class="mono c-credit" style="text-align:right">2 450,00</td></tr>
+          <tr><td>05/01</td><td style="color:#e2e8f0">EDF — Électricité parties communes</td><td class="mono c-debit" style="text-align:right">1 890,00</td><td></td></tr>
+          <tr><td>10/01</td><td style="color:#e2e8f0">Banque — Encaissement appel T1</td><td class="mono c-debit" style="text-align:right">18 750,00</td><td></td></tr>
+          <tr><td>15/01</td><td style="color:#e2e8f0">SecuriPlus — Contrat gardiennage</td><td class="mono c-debit" style="text-align:right">3 200,00</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-grid">
+    <div class="legend-card">
+      <h4>Ce qui change (v1 → v2)</h4>
+      <p>
+        <span class="color-swatch" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"></span> Logo bleu → <span class="color-swatch" style="background:linear-gradient(135deg,#adc6ff,#4d8eff)"></span> Logo Stitch<br>
+        <span class="color-swatch" style="background:#3b82f6"></span> Accent <code>#3b82f6</code> → <span class="color-swatch" style="background:#adc6ff"></span> Accent <code>#adc6ff</code><br>
+        <span class="color-swatch" style="background:#60a5fa"></span> Active <code>#60a5fa</code> → <span class="color-swatch" style="background:#adc6ff"></span> Active <code>#adc6ff</code><br>
+        <span class="color-swatch" style="background:rgba(59,130,246,0.06)"></span> Active bg → <span class="color-swatch" style="background:rgba(173,198,255,0.06)"></span> Active bg Stitch<br>
+        Border-left active : <code>#3b82f6</code> → <code>#adc6ff</code>
+      </p>
+    </div>
+    <div class="legend-card">
+      <h4>Ce qui ne change PAS</h4>
+      <p>
+        Structure : logo + copro selector + recherche + modules + sous-pages + footer<br>
+        Collapse (60px) : même comportement<br>
+        Recherche ⌘K : même fonctionnalité<br>
+        Sous-pages expansibles : même pattern<br>
+        Footer : thème, paramètres, user info<br>
+        Back to Portefeuille : même lien
+      </p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

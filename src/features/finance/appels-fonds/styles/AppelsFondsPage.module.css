@@ -60,7 +60,7 @@
 
 .btnSecondary {
   composes: btn;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.15);
   color: #e2e8f0;
 }
@@ -82,7 +82,7 @@
   gap: 12px;
   width: 100%;
   padding: 12px 16px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
   cursor: pointer;
@@ -125,7 +125,7 @@
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.4);
@@ -184,7 +184,7 @@
   gap: 4px;
   margin-bottom: 24px;
   padding: 4px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
 }

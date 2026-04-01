@@ -90,7 +90,7 @@
 
 .kpiCard {
   padding: 16px 20px;
-  background: #1a1d2e;
+  background: var(--surface);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 12px;
 }
@@ -172,7 +172,7 @@
 .searchInput {
   width: 100%;
   padding: 8px 12px 8px 36px;
-  background: #131620;
+  background: var(--bg-secondary);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   color: #e2e8f0;
@@ -191,7 +191,7 @@
 
 .filterSelect {
   padding: 8px 12px;
-  background: #131620;
+  background: var(--bg-secondary);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   color: #e2e8f0;

@@ -1,5 +1,5 @@
 .card {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     padding: 24px;
@@ -40,7 +40,7 @@
     gap: 8px;
     padding: 8px 12px;
     border-radius: 8px;
-    background: #131620;
+    background: var(--bg-secondary);
     border: 1px solid rgba(148, 163, 184, 0.08);
 }
 
@@ -79,7 +79,7 @@
 }
 
 .workflowStepPending .workflowStepNumber {
-    background: #131620;
+    background: var(--bg-secondary);
     color: #64748b;
 }
 

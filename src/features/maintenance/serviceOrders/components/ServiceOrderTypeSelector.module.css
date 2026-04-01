@@ -1,5 +1,5 @@
 .section {
-    background: #1a1d2e;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.08);
     border-radius: 12px;
     padding: 24px;
@@ -28,7 +28,7 @@
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s;
-    background: #131620;
+    background: var(--bg-secondary);
 }
 
 .radioCard:hover {

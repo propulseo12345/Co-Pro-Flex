@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Light Theme — CoProFlex</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0c12; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  .page-title { text-align: center; padding: 20px 0 6px; font-size: 20px; color: #adc6ff; }
+  .page-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 24px; }
+
+  .shells { display: flex; flex-direction: column; gap: 40px; max-width: 1280px; margin: 0 auto; padding: 0 20px 40px; }
+  .shell-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    color: #64748b; margin-bottom: 10px; text-align: center;
+  }
+  .shell-label span { color: #adc6ff; }
+
+  .app-shell {
+    display: flex; height: 520px;
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+
+  /* === SIDEBAR (same for both) === */
+  .sidebar {
+    width: 220px; background: #0f1219;
+    border-right: 1px solid rgba(148,163,184,0.06);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    font-size: 13px;
+  }
+  .logo-area {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 11px; color: white;
+  }
+  .logo-title { font-weight: 700; font-size: 14px; color: #e2e8f0; }
+  .logo-sub { font-size: 9px; color: #64748b; }
+
+  .copro-sel {
+    margin: 8px 10px 4px; background: rgba(148,163,184,0.04);
+    border: 1px solid rgba(148,163,184,0.08); border-radius: 7px; padding: 8px 10px;
+  }
+  .copro-name { font-size: 12px; font-weight: 500; color: #e2e8f0; }
+  .copro-addr { font-size: 9px; color: #64748b; margin-top: 1px; }
+
+  .nav { flex: 1; padding: 6px 0; overflow: hidden; }
+  .mod-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px; color: #8892a4; font-size: 12px;
+    border-left: 3px solid transparent;
+  }
+  .mod-item.active {
+    background: rgba(59,130,246,0.06);
+    border-left-color: #3b82f6; color: #60a5fa; font-weight: 500;
+  }
+  .sub-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 14px 5px 43px; color: #64748b; font-size: 11px;
+    border-left: 3px solid transparent;
+  }
+  .sub-item.active { color: #60a5fa; border-left-color: rgba(59,130,246,0.3); }
+  .sub-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(148,163,184,0.2); }
+  .sub-item.active .sub-dot { background: #3b82f6; }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 8px 10px 10px;
+    border-top: 1px solid rgba(148,163,184,0.06);
+  }
+  .footer-item { display: flex; align-items: center; gap: 8px; padding: 6px; color: #64748b; font-size: 11px; }
+  .user-info { display: flex; align-items: center; gap: 8px; padding: 6px; }
+  .avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; color: white;
+  }
+  .user-name { font-size: 11px; color: #e2e8f0; }
+  .user-role { font-size: 9px; color: #64748b; }
+
+  /* === DARK CONTENT === */
+  .main-dark { flex: 1; background: #0f1117; overflow: auto; }
+  .main-dark .header {
+    padding: 12px 20px; background: #131620;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+    font-size: 11px; color: #64748b;
+  }
+  .main-dark .page { padding: 20px; }
+  .main-dark .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .main-dark .topbar h3 { font-size: 22px; font-weight: 800; color: #e2e2eb; }
+  .main-dark .topbar-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .main-dark .btn { padding: 7px 14px; border-radius: 8px; background: #3b82f6; color: white; font-size: 11px; font-weight: 700; border: none; }
+  .main-dark .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .main-dark .kpi { background: #1a1d2e; border-radius: 8px; padding: 14px; position: relative; overflow: hidden; }
+  .main-dark .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .main-dark .kpi:nth-child(1)::before { background: #3b82f6; }
+  .main-dark .kpi:nth-child(2)::before { background: #34d399; }
+  .main-dark .kpi:nth-child(3)::before { background: #ef4444; }
+  .main-dark .kpi:nth-child(4)::before { background: #f59e0b; }
+  .main-dark .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+  .main-dark .kpi-value { font-size: 18px; font-weight: 800; }
+  .main-dark .kpi:nth-child(1) .kpi-value { color: #60a5fa; }
+  .main-dark .kpi:nth-child(2) .kpi-value { color: #34d399; }
+  .main-dark .kpi:nth-child(3) .kpi-value { color: #f87171; }
+  .main-dark .kpi:nth-child(4) .kpi-value { color: #fbbf24; }
+  .main-dark .tbl { width: 100%; border-collapse: collapse; }
+  .main-dark .tbl th { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #475569; text-align: left; padding: 8px 14px; border-bottom: 1px solid rgba(148,163,184,0.06); }
+  .main-dark .tbl td { font-size: 11px; padding: 10px 14px; color: #94a3b8; border-bottom: 1px solid rgba(148,163,184,0.03); }
+  .main-dark .mono { font-family: 'SF Mono', monospace; }
+  .main-dark .c-d { color: #f87171; }
+  .main-dark .c-c { color: #34d399; }
+
+  /* === LIGHT CONTENT === */
+  .main-light { flex: 1; background: #f8fafc; overflow: auto; }
+  .main-light .header {
+    padding: 12px 20px; background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 11px; color: #64748b;
+  }
+  .main-light .page { padding: 20px; }
+  .main-light .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .main-light .topbar h3 { font-size: 22px; font-weight: 800; color: #0f172a; }
+  .main-light .topbar-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .main-light .btn { padding: 7px 14px; border-radius: 8px; background: #3b82f6; color: white; font-size: 11px; font-weight: 700; border: none; }
+  .main-light .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .main-light .kpi { background: #ffffff; border-radius: 8px; padding: 14px; position: relative; overflow: hidden; border: 1px solid #e2e8f0; }
+  .main-light .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .main-light .kpi:nth-child(1)::before { background: #3b82f6; }
+  .main-light .kpi:nth-child(2)::before { background: #22c55e; }
+  .main-light .kpi:nth-child(3)::before { background: #ef4444; }
+  .main-light .kpi:nth-child(4)::before { background: #f59e0b; }
+  .main-light .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; letter-spacing: 0.05em; }
+  .main-light .kpi-value { font-size: 18px; font-weight: 800; }
+  .main-light .kpi:nth-child(1) .kpi-value { color: #2563eb; }
+  .main-light .kpi:nth-child(2) .kpi-value { color: #16a34a; }
+  .main-light .kpi:nth-child(3) .kpi-value { color: #dc2626; }
+  .main-light .kpi:nth-child(4) .kpi-value { color: #d97706; }
+  .main-light .tbl { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .main-light .tbl th { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; text-align: left; padding: 8px 14px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+  .main-light .tbl td { font-size: 11px; padding: 10px 14px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+  .main-light .tbl tr:hover td { background: #f8fafc; }
+  .main-light .mono { font-family: 'SF Mono', monospace; }
+  .main-light .c-d { color: #dc2626; }
+  .main-light .c-c { color: #16a34a; }
+
+  .badge-light {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 600;
+  }
+  .badge-ok { background: #dcfce7; color: #16a34a; }
+  .badge-warn { background: #fef3c7; color: #d97706; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Thème Light — Comparaison</div>
+<p class="page-sub">Sidebar sombre conservée · Contenu light · Même structure de page</p>
+
+<div class="shells">
+
+  <!-- DARK (current) -->
+  <div>
+    <div class="shell-label">Actuel — <span>Dark</span></div>
+    <div class="app-shell">
+      <div class="sidebar">
+        <div class="logo-area"><div class="logo-icon">CF</div><div><div class="logo-title">CoProFlex</div><div class="logo-sub">Gestion de copropriété</div></div></div>
+        <div class="copro-sel"><div class="copro-name">Résidence Les Lilas</div><div class="copro-addr">12 rue des Lilas, 75011</div></div>
+        <div class="nav">
+          <div class="mod-item">📊 Dashboard</div>
+          <div class="mod-item">👥 AG</div>
+          <div class="mod-item active">💰 Finance</div>
+          <div class="sub-item active"><span class="sub-dot"></span> Comptabilité</div>
+          <div class="sub-item"><span class="sub-dot"></span> Budgets</div>
+          <div class="sub-item"><span class="sub-dot"></span> Factures</div>
+          <div class="mod-item">🔧 Maintenance</div>
+          <div class="mod-item">📁 Documents</div>
+          <div class="mod-item">💬 Communication</div>
+        </div>
+        <div class="sidebar-footer">
+          <div class="footer-item">🌙 Thème sombre</div>
+          <div style="height:1px;background:rgba(148,163,184,0.06);margin:4px 0"></div>
+          <div class="user-info"><div class="avatar">JD</div><div><div class="user-name">Jean Dupont</div><div class="user-role">Syndic</div></div></div>
+        </div>
+      </div>
+      <div class="main-dark">
+        <div class="header">Finance / <span style="color:#94a3b8">Comptabilité</span></div>
+        <div class="page">
+          <div class="topbar"><div><h3>Comptabilité</h3><div class="topbar-sub">Exercice 2026</div></div><button class="btn">+ Écriture</button></div>
+          <div class="kpis">
+            <div class="kpi"><div class="kpi-label">Total Débit</div><div class="kpi-value">30 790 €</div></div>
+            <div class="kpi"><div class="kpi-label">Total Crédit</div><div class="kpi-value">30 790 €</div></div>
+            <div class="kpi"><div class="kpi-label">En retard</div><div class="kpi-value">4 720 €</div></div>
+            <div class="kpi"><div class="kpi-label">Balance</div><div class="kpi-value">Équilibrée</div></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Libellé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+            <tbody>
+              <tr><td>02/01</td><td style="color:#e2e8f0">Veolia — Facture eau</td><td class="mono c-d" style="text-align:right">2 450,00</td><td></td></tr>
+              <tr><td>05/01</td><td style="color:#e2e8f0">EDF — Électricité</td><td class="mono c-d" style="text-align:right">1 890,00</td><td></td></tr>
+              <tr><td>10/01</td><td style="color:#e2e8f0">Encaissement T1</td><td></td><td class="mono c-c" style="text-align:right">18 750,00</td></tr>
+              <tr><td>15/01</td><td style="color:#e2e8f0">SecuriPlus — Gardiennage</td><td class="mono c-d" style="text-align:right">3 200,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHT (proposed) -->
+  <div>
+    <div class="shell-label">Proposé — <span>Light</span> (sidebar sombre conservée)</div>
+    <div class="app-shell">
+      <div class="sidebar">
+        <div class="logo-area"><div class="logo-icon">CF</div><div><div class="logo-title">CoProFlex</div><div class="logo-sub">Gestion de copropriété</div></div></div>
+        <div class="copro-sel"><div class="copro-name">Résidence Les Lilas</div><div class="copro-addr">12 rue des Lilas, 75011</div></div>
+        <div class="nav">
+          <div class="mod-item">📊 Dashboard</div>
+          <div class="mod-item">👥 AG</div>
+          <div class="mod-item active">💰 Finance</div>
+          <div class="sub-item active"><span class="sub-dot"></span> Comptabilité</div>
+          <div class="sub-item"><span class="sub-dot"></span> Budgets</div>
+          <div class="sub-item"><span class="sub-dot"></span> Factures</div>
+          <div class="mod-item">🔧 Maintenance</div>
+          <div class="mod-item">📁 Documents</div>
+          <div class="mod-item">💬 Communication</div>
+        </div>
+        <div class="sidebar-footer">
+          <div class="footer-item">☀️ Thème clair</div>
+          <div style="height:1px;background:rgba(148,163,184,0.06);margin:4px 0"></div>
+          <div class="user-info"><div class="avatar">JD</div><div><div class="user-name">Jean Dupont</div><div class="user-role">Syndic</div></div></div>
+        </div>
+      </div>
+      <div class="main-light">
+        <div class="header">Finance / <span style="color:#334155">Comptabilité</span></div>
+        <div class="page">
+          <div class="topbar"><div><h3>Comptabilité</h3><div class="topbar-sub">Exercice 2026</div></div><button class="btn">+ Écriture</button></div>
+          <div class="kpis">
+            <div class="kpi"><div class="kpi-label">Total Débit</div><div class="kpi-value">30 790 €</div></div>
+            <div class="kpi"><div class="kpi-label">Total Crédit</div><div class="kpi-value">30 790 €</div></div>
+            <div class="kpi"><div class="kpi-label">En retard</div><div class="kpi-value">4 720 €</div></div>
+            <div class="kpi"><div class="kpi-label">Balance</div><div class="kpi-value"><span class="badge-light badge-ok">Équilibrée</span></div></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Libellé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+            <tbody>
+              <tr><td>02/01</td><td style="color:#0f172a;font-weight:500">Veolia — Facture eau</td><td class="mono c-d" style="text-align:right">2 450,00</td><td></td></tr>
+              <tr><td>05/01</td><td style="color:#0f172a;font-weight:500">EDF — Électricité</td><td class="mono c-d" style="text-align:right">1 890,00</td><td></td></tr>
+              <tr><td>10/01</td><td style="color:#0f172a;font-weight:500">Encaissement T1</td><td></td><td class="mono c-c" style="text-align:right">18 750,00</td></tr>
+              <tr><td>15/01</td><td style="color:#0f172a;font-weight:500">SecuriPlus — Gardiennage</td><td class="mono c-d" style="text-align:right">3 200,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
