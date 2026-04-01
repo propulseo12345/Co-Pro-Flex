@@ -1,23 +1,49 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
-/**
- * ThemeProvider simplifié - Application dark-only
- * Conservé pour compatibilité avec les composants existants
- */
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+type Theme = 'dark' | 'light';
+
+interface ThemeContextValue {
+  theme: Theme;
+  toggleTheme: () => void;
+  mounted: boolean;
 }
 
-/**
- * Hook useTheme - Retourne toujours 'dark'
- * @deprecated L'application est désormais dark-only
- */
+const ThemeContext = createContext<ThemeContextValue>({
+  theme: 'dark',
+  toggleTheme: () => {},
+  mounted: false,
+});
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>('dark');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('coproflex-theme') as Theme | null;
+    const initial = stored === 'light' ? 'light' : 'dark';
+    setTheme(initial);
+    document.documentElement.setAttribute('data-theme', initial);
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('coproflex-theme', next);
+      return next;
+    });
+  }, []);
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
 export function useTheme() {
-  return {
-    theme: 'dark' as const,
-    toggleTheme: () => {}, // No-op
-    mounted: true,
-  };
+  return useContext(ThemeContext);
 }
