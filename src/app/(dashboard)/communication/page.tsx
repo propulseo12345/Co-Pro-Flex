@@ -1,70 +1,141 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-import { MOCK_MAILS } from '@/features/communication/mail/domain/mock-data';
-import { MOCK_CONVERSATION_PREVIEWS } from '@/features/communication/messagerie/domain/mock-data';
-import { MOCK_POSTS } from '@/features/communication/mur/domain/mock-data';
+import { createClient } from '@/lib/supabase/client';
+import { useCopro } from '@/providers/CoproContext';
 
 import styles from './communication-hub.module.css';
 
-// ── KPI computations ──────────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
-// NOTE: Les KPIs sont calculés à partir des données mockées statiques importées directement.
-// En production (Supabase), ces calculs seront remplacés par un hook dédié (ex: useCommunicationKPIs)
-// ou intégrés dans les hooks existants (useMailbox, useMessagerie, useMur).
-function getUnreadMailCount(): number {
-  return MOCK_MAILS.filter(
-    (m) => m.status === 'received' && !m.isRead && !m.isArchived && !m.isDeleted,
-  ).length;
+const DEFAULT_OWNER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
+
+// ── Types pour les KPI ────────────────────────────────────────────────────────
+
+interface HubKpis {
+  unreadMails: number;
+  unreadMessages: number;
+  recentPosts: number;
+  lastSubjects: string[];
+  activeConversations: number;
+  lastConvName: string | null;
+  lastPinnedTitle: string | null;
 }
 
-function getUnreadMessageCount(): number {
-  return MOCK_CONVERSATION_PREVIEWS.reduce((sum, c) => sum + c.unreadCount, 0);
-}
+const EMPTY_KPIS: HubKpis = {
+  unreadMails: 0,
+  unreadMessages: 0,
+  recentPosts: 0,
+  lastSubjects: [],
+  activeConversations: 0,
+  lastConvName: null,
+  lastPinnedTitle: null,
+};
 
-function getRecentPostCount(): number {
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  return MOCK_POSTS.filter((p) => new Date(p.createdAt).getTime() > sevenDaysAgo).length;
-}
+// ── Hook KPI — lecture Supabase ───────────────────────────────────────────────
 
-// ── Preview helpers ───────────────────────────────────────────────────────────
+function useCommunicationKpis(coproId: string | null): HubKpis {
+  const supabase = useMemo(() => createUntypedClient(), []);
+  const [kpis, setKpis] = useState<HubKpis>(EMPTY_KPIS);
 
-function getLastMailSubjects(count: number): string[] {
-  return MOCK_MAILS
-    .filter((m) => m.status === 'received' && !m.isRead && !m.isDeleted)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, count)
-    .map((m) => m.subject);
-}
+  useEffect(() => {
+    if (!coproId) return;
 
-function getActiveConversationCount(): number {
-  return MOCK_CONVERSATION_PREVIEWS.filter((c) => !c.isArchived).length;
-}
+    async function load() {
+      // 1. Mails non lus (boite de reception)
+      const { count: unreadMailCount } = await supabase
+        .from('mails')
+        .select('*', { count: 'exact', head: true })
+        .eq('copro_id', coproId)
+        .eq('owner_id', DEFAULT_OWNER_ID)
+        .eq('status', 'received')
+        .eq('is_read', false)
+        .eq('is_archived', false)
+        .eq('is_deleted', false);
 
-function getLastConversationName(): string | null {
-  const sorted = [...MOCK_CONVERSATION_PREVIEWS]
-    .sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
-  return sorted[0]?.title ?? null;
-}
+      // 2. Derniers sujets non lus
+      const { data: unreadMails } = await supabase
+        .from('mails')
+        .select('subject')
+        .eq('copro_id', coproId)
+        .eq('owner_id', DEFAULT_OWNER_ID)
+        .eq('status', 'received')
+        .eq('is_read', false)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .limit(2);
 
-function getLastPinnedPostTitle(): string | null {
-  const pinned = MOCK_POSTS.filter((p) => p.isPinned);
-  return pinned[0]?.title ?? null;
+      // 3. Conversations actives + non lues
+      const { data: conversations } = await supabase
+        .from('conversations')
+        .select('id, subject, is_archived, unread_count, last_message_at')
+        .eq('copro_id', coproId)
+        .eq('is_archived', false)
+        .order('last_message_at', { ascending: false, nullsFirst: false });
+
+      const convList = (conversations ?? []) as {
+        id: string;
+        subject: string | null;
+        is_archived: boolean;
+        unread_count: number;
+        last_message_at: string | null;
+      }[];
+
+      const activeCount = convList.length;
+      const totalUnread = convList.reduce((sum, c) => sum + (c.unread_count ?? 0), 0);
+      const lastConv = convList[0]?.subject ?? null;
+
+      // 4. Publications recentes (7 jours) + epingle
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { count: recentCount } = await supabase
+        .from('wall_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('copro_id', coproId)
+        .gte('created_at', sevenDaysAgo);
+
+      const { data: pinnedPosts } = await supabase
+        .from('wall_posts')
+        .select('title')
+        .eq('copro_id', coproId)
+        .eq('is_pinned', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      setKpis({
+        unreadMails: unreadMailCount ?? 0,
+        unreadMessages: totalUnread,
+        recentPosts: recentCount ?? 0,
+        lastSubjects: (unreadMails ?? []).map((m: { subject: string }) => m.subject),
+        activeConversations: activeCount,
+        lastConvName: lastConv,
+        lastPinnedTitle: (pinnedPosts ?? [])[0]?.title ?? null,
+      });
+    }
+
+    load();
+  }, [coproId, supabase]);
+
+  return kpis;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function CommunicationHubPage() {
-  const unreadMails = getUnreadMailCount();
-  const unreadMessages = getUnreadMessageCount();
-  const recentPosts = getRecentPostCount();
-
-  const lastSubjects = getLastMailSubjects(2);
-  const activeConversations = getActiveConversationCount();
-  const lastConvName = getLastConversationName();
-  const lastPinnedTitle = getLastPinnedPostTitle();
+  const { currentCoproId } = useCopro();
+  const {
+    unreadMails,
+    unreadMessages,
+    recentPosts,
+    lastSubjects,
+    activeConversations,
+    lastConvName,
+    lastPinnedTitle,
+  } = useCommunicationKpis(currentCoproId);
 
   return (
     <div className={styles.hubContainer}>

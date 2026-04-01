@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
 import type { IMail, IMailFolder, IMailLabel, IDraftData } from '@/features/communication/mail/domain/types';
-import { MOCK_FOLDERS, MOCK_LABELS } from '@/features/communication/mail/domain/mock-data';
+import { DEFAULT_FOLDERS, DEFAULT_LABELS } from '@/features/communication/mail/domain/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
@@ -92,8 +92,8 @@ export function useMailbox(): UseMailboxReturn {
   const supabase = useMemo(() => createUntypedClient(), []);
 
   const [allMails, setAllMails] = useState<IMail[]>([]);
-  const [folders, setFolders] = useState<IMailFolder[]>(MOCK_FOLDERS);
-  const [labels, setLabels] = useState<IMailLabel[]>(MOCK_LABELS);
+  const [folders, setFolders] = useState<IMailFolder[]>(DEFAULT_FOLDERS);
+  const [labels, setLabels] = useState<IMailLabel[]>(DEFAULT_LABELS);
   const [selectedMailId, setSelectedMailId] = useState<string | null>(null);
   const [currentFolder, setCurrentFolder] = useState<MailboxFolder>('inbox');
   const [searchTerm, setSearchTerm] = useState('');

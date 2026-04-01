@@ -12,6 +12,8 @@ import { Step5Budget } from '@/components/features/onboarding/steps/Step5Budget'
 import { Step6AgAppels } from '@/components/features/onboarding/steps/Step6AgAppels';
 import { Step7RepriseSoldes } from '@/components/features/onboarding/steps/Step7RepriseSoldes';
 import { StepContracts } from '@/components/features/onboarding/steps/StepContracts';
+import { StepDocuments } from '@/components/features/onboarding/steps/StepDocuments';
+import { StepCarnetEntretien } from '@/components/features/onboarding/steps/StepCarnetEntretien';
 import styles from './onboarding.module.css';
 
 export default function OnboardingPage() {
@@ -30,8 +32,10 @@ export default function OnboardingPage() {
   const [budgetId, setBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
 
-  // Parallel step: contracts (optional, available from step 4+)
+  // Parallel steps: optional, available from step 4+
   const [showContractsStep, setShowContractsStep] = useState(false);
+  const [showDocumentsStep, setShowDocumentsStep] = useState(false);
+  const [showCarnetStep, setShowCarnetStep] = useState(false);
 
   const handleStep1Complete = useCallback((coproId: string, coproName: string) => {
     setCoproCreated(coproId, coproName);
@@ -82,25 +86,63 @@ export default function OnboardingPage() {
         onStepClick={goToStep}
       />
 
-      {/* Parallel step: contracts — available from step 4+ */}
-      {state.coproId && currentStep >= 4 && !showContractsStep && (
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <button
-            onClick={() => setShowContractsStep(true)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 8,
-              border: '1px solid rgba(148, 163, 184, 0.08)',
-              background: 'rgba(148, 163, 184, 0.04)',
-              color: '#94a3b8',
-              fontSize: 12,
-              fontWeight: 600,
-              fontFamily: 'inherit',
-              cursor: 'pointer',
-            }}
-          >
-            + Ajouter des contrats de maintenance (optionnel)
-          </button>
+      {/* Parallel steps — optional, available from step 4+ */}
+      {state.coproId && currentStep >= 4 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+          {!showContractsStep && (
+            <button
+              onClick={() => setShowContractsStep(true)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: '1px solid rgba(148, 163, 184, 0.08)',
+                background: 'rgba(148, 163, 184, 0.04)',
+                color: '#94a3b8',
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+              }}
+            >
+              + Contrats de maintenance
+            </button>
+          )}
+          {!showDocumentsStep && (
+            <button
+              onClick={() => setShowDocumentsStep(true)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: '1px solid rgba(148, 163, 184, 0.08)',
+                background: 'rgba(148, 163, 184, 0.04)',
+                color: '#94a3b8',
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+              }}
+            >
+              + Documents initiaux
+            </button>
+          )}
+          {!showCarnetStep && (
+            <button
+              onClick={() => setShowCarnetStep(true)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: '1px solid rgba(148, 163, 184, 0.08)',
+                background: 'rgba(148, 163, 184, 0.04)',
+                color: '#94a3b8',
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+              }}
+            >
+              + Carnet d&apos;entretien
+            </button>
+          )}
         </div>
       )}
 
@@ -108,6 +150,20 @@ export default function OnboardingPage() {
         <StepContracts
           coproId={state.coproId}
           onClose={() => setShowContractsStep(false)}
+        />
+      )}
+
+      {showDocumentsStep && state.coproId && (
+        <StepDocuments
+          coproId={state.coproId}
+          onClose={() => setShowDocumentsStep(false)}
+        />
+      )}
+
+      {showCarnetStep && state.coproId && (
+        <StepCarnetEntretien
+          coproId={state.coproId}
+          onClose={() => setShowCarnetStep(false)}
         />
       )}
 
