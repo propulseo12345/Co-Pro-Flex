@@ -58,7 +58,7 @@
 .bannerGreen .bannerLabel { color: #22c55e; }
 
 .bannerDetail {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -85,9 +85,9 @@
   gap: 8px;
   padding: 8px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 13px;
 }
 
@@ -95,14 +95,14 @@
   flex: 1;
   border: none;
   background: transparent;
-  color: #e2e8f0;
+  color: var(--text-main);
   outline: none;
   font-size: 13px;
   font-family: inherit;
 }
 
 .searchInput::placeholder {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .filterBtn {
@@ -111,9 +111,9 @@
   gap: 4px;
   padding: 8px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
@@ -123,7 +123,7 @@
 
 .filterBtn:hover {
   border-color: rgba(59, 130, 246, 0.4);
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .filterBtnActive {
@@ -136,9 +136,9 @@
 .filterSelect {
   padding: 8px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
@@ -154,12 +154,12 @@
 .filterSelect:hover,
 .filterSelect:focus {
   border-color: rgba(59, 130, 246, 0.4);
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .filterSelect option {
   background: var(--surface);
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .resultsSummary {
@@ -168,7 +168,7 @@
   gap: 12px;
   padding: 8px 0;
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .resultsBadges {
@@ -184,7 +184,7 @@
 /* ========== TABLE ========== */
 .tableContainer {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 14px;
   overflow-x: auto;
@@ -197,7 +197,7 @@
 }
 
 .table thead tr {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .table th {
@@ -207,7 +207,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .table th.thRight {
@@ -216,7 +216,7 @@
 
 .table td {
   padding: 10px 8px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .table tbody tr {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
   transition: background 0.15s ease;
   cursor: pointer;
 }
@@ -239,7 +239,7 @@
 }
 
 .tableMeta {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .tableCout {
@@ -255,7 +255,7 @@
 .tableActionBtn {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -265,8 +265,8 @@
 }
 
 .tableActionBtn:hover {
-  color: #e2e8f0;
-  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-main);
+  background: var(--border-light);
 }
 
 /* ========== BADGES ========== */
@@ -284,7 +284,7 @@
 .badgeRed { background: rgba(239, 68, 68, 0.1); color: #f87171; }
 .badgeAmber { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
 .badgeBlue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-.badgeGray { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+.badgeGray { background: var(--border-light); color: var(--text-secondary); }
 .badgePurple { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
 
 /* ========== DOMAIN TAGS ========== */
@@ -305,7 +305,7 @@
 
 .splitList {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 8px;
   max-height: 560px;
@@ -324,7 +324,7 @@
 }
 
 .splitItem:hover {
-  background: rgba(148, 163, 184, 0.04);
+  background: var(--border-light);
 }
 
 .splitItemActive {
@@ -353,7 +353,7 @@
 .splitItemName {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -361,7 +361,7 @@
 
 .splitItemMeta {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 2px;
 }
 
@@ -375,7 +375,7 @@
 /* ========== DETAIL PANEL ========== */
 .splitDetail {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px;
 }
@@ -389,7 +389,7 @@
 
 .detailRef {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -398,13 +398,13 @@
 .detailTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin-bottom: 4px;
 }
 
 .detailSub {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .detailStats {
@@ -416,7 +416,7 @@
 
 .detailStatCard {
   background: var(--bg-secondary);
-  border: 1px solid rgba(148, 163, 184, 0.06);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 12px;
   text-align: center;
@@ -432,7 +432,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 4px;
 }
 
@@ -447,13 +447,13 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 4px;
 }
 
 .infoItemValue {
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -470,7 +470,7 @@
   margin-bottom: 20px;
   padding: 16px 20px;
   background: var(--bg-secondary);
-  border: 1px solid rgba(148, 163, 184, 0.06);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
 }
 
@@ -479,7 +479,7 @@
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: #475569;
+  color: var(--text-tertiary);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -497,7 +497,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #334155;
+  background: var(--text-secondary);
   flex-shrink: 0;
 }
 
@@ -513,7 +513,7 @@
 .workflowLine {
   flex: 1;
   height: 2px;
-  background: #334155;
+  background: var(--text-secondary);
   margin: 0 6px;
   min-width: 16px;
 }
@@ -525,7 +525,7 @@
 /* ========== COST BAR ========== */
 .costBar {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 16px;
@@ -538,13 +538,13 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .costBarTotal {
   font-size: 20px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-variant-numeric: tabular-nums;
 }
 
@@ -563,7 +563,7 @@
 .costBarItemLabel {
   font-size: 10px;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 2px;
   text-align: center;
 }
@@ -601,12 +601,12 @@
 .syndicName {
   font-size: 14px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .syndicMeta {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-top: 2px;
 }
 
@@ -635,7 +635,7 @@
 
 .descriptionBoxText {
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
   line-height: 1.5;
 }
 
@@ -643,7 +643,7 @@
 .emptyState {
   padding: 40px 20px;
   text-align: center;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 14px;
 }
 

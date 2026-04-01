@@ -61,13 +61,13 @@
 .btnSecondary {
   composes: btn;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  color: #e2e8f0;
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
 }
 
 .btnSecondary:hover {
-  background: rgba(148, 163, 184, 0.1);
-  border-color: rgba(148, 163, 184, 0.25);
+  background: var(--border-light);
+  border-color: var(--border);
 }
 
 /* ── Period Bar ── */
@@ -83,7 +83,7 @@
   width: 100%;
   padding: 12px 16px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   cursor: pointer;
   transition: all 150ms;
@@ -92,18 +92,18 @@
 }
 
 .periodSelector:hover {
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: var(--border);
 }
 
 .periodLabel {
   font-size: 16px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .periodMeta {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-left: 4px;
 }
 
@@ -126,7 +126,7 @@
   left: 0;
   right: 0;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.4);
   z-index: 50;
@@ -143,7 +143,7 @@
   padding: 12px 16px;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid var(--border-light);
   cursor: pointer;
   transition: background 150ms;
   font-family: inherit;
@@ -169,12 +169,12 @@
 .periodOptionName {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .periodOptionDates {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-left: auto;
 }
 
@@ -185,7 +185,7 @@
   margin-bottom: 24px;
   padding: 4px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -246,7 +246,7 @@
 
 .tabIconBlue { background: var(--primary-light); }
 .tabIconPurple { background: rgba(167, 139, 250, 0.15); }
-.tabIconNeutral { background: rgba(148, 163, 184, 0.15); }
+.tabIconNeutral { background: var(--border-light); }
 
 .tabLabel { font-weight: 600; }
 

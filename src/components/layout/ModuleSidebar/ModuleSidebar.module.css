@@ -29,7 +29,7 @@
 .title {
   font-weight: 600;
   font-size: 13px;
-  color: var(--nav-text, #e2e8f0);
+  color: var(--nav-text, var(--text-main));
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -45,14 +45,14 @@
   border-radius: 6px;
   border: none;
   background: none;
-  color: var(--nav-text-muted, #8892a4);
+  color: var(--nav-text-muted, var(--text-secondary));
   cursor: pointer;
   transition: color 150ms, background-color 150ms;
   flex-shrink: 0;
 }
 
 .toggleBtn:hover {
-  color: var(--nav-text, #e2e8f0);
+  color: var(--nav-text, var(--text-main));
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -75,7 +75,7 @@
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--nav-text-muted, #8892a4);
+  color: var(--nav-text-muted, var(--text-secondary));
   text-decoration: none;
   transition: color 0.15s, background-color 0.15s;
   border-left: 2px solid transparent;
@@ -90,7 +90,7 @@
 }
 
 .item:hover {
-  color: var(--nav-text, #e2e8f0);
+  color: var(--nav-text, var(--text-main));
   background-color: rgba(255, 255, 255, 0.04);
 }
 
@@ -119,7 +119,7 @@
 }
 
 .settingsLink {
-  color: var(--nav-text-muted, #8892a4);
+  color: var(--nav-text-muted, var(--text-secondary));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,7 +129,7 @@
 }
 
 .settingsLink:hover {
-  color: var(--nav-text, #e2e8f0);
+  color: var(--nav-text, var(--text-main));
   background-color: rgba(255, 255, 255, 0.06);
 }
 

@@ -18,7 +18,7 @@
   justify-content: center;
   height: 100%;
   gap: 16px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .emptyIcon {
@@ -28,7 +28,7 @@
 .emptyTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .emptyText {
@@ -38,7 +38,7 @@
 /* Header */
 .header {
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .headerTop {
@@ -52,7 +52,7 @@
 .subject {
   font-size: 20px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
   line-height: 1.3;
 }
@@ -69,17 +69,17 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(148, 163, 184, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, transform 0.15s;
 }
 
 .actionButton:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
   transform: translateY(-1px);
 }
 
@@ -89,7 +89,7 @@
 }
 
 .actionButtonStar {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .actionButtonStarActive {
@@ -125,17 +125,17 @@
 .senderName {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .senderEmail {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .senderDate {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   flex-shrink: 0;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
@@ -144,7 +144,7 @@
 .recipients {
   margin-top: 8px;
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   padding-left: 52px;
   letter-spacing: 0.3px;
 }
@@ -154,12 +154,12 @@
   max-width: 640px;
   margin: 20px 24px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.06);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px 28px;
   font-size: 13px;
   line-height: 1.6;
-  color: #e2e8f0;
+  color: var(--text-main);
   word-wrap: break-word;
 }
 
@@ -181,7 +181,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 8px;
 }
 
@@ -197,15 +197,15 @@
   gap: 10px;
   padding: 10px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .attachmentCard:hover {
-  background: rgba(148, 163, 184, 0.06);
-  border-color: rgba(148, 163, 184, 0.12);
+  background: var(--border-light);
+  border-color: var(--border-light);
 }
 
 .attachmentIcon {
@@ -220,12 +220,12 @@
 .attachmentName {
   font-size: 12px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .attachmentSize {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .attachmentDownload {
@@ -237,7 +237,7 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -250,7 +250,7 @@
 /* Footer actions */
 .footer {
   padding: 16px 24px;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border-light);
   display: flex;
   gap: 8px;
 }
@@ -260,10 +260,10 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: rgba(148, 163, 184, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -271,8 +271,8 @@
 }
 
 .replyButton:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .replyButtonPrimary {

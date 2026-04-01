@@ -10,7 +10,7 @@
   align-items: center;
   gap: 12px;
   background: var(--surface);
-  border: 1.5px solid rgba(148, 163, 184, 0.08);
+  border: 1.5px solid var(--border-light);
   border-radius: 12px;
   padding: 12px 16px;
   cursor: pointer;
@@ -39,7 +39,7 @@
   font-size: 13px;
   font-weight: 700;
   color: white;
-  background: #334155;
+  background: var(--text-secondary);
   flex-shrink: 0;
 }
 
@@ -54,14 +54,14 @@
 
 .pillLabel {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .pillSolde {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .pillActive .pillSolde {

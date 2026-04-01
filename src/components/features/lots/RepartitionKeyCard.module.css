@@ -1,7 +1,7 @@
 .card {
   padding: 20px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s;
@@ -27,7 +27,7 @@
 .name {
   font-size: 15px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -49,19 +49,19 @@
 
 .metaItem {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .metaValue {
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-left: 4px;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .progressBar {
   height: 4px;
-  background: rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -92,7 +92,7 @@
 .detailPanel {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border-light);
 }
 
 .detailTable {
@@ -106,14 +106,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: left;
-  background: rgba(148, 163, 184, 0.04);
+  background: var(--border-light);
 }
 
 .detailTable td {
   padding: 6px 10px;
   font-size: 12px;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
 }

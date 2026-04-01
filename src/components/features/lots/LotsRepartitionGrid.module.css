@@ -1,6 +1,6 @@
 .grid {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -21,23 +21,23 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: left;
   white-space: nowrap;
-  background: rgba(148, 163, 184, 0.03);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .colTantiemes {
   text-align: right !important;
-  border-right: 2px solid rgba(148, 163, 184, 0.06) !important;
+  border-right: 2px solid var(--border-light) !important;
   padding-right: 20px !important;
 }
 
 /* Key header */
 .keyHeader {
   text-align: center !important;
-  border-left: 1px solid rgba(148, 163, 184, 0.05) !important;
+  border-left: 1px solid var(--border-light) !important;
   padding: 8px 12px !important;
   cursor: pointer;
   transition: background 0.15s;
@@ -64,14 +64,14 @@
 .keyHeaderName {
   font-size: 11px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   text-transform: none;
   letter-spacing: 0;
 }
 
 .keyHeaderEdit {
   opacity: 0;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 10px;
   transition: opacity 0.15s;
 }
@@ -100,8 +100,8 @@
   padding: 11px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .table tbody tr {
@@ -109,7 +109,7 @@
 }
 
 .table tbody tr:hover td {
-  background: rgba(148, 163, 184, 0.025);
+  background: var(--border-light);
 }
 
 .table tbody tr:last-child td {
@@ -132,8 +132,8 @@
   border-radius: 8px;
   font-size: 11px;
   font-weight: 500;
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  background: var(--border-light);
+  color: var(--text-secondary);
 }
 
 .badgeBlue {
@@ -144,18 +144,18 @@
 
 .badgeDim {
   composes: badge;
-  background: rgba(148, 163, 184, 0.06);
-  color: #64748b;
+  background: var(--border-light);
+  color: var(--text-tertiary);
 }
 
 .cellOwner {
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .cellOwnerSub {
   font-size: 10px;
-  color: #475569;
+  color: var(--text-tertiary);
   margin-top: 1px;
 }
 
@@ -165,15 +165,15 @@
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   font-size: 14px;
-  color: #e2e8f0;
-  border-right: 2px solid rgba(148, 163, 184, 0.06);
+  color: var(--text-main);
+  border-right: 2px solid var(--border-light);
   padding-right: 20px !important;
 }
 
 /* Key cells */
 .keyCell {
   text-align: center;
-  border-left: 1px solid rgba(148, 163, 184, 0.03);
+  border-left: 1px solid var(--border-light);
   padding: 8px 10px !important;
 }
 
@@ -190,7 +190,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 13px;
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
   font-weight: 500;
@@ -199,8 +199,8 @@
 }
 
 .weightInput:hover {
-  background: rgba(148, 163, 184, 0.04);
-  border-color: rgba(148, 163, 184, 0.1);
+  background: var(--border-light);
+  border-color: var(--border-light);
 }
 
 .weightInput:focus {
@@ -211,24 +211,24 @@
 
 .weightInputZero {
   composes: weightInput;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .weightInputZero:hover,
 .weightInputZero:focus {
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .weightPct {
   font-size: 10px;
-  color: #475569;
+  color: var(--text-tertiary);
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
   margin-top: 1px;
 }
 
 .emptyDash {
   composes: weightPct;
-  color: #1e293b;
+  color: var(--border);
 }
 
 /* Row edit */
@@ -245,7 +245,7 @@
 .rowEditBtn {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 4px;
   border-radius: 6px;
@@ -260,21 +260,21 @@
 
 /* Total row */
 .totalRow td {
-  background: rgba(148, 163, 184, 0.03) !important;
-  border-top: 2px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light) !important;
+  border-top: 2px solid var(--border-light);
   padding: 14px 16px !important;
   font-weight: 700;
 }
 
 .totalRow:hover td {
-  background: rgba(148, 163, 184, 0.03) !important;
+  background: var(--border-light) !important;
 }
 
 .totalLabel {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .totalNum {

@@ -2,7 +2,7 @@
   display: flex;
   gap: 2px;
   background: #111827;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 4px;
 }
@@ -16,7 +16,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -25,13 +25,13 @@
 }
 
 .tab:hover {
-  color: #e2e8f0;
+  color: var(--text-main);
   background: rgba(255, 255, 255, 0.04);
 }
 
 .active {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--border);
+  color: var(--text-main);
 }
 
 .count {
@@ -43,7 +43,7 @@
   padding: 0 6px;
   border-radius: 10px;
   background: #374151;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;

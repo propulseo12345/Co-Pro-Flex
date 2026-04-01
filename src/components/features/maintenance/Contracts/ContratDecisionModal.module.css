@@ -13,7 +13,7 @@
 /* Modal */
 .modal {
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     max-width: 620px;
@@ -28,7 +28,7 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 20px 24px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
     background: rgba(245, 158, 11, 0.08);
 }
 
@@ -70,13 +70,13 @@
     margin: 0;
     font-size: 16px;
     font-weight: 700;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .subtitle {
     margin: 4px 0 0;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .subtitle strong {
@@ -99,20 +99,20 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    color: #64748b;
+    color: var(--text-tertiary);
     transition: all 0.15s;
 }
 
 .closeBtn:hover {
-    background: rgba(148, 163, 184, 0.08);
-    color: #e2e8f0;
+    background: var(--border-light);
+    color: var(--text-main);
 }
 
 /* Infos contrat */
 .contratInfo {
     padding: 16px 24px;
     background: var(--bg-secondary);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .contratHeader {
@@ -123,27 +123,27 @@
 }
 
 .contratHeader svg {
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 .contratNom {
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .contratFournisseur {
     margin: 2px 0 0;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .contratMeta {
     display: flex;
     gap: 20px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 .contratMeta span {
@@ -160,12 +160,12 @@
 .choixIntro {
     margin: 0 0 20px;
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
 .choixIntro strong {
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .actionsGrid {
@@ -182,7 +182,7 @@
     gap: 14px;
     padding: 24px 16px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
@@ -226,13 +226,13 @@
     margin: 0 0 4px;
     font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .actionContent p {
     margin: 0;
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-tertiary);
     line-height: 1.4;
 }
 
@@ -263,12 +263,12 @@
 .suggestionBox li {
     margin-bottom: 4px;
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     line-height: 1.4;
 }
 
 .suggestionBox li strong {
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 /* Form Container */
@@ -284,7 +284,7 @@
     background: none;
     border: none;
     font-size: 13px;
-    color: #64748b;
+    color: var(--text-tertiary);
     cursor: pointer;
     transition: color 0.15s;
 }
@@ -300,7 +300,7 @@
     margin: 0 0 20px;
     font-size: 16px;
     font-weight: 700;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .formGroup {
@@ -312,7 +312,7 @@
     margin-bottom: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .input,
@@ -320,10 +320,10 @@
     width: 100%;
     padding: 10px 14px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     font-size: 14px;
-    color: #e2e8f0;
+    color: var(--text-main);
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -337,7 +337,7 @@
 .hint {
     margin: 6px 0 0;
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 /* Raisons Grid */
@@ -352,14 +352,14 @@
     gap: 10px;
     padding: 12px 14px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.15s;
 }
 
 .raisonOption:hover {
-    background: rgba(148, 163, 184, 0.04);
+    background: var(--border-light);
 }
 
 .raisonOption.selected {
@@ -376,14 +376,14 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .raisonOption span {
     display: block;
     margin-top: 2px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 .checkboxLabel {
@@ -392,7 +392,7 @@
     gap: 8px;
     cursor: pointer;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .checkboxLabel input {
@@ -405,7 +405,7 @@
 .summary {
     padding: 16px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     margin-bottom: 20px;
 }
@@ -414,7 +414,7 @@
     margin: 0 0 10px;
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .summary ul {
@@ -429,11 +429,11 @@
     gap: 8px;
     margin-bottom: 6px;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .summary li svg {
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 /* Warning Box */
@@ -457,7 +457,7 @@
 .warningBox p {
     margin: 0;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
@@ -467,7 +467,7 @@
     justify-content: flex-end;
     gap: 10px;
     padding-top: 16px;
-    border-top: 1px solid rgba(148, 163, 184, 0.08);
+    border-top: 1px solid var(--border-light);
 }
 
 /* Responsive */

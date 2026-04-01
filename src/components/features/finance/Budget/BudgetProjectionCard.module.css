@@ -1,7 +1,7 @@
 .card {
   padding: 20px 24px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   margin-bottom: 24px;
 }
@@ -16,7 +16,7 @@
 .title {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .badge {
@@ -66,7 +66,7 @@
   justify-content: space-between;
   margin-top: 8px;
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .stats {
@@ -80,7 +80,7 @@
 
 .statLabel {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 2px;
 }
 
@@ -88,7 +88,7 @@
   font-size: 16px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 @media (max-width: 768px) {

@@ -7,7 +7,7 @@
 .card {
   padding: 20px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -18,10 +18,10 @@
   margin: 0 0 16px;
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
-.cardTitle svg { color: #64748b; }
+.cardTitle svg { color: var(--text-tertiary); }
 
 .field {
   display: flex;
@@ -37,13 +37,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .fieldValue {
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .fieldValueMono {
@@ -64,13 +64,13 @@
 
 .emptyNote {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-tertiary);
   font-style: italic;
 }
 
 .loanItem {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .loanItem:last-child {
@@ -81,11 +81,11 @@
 .loanLabel {
   font-size: 12px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin-bottom: 4px;
 }
 
 .loanMeta {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }

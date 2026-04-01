@@ -200,7 +200,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(148, 163, 184, 0.2);
+  background: var(--border);
   color: var(--text-tertiary);
   flex-shrink: 0;
   transition: all 0.3s;
@@ -218,7 +218,7 @@
 }
 
 .stepNext {
-  background: rgba(148, 163, 184, 0.1);
+  background: var(--border-light);
   color: var(--text-tertiary);
 }
 
@@ -257,7 +257,7 @@
   top: 56px;
   width: 2px;
   height: calc(100% - 8px);
-  background: rgba(148, 163, 184, 0.2);
+  background: var(--border);
 }
 
 .connectorCompleted {
@@ -403,7 +403,7 @@
 .timelineLine {
   width: 2px;
   flex: 1;
-  background: rgba(148, 163, 184, 0.2);
+  background: var(--border);
   margin-top: 0.5rem;
   min-height: 40px;
 }

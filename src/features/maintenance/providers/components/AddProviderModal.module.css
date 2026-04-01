@@ -11,7 +11,7 @@
 
 .modal {
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     width: 100%;
@@ -27,14 +27,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .modalHeader h2 {
     font-size: 17px;
     font-weight: 700;
     margin: 0;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .modalClose {
@@ -48,13 +48,13 @@
     border-radius: 8px;
     font-size: 20px;
     cursor: pointer;
-    color: #64748b;
+    color: var(--text-tertiary);
     transition: all 0.15s;
 }
 
 .modalClose:hover {
-    background: rgba(148, 163, 184, 0.08);
-    color: #e2e8f0;
+    background: var(--border-light);
+    color: var(--text-main);
 }
 
 .modalContent {
@@ -77,7 +77,7 @@
 .formGroup label {
     font-size: 12px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
@@ -86,18 +86,18 @@
 .formGroup select,
 .formGroup textarea {
     padding: 10px 14px;
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
     background: var(--bg-secondary);
-    color: #e2e8f0;
+    color: var(--text-main);
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .formGroup input::placeholder,
 .formGroup textarea::placeholder {
-    color: #475569;
+    color: var(--text-tertiary);
 }
 
 .formGroup select {
@@ -110,7 +110,7 @@
 
 .formGroup select option {
     background: var(--surface);
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .formGroup input:focus,
@@ -136,7 +136,7 @@
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 6px 8px;
     border-radius: 6px;
@@ -144,8 +144,8 @@
 }
 
 .domaineCheckbox:hover {
-    background: rgba(148, 163, 184, 0.04);
-    color: #e2e8f0;
+    background: var(--border-light);
+    color: var(--text-main);
 }
 
 .domaineCheckbox input {
@@ -156,7 +156,7 @@
 }
 
 .domaineCheckbox input:checked + span {
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .inputError {
@@ -173,7 +173,7 @@
     justify-content: flex-end;
     gap: 10px;
     padding-top: 20px;
-    border-top: 1px solid rgba(148, 163, 184, 0.08);
+    border-top: 1px solid var(--border-light);
     margin-top: 20px;
 }
 

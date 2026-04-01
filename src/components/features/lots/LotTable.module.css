@@ -1,7 +1,7 @@
 .tableContainer {
   overflow-x: auto;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -16,17 +16,17 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: left;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
 }
 
 .table th:hover {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .sortIcon {
@@ -44,8 +44,8 @@
   padding: 10px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .table tbody tr {
@@ -53,7 +53,7 @@
 }
 
 .table tbody tr:hover {
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
 }
 
 .table tbody tr:last-child td {
@@ -77,8 +77,8 @@
   border-radius: 8px;
   font-size: 11px;
   font-weight: 500;
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  background: var(--border-light);
+  color: var(--text-secondary);
 }
 
 .tantiemes {
@@ -93,10 +93,10 @@
 }
 
 .ownerName {
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .noOwner {
-  color: #64748b;
+  color: var(--text-tertiary);
   font-style: italic;
 }

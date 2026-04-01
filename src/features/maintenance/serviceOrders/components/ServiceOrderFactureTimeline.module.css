@@ -4,7 +4,7 @@
 
 .factureCard {
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 24px;
 }
@@ -15,10 +15,10 @@
     gap: 8px;
     font-size: 16px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
     margin: 0 0 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .noFacture {
@@ -27,7 +27,7 @@
     align-items: center;
     justify-content: center;
     padding: 32px;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-align: center;
 }
 
@@ -50,14 +50,14 @@
 .factureLabel {
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .factureValue {
     font-size: 15px;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .factureLink {
@@ -76,7 +76,7 @@
 .factureMontant {
     font-size: 16px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
     font-variant-numeric: tabular-nums;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .factureStatutEnCours {
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 /* Timeline */
@@ -124,7 +124,7 @@
 
 .card {
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 24px;
 }
@@ -135,10 +135,10 @@
     gap: 8px;
     font-size: 16px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
     margin: 0 0 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .timeline {
@@ -155,7 +155,7 @@
     left: 10%;
     right: 10%;
     height: 2px;
-    background: rgba(148, 163, 184, 0.12);
+    background: var(--border-light);
     transform: translateY(-50%);
     z-index: 0;
 }
@@ -178,8 +178,8 @@
     height: 40px;
     border-radius: 50%;
     background: var(--surface);
-    border: 2px solid rgba(148, 163, 184, 0.12);
-    color: #94a3b8;
+    border: 2px solid var(--border-light);
+    color: var(--text-secondary);
 }
 
 .timelineStepCompleted .timelineIcon {
@@ -201,13 +201,13 @@
 .timelineLabel {
     font-size: 13px;
     font-weight: 500;
-    color: #e2e8f0;
+    color: var(--text-main);
     text-align: center;
 }
 
 .timelineDate {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     text-align: center;
 }
 

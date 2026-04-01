@@ -13,28 +13,28 @@
   gap: 8px;
   padding: 8px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 13px;
 }
 
 .searchBox svg {
   flex-shrink: 0;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .searchInput {
   flex: 1;
   border: none;
   background: transparent;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 13px;
   outline: none;
 }
 
 .searchInput::placeholder {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .filterBtn {
@@ -43,9 +43,9 @@
   gap: 4px;
   padding: 8px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -54,7 +54,7 @@
 
 .filterBtn:hover {
   border-color: rgba(59, 130, 246, 0.4);
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .filterBtnActive {

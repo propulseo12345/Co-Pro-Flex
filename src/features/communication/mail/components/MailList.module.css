@@ -7,13 +7,13 @@
   flex-direction: column;
   height: 100%;
   background: var(--bg-secondary);
-  border-right: 1px solid rgba(148, 163, 184, 0.08);
+  border-right: 1px solid var(--border-light);
 }
 
 /* Search bar */
 .searchBar {
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .searchWrapper {
@@ -25,7 +25,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: var(--text-tertiary);
   pointer-events: none;
 }
 
@@ -33,15 +33,15 @@
   width: 100%;
   padding: 8px 12px 8px 36px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .searchInput::placeholder {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .searchInput:focus {
@@ -62,15 +62,15 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
   border-left: 3px solid transparent;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .mailItem:hover {
-  background: rgba(148, 163, 184, 0.03);
-  border-left-color: rgba(148, 163, 184, 0.15);
+  background: var(--border-light);
+  border-left-color: var(--border-light);
 }
 
 .mailItemSelected {
@@ -125,7 +125,7 @@
 .mailFrom {
   font-size: 13px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -133,7 +133,7 @@
 
 .mailFromUnread {
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .mailMeta {
@@ -145,19 +145,19 @@
 
 .mailDate {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   white-space: nowrap;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .attachmentIcon {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .mailSubject {
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,7 +170,7 @@
 
 .mailPreview {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 2px 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -183,7 +183,7 @@
   border: none;
   padding: 4px;
   cursor: pointer;
-  color: #475569;
+  color: var(--text-tertiary);
   transition: color 0.15s, transform 0.15s;
   flex-shrink: 0;
 }
@@ -222,7 +222,7 @@
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: center;
   gap: 12px;
 }
@@ -234,7 +234,7 @@
 .emptyTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .emptyText {

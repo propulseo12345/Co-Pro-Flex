@@ -1,6 +1,6 @@
 .partieSection {
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .partieHeader {
@@ -16,7 +16,7 @@
 .partieTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .partieTotal {
@@ -24,7 +24,7 @@
   font-weight: 700;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .partieTotalDanger {
@@ -42,19 +42,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .partieRow:hover {
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
 }
 
 .partieRowLabel {
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -65,20 +65,20 @@
   font-weight: 600;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .partieRowAmountZero {
   composes: partieRowAmount;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .partieRowDetail {
   padding: 8px 12px 8px 32px;
-  background: rgba(148, 163, 184, 0.02);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .detailTable {
@@ -90,7 +90,7 @@
 .detailTable td {
   padding: 3px 8px;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .detailTable td:last-child {
@@ -103,13 +103,13 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .summaryCard {
   padding: 12px 16px;
   background: var(--bg-secondary);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   text-align: center;
 }
@@ -120,7 +120,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 4px;
 }
 
@@ -130,7 +130,7 @@
   font-weight: 700;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .summaryValueDanger {
@@ -156,13 +156,13 @@
 
 .annexeSection {
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .annexeTitle {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0 0 12px;
   display: flex;
   align-items: center;
@@ -170,7 +170,7 @@
 }
 
 .annexeTitle svg {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .annexeTable {
@@ -184,17 +184,17 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: left;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .annexeTable td {
   padding: 6px 10px;
   font-size: 12px;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .annexeTable td.mono {
@@ -205,14 +205,14 @@
 
 .emptyNote {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-tertiary);
   font-style: italic;
   padding: 8px 0;
 }
 
 .headerSection {
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .headerGrid {
@@ -232,19 +232,19 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .headerValue {
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .headerSectionTitle {
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 12px 0 8px;
   display: flex;
   align-items: center;
@@ -252,7 +252,7 @@
 }
 
 .headerSectionTitle svg {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .jsonSection {
@@ -264,18 +264,18 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(148, 163, 184, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .jsonToggle:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .jsonContent {
@@ -287,5 +287,5 @@
   font-family: 'SF Mono', 'Fira Code', monospace;
   overflow-x: auto;
   max-height: 400px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }

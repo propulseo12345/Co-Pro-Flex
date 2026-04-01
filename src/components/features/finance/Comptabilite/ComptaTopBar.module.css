@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 32px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid var(--border-light);
   background: #161822;
   position: sticky;
   top: 0;
@@ -61,9 +61,9 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  border: 1px solid var(--border-light);
   background: none;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -73,8 +73,8 @@
 }
 
 .btnIcon:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .btnPrimary {

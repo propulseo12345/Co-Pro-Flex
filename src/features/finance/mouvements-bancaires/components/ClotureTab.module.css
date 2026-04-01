@@ -18,7 +18,7 @@
 
 .card {
   background: #111827;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -48,7 +48,7 @@
 .cardTitle {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -88,7 +88,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .checkOk {
@@ -141,7 +141,7 @@
 }
 
 .noData {
-  color: #475569;
+  color: var(--text-tertiary);
   font-size: 0.75rem;
   text-align: center;
   padding: 8px 0;

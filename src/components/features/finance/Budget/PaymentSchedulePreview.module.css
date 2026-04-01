@@ -6,7 +6,7 @@
   flex-direction: column;
   gap: 0;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -17,8 +17,8 @@
   grid-template-columns: 40px 1.5fr 0.7fr 1fr 1fr;
   gap: 0;
   padding: 8px 12px;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .headerCell {
@@ -26,7 +26,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-tertiary);
   padding: 0 4px;
 }
 
@@ -37,7 +37,7 @@
   gap: 0;
   padding: 6px 12px;
   align-items: center;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid var(--border-light);
   transition: background 150ms;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .row:hover {
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
 }
 
 .retentionRow {
@@ -60,7 +60,7 @@
 /* ── Cells ── */
 .cell {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-main);
   padding: 0 4px;
   display: flex;
   align-items: center;
@@ -69,13 +69,13 @@
 
 .cellIndex {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .cellAmount {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-variant-numeric: tabular-nums;
 }
 
@@ -92,9 +92,9 @@
 /* ── Inline inputs ── */
 .inlineInput {
   background: #161822;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border-light);
   border-radius: 4px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 12px;
   padding: 3px 6px;
   width: 100%;
@@ -107,7 +107,7 @@
 }
 
 .inlineInput::placeholder {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .percentInput {
@@ -124,7 +124,7 @@
 
 .readonlyPercent {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -133,7 +133,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #475569;
+  color: var(--text-tertiary);
   padding: 2px;
   border-radius: 4px;
   display: flex;
@@ -152,7 +152,7 @@
   align-items: center;
   gap: 6px;
   background: none;
-  border: 1px dashed rgba(148, 163, 184, 0.15);
+  border: 1px dashed var(--border-light);
   border-radius: 6px;
   color: #60a5fa;
   font-size: 12px;
@@ -173,8 +173,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  background: rgba(148, 163, 184, 0.04);
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-top: 1px solid var(--border-light);
   font-size: 12px;
 }
 
@@ -182,11 +182,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .summaryLabel {
-  color: #64748b;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 

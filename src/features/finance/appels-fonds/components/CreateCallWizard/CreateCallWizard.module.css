@@ -173,7 +173,7 @@
 
 .btnPrev:hover {
   color: var(--text-main);
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: var(--border);
 }
 
 .btnNext {
@@ -294,7 +294,7 @@
 }
 
 .radioCard:hover {
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: var(--border);
 }
 
 .radioCardSelected {

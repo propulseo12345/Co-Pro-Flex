@@ -1,6 +1,6 @@
 .card {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px;
   cursor: pointer;
@@ -63,7 +63,7 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .roleBadge {
@@ -82,7 +82,7 @@
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .categoryBadge {
@@ -112,14 +112,14 @@
 .title {
   font-size: 15px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
 
 .content {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0 0 12px 0;
   display: -webkit-box;
@@ -170,7 +170,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid rgba(148, 163, 184, 0.04);
+  border-top: 1px solid var(--border-light);
 }
 
 .interactionBtn {
@@ -179,18 +179,18 @@
   gap: 6px;
   padding: 6px 12px;
   background: transparent;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .interactionBtn:hover {
-  background: rgba(148, 163, 184, 0.06);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .interactionBtn.liked {

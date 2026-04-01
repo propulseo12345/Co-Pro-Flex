@@ -5,7 +5,7 @@
   align-items: flex-start;
   padding: 20px 24px;
   background: #161822;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   margin-bottom: 24px;
 }
@@ -14,13 +14,13 @@
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .topBarLeft p {
   margin: 4px 0 0;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .topBarActions {
@@ -33,17 +33,17 @@
   display: flex;
   align-items: center;
   padding: 8px;
-  background: rgba(148, 163, 184, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .refreshBtn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 @keyframes spin {
@@ -59,7 +59,7 @@
   display: inline-flex;
   padding: 3px;
   background: var(--bg-secondary);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   margin-bottom: 24px;
 }
@@ -71,19 +71,19 @@
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
 }
 
 .tab:hover {
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .tabActive {
   background: var(--surface);
-  color: #e2e8f0;
+  color: var(--text-main);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   font-weight: 600;
 }
@@ -99,7 +99,7 @@
 .kpiCard {
   padding: 16px 20px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -109,7 +109,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 6px;
 }
 
@@ -117,7 +117,7 @@
   display: block;
   font-size: 22px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .kpiValueSuccess {
@@ -149,7 +149,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: var(--text-tertiary);
   pointer-events: none;
 }
 
@@ -157,20 +157,20 @@
   width: 100%;
   padding: 8px 12px 8px 36px;
   background: var(--bg-secondary);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s;
 }
 
 .searchInput:focus {
-  border-color: rgba(148, 163, 184, 0.12);
+  border-color: var(--border-light);
 }
 
 .searchInput::placeholder {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .clearButton {
@@ -181,7 +181,7 @@
   background: none;
   border: none;
   font-size: 16px;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   width: 20px;
   height: 20px;
@@ -192,8 +192,8 @@
 }
 
 .clearButton:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .actionButtons {
@@ -207,10 +207,10 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: rgba(148, 163, 184, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -218,8 +218,8 @@
 }
 
 .ghostBtn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .primaryBtn {
@@ -247,7 +247,7 @@
 .tableContainer {
   overflow-x: auto;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -263,10 +263,10 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: left;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
   white-space: nowrap;
 }
 
@@ -274,8 +274,8 @@
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .table tbody tr {
@@ -283,7 +283,7 @@
 }
 
 .table tbody tr:hover {
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
 }
 
 .table tbody tr:last-child td {
@@ -324,7 +324,7 @@
 
 .noFonction,
 .noData {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .soldePositif {
@@ -342,7 +342,7 @@
 }
 
 .soldeNeutral {
-  color: #e2e8f0;
+  color: var(--text-main);
   font-weight: 500;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
@@ -352,13 +352,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .contactCell svg {
   flex-shrink: 0;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .actionCell {
@@ -371,7 +371,7 @@
 .moreButton {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 4px;
   border-radius: 6px;
@@ -382,15 +382,15 @@
 }
 
 .moreButton:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 /* Action Menu */
 .actionMenu {
   position: fixed;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   z-index: 1000;
@@ -408,13 +408,13 @@
   border: none;
   text-align: left;
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .actionMenuItem:hover {
-  background: rgba(148, 163, 184, 0.06);
+  background: var(--border-light);
 }
 
 .actionMenuItemDanger {
@@ -428,7 +428,7 @@
 .emptyState {
   text-align: center;
   padding: 40px 20px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 /* Modal */
@@ -445,7 +445,7 @@
 
 .modal {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
@@ -458,14 +458,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .modalHeader h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .modalClose {
@@ -476,15 +476,15 @@
   height: 2rem;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-secondary);
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.15s;
 }
 
 .modalClose:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .modalContent {
@@ -497,7 +497,7 @@
   gap: 12px;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border-light);
 }
 
 .formGrid {
@@ -521,22 +521,22 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .formGroup input {
   padding: 8px 12px;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 13px;
   background: var(--bg-secondary);
-  color: #e2e8f0;
+  color: var(--text-main);
   transition: border-color 0.15s;
   outline: none;
 }
 
 .formGroup input:focus {
-  border-color: rgba(148, 163, 184, 0.12);
+  border-color: var(--border-light);
 }
 
 .formGroup input:disabled {

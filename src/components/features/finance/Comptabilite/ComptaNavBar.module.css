@@ -1,7 +1,7 @@
 /* ── Horizontal nav bar under TopBar ── */
 .navbar {
   padding: 0 32px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid var(--border-light);
   background: #161822;
 }
 
@@ -18,7 +18,7 @@
   padding: 10px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -29,7 +29,7 @@
 }
 
 .tab:hover {
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .active {
@@ -58,7 +58,7 @@
   left: 0;
   min-width: 240px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
   padding: 4px;
@@ -71,7 +71,7 @@
   text-align: left;
   padding: 8px 12px;
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: none;
   border: none;
   border-radius: 6px;
@@ -80,8 +80,8 @@
 }
 
 .dropdownItem:hover {
-  background: rgba(148, 163, 184, 0.06);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .dropdownItemActive {

@@ -3895,7 +3895,7 @@
     border-radius: 0.25rem;
     border: none;
     background: transparent;
-    color: var(--text-tertiary, #475569);
+    color: var(--text-tertiary, var(--text-tertiary));
     cursor: pointer;
     display: flex;
     align-items: center;

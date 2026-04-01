@@ -10,7 +10,7 @@
   align-items: center;
   gap: 12px;
   padding: 48px 20px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
 }
 
@@ -24,7 +24,7 @@
   background: #111827;
   border-radius: 8px;
   padding: 4px;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border);
 }
 
 .filterBtn {
@@ -32,7 +32,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
@@ -40,18 +40,18 @@
 }
 
 .filterBtn:hover {
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .filterActive {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--border);
+  color: var(--text-main);
 }
 
 .tableWrapper {
   overflow-x: auto;
   background: #111827;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border);
   border-radius: 10px;
 }
 
@@ -65,16 +65,16 @@
   text-align: left;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--border);
 }
 
 .table td {
   padding: 10px 12px;
   font-size: 0.8125rem;
-  color: #e2e8f0;
+  color: var(--text-main);
   border-bottom: 1px solid rgba(30, 41, 59, 0.5);
 }
 
@@ -97,7 +97,7 @@
 
 .dateCell {
   white-space: nowrap;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
@@ -142,8 +142,8 @@
   padding: 4px 24px 4px 8px;
   border: 1px solid #374151;
   border-radius: 4px;
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--border);
+  color: var(--text-main);
   font-size: 0.75rem;
   cursor: pointer;
   appearance: none;
@@ -153,7 +153,7 @@
 .selectIcon {
   position: absolute;
   right: 6px;
-  color: #64748b;
+  color: var(--text-tertiary);
   pointer-events: none;
 }
 
@@ -175,8 +175,8 @@
 }
 
 .confidence_basse {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  background: var(--border-light);
+  color: var(--text-secondary);
 }
 
 .actionBar {
@@ -185,12 +185,12 @@
   justify-content: space-between;
   padding: 12px 16px;
   background: #111827;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border);
   border-radius: 10px;
 }
 
 .actionCount {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.8125rem;
 }
 

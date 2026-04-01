@@ -51,11 +51,11 @@
 }
 
 .zebraRow {
-    background-color: var(--background-secondary, #1e293b);
+    background-color: var(--background-secondary, var(--border));
 }
 
 .zebraRow:hover {
-    background-color: var(--background-tertiary, #334155);
+    background-color: var(--background-tertiary, var(--text-secondary));
 }
 
 .accountInfo {
@@ -461,9 +461,9 @@
 }
 
 .dataRow { transition: background-color 0.15s ease; }
-.dataRow:hover { background-color: var(--background-tertiary, #334155); }
-.dataRow.zebraRow { background-color: var(--background-secondary, #1e293b); }
-.dataRow.zebraRow:hover { background-color: var(--background-tertiary, #334155); }
+.dataRow:hover { background-color: var(--background-tertiary, var(--text-secondary)); }
+.dataRow.zebraRow { background-color: var(--background-secondary, var(--border)); }
+.dataRow.zebraRow:hover { background-color: var(--background-tertiary, var(--text-secondary)); }
 
 .groupHeader {
     cursor: pointer;

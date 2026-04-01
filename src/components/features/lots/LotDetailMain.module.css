@@ -7,7 +7,7 @@
 .card {
   padding: 24px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -18,10 +18,10 @@
   margin: 0 0 16px;
   font-size: 15px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
-.cardTitle svg { color: #64748b; }
+.cardTitle svg { color: var(--text-tertiary); }
 
 .repTable {
   width: 100%;
@@ -34,17 +34,17 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-align: left;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .repTable td {
   padding: 8px 12px;
   font-size: 13px;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .repTable tbody tr:last-child td { border-bottom: none; }
@@ -56,7 +56,7 @@
 
 .barContainer {
   height: 6px;
-  background: rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
   border-radius: 3px;
   overflow: hidden;
   min-width: 100px;
@@ -71,12 +71,12 @@
 
 .pct {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .emptyNote {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-tertiary);
   font-style: italic;
 }

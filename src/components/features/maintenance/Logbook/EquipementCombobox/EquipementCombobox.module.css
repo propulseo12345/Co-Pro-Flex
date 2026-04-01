@@ -8,7 +8,7 @@
     margin-bottom: 6px;
     font-size: 10px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -30,10 +30,10 @@
 .input {
     width: 100%;
     padding: 10px 2.5rem 10px 2.5rem;
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-main);
     background-color: var(--bg-secondary);
     font-family: inherit;
     transition: all 150ms;
@@ -52,7 +52,7 @@
 }
 
 .input::placeholder {
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 .inputError .input {
@@ -114,7 +114,7 @@
     padding: 4px;
     list-style: none;
     background-color: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -175,7 +175,7 @@
 .optionLabel {
     flex: 1;
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

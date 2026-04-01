@@ -11,7 +11,7 @@
   padding: 3px;
   background: var(--surface);
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
 }
 
 .viewMode {
@@ -19,7 +19,7 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   border: none;
   background: none;
@@ -27,7 +27,7 @@
 }
 
 .viewMode:hover {
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .active {
@@ -46,9 +46,9 @@
   gap: 8px;
   padding: 7px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border-light);
   background: var(--surface);
-  color: #94a3b8;
+  color: var(--text-secondary);
   width: 220px;
 }
 
@@ -56,21 +56,21 @@
   border: none;
   background: none;
   outline: none;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 13px;
   flex: 1;
 }
 
 .searchInput input::placeholder {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .filterSelect {
   padding: 7px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border-light);
   background: var(--surface);
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
 }

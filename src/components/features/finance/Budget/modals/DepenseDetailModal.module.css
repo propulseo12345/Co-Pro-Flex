@@ -13,7 +13,7 @@
 /* ── Modal container ── */
 .modal {
   background: #161822;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--border-light);
   border-radius: 16px;
   width: 100%;
   max-width: 560px;
@@ -28,7 +28,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .headerLeft {
@@ -40,7 +40,7 @@
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -50,7 +50,7 @@
   border-radius: 8px;
   border: none;
   background: none;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -59,8 +59,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 /* ── Body ── */
@@ -75,7 +75,7 @@
 .amountCard {
   padding: 20px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   text-align: center;
 }
@@ -84,7 +84,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 4px;
 }
 
@@ -112,13 +112,13 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .infoValue {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .infoValueSuccess {
@@ -160,7 +160,7 @@
 
 .rejectText {
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -194,7 +194,7 @@
 
 .attachmentSub {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 2px;
 }
 
@@ -202,14 +202,14 @@
 .rejectForm {
   padding: 16px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
 }
 
 .rejectFormLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin-bottom: 8px;
   display: block;
 }
@@ -219,15 +219,15 @@
   min-height: 80px;
   padding: 10px 12px;
   background: #161822;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 13px;
   resize: vertical;
 }
 
 .rejectTextarea::placeholder {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .rejectActions {
@@ -242,7 +242,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border-light);
 }
 
 .footerLeft {
@@ -271,13 +271,13 @@
 
 .btnSecondary {
   background: none;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  color: #94a3b8;
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
 }
 
 .btnSecondary:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
+  background: var(--border-light);
+  color: var(--text-main);
 }
 
 .btnPrimary {
@@ -326,8 +326,8 @@
 }
 
 .statusBrouillon {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  background: var(--border-light);
+  color: var(--text-secondary);
 }
 
 .statusEnAttente {

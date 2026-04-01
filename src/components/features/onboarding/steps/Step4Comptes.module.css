@@ -14,20 +14,20 @@
 .card {
   padding: 20px;
   border-radius: 12px;
-  background: rgba(148, 163, 184, 0.03);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
 }
 
 .cardTitle {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-main, #e2e8f0);
+  color: var(--text-main, var(--text-main));
   margin-bottom: 4px;
 }
 
 .cardDesc {
   font-size: 11px;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary, var(--text-secondary));
   margin-bottom: 16px;
 }
 
@@ -58,7 +58,7 @@
 .label {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-tertiary, #64748b);
+  color: var(--text-tertiary, var(--text-tertiary));
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -66,9 +66,9 @@
 .input {
   padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(148, 163, 184, 0.04);
-  color: var(--text-main, #e2e8f0);
+  border: 1px solid var(--border-light);
+  background: var(--border-light);
+  color: var(--text-main, var(--text-main));
   font-size: 13px;
   font-family: inherit;
   outline: none;
@@ -80,7 +80,7 @@
 }
 
 .input::placeholder {
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, var(--text-tertiary));
 }
 
 .inputMoney {
@@ -94,15 +94,15 @@
   align-items: center;
   margin-top: 32px;
   padding-top: 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  border-top: 1px solid var(--border-light);
 }
 
 .btnBack {
   padding: 10px 20px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  background: rgba(148, 163, 184, 0.04);
-  color: var(--text-secondary, #94a3b8);
+  border: 1px solid var(--border-light);
+  background: var(--border-light);
+  color: var(--text-secondary, var(--text-secondary));
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
@@ -111,8 +111,8 @@
 }
 
 .btnBack:hover {
-  background: rgba(148, 163, 184, 0.08);
-  color: var(--text-main, #e2e8f0);
+  background: var(--border-light);
+  color: var(--text-main, var(--text-main));
 }
 
 .btnFinish {

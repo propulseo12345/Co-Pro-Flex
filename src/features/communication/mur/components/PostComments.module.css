@@ -13,7 +13,7 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -27,7 +27,7 @@
   display: flex;
   gap: 10px;
   padding: 12px;
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
   border-radius: 8px;
 }
 
@@ -65,7 +65,7 @@
 .commentAuthor {
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .commentRole {
@@ -79,12 +79,12 @@
 
 .commentDate {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .commentText {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin: 0;
 }
@@ -94,18 +94,18 @@
   display: flex;
   gap: 10px;
   padding-top: 12px;
-  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  border-top: 1px solid var(--border-light);
 }
 
 .newCommentInput {
   flex: 1;
   padding: 10px 14px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 13px;
   font-family: inherit;
-  color: #e2e8f0;
+  color: var(--text-main);
   resize: none;
   min-height: 40px;
   max-height: 100px;
@@ -113,7 +113,7 @@
 }
 
 .newCommentInput::placeholder {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 .newCommentInput:focus {

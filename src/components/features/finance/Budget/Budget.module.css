@@ -2198,7 +2198,7 @@
 }
 
 .etapeBadgeAFaire {
-    background: rgba(148, 163, 184, 0.15);
+    background: var(--border-light);
     color: var(--text-secondary);
 }
 

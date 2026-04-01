@@ -12,7 +12,7 @@
   gap: var(--space-md);
   padding: var(--space-md) 20px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base);
@@ -41,7 +41,7 @@
 
 .label {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
@@ -51,7 +51,7 @@
   font-size: 22px;
   font-weight: 700;
   line-height: 1.2;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-variant-numeric: tabular-nums;
 }
 
@@ -75,7 +75,7 @@
   gap: 12px;
   padding: 10px 16px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-md);
   font-size: var(--text-sm);
@@ -159,5 +159,5 @@
 .badgeGreen { background: rgba(52, 211, 153, 0.2); color: var(--success); }
 .badgeAmber { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
 .badgeRed { background: rgba(248, 113, 113, 0.2); color: var(--danger); }
-.badgeNeutral { background: rgba(148, 163, 184, 0.2); color: var(--text-tertiary); }
+.badgeNeutral { background: var(--border); color: var(--text-tertiary); }
 .badgePurple { background: rgba(167, 139, 250, 0.15); color: #A78BFA; }

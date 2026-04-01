@@ -489,7 +489,7 @@
 
 .modalHeader {
     padding: var(--space-xl);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -531,7 +531,7 @@
     gap: var(--space-md);
     justify-content: flex-end;
     padding: var(--space-xl);
-    border-top: 1px solid rgba(148, 163, 184, 0.08);
+    border-top: 1px solid var(--border-light);
 }
 
 /* Mouvement Info */
@@ -541,7 +541,7 @@
     gap: var(--space-md);
     padding: var(--space-lg);
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     margin-bottom: var(--space-xl);
 }
@@ -555,7 +555,7 @@
 .infoLabel {
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -563,7 +563,7 @@
 .infoValue {
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
     font-variant-numeric: tabular-nums;
 }
 
@@ -578,17 +578,17 @@
 .formGroup label {
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .formGroup select {
     padding: var(--space-md);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     background: var(--bg-secondary);
-    color: #e2e8f0;
+    color: var(--text-main);
     font-size: 13px;
     transition: all var(--transition-base);
 }
@@ -612,9 +612,9 @@
 .cancelButton {
     padding: var(--space-md) var(--space-xl);
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
-    color: #e2e8f0;
+    color: var(--text-main);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -1040,7 +1040,7 @@
 .suggestionCard {
     padding: var(--space-md);
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     cursor: pointer;
     transition: all var(--transition-base);
@@ -1065,7 +1065,7 @@
 }
 
 .suggestionCardBasse {
-    border-left: 4px solid #94a3b8;
+    border-left: 4px solid var(--text-secondary);
 }
 
 .suggestionCardHeader {
@@ -1096,8 +1096,8 @@
 }
 
 .suggestionConfianceBasse {
-    background: rgba(148, 163, 184, 0.1);
-    color: #94a3b8;
+    background: var(--border-light);
+    color: var(--text-secondary);
 }
 
 .suggestionType {
@@ -1111,7 +1111,7 @@
 .suggestionCompte {
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
     margin-bottom: var(--space-xs);
     font-family: 'SF Mono', 'Fira Code', monospace;
     font-variant-numeric: tabular-nums;
@@ -1119,7 +1119,7 @@
 
 .suggestionRaison {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
@@ -1148,7 +1148,7 @@
 /* Catégorisation manuelle */
 .manualCategorisation {
     padding-top: var(--space-lg);
-    border-top: 1px solid rgba(148, 163, 184, 0.08);
+    border-top: 1px solid var(--border-light);
 }
 
 .manualTitle {
@@ -1453,8 +1453,8 @@
 }
 
 .syncStatusDeconnecte {
-    background: rgba(148, 163, 184, 0.2);
-    color: #94a3b8;
+    background: var(--border);
+    color: var(--text-secondary);
 }
 
 .syncStatusErreur {
@@ -1518,13 +1518,13 @@
 }
 
 .syncModeManuel {
-    background: rgba(148, 163, 184, 0.2);
-    color: #94a3b8;
-    border-color: rgba(148, 163, 184, 0.5);
+    background: var(--border);
+    color: var(--text-secondary);
+    border-color: var(--border);
 }
 
 .syncModeManuel:hover {
-    background: #e2e8f0;
+    background: var(--text-main);
 }
 
 .syncHistoryButton {
@@ -1593,8 +1593,8 @@
 }
 
 .syncStatusBadgeDeconnecte {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--text-main);
+    color: var(--text-tertiary);
 }
 
 .syncStatusBadgeErreur {

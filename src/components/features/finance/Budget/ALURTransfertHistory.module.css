@@ -1,6 +1,6 @@
 .container {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 24px;
@@ -16,25 +16,25 @@
 .title {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
 .info {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 0 0 16px;
 }
 
 .historySection {
   padding-top: 16px;
-  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  border-top: 1px solid var(--border-light);
 }
 
 .historyTitle {
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 0 0 10px;
 }
 
@@ -54,12 +54,12 @@
 }
 
 .row:hover {
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
 }
 
 .rowDate {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-family: 'SF Mono', monospace;
   width: 90px;
   flex-shrink: 0;
@@ -68,7 +68,7 @@
 .rowDesc {
   flex: 1;
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .rowAmount {
@@ -81,7 +81,7 @@
 
 .empty {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-tertiary);
   text-align: center;
   padding: 12px;
 }

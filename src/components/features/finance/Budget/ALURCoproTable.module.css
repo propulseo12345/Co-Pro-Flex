@@ -1,6 +1,6 @@
 .container {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -12,7 +12,7 @@
 .title {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -25,9 +25,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #475569;
-  background: rgba(148, 163, 184, 0.04);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  color: var(--text-tertiary);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .right {
@@ -39,16 +39,16 @@
   grid-template-columns: 80px 1fr 80px 120px 120px 100px 40px;
   gap: 12px;
   padding: 12px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
   align-items: center;
   cursor: pointer;
   transition: background 150ms;
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .row:hover {
-  background: rgba(148, 163, 184, 0.03);
+  background: var(--border-light);
 }
 
 .row:last-child {
@@ -59,7 +59,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .nom {
@@ -82,7 +82,7 @@
 
 .total {
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .statutBadge {
@@ -111,12 +111,12 @@
 }
 
 .chevron {
-  color: #475569;
+  color: var(--text-tertiary);
   transition: color 150ms;
 }
 
 .row:hover .chevron {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 900px) {

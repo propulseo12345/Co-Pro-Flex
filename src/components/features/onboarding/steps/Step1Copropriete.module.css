@@ -24,7 +24,7 @@
 .label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary, var(--text-secondary));
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -36,9 +36,9 @@
 .input {
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(148, 163, 184, 0.04);
-  color: var(--text-main, #e2e8f0);
+  border: 1px solid var(--border-light);
+  background: var(--border-light);
+  color: var(--text-main, var(--text-main));
   font-size: 14px;
   font-family: inherit;
   outline: none;
@@ -50,7 +50,7 @@
 }
 
 .input::placeholder {
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, var(--text-tertiary));
 }
 
 .error {
@@ -64,7 +64,7 @@
   justify-content: flex-end;
   margin-top: 32px;
   padding-top: 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  border-top: 1px solid var(--border-light);
 }
 
 .btnPrimary {

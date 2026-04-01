@@ -12,7 +12,7 @@
 
 .topBar {
   background: #161822;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
@@ -21,14 +21,14 @@
 .topBarTitle {
   font-size: 24px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0 0 4px 0;
 }
 
 .topBarSubtitle {
   font-size: 14px;
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -43,7 +43,7 @@
 
 .kpiCard {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px;
   transition: transform 0.2s ease, border-color 0.2s ease;
@@ -59,14 +59,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 0 0 8px 0;
 }
 
 .kpiValue {
   font-size: 22px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -93,7 +93,7 @@
 
 .moduleCard {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px;
   text-decoration: none;
@@ -123,7 +123,7 @@
 .moduleTitle {
   font-size: 20px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -163,7 +163,7 @@
 .previewItem {
   font-size: 13px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -174,7 +174,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #64748b;
+  background: var(--text-tertiary);
   margin-right: 8px;
   vertical-align: middle;
 }
@@ -186,7 +186,7 @@
   align-items: center;
   justify-content: space-between;
   padding-top: 12px;
-  border-top: 1px solid rgba(148, 163, 184, 0.04);
+  border-top: 1px solid var(--border-light);
   margin-top: auto;
 }
 

@@ -694,8 +694,8 @@
 }
 
 .badgeResilie {
-    background: rgba(148, 163, 184, 0.2);
-    color: #94A3B8;
+    background: var(--border);
+    color: var(--text-secondary);
 }
 
 .badgeBrouillon {

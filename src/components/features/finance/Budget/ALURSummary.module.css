@@ -8,7 +8,7 @@
   flex: 1;
   padding: 16px 20px;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -17,7 +17,7 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 6px;
 }
 
@@ -33,7 +33,7 @@
 
 .sub {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 4px;
 }
 

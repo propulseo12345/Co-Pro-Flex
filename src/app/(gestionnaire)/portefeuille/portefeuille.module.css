@@ -21,14 +21,14 @@
   font-family: var(--font-manrope), sans-serif;
   font-size: 36px;
   font-weight: 800;
-  color: #e2e2eb;
+  color: var(--text-main);
   letter-spacing: -0.02em;
   margin: 0;
 }
 
 .headerSub {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-weight: 500;
   margin-top: 4px;
 }
@@ -100,7 +100,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .kpiIcon {
@@ -131,7 +131,7 @@
 
 .kpiSub {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 4px;
 }
 
@@ -166,7 +166,7 @@
   font-family: var(--font-manrope), sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-main);
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -206,12 +206,12 @@
 .actionLabel {
   font-size: 12px;
   font-weight: 700;
-  color: #e2e2eb;
+  color: var(--text-main);
 }
 
 .actionSub {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 1px;
 }
 
@@ -222,7 +222,7 @@
   border-radius: 4px;
   border: 1px solid rgba(66, 71, 84, 0.2);
   background: none;
-  color: #e2e2eb;
+  color: var(--text-main);
   font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
@@ -253,12 +253,12 @@
   font-family: var(--font-manrope), sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-main);
 }
 
 .maintenanceSub {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 4px;
   line-height: 1.5;
 }
@@ -317,7 +317,7 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .agCardIcon {
@@ -338,7 +338,7 @@
 }
 
 .agListName {
-  color: #cbd5e1;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -356,7 +356,7 @@
 
 .agListDateLater {
   background: #33343b;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 /* =============================================================================
@@ -377,7 +377,7 @@
   font-family: var(--font-manrope), sans-serif;
   font-size: 20px;
   font-weight: 700;
-  color: #e2e2eb;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -401,7 +401,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: var(--text-tertiary);
   pointer-events: none;
 }
 
@@ -411,7 +411,7 @@
   border-radius: 8px;
   padding: 8px 16px 8px 36px;
   font-size: 12px;
-  color: #e2e2eb;
+  color: var(--text-main);
   width: 260px;
   outline: none;
   transition: box-shadow 0.15s ease;
@@ -422,7 +422,7 @@
 }
 
 .listSearchInput::placeholder {
-  color: #475569;
+  color: var(--text-tertiary);
 }
 
 /* Rows container */
@@ -471,7 +471,7 @@
 .rowName {
   font-size: 14px;
   font-weight: 700;
-  color: #e2e2eb;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -484,7 +484,7 @@
 
 .rowAddress {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -502,7 +502,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 2px;
 }
 
@@ -510,7 +510,7 @@
   font-family: var(--font-manrope), sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #e2e2eb;
+  color: var(--text-main);
   font-variant-numeric: tabular-nums;
 }
 
@@ -531,7 +531,7 @@
 
 .rowAlertDanger { color: #ffb4ab; }
 .rowAlertWarning { color: #ffb786; }
-.rowAlertOk { color: #475569; }
+.rowAlertOk { color: var(--text-tertiary); }
 
 .rowAlertCount {
   font-size: 10px;
@@ -549,18 +549,18 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-bottom: 2px;
 }
 
 .rowAGValue {
   font-size: 14px;
   font-weight: 700;
-  color: #cbd5e1;
+  color: var(--text-main);
 }
 
 .rowChevron {
-  color: #475569;
+  color: var(--text-tertiary);
   flex-shrink: 0;
   transition: transform 0.15s ease;
 }
@@ -576,7 +576,7 @@
   align-items: center;
   justify-content: center;
   padding: 64px 24px;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .emptyState p {

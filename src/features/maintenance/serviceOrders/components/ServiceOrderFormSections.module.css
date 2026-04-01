@@ -1,6 +1,6 @@
 .section {
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 16px;
@@ -9,13 +9,13 @@
 .sectionTitle {
     font-size: 16px;
     font-weight: 700;
-    color: #e2e8f0;
+    color: var(--text-main);
     margin: 0 0 6px;
 }
 
 .sectionDescription {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     margin: 0 0 16px;
     line-height: 1.5;
 }
@@ -44,7 +44,7 @@
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     margin-bottom: 8px;
@@ -63,18 +63,18 @@
     width: 100%;
     padding: 10px 14px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
-    color: #e2e8f0;
+    color: var(--text-main);
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .section :global(.input)::placeholder,
 .section input::placeholder,
 .section textarea::placeholder {
-    color: #475569;
+    color: var(--text-tertiary);
 }
 
 .section select {
@@ -88,7 +88,7 @@
 
 .section select option {
     background: var(--surface);
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .section :global(.input):focus,
@@ -123,7 +123,7 @@
     gap: 10px;
     padding: 12px 16px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
 }
 
@@ -136,7 +136,7 @@
 
 .checkbox label {
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-main);
     cursor: pointer;
 }
 
@@ -174,13 +174,13 @@
     margin-top: 16px;
     padding: 16px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.06);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
 }
 
 .infoRow {
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-main);
     margin-bottom: 4px;
 }
 
@@ -189,7 +189,7 @@
 }
 
 .infoRow strong {
-    color: #64748b;
+    color: var(--text-tertiary);
     font-weight: 600;
 }
 
@@ -212,7 +212,7 @@
     border: none;
     border-radius: 6px;
     font-size: 18px;
-    color: #64748b;
+    color: var(--text-tertiary);
     cursor: pointer;
     transition: all 0.15s;
 }
@@ -229,7 +229,7 @@
     right: 0;
     margin-top: 4px;
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
     z-index: 50;
@@ -246,16 +246,16 @@
 }
 
 .dropdownItem:hover {
-    background: rgba(148, 163, 184, 0.04);
+    background: var(--border-light);
 }
 
 .dropdownItem strong {
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .dropdownMeta {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-tertiary);
     margin-top: 2px;
 }

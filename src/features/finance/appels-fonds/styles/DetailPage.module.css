@@ -84,7 +84,7 @@
 
 .btnSecondary:hover {
   background: var(--bg-tertiary);
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: var(--border);
 }
 
 /* ── Loading / Error ── */

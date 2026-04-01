@@ -1,6 +1,6 @@
 .card {
     background: var(--surface);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 16px;
@@ -12,10 +12,10 @@
     gap: 8px;
     font-size: 16px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-main);
     margin: 0 0 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .workflowProgressContainer {
@@ -41,7 +41,7 @@
     padding: 8px 12px;
     border-radius: 8px;
     background: var(--bg-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-light);
 }
 
 .workflowStepCompleted {
@@ -80,7 +80,7 @@
 
 .workflowStepPending .workflowStepNumber {
     background: var(--bg-secondary);
-    color: #64748b;
+    color: var(--text-tertiary);
 }
 
 .workflowStepInfo {
@@ -92,18 +92,18 @@
 .workflowStepLabel {
     font-size: 13px;
     font-weight: 500;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .workflowStepDescription {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .workflowConnector {
     width: 20px;
     height: 2px;
-    background: rgba(148, 163, 184, 0.12);
+    background: var(--border-light);
 }
 
 .workflowConnectorCompleted {

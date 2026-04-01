@@ -66,9 +66,9 @@
 .secondaryButton {
   background: var(--color-bg-secondary, #f8fafc);
   color: var(--color-text-primary);
-  border: 1px solid var(--color-border, #e2e8f0);
+  border: 1px solid var(--color-border, var(--text-main));
 }
 
 .secondaryButton:hover {
-  background: var(--color-bg-hover, #e2e8f0);
+  background: var(--color-bg-hover, var(--text-main));
 }

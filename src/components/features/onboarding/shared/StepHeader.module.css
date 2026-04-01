@@ -10,15 +10,15 @@
 .title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-main, #e2e8f0);
+  color: var(--text-main, var(--text-main));
 }
 .count {
   font-size: 13px;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary, var(--text-secondary));
   font-weight: 500;
 }
 .description {
   font-size: 13px;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary, var(--text-secondary));
   line-height: 1.5;
 }
