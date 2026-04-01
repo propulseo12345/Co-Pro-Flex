@@ -1,2 +1,3 @@
 export { PortefeuilleKpis } from './PortefeuilleKpis';
-export { PortefeuilleTable } from './PortefeuilleTable';
+export { PortefeuilleCoproCard } from './PortefeuilleCoproCard';
+export { PortefeuilleGrid } from './PortefeuilleGrid';
