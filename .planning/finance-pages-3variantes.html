@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Finance — 3 Variantes DA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;font-family:'Inter',sans-serif}
+    .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+    .tabular{font-variant-numeric:tabular-nums}
+
+    /* ===== MASTER SWITCHER ===== */
+    .master-sw{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;height:44px;padding:0 24px;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06)}
+    .master-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-right:20px;opacity:0.5}
+    .ms-btn{background:none;border:none;font-size:12px;font-weight:700;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;opacity:0.5}
+    .ms-btn:hover{opacity:0.8}
+    .ms-btn.active{opacity:1;border-bottom-color:currentColor}
+
+    /* ===== PAGE SWITCHER ===== */
+    .page-sw{position:fixed;top:44px;left:0;right:0;z-index:190;display:flex;align-items:center;height:40px;padding:0 24px;gap:0;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .ps-btn{background:none;border:none;font-size:11px;font-weight:700;padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;opacity:0.4}
+    .ps-btn:hover{opacity:0.7}
+    .ps-btn.active{opacity:1;border-bottom-color:currentColor}
+
+    .variant{display:none;padding-top:84px}
+    .variant.active{display:block}
+    .pg{display:none}.pg.active{display:block}
+    .page{max-width:1500px;margin:0 auto;padding:28px}
+
+
+    /* =====================================================
+       VARIANTE A — "Indigo Neon"
+       Fond tres sombre, accents indigo/violet vif, radius genereux, ombres glowing
+       ===================================================== */
+    .va{background:#08090e;color:#e4e4f0}
+    .va .master-sw{background:rgba(8,9,14,0.9);color:#e4e4f0}
+    .va .ms-btn{color:#a5b4fc}
+    .va .page-sw{background:rgba(8,9,14,0.85);color:#e4e4f0}
+    .va .ps-btn{color:#a5b4fc}
+
+    .va .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+    .va .topbar h1{font-family:'Plus Jakarta Sans';font-size:28px;font-weight:800;letter-spacing:-0.03em;color:#f0f0ff}
+    .va .topbar-sub{font-size:13px;color:#6366f1;opacity:0.6;margin-top:2px}
+    .va .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(99,102,241,0.12);color:#a5b4fc;margin-left:14px}
+    .va .pill-dot{width:6px;height:6px;border-radius:50%;background:#818cf8;animation:va-pulse 2s ease-in-out infinite}
+    @keyframes va-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .va .topbar-actions{display:flex;gap:8px}
+    .va .btn-i{width:36px;height:36px;border-radius:10px;background:#111227;border:1px solid rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;color:#6366f1;cursor:pointer;transition:all .15s}
+    .va .btn-i:hover{background:#1a1b3a;border-color:rgba(99,102,241,0.3);box-shadow:0 0 12px rgba(99,102,241,0.15)}
+    .va .btn-p{padding:8px 18px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;box-shadow:0 2px 12px rgba(99,102,241,0.25)}
+    .va .btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(99,102,241,0.35)}
+    .va .btn-g{padding:8px 16px;border-radius:10px;background:#111227;border:1px solid rgba(99,102,241,0.12);color:#a5b4fc;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+    .va .btn-g:hover{background:#1a1b3a;border-color:rgba(99,102,241,0.3)}
+    .va .btn-d{padding:8px 18px;border-radius:10px;background:rgba(244,63,94,0.08);color:#fb7185;font-size:12px;font-weight:700;border:1px solid rgba(244,63,94,0.15);cursor:pointer;display:flex;align-items:center;gap:6px}
+
+    .va .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .va .kpi{background:#111227;border-radius:16px;padding:20px 22px;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,0.06);transition:border-color .2s}
+    .va .kpi:hover{border-color:rgba(99,102,241,0.15)}
+    .va .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+    .va .kpi.k1::before{background:linear-gradient(90deg,#6366f1,#818cf8)}.va .kpi.k2::before{background:linear-gradient(90deg,#10b981,#34d399)}
+    .va .kpi.k3::before{background:linear-gradient(90deg,#f43f5e,#fb7185)}.va .kpi.k4::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+    .va .kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .va .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b}
+    .va .kpi-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+    .va .kpi.k1 .kpi-ico{background:rgba(99,102,241,0.1);color:#818cf8}
+    .va .kpi.k2 .kpi-ico{background:rgba(16,185,129,0.1);color:#34d399}
+    .va .kpi.k3 .kpi-ico{background:rgba(244,63,94,0.1);color:#fb7185}
+    .va .kpi.k4 .kpi-ico{background:rgba(245,158,11,0.1);color:#fbbf24}
+    .va .kpi-val{font-family:'Plus Jakarta Sans';font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+    .va .kpi.k1 .kpi-val{color:#a5b4fc}.va .kpi.k2 .kpi-val{color:#34d399}
+    .va .kpi.k3 .kpi-val{color:#fb7185}.va .kpi.k4 .kpi-val{color:#fbbf24}
+    .va .kpi-sub{font-size:11px;color:#475569;margin-top:4px}
+
+    .va .tab-bar{display:flex;gap:0;border-bottom:1px solid rgba(99,102,241,0.08);margin-bottom:24px}
+    .va .tab{padding:10px 18px;font-family:'Plus Jakarta Sans';font-size:12px;font-weight:700;color:#475569;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none}
+    .va .tab:hover{color:#a5b4fc}
+    .va .tab.active{color:#818cf8;border-bottom-color:#6366f1}
+    .va .tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;font-size:9px;font-weight:800;margin-left:6px;background:rgba(99,102,241,0.12);color:#a5b4fc}
+
+    .va .tbl{width:100%;border-collapse:separate;border-spacing:0}
+    .va .tbl thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;text-align:left;padding:10px 16px;border-bottom:1px solid rgba(99,102,241,0.06)}
+    .va .tbl thead th:last-child{text-align:right}
+    .va .tbl tbody td{font-size:13px;padding:12px 16px;border-bottom:1px solid rgba(99,102,241,0.04);color:#c7d2fe;vertical-align:middle}
+    .va .tbl tbody td:last-child{text-align:right}
+    .va .tbl tbody tr{transition:background .15s}
+    .va .tbl tbody tr:hover{background:rgba(99,102,241,0.04)}
+    .va .mono{font-family:'SF Mono','Fira Code',monospace;font-variant-numeric:tabular-nums}
+    .va .c-red{color:#fb7185}.va .c-green{color:#34d399}
+
+    .va .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600}
+    .va .b-ok{background:rgba(16,185,129,0.1);color:#4ade80}
+    .va .b-err{background:rgba(244,63,94,0.1);color:#fb7185}
+    .va .b-warn{background:rgba(245,158,11,0.1);color:#fbbf24}
+    .va .b-info{background:rgba(99,102,241,0.1);color:#a5b4fc}
+    .va .b-muted{background:rgba(148,163,184,0.08);color:#94a3b8}
+
+
+    /* =====================================================
+       VARIANTE B — "Emerald Minimal"
+       Fond gris charbon chaud, accents emeraude/teal, radius doux, ultra clean
+       ===================================================== */
+    .vb{background:#111514;color:#d4e5df}
+    .vb .master-sw{background:rgba(17,21,20,0.9);color:#d4e5df}
+    .vb .ms-btn{color:#6ee7b7}
+    .vb .page-sw{background:rgba(17,21,20,0.85);color:#d4e5df}
+    .vb .ps-btn{color:#6ee7b7}
+
+    .vb .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+    .vb .topbar h1{font-family:'DM Sans';font-size:28px;font-weight:800;letter-spacing:-0.02em;color:#ecfdf5}
+    .vb .topbar-sub{font-size:13px;color:#6ee7b7;opacity:0.5;margin-top:2px}
+    .vb .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(16,185,129,0.08);color:#6ee7b7;margin-left:14px}
+    .vb .pill-dot{width:6px;height:6px;border-radius:2px;background:#34d399;animation:vb-pulse 2.5s ease-in-out infinite}
+    @keyframes vb-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .vb .topbar-actions{display:flex;gap:8px}
+    .vb .btn-i{width:36px;height:36px;border-radius:6px;background:#1a1f1d;border:1px solid rgba(16,185,129,0.08);display:flex;align-items:center;justify-content:center;color:#10b981;cursor:pointer;transition:all .15s}
+    .vb .btn-i:hover{background:#1f2a26;border-color:rgba(16,185,129,0.2)}
+    .vb .btn-p{padding:8px 18px;border-radius:6px;background:#10b981;color:#022c22;font-size:12px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+    .vb .btn-p:hover{background:#34d399}
+    .vb .btn-g{padding:8px 16px;border-radius:6px;background:#1a1f1d;border:1px solid rgba(16,185,129,0.08);color:#6ee7b7;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+    .vb .btn-g:hover{background:#1f2a26}
+    .vb .btn-d{padding:8px 18px;border-radius:6px;background:rgba(239,68,68,0.06);color:#f87171;font-size:12px;font-weight:700;border:1px solid rgba(239,68,68,0.12);cursor:pointer;display:flex;align-items:center;gap:6px}
+
+    .vb .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .vb .kpi{background:#1a1f1d;border-radius:8px;padding:20px 22px;position:relative;overflow:hidden;border:1px solid rgba(16,185,129,0.04)}
+    .vb .kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:8px 0 0 8px}
+    .vb .kpi.k1::before{background:#10b981}.vb .kpi.k2::before{background:#06b6d4}
+    .vb .kpi.k3::before{background:#ef4444}.vb .kpi.k4::before{background:#f59e0b}
+    .vb .kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .vb .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#5a7a6e}
+    .vb .kpi-ico{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+    .vb .kpi.k1 .kpi-ico{background:rgba(16,185,129,0.08);color:#34d399}
+    .vb .kpi.k2 .kpi-ico{background:rgba(6,182,212,0.08);color:#22d3ee}
+    .vb .kpi.k3 .kpi-ico{background:rgba(239,68,68,0.08);color:#f87171}
+    .vb .kpi.k4 .kpi-ico{background:rgba(245,158,11,0.08);color:#fbbf24}
+    .vb .kpi-val{font-family:'DM Sans';font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+    .vb .kpi.k1 .kpi-val{color:#6ee7b7}.vb .kpi.k2 .kpi-val{color:#22d3ee}
+    .vb .kpi.k3 .kpi-val{color:#fca5a5}.vb .kpi.k4 .kpi-val{color:#fcd34d}
+    .vb .kpi-sub{font-size:11px;color:#5a7a6e;margin-top:4px}
+
+    .vb .tab-bar{display:flex;gap:4px;margin-bottom:24px;background:#151a18;border-radius:8px;padding:4px}
+    .vb .tab{padding:8px 16px;font-family:'DM Sans';font-size:12px;font-weight:700;color:#5a7a6e;cursor:pointer;border:none;background:none;border-radius:6px;transition:all .15s}
+    .vb .tab:hover{color:#a7f3d0;background:rgba(16,185,129,0.06)}
+    .vb .tab.active{color:#ecfdf5;background:#1a1f1d;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+    .vb .tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:4px;font-size:9px;font-weight:800;margin-left:6px;background:rgba(16,185,129,0.1);color:#6ee7b7}
+
+    .vb .tbl{width:100%;border-collapse:separate;border-spacing:0}
+    .vb .tbl thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#5a7a6e;text-align:left;padding:10px 16px;border-bottom:1px solid rgba(16,185,129,0.06)}
+    .vb .tbl thead th:last-child{text-align:right}
+    .vb .tbl tbody td{font-size:13px;padding:12px 16px;border-bottom:1px solid rgba(16,185,129,0.03);color:#d4e5df;vertical-align:middle}
+    .vb .tbl tbody td:last-child{text-align:right}
+    .vb .tbl tbody tr{transition:background .15s}
+    .vb .tbl tbody tr:hover{background:rgba(16,185,129,0.03)}
+    .vb .mono{font-family:'SF Mono','Fira Code',monospace;font-variant-numeric:tabular-nums}
+    .vb .c-red{color:#fca5a5}.vb .c-green{color:#6ee7b7}
+
+    .vb .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600}
+    .vb .b-ok{background:rgba(16,185,129,0.08);color:#6ee7b7}
+    .vb .b-err{background:rgba(239,68,68,0.08);color:#fca5a5}
+    .vb .b-warn{background:rgba(245,158,11,0.08);color:#fcd34d}
+    .vb .b-info{background:rgba(6,182,212,0.08);color:#22d3ee}
+    .vb .b-muted{background:rgba(148,163,184,0.06);color:#94a3b8}
+
+
+    /* =====================================================
+       VARIANTE C — "Amber Executive"
+       Fond noir profond, accents ambre/or chaud, radius sharp, feel luxe
+       ===================================================== */
+    .vc{background:#0a0a0a;color:#e8e0d4}
+    .vc .master-sw{background:rgba(10,10,10,0.92);color:#e8e0d4}
+    .vc .ms-btn{color:#fbbf24}
+    .vc .page-sw{background:rgba(10,10,10,0.88);color:#e8e0d4}
+    .vc .ps-btn{color:#fbbf24}
+
+    .vc .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+    .vc .topbar h1{font-family:'Manrope';font-size:28px;font-weight:800;letter-spacing:-0.02em;color:#fef3c7}
+    .vc .topbar-sub{font-size:13px;color:#92400e;margin-top:2px}
+    .vc .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:2px;font-size:11px;font-weight:700;background:rgba(251,191,36,0.08);color:#fbbf24;margin-left:14px;text-transform:uppercase;letter-spacing:0.06em}
+    .vc .pill-dot{width:6px;height:6px;background:#f59e0b;animation:vc-pulse 2s ease-in-out infinite}
+    @keyframes vc-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .vc .topbar-actions{display:flex;gap:8px}
+    .vc .btn-i{width:36px;height:36px;border-radius:2px;background:#141414;border:1px solid rgba(251,191,36,0.08);display:flex;align-items:center;justify-content:center;color:#d97706;cursor:pointer;transition:all .15s}
+    .vc .btn-i:hover{background:#1c1a14;border-color:rgba(251,191,36,0.2)}
+    .vc .btn-p{padding:8px 18px;border-radius:2px;background:#f59e0b;color:#451a03;font-size:12px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;text-transform:uppercase;letter-spacing:0.04em}
+    .vc .btn-p:hover{background:#fbbf24}
+    .vc .btn-g{padding:8px 16px;border-radius:2px;background:#141414;border:1px solid rgba(251,191,36,0.08);color:#fbbf24;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+    .vc .btn-g:hover{background:#1c1a14}
+    .vc .btn-d{padding:8px 18px;border-radius:2px;background:rgba(239,68,68,0.06);color:#f87171;font-size:12px;font-weight:700;border:1px solid rgba(239,68,68,0.12);cursor:pointer;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.04em}
+
+    .vc .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .vc .kpi{background:#141414;border-radius:2px;padding:20px 22px;position:relative;overflow:hidden;border-bottom:2px solid transparent}
+    .vc .kpi.k1{border-bottom-color:#f59e0b}.vc .kpi.k2{border-bottom-color:#22c55e}
+    .vc .kpi.k3{border-bottom-color:#ef4444}.vc .kpi.k4{border-bottom-color:#f59e0b}
+    .vc .kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .vc .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#78716c}
+    .vc .kpi-ico{width:34px;height:34px;border-radius:2px;display:flex;align-items:center;justify-content:center}
+    .vc .kpi.k1 .kpi-ico{background:rgba(245,158,11,0.08);color:#fbbf24}
+    .vc .kpi.k2 .kpi-ico{background:rgba(34,197,94,0.08);color:#4ade80}
+    .vc .kpi.k3 .kpi-ico{background:rgba(239,68,68,0.08);color:#f87171}
+    .vc .kpi.k4 .kpi-ico{background:rgba(245,158,11,0.08);color:#fbbf24}
+    .vc .kpi-val{font-family:'Manrope';font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+    .vc .kpi.k1 .kpi-val{color:#fcd34d}.vc .kpi.k2 .kpi-val{color:#4ade80}
+    .vc .kpi.k3 .kpi-val{color:#fca5a5}.vc .kpi.k4 .kpi-val{color:#fcd34d}
+    .vc .kpi-sub{font-size:11px;color:#78716c;margin-top:4px}
+
+    .vc .tab-bar{display:flex;gap:0;border-bottom:1px solid rgba(251,191,36,0.08);margin-bottom:24px}
+    .vc .tab{padding:10px 18px;font-family:'Manrope';font-size:12px;font-weight:700;color:#78716c;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;text-transform:uppercase;letter-spacing:0.04em}
+    .vc .tab:hover{color:#fbbf24}
+    .vc .tab.active{color:#fcd34d;border-bottom-color:#f59e0b}
+    .vc .tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:2px;font-size:9px;font-weight:800;margin-left:6px;background:rgba(245,158,11,0.1);color:#fbbf24}
+
+    .vc .tbl{width:100%;border-collapse:separate;border-spacing:0}
+    .vc .tbl thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#78716c;text-align:left;padding:10px 16px;border-bottom:1px solid rgba(251,191,36,0.06)}
+    .vc .tbl thead th:last-child{text-align:right}
+    .vc .tbl tbody td{font-size:13px;padding:12px 16px;border-bottom:1px solid rgba(251,191,36,0.03);color:#e8e0d4;vertical-align:middle}
+    .vc .tbl tbody td:last-child{text-align:right}
+    .vc .tbl tbody tr{transition:background .15s}
+    .vc .tbl tbody tr:hover{background:rgba(251,191,36,0.02)}
+    .vc .mono{font-family:'SF Mono','Fira Code',monospace;font-variant-numeric:tabular-nums}
+    .vc .c-red{color:#fca5a5}.vc .c-green{color:#4ade80}
+
+    .vc .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:2px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+    .vc .b-ok{background:rgba(34,197,94,0.06);color:#4ade80}
+    .vc .b-err{background:rgba(239,68,68,0.06);color:#fca5a5}
+    .vc .b-warn{background:rgba(245,158,11,0.06);color:#fcd34d}
+    .vc .b-info{background:rgba(245,158,11,0.06);color:#fbbf24}
+    .vc .b-muted{background:rgba(148,163,184,0.04);color:#a8a29e}
+  </style>
+</head>
+<body>
+
+<!-- ===== CONTENT TEMPLATE (repeated per variant with different wrapper class) ===== -->
+
+<!-- VARIANTE A — Indigo Neon -->
+<div id="va" class="variant active va">
+  <div class="master-sw"><span class="master-label">DA</span><button class="ms-btn active" onclick="showV('va')">A — Indigo Neon</button><button class="ms-btn" onclick="showV('vb')">B — Emerald Minimal</button><button class="ms-btn" onclick="showV('vc')">C — Amber Executive</button></div>
+  <div class="page-sw"><button class="ps-btn active" onclick="showP('va','compta')">Comptabilite</button><button class="ps-btn" onclick="showP('va','factures')">Factures</button><button class="ps-btn" onclick="showP('va','budgets')">Budgets</button><button class="ps-btn" onclick="showP('va','appels')">Appels de Fonds</button><button class="ps-btn" onclick="showP('va','mouvements')">Mouvements</button></div>
+
+  <!-- Compta -->
+  <div id="va-compta" class="pg active"><div class="page">
+    <div class="topbar"><div style="display:flex;align-items:center"><div><h1>Comptabilite</h1><p class="topbar-sub">Exercice en cours</p></div><span class="pill"><span class="pill-dot"></span>2025 — Ouvert</span></div><div class="topbar-actions"><button class="btn-i"><span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span></button><button class="btn-i"><span class="material-symbols-outlined" style="font-size:18px">table_chart</span></button><button class="btn-d"><span class="material-symbols-outlined" style="font-size:16px">lock</span> Cloturer 2025</button></div></div>
+    <div class="kpi-strip">
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Total Debit</span><div class="kpi-ico"><span class="material-symbols-outlined">arrow_downward</span></div></div><div class="kpi-val">245 680&euro;</div><div class="kpi-sub">1 247 ecritures</div></div>
+      <div class="kpi k2"><div class="kpi-top"><span class="kpi-label">Total Credit</span><div class="kpi-ico"><span class="material-symbols-outlined">arrow_upward</span></div></div><div class="kpi-val">245 680&euro;</div><div class="kpi-sub">Balance equilibree</div></div>
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Ecritures</span><div class="kpi-ico"><span class="material-symbols-outlined">receipt_long</span></div></div><div class="kpi-val">1 247</div><div class="kpi-sub"><span style="color:#34d399">&#10003;</span> Toutes comptabilisees</div></div>
+      <div class="kpi k2"><div class="kpi-top"><span class="kpi-label">Etat Balance</span><div class="kpi-ico"><span class="material-symbols-outlined">balance</span></div></div><div class="kpi-val">Equilibree</div><div class="kpi-sub">Debit = Credit</div></div>
+    </div>
+    <div class="tab-bar"><button class="tab active">Grand Livre</button><button class="tab">Livre comptable</button><button class="tab">Balance</button><button class="tab">Compte de gestion</button><button class="tab">Annexes</button></div>
+    <table class="tbl"><thead><tr><th>Date</th><th>N° Piece</th><th>Compte</th><th>Libelle</th><th>Debit</th><th>Credit</th></tr></thead><tbody>
+      <tr><td>02/01</td><td>EC-001</td><td>401000</td><td>Fournisseur Veolia — Facture eau T4</td><td class="mono c-red">2 450,00</td><td></td></tr>
+      <tr><td>02/01</td><td>EC-001</td><td>601000</td><td>Charge eau — Repartition generale</td><td></td><td class="mono c-green">2 450,00</td></tr>
+      <tr><td>05/01</td><td>EC-002</td><td>401001</td><td>EDF — Electricite parties communes</td><td class="mono c-red">1 890,00</td><td></td></tr>
+      <tr><td>05/01</td><td>EC-002</td><td>602000</td><td>Charge electricite — Parties communes</td><td></td><td class="mono c-green">1 890,00</td></tr>
+      <tr><td>10/01</td><td>EC-003</td><td>512000</td><td>Banque — Encaissement appel T1</td><td class="mono c-red">18 750,00</td><td></td></tr>
+      <tr><td>10/01</td><td>EC-003</td><td>701000</td><td>Appels de fonds — Budget courant T1</td><td></td><td class="mono c-green">18 750,00</td></tr>
+    </tbody></table>
+  </div></div>
+
+  <!-- Factures -->
+  <div id="va-factures" class="pg"><div class="page">
+    <div class="topbar"><div><h1>Factures Fournisseurs</h1><p class="topbar-sub">Gestion et suivi des factures</p></div><div class="topbar-actions"><button class="btn-g"><span class="material-symbols-outlined" style="font-size:16px">download</span> Export</button><button class="btn-p"><span class="material-symbols-outlined" style="font-size:16px">add</span> Nouvelle facture</button></div></div>
+    <div class="kpi-strip">
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Factures</span><div class="kpi-ico"><span class="material-symbols-outlined">receipt</span></div></div><div class="kpi-val">34</div><div class="kpi-sub">Total exercice</div></div>
+      <div class="kpi k2"><div class="kpi-top"><span class="kpi-label">Total Paye</span><div class="kpi-ico"><span class="material-symbols-outlined">check_circle</span></div></div><div class="kpi-val">68 450&euro;</div><div class="kpi-sub">22 factures</div></div>
+      <div class="kpi k3"><div class="kpi-top"><span class="kpi-label">En Retard</span><div class="kpi-ico"><span class="material-symbols-outlined">warning</span></div></div><div class="kpi-val">6 720&euro;</div><div class="kpi-sub">8 factures</div></div>
+      <div class="kpi k4"><div class="kpi-top"><span class="kpi-label">Cette Semaine</span><div class="kpi-ico"><span class="material-symbols-outlined">calendar_today</span></div></div><div class="kpi-val">3</div><div class="kpi-sub">Echeances a venir</div></div>
+    </div>
+    <table class="tbl"><thead><tr><th>Date</th><th>Fournisseur</th><th>Reference</th><th>Poste</th><th>Statut</th><th>Montant</th></tr></thead><tbody>
+      <tr><td>15/01</td><td style="font-weight:600">Veolia Eau</td><td style="opacity:.5">FAC-001</td><td style="opacity:.5">601 — Eau</td><td><span class="badge b-ok">Payee</span></td><td class="mono" style="font-weight:700">2 450,00&euro;</td></tr>
+      <tr><td>18/01</td><td style="font-weight:600">EDF Pro</td><td style="opacity:.5">FAC-002</td><td style="opacity:.5">602 — Elec.</td><td><span class="badge b-ok">Payee</span></td><td class="mono" style="font-weight:700">1 890,00&euro;</td></tr>
+      <tr><td>22/01</td><td style="font-weight:600">SecuriPlus</td><td style="opacity:.5">FAC-003</td><td style="opacity:.5">615 — Entretien</td><td><span class="badge b-err">En retard</span></td><td class="mono" style="font-weight:700">3 200,00&euro;</td></tr>
+      <tr><td>01/02</td><td style="font-weight:600">Otis Ascenseurs</td><td style="opacity:.5">FAC-004</td><td style="opacity:.5">615 — Entretien</td><td><span class="badge b-warn">A payer</span></td><td class="mono" style="font-weight:700">4 800,00&euro;</td></tr>
+      <tr><td>05/02</td><td style="font-weight:600">AXA Assurances</td><td style="opacity:.5">FAC-005</td><td style="opacity:.5">614 — Assurance</td><td><span class="badge b-ok">Payee</span></td><td class="mono" style="font-weight:700">9 800,00&euro;</td></tr>
+    </tbody></table>
+  </div></div>
+
+  <!-- Budgets -->
+  <div id="va-budgets" class="pg"><div class="page">
+    <div class="topbar"><div style="display:flex;align-items:center"><div><h1>Budgets</h1></div><span class="pill"><span class="pill-dot"></span>Exercice 2025</span></div><div class="topbar-actions"><button class="btn-i"><span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span></button><button class="btn-p"><span class="material-symbols-outlined" style="font-size:16px">add</span> Creer un budget</button></div></div>
+    <div class="tab-bar"><button class="tab active">Fonctionnement</button><button class="tab">Travaux</button><button class="tab">ALUR</button></div>
+    <div class="kpi-strip">
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Budget Vote</span><div class="kpi-ico"><span class="material-symbols-outlined">how_to_vote</span></div></div><div class="kpi-val">85 000&euro;</div><div class="kpi-sub">Fonctionnement 2025</div></div>
+      <div class="kpi k2"><div class="kpi-top"><span class="kpi-label">Realise</span><div class="kpi-ico"><span class="material-symbols-outlined">check</span></div></div><div class="kpi-val">45 050&euro;</div><div class="kpi-sub">53% consomme</div></div>
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Restant</span><div class="kpi-ico"><span class="material-symbols-outlined">savings</span></div></div><div class="kpi-val">39 950&euro;</div><div class="kpi-sub">47% disponible</div></div>
+      <div class="kpi k4"><div class="kpi-top"><span class="kpi-label">Postes en Alerte</span><div class="kpi-ico"><span class="material-symbols-outlined">warning</span></div></div><div class="kpi-val">2</div><div class="kpi-sub">Depassement &gt;80%</div></div>
+    </div>
+    <table class="tbl"><thead><tr><th>Poste</th><th>Libelle</th><th>Realise</th><th>Budget</th><th>Consommation</th><th>Restant</th></tr></thead><tbody>
+      <tr><td style="font-weight:700">601</td><td>Eau</td><td class="mono">8 200&euro;</td><td class="mono" style="opacity:.5">12 000&euro;</td><td><span class="badge b-info">68%</span></td><td class="mono">3 800&euro;</td></tr>
+      <tr><td style="font-weight:700">602</td><td>Electricite</td><td class="mono">6 400&euro;</td><td class="mono" style="opacity:.5">8 500&euro;</td><td><span class="badge b-warn">75%</span></td><td class="mono">2 100&euro;</td></tr>
+      <tr><td style="font-weight:700">614</td><td>Assurances</td><td class="mono">9 800&euro;</td><td class="mono" style="opacity:.5">10 000&euro;</td><td><span class="badge b-err">98%</span></td><td class="mono c-red">200&euro;</td></tr>
+      <tr><td style="font-weight:700">615</td><td>Entretien courant</td><td class="mono">12 100&euro;</td><td class="mono" style="opacity:.5">22 000&euro;</td><td><span class="badge b-ok">55%</span></td><td class="mono">9 900&euro;</td></tr>
+      <tr><td style="font-weight:700">671</td><td>Honoraires syndic</td><td class="mono">4 500&euro;</td><td class="mono" style="opacity:.5">18 000&euro;</td><td><span class="badge b-ok">25%</span></td><td class="mono">13 500&euro;</td></tr>
+    </tbody></table>
+  </div></div>
+
+  <!-- Appels -->
+  <div id="va-appels" class="pg"><div class="page">
+    <div class="topbar"><div><h1>Appels de Fonds</h1><p class="topbar-sub">Suivi des appels et recouvrements</p></div><div class="topbar-actions"><button class="btn-g"><span class="material-symbols-outlined" style="font-size:16px">download</span> Export</button><button class="btn-p"><span class="material-symbols-outlined" style="font-size:16px">add</span> Generer les appels</button></div></div>
+    <div class="kpi-strip">
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Total Appele</span><div class="kpi-ico"><span class="material-symbols-outlined">send</span></div></div><div class="kpi-val">75 000&euro;</div><div class="kpi-sub">Budget courant + travaux</div></div>
+      <div class="kpi k2"><div class="kpi-top"><span class="kpi-label">Total Encaisse</span><div class="kpi-ico"><span class="material-symbols-outlined">savings</span></div></div><div class="kpi-val">61 780&euro;</div><div class="kpi-sub">82.4% recouvre</div></div>
+      <div class="kpi k3"><div class="kpi-top"><span class="kpi-label">Impayes</span><div class="kpi-ico"><span class="material-symbols-outlined">error</span></div></div><div class="kpi-val">13 220&euro;</div><div class="kpi-sub">4 coproprietaires</div></div>
+      <div class="kpi k4"><div class="kpi-top"><span class="kpi-label">Taux Recouvrement</span><div class="kpi-ico"><span class="material-symbols-outlined">percent</span></div></div><div class="kpi-val">82.4%</div><div class="kpi-sub">Objectif: 95%</div></div>
+    </div>
+    <div class="tab-bar"><button class="tab active">Vue Globale <span class="tab-badge">75k</span></button><button class="tab">Budget Courant <span class="tab-badge">85%</span></button><button class="tab">Travaux <span class="tab-badge">72%</span></button></div>
+    <table class="tbl"><thead><tr><th>Trimestre</th><th>Montant Appele</th><th>Encaisse</th><th>Reste du</th><th>Taux</th><th>Statut</th></tr></thead><tbody>
+      <tr><td style="font-weight:700">T1 — Janv. a Mars</td><td class="mono">18 750&euro;</td><td class="mono c-green">18 750&euro;</td><td class="mono">0&euro;</td><td><span class="badge b-ok">100%</span></td><td><span class="badge b-ok">Solde</span></td></tr>
+      <tr><td style="font-weight:700">T2 — Avr. a Juin</td><td class="mono">18 750&euro;</td><td class="mono c-green">14 030&euro;</td><td class="mono c-red">4 720&euro;</td><td><span class="badge b-warn">74.8%</span></td><td><span class="badge b-warn">En cours</span></td></tr>
+      <tr><td style="font-weight:700">T3 — Juil. a Sept.</td><td class="mono" style="opacity:.4">18 750&euro;</td><td class="mono" style="opacity:.4">—</td><td class="mono" style="opacity:.4">—</td><td><span class="badge b-muted">—</span></td><td><span class="badge b-muted">A venir</span></td></tr>
+      <tr><td style="font-weight:700">T4 — Oct. a Dec.</td><td class="mono" style="opacity:.4">18 750&euro;</td><td class="mono" style="opacity:.4">—</td><td class="mono" style="opacity:.4">—</td><td><span class="badge b-muted">—</span></td><td><span class="badge b-muted">A venir</span></td></tr>
+    </tbody></table>
+  </div></div>
+
+  <!-- Mouvements -->
+  <div id="va-mouvements" class="pg"><div class="page">
+    <div class="topbar"><div><h1>Mouvements Bancaires</h1><p class="topbar-sub">Derniere synchro: il y a 2h</p></div><div class="topbar-actions"><button class="btn-g"><span class="material-symbols-outlined" style="font-size:16px">sync</span> Actualiser</button><button class="btn-p"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importer</button></div></div>
+    <div class="kpi-strip">
+      <div class="kpi k1"><div class="kpi-top"><span class="kpi-label">Solde CC</span><div class="kpi-ico"><span class="material-symbols-outlined">account_balance</span></div></div><div class="kpi-val">45 230&euro;</div><div class="kpi-sub">BNP ****4521</div></div>
+      <div class="kpi k2"><div class="kpi-top"><span class="kpi-label">Solde FT</span><div class="kpi-ico"><span class="material-symbols-outlined">savings</span></div></div><div class="kpi-val">32 600&euro;</div><div class="kpi-sub">Livret A ****7890</div></div>
+      <div class="kpi k4"><div class="kpi-top"><span class="kpi-label">Non Categorises</span><div class="kpi-ico"><span class="material-symbols-outlined">help</span></div></div><div class="kpi-val">8</div><div class="kpi-sub">A traiter</div></div>
+      <div class="kpi k3"><div class="kpi-top"><span class="kpi-label">Non Rapproches</span><div class="kpi-ico"><span class="material-symbols-outlined">link_off</span></div></div><div class="kpi-val">16</div><div class="kpi-sub">3 copro.</div></div>
+    </div>
+    <div class="tab-bar"><button class="tab active">Categorisation <span class="tab-badge">8</span></button><button class="tab">Rapprochement <span class="tab-badge">16</span></button><button class="tab">Tous</button><button class="tab">Cloture</button></div>
+    <table class="tbl"><thead><tr><th>Date</th><th>Libelle</th><th>Montant</th><th>Compte</th><th>Statut</th><th>Action</th></tr></thead><tbody>
+      <tr><td>02/03</td><td>VIR VEOLIA EAU IDF FACTURE 2025-0342</td><td class="mono c-red">-2 450,00&euro;</td><td style="opacity:.5">—</td><td><span class="badge b-warn">A categoriser</span></td><td><button class="btn-p" style="padding:4px 12px;font-size:10px">Categoriser</button></td></tr>
+      <tr><td>03/03</td><td>VIR EDF ENTREPRISES MARS 2025</td><td class="mono c-red">-1 890,00&euro;</td><td style="opacity:.5">—</td><td><span class="badge b-warn">A categoriser</span></td><td><button class="btn-p" style="padding:4px 12px;font-size:10px">Categoriser</button></td></tr>
+      <tr><td>05/03</td><td>VIR DUPONT JEAN APPEL FONDS T1</td><td class="mono c-green">+1 250,00&euro;</td><td style="opacity:.5">—</td><td><span class="badge b-warn">A categoriser</span></td><td><button class="btn-p" style="padding:4px 12px;font-size:10px">Categoriser</button></td></tr>
+      <tr><td>06/03</td><td>VIR MARTIN SOPHIE APPEL FONDS T1</td><td class="mono c-green">+980,00&euro;</td><td style="opacity:.5">—</td><td><span class="badge b-warn">A categoriser</span></td><td><button class="btn-p" style="padding:4px 12px;font-size:10px">Categoriser</button></td></tr>
+      <tr><td>08/03</td><td>PRLV OTIS MAINTENANCE ASCENSEUR</td><td class="mono c-red">-680,00&euro;</td><td style="opacity:.5">—</td><td><span class="badge b-warn">A categoriser</span></td><td><button class="btn-p" style="padding:4px 12px;font-size:10px">Categoriser</button></td></tr>
+    </tbody></table>
+  </div></div>
+</div>
+
+<!-- VARIANTE B — Emerald Minimal (clone structure, different wrapper) -->
+<div id="vb" class="variant vb"></div>
+
+<!-- VARIANTE C — Amber Executive (clone structure, different wrapper) -->
+<div id="vc-var" class="variant vc"></div>
+
+<script>
+// Clone content from VA into VB and VC with updated IDs
+function cloneVariant(srcId, destId, prefix) {
+  const src = document.getElementById(srcId);
+  const dest = document.getElementById(destId);
+  dest.innerHTML = src.innerHTML;
+  // Fix IDs
+  dest.querySelectorAll('[id]').forEach(el => {
+    el.id = el.id.replace('va-', prefix + '-');
+  });
+  // Fix onclick page switcher
+  dest.querySelectorAll('.ps-btn').forEach(btn => {
+    const orig = btn.getAttribute('onclick');
+    if (orig) btn.setAttribute('onclick', orig.replace("'va'", "'" + prefix + "'"));
+  });
+  // Fix master switcher
+  dest.querySelectorAll('.ms-btn').forEach(btn => {
+    // Keep original onclick
+  });
+}
+
+cloneVariant('va', 'vb', 'vb');
+cloneVariant('va', 'vc-var', 'vc');
+
+function showV(id) {
+  document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+  document.getElementById(id === 'vc' ? 'vc-var' : id).classList.add('active');
+  // Update all master buttons across all variants
+  document.querySelectorAll('.ms-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'")) b.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+
+function showP(variantId, pageId) {
+  const container = document.getElementById(variantId === 'vc' ? 'vc-var' : variantId);
+  container.querySelectorAll('.pg').forEach(p => p.classList.remove('active'));
+  container.querySelectorAll('.ps-btn').forEach(b => b.classList.remove('active'));
+  const target = container.querySelector('#' + variantId + '-' + pageId) || container.querySelector('#' + pageId);
+  if (target) target.classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Ensure first pages are active in cloned variants
+document.querySelectorAll('.variant').forEach(v => {
+  const firstPg = v.querySelector('.pg');
+  if (firstPg && !v.querySelector('.pg.active')) firstPg.classList.add('active');
+  const firstPs = v.querySelector('.ps-btn');
+  if (firstPs && !v.querySelector('.ps-btn.active')) firstPs.classList.add('active');
+});
+</script>
+</body>
+</html>

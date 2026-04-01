@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Portefeuille — 3 Variantes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d2e;
+      --surface-deep: #131620;
+      --surface-hover: #1e1f26;
+      --text: #e2e2eb;
+      --text-sec: #94a3b8;
+      --text-muted: #64748b;
+      --text-dim: #475569;
+      --primary: #adc6ff;
+      --primary-bright: #4d8eff;
+      --danger: #ffb4ab;
+      --warning: #ffb786;
+      --success: #34d399;
+      --border: rgba(66, 71, 84, 0.15);
+      --border-light: rgba(66, 71, 84, 0.08);
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    .font-headline { font-family: 'Manrope', sans-serif; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ========== VARIANT SWITCHER ========== */
+    .switcher {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--surface-deep);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 32px;
+      height: 52px;
+      backdrop-filter: blur(12px);
+    }
+
+    .switcher-label {
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-right: 24px;
+    }
+
+    .switcher-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      position: relative;
+    }
+
+    .switcher-btn:hover { color: var(--text); }
+    .switcher-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .variant { display: none; padding-top: 52px; }
+    .variant.active { display: block; }
+
+    /* ========== SHARED STYLES ========== */
+    .page { max-width: 1500px; margin: 0 auto; padding: 32px; }
+
+    .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
+    .header h1 { font-family: 'Manrope'; font-size: 36px; font-weight: 800; letter-spacing: -0.02em; }
+    .header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-bright));
+      color: #00285d; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .btn-primary:hover { transform: scale(0.98); }
+
+    .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; color: var(--primary); }
+
+    .metric-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .metric-value {
+      font-family: 'Manrope'; font-weight: 800; color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-unit { font-size: 0.55em; margin-left: 2px; opacity: 0.7; }
+
+    .progress-bar { height: 6px; background: #0c0e14; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 99px; }
+
+    .trend { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--success); margin-top: 6px; }
+
+    /* Actions critiques shared */
+    .action-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .dot-danger { background: var(--danger); }
+    .dot-warning { background: var(--warning); }
+    .dot-info { background: var(--primary); }
+
+    .action-item { display: flex; gap: 12px; }
+    .action-label { font-size: 12px; font-weight: 700; color: var(--text); }
+    .action-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+    /* Mini chart */
+    .mini-chart { display: flex; align-items: flex-end; gap: 6px; }
+    .mini-bar {
+      flex: 1; background: rgba(173,198,255,0.15); border-radius: 2px 2px 0 0;
+      transition: background 0.15s; cursor: pointer;
+    }
+    .mini-bar:hover { background: rgba(173,198,255,0.35); }
+    .mini-bar.current { background: var(--primary); }
+    .chart-label { font-size: 10px; color: var(--text-dim); text-align: center; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+
+    /* Copro rows */
+    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .list-title { font-family: 'Manrope'; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+    .list-badge { font-size: 10px; font-weight: 900; padding: 3px 10px; border-radius: 99px; background: rgba(173,198,255,0.15); color: var(--primary); }
+
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      background: #0c0e14; border: none; border-radius: 8px;
+      padding: 8px 16px 8px 36px; font-size: 12px; color: var(--text);
+      width: 260px; outline: none; transition: box-shadow 0.15s;
+    }
+    .search-wrap input:focus { box-shadow: 0 0 0 1px rgba(173,198,255,0.4); }
+    .search-wrap input::placeholder { color: var(--text-dim); }
+    .search-wrap .material-symbols-outlined { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 18px; color: var(--text-muted); }
+
+    .rows { display: flex; flex-direction: column; gap: 6px; }
+
+    .copro-row {
+      display: flex; align-items: center; gap: 20px;
+      background: var(--surface); border-radius: 8px;
+      padding: 14px 24px; cursor: pointer; transition: background 0.2s;
+    }
+    .copro-row:hover { background: var(--surface-hover); }
+    .copro-row:hover .row-name { color: var(--primary); }
+    .copro-row:hover .row-chevron { transform: translateX(4px); }
+
+    .row-icon {
+      width: 40px; height: 40px; border-radius: 6px; background: var(--surface-deep);
+      display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0;
+    }
+    .row-info { flex: 1; min-width: 0; }
+    .row-name { font-size: 14px; font-weight: 700; transition: color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-addr { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    .row-col { text-align: right; flex-shrink: 0; }
+    .row-col-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-muted); margin-bottom: 2px; }
+    .row-col-value { font-family: 'Manrope'; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .row-alerts { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .row-alert { display: flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 900; }
+    .alert-danger { color: var(--danger); }
+    .alert-warning { color: var(--warning); }
+    .alert-ok { color: var(--text-dim); }
+
+    .row-chevron { color: var(--text-dim); transition: transform 0.15s; flex-shrink: 0; }
+
+    /* AG card shared */
+    .ag-card { background: var(--surface); border-radius: var(--radius); padding: 24px; border-left: 4px solid var(--primary); }
+    .ag-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .ag-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-sec); }
+    .ag-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+    .ag-name { color: #cbd5e1; font-weight: 500; }
+    .ag-date { padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+    .ag-soon { background: rgba(173,198,255,0.1); color: var(--primary); }
+    .ag-later { background: #33343b; color: var(--text-sec); }
+
+    /* Maintenance shared */
+    .maint-card { background: var(--surface); border-radius: var(--radius); padding: 24px; position: relative; overflow: hidden; }
+    .maint-bg { position: absolute; top: 8px; right: 8px; color: rgba(255,255,255,0.04); font-size: 64px; transition: transform 0.5s; }
+    .maint-card:hover .maint-bg { transform: scale(1.1); }
+    .maint-title { font-family: 'Manrope'; font-size: 18px; font-weight: 700; color: #f1f5f9; }
+    .maint-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+    .avatars { display: flex; margin-top: 14px; }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; margin-left: -6px;
+    }
+    .avatar:first-child { margin-left: 0; }
+
+    /* Ghost button */
+    .btn-ghost {
+      width: 100%; padding: 10px; border-radius: 4px;
+      border: 1px solid var(--border); background: none; color: var(--text);
+      font-size: 10px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 0.12em; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.04); }
+
+
+    /* =====================================================
+       VARIANTE A — "Executive" : Finance+Actions fusionnés + colonne droite
+       ===================================================== */
+    .va-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .va-finance {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .va-finance-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .va-metric-cell {
+      padding: 28px 32px;
+    }
+
+    .va-metric-cell:first-child {
+      border-right: 1px solid var(--border-light);
+    }
+
+    .va-finance-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .va-chart-cell {
+      padding: 24px 32px;
+      border-right: 1px solid var(--border-light);
+    }
+
+    .va-actions-cell {
+      padding: 24px 32px;
+      background: var(--surface-deep);
+    }
+
+    .va-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+
+    /* =====================================================
+       VARIANTE B — "Dashboard" : KPI strip horizontal + 3 colonnes en dessous
+       ===================================================== */
+    .vb-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .vb-kpi {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vb-kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .vb-kpi.kpi-danger::before { background: var(--danger); }
+    .vb-kpi.kpi-warning::before { background: var(--warning); }
+    .vb-kpi.kpi-success::before { background: var(--success); }
+    .vb-kpi.kpi-primary::before { background: var(--primary); }
+
+    .vb-kpi-header {
+      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;
+    }
+
+    .vb-kpi-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .vb-kpi.kpi-danger .vb-kpi-icon { background: rgba(255,180,171,0.1); color: var(--danger); }
+    .vb-kpi.kpi-warning .vb-kpi-icon { background: rgba(255,183,134,0.1); color: var(--warning); }
+    .vb-kpi.kpi-success .vb-kpi-icon { background: rgba(52,211,153,0.1); color: var(--success); }
+    .vb-kpi.kpi-primary .vb-kpi-icon { background: rgba(173,198,255,0.1); color: var(--primary); }
+
+    .vb-kpi-value {
+      font-family: 'Manrope'; font-size: 28px; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vb-kpi.kpi-danger .vb-kpi-value { color: var(--danger); }
+    .vb-kpi.kpi-warning .vb-kpi-value { color: var(--warning); }
+    .vb-kpi.kpi-success .vb-kpi-value { color: var(--success); }
+    .vb-kpi.kpi-primary .vb-kpi-value { color: var(--primary); }
+
+    .vb-kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .vb-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .vb-actions-panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .vb-actions-title {
+      font-family: 'Manrope'; font-size: 14px; font-weight: 700;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+
+
+    /* =====================================================
+       VARIANTE C — "Command Center" : Hero pleine largeur + bande actions
+       ===================================================== */
+    .vc-hero {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 32px 40px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: stretch;
+      gap: 48px;
+    }
+
+    .vc-hero-left { flex: 1; }
+
+    .vc-metrics-row {
+      display: flex;
+      gap: 64px;
+      align-items: flex-end;
+    }
+
+    .vc-metric {}
+
+    .vc-divider {
+      width: 1px;
+      background: var(--border);
+      align-self: stretch;
+      flex-shrink: 0;
+    }
+
+    .vc-hero-chart {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .vc-actions-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .vc-action-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border-left: 3px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .vc-action-card:hover { background: var(--surface-hover); }
+    .vc-action-card.ac-danger { border-left-color: var(--danger); }
+    .vc-action-card.ac-warning { border-left-color: var(--warning); }
+    .vc-action-card.ac-info { border-left-color: var(--primary); }
+    .vc-action-card.ac-ok { border-left-color: var(--success); }
+
+    .vc-action-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ac-danger .vc-action-icon { background: rgba(255,180,171,0.1); color: var(--danger); }
+    .ac-warning .vc-action-icon { background: rgba(255,183,134,0.1); color: var(--warning); }
+    .ac-info .vc-action-icon { background: rgba(173,198,255,0.1); color: var(--primary); }
+    .ac-ok .vc-action-icon { background: rgba(52,211,153,0.1); color: var(--success); }
+
+    .vc-action-value { font-family: 'Manrope'; font-size: 22px; font-weight: 800; }
+    .ac-danger .vc-action-value { color: var(--danger); }
+    .ac-warning .vc-action-value { color: var(--warning); }
+    .ac-info .vc-action-value { color: var(--primary); }
+    .ac-ok .vc-action-value { color: var(--success); }
+
+    .vc-action-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+    .vc-bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+
+    .vc-right {
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- VARIANT SWITCHER -->
+  <div class="switcher">
+    <span class="switcher-label">Variantes</span>
+    <button class="switcher-btn active" onclick="showVariant('a')">A — Executive</button>
+    <button class="switcher-btn" onclick="showVariant('b')">B — Dashboard</button>
+    <button class="switcher-btn" onclick="showVariant('c')">C — Command Center</button>
+  </div>
+
+  <!-- =====================================================
+       VARIANTE A — "Executive"
+       Finance panel (2x2 grid) + colonne droite
+       ===================================================== -->
+  <div id="variant-a" class="variant active">
+    <div class="page">
+      <div class="header">
+        <div>
+          <h1 class="font-headline">Mon Portefeuille</h1>
+          <p>Vue consolidee de vos 5 coproprietes &middot; 187 lots</p>
+        </div>
+        <button class="btn-primary">
+          <span class="material-symbols-outlined" style="font-size:20px">add</span>
+          Nouvelle copropriete
+        </button>
+      </div>
+
+      <div class="va-grid">
+        <!-- Finance Panel 2x2 -->
+        <div class="va-finance">
+          <!-- Top row: 2 metrics side by side -->
+          <div class="va-finance-top">
+            <div class="va-metric-cell">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+                <span class="pulse-dot"></span>
+                <span class="tag">Sante Financiere</span>
+              </div>
+              <p class="metric-label">Encaisse Totale</p>
+              <div class="metric-value" style="font-size:40px">338 361<span class="metric-unit">&euro;</span></div>
+              <div class="trend">
+                <span class="material-symbols-outlined" style="font-size:16px">trending_up</span>
+                +4.2% vs mois dernier
+              </div>
+            </div>
+            <div class="va-metric-cell">
+              <div style="height:36px"></div>
+              <p class="metric-label">Taux de Recouvrement</p>
+              <div class="metric-value" style="font-size:40px">84.8<span class="metric-unit">%</span></div>
+              <div style="margin-top:12px">
+                <div class="progress-bar"><div class="progress-fill" style="width:84.8%"></div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Bottom row: chart + actions -->
+          <div class="va-finance-bottom">
+            <div class="va-chart-cell">
+              <div class="mini-chart" style="height:80px">
+                <div class="mini-bar" style="height:55%"></div>
+                <div class="mini-bar" style="height:40%"></div>
+                <div class="mini-bar" style="height:70%"></div>
+                <div class="mini-bar" style="height:60%"></div>
+                <div class="mini-bar" style="height:80%"></div>
+                <div class="mini-bar" style="height:65%"></div>
+                <div class="mini-bar current" style="height:90%"></div>
+              </div>
+              <p class="chart-label">Historique recouvrement (7 mois)</p>
+            </div>
+            <div class="va-actions-cell">
+              <h4 style="font-family:Manrope;font-size:13px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+                <span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">assignment_late</span>
+                Actions Critiques
+              </h4>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div class="action-item"><span class="action-dot dot-danger"></span><div><p class="action-label">3 copro. avec impayes</p><p class="action-sub">13 219&euro;</p></div></div>
+                <div class="action-item"><span class="action-dot dot-warning"></span><div><p class="action-label">8 factures en retard</p><p class="action-sub">6 720&euro;</p></div></div>
+                <div class="action-item"><span class="action-dot dot-info"></span><div><p class="action-label">16 mvts non rapproches</p><p class="action-sub">3 copro.</p></div></div>
+              </div>
+              <button class="btn-ghost" style="margin-top:16px">Voir tout</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="va-right">
+          <div class="maint-card">
+            <div style="position:relative;z-index:1">
+              <span class="material-symbols-outlined" style="font-size:28px;color:var(--warning);margin-bottom:8px">construction</span>
+              <h4 class="maint-title">Maintenance</h4>
+              <p class="maint-sub">8 interventions en cours sur l'ensemble du parc.</p>
+              <div class="avatars">
+                <div class="avatar" style="background:rgba(173,198,255,0.2);color:var(--primary)">JD</div>
+                <div class="avatar" style="background:rgba(255,183,134,0.2);color:var(--warning)">ML</div>
+                <div class="avatar" style="background:#33343b;color:var(--text-sec)">+4</div>
+              </div>
+            </div>
+            <span class="material-symbols-outlined maint-bg">engineering</span>
+          </div>
+
+          <div class="ag-card">
+            <div class="ag-header">
+              <h4 class="ag-title">Prochaines AG</h4>
+              <span class="material-symbols-outlined" style="color:var(--primary)">event</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="ag-item"><span class="ag-name">Domaine de la Foret</span><span class="ag-date ag-soon">20 avr.</span></div>
+              <div class="ag-item"><span class="ag-name">Residence Les Lilas</span><span class="ag-date ag-later">15 mai</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copro list -->
+      <div class="list-header">
+        <h3 class="list-title">Coproprietes <span class="list-badge">5 UNITES</span></h3>
+        <div class="search-wrap">
+          <span class="material-symbols-outlined">search</span>
+          <input placeholder="Rechercher une adresse, un nom..." type="text"/>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">apartment</span></div><div class="row-info"><div class="row-name">Domaine de la Foret</div><div class="row-addr">120 boulevard de la Foret, 92400 Courbevoie</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">125 800,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-danger"><span class="material-symbols-outlined" style="font-size:16px">warning</span> 2</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 5</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">20 avr. 2026</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home_work</span></div><div class="row-info"><div class="row-name">Residence Les Lilas</div><div class="row-addr">15 rue des Lilas, 75011 Paris</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">45 230,50&euro;</div></div><div class="row-alerts"><span class="row-alert alert-danger"><span class="material-symbols-outlined" style="font-size:16px">warning</span> 1</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 2</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">15 mai 2026</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">corporate_fare</span></div><div class="row-info"><div class="row-name">Residence Haussmann</div><div class="row-addr">45 boulevard Haussmann, 75009 Paris</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">32 100,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 1</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">&mdash;</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">holiday_village</span></div><div class="row-info"><div class="row-name">Le Clos Saint-Martin</div><div class="row-addr">8 avenue Saint-Martin, 75003 Paris</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">78 450,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 0</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">&mdash;</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">park</span></div><div class="row-info"><div class="row-name">Les Jardins du Parc</div><div class="row-addr">5 allee des Jardins, 94300 Vincennes</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">56 780,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 0</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">&mdash;</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       VARIANTE B — "Dashboard"
+       KPI strip + 3 colonnes (actions | maintenance | AG)
+       ===================================================== -->
+  <div id="variant-b" class="variant">
+    <div class="page">
+      <div class="header">
+        <div>
+          <h1 class="font-headline">Mon Portefeuille</h1>
+          <p>Vue consolidee de vos 5 coproprietes &middot; 187 lots</p>
+        </div>
+        <button class="btn-primary">
+          <span class="material-symbols-outlined" style="font-size:20px">add</span>
+          Nouvelle copropriete
+        </button>
+      </div>
+
+      <!-- KPI Strip -->
+      <div class="vb-kpis">
+        <div class="vb-kpi kpi-primary">
+          <div class="vb-kpi-header">
+            <p class="metric-label">Encaisse Totale</p>
+            <div class="vb-kpi-icon"><span class="material-symbols-outlined">account_balance</span></div>
+          </div>
+          <div class="vb-kpi-value">338 361&euro;</div>
+          <div class="trend" style="margin-top:8px">
+            <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
+            +4.2%
+          </div>
+        </div>
+        <div class="vb-kpi kpi-warning">
+          <div class="vb-kpi-header">
+            <p class="metric-label">Taux Recouvrement</p>
+            <div class="vb-kpi-icon"><span class="material-symbols-outlined">percent</span></div>
+          </div>
+          <div class="vb-kpi-value">84.8%</div>
+          <div class="vb-kpi-sub">A ameliorer</div>
+        </div>
+        <div class="vb-kpi kpi-danger">
+          <div class="vb-kpi-header">
+            <p class="metric-label">Impayes Totaux</p>
+            <div class="vb-kpi-icon"><span class="material-symbols-outlined">error</span></div>
+          </div>
+          <div class="vb-kpi-value">13 219&euro;</div>
+          <div class="vb-kpi-sub">3 copro. concernees</div>
+        </div>
+        <div class="vb-kpi kpi-success">
+          <div class="vb-kpi-header">
+            <p class="metric-label">Rapprochement</p>
+            <div class="vb-kpi-icon"><span class="material-symbols-outlined">sync</span></div>
+          </div>
+          <div class="vb-kpi-value">16</div>
+          <div class="vb-kpi-sub">mvts non rapproches</div>
+        </div>
+      </div>
+
+      <!-- 3-column band -->
+      <div class="vb-bottom">
+        <div class="vb-actions-panel">
+          <h4 class="vb-actions-title">
+            <span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">assignment_late</span>
+            Actions Critiques
+          </h4>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="action-item"><span class="action-dot dot-danger"></span><div><p class="action-label">3 copro. avec impayes</p><p class="action-sub">Montant total: 13 219&euro;</p></div></div>
+            <div class="action-item"><span class="action-dot dot-warning"></span><div><p class="action-label">8 factures en retard</p><p class="action-sub">6 720&euro; a traiter</p></div></div>
+            <div class="action-item"><span class="action-dot dot-info"></span><div><p class="action-label">16 mouvements non rapproches</p><p class="action-sub">3 copro. en attente</p></div></div>
+            <div class="action-item"><span class="action-dot dot-warning"></span><div><p class="action-label">1 budget a risque</p><p class="action-sub">49% consomme</p></div></div>
+          </div>
+          <button class="btn-ghost" style="margin-top:20px">Voir tout le flux</button>
+        </div>
+
+        <div class="maint-card">
+          <div style="position:relative;z-index:1">
+            <span class="material-symbols-outlined" style="font-size:28px;color:var(--warning);margin-bottom:8px">construction</span>
+            <h4 class="maint-title">Maintenance</h4>
+            <p class="maint-sub">8 interventions en cours sur l'ensemble du parc immobilier.</p>
+            <div class="avatars" style="margin-top:20px">
+              <div class="avatar" style="background:rgba(173,198,255,0.2);color:var(--primary)">JD</div>
+              <div class="avatar" style="background:rgba(255,183,134,0.2);color:var(--warning)">ML</div>
+              <div class="avatar" style="background:#33343b;color:var(--text-sec)">+4</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined maint-bg">engineering</span>
+        </div>
+
+        <div class="ag-card">
+          <div class="ag-header">
+            <h4 class="ag-title">Prochaines AG</h4>
+            <span class="material-symbols-outlined" style="color:var(--primary)">event</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="ag-item"><span class="ag-name">Domaine de la Foret</span><span class="ag-date ag-soon">20 avr.</span></div>
+            <div class="ag-item"><span class="ag-name">Residence Les Lilas</span><span class="ag-date ag-later">15 mai</span></div>
+            <div class="ag-item"><span class="ag-name">Les Jardins du Parc</span><span class="ag-date ag-later">03 sept.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copro list (same) -->
+      <div class="list-header">
+        <h3 class="list-title">Coproprietes <span class="list-badge">5 UNITES</span></h3>
+        <div class="search-wrap">
+          <span class="material-symbols-outlined">search</span>
+          <input placeholder="Rechercher une adresse, un nom..." type="text"/>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">apartment</span></div><div class="row-info"><div class="row-name">Domaine de la Foret</div><div class="row-addr">120 boulevard de la Foret, 92400 Courbevoie</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">125 800,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-danger"><span class="material-symbols-outlined" style="font-size:16px">warning</span> 2</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 5</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">20 avr. 2026</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home_work</span></div><div class="row-info"><div class="row-name">Residence Les Lilas</div><div class="row-addr">15 rue des Lilas, 75011 Paris</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">45 230,50&euro;</div></div><div class="row-alerts"><span class="row-alert alert-danger"><span class="material-symbols-outlined" style="font-size:16px">warning</span> 1</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 2</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">15 mai 2026</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">corporate_fare</span></div><div class="row-info"><div class="row-name">Residence Haussmann</div><div class="row-addr">45 boulevard Haussmann, 75009 Paris</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">32 100,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 1</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">&mdash;</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">holiday_village</span></div><div class="row-info"><div class="row-name">Le Clos Saint-Martin</div><div class="row-addr">8 avenue Saint-Martin, 75003 Paris</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">78 450,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 0</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">&mdash;</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+        <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">park</span></div><div class="row-info"><div class="row-name">Les Jardins du Parc</div><div class="row-addr">5 allee des Jardins, 94300 Vincennes</div></div><div class="row-col" style="width:140px"><div class="row-col-label">Solde Global</div><div class="row-col-value">56 780,00&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 0</span></div><div class="row-col" style="width:130px"><div class="row-col-label">Date AG</div><div class="row-col-value">&mdash;</div></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       VARIANTE C — "Command Center"
+       Hero pleine largeur + bande action cards + list
+       ===================================================== -->
+  <div id="variant-c" class="variant">
+    <div class="page">
+      <div class="header">
+        <div>
+          <h1 class="font-headline">Mon Portefeuille</h1>
+          <p>Vue consolidee de vos 5 coproprietes &middot; 187 lots</p>
+        </div>
+        <button class="btn-primary">
+          <span class="material-symbols-outlined" style="font-size:20px">add</span>
+          Nouvelle copropriete
+        </button>
+      </div>
+
+      <!-- Full-width hero -->
+      <div class="vc-hero">
+        <div class="vc-hero-left">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px">
+            <span class="pulse-dot"></span>
+            <span class="tag">Sante Financiere Globale</span>
+          </div>
+          <div class="vc-metrics-row">
+            <div class="vc-metric">
+              <p class="metric-label">Encaisse Totale</p>
+              <div class="metric-value" style="font-size:44px">338 361<span class="metric-unit">&euro;</span></div>
+              <div class="trend">
+                <span class="material-symbols-outlined" style="font-size:16px">trending_up</span>
+                +4.2% vs mois dernier
+              </div>
+            </div>
+            <div class="vc-metric">
+              <p class="metric-label">Taux de Recouvrement</p>
+              <div class="metric-value" style="font-size:44px">84.8<span class="metric-unit">%</span></div>
+              <div style="margin-top:12px;width:200px">
+                <div class="progress-bar"><div class="progress-fill" style="width:84.8%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vc-divider"></div>
+
+        <div class="vc-hero-chart">
+          <div class="mini-chart" style="height:100px;flex:1;align-items:flex-end">
+            <div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:40%"></div>
+            <div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:60%"></div>
+            <div class="mini-bar" style="height:80%"></div>
+            <div class="mini-bar" style="height:65%"></div>
+            <div class="mini-bar current" style="height:90%"></div>
+          </div>
+          <p class="chart-label">Historique recouvrement (7 mois)</p>
+        </div>
+      </div>
+
+      <!-- Action cards strip -->
+      <div class="vc-actions-strip">
+        <div class="vc-action-card ac-danger">
+          <div class="vc-action-icon"><span class="material-symbols-outlined">error</span></div>
+          <div>
+            <div class="vc-action-value">13 219&euro;</div>
+            <div class="vc-action-label">Impayes &middot; 3 copro.</div>
+          </div>
+        </div>
+        <div class="vc-action-card ac-warning">
+          <div class="vc-action-icon"><span class="material-symbols-outlined">receipt_long</span></div>
+          <div>
+            <div class="vc-action-value">8</div>
+            <div class="vc-action-label">Factures en retard</div>
+          </div>
+        </div>
+        <div class="vc-action-card ac-info">
+          <div class="vc-action-icon"><span class="material-symbols-outlined">sync_alt</span></div>
+          <div>
+            <div class="vc-action-value">16</div>
+            <div class="vc-action-label">Mvts non rapproches</div>
+          </div>
+        </div>
+        <div class="vc-action-card ac-ok">
+          <div class="vc-action-icon"><span class="material-symbols-outlined">pie_chart</span></div>
+          <div>
+            <div class="vc-action-value">1</div>
+            <div class="vc-action-label">Budget a risque</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom: list + right column -->
+      <div class="vc-bottom-grid">
+        <div>
+          <div class="list-header">
+            <h3 class="list-title">Coproprietes <span class="list-badge">5 UNITES</span></h3>
+            <div class="search-wrap">
+              <span class="material-symbols-outlined">search</span>
+              <input placeholder="Rechercher une adresse, un nom..." type="text"/>
+            </div>
+          </div>
+          <div class="rows">
+            <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">apartment</span></div><div class="row-info"><div class="row-name">Domaine de la Foret</div><div class="row-addr">120 boulevard de la Foret, 92400 Courbevoie</div></div><div class="row-col" style="width:130px"><div class="row-col-label">Solde</div><div class="row-col-value">125 800&euro;</div></div><div class="row-alerts"><span class="row-alert alert-danger"><span class="material-symbols-outlined" style="font-size:16px">warning</span> 2</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 5</span></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+            <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home_work</span></div><div class="row-info"><div class="row-name">Residence Les Lilas</div><div class="row-addr">15 rue des Lilas, 75011 Paris</div></div><div class="row-col" style="width:130px"><div class="row-col-label">Solde</div><div class="row-col-value">45 230&euro;</div></div><div class="row-alerts"><span class="row-alert alert-danger"><span class="material-symbols-outlined" style="font-size:16px">warning</span> 1</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 2</span></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+            <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">corporate_fare</span></div><div class="row-info"><div class="row-name">Residence Haussmann</div><div class="row-addr">45 boulevard Haussmann, 75009 Paris</div></div><div class="row-col" style="width:130px"><div class="row-col-label">Solde</div><div class="row-col-value">32 100&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-warning"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 1</span></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+            <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">holiday_village</span></div><div class="row-info"><div class="row-name">Le Clos Saint-Martin</div><div class="row-addr">8 avenue Saint-Martin, 75003 Paris</div></div><div class="row-col" style="width:130px"><div class="row-col-label">Solde</div><div class="row-col-value">78 450&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 0</span></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+            <div class="copro-row"><div class="row-icon"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">park</span></div><div class="row-info"><div class="row-name">Les Jardins du Parc</div><div class="row-addr">5 allee des Jardins, 94300 Vincennes</div></div><div class="row-col" style="width:130px"><div class="row-col-label">Solde</div><div class="row-col-value">56 780&euro;</div></div><div class="row-alerts"><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 0</span><span class="row-alert alert-ok"><span class="material-symbols-outlined" style="font-size:16px">construction</span> 0</span></div><span class="material-symbols-outlined row-chevron">chevron_right</span></div>
+          </div>
+        </div>
+
+        <!-- Right sidebar -->
+        <div class="vc-right">
+          <div class="maint-card">
+            <div style="position:relative;z-index:1">
+              <span class="material-symbols-outlined" style="font-size:28px;color:var(--warning);margin-bottom:8px">construction</span>
+              <h4 class="maint-title">Maintenance</h4>
+              <p class="maint-sub">8 interventions en cours sur l'ensemble du parc.</p>
+              <div class="avatars" style="margin-top:14px">
+                <div class="avatar" style="background:rgba(173,198,255,0.2);color:var(--primary)">JD</div>
+                <div class="avatar" style="background:rgba(255,183,134,0.2);color:var(--warning)">ML</div>
+                <div class="avatar" style="background:#33343b;color:var(--text-sec)">+4</div>
+              </div>
+            </div>
+            <span class="material-symbols-outlined maint-bg">engineering</span>
+          </div>
+
+          <div class="ag-card">
+            <div class="ag-header">
+              <h4 class="ag-title">Prochaines AG</h4>
+              <span class="material-symbols-outlined" style="color:var(--primary)">event</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="ag-item"><span class="ag-name">Domaine de la Foret</span><span class="ag-date ag-soon">20 avr.</span></div>
+              <div class="ag-item"><span class="ag-name">Residence Les Lilas</span><span class="ag-date ag-later">15 mai</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    function showVariant(id) {
+      document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.switcher-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('variant-' + id).classList.add('active');
+      event.target.classList.add('active');
+      window.scrollTo(0, 0);
+    }
+  </script>
+
+</body>
+</html>

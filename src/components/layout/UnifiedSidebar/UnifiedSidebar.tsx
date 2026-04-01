@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import {
   Search, Settings, ChevronDown, ChevronRight,
-  Sun, Moon, PanelLeftClose, PanelLeftOpen, Bell, Globe,
+  Sun, Moon, PanelLeftClose, PanelLeftOpen, Bell, Globe, ArrowLeft,
 } from 'lucide-react';
 import { MODULES, getActiveModule } from '@/lib/config/navigation';
 import { searchRoutes, SearchableRoute } from '@/lib/config/search';
@@ -115,6 +115,19 @@ export default function UnifiedSidebar() {
 
   return (
     <aside className={clsx(styles.sidebar, collapsed && styles.collapsed)} aria-label="Navigation principale">
+      {/* Back to Portefeuille */}
+      {!collapsed && (
+        <Link href="/portefeuille" className={styles.backLink}>
+          <ArrowLeft size={14} />
+          <span>Portefeuille</span>
+        </Link>
+      )}
+      {collapsed && (
+        <Link href="/portefeuille" className={styles.backLinkCollapsed} title="Portefeuille">
+          <ArrowLeft size={14} />
+        </Link>
+      )}
+
       {/* Logo */}
       <div className={styles.logo}>
         <Link href="/dashboard" className={styles.logoLink}>

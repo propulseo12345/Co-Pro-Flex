@@ -16,7 +16,7 @@ export function OnboardingRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !currentCopro && !pathname.startsWith('/onboarding')) {
+    if (!isLoading && !currentCopro && !pathname.startsWith('/onboarding') && !pathname.startsWith('/finance-v2')) {
       router.push('/onboarding');
     }
   }, [isLoading, currentCopro, pathname, router]);

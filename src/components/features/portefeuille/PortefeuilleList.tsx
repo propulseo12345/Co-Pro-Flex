@@ -2,34 +2,35 @@
 
 import { Search, Building2 } from 'lucide-react';
 import type { ICoproprietePortefeuille } from '@/types/models/portefeuille';
-import { PortefeuilleCoproCard } from './PortefeuilleCoproCard';
-import styles from '../../../app/(dashboard)/portefeuille/portefeuille.module.css';
+import { PortefeuilleCoproRow } from './PortefeuilleCoproRow';
+import styles from '../../../app/(gestionnaire)/portefeuille/portefeuille.module.css';
 
-interface PortefeuilleGridProps {
+interface PortefeuilleListProps {
   coproprietes: ICoproprietePortefeuille[];
   recherche: string;
   onRecherche: (value: string) => void;
   onSelectCopro: (copro: ICoproprietePortefeuille) => void;
 }
 
-export function PortefeuilleGrid({
+export function PortefeuilleList({
   coproprietes,
   recherche,
   onRecherche,
   onSelectCopro,
-}: PortefeuilleGridProps) {
+}: PortefeuilleListProps) {
   return (
-    <div className={styles.gridSection}>
-      <div className={styles.gridHeader}>
-        <h2 className={styles.gridTitle}>
-          Copropriétés
-          <span className={styles.gridCount}>{coproprietes.length}</span>
-        </h2>
-        <div className={styles.gridSearch}>
-          <Search size={16} />
+    <section className={styles.listSection}>
+      <div className={styles.listHeader}>
+        <h3 className={styles.listTitle}>
+          Coproprietes
+          <span className={styles.listBadge}>{coproprietes.length} UNITES</span>
+        </h3>
+        <div className={styles.listSearch}>
+          <Search size={16} className={styles.listSearchIcon} />
           <input
             type="text"
-            placeholder="Rechercher une copropriété..."
+            placeholder="Rechercher une adresse, un nom..."
+            className={styles.listSearchInput}
             value={recherche}
             onChange={(e) => onRecherche(e.target.value)}
           />
@@ -39,12 +40,12 @@ export function PortefeuilleGrid({
       {coproprietes.length === 0 ? (
         <div className={styles.emptyState}>
           <Building2 size={48} />
-          <p>Aucune copropriété ne correspond à votre recherche</p>
+          <p>Aucune copropriete ne correspond a votre recherche</p>
         </div>
       ) : (
-        <div className={styles.coproGrid}>
+        <div className={styles.rowsContainer}>
           {coproprietes.map((copro) => (
-            <PortefeuilleCoproCard
+            <PortefeuilleCoproRow
               key={copro.id}
               copro={copro}
               onSelect={onSelectCopro}
@@ -52,6 +53,6 @@ export function PortefeuilleGrid({
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

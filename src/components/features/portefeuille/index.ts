@@ -1,3 +1,3 @@
-export { PortefeuilleKpis } from './PortefeuilleKpis';
-export { PortefeuilleCoproCard } from './PortefeuilleCoproCard';
-export { PortefeuilleGrid } from './PortefeuilleGrid';
+export { PortefeuilleSummary } from './PortefeuilleSummary';
+export { PortefeuilleCoproRow } from './PortefeuilleCoproRow';
+export { PortefeuilleList } from './PortefeuilleList';

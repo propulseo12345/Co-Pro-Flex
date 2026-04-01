@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Portefeuille — Preview Stitch</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary-fixed": "#311400",
+            "on-secondary-container": "#9fb5e7",
+            "surface-container-low": "#191b22",
+            "tertiary-container": "#df7412",
+            "surface-container-highest": "#33343b",
+            "on-surface": "#e2e2eb",
+            "inverse-primary": "#005ac2",
+            "surface-variant": "#33343b",
+            "inverse-on-surface": "#2e3037",
+            "error": "#ffb4ab",
+            "on-primary-container": "#00285d",
+            "surface-container-high": "#282a30",
+            "secondary": "#b1c6f9",
+            "secondary-fixed-dim": "#b1c6f9",
+            "on-secondary-fixed-variant": "#304671",
+            "secondary-container": "#304671",
+            "primary-fixed": "#d8e2ff",
+            "surface-container-lowest": "#0c0e14",
+            "on-primary-fixed": "#001a42",
+            "on-tertiary": "#502400",
+            "on-secondary": "#182f59",
+            "surface-tint": "#adc6ff",
+            "background": "#111319",
+            "outline": "#8c909f",
+            "on-error": "#690005",
+            "tertiary": "#ffb786",
+            "surface": "#111319",
+            "on-background": "#e2e2eb",
+            "on-error-container": "#ffdad6",
+            "on-tertiary-container": "#461f00",
+            "primary-fixed-dim": "#adc6ff",
+            "tertiary-fixed-dim": "#ffb786",
+            "surface-container": "#1e1f26",
+            "on-tertiary-fixed-variant": "#723600",
+            "tertiary-fixed": "#ffdcc6",
+            "error-container": "#93000a",
+            "on-secondary-fixed": "#001a42",
+            "on-surface-variant": "#c2c6d6",
+            "surface-dim": "#111319",
+            "inverse-surface": "#e2e2eb",
+            "on-primary-fixed-variant": "#004395",
+            "on-primary": "#002e6a",
+            "surface-bright": "#373940",
+            "primary": "#adc6ff",
+            "secondary-fixed": "#d8e2ff",
+            "outline-variant": "#424754",
+            "primary-container": "#4d8eff"
+          },
+          fontFamily: {
+            "headline": ["Manrope"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30">
+
+  <!-- SideNavBar -->
+  <nav class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest flex flex-col py-6 z-50">
+    <div class="px-6 mb-10">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-container rounded flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-primary-container text-xl" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+        </div>
+        <div>
+          <h1 class="font-headline text-lg font-black text-slate-100 tracking-tight">CoProFlex</h1>
+          <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Gestion Immobiliere</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 space-y-1">
+      <a class="bg-gradient-to-r from-primary/10 to-transparent text-primary border-l-4 border-primary px-6 py-3 flex items-center gap-3 transition-all duration-200" href="#">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+        <span class="font-headline text-sm font-semibold">Vue d'ensemble</span>
+      </a>
+      <a class="text-slate-500 hover:text-slate-300 hover:bg-white/5 px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:translate-x-1" href="#">
+        <span class="material-symbols-outlined">domain</span>
+        <span class="font-headline text-sm font-semibold">Coproprietes</span>
+      </a>
+      <a class="text-slate-500 hover:text-slate-300 hover:bg-white/5 px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:translate-x-1" href="#">
+        <span class="material-symbols-outlined">groups</span>
+        <span class="font-headline text-sm font-semibold">Coproprietaires</span>
+      </a>
+      <a class="text-slate-500 hover:text-slate-300 hover:bg-white/5 px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:translate-x-1" href="#">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span class="font-headline text-sm font-semibold">Finances</span>
+      </a>
+      <a class="text-slate-500 hover:text-slate-300 hover:bg-white/5 px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:translate-x-1" href="#">
+        <span class="material-symbols-outlined">construction</span>
+        <span class="font-headline text-sm font-semibold">Maintenance</span>
+      </a>
+      <a class="text-slate-500 hover:text-slate-300 hover:bg-white/5 px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:translate-x-1" href="#">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="font-headline text-sm font-semibold">Parametres</span>
+      </a>
+    </div>
+
+    <div class="px-4 mt-auto space-y-1">
+      <div class="p-4 bg-surface-container rounded-lg mb-4 border border-outline-variant/10">
+        <p class="text-xs text-slate-400 mb-2">Besoin d'aide ?</p>
+        <button class="w-full py-2 bg-white/5 hover:bg-white/10 text-primary text-xs font-bold rounded transition-colors uppercase tracking-widest">Support Expert</button>
+      </div>
+      <a class="text-slate-500 hover:text-slate-300 px-4 py-2 flex items-center gap-3 text-sm" href="#">
+        <span class="material-symbols-outlined text-lg">help</span>
+        <span>Aide</span>
+      </a>
+      <a class="text-error/70 hover:text-error px-4 py-2 flex items-center gap-3 text-sm" href="#">
+        <span class="material-symbols-outlined text-lg">logout</span>
+        <span>Deconnexion</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="ml-64 min-h-screen p-6 bg-[#0f1117]">
+
+    <!-- Top Bar -->
+    <header class="flex justify-between items-end mb-8">
+      <div>
+        <h2 class="font-headline text-4xl font-extrabold text-on-surface tracking-tight">Mon Portefeuille</h2>
+        <p class="text-slate-500 font-medium mt-1">Vue consolidee de vos 6 coproprietes &middot; 187 lots</p>
+      </div>
+      <button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-[0.98] transition-transform active:scale-95">
+        <span class="material-symbols-outlined text-xl">add</span>
+        <span>Nouvelle copropriete</span>
+      </button>
+    </header>
+
+    <!-- Summary Hero -->
+    <section class="grid grid-cols-12 gap-6 mb-8">
+
+      <!-- Main Metric Panel -->
+      <div class="col-span-12 lg:col-span-8 bg-[#1a1d2e] rounded-xl overflow-hidden flex flex-col md:flex-row">
+        <div class="p-8 flex-1 border-r border-outline-variant/5">
+          <div class="flex items-center gap-2 mb-8">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            <span class="text-[10px] uppercase tracking-widest font-bold text-primary">Sante Financiere Globale</span>
+          </div>
+          <div class="grid grid-cols-2 gap-8">
+            <div>
+              <p class="text-slate-500 text-xs font-bold uppercase tracking-tighter mb-1">Encaisse Totale</p>
+              <h3 class="text-4xl font-headline font-extrabold tabular-nums text-on-surface">412.850<span class="text-xl ml-1">&euro;</span></h3>
+              <div class="flex items-center gap-1 mt-2 text-emerald-400 text-xs font-bold">
+                <span class="material-symbols-outlined text-sm">trending_up</span>
+                <span>+4.2% vs mois dernier</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-slate-500 text-xs font-bold uppercase tracking-tighter mb-1">Taux de Recouvrement</p>
+              <h3 class="text-4xl font-headline font-extrabold tabular-nums text-on-surface">94.8<span class="text-xl ml-1">%</span></h3>
+              <div class="w-full h-1.5 bg-surface-container-lowest rounded-full mt-4 overflow-hidden">
+                <div class="h-full bg-primary w-[94.8%]"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Tiny Chart -->
+          <div class="mt-10 h-24 flex items-end gap-1.5">
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-[60%] hover:bg-primary/40 transition-colors"></div>
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-[45%] hover:bg-primary/40 transition-colors"></div>
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-[75%] hover:bg-primary/40 transition-colors"></div>
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-[65%] hover:bg-primary/40 transition-colors"></div>
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-[85%] hover:bg-primary/40 transition-colors"></div>
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-[70%] hover:bg-primary/40 transition-colors"></div>
+            <div class="flex-1 bg-primary rounded-t-sm h-[95%]"></div>
+          </div>
+          <p class="text-[10px] text-slate-600 mt-2 text-center uppercase tracking-widest font-bold">Historique de recouvrement (7 mois)</p>
+        </div>
+
+        <!-- Actions Critiques -->
+        <div class="bg-[#131620] p-8 w-full md:w-80">
+          <h4 class="font-headline text-sm font-bold text-slate-100 mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+            Actions Critiques
+          </h4>
+          <ul class="space-y-4">
+            <li class="flex gap-3">
+              <div class="mt-1 w-2 h-2 rounded-full bg-error shrink-0"></div>
+              <div>
+                <p class="text-xs font-bold text-on-surface">3 Factures impayees</p>
+                <p class="text-[10px] text-slate-500">Montant total: 12.450&euro;</p>
+              </div>
+            </li>
+            <li class="flex gap-3">
+              <div class="mt-1 w-2 h-2 rounded-full bg-tertiary shrink-0"></div>
+              <div>
+                <p class="text-xs font-bold text-on-surface">AG a preparer</p>
+                <p class="text-[10px] text-slate-500">Residence Les Lilas (J-14)</p>
+              </div>
+            </li>
+            <li class="flex gap-3">
+              <div class="mt-1 w-2 h-2 rounded-full bg-primary shrink-0"></div>
+              <div>
+                <p class="text-xs font-bold text-on-surface">Audit energetique</p>
+                <p class="text-[10px] text-slate-500">Signature requise du conseil</p>
+              </div>
+            </li>
+          </ul>
+          <button class="w-full mt-8 py-3 rounded border border-outline-variant/20 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest transition-colors">
+            Voir tout le flux
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-span-12 lg:col-span-4 grid grid-rows-2 gap-6">
+        <!-- Maintenance Card -->
+        <div class="bg-[#1a1d2e] rounded-xl p-6 relative overflow-hidden group">
+          <div class="relative z-10">
+            <span class="material-symbols-outlined text-tertiary mb-2 text-3xl">construction</span>
+            <h4 class="text-lg font-headline font-bold text-slate-100">Maintenance</h4>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">12 interventions en cours sur l'ensemble du parc immobilier.</p>
+            <div class="mt-4 flex -space-x-2">
+              <div class="w-8 h-8 rounded-full border-2 border-[#1a1d2e] bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">JD</div>
+              <div class="w-8 h-8 rounded-full border-2 border-[#1a1d2e] bg-tertiary/20 flex items-center justify-center text-[10px] font-bold text-tertiary">ML</div>
+              <div class="w-8 h-8 rounded-full border-2 border-[#1a1d2e] bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-slate-400">+4</div>
+            </div>
+          </div>
+          <div class="absolute top-0 right-0 p-4">
+            <span class="material-symbols-outlined text-slate-800 text-6xl opacity-20 group-hover:scale-110 transition-transform duration-500">engineering</span>
+          </div>
+        </div>
+
+        <!-- Prochaines AG -->
+        <div class="bg-[#1a1d2e] rounded-xl p-6 border-l-4 border-primary">
+          <div class="flex justify-between items-start mb-4">
+            <h4 class="text-xs font-black uppercase tracking-widest text-slate-400">Prochaines AG</h4>
+            <span class="material-symbols-outlined text-primary">event</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium">Residence Les Lilas</span>
+              <span class="bg-primary/10 text-primary px-2 py-0.5 rounded font-bold">15 Mai</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium">Residence Haussmann</span>
+              <span class="bg-surface-container-highest text-slate-400 px-2 py-0.5 rounded font-bold">22 Juin</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium">Les Jardins du Parc</span>
+              <span class="bg-surface-container-highest text-slate-400 px-2 py-0.5 rounded font-bold">03 Sept.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Property List Section -->
+    <section>
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-3">
+          <h3 class="font-headline text-xl font-bold text-on-surface">Coproprietes</h3>
+          <span class="bg-primary/20 text-primary text-[10px] font-black px-2 py-0.5 rounded-full">6 UNITES</span>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg">search</span>
+          <input class="bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary/40 rounded-lg pl-10 pr-4 py-2 text-xs w-64 text-on-surface placeholder:text-slate-600 transition-all" placeholder="Rechercher une adresse, un nom..." type="text"/>
+        </div>
+      </div>
+
+      <!-- Compact Rows -->
+      <div class="space-y-2">
+
+        <!-- Row 1 — Residence de la Foret -->
+        <div class="group bg-[#1a1d2e] hover:bg-surface-container transition-all duration-200 rounded-lg px-6 py-4 flex items-center gap-6 cursor-pointer">
+          <div class="w-10 h-10 rounded bg-[#131620] flex items-center justify-center shrink-0 text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">apartment</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">Residence de la Foret</h5>
+            <p class="text-[10px] text-slate-500 truncate mt-0.5">8 avenue de la Foret, 92400 Courbevoie</p>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Solde Global</p>
+            <p class="text-sm font-headline font-bold text-on-surface tabular-nums">78.340,00&euro;</p>
+          </div>
+          <div class="flex items-center gap-3 w-32 justify-center">
+            <div class="flex items-center gap-1 text-error">
+              <span class="material-symbols-outlined text-sm">warning</span>
+              <span class="text-[10px] font-black">3</span>
+            </div>
+            <div class="flex items-center gap-1 text-tertiary">
+              <span class="material-symbols-outlined text-sm">construction</span>
+              <span class="text-[10px] font-black">2</span>
+            </div>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Date AG</p>
+            <p class="text-sm font-bold text-slate-300">20 Avr. 2026</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+        </div>
+
+        <!-- Row 2 — Residence Les Lilas -->
+        <div class="group bg-[#1a1d2e] hover:bg-surface-container transition-all duration-200 rounded-lg px-6 py-4 flex items-center gap-6 cursor-pointer">
+          <div class="w-10 h-10 rounded bg-[#131620] flex items-center justify-center shrink-0 text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home_work</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">Residence Les Lilas</h5>
+            <p class="text-[10px] text-slate-500 truncate mt-0.5">15 rue des Lilas, 75011 Paris</p>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Solde Global</p>
+            <p class="text-sm font-headline font-bold text-on-surface tabular-nums">45.230,50&euro;</p>
+          </div>
+          <div class="flex items-center gap-3 w-32 justify-center">
+            <div class="flex items-center gap-1 text-error">
+              <span class="material-symbols-outlined text-sm">warning</span>
+              <span class="text-[10px] font-black">4</span>
+            </div>
+            <div class="flex items-center gap-1 text-tertiary">
+              <span class="material-symbols-outlined text-sm">construction</span>
+              <span class="text-[10px] font-black">1</span>
+            </div>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Date AG</p>
+            <p class="text-sm font-bold text-slate-300">15 Mai 2026</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+        </div>
+
+        <!-- Row 3 — Residence Haussmann -->
+        <div class="group bg-[#1a1d2e] hover:bg-surface-container transition-all duration-200 rounded-lg px-6 py-4 flex items-center gap-6 cursor-pointer">
+          <div class="w-10 h-10 rounded bg-[#131620] flex items-center justify-center shrink-0 text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">Residence Haussmann</h5>
+            <p class="text-[10px] text-slate-500 truncate mt-0.5">45 boulevard Haussmann, 75009 Paris</p>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Solde Global</p>
+            <p class="text-sm font-headline font-bold text-on-surface tabular-nums">32.100,00&euro;</p>
+          </div>
+          <div class="flex items-center gap-3 w-32 justify-center">
+            <div class="flex items-center gap-1 text-error">
+              <span class="material-symbols-outlined text-sm">warning</span>
+              <span class="text-[10px] font-black">1</span>
+            </div>
+            <div class="flex items-center gap-1 text-slate-600">
+              <span class="material-symbols-outlined text-sm">construction</span>
+              <span class="text-[10px] font-black">0</span>
+            </div>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Date AG</p>
+            <p class="text-sm font-bold text-slate-300">22 Juin 2026</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+        </div>
+
+        <!-- Row 4 — Residence Saint-Martin -->
+        <div class="group bg-[#1a1d2e] hover:bg-surface-container transition-all duration-200 rounded-lg px-6 py-4 flex items-center gap-6 cursor-pointer">
+          <div class="w-10 h-10 rounded bg-[#131620] flex items-center justify-center shrink-0 text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">holiday_village</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">Residence Saint-Martin</h5>
+            <p class="text-[10px] text-slate-500 truncate mt-0.5">12 rue Saint-Martin, 75003 Paris</p>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Solde Global</p>
+            <p class="text-sm font-headline font-bold text-on-surface tabular-nums">28.650,00&euro;</p>
+          </div>
+          <div class="flex items-center gap-3 w-32 justify-center">
+            <div class="flex items-center gap-1 text-slate-600">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span class="text-[10px] font-black">0</span>
+            </div>
+            <div class="flex items-center gap-1 text-slate-600">
+              <span class="material-symbols-outlined text-sm">construction</span>
+              <span class="text-[10px] font-black">0</span>
+            </div>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Date AG</p>
+            <p class="text-sm font-bold text-slate-300">&mdash;</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+        </div>
+
+        <!-- Row 5 — Les Jardins du Parc -->
+        <div class="group bg-[#1a1d2e] hover:bg-surface-container transition-all duration-200 rounded-lg px-6 py-4 flex items-center gap-6 cursor-pointer">
+          <div class="w-10 h-10 rounded bg-[#131620] flex items-center justify-center shrink-0 text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">park</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">Les Jardins du Parc</h5>
+            <p class="text-[10px] text-slate-500 truncate mt-0.5">5 allee des Jardins, 94300 Vincennes</p>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Solde Global</p>
+            <p class="text-sm font-headline font-bold text-on-surface tabular-nums">56.780,00&euro;</p>
+          </div>
+          <div class="flex items-center gap-3 w-32 justify-center">
+            <div class="flex items-center gap-1 text-slate-600">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span class="text-[10px] font-black">0</span>
+            </div>
+            <div class="flex items-center gap-1 text-tertiary">
+              <span class="material-symbols-outlined text-sm">construction</span>
+              <span class="text-[10px] font-black">3</span>
+            </div>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Date AG</p>
+            <p class="text-sm font-bold text-slate-300">03 Sept. 2026</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+        </div>
+
+        <!-- Row 6 — Domaine des Cerisiers -->
+        <div class="group bg-[#1a1d2e] hover:bg-surface-container transition-all duration-200 rounded-lg px-6 py-4 flex items-center gap-6 cursor-pointer">
+          <div class="w-10 h-10 rounded bg-[#131620] flex items-center justify-center shrink-0 text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">domain_add</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">Domaine des Cerisiers</h5>
+            <p class="text-[10px] text-slate-500 truncate mt-0.5">3 chemin des Cerisiers, 92100 Boulogne</p>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Solde Global</p>
+            <p class="text-sm font-headline font-bold text-on-surface tabular-nums">171.750,00&euro;</p>
+          </div>
+          <div class="flex items-center gap-3 w-32 justify-center">
+            <div class="flex items-center gap-1 text-error">
+              <span class="material-symbols-outlined text-sm">warning</span>
+              <span class="text-[10px] font-black">2</span>
+            </div>
+            <div class="flex items-center gap-1 text-tertiary">
+              <span class="material-symbols-outlined text-sm">construction</span>
+              <span class="text-[10px] font-black">6</span>
+            </div>
+          </div>
+          <div class="w-32 text-right">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter mb-0.5">Date AG</p>
+            <p class="text-sm font-bold text-slate-300">10 Nov. 2026</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+        </div>
+
+      </div>
+
+      <div class="mt-8 flex justify-center">
+        <button class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-primary transition-colors flex items-center gap-2">
+          Charger plus de coproprietes
+          <span class="material-symbols-outlined text-lg">expand_more</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

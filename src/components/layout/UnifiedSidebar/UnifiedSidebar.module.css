@@ -31,6 +31,42 @@
 }
 
 /* ============================== */
+/* BACK LINK                      */
+/* ============================== */
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+
+.backLink:hover {
+  color: #e2e8f0;
+}
+
+.backLinkCollapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+
+.backLinkCollapsed:hover {
+  color: #e2e8f0;
+}
+
+/* ============================== */
 /* LOGO                           */
 /* ============================== */
 .logo {

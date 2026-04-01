@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Budgets — 3 DA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ===== DEFAULT THEME (actuel — bleu) ===== */
+:root{
+  --bg:#0f1117;
+  --card:#1a1d2e;
+  --card-alt:#161a2a;
+  --text:#e2e8f0;
+  --text-sec:#94a3b8;
+  --text-muted:#64748b;
+  --text-dim:#475569;
+  --accent:#3b82f6;
+  --accent-light:rgba(59,130,246,0.15);
+  --accent-text:#60a5fa;
+  --success:#22c55e;
+  --success-light:rgba(34,197,94,0.15);
+  --danger:#ef4444;
+  --danger-light:rgba(239,68,68,0.1);
+  --warning:#f59e0b;
+  --warning-light:rgba(245,158,11,0.15);
+  --border:rgba(148,163,184,0.08);
+  --radius:12px;
+  --radius-sm:8px;
+  --radius-pill:99px;
+  --font-h:'Manrope',sans-serif;
+  --font-b:'Inter',sans-serif;
+  --mono:'SF Mono','Fira Code','Consolas',monospace;
+  /* donut colors */
+  --donut-1:#22c55e;--donut-2:#3b82f6;--donut-3:#f59e0b;--donut-rest:#1e293b;
+}
+
+/* ===== THEME — Indigo Neon ===== */
+body.indigo{
+  --bg:#08090e;--card:#111227;--card-alt:#0d0e1a;
+  --text:#e4e4f0;--text-sec:#a5b4fc;--text-muted:#6366f1;--text-dim:#4338ca;
+  --accent:#6366f1;--accent-light:rgba(99,102,241,0.12);--accent-text:#818cf8;
+  --success:#10b981;--success-light:rgba(16,185,129,0.1);
+  --danger:#f43f5e;--danger-light:rgba(244,63,94,0.08);
+  --warning:#f59e0b;--warning-light:rgba(245,158,11,0.1);
+  --border:rgba(99,102,241,0.08);
+  --radius:16px;--radius-sm:10px;--radius-pill:99px;
+  --font-h:'Plus Jakarta Sans',sans-serif;
+  --donut-1:#10b981;--donut-2:#818cf8;--donut-3:#fbbf24;--donut-rest:#1a1b3a;
+}
+
+/* ===== THEME — Emerald Minimal ===== */
+body.emerald{
+  --bg:#111514;--card:#1a1f1d;--card-alt:#151a18;
+  --text:#d4e5df;--text-sec:#6ee7b7;--text-muted:#5a7a6e;--text-dim:#3d5a4e;
+  --accent:#10b981;--accent-light:rgba(16,185,129,0.08);--accent-text:#34d399;
+  --success:#10b981;--success-light:rgba(16,185,129,0.08);
+  --danger:#ef4444;--danger-light:rgba(239,68,68,0.06);
+  --warning:#f59e0b;--warning-light:rgba(245,158,11,0.08);
+  --border:rgba(16,185,129,0.06);
+  --radius:6px;--radius-sm:4px;--radius-pill:6px;
+  --font-h:'DM Sans',sans-serif;--font-b:'DM Sans',sans-serif;
+  --donut-1:#10b981;--donut-2:#06b6d4;--donut-3:#f59e0b;--donut-rest:#1f2a26;
+}
+
+/* ===== THEME — Amber Executive ===== */
+body.amber{
+  --bg:#0a0a0a;--card:#141414;--card-alt:#101010;
+  --text:#e8e0d4;--text-sec:#fbbf24;--text-muted:#78716c;--text-dim:#57534e;
+  --accent:#f59e0b;--accent-light:rgba(245,158,11,0.06);--accent-text:#fbbf24;
+  --success:#22c55e;--success-light:rgba(34,197,94,0.06);
+  --danger:#ef4444;--danger-light:rgba(239,68,68,0.06);
+  --warning:#f59e0b;--warning-light:rgba(245,158,11,0.06);
+  --border:rgba(251,191,36,0.06);
+  --radius:2px;--radius-sm:2px;--radius-pill:2px;
+  --font-h:'Manrope',sans-serif;
+  --donut-1:#22c55e;--donut-2:#f59e0b;--donut-3:#ef4444;--donut-rest:#1c1a14;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);transition:background .3s,color .3s}
+.page{max-width:1400px;margin:0 auto;padding:24px;padding-top:64px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ===== DA SWITCHER ===== */
+.da{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);display:flex;align-items:center;height:44px;padding:0 24px;gap:0;border-bottom:1px solid var(--border)}
+.da span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-right:16px}
+.da button{background:none;border:none;font-size:11px;font-weight:700;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-muted);transition:all .15s}
+.da button:hover{color:var(--text)}
+.da button.on{color:var(--accent-text);border-bottom-color:var(--accent)}
+
+/* ===== TOPBAR ===== */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.topbar h1{font-family:var(--font-h);font-size:24px;font-weight:700;display:flex;align-items:center;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;background:var(--accent-light);color:var(--accent-text)}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.topbar-r{display:flex;gap:8px;align-items:center}
+.btn-ico{width:38px;height:38px;border-radius:var(--radius-sm);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-sec);cursor:pointer;font-size:18px}
+.btn-p{padding:9px 20px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:6px}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-family:var(--font-h);font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--accent-text);border-bottom-color:var(--accent)}
+body.emerald .tabs{background:var(--card-alt);border-radius:var(--radius);padding:4px;border-bottom:none;gap:4px}
+body.emerald .tab{border-bottom:none;border-radius:var(--radius-sm);padding:8px 18px}
+body.emerald .tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.2);border-bottom:none}
+body.amber .tab{text-transform:uppercase;letter-spacing:0.06em;font-size:11px}
+
+/* ===== PERIOD BAR ===== */
+.period{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.period-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--radius-pill);background:var(--accent-light);color:var(--accent-text);font-size:12px;font-weight:700}
+.period-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--success)}
+.period select{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;font-size:12px;color:var(--text);font-weight:600}
+
+/* ===== SUMMARY ROW (budget + donut) ===== */
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:24px;transition:all .3s}
+
+.budget-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:12px}
+.budget-val{font-family:var(--font-h);font-size:32px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.budget-sub{font-size:13px;color:var(--text-muted);margin-top:4px;margin-bottom:24px}
+
+.metrics-row{display:flex;gap:40px}
+.metric{flex:1}
+.metric-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:6px}
+.metric-val{font-family:var(--font-h);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:6px}
+.metric-bar{height:3px;border-radius:2px;background:var(--border)}
+.metric-fill{height:100%;border-radius:2px}
+.m-warn{color:var(--warning)}.m-accent{color:var(--accent-text)}.m-danger{color:var(--danger)}
+
+/* ===== DONUT CHART ===== */
+.donut-wrap{display:flex;align-items:center;justify-content:center;gap:40px;height:100%}
+.donut{position:relative;width:180px;height:180px}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-pct{font-family:var(--font-h);font-size:28px;font-weight:800;color:var(--text)}
+.donut-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-text)}
+.legend{display:flex;flex-direction:column;gap:12px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-name{color:var(--text-sec);flex:1}
+.legend-val{font-family:var(--font-h);font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+
+/* ===== PROJECTION CARD ===== */
+.projection{margin-bottom:20px}
+.proj-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.proj-title{font-family:var(--font-h);font-size:15px;font-weight:700}
+.proj-badge{padding:4px 14px;border-radius:var(--radius-pill);font-size:11px;font-weight:700;background:var(--danger-light);color:var(--danger);display:flex;align-items:center;gap:4px}
+.proj-bar-wrap{position:relative;height:8px;background:var(--border);border-radius:4px;margin-bottom:4px}
+.proj-bar{height:100%;border-radius:4px;background:var(--accent)}
+.proj-bar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-bottom:20px}
+.proj-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.proj-m-label{font-size:10px;font-weight:600;color:var(--text-muted);margin-bottom:4px}
+.proj-m-val{font-family:var(--font-h);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ===== POSTES TABLE ===== */
+.postes-table{width:100%;border-collapse:separate;border-spacing:0}
+.postes-table thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);text-align:left;padding:10px 16px;border-bottom:1px solid var(--border)}
+.postes-table thead th:nth-child(n+2){text-align:right}
+.postes-table tbody td{font-size:13px;padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.postes-table tbody td:nth-child(n+2){text-align:right}
+.postes-table tbody tr{transition:background .15s}
+.postes-table tbody tr:hover{background:rgba(148,163,184,0.03)}
+
+.poste-name{display:flex;align-items:center;gap:8px}
+.poste-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.poste-chevron{font-size:14px;color:var(--text-dim);cursor:pointer}
+.poste-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:var(--radius-sm);font-size:10px;font-weight:600;background:var(--success-light);color:var(--success);margin-left:8px}
+
+.prog-cell{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.prog-bar{width:120px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px}
+.prog-pct{font-size:12px;font-weight:700;width:48px;text-align:right}
+</style>
+</head>
+<body>
+
+<!-- DA SWITCHER -->
+<div class="da">
+  <span>Theme</span>
+  <button class="on" onclick="setDA('',this)">Bleu (actuel)</button>
+  <button onclick="setDA('indigo',this)">Indigo Neon</button>
+  <button onclick="setDA('emerald',this)">Emerald Minimal</button>
+  <button onclick="setDA('amber',this)">Amber Executive</button>
+</div>
+
+<div class="page">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <h1>Budgets <span class="pill"><span class="pill-dot"></span> Exercice 2026</span></h1>
+    <div class="topbar-r">
+      <button class="btn-ico">&#8681;</button>
+      <button class="btn-p">+ Creer un budget</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on">Fonctionnement</button>
+    <button class="tab">Travaux</button>
+    <button class="tab">Fonds ALUR</button>
+  </div>
+
+  <!-- PERIOD -->
+  <div class="period">
+    <span class="period-pill"><span class="dot"></span> Exercice 2026</span>
+    <select><option>2026</option><option>2025</option></select>
+  </div>
+
+  <!-- SUMMARY ROW -->
+  <div class="summary">
+    <!-- Budget card -->
+    <div class="card">
+      <div class="budget-label">Budget Annuel Vote</div>
+      <div class="budget-val">23 200 &euro;</div>
+      <div class="budget-sub">7 postes budgetaires</div>
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="metric-label">Consomme</div>
+          <div class="metric-val m-warn">5 430 &euro;</div>
+          <div class="metric-bar"><div class="metric-fill" style="width:23.4%;background:var(--warning)"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Disponible</div>
+          <div class="metric-val m-accent">17 770 &euro;</div>
+          <div class="metric-bar"><div class="metric-fill" style="width:76.6%;background:var(--accent)"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Postes en Alerte</div>
+          <div class="metric-val m-danger">1</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Assurance immeuble</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donut card -->
+    <div class="card">
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--donut-rest)" stroke-width="12"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--donut-1)" stroke-width="12" stroke-dasharray="58.4 193" stroke-dashoffset="0" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--donut-2)" stroke-width="12" stroke-dasharray="9.7 241.7" stroke-dashoffset="-58.4" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--donut-3)" stroke-width="12" stroke-dasharray="2.3 249.1" stroke-dashoffset="-68.1" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-pct">23.4%</div>
+            <div class="donut-lbl">Consomme</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--donut-1)"></div><span class="legend-name">Assurance immeuble</span><span class="legend-val">4 500 &euro;</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--donut-2)"></div><span class="legend-name">Eau froide collective</span><span class="legend-val">750 &euro;</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--donut-3)"></div><span class="legend-name">Electricite parties communes</span><span class="legend-val">180 &euro;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECTION -->
+  <div class="card projection">
+    <div class="proj-header">
+      <div class="proj-title">Projection fin d'exercice</div>
+      <div class="proj-badge">&#9888; Depassement prevu</div>
+    </div>
+    <div class="proj-bar-wrap"><div class="proj-bar" style="width:28%"></div></div>
+    <div class="proj-bar-labels"><span>Jan — Mois 4</span><span>8 mois restants</span></div>
+    <div class="proj-metrics">
+      <div><div class="proj-m-label">Projection totale</div><div class="proj-m-val m-accent">18 593 &euro;</div></div>
+      <div><div class="proj-m-label">Ecart vs budget</div><div class="proj-m-val m-danger">+4 607 &euro;</div></div>
+      <div><div class="proj-m-label">Conso. mensuelle moy.</div><div class="proj-m-val">1 358 &euro; /mois</div></div>
+      <div><div class="proj-m-label">Fiabilite</div><div class="proj-m-val" style="color:var(--success)">Haute (4 mois)</div></div>
+    </div>
+  </div>
+
+  <!-- POSTES TABLE -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="postes-table">
+      <thead>
+        <tr><th>Poste</th><th>Budget Vote</th><th>Consommation</th><th>%</th><th>Reste</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--donut-2)"></span>Eau froide collective</div></td>
+          <td class="mono">8 000 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:9.4%;background:var(--success)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--warning)">9.4%</span></td>
+          <td class="mono">7 250 &euro;</td>
+        </tr>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--donut-3)"></span>Electricite parties communes</div></td>
+          <td class="mono">2 000 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:9%;background:var(--success)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--warning)">9.0%</span></td>
+          <td class="mono">1 820 &euro;</td>
+        </tr>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--donut-1)"></span>Assurance immeuble <span class="poste-badge">&#10003; Consomme</span></div></td>
+          <td class="mono">4 500 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--danger)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--danger)">100.0%</span></td>
+          <td class="mono" style="color:var(--danger)">0 &euro;</td>
+        </tr>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--text-dim)"></span>Menage parties communes</div></td>
+          <td class="mono">3 600 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--success)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--success)">0.0%</span></td>
+          <td class="mono">3 600 &euro;</td>
+        </tr>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--text-dim)"></span>Entretien espaces verts</div></td>
+          <td class="mono">2 400 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--success)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--success)">0.0%</span></td>
+          <td class="mono">2 400 &euro;</td>
+        </tr>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--text-dim)"></span>Honoraires syndic</div></td>
+          <td class="mono">1 800 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--success)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--success)">0.0%</span></td>
+          <td class="mono">1 800 &euro;</td>
+        </tr>
+        <tr>
+          <td><div class="poste-name"><span class="poste-chevron">&#9662;</span><span class="poste-dot" style="background:var(--text-dim)"></span>Divers et imprevu</div></td>
+          <td class="mono">900 &euro;</td>
+          <td><div class="prog-cell"><div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--success)"></div></div></div></td>
+          <td><span class="prog-pct" style="color:var(--success)">0.0%</span></td>
+          <td class="mono">900 &euro;</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function setDA(cls,btn){
+  document.body.className=cls;
+  document.querySelectorAll('.da button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
