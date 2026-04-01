@@ -706,3 +706,129 @@ textarea:focus-visible,
 .pb-0 { padding-bottom: 0; }
 .pb-lg { padding-bottom: var(--space-lg); }
 .pb-xl { padding-bottom: var(--space-xl); }
+
+/* =============================================
+   LIGHT THEME — Crème + Pastels
+   Sidebar conserve ses couleurs dark (--sidebar-*, --nav-*)
+   ============================================= */
+[data-theme="light"] {
+  /* Surfaces */
+  --background: #faf8f5;
+  --bg-secondary: #f5f0e8;
+  --bg-tertiary: #f0ece5;
+  --surface: #fffefa;
+  --surface-hover: #f8f4ee;
+  --card-bg: #fffefa;
+  --hover-bg: #f8f4ee;
+  --bg: #faf8f5;
+  --surface-secondary: #f5f0e8;
+  --background-hover: #f0ece5;
+  --background-secondary: #f5f0e8;
+  --background-disabled: #f0ece5;
+
+  /* Text */
+  --text-main: #3d3529;
+  --text-secondary: #6b5e4e;
+  --text-tertiary: #a89b88;
+  --text-inverse: #fffefa;
+  --text-primary: #3d3529;
+  --text: #3d3529;
+  --color-text-primary: #3d3529;
+  --color-text-secondary: #6b5e4e;
+  --color-text-tertiary: #a89b88;
+
+  /* Borders */
+  --border: #ebe6dd;
+  --border-light: #f3efe8;
+  --border-dark: #ddd6ca;
+  --border-color: #ebe6dd;
+  --color-border: #ebe6dd;
+
+  /* Semantic colors */
+  --primary: #4a72c0;
+  --primary-hover: #3b5fa8;
+  --primary-light: rgba(74, 114, 192, 0.12);
+  --primary-dark: #5a82d4;
+  --primary-color: #4a72c0;
+  --secondary: #5a82d4;
+  --secondary-hover: #4a72c0;
+  --secondary-light: rgba(90, 130, 212, 0.12);
+  --danger: #c45555;
+  --danger-light: rgba(196, 85, 85, 0.1);
+  --warning: #b08930;
+  --warning-light: rgba(176, 137, 48, 0.1);
+  --warning-dark: #c49a38;
+  --success: #3d8f5e;
+  --success-light: rgba(61, 143, 94, 0.1);
+  --success-dark: #4aa86e;
+  --info: #4a72c0;
+  --info-light: rgba(74, 114, 192, 0.1);
+  --error: #c45555;
+  --error-light: rgba(196, 85, 85, 0.1);
+  --error-dark: #b53e3e;
+
+  /* Badges */
+  --badge-success-bg: #d4f0e0;
+  --badge-success-text: #3d8f5e;
+  --badge-warning-bg: #faecd0;
+  --badge-warning-text: #b08930;
+  --badge-danger-bg: #fce0e0;
+  --badge-danger-text: #c45555;
+  --badge-info-bg: #dce6fa;
+  --badge-info-text: #4a72c0;
+  --badge-neutral-bg: #f0ece5;
+  --badge-neutral-text: #8c7e6a;
+  --badge-purple-bg: #ece0fa;
+  --badge-purple-text: #7c5cbf;
+
+  /* Status */
+  --status-active-bg: #d4f0e0;
+  --status-active-text: #3d8f5e;
+  --status-pending-bg: #faecd0;
+  --status-pending-text: #b08930;
+  --status-inactive-bg: #f0ece5;
+  --status-inactive-text: #8c7e6a;
+
+  /* Additional semantic */
+  --blue-500: #5a82d4;
+  --blue-600: #4a72c0;
+  --blue-700: #3b5fa8;
+  --indigo-500: #7c7cf4;
+  --indigo-600: #6366f1;
+  --purple-500: #9b7cf4;
+  --purple-600: #8b5cf6;
+  --amber-500: #d4a740;
+  --amber-600: #b08930;
+  --green-600: #3d8f5e;
+  --green-700: #2d7a4a;
+  --red-600: #c45555;
+  --red-700: #b53e3e;
+
+  /* Icon backgrounds */
+  --icon-bg-blue: #dce6fa;
+  --icon-bg-indigo: #e0dafa;
+  --icon-bg-purple: #ece0fa;
+  --icon-bg-amber: #faecd0;
+  --icon-bg-green: #d4f0e0;
+  --icon-bg-cyan: #d0f0f0;
+
+  /* Color aliases */
+  --color-bg-primary: #faf8f5;
+  --color-bg-secondary: #f5f0e8;
+  --color-bg-tertiary: #f0ece5;
+  --color-primary-100: rgba(74, 114, 192, 0.1);
+  --color-primary-500: #5a82d4;
+  --color-primary-600: #4a72c0;
+  --color-primary-700: #3b5fa8;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Glows disabled */
+  --glow-primary: none;
+  --glow-success: none;
+  --glow-warning: none;
+}
