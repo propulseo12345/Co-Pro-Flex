@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoProFlex — Flow Builder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f1117;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;height:100vh;overflow:hidden;user-select:none}
+
+.top{height:50px;background:#161822;border-bottom:1px solid rgba(148,163,184,.08);display:flex;align-items:center;padding:0 20px;justify-content:space-between;z-index:100;position:relative}
+.top h1{font-size:16px;font-weight:700}
+.top-hint{font-size:11px;color:#94a3b8}
+.top-btns{display:flex;gap:8px}
+.btn{padding:6px 16px;border-radius:8px;border:none;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.btn-g{background:rgba(148,163,184,.06);color:#94a3b8;border:1px solid rgba(148,163,184,.08)}.btn-g:hover{color:#e2e8f0}
+
+.main{display:flex;height:calc(100vh - 50px)}
+
+/* Canvas */
+.cvs{flex:1;position:relative;overflow:hidden}
+svg#lines{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+/* Nodes */
+.nd{position:absolute;padding:10px 14px;border-radius:10px;background:#1a1d2e;border:1.5px solid rgba(148,163,184,.12);cursor:grab;z-index:10;transition:border-color .15s,box-shadow .15s,transform .15s}
+.nd:hover{border-color:rgba(59,130,246,.3);box-shadow:0 0 16px rgba(59,130,246,.08)}
+.nd.dragging{cursor:grabbing;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);border-color:rgba(59,130,246,.5)}
+.nd.src-active{border-color:rgba(34,197,94,.7)!important;box-shadow:0 0 24px rgba(34,197,94,.2)!important;transform:scale(1.03)}
+.nd.tgt-hover:hover{border-color:rgba(34,197,94,.9)!important;box-shadow:0 0 30px rgba(34,197,94,.3)!important}
+.nd .nm{font-size:12px;font-weight:700;margin-bottom:1px}
+.nd .sb{font-size:9px;color:#64748b}
+
+.nd.m-core .nm{color:#60a5fa}.nd.m-core{border-color:rgba(59,130,246,.3)}
+.nd.m-finance .nm{color:#4ade80}.nd.m-finance{border-color:rgba(34,197,94,.25)}
+.nd.m-finance.st{border-color:rgba(34,197,94,.5);border-width:2.5px}
+.nd.m-maintenance .nm{color:#fbbf24}.nd.m-maintenance{border-color:rgba(245,158,11,.25)}
+.nd.m-ag .nm{color:#c084fc}.nd.m-ag{border-color:rgba(168,85,247,.25)}
+.nd.m-ventes .nm{color:#f87171}.nd.m-ventes{border-color:rgba(239,68,68,.35);border-width:2px}
+.nd.m-communication .nm{color:#94a3b8}.nd.m-communication{border-color:rgba(148,163,184,.15)}
+.nd.m-documents .nm{color:#38bdf8}.nd.m-documents{border-color:rgba(14,165,233,.25)}
+
+/* Type picker popup */
+.picker{position:absolute;z-index:200;background:#1a1d2e;border:1px solid rgba(148,163,184,.15);border-radius:10px;padding:6px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;min-width:180px}
+.picker.show{display:block}
+.pick-opt{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;transition:background .1s}
+.pick-opt:hover{background:rgba(148,163,184,.08)}
+.pick-dot{width:8px;height:8px;border-radius:50%}
+.pick-opt input{background:transparent;border:1px solid rgba(148,163,184,.15);border-radius:4px;padding:4px 8px;color:#e2e8f0;font-family:inherit;font-size:11px;width:100px;outline:none}
+.pick-opt input:focus{border-color:rgba(59,130,246,.4)}
+
+/* Sidebar */
+.side{width:320px;background:#131620;border-left:1px solid rgba(148,163,184,.08);display:flex;flex-direction:column;overflow:hidden}
+.side-head{padding:14px 16px;border-bottom:1px solid rgba(148,163,184,.06)}
+.side-head h3{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#64748b;margin-bottom:4px}
+.side-head .cnt{font-size:20px;font-weight:700;color:#e2e8f0}
+
+.side-scroll{flex:1;overflow-y:auto;padding:8px}
+
+.flow-item{padding:10px 12px;margin-bottom:6px;border-radius:8px;background:rgba(148,163,184,.03);border:1px solid rgba(148,163,184,.06);cursor:grab;transition:all .15s;position:relative}
+.flow-item:hover{background:rgba(148,163,184,.06);border-color:rgba(148,163,184,.1)}
+.flow-item.drag-over{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.06)}
+.flow-item .fi-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.flow-item .fi-num{font-size:10px;font-weight:700;color:#64748b;min-width:18px}
+.flow-item .fi-type{font-size:9px;font-weight:600;padding:1px 7px;border-radius:4px}
+.flow-item .fi-del{position:absolute;top:8px;right:8px;color:#475569;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px}
+.flow-item .fi-del:hover{color:#ef4444;background:rgba(239,68,68,.1)}
+.flow-item .fi-path{font-size:12px;font-weight:600;color:#e2e8f0}
+.flow-item .fi-arrow{color:#64748b;margin:0 4px}
+
+.type-montant{background:rgba(34,197,94,.1);color:#4ade80}
+.type-tantiemes{background:rgba(59,130,246,.1);color:#60a5fa}
+.type-statut{background:rgba(245,158,11,.1);color:#fbbf24}
+.type-document{background:rgba(14,165,233,.1);color:#38bdf8}
+.type-reference{background:rgba(168,85,247,.1);color:#c084fc}
+.type-custom{background:rgba(148,163,184,.1);color:#94a3b8}
+
+/* Chains */
+.chains{padding:12px 16px;border-top:1px solid rgba(148,163,184,.06)}
+.chains h4{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:8px}
+.chain{padding:8px 10px;margin-bottom:6px;border-radius:6px;background:rgba(148,163,184,.03);font-size:11px;line-height:1.5}
+.chain-name{font-weight:700;color:#e2e8f0;margin-bottom:2px}
+.chain-path{color:#94a3b8}
+.chain-path strong{color:#e2e8f0;font-weight:600}
+.chain-path .ca{color:#4ade80;font-weight:600}
+
+/* Bottom actions */
+.side-bot{padding:12px 16px;border-top:1px solid rgba(148,163,184,.06)}
+
+/* Instructions overlay */
+.instr-bar{position:absolute;bottom:12px;left:12px;background:#161822;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:10px 16px;z-index:50;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:16px}
+.instr-bar .step{display:flex;align-items:center;gap:6px}
+.step-num{width:20px;height:20px;border-radius:50%;background:rgba(59,130,246,.15);color:#60a5fa;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step-num.active{background:#3b82f6;color:#fff}
+
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.on{opacity:1}
+.toast-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>Flow Builder — Trace tes flux de données</h1>
+  <span class="top-hint" id="hint">Clique sur un bloc source pour commencer</span>
+  <div class="top-btns">
+    <button class="btn btn-g" onclick="clearAll()">Tout effacer</button>
+    <button class="btn btn-p" onclick="sendAll()">Envoyer</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="cvs" id="cvs">
+    <svg id="lines">
+      <defs>
+        <marker id="a-montant" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#22c55e"/></marker>
+        <marker id="a-tantiemes" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#3b82f6"/></marker>
+        <marker id="a-statut" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#f59e0b"/></marker>
+        <marker id="a-document" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#0ea5e9"/></marker>
+        <marker id="a-reference" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#a855f7"/></marker>
+        <marker id="a-custom" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#94a3b8"/></marker>
+      </defs>
+    </svg>
+    <div class="picker" id="picker"></div>
+  </div>
+
+  <div class="side">
+    <div class="side-head">
+      <h3>Flux tracés</h3>
+      <div class="cnt" id="flow-count">0</div>
+    </div>
+    <div class="side-scroll" id="flow-list"></div>
+    <div class="chains" id="chains-area" style="display:none">
+      <h4>Chaînes détectées</h4>
+      <div id="chains-list"></div>
+    </div>
+    <div class="side-bot">
+      <div style="font-size:10px;color:#475569;line-height:1.5">
+        Glisse les items pour changer l'ordre.<br/>
+        Clique ✕ pour supprimer un flux.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="instr-bar" id="instr">
+  <div class="step"><span class="step-num active" id="s1">1</span>Clique source</div>
+  <div class="step"><span class="step-num" id="s2">2</span>Clique cible</div>
+  <div class="step"><span class="step-num" id="s3">3</span>Choisis le type</div>
+</div>
+
+<div class="toast toast-ok" id="toast">Envoyé !</div>
+
+<script>
+// ═══ DATA ═══
+const NODES=[
+  {id:'copropriete',nm:'Copropriété',sb:'nom, adresse, tantièmes',m:'core',x:350,y:20},
+  {id:'lot',nm:'Lot',sb:'n°, tantièmes',m:'core',x:540,y:20},
+  {id:'coproprietaire',nm:'Copropriétaire',sb:'nom, email',m:'core',x:700,y:20},
+
+  {id:'journal',nm:'★ Journal Comptable',sb:'SOURCE DE VÉRITÉ',m:'finance',x:40,y:130,st:1},
+  {id:'budget',nm:'Budget',sb:'prévisionnel',m:'finance',x:280,y:110},
+  {id:'appel',nm:'Appel de Fonds',sb:'par lot, échéance',m:'finance',x:440,y:110},
+  {id:'paiement',nm:'Paiement',sb:'virement, chèque',m:'finance',x:40,y:250},
+  {id:'facture',nm:'Facture Fourn.',sb:'montant HT/TTC',m:'finance',x:220,y:250},
+  {id:'impaye',nm:'Impayé',sb:'relances',m:'finance',x:410,y:250},
+  {id:'balance',nm:'v_lot_balance',sb:'VUE calculée',m:'finance',x:40,y:350},
+
+  {id:'prestataire',nm:'Prestataire',sb:'fournisseur',m:'maintenance',x:620,y:130},
+  {id:'contrat',nm:'Contrat',sb:'montant opérat.',m:'maintenance',x:780,y:130},
+  {id:'os',nm:'Ordre Service',sb:'devis = opérat.',m:'maintenance',x:780,y:230},
+  {id:'logbook',nm:'Carnet Entretien',sb:'historique',m:'maintenance',x:620,y:230},
+
+  {id:'ag',nm:'AG',sb:'date, format',m:'ag',x:620,y:350},
+  {id:'resolution',nm:'Résolution',sb:'article, majorité',m:'ag',x:780,y:350},
+  {id:'vote',nm:'Vote',sb:'pour/contre',m:'ag',x:940,y:350},
+  {id:'presence',nm:'Présence',sb:'signature',m:'ag',x:940,y:430},
+
+  {id:'vente',nm:'⚠ Vente',sb:'À CRÉER',m:'ventes',x:40,y:470},
+  {id:'wf-vente',nm:'⚠ Workflow Vente',sb:'6 étapes',m:'ventes',x:230,y:470},
+  {id:'mutation',nm:'Mutation',sb:'transfert ALUR',m:'ventes',x:440,y:470},
+
+  {id:'messagerie',nm:'Messagerie',sb:'conversations',m:'communication',x:40,y:580},
+  {id:'mur',nm:'Mur / Forum',sb:'posts',m:'communication',x:210,y:580},
+  {id:'evenement',nm:'Événements',sb:'calendrier',m:'communication',x:380,y:580},
+
+  {id:'document',nm:'Document',sb:'catégorie, version',m:'documents',x:620,y:510},
+  {id:'dossier',nm:'Dossier GED',sb:'arborescence',m:'documents',x:810,y:510},
+];
+
+const TYPES=[
+  {id:'montant',label:'💰 Montant / euros',color:'#22c55e'},
+  {id:'tantiemes',label:'📊 Tantièmes / quote-part',color:'#3b82f6'},
+  {id:'statut',label:'🔄 Statut / workflow',color:'#f59e0b'},
+  {id:'document',label:'📄 Document / pièce',color:'#0ea5e9'},
+  {id:'reference',label:'🔗 Référence / lien',color:'#a855f7'},
+];
+
+let flows=[];
+let nEls={}, srcId=null, step=0;
+let dragNode=null, dragOff={x:0,y:0};
+let dragItem=null, dragOverItem=null;
+
+const cvs=document.getElementById('cvs');
+const svg=document.getElementById('lines');
+const picker=document.getElementById('picker');
+const hint=document.getElementById('hint');
+
+// ═══ RENDER NODES ═══
+NODES.forEach(n=>{
+  const e=document.createElement('div');
+  e.className=`nd m-${n.m}${n.st?' st':''}`;
+  e.dataset.id=n.id;
+  e.style.left=n.x+'px';e.style.top=n.y+'px';
+  e.innerHTML=`<div class="nm">${n.nm}</div><div class="sb">${n.sb}</div>`;
+  e.addEventListener('mousedown',ev=>ndDown(ev,n));
+  cvs.appendChild(e);
+  nEls[n.id]=e;
+});
+
+// ═══ NODE INTERACTIONS ═══
+function ndDown(ev,n){
+  if(picker.classList.contains('show'))return;
+  ev.preventDefault();
+  if(step===0){
+    // Start source selection
+    srcId=n.id;
+    step=1;
+    nEls[n.id].classList.add('src-active');
+    Object.values(nEls).forEach(e=>{if(e.dataset.id!==n.id)e.classList.add('tgt-hover')});
+    updateHint('Maintenant clique sur la cible (où va la donnée)');
+    updateSteps(2);
+  } else if(step===1 && n.id!==srcId){
+    // Target selected — show type picker
+    step=2;
+    Object.values(nEls).forEach(e=>e.classList.remove('tgt-hover'));
+    showPicker(ev, srcId, n.id);
+  } else if(step===1 && n.id===srcId){
+    // Cancel
+    cancelFlow();
+  } else {
+    // Normal drag
+    dragNode=n;
+    const el=nEls[n.id],r=el.getBoundingClientRect();
+    dragOff.x=ev.clientX-r.left;dragOff.y=ev.clientY-r.top;
+    el.classList.add('dragging');
+  }
+}
+
+function cancelFlow(){
+  if(srcId)nEls[srcId].classList.remove('src-active');
+  Object.values(nEls).forEach(e=>e.classList.remove('tgt-hover'));
+  srcId=null;step=0;
+  updateHint('Clique sur un bloc source pour commencer');
+  updateSteps(1);
+  picker.classList.remove('show');
+}
+
+// ═══ TYPE PICKER ═══
+function showPicker(ev, from, to){
+  const fromN=NODES.find(n=>n.id===from);
+  const toN=NODES.find(n=>n.id===to);
+  let html=`<div style="padding:6px 10px 8px;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid rgba(148,163,184,.06);margin-bottom:4px">
+    ${fromN.nm} → ${toN.nm}</div>`;
+  TYPES.forEach(t=>{
+    html+=`<div class="pick-opt" onclick="addFlow('${from}','${to}','${t.id}')">
+      <div class="pick-dot" style="background:${t.color}"></div>${t.label}</div>`;
+  });
+  html+=`<div class="pick-opt" style="padding:6px 12px">
+    <div class="pick-dot" style="background:#94a3b8"></div>
+    <input id="custom-type" placeholder="Autre (tape et Entrée)" onkeydown="if(event.key==='Enter')addFlow('${from}','${to}','custom',this.value)"/>
+  </div>`;
+  picker.innerHTML=html;
+
+  const cr=cvs.getBoundingClientRect();
+  const te=nEls[to].getBoundingClientRect();
+  picker.style.left=(te.left-cr.left+te.width+10)+'px';
+  picker.style.top=(te.top-cr.top)+'px';
+  picker.classList.add('show');
+  updateHint('Choisis le type de donnée');
+  updateSteps(3);
+}
+
+function addFlow(from,to,type,customLabel){
+  const f={from,to,type,label:customLabel||null,id:Date.now()};
+  flows.push(f);
+  cancelFlow();
+  renderFlows();
+  renderLines();
+}
+
+// ═══ RENDER LINES ═══
+function edgePts(fid,tid){
+  const fe=nEls[fid],te=nEls[tid];
+  if(!fe||!te)return{fx:0,fy:0,tx:0,ty:0};
+  const cr=cvs.getBoundingClientRect();
+  const fr=fe.getBoundingClientRect(),tr=te.getBoundingClientRect();
+  const fc={x:fr.left-cr.left+fr.width/2,y:fr.top-cr.top+fr.height/2};
+  const tc={x:tr.left-cr.left+tr.width/2,y:tr.top-cr.top+tr.height/2};
+  const a=Math.atan2(tc.y-fc.y,tc.x-fc.x);
+  function ep(cx,cy,hw,hh,ang){const c=Math.cos(ang),s=Math.sin(ang),t=Math.min(Math.abs(hw/c)||9e9,Math.abs(hh/s)||9e9);return{x:cx+c*t,y:cy+s*t}}
+  const fp=ep(fc.x,fc.y,fr.width/2+6,fr.height/2+6,a);
+  const tp=ep(tc.x,tc.y,tr.width/2+6,tr.height/2+6,a+Math.PI);
+  return{fx:fp.x,fy:fp.y,tx:tp.x,ty:tp.y,mx:(fp.x+tp.x)/2,my:(fp.y+tp.y)/2};
+}
+
+function renderLines(){
+  svg.querySelectorAll('.fl').forEach(e=>e.remove());
+  cvs.querySelectorAll('.fl-label').forEach(e=>e.remove());
+
+  flows.forEach((f,i)=>{
+    const p=edgePts(f.from,f.to);
+    const col=TYPES.find(t=>t.id===f.type)?.color||'#94a3b8';
+    // Offset parallel arrows
+    const parallel=flows.filter((ff,j)=>j<i&&ff.from===f.from&&ff.to===f.to).length;
+    const off=parallel*12;
+
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    const dx=p.tx-p.fx, dy=p.ty-p.fy;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const nx=-dy/len*off, ny=dx/len*off;
+
+    line.setAttribute('x1',p.fx+nx);line.setAttribute('y1',p.fy+ny);
+    line.setAttribute('x2',p.tx+nx);line.setAttribute('y2',p.ty+ny);
+    line.setAttribute('stroke',col);line.setAttribute('stroke-width','2.2');
+    line.setAttribute('marker-end',`url(#a-${f.type})`);
+    if(f.type==='montant')line.setAttribute('stroke-dasharray','8 4');
+    line.classList.add('fl');
+    svg.appendChild(line);
+
+    // Label
+    const lbl=document.createElement('div');
+    const typeObj=TYPES.find(t=>t.id===f.type);
+    const typeName=f.label||typeObj?.label?.split(' ').slice(1).join(' ')||f.type;
+    lbl.className='fl-label';
+    lbl.style.cssText=`position:absolute;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(15,17,23,.85);color:${col};z-index:5;pointer-events:none;white-space:nowrap`;
+    lbl.style.left=(p.mx+nx)+'px';lbl.style.top=(p.my+ny-10)+'px';
+    lbl.textContent=typeName;
+    cvs.appendChild(lbl);
+  });
+}
+
+// ═══ RENDER FLOW LIST ═══
+function renderFlows(){
+  const list=document.getElementById('flow-list');
+  document.getElementById('flow-count').textContent=flows.length;
+
+  let html='';
+  flows.forEach((f,i)=>{
+    const fromN=NODES.find(n=>n.id===f.from);
+    const toN=NODES.find(n=>n.id===f.to);
+    const typeObj=TYPES.find(t=>t.id===f.type);
+    const typeName=f.label||typeObj?.label?.split(' ').slice(1).join(' ')||f.type;
+    const typeClass='type-'+(f.type||'custom');
+
+    html+=`<div class="flow-item" draggable="true" data-idx="${i}"
+      ondragstart="fiDragStart(event,${i})" ondragover="fiDragOver(event,${i})" ondragleave="fiDragLeave(event)" ondrop="fiDrop(event,${i})">
+      <div class="fi-del" onclick="delFlow(${i})">✕</div>
+      <div class="fi-top">
+        <span class="fi-num">#${i+1}</span>
+        <span class="fi-type ${typeClass}">${typeName}</span>
+      </div>
+      <div class="fi-path">
+        ${fromN?.nm||f.from}<span class="fi-arrow">→</span>${toN?.nm||f.to}
+      </div>
+    </div>`;
+  });
+  list.innerHTML=html;
+  buildChains();
+}
+
+function delFlow(i){flows.splice(i,1);renderFlows();renderLines()}
+
+// ═══ DRAG REORDER ═══
+function fiDragStart(ev,i){dragItem=i;ev.dataTransfer.effectAllowed='move'}
+function fiDragOver(ev,i){ev.preventDefault();ev.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.flow-item').forEach(e=>e.classList.remove('drag-over'));
+  ev.currentTarget.classList.add('drag-over');dragOverItem=i}
+function fiDragLeave(ev){ev.currentTarget.classList.remove('drag-over')}
+function fiDrop(ev,i){
+  ev.preventDefault();
+  document.querySelectorAll('.flow-item').forEach(e=>e.classList.remove('drag-over'));
+  if(dragItem!==null&&dragItem!==i){
+    const item=flows.splice(dragItem,1)[0];
+    flows.splice(i,0,item);
+    renderFlows();renderLines();
+  }
+  dragItem=null;
+}
+
+// ═══ CHAINS ═══
+function buildChains(){
+  const area=document.getElementById('chains-area');
+  const list=document.getElementById('chains-list');
+  if(flows.length<2){area.style.display='none';return}
+
+  // Group by type and find chains
+  const byType={};
+  flows.forEach(f=>{
+    const t=f.type;
+    if(!byType[t])byType[t]=[];
+    byType[t].push(f);
+  });
+
+  let html='';
+  Object.entries(byType).forEach(([type,fls])=>{
+    if(fls.length<2)return;
+    // Try to build chain
+    const chains=[];
+    const used=new Set();
+    fls.forEach((f,i)=>{
+      if(used.has(i))return;
+      let chain=[f.from,f.to];
+      used.add(i);
+      let extended=true;
+      while(extended){
+        extended=false;
+        fls.forEach((ff,j)=>{
+          if(used.has(j))return;
+          if(ff.from===chain[chain.length-1]){chain.push(ff.to);used.add(j);extended=true}
+        });
+      }
+      if(chain.length>2)chains.push(chain);
+    });
+
+    const typeObj=TYPES.find(t=>t.id===type);
+    const typeName=typeObj?.label?.split(' ').slice(1).join(' ')||type;
+    const col=typeObj?.color||'#94a3b8';
+
+    chains.forEach(ch=>{
+      html+=`<div class="chain">
+        <div class="chain-name" style="color:${col}">${typeName}</div>
+        <div class="chain-path">${ch.map(id=>{
+          const n=NODES.find(n=>n.id===id);
+          return `<strong>${n?.nm||id}</strong>`;
+        }).join(' <span class="ca">→</span> ')}</div>
+      </div>`;
+    });
+  });
+
+  if(html){area.style.display='block';list.innerHTML=html}
+  else{area.style.display='none'}
+}
+
+// ═══ NODE DRAG ═══
+document.addEventListener('mousemove',ev=>{
+  if(!dragNode)return;
+  const cr=cvs.getBoundingClientRect();
+  const x=ev.clientX-cr.left-dragOff.x,y=ev.clientY-cr.top-dragOff.y;
+  const e=nEls[dragNode.id];
+  e.style.left=x+'px';e.style.top=y+'px';
+  dragNode.x=x;dragNode.y=y;
+  renderLines();
+});
+document.addEventListener('mouseup',()=>{
+  if(dragNode){nEls[dragNode.id].classList.remove('dragging');dragNode=null}
+});
+
+// Click outside to cancel
+cvs.addEventListener('mousedown',ev=>{
+  if(ev.target===cvs||ev.target===svg){
+    if(step>0)cancelFlow();
+  }
+});
+
+// ═══ UTILS ═══
+function updateHint(t){hint.textContent=t}
+function updateSteps(active){
+  document.getElementById('s1').className='step-num'+(active>=1?' active':'');
+  document.getElementById('s2').className='step-num'+(active>=2?' active':'');
+  document.getElementById('s3').className='step-num'+(active>=3?' active':'');
+}
+
+function clearAll(){flows=[];renderFlows();renderLines()}
+
+function sendAll(){
+  const data={
+    flows:flows.map((f,i)=>{
+      const fn=NODES.find(n=>n.id===f.from);
+      const tn=NODES.find(n=>n.id===f.to);
+      return{order:i+1,from:f.from,fromName:fn?.nm,to:f.to,toName:tn?.nm,type:f.type,label:f.label};
+    }),
+    nodes:NODES.map(n=>({id:n.id,name:n.nm,x:Math.round(n.x),y:Math.round(n.y)}))
+  };
+  try{new Image().src='/event?type=flows&choice=flows&text='+encodeURIComponent(JSON.stringify(data))+'&t='+Date.now()}catch(e){}
+  const t=document.getElementById('toast');t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);
+}
+
+renderLines();
+</script>
+</body>
+</html>

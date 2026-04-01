@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoProFlex — Modèle de données interactif</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+    background: #161822;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 13px; color: #94a3b8; }
+
+  .layout {
+    display: flex;
+    height: calc(100vh - 80px);
+  }
+
+  .canvas-area {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    padding: 24px;
+  }
+
+  .sidebar {
+    width: 320px;
+    border-left: 1px solid rgba(148,163,184,0.08);
+    background: #131620;
+    overflow-y: auto;
+    padding: 20px;
+    transition: all 0.3s;
+  }
+
+  .sidebar h3 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  .sidebar .entity-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+  }
+
+  .sidebar .entity-module {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 10px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  .sidebar .fields {
+    margin-bottom: 20px;
+  }
+  .sidebar .field {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(148,163,184,0.04);
+    font-size: 12px;
+  }
+  .sidebar .field-name { color: #e2e8f0; font-weight: 500; }
+  .sidebar .field-type { color: #64748b; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }
+
+  .sidebar .relation {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: rgba(148,163,184,0.04);
+    border: 1px solid rgba(148,163,184,0.06);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+  }
+  .sidebar .relation:hover {
+    background: rgba(59,130,246,0.08);
+    border-color: rgba(59,130,246,0.2);
+  }
+  .sidebar .relation .rel-arrow { color: #3b82f6; font-weight: 600; }
+  .sidebar .relation .rel-target { color: #e2e8f0; font-weight: 600; }
+  .sidebar .relation .rel-desc { color: #94a3b8; display: block; margin-top: 4px; }
+  .sidebar .relation .rel-type {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .rel-type.financial { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .rel-type.operational { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .rel-type.reference { background: rgba(59,130,246,0.1); color: #60a5fa; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  /* Legend bar */
+  .legend {
+    display: flex;
+    gap: 20px;
+    padding: 12px 20px;
+    background: rgba(148,163,184,0.03);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  /* Filter bar */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(148,163,184,0.08);
+    background: rgba(148,163,184,0.04);
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .filter-btn:hover { background: rgba(148,163,184,0.08); color: #e2e8f0; }
+  .filter-btn.active { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+
+  /* SVG styles */
+  .entity-node {
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .entity-node:hover .entity-bg { filter: brightness(1.3); }
+  .entity-node.selected .entity-bg { stroke-width: 2.5; filter: brightness(1.2); }
+  .entity-node.dimmed { opacity: 0.25; }
+
+  .relation-line {
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .relation-line.dimmed { opacity: 0.08; }
+  .relation-line.highlighted { opacity: 1; }
+  .relation-line:hover { opacity: 1; }
+
+  .relation-label {
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .relation-label.dimmed { opacity: 0.08; }
+  .relation-label.highlighted { opacity: 1; }
+
+  /* Selected relations in sidebar */
+  .selected-relations {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(148,163,184,0.08);
+  }
+  .selected-count {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  .sel-rel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.15);
+    font-size: 11px;
+  }
+  .sel-rel .remove {
+    color: #64748b;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+  }
+  .sel-rel .remove:hover { color: #ef4444; }
+
+  .action-bar {
+    position: sticky;
+    bottom: 0;
+    padding: 16px 0;
+    background: #131620;
+    border-top: 1px solid rgba(148,163,184,0.08);
+    margin-top: 20px;
+  }
+  .action-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn.primary {
+    background: #3b82f6;
+    color: white;
+  }
+  .action-btn.primary:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    transform: translateY(-1px);
+  }
+  .action-btn.ghost {
+    background: rgba(148,163,184,0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(148,163,184,0.08);
+    margin-top: 8px;
+  }
+  .action-btn.ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Modèle de données — Relations interactives</h1>
+  <p>Clique sur une entité pour voir ses relations. Clique sur une flèche pour la sélectionner.</p>
+</div>
+
+<div class="layout">
+  <div class="canvas-area">
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all" onclick="filterModule('all')">Tout</button>
+      <button class="filter-btn" data-filter="finance" onclick="filterModule('finance')">Finance</button>
+      <button class="filter-btn" data-filter="maintenance" onclick="filterModule('maintenance')">Maintenance</button>
+      <button class="filter-btn" data-filter="ag" onclick="filterModule('ag')">AG</button>
+      <button class="filter-btn" data-filter="ventes" onclick="filterModule('ventes')">Ventes</button>
+      <button class="filter-btn" data-filter="communication" onclick="filterModule('communication')">Communication</button>
+      <button class="filter-btn" data-filter="documents" onclick="filterModule('documents')">Documents</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Noyau (Copropriété)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Finance</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Maintenance</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div>AG</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Ventes</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Communication</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Documents</div>
+      <div class="legend-item" style="margin-left: auto;"><span style="color:#4ade80">- - -</span>&nbsp; Flux financier → journal</div>
+    </div>
+
+    <svg id="diagram" viewBox="0 0 1050 750" style="width:100%; max-width:1050px;">
+      <defs>
+        <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#3b82f6"/></marker>
+        <marker id="arr-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#22c55e"/></marker>
+        <marker id="arr-yellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#f59e0b"/></marker>
+        <marker id="arr-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#a855f7"/></marker>
+        <marker id="arr-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#ef4444"/></marker>
+        <marker id="arr-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#0ea5e9"/></marker>
+        <marker id="arr-gray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="#94a3b8"/></marker>
+        <marker id="arr-green-dash" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0L8 3L0 6Z" fill="rgba(34,197,94,0.5)"/></marker>
+      </defs>
+
+      <!-- Relations (lines drawn first, behind entities) -->
+      <g id="relations-layer">
+        <!-- Core relations -->
+        <line class="relation-line" data-rel="copro-lot" x1="255" y1="55" x2="365" y2="55" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#arr-blue)"/>
+        <text class="relation-label" data-rel="copro-lot" x="310" y="48" text-anchor="middle" fill="#60a5fa" font-size="9" font-weight="600">1:N</text>
+
+        <line class="relation-line" data-rel="lot-owner" x1="445" y1="55" x2="530" y2="55" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#arr-blue)"/>
+        <text class="relation-label" data-rel="lot-owner" x="488" y="48" text-anchor="middle" fill="#60a5fa" font-size="9" font-weight="600">N:M</text>
+
+        <!-- Finance internal -->
+        <line class="relation-line" data-rel="budget-appel" x1="315" y1="210" x2="395" y2="210" stroke="rgba(34,197,94,0.4)" stroke-width="1.2" marker-end="url(#arr-green)"/>
+        <text class="relation-label" data-rel="budget-appel" x="355" y="203" text-anchor="middle" fill="#4ade80" font-size="8">génère</text>
+
+        <line class="relation-line" data-rel="appel-journal" x1="400" y1="235" x2="225" y2="170" stroke="rgba(34,197,94,0.5)" stroke-width="1.8" stroke-dasharray="6 3" marker-end="url(#arr-green-dash)"/>
+        <text class="relation-label" data-rel="appel-journal" x="325" y="195" text-anchor="middle" fill="#4ade80" font-size="8">→ écriture</text>
+
+        <line class="relation-line" data-rel="paiement-journal" x1="115" y1="295" x2="135" y2="185" stroke="rgba(34,197,94,0.5)" stroke-width="1.8" stroke-dasharray="6 3" marker-end="url(#arr-green-dash)"/>
+        <text class="relation-label" data-rel="paiement-journal" x="100" y="245" text-anchor="middle" fill="#4ade80" font-size="8">→ écriture</text>
+
+        <line class="relation-line" data-rel="facture-journal" x1="280" y1="295" x2="190" y2="185" stroke="rgba(34,197,94,0.5)" stroke-width="1.8" stroke-dasharray="6 3" marker-end="url(#arr-green-dash)"/>
+        <text class="relation-label" data-rel="facture-journal" x="255" y="245" text-anchor="middle" fill="#4ade80" font-size="8">→ écriture</text>
+
+        <line class="relation-line" data-rel="journal-balance" x1="150" y1="185" x2="150" y2="355" stroke="rgba(34,197,94,0.5)" stroke-width="1.5" stroke-dasharray="4 2"/>
+        <text class="relation-label" data-rel="journal-balance" x="170" y="280" fill="#4ade80" font-size="8" transform="rotate(-90 170 280)">calcule</text>
+
+        <line class="relation-line" data-rel="appel-impaye" x1="460" y1="235" x2="430" y2="295" stroke="rgba(34,197,94,0.4)" stroke-width="1.2" marker-end="url(#arr-green)"/>
+        <text class="relation-label" data-rel="appel-impaye" x="460" y="270" fill="#4ade80" font-size="8">non payé</text>
+
+        <!-- Maintenance internal -->
+        <line class="relation-line" data-rel="presta-contrat" x1="700" y1="210" x2="760" y2="210" stroke="#f59e0b" stroke-width="1.2" marker-end="url(#arr-yellow)"/>
+        <text class="relation-label" data-rel="presta-contrat" x="730" y="203" text-anchor="middle" fill="#fbbf24" font-size="8">1:N</text>
+
+        <line class="relation-line" data-rel="contrat-os" x1="870" y1="210" x2="900" y2="210" stroke="#f59e0b" stroke-width="1.2" marker-end="url(#arr-yellow)"/>
+        <text class="relation-label" data-rel="contrat-os" x="885" y="203" text-anchor="middle" fill="#fbbf24" font-size="8">1:N</text>
+
+        <line class="relation-line" data-rel="os-logbook" x1="680" y1="250" x2="680" y2="275" stroke="#f59e0b" stroke-width="1.2" marker-end="url(#arr-yellow)"/>
+
+        <!-- Maintenance → Finance (facture validée) -->
+        <path class="relation-line" data-rel="os-facture" d="M 900 240 Q 600 340 500 310" fill="none" stroke="rgba(34,197,94,0.4)" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arr-green-dash)"/>
+        <text class="relation-label" data-rel="os-facture" x="700" y="300" text-anchor="middle" fill="#4ade80" font-size="8">facture validée → journal</text>
+
+        <!-- AG internal -->
+        <line class="relation-line" data-rel="ag-resolution" x1="700" y1="430" x2="760" y2="430" stroke="#a855f7" stroke-width="1.2" marker-end="url(#arr-purple)"/>
+        <text class="relation-label" data-rel="ag-resolution" x="730" y="423" text-anchor="middle" fill="#c084fc" font-size="8">1:N</text>
+
+        <line class="relation-line" data-rel="resolution-vote" x1="870" y1="430" x2="900" y2="430" stroke="#a855f7" stroke-width="1.2" marker-end="url(#arr-purple)"/>
+        <line class="relation-line" data-rel="ag-presence" x1="700" y1="450" x2="950" y2="450" stroke="#a855f7" stroke-width="1" marker-end="url(#arr-purple)"/>
+
+        <!-- AG → Finance (budget voté) -->
+        <path class="relation-line" data-rel="ag-budget" d="M 620 415 Q 500 370 310 235" fill="none" stroke="rgba(34,197,94,0.4)" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arr-green-dash)"/>
+        <text class="relation-label" data-rel="ag-budget" x="480" y="340" text-anchor="middle" fill="#4ade80" font-size="8">budget voté</text>
+
+        <!-- Ventes internal -->
+        <line class="relation-line" data-rel="vente-workflow" x1="155" y1="555" x2="215" y2="555" stroke="#ef4444" stroke-width="1.2" marker-end="url(#arr-red)"/>
+        <line class="relation-line" data-rel="vente-mutation" x1="375" y1="555" x2="425" y2="555" stroke="#ef4444" stroke-width="1.2" marker-end="url(#arr-red)"/>
+
+        <!-- Ventes → Finance (mutation ALUR) -->
+        <path class="relation-line" data-rel="mutation-journal" d="M 480 535 Q 510 400 250 185" fill="none" stroke="rgba(34,197,94,0.4)" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arr-green-dash)"/>
+        <text class="relation-label" data-rel="mutation-journal" x="430" y="370" text-anchor="middle" fill="#4ade80" font-size="8">transfert ALUR → journal</text>
+
+        <!-- Ventes → Lot -->
+        <path class="relation-line" data-rel="vente-lot" d="M 90 530 Q 90 300 380 70" fill="none" stroke="rgba(239,68,68,0.3)" stroke-width="1.2" marker-end="url(#arr-red)"/>
+        <text class="relation-label" data-rel="vente-lot" x="130" y="290" fill="#f87171" font-size="8">lot vendu</text>
+
+        <!-- Documents cross-refs -->
+        <path class="relation-line" data-rel="doc-ag" d="M 720 620 Q 760 580 760 470" fill="none" stroke="rgba(14,165,233,0.3)" stroke-width="1.2" marker-end="url(#arr-cyan)"/>
+        <text class="relation-label" data-rel="doc-ag" x="770" y="545" fill="#38bdf8" font-size="8">PV, convoc</text>
+
+        <path class="relation-line" data-rel="doc-maintenance" d="M 780 620 Q 850 500 960 250" fill="none" stroke="rgba(14,165,233,0.3)" stroke-width="1.2" marker-end="url(#arr-cyan)"/>
+        <text class="relation-label" data-rel="doc-maintenance" x="890" y="440" fill="#38bdf8" font-size="8">devis, rapport</text>
+
+        <path class="relation-line" data-rel="doc-vente" d="M 640 650 Q 400 650 300 580" fill="none" stroke="rgba(14,165,233,0.3)" stroke-width="1.2" marker-end="url(#arr-cyan)"/>
+        <text class="relation-label" data-rel="doc-vente" x="460" y="640" fill="#38bdf8" font-size="8">état daté, diagnostics</text>
+
+        <!-- Communication → Copro -->
+        <path class="relation-line" data-rel="comm-copro" d="M 200 680 Q 200 400 560 70" fill="none" stroke="rgba(148,163,184,0.2)" stroke-width="1" marker-end="url(#arr-gray)"/>
+        <text class="relation-label" data-rel="comm-copro" x="300" y="400" fill="#94a3b8" font-size="8">participants</text>
+      </g>
+
+      <!-- Entity nodes -->
+      <g id="entities-layer">
+        <!-- CORE -->
+        <g class="entity-node" data-id="copropriete" data-module="core" onclick="selectEntity('copropriete')">
+          <rect class="entity-bg" x="100" y="25" width="155" height="60" rx="8" fill="#1a1d2e" stroke="rgba(59,130,246,0.4)" stroke-width="1.8"/>
+          <text x="178" y="50" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Copropriété</text>
+          <text x="178" y="70" text-anchor="middle" fill="#64748b" font-size="10">nom, adresse, tantièmes</text>
+        </g>
+        <g class="entity-node" data-id="lot" data-module="core" onclick="selectEntity('lot')">
+          <rect class="entity-bg" x="365" y="25" width="80" height="60" rx="8" fill="#1a1d2e" stroke="rgba(59,130,246,0.4)" stroke-width="1.8"/>
+          <text x="405" y="50" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Lot</text>
+          <text x="405" y="70" text-anchor="middle" fill="#64748b" font-size="10">n°, tantiè.</text>
+        </g>
+        <g class="entity-node" data-id="coproprietaire" data-module="core" onclick="selectEntity('coproprietaire')">
+          <rect class="entity-bg" x="530" y="25" width="130" height="60" rx="8" fill="#1a1d2e" stroke="rgba(59,130,246,0.4)" stroke-width="1.8"/>
+          <text x="595" y="50" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Copropriétaire</text>
+          <text x="595" y="70" text-anchor="middle" fill="#64748b" font-size="10">nom, email, rôle</text>
+        </g>
+
+        <!-- FINANCE -->
+        <g class="entity-node" data-id="journal" data-module="finance" onclick="selectEntity('journal')">
+          <rect class="entity-bg" x="30" y="140" width="220" height="45" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.5)" stroke-width="2.5"/>
+          <text x="140" y="160" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">★ Journal Comptable</text>
+          <text x="140" y="176" text-anchor="middle" fill="#64748b" font-size="9">SOURCE DE VÉRITÉ — débit/crédit</text>
+        </g>
+        <g class="entity-node" data-id="budget" data-module="finance" onclick="selectEntity('budget')">
+          <rect class="entity-bg" x="260" y="195" width="110" height="45" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+          <text x="315" y="215" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Budget</text>
+          <text x="315" y="231" text-anchor="middle" fill="#64748b" font-size="9">prévisionnel</text>
+        </g>
+        <g class="entity-node" data-id="appel" data-module="finance" onclick="selectEntity('appel')">
+          <rect class="entity-bg" x="395" y="195" width="120" height="45" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+          <text x="455" y="215" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Appel Fonds</text>
+          <text x="455" y="231" text-anchor="middle" fill="#64748b" font-size="9">par lot, échéance</text>
+        </g>
+        <g class="entity-node" data-id="paiement" data-module="finance" onclick="selectEntity('paiement')">
+          <rect class="entity-bg" x="30" y="295" width="120" height="40" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+          <text x="90" y="320" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Paiement</text>
+        </g>
+        <g class="entity-node" data-id="facture" data-module="finance" onclick="selectEntity('facture')">
+          <rect class="entity-bg" x="170" y="295" width="150" height="40" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+          <text x="245" y="320" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Facture Fournisseur</text>
+        </g>
+        <g class="entity-node" data-id="impaye" data-module="finance" onclick="selectEntity('impaye')">
+          <rect class="entity-bg" x="380" y="295" width="120" height="40" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+          <text x="440" y="320" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Impayé</text>
+        </g>
+        <g class="entity-node" data-id="balance" data-module="finance" onclick="selectEntity('balance')">
+          <rect class="entity-bg" x="30" y="355" width="210" height="40" rx="8" fill="#131620" stroke="rgba(34,197,94,0.2)" stroke-width="1" stroke-dasharray="6 3"/>
+          <text x="135" y="380" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="600">v_lot_balance (vue calculée)</text>
+        </g>
+
+        <!-- MAINTENANCE -->
+        <g class="entity-node" data-id="prestataire" data-module="maintenance" onclick="selectEntity('prestataire')">
+          <rect class="entity-bg" x="600" y="195" width="100" height="45" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+          <text x="650" y="215" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Prestataire</text>
+          <text x="650" y="231" text-anchor="middle" fill="#64748b" font-size="9">fournisseur</text>
+        </g>
+        <g class="entity-node" data-id="contrat" data-module="maintenance" onclick="selectEntity('contrat')">
+          <rect class="entity-bg" x="760" y="195" width="110" height="45" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+          <text x="815" y="215" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Contrat</text>
+          <text x="815" y="231" text-anchor="middle" fill="#fbbf24" font-size="9">montant opérat.</text>
+        </g>
+        <g class="entity-node" data-id="os" data-module="maintenance" onclick="selectEntity('os')">
+          <rect class="entity-bg" x="900" y="195" width="130" height="45" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+          <text x="965" y="215" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Ordre Service</text>
+          <text x="965" y="231" text-anchor="middle" fill="#fbbf24" font-size="9">devis = opérat.</text>
+        </g>
+        <g class="entity-node" data-id="logbook" data-module="maintenance" onclick="selectEntity('logbook')">
+          <rect class="entity-bg" x="610" y="275" width="140" height="35" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+          <text x="680" y="297" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">Carnet Entretien</text>
+        </g>
+
+        <!-- AG -->
+        <g class="entity-node" data-id="ag" data-module="ag" onclick="selectEntity('ag')">
+          <rect class="entity-bg" x="600" y="410" width="100" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+          <text x="650" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">AG</text>
+          <text x="650" y="448" text-anchor="middle" fill="#64748b" font-size="9">date, format</text>
+        </g>
+        <g class="entity-node" data-id="resolution" data-module="ag" onclick="selectEntity('resolution')">
+          <rect class="entity-bg" x="760" y="410" width="110" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+          <text x="815" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Résolution</text>
+          <text x="815" y="448" text-anchor="middle" fill="#64748b" font-size="9">article, majorité</text>
+        </g>
+        <g class="entity-node" data-id="vote" data-module="ag" onclick="selectEntity('vote')">
+          <rect class="entity-bg" x="900" y="410" width="80" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+          <text x="940" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Vote</text>
+          <text x="940" y="448" text-anchor="middle" fill="#64748b" font-size="9">pour/contre</text>
+        </g>
+        <g class="entity-node" data-id="presence" data-module="ag" onclick="selectEntity('presence')">
+          <rect class="entity-bg" x="950" y="470" width="80" height="35" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+          <text x="990" y="492" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">Présence</text>
+        </g>
+
+        <!-- VENTES -->
+        <g class="entity-node" data-id="vente" data-module="ventes" onclick="selectEntity('vente')">
+          <rect class="entity-bg" x="30" y="530" width="125" height="50" rx="8" fill="#1a1d2e" stroke="rgba(239,68,68,0.5)" stroke-width="2.5"/>
+          <text x="93" y="550" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">Vente</text>
+          <text x="93" y="567" text-anchor="middle" fill="#f87171" font-size="9">⚠ À CRÉER</text>
+        </g>
+        <g class="entity-node" data-id="workflow-vente" data-module="ventes" onclick="selectEntity('workflow-vente')">
+          <rect class="entity-bg" x="215" y="530" width="160" height="50" rx="8" fill="#1a1d2e" stroke="rgba(239,68,68,0.5)" stroke-width="2.5"/>
+          <text x="295" y="550" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">Workflow Vente</text>
+          <text x="295" y="567" text-anchor="middle" fill="#f87171" font-size="9">⚠ 6 étapes, À CRÉER</text>
+        </g>
+        <g class="entity-node" data-id="mutation" data-module="ventes" onclick="selectEntity('mutation')">
+          <rect class="entity-bg" x="425" y="530" width="110" height="50" rx="8" fill="#1a1d2e" stroke="rgba(239,68,68,0.3)" stroke-width="1.5"/>
+          <text x="480" y="552" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Mutation</text>
+          <text x="480" y="568" text-anchor="middle" fill="#64748b" font-size="9">transfert ALUR</text>
+        </g>
+
+        <!-- COMMUNICATION -->
+        <g class="entity-node" data-id="messagerie" data-module="communication" onclick="selectEntity('messagerie')">
+          <rect class="entity-bg" x="30" y="680" width="120" height="40" rx="8" fill="#1a1d2e" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+          <text x="90" y="705" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Messagerie</text>
+        </g>
+        <g class="entity-node" data-id="mur" data-module="communication" onclick="selectEntity('mur')">
+          <rect class="entity-bg" x="170" y="680" width="120" height="40" rx="8" fill="#1a1d2e" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+          <text x="230" y="705" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Mur / Forum</text>
+        </g>
+        <g class="entity-node" data-id="evenement" data-module="communication" onclick="selectEntity('evenement')">
+          <rect class="entity-bg" x="310" y="680" width="120" height="40" rx="8" fill="#1a1d2e" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+          <text x="370" y="705" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Événements</text>
+        </g>
+
+        <!-- DOCUMENTS -->
+        <g class="entity-node" data-id="document" data-module="documents" onclick="selectEntity('document')">
+          <rect class="entity-bg" x="620" y="620" width="160" height="50" rx="8" fill="#1a1d2e" stroke="rgba(14,165,233,0.3)" stroke-width="1.5"/>
+          <text x="700" y="642" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Document</text>
+          <text x="700" y="658" text-anchor="middle" fill="#64748b" font-size="9">catégorie, version, accès</text>
+        </g>
+        <g class="entity-node" data-id="dossier" data-module="documents" onclick="selectEntity('dossier')">
+          <rect class="entity-bg" x="820" y="620" width="130" height="50" rx="8" fill="#1a1d2e" stroke="rgba(14,165,233,0.3)" stroke-width="1.5"/>
+          <text x="885" y="642" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Dossier GED</text>
+          <text x="885" y="658" text-anchor="middle" fill="#64748b" font-size="9">arborescence</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="empty-state" id="empty-state">
+      <div class="icon">&#8594;</div>
+      <p>Clique sur une <strong>entité</strong> pour voir ses champs et relations.<br/><br/>Clique sur une <strong>flèche</strong> pour la sélectionner et construire ton schéma de migration.</p>
+    </div>
+    <div id="entity-detail" style="display:none;"></div>
+
+    <div class="selected-relations" id="selected-relations" style="display:none;">
+      <h3>Relations sélectionnées</h3>
+      <div class="selected-count" id="selected-count"></div>
+      <div id="selected-list"></div>
+      <div class="action-bar">
+        <button class="action-btn primary" onclick="exportSelections()">Valider cette sélection</button>
+        <button class="action-btn ghost" onclick="clearSelections()">Tout désélectionner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ENTITIES = {
+  copropriete: { name: 'Copropriété', module: 'core', color: '#3b82f6',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'nom', type: 'text' }, { name: 'adresse', type: 'text' },
+      { name: 'nombre_lots', type: 'int' }, { name: 'total_tantiemes', type: 'int' },
+      { name: 'siret_syndic', type: 'text' }, { name: 'exercice_debut', type: 'date' }
+    ],
+    relations: [
+      { target: 'Lot', rel: 'copro-lot', desc: '1 copropriété → N lots', type: 'reference' },
+      { target: 'Budget', rel: 'budget-appel', desc: '1 copropriété → N budgets/an', type: 'reference' },
+      { target: 'Contrat', rel: 'presta-contrat', desc: '1 copropriété → N contrats', type: 'reference' },
+      { target: 'AG', rel: 'ag-resolution', desc: '1 copropriété → N assemblées', type: 'reference' },
+    ]},
+  lot: { name: 'Lot', module: 'core', color: '#3b82f6',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'copropriete_id', type: 'uuid FK' },
+      { name: 'numero', type: 'text' }, { name: 'type', type: 'enum' },
+      { name: 'etage', type: 'int' }, { name: 'surface', type: 'numeric' }, { name: 'tantiemes', type: 'int' }
+    ],
+    relations: [
+      { target: 'Copropriétaire', rel: 'lot-owner', desc: 'N:M via lot_owners', type: 'reference' },
+      { target: 'Appel Fonds', rel: 'appel-journal', desc: 'Montant dû par lot', type: 'financial' },
+      { target: 'v_lot_balance', rel: 'journal-balance', desc: 'Solde calculé depuis journal', type: 'financial' },
+      { target: 'Vente', rel: 'vente-lot', desc: 'Lot peut être vendu', type: 'reference' },
+    ]},
+  coproprietaire: { name: 'Copropriétaire', module: 'core', color: '#3b82f6',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'user_id', type: 'uuid FK' },
+      { name: 'nom', type: 'text' }, { name: 'prenom', type: 'text' },
+      { name: 'email', type: 'text' }, { name: 'telephone', type: 'text' },
+      { name: 'total_tantiemes', type: 'int (calculé)' }
+    ],
+    relations: [
+      { target: 'Lot', rel: 'lot-owner', desc: 'N:M via lot_owners', type: 'reference' },
+      { target: 'Vote', rel: 'resolution-vote', desc: 'Vote aux AG', type: 'reference' },
+      { target: 'Paiement', rel: 'paiement-journal', desc: 'Effectue des paiements', type: 'financial' },
+      { target: 'Messagerie', rel: 'comm-copro', desc: 'Participant aux conversations', type: 'reference' },
+    ]},
+  journal: { name: 'Journal Comptable', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'date', type: 'date' }, { name: 'libelle', type: 'text' },
+      { name: 'source_type', type: 'enum' }, { name: 'source_id', type: 'uuid FK' },
+      { name: 'status', type: 'draft|posted' }, { name: '→ entries[]', type: 'débit/crédit' }
+    ],
+    relations: [
+      { target: 'v_lot_balance', rel: 'journal-balance', desc: 'Calcule le solde de chaque lot', type: 'financial' },
+      { target: 'Appel Fonds', rel: 'appel-journal', desc: 'Reçoit écritures des appels', type: 'financial' },
+      { target: 'Paiement', rel: 'paiement-journal', desc: 'Reçoit écritures des paiements', type: 'financial' },
+      { target: 'Facture', rel: 'facture-journal', desc: 'Reçoit écritures des factures', type: 'financial' },
+      { target: 'Mutation', rel: 'mutation-journal', desc: 'Transfert ALUR via mutation', type: 'financial' },
+    ]},
+  budget: { name: 'Budget', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'copro_id', type: 'uuid FK' },
+      { name: 'annee', type: 'int' }, { name: 'type', type: 'COURANT|TRAVAUX' },
+      { name: 'montant_total', type: 'numeric' }, { name: 'statut', type: 'enum' },
+      { name: 'resolution_id', type: 'uuid FK (AG)' }
+    ],
+    relations: [
+      { target: 'Appel Fonds', rel: 'budget-appel', desc: 'Génère les appels de fonds', type: 'financial' },
+      { target: 'Résolution AG', rel: 'ag-budget', desc: 'Voté en AG', type: 'reference' },
+    ]},
+  appel: { name: 'Appel de Fonds', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'budget_id', type: 'uuid FK' },
+      { name: 'date_echeance', type: 'date' }, { name: 'montant_total', type: 'numeric' },
+      { name: 'mode', type: 'TRIMESTRIEL|SEMESTRIEL|...' }, { name: 'statut', type: 'enum' }
+    ],
+    relations: [
+      { target: 'Journal', rel: 'appel-journal', desc: '→ Écriture au journal (créance)', type: 'financial' },
+      { target: 'Impayé', rel: 'appel-impaye', desc: 'Génère impayé si non payé', type: 'operational' },
+    ]},
+  paiement: { name: 'Paiement', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'lot_id', type: 'uuid FK' },
+      { name: 'montant', type: 'numeric' }, { name: 'date', type: 'date' },
+      { name: 'mode', type: 'VIREMENT|CHEQUE|PRELEVEMENT' }, { name: 'reference', type: 'text' }
+    ],
+    relations: [
+      { target: 'Journal', rel: 'paiement-journal', desc: '→ Écriture au journal (encaissement)', type: 'financial' },
+    ]},
+  facture: { name: 'Facture Fournisseur', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'supplier_id', type: 'uuid FK' },
+      { name: 'montant_ht', type: 'numeric' }, { name: 'montant_ttc', type: 'numeric' },
+      { name: 'date_facture', type: 'date' }, { name: 'statut', type: 'enum' }
+    ],
+    relations: [
+      { target: 'Journal', rel: 'facture-journal', desc: '→ Écriture au journal (dette)', type: 'financial' },
+      { target: 'Ordre Service', rel: 'os-facture', desc: 'Liée à un OS validé', type: 'operational' },
+    ]},
+  impaye: { name: 'Impayé', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'lot_id', type: 'uuid FK' },
+      { name: 'appel_id', type: 'uuid FK' }, { name: 'montant_du', type: 'numeric' },
+      { name: 'jours_retard', type: 'int' }, { name: 'statut', type: 'enum relance' }
+    ],
+    relations: [
+      { target: 'Appel Fonds', rel: 'appel-impaye', desc: 'Créé quand appel non payé', type: 'financial' },
+    ]},
+  balance: { name: 'v_lot_balance', module: 'finance', color: '#22c55e',
+    fields: [
+      { name: 'lot_id', type: 'uuid' }, { name: 'solde', type: 'numeric (calculé)' },
+      { name: 'total_appele', type: 'numeric (calculé)' }, { name: 'total_paye', type: 'numeric (calculé)' }
+    ],
+    relations: [
+      { target: 'Journal', rel: 'journal-balance', desc: 'Calculé depuis les écritures', type: 'financial' },
+    ]},
+  prestataire: { name: 'Prestataire', module: 'maintenance', color: '#f59e0b',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'nom', type: 'text' },
+      { name: 'email', type: 'text' }, { name: 'siret', type: 'text' },
+      { name: 'specialites[]', type: 'enum[]' }, { name: 'notation', type: 'int' }
+    ],
+    relations: [
+      { target: 'Contrat', rel: 'presta-contrat', desc: '1:N contrats de maintenance', type: 'operational' },
+    ]},
+  contrat: { name: 'Contrat', module: 'maintenance', color: '#f59e0b',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'prestataire_id', type: 'uuid FK' },
+      { name: 'type', type: 'ASCENSEUR|MENAGE|...' }, { name: 'montant_annuel', type: 'numeric' },
+      { name: 'date_debut/fin', type: 'date' }, { name: 'tacite_reconduction', type: 'bool' }
+    ],
+    relations: [
+      { target: 'Ordre Service', rel: 'contrat-os', desc: '1:N ordres liés au contrat', type: 'operational' },
+      { target: 'Document', rel: 'doc-maintenance', desc: 'Pièces jointes', type: 'reference' },
+    ]},
+  os: { name: 'Ordre de Service', module: 'maintenance', color: '#f59e0b',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'contrat_id', type: 'uuid FK (opt)' },
+      { name: 'prestataire_id', type: 'uuid FK' }, { name: 'urgence', type: 'enum' },
+      { name: 'montant_devis', type: 'numeric' }, { name: 'montant_facture', type: 'numeric' },
+      { name: 'statut', type: 'enum workflow' }
+    ],
+    relations: [
+      { target: 'Facture → Journal', rel: 'os-facture', desc: 'Facture validée → écriture journal', type: 'financial' },
+      { target: 'Carnet Entretien', rel: 'os-logbook', desc: 'Trace dans le logbook', type: 'operational' },
+    ]},
+  logbook: { name: 'Carnet d\'Entretien', module: 'maintenance', color: '#f59e0b',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'copro_id', type: 'uuid FK' },
+      { name: 'date', type: 'date' }, { name: 'description', type: 'text' },
+      { name: 'type', type: 'enum' }
+    ],
+    relations: []},
+  ag: { name: 'Assemblée Générale', module: 'ag', color: '#a855f7',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'copro_id', type: 'uuid FK' },
+      { name: 'type', type: 'ordinaire|extraordinaire' }, { name: 'date', type: 'timestamp' },
+      { name: 'format', type: 'PRESENTIEL|VISIO|MIXTE' }, { name: 'statut', type: 'enum' }
+    ],
+    relations: [
+      { target: 'Résolution', rel: 'ag-resolution', desc: '1:N résolutions à voter', type: 'reference' },
+      { target: 'Présence', rel: 'ag-presence', desc: 'Feuille de présence', type: 'reference' },
+      { target: 'Budget', rel: 'ag-budget', desc: 'Vote le budget → lien résolution', type: 'financial' },
+      { target: 'Document', rel: 'doc-ag', desc: 'PV, convocations', type: 'reference' },
+    ]},
+  resolution: { name: 'Résolution', module: 'ag', color: '#a855f7',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'ag_id', type: 'uuid FK' },
+      { name: 'numero', type: 'text' }, { name: 'article', type: 'Art.24|25|26|...' },
+      { name: 'resultat', type: 'adoptee|rejetee' }
+    ],
+    relations: [
+      { target: 'Vote', rel: 'resolution-vote', desc: '1:N votes des copropriétaires', type: 'reference' },
+    ]},
+  vote: { name: 'Vote', module: 'ag', color: '#a855f7',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'resolution_id', type: 'uuid FK' },
+      { name: 'coproprietaire_id', type: 'uuid FK' }, { name: 'direction', type: 'pour|contre|abstention' },
+      { name: 'tantiemes', type: 'int' }, { name: 'source', type: 'live|correspondence' }
+    ],
+    relations: []},
+  presence: { name: 'Présence', module: 'ag', color: '#a855f7',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'ag_id', type: 'uuid FK' },
+      { name: 'coproprietaire_id', type: 'uuid FK' }, { name: 'type', type: 'present|proxy|correspondence' },
+      { name: 'signature', type: 'text' }
+    ],
+    relations: []},
+  vente: { name: 'Vente ⚠️', module: 'ventes', color: '#ef4444',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'lot_ids[]', type: 'uuid[] FK' },
+      { name: 'vendeur_id', type: 'uuid FK' }, { name: 'acquereur_id', type: 'uuid FK' },
+      { name: 'notaire', type: 'text' }, { name: 'date_compromis', type: 'date' },
+      { name: 'statut', type: 'EN_COURS|TERMINEE|ANNULEE' }
+    ],
+    relations: [
+      { target: 'Workflow Vente', rel: 'vente-workflow', desc: '6 étapes de la vente', type: 'operational' },
+      { target: 'Lot', rel: 'vente-lot', desc: 'Lot(s) vendu(s)', type: 'reference' },
+      { target: 'Mutation', rel: 'vente-mutation', desc: 'Transfert propriété', type: 'operational' },
+      { target: 'Document', rel: 'doc-vente', desc: 'État daté, diagnostics', type: 'reference' },
+    ]},
+  'workflow-vente': { name: 'Workflow Vente ⚠️', module: 'ventes', color: '#ef4444',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'vente_id', type: 'uuid FK' },
+      { name: 'etape', type: 'enum (6 étapes)' }, { name: 'statut', type: 'pending|done' },
+      { name: 'date_completion', type: 'date' }
+    ],
+    relations: [
+      { target: 'Vente', rel: 'vente-workflow', desc: 'Appartient à une vente', type: 'reference' },
+    ]},
+  mutation: { name: 'Mutation', module: 'ventes', color: '#ef4444',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'vente_id', type: 'uuid FK' },
+      { name: 'type', type: 'vente|donation|succession' }, { name: 'montant_alur', type: 'numeric' }
+    ],
+    relations: [
+      { target: 'Journal', rel: 'mutation-journal', desc: 'Transfert ALUR → écriture journal', type: 'financial' },
+    ]},
+  messagerie: { name: 'Messagerie', module: 'communication', color: '#94a3b8',
+    fields: [
+      { name: 'conversation_id', type: 'uuid' }, { name: 'participant_ids', type: 'uuid[]' },
+      { name: 'contenu', type: 'text' }, { name: 'lu', type: 'bool' }
+    ],
+    relations: [
+      { target: 'Copropriétaire', rel: 'comm-copro', desc: 'Participants', type: 'reference' },
+    ]},
+  mur: { name: 'Mur / Forum', module: 'communication', color: '#94a3b8',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'auteur_id', type: 'uuid FK' },
+      { name: 'contenu', type: 'text' }, { name: 'epingle', type: 'bool' },
+      { name: 'commentaires[]', type: 'relation' }, { name: 'reactions[]', type: 'relation' }
+    ],
+    relations: []},
+  evenement: { name: 'Événement', module: 'communication', color: '#94a3b8',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'titre', type: 'text' },
+      { name: 'date_debut/fin', type: 'timestamp' }, { name: 'lieu', type: 'text' },
+      { name: 'createur_id', type: 'uuid FK' }
+    ],
+    relations: []},
+  document: { name: 'Document', module: 'documents', color: '#0ea5e9',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'copro_id', type: 'uuid FK' },
+      { name: 'categorie', type: 'AG|CONTRAT|VENTE|...' }, { name: 'titre', type: 'text' },
+      { name: 'fichier_url', type: 'text' }, { name: 'version', type: 'int' },
+      { name: 'confidentialite', type: 'enum' }
+    ],
+    relations: [
+      { target: 'AG', rel: 'doc-ag', desc: 'PV, convocations AG', type: 'reference' },
+      { target: 'Maintenance', rel: 'doc-maintenance', desc: 'Devis, rapports', type: 'reference' },
+      { target: 'Vente', rel: 'doc-vente', desc: 'État daté, diagnostics', type: 'reference' },
+    ]},
+  dossier: { name: 'Dossier GED', module: 'documents', color: '#0ea5e9',
+    fields: [
+      { name: 'id', type: 'uuid' }, { name: 'parent_id', type: 'uuid FK (self)' },
+      { name: 'nom', type: 'text' }, { name: 'copro_id', type: 'uuid FK' }
+    ],
+    relations: []},
+};
+
+const MODULE_COLORS = {
+  core: { bg: 'rgba(59,130,246,0.1)', text: '#60a5fa' },
+  finance: { bg: 'rgba(34,197,94,0.1)', text: '#4ade80' },
+  maintenance: { bg: 'rgba(245,158,11,0.1)', text: '#fbbf24' },
+  ag: { bg: 'rgba(168,85,247,0.1)', text: '#c084fc' },
+  ventes: { bg: 'rgba(239,68,68,0.1)', text: '#f87171' },
+  communication: { bg: 'rgba(148,163,184,0.1)', text: '#94a3b8' },
+  documents: { bg: 'rgba(14,165,233,0.1)', text: '#38bdf8' },
+};
+
+let selectedEntityId = null;
+let selectedRelations = new Set();
+let activeFilter = 'all';
+
+function selectEntity(id) {
+  if (selectedEntityId === id) { selectedEntityId = null; clearHighlights(); return; }
+  selectedEntityId = id;
+  const entity = ENTITIES[id];
+  if (!entity) return;
+
+  // Highlight
+  clearHighlights();
+  document.querySelectorAll('.entity-node').forEach(n => n.classList.add('dimmed'));
+  document.querySelectorAll('.relation-line, .relation-label').forEach(n => n.classList.add('dimmed'));
+
+  const thisNode = document.querySelector(`[data-id="${id}"]`);
+  if (thisNode) { thisNode.classList.remove('dimmed'); thisNode.classList.add('selected'); }
+
+  // Find connected relations
+  const connectedRels = new Set();
+  entity.relations.forEach(r => connectedRels.add(r.rel));
+  // Also check reverse
+  Object.entries(ENTITIES).forEach(([eid, e]) => {
+    e.relations.forEach(r => {
+      if (r.rel && connectedRels.has(r.rel)) {
+        const node = document.querySelector(`[data-id="${eid}"]`);
+        if (node) node.classList.remove('dimmed');
+      }
+    });
+  });
+
+  connectedRels.forEach(rel => {
+    document.querySelectorAll(`[data-rel="${rel}"]`).forEach(el => {
+      el.classList.remove('dimmed');
+      el.classList.add('highlighted');
+    });
+  });
+
+  // Sidebar
+  const mc = MODULE_COLORS[entity.module];
+  let html = `
+    <div class="entity-name">${entity.name}</div>
+    <span class="entity-module" style="background:${mc.bg};color:${mc.text}">${entity.module}</span>
+    <div class="fields"><h3>Champs</h3>`;
+  entity.fields.forEach(f => {
+    html += `<div class="field"><span class="field-name">${f.name}</span><span class="field-type">${f.type}</span></div>`;
+  });
+  html += '</div>';
+
+  if (entity.relations.length) {
+    html += '<h3>Relations</h3>';
+    entity.relations.forEach(r => {
+      const typeClass = r.type || 'reference';
+      const typeLabel = r.type === 'financial' ? 'Financier' : r.type === 'operational' ? 'Opérationnel' : 'Référence';
+      const isSelected = selectedRelations.has(r.rel);
+      html += `<div class="relation" onclick="toggleRelation('${r.rel}')" style="${isSelected ? 'border-color:rgba(59,130,246,0.4);background:rgba(59,130,246,0.1);':''}">
+        <span class="rel-arrow">→</span> <span class="rel-target">${r.target}</span>
+        <span class="rel-type ${typeClass}">${typeLabel}</span>
+        <span class="rel-desc">${r.desc}</span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('entity-detail').innerHTML = html;
+  document.getElementById('entity-detail').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+  updateSelectedUI();
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.entity-node').forEach(n => { n.classList.remove('dimmed','selected'); });
+  document.querySelectorAll('.relation-line, .relation-label').forEach(n => { n.classList.remove('dimmed','highlighted'); });
+}
+
+function toggleRelation(relId) {
+  if (selectedRelations.has(relId)) {
+    selectedRelations.delete(relId);
+  } else {
+    selectedRelations.add(relId);
+  }
+  // Re-render sidebar for current entity
+  if (selectedEntityId) selectEntity(selectedEntityId);
+  // re-select to refresh
+  selectedEntityId = null; // hack to force re-render
+  updateSelectedUI();
+  sendEvent('toggle-relation', relId);
+}
+
+// Click on relation lines directly
+document.querySelectorAll('.relation-line').forEach(line => {
+  line.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const rel = line.dataset.rel;
+    if (rel) toggleRelation(rel);
+  });
+});
+
+function updateSelectedUI() {
+  const container = document.getElementById('selected-relations');
+  const list = document.getElementById('selected-list');
+  const count = document.getElementById('selected-count');
+
+  if (selectedRelations.size === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+  count.textContent = selectedRelations.size + ' relation(s) sélectionnée(s)';
+
+  let html = '';
+  selectedRelations.forEach(rel => {
+    // Find description
+    let desc = rel;
+    Object.values(ENTITIES).forEach(e => {
+      e.relations.forEach(r => {
+        if (r.rel === rel) desc = r.target + ' — ' + r.desc;
+      });
+    });
+    html += `<div class="sel-rel"><span>${desc}</span><span class="remove" onclick="toggleRelation('${rel}')">×</span></div>`;
+  });
+  list.innerHTML = html;
+}
+
+function clearSelections() {
+  selectedRelations.clear();
+  updateSelectedUI();
+  if (selectedEntityId) { const id = selectedEntityId; selectedEntityId = null; selectEntity(id); }
+  sendEvent('clear-selections', null);
+}
+
+function exportSelections() {
+  const data = Array.from(selectedRelations);
+  sendEvent('validate-selections', data.join(','));
+}
+
+function filterModule(mod) {
+  activeFilter = mod;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === mod));
+
+  document.querySelectorAll('.entity-node').forEach(node => {
+    const m = node.dataset.module;
+    if (mod === 'all' || m === mod || m === 'core') {
+      node.style.opacity = '1';
+    } else {
+      node.style.opacity = '0.15';
+    }
+  });
+
+  // Dim relations not connected to filtered module
+  document.querySelectorAll('.relation-line, .relation-label').forEach(el => {
+    if (mod === 'all') { el.style.opacity = ''; return; }
+    // Check if any entity in this module has this relation
+    const rel = el.dataset.rel;
+    let connected = false;
+    Object.entries(ENTITIES).forEach(([id, e]) => {
+      if (e.module === mod || e.module === 'core') {
+        e.relations.forEach(r => { if (r.rel === rel) connected = true; });
+      }
+    });
+    el.style.opacity = connected ? '' : '0.08';
+  });
+  sendEvent('filter', mod);
+}
+
+function sendEvent(type, value) {
+  try {
+    const img = new Image();
+    img.src = '/event?type=' + encodeURIComponent(type) + '&choice=' + encodeURIComponent(value || '') + '&text=' + encodeURIComponent(type + ':' + (value||'')) + '&t=' + Date.now();
+  } catch(e) {}
+}
+</script>
+</body>
+</html>

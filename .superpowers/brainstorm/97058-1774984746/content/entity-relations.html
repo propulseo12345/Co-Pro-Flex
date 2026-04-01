@@ -1,0 +1,230 @@
+<h2>Modèle de données unifié — CoProFlex</h2>
+<p class="subtitle">Architecture "mix" : données opérationnelles dans les tables métier, mouvements financiers dans le journal comptable</p>
+
+<div style="margin: 32px 0;">
+  <svg viewBox="0 0 1100 820" style="width: 100%; max-width: 1100px; font-family: Inter, system-ui, sans-serif;">
+
+    <!-- Background groups -->
+    <!-- Core -->
+    <rect x="360" y="10" width="380" height="120" rx="12" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.25)" stroke-width="1.5"/>
+    <text x="550" y="35" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600" letter-spacing="1">NOYAU</text>
+
+    <!-- Finance group -->
+    <rect x="10" y="160" width="520" height="310" rx="12" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.2)" stroke-width="1.5"/>
+    <text x="270" y="185" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="600" letter-spacing="1">FINANCE & COMPTABILITÉ</text>
+
+    <!-- Maintenance group -->
+    <rect x="570" y="160" width="510" height="180" rx="12" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1.5"/>
+    <text x="825" y="185" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600" letter-spacing="1">MAINTENANCE</text>
+
+    <!-- AG group -->
+    <rect x="570" y="370" width="510" height="180" rx="12" fill="rgba(168,85,247,0.06)" stroke="rgba(168,85,247,0.2)" stroke-width="1.5"/>
+    <text x="825" y="395" text-anchor="middle" fill="#c084fc" font-size="11" font-weight="600" letter-spacing="1">ASSEMBLÉES GÉNÉRALES</text>
+
+    <!-- Ventes group -->
+    <rect x="10" y="500" width="520" height="140" rx="12" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.2)" stroke-width="1.5"/>
+    <text x="270" y="525" text-anchor="middle" fill="#f87171" font-size="11" font-weight="600" letter-spacing="1">VENTES & MUTATIONS</text>
+
+    <!-- Communication group -->
+    <rect x="10" y="670" width="520" height="130" rx="12" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+    <text x="270" y="695" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1">COMMUNICATION</text>
+
+    <!-- Documents group -->
+    <rect x="570" y="580" width="510" height="220" rx="12" fill="rgba(14,165,233,0.06)" stroke="rgba(14,165,233,0.2)" stroke-width="1.5"/>
+    <text x="825" y="605" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="600" letter-spacing="1">DOCUMENTS / GED</text>
+
+    <!-- ═══ CORE ENTITIES ═══ -->
+    <rect x="380" y="50" width="150" height="55" rx="8" fill="#1a1d2e" stroke="rgba(59,130,246,0.4)" stroke-width="2"/>
+    <text x="455" y="73" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Copropriété</text>
+    <text x="455" y="92" text-anchor="middle" fill="#64748b" font-size="10">nom, adresse, tantièmes</text>
+
+    <rect x="560" y="50" width="80" height="55" rx="8" fill="#1a1d2e" stroke="rgba(59,130,246,0.4)" stroke-width="2"/>
+    <text x="600" y="73" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Lot</text>
+    <text x="600" y="92" text-anchor="middle" fill="#64748b" font-size="10">n°, tantièmes</text>
+
+    <rect x="660" y="50" width="60" height="55" rx="8" fill="#1a1d2e" stroke="rgba(59,130,246,0.4)" stroke-width="2"/>
+    <text x="690" y="73" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">Copro</text>
+    <text x="690" y="92" text-anchor="middle" fill="#64748b" font-size="10">owner</text>
+
+    <!-- Core arrows -->
+    <line x1="530" y1="77" x2="558" y2="77" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+    <line x1="642" y1="77" x2="658" y2="77" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+    <text x="550" y="70" fill="#60a5fa" font-size="9">1:N</text>
+    <text x="653" y="70" fill="#60a5fa" font-size="9">N:M</text>
+
+    <!-- ═══ FINANCE ENTITIES ═══ -->
+    <!-- Ledger = source of truth -->
+    <rect x="30" y="200" width="200" height="70" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.5)" stroke-width="2.5"/>
+    <text x="130" y="218" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">★ JOURNAL COMPTABLE</text>
+    <text x="130" y="234" text-anchor="middle" fill="#4ade80" font-size="10">SOURCE DE VÉRITÉ</text>
+    <text x="130" y="250" text-anchor="middle" fill="#64748b" font-size="10">ledger_transactions</text>
+    <text x="130" y="262" text-anchor="middle" fill="#64748b" font-size="10">ledger_entries (débit/crédit)</text>
+
+    <rect x="260" y="200" width="120" height="50" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+    <text x="320" y="222" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Budget</text>
+    <text x="320" y="240" text-anchor="middle" fill="#64748b" font-size="10">prévisionnel</text>
+
+    <rect x="400" y="200" width="120" height="50" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+    <text x="460" y="222" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Appel Fonds</text>
+    <text x="460" y="240" text-anchor="middle" fill="#64748b" font-size="10">→ écriture journal</text>
+
+    <rect x="30" y="290" width="120" height="50" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+    <text x="90" y="312" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Paiement</text>
+    <text x="90" y="330" text-anchor="middle" fill="#64748b" font-size="10">→ écriture journal</text>
+
+    <rect x="170" y="290" width="140" height="50" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+    <text x="240" y="312" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Facture Fourn.</text>
+    <text x="240" y="330" text-anchor="middle" fill="#64748b" font-size="10">→ écriture journal</text>
+
+    <rect x="330" y="290" width="120" height="50" rx="8" fill="#1a1d2e" stroke="rgba(34,197,94,0.3)" stroke-width="1.5"/>
+    <text x="390" y="312" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Impayé</text>
+    <text x="390" y="330" text-anchor="middle" fill="#64748b" font-size="10">relances, recouvrement</text>
+
+    <rect x="30" y="380" width="200" height="50" rx="8" fill="#131620" stroke="rgba(34,197,94,0.2)" stroke-width="1" stroke-dasharray="6 3"/>
+    <text x="130" y="402" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="600">v_lot_balance</text>
+    <text x="130" y="418" text-anchor="middle" fill="#64748b" font-size="10">VUE calculée depuis journal</text>
+
+    <!-- Finance arrows to ledger -->
+    <line x1="400" y1="240" x2="232" y2="240" stroke="rgba(34,197,94,0.4)" stroke-width="1" stroke-dasharray="4 2"/>
+    <line x1="90" y1="290" x2="110" y2="272" stroke="rgba(34,197,94,0.4)" stroke-width="1" stroke-dasharray="4 2"/>
+    <line x1="200" y1="290" x2="160" y2="272" stroke="rgba(34,197,94,0.4)" stroke-width="1" stroke-dasharray="4 2"/>
+    <line x1="130" y1="380" x2="130" y2="272" stroke="rgba(34,197,94,0.5)" stroke-width="1.5" stroke-dasharray="4 2"/>
+
+    <!-- ═══ MAINTENANCE ENTITIES ═══ -->
+    <rect x="590" y="200" width="130" height="50" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+    <text x="655" y="222" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Prestataire</text>
+    <text x="655" y="240" text-anchor="middle" fill="#64748b" font-size="10">fournisseur/artisan</text>
+
+    <rect x="740" y="200" width="130" height="50" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+    <text x="805" y="222" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Contrat</text>
+    <text x="805" y="240" text-anchor="middle" fill="#fbbf24" font-size="10">montant = opérationnel</text>
+
+    <rect x="890" y="200" width="170" height="50" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+    <text x="975" y="222" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Ordre de Service</text>
+    <text x="975" y="240" text-anchor="middle" fill="#fbbf24" font-size="10">devis/facture = opérationnel</text>
+
+    <rect x="590" y="280" width="130" height="45" rx="8" fill="#1a1d2e" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+    <text x="655" y="305" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Carnet Entretien</text>
+
+    <!-- Maintenance arrows -->
+    <line x1="722" y1="225" x2="738" y2="225" stroke="#f59e0b" stroke-width="1" marker-end="url(#arrow-yellow)"/>
+    <line x1="872" y1="225" x2="888" y2="225" stroke="#f59e0b" stroke-width="1" marker-end="url(#arrow-yellow)"/>
+
+    <!-- Maintenance → Finance (facture validée → journal) -->
+    <path d="M 890 250 Q 700 350 520 310" fill="none" stroke="rgba(34,197,94,0.3)" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="700" y="305" fill="#4ade80" font-size="9">facture validée → journal</text>
+
+    <!-- ═══ AG ENTITIES ═══ -->
+    <rect x="590" y="410" width="130" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+    <text x="655" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">AG Meeting</text>
+    <text x="655" y="448" text-anchor="middle" fill="#64748b" font-size="10">date, lieu, format</text>
+
+    <rect x="740" y="410" width="120" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+    <text x="800" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Résolution</text>
+    <text x="800" y="448" text-anchor="middle" fill="#64748b" font-size="10">article, majorité</text>
+
+    <rect x="880" y="410" width="90" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+    <text x="925" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Vote</text>
+    <text x="925" y="448" text-anchor="middle" fill="#64748b" font-size="10">pour/contre</text>
+
+    <rect x="990" y="410" width="80" height="50" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+    <text x="1030" y="432" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Présence</text>
+    <text x="1030" y="448" text-anchor="middle" fill="#64748b" font-size="10">signature</text>
+
+    <rect x="590" y="480" width="200" height="45" rx="8" fill="#1a1d2e" stroke="rgba(168,85,247,0.3)" stroke-width="1.5"/>
+    <text x="690" y="505" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Vote par correspondance</text>
+
+    <!-- AG arrows -->
+    <line x1="722" y1="435" x2="738" y2="435" stroke="#a855f7" stroke-width="1" marker-end="url(#arrow-purple)"/>
+    <line x1="862" y1="435" x2="878" y2="435" stroke="#a855f7" stroke-width="1" marker-end="url(#arrow-purple)"/>
+    <line x1="972" y1="435" x2="988" y2="435" stroke="#a855f7" stroke-width="1" marker-end="url(#arrow-purple)"/>
+
+    <!-- AG → Finance (budget voté → budget) -->
+    <path d="M 590 460 Q 540 460 460 260" fill="none" stroke="rgba(34,197,94,0.3)" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="500" y="370" fill="#4ade80" font-size="9">budget voté</text>
+
+    <!-- ═══ VENTES ENTITIES ═══ -->
+    <rect x="30" y="540" width="120" height="50" rx="8" fill="#1a1d2e" stroke="rgba(239,68,68,0.4)" stroke-width="2"/>
+    <text x="90" y="558" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">Vente</text>
+    <text x="90" y="575" text-anchor="middle" fill="#f87171" font-size="9">⚠ À CRÉER</text>
+
+    <rect x="170" y="540" width="140" height="50" rx="8" fill="#1a1d2e" stroke="rgba(239,68,68,0.4)" stroke-width="2"/>
+    <text x="240" y="558" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">Workflow Vente</text>
+    <text x="240" y="575" text-anchor="middle" fill="#f87171" font-size="9">⚠ 6 étapes, À CRÉER</text>
+
+    <rect x="330" y="540" width="130" height="50" rx="8" fill="#1a1d2e" stroke="rgba(239,68,68,0.3)" stroke-width="1.5"/>
+    <text x="395" y="562" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Mutation</text>
+    <text x="395" y="578" text-anchor="middle" fill="#64748b" font-size="10">transfert ALUR</text>
+
+    <!-- Vente arrows -->
+    <line x1="152" y1="565" x2="168" y2="565" stroke="#ef4444" stroke-width="1" marker-end="url(#arrow-red)"/>
+    <line x1="312" y1="565" x2="328" y2="565" stroke="#ef4444" stroke-width="1" marker-end="url(#arrow-red)"/>
+
+    <!-- ═══ COMMUNICATION ═══ -->
+    <rect x="30" y="710" width="120" height="45" rx="8" fill="#1a1d2e" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+    <text x="90" y="737" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Messagerie</text>
+
+    <rect x="170" y="710" width="120" height="45" rx="8" fill="#1a1d2e" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+    <text x="230" y="737" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Mur / Forum</text>
+
+    <rect x="310" y="710" width="120" height="45" rx="8" fill="#1a1d2e" stroke="rgba(148,163,184,0.2)" stroke-width="1.5"/>
+    <text x="370" y="737" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Événements</text>
+
+    <!-- ═══ DOCUMENTS ═══ -->
+    <rect x="610" y="630" width="160" height="55" rx="8" fill="#1a1d2e" stroke="rgba(14,165,233,0.3)" stroke-width="1.5"/>
+    <text x="690" y="652" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Document</text>
+    <text x="690" y="670" text-anchor="middle" fill="#64748b" font-size="10">catégorie, version, accès</text>
+
+    <rect x="800" y="630" width="130" height="55" rx="8" fill="#1a1d2e" stroke="rgba(14,165,233,0.3)" stroke-width="1.5"/>
+    <text x="865" y="652" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Dossier GED</text>
+    <text x="865" y="670" text-anchor="middle" fill="#64748b" font-size="10">arborescence</text>
+
+    <!-- Doc cross-references -->
+    <text x="690" y="710" text-anchor="middle" fill="#38bdf8" font-size="10">Référencé par : AG, Maintenance, Ventes, Contrats</text>
+
+    <!-- ═══ LEGEND ═══ -->
+    <rect x="590" y="730" width="490" height="60" rx="8" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+    <text x="610" y="750" fill="#64748b" font-size="10" font-weight="600">LÉGENDE</text>
+    <line x1="610" y1="765" x2="650" y2="765" stroke="rgba(34,197,94,0.5)" stroke-width="2" stroke-dasharray="6 3"/>
+    <text x="655" y="769" fill="#64748b" font-size="10">→ Génère écriture au journal</text>
+    <rect x="800" y="755" width="12" height="12" rx="3" fill="#1a1d2e" stroke="rgba(239,68,68,0.4)" stroke-width="2"/>
+    <text x="818" y="766" fill="#64748b" font-size="10">Tables à créer (Ventes)</text>
+    <rect x="950" y="755" width="12" height="12" rx="3" fill="#1a1d2e" stroke="rgba(34,197,94,0.5)" stroke-width="2.5"/>
+    <text x="968" y="766" fill="#64748b" font-size="10">Source de vérité</text>
+
+    <!-- Arrow markers -->
+    <defs>
+      <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M 0 0 L 8 3 L 0 6 Z" fill="#3b82f6"/>
+      </marker>
+      <marker id="arrow-yellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M 0 0 L 8 3 L 0 6 Z" fill="#f59e0b"/>
+      </marker>
+      <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M 0 0 L 8 3 L 0 6 Z" fill="#a855f7"/>
+      </marker>
+      <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M 0 0 L 8 3 L 0 6 Z" fill="#ef4444"/>
+      </marker>
+    </defs>
+  </svg>
+</div>
+
+<div style="margin-top: 24px; padding: 20px; background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px;">
+  <h3 style="color: #4ade80; margin: 0 0 12px 0; font-size: 14px;">Principe clé : le journal comptable comme source unique</h3>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0; line-height: 1.6;">
+    Les montants opérationnels (devis, contrat) restent dans leurs tables métier.<br/>
+    Dès qu'un euro <strong style="color: #e2e8f0;">bouge vraiment</strong> (appel émis, paiement reçu, facture validée) → écriture au journal.<br/>
+    Le <strong style="color: #e2e8f0;">solde d'un lot</strong> = vue calculée depuis le journal. Jamais stocké, toujours calculé.
+  </p>
+</div>
+
+<div style="margin-top: 20px; padding: 20px; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;">
+  <h3 style="color: #f87171; margin: 0 0 12px 0; font-size: 14px;">Priorité : module Ventes (aucune table Supabase)</h3>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0; line-height: 1.6;">
+    Tables à créer : <code style="color: #e2e8f0; background: rgba(148,163,184,0.1); padding: 2px 6px; border-radius: 4px;">sales</code>,
+    <code style="color: #e2e8f0; background: rgba(148,163,184,0.1); padding: 2px 6px; border-radius: 4px;">sale_workflow_steps</code>,
+    <code style="color: #e2e8f0; background: rgba(148,163,184,0.1); padding: 2px 6px; border-radius: 4px;">sale_documents</code><br/>
+    Workflow 6 étapes : Notification → Pré-état daté → État daté → Questionnaire → Transfert → Clôture
+  </p>
+</div>

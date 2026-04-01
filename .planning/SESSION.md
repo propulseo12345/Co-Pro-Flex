@@ -1,23 +1,22 @@
-# Session State — 2026-03-31 21:10
+# Session State — 2026-04-01 22:45
 
 ## Branch
 v2
 
 ## Completed This Session
-- Deep research dashboards SaaS (117 sources, tendances 2026, concurrents)
-- 5 previews HTML (Command Center, Zen, Action Board, Status Wall, Split View)
-- Dashboard Action Board implémenté : CSS bento grid, 7 composants, page reécrite
-- Nettoyage 8 anciens fichiers dashboard
-- Build OK (erreur TS préexistante lots/page.tsx non liée)
+- Brainstorm complet : architecture données "mix", wizard onboarding, migration 9 modules
+- Spec rédigé : docs/superpowers/specs/2026-04-01-onboarding-migration-db-design.md
+- Phase 1 terminée : Wizard onboarding (13 commits, 12 tâches, route+stepper+hook+4 steps+API+redirect)
+- Build OK (seule erreur TS préexistante lots/page.tsx:110)
 
 ## Next Task
-Brainstorm migration mock→Supabase : modélisation DB unifiée pour éviter la duplication de données entre modules (ex: montant contrat = dépense budget = ligne comptable). L'utilisateur veut réfléchir aux liens entre entités avant de coder.
+Phase 2 : Finance & AG (budget, vote→appels, reprise soldes, v_lot_balance) — écrire le plan puis exécuter
 
 ## Blockers
 None
 
 ## Key Context
-- 117 fichiers utilisent encore des mock data (maintenance, finance, ventes, AG, communication)
-- Dashboard fonctionne sur Supabase (v_dashboard_kpis, v_dashboard_todos, v_dashboard_recent_activity)
-- Montants à 0 = normal, pas de données financières saisies dans Supabase encore
-- L'utilisateur veut une source unique de vérité par donnée (pas de duplication contrat↔budget↔compta)
+- Architecture "mix" validée : opérationnel dans tables métier, euros réels dans le journal comptable
+- Wizard onboarding 4 étapes : copro→copropriétaires→lots+clés→comptes bancaires
+- 5 phases totales : P1 done, P2-P5 à faire (Finance, Maintenance, Ventes, Communication)
+- L'utilisateur est absent, exécution autonome des phases 2-5 en cours

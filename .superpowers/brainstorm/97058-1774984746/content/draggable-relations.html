@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoProFlex — Schéma interactif (drag & drop)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+    font-family: Inter, system-ui, sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+  .header {
+    padding: 16px 24px;
+    background: #161822;
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+    position: relative;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header p { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .header-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: none;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #3b82f6; color: white; }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .btn-ghost { background: rgba(148,163,184,0.06); color: #94a3b8; border: 1px solid rgba(148,163,184,0.08); }
+  .btn-ghost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+  .btn-danger { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .btn-danger:hover { background: rgba(239,68,68,0.15); }
+
+  .toolbar {
+    position: absolute;
+    top: 70px;
+    left: 16px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #161822;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .tool-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(148,163,184,0.08);
+    background: rgba(148,163,184,0.04);
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .tool-btn:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+  .tool-btn.active { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+  .tool-btn .tooltip {
+    display: none;
+    position: absolute;
+    left: 48px;
+    background: #1a1d2e;
+    color: #e2e8f0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    border: 1px solid rgba(148,163,184,0.1);
+  }
+  .tool-btn:hover .tooltip { display: block; }
+
+  #canvas {
+    width: 100vw;
+    height: calc(100vh - 62px);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+  #canvas.mode-connect { cursor: crosshair; }
+  #canvas.mode-delete { cursor: not-allowed; }
+  #canvas.panning { cursor: grabbing; }
+
+  svg#lines {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  svg#lines line, svg#lines path { pointer-events: stroke; cursor: pointer; }
+
+  .node {
+    position: absolute;
+    min-width: 120px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #1a1d2e;
+    border: 1.5px solid rgba(148,163,184,0.12);
+    cursor: grab;
+    z-index: 10;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .node:hover { border-color: rgba(59,130,246,0.3); box-shadow: 0 0 20px rgba(59,130,246,0.1); }
+  .node.dragging { cursor: grabbing; z-index: 100; box-shadow: 0 8px 30px rgba(0,0,0,0.4); border-color: rgba(59,130,246,0.5); }
+  .node.connect-source { border-color: rgba(34,197,94,0.6); box-shadow: 0 0 20px rgba(34,197,94,0.2); }
+  .node.connect-target:hover { border-color: rgba(34,197,94,0.8); box-shadow: 0 0 25px rgba(34,197,94,0.3); }
+
+  .node .name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .node .sub { font-size: 10px; color: #64748b; }
+  .node .badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .node.module-core { border-color: rgba(59,130,246,0.3); }
+  .node.module-core .name { color: #60a5fa; }
+  .node.module-finance { border-color: rgba(34,197,94,0.25); }
+  .node.module-finance .name { color: #4ade80; }
+  .node.module-finance.source-truth { border-color: rgba(34,197,94,0.5); border-width: 2.5px; }
+  .node.module-maintenance { border-color: rgba(245,158,11,0.25); }
+  .node.module-maintenance .name { color: #fbbf24; }
+  .node.module-ag { border-color: rgba(168,85,247,0.25); }
+  .node.module-ag .name { color: #c084fc; }
+  .node.module-ventes { border-color: rgba(239,68,68,0.35); border-width: 2px; }
+  .node.module-ventes .name { color: #f87171; }
+  .node.module-communication { border-color: rgba(148,163,184,0.15); }
+  .node.module-communication .name { color: #94a3b8; }
+  .node.module-documents { border-color: rgba(14,165,233,0.25); }
+  .node.module-documents .name { color: #38bdf8; }
+
+  .connection-label {
+    position: absolute;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.08);
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 5;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .connection-label:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
+  .connection-label.financial { color: #4ade80; }
+  .connection-label.operational { color: #fbbf24; }
+  .connection-label.reference { color: #60a5fa; }
+
+  .legend {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: #161822;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 10px;
+    padding: 12px 16px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; color: #94a3b8; }
+  .legend-line { width: 30px; height: 2px; }
+
+  .instructions {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background: #161822;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 10px;
+    padding: 12px 16px;
+    z-index: 50;
+    font-size: 11px;
+    color: #64748b;
+    max-width: 250px;
+    line-height: 1.6;
+  }
+  .instructions strong { color: #94a3b8; }
+
+  .snap-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #4ade80;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .snap-toast.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Modèle de données — Drag & Drop</h1>
+    <p>Déplace les blocs, crée ou supprime des flèches pour dessiner ton schéma</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="resetLayout()">Reset positions</button>
+    <button class="btn btn-primary" onclick="saveSnapshot()">Envoyer le schéma</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="tool-btn active" id="tool-move" onclick="setMode('move')">
+    <span>✋</span><span class="tooltip">Déplacer</span>
+  </button>
+  <button class="tool-btn" id="tool-connect" onclick="setMode('connect')">
+    <span>↗</span><span class="tooltip">Créer une flèche</span>
+  </button>
+  <button class="tool-btn" id="tool-delete" onclick="setMode('delete')">
+    <span>✕</span><span class="tooltip">Supprimer une flèche</span>
+  </button>
+</div>
+
+<div id="canvas">
+  <svg id="lines">
+    <defs>
+      <marker id="ah-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#22c55e"/>
+      </marker>
+      <marker id="ah-green-dash" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="rgba(34,197,94,0.6)"/>
+      </marker>
+      <marker id="ah-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#3b82f6"/>
+      </marker>
+      <marker id="ah-yellow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#f59e0b"/>
+      </marker>
+      <marker id="ah-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#a855f7"/>
+      </marker>
+      <marker id="ah-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#ef4444"/>
+      </marker>
+      <marker id="ah-cyan" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#0ea5e9"/>
+      </marker>
+      <marker id="ah-gray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <path d="M0 0L10 3.5L0 7Z" fill="#94a3b8"/>
+      </marker>
+    </defs>
+  </svg>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line" style="background:rgba(34,197,94,0.6);border-top:2px dashed rgba(34,197,94,0.6);height:0"></div>Flux financier → journal</div>
+  <div class="legend-item"><div class="legend-line" style="background:#f59e0b;height:2px"></div>Opérationnel</div>
+  <div class="legend-item"><div class="legend-line" style="background:#3b82f6;height:2px"></div>Référence / lien</div>
+</div>
+
+<div class="instructions">
+  <strong>✋ Déplacer</strong> — glisse les blocs<br/>
+  <strong>↗ Flèche</strong> — clique source → cible<br/>
+  <strong>✕ Supprimer</strong> — clique sur un label de flèche<br/>
+  <strong>Envoyer</strong> — sauvegarde ton schéma
+</div>
+
+<div class="snap-toast" id="toast">Schéma sauvegardé !</div>
+
+<script>
+// ═══ DATA ═══
+const NODES = [
+  { id:'copropriete', name:'Copropriété', sub:'nom, adresse, tantièmes', module:'core', x:380, y:30 },
+  { id:'lot', name:'Lot', sub:'n°, tantièmes, type', module:'core', x:580, y:30 },
+  { id:'coproprietaire', name:'Copropriétaire', sub:'nom, email, rôle', module:'core', x:740, y:30 },
+
+  { id:'journal', name:'★ Journal Comptable', sub:'SOURCE DE VÉRITÉ — débit/crédit', module:'finance', x:60, y:160, sourceTruth:true },
+  { id:'budget', name:'Budget', sub:'prévisionnel, annuel', module:'finance', x:310, y:140 },
+  { id:'appel', name:'Appel de Fonds', sub:'par lot, échéance', module:'finance', x:470, y:140 },
+  { id:'paiement', name:'Paiement', sub:'virement, chèque', module:'finance', x:60, y:280 },
+  { id:'facture', name:'Facture Fournisseur', sub:'montant HT/TTC', module:'finance', x:240, y:280 },
+  { id:'impaye', name:'Impayé', sub:'relances, recouvrement', module:'finance', x:450, y:280 },
+  { id:'balance', name:'v_lot_balance', sub:'VUE calculée depuis journal', module:'finance', x:60, y:380 },
+
+  { id:'prestataire', name:'Prestataire', sub:'fournisseur, artisan', module:'maintenance', x:650, y:160 },
+  { id:'contrat', name:'Contrat', sub:'montant = opérationnel', module:'maintenance', x:820, y:160 },
+  { id:'os', name:'Ordre de Service', sub:'devis/facture = opérationnel', module:'maintenance', x:820, y:260 },
+  { id:'logbook', name:'Carnet Entretien', sub:'historique interventions', module:'maintenance', x:650, y:260 },
+
+  { id:'ag', name:'AG', sub:'date, format, lieu', module:'ag', x:650, y:380 },
+  { id:'resolution', name:'Résolution', sub:'article, majorité', module:'ag', x:820, y:380 },
+  { id:'vote', name:'Vote', sub:'pour/contre/abstention', module:'ag', x:980, y:380 },
+  { id:'presence', name:'Présence', sub:'signature, procuration', module:'ag', x:980, y:470 },
+
+  { id:'vente', name:'⚠ Vente', sub:'À CRÉER — lot, vendeur, acquéreur', module:'ventes', x:60, y:500 },
+  { id:'workflow-vente', name:'⚠ Workflow Vente', sub:'À CRÉER — 6 étapes', module:'ventes', x:260, y:500 },
+  { id:'mutation', name:'Mutation', sub:'transfert ALUR', module:'ventes', x:470, y:500 },
+
+  { id:'messagerie', name:'Messagerie', sub:'conversations privées', module:'communication', x:60, y:620 },
+  { id:'mur', name:'Mur / Forum', sub:'posts, commentaires', module:'communication', x:240, y:620 },
+  { id:'evenement', name:'Événements', sub:'calendrier copro', module:'communication', x:420, y:620 },
+
+  { id:'document', name:'Document', sub:'catégorie, version, accès', module:'documents', x:650, y:560 },
+  { id:'dossier', name:'Dossier GED', sub:'arborescence', module:'documents', x:860, y:560 },
+];
+
+let CONNECTIONS = [
+  { from:'copropriete', to:'lot', label:'1:N', type:'reference', color:'#3b82f6' },
+  { from:'lot', to:'coproprietaire', label:'N:M', type:'reference', color:'#3b82f6' },
+  { from:'budget', to:'appel', label:'génère', type:'financial', color:'#22c55e', dash:true },
+  { from:'appel', to:'journal', label:'→ écriture', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'paiement', to:'journal', label:'→ écriture', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'facture', to:'journal', label:'→ écriture', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'journal', to:'balance', label:'calcule', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'appel', to:'impaye', label:'non payé', type:'operational', color:'#f59e0b' },
+  { from:'prestataire', to:'contrat', label:'1:N', type:'operational', color:'#f59e0b' },
+  { from:'contrat', to:'os', label:'1:N', type:'operational', color:'#f59e0b' },
+  { from:'os', to:'logbook', label:'trace', type:'operational', color:'#f59e0b' },
+  { from:'os', to:'facture', label:'facture validée', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'ag', to:'resolution', label:'1:N', type:'reference', color:'#a855f7' },
+  { from:'resolution', to:'vote', label:'1:N', type:'reference', color:'#a855f7' },
+  { from:'ag', to:'presence', label:'feuille', type:'reference', color:'#a855f7' },
+  { from:'resolution', to:'budget', label:'budget voté', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'vente', to:'workflow-vente', label:'6 étapes', type:'operational', color:'#ef4444' },
+  { from:'vente', to:'mutation', label:'transfert', type:'operational', color:'#ef4444' },
+  { from:'mutation', to:'journal', label:'ALUR → journal', type:'financial', color:'rgba(34,197,94,0.6)', dash:true },
+  { from:'vente', to:'lot', label:'lot vendu', type:'reference', color:'#ef4444' },
+  { from:'document', to:'ag', label:'PV, convoc', type:'reference', color:'#0ea5e9' },
+  { from:'document', to:'os', label:'devis, rapport', type:'reference', color:'#0ea5e9' },
+  { from:'document', to:'vente', label:'état daté', type:'reference', color:'#0ea5e9' },
+];
+
+// ═══ STATE ═══
+let mode = 'move';
+let dragging = null;
+let dragOffset = { x:0, y:0 };
+let connectSource = null;
+let nodeEls = {};
+let labelEls = [];
+const origPositions = NODES.map(n => ({ id:n.id, x:n.x, y:n.y }));
+
+// ═══ RENDER NODES ═══
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('lines');
+
+NODES.forEach(n => {
+  const el = document.createElement('div');
+  el.className = `node module-${n.module}${n.sourceTruth ? ' source-truth' : ''}`;
+  el.dataset.id = n.id;
+  el.style.left = n.x + 'px';
+  el.style.top = n.y + 'px';
+  el.innerHTML = `<div class="name">${n.name}</div><div class="sub">${n.sub}</div>`;
+
+  el.addEventListener('mousedown', (e) => onNodeMouseDown(e, n));
+  el.addEventListener('mouseup', (e) => onNodeMouseUp(e, n));
+
+  canvas.appendChild(el);
+  nodeEls[n.id] = el;
+});
+
+// ═══ RENDER CONNECTIONS ═══
+function getNodeCenter(id) {
+  const el = nodeEls[id];
+  if (!el) return { x:0, y:0 };
+  const r = el.getBoundingClientRect();
+  const cr = canvas.getBoundingClientRect();
+  return { x: r.left - cr.left + r.width/2, y: r.top - cr.top + r.height/2 };
+}
+
+function getNodeEdge(fromId, toId) {
+  const fEl = nodeEls[fromId], tEl = nodeEls[toId];
+  if (!fEl || !tEl) return { fx:0,fy:0,tx:0,ty:0 };
+  const cr = canvas.getBoundingClientRect();
+  const fr = fEl.getBoundingClientRect();
+  const tr = tEl.getBoundingClientRect();
+
+  const fc = { x: fr.left-cr.left+fr.width/2, y: fr.top-cr.top+fr.height/2 };
+  const tc = { x: tr.left-cr.left+tr.width/2, y: tr.top-cr.top+tr.height/2 };
+
+  const angle = Math.atan2(tc.y-fc.y, tc.x-fc.x);
+  const fw = fr.width/2+4, fh = fr.height/2+4;
+  const tw = tr.width/2+4, th = tr.height/2+4;
+
+  function edgePoint(cx,cy,hw,hh,a) {
+    const cos = Math.cos(a), sin = Math.sin(a);
+    const t = Math.min(Math.abs(hw/cos)||9999, Math.abs(hh/sin)||9999);
+    return { x: cx+cos*t, y: cy+sin*t };
+  }
+
+  const fp = edgePoint(fc.x, fc.y, fw, fh, angle);
+  const tp = edgePoint(tc.x, tc.y, tw, th, angle+Math.PI);
+  return { fx:fp.x, fy:fp.y, tx:tp.x, ty:tp.y, mx:(fp.x+tp.x)/2, my:(fp.y+tp.y)/2 };
+}
+
+function renderConnections() {
+  // Clear old
+  svg.querySelectorAll('.conn').forEach(e => e.remove());
+  labelEls.forEach(e => e.remove());
+  labelEls = [];
+
+  CONNECTIONS.forEach((c, i) => {
+    const pts = getNodeEdge(c.from, c.to);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', pts.fx);
+    line.setAttribute('y1', pts.fy);
+    line.setAttribute('x2', pts.tx);
+    line.setAttribute('y2', pts.ty);
+    line.setAttribute('stroke', c.color || '#3b82f6');
+    line.setAttribute('stroke-width', c.dash ? '2' : '1.5');
+    if (c.dash) line.setAttribute('stroke-dasharray', '8 4');
+
+    const markerColor = c.dash ? 'green-dash' : (c.color === '#3b82f6' ? 'blue' : c.color === '#f59e0b' ? 'yellow' : c.color === '#a855f7' ? 'purple' : c.color === '#ef4444' ? 'red' : c.color === '#0ea5e9' ? 'cyan' : 'gray');
+    line.setAttribute('marker-end', `url(#ah-${markerColor})`);
+    line.classList.add('conn');
+    line.style.pointerEvents = 'stroke';
+    line.style.cursor = 'pointer';
+    line.dataset.index = i;
+    svg.appendChild(line);
+
+    // Label
+    if (c.label) {
+      const lbl = document.createElement('div');
+      lbl.className = `connection-label ${c.type||'reference'}`;
+      lbl.textContent = c.label;
+      lbl.style.left = (pts.mx - 20) + 'px';
+      lbl.style.top = (pts.my - 10) + 'px';
+      lbl.dataset.index = i;
+      lbl.addEventListener('click', () => {
+        if (mode === 'delete') deleteConnection(i);
+      });
+      canvas.appendChild(lbl);
+      labelEls.push(lbl);
+    }
+  });
+}
+
+// ═══ INTERACTIONS ═══
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-'+m).classList.add('active');
+  canvas.className = m === 'connect' ? 'mode-connect' : m === 'delete' ? 'mode-delete' : '';
+  if (connectSource) { nodeEls[connectSource].classList.remove('connect-source'); connectSource = null; }
+}
+
+function onNodeMouseDown(e, node) {
+  if (mode === 'move') {
+    e.preventDefault();
+    dragging = node;
+    const el = nodeEls[node.id];
+    el.classList.add('dragging');
+    const r = el.getBoundingClientRect();
+    dragOffset.x = e.clientX - r.left;
+    dragOffset.y = e.clientY - r.top;
+  }
+  if (mode === 'connect') {
+    e.preventDefault();
+    if (!connectSource) {
+      connectSource = node.id;
+      nodeEls[node.id].classList.add('connect-source');
+      document.querySelectorAll('.node').forEach(n => { if (n.dataset.id !== node.id) n.classList.add('connect-target'); });
+    }
+  }
+}
+
+function onNodeMouseUp(e, node) {
+  if (mode === 'connect' && connectSource && connectSource !== node.id) {
+    const label = prompt('Label pour cette flèche (ex: "1:N", "→ écriture", "référence") :');
+    if (label !== null) {
+      const type = label.includes('écriture') || label.includes('journal') || label.includes('ALUR') ? 'financial' :
+                   label.includes('1:N') || label.includes('N:M') || label.includes('réf') ? 'reference' : 'operational';
+      const color = type === 'financial' ? 'rgba(34,197,94,0.6)' : type === 'reference' ? '#3b82f6' : '#f59e0b';
+      CONNECTIONS.push({ from: connectSource, to: node.id, label, type, color, dash: type==='financial' });
+      renderConnections();
+      sendEvent('add-connection', `${connectSource} → ${node.id}: ${label}`);
+    }
+    nodeEls[connectSource].classList.remove('connect-source');
+    document.querySelectorAll('.node').forEach(n => n.classList.remove('connect-target'));
+    connectSource = null;
+  }
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const cr = canvas.getBoundingClientRect();
+  const x = e.clientX - cr.left - dragOffset.x;
+  const y = e.clientY - cr.top - dragOffset.y;
+  const el = nodeEls[dragging.id];
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  dragging.x = x;
+  dragging.y = y;
+  renderConnections();
+});
+
+document.addEventListener('mouseup', () => {
+  if (dragging) {
+    nodeEls[dragging.id].classList.remove('dragging');
+    dragging = null;
+  }
+});
+
+function deleteConnection(index) {
+  if (mode !== 'delete') return;
+  const c = CONNECTIONS[index];
+  CONNECTIONS.splice(index, 1);
+  renderConnections();
+  sendEvent('delete-connection', `${c.from} → ${c.to}: ${c.label}`);
+}
+
+function resetLayout() {
+  origPositions.forEach(op => {
+    const node = NODES.find(n => n.id === op.id);
+    const el = nodeEls[op.id];
+    if (node && el) {
+      node.x = op.x;
+      node.y = op.y;
+      el.style.left = op.x + 'px';
+      el.style.top = op.y + 'px';
+    }
+  });
+  renderConnections();
+}
+
+function saveSnapshot() {
+  const positions = NODES.map(n => ({ id:n.id, name:n.name, x:Math.round(n.x), y:Math.round(n.y) }));
+  const connections = CONNECTIONS.map(c => ({ from:c.from, to:c.to, label:c.label, type:c.type }));
+  const data = JSON.stringify({ positions, connections }, null, 2);
+
+  sendEvent('validate-schema', data);
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2000);
+}
+
+function sendEvent(type, value) {
+  try {
+    const img = new Image();
+    img.src = '/event?type=' + encodeURIComponent(type) + '&choice=' + encodeURIComponent(type) + '&text=' + encodeURIComponent(value||'') + '&t=' + Date.now();
+  } catch(e) {}
+}
+
+// Init
+renderConnections();
+</script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoProFlex — Schéma drag & drop (blocs + flèches)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0f1117;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;min-height:100vh;overflow:hidden;user-select:none}
+
+  .header{padding:14px 24px;background:#161822;border-bottom:1px solid rgba(148,163,184,0.08);display:flex;align-items:center;justify-content:space-between;z-index:100;position:relative}
+  .header h1{font-size:17px;font-weight:700}
+  .header p{font-size:11px;color:#94a3b8;margin-top:2px}
+  .hdr-btns{display:flex;gap:8px}
+  .btn{padding:6px 16px;border-radius:8px;border:none;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-p{background:#3b82f6;color:#fff}.btn-p:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3)}
+  .btn-g{background:rgba(148,163,184,.06);color:#94a3b8;border:1px solid rgba(148,163,184,.08)}.btn-g:hover{background:rgba(148,163,184,.1);color:#e2e8f0}
+
+  .toolbar{position:absolute;top:68px;left:12px;z-index:50;display:flex;flex-direction:column;gap:5px;background:#161822;padding:8px;border-radius:10px;border:1px solid rgba(148,163,184,.08)}
+  .tb{width:34px;height:34px;border-radius:8px;border:1px solid rgba(148,163,184,.08);background:rgba(148,163,184,.04);color:#94a3b8;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative}
+  .tb:hover{background:rgba(148,163,184,.1);color:#e2e8f0}
+  .tb.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);color:#60a5fa}
+  .tb .tip{display:none;position:absolute;left:44px;background:#1a1d2e;color:#e2e8f0;padding:3px 10px;border-radius:6px;font-size:10px;white-space:nowrap;border:1px solid rgba(148,163,184,.1)}
+  .tb:hover .tip{display:block}
+
+  #canvas{width:100vw;height:calc(100vh - 56px);position:relative;overflow:hidden}
+  #canvas.m-conn{cursor:crosshair}
+
+  svg#lines{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+
+  .node{position:absolute;min-width:110px;padding:10px 14px;border-radius:10px;background:#1a1d2e;border:1.5px solid rgba(148,163,184,.12);cursor:grab;z-index:10;transition:box-shadow .2s,border-color .2s}
+  .node:hover{border-color:rgba(59,130,246,.3);box-shadow:0 0 16px rgba(59,130,246,.08)}
+  .node.dragging{cursor:grabbing;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,.4);border-color:rgba(59,130,246,.5)}
+  .node .nm{font-size:12px;font-weight:700;margin-bottom:1px}
+  .node .sb{font-size:9px;color:#64748b}
+
+  .node.m-core{border-color:rgba(59,130,246,.3)}.node.m-core .nm{color:#60a5fa}
+  .node.m-finance{border-color:rgba(34,197,94,.25)}.node.m-finance .nm{color:#4ade80}
+  .node.m-finance.st{border-color:rgba(34,197,94,.5);border-width:2.5px}
+  .node.m-maintenance{border-color:rgba(245,158,11,.25)}.node.m-maintenance .nm{color:#fbbf24}
+  .node.m-ag{border-color:rgba(168,85,247,.25)}.node.m-ag .nm{color:#c084fc}
+  .node.m-ventes{border-color:rgba(239,68,68,.35);border-width:2px}.node.m-ventes .nm{color:#f87171}
+  .node.m-communication{border-color:rgba(148,163,184,.15)}.node.m-communication .nm{color:#94a3b8}
+  .node.m-documents{border-color:rgba(14,165,233,.25)}.node.m-documents .nm{color:#38bdf8}
+
+  .node.conn-src{border-color:rgba(34,197,94,.6)!important;box-shadow:0 0 20px rgba(34,197,94,.2)}
+  .node.conn-tgt:hover{border-color:rgba(34,197,94,.8)!important;box-shadow:0 0 25px rgba(34,197,94,.3)}
+
+  /* Arrow drag handles */
+  .arrow-handle{position:absolute;width:14px;height:14px;border-radius:50%;background:rgba(148,163,184,.15);border:2px solid rgba(148,163,184,.3);cursor:grab;z-index:15;transform:translate(-50%,-50%);transition:background .15s,border-color .15s,box-shadow .15s}
+  .arrow-handle:hover{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.5);box-shadow:0 0 10px rgba(59,130,246,.2)}
+  .arrow-handle.dragging{cursor:grabbing;background:rgba(59,130,246,.3);border-color:#3b82f6;box-shadow:0 0 15px rgba(59,130,246,.3);z-index:100}
+
+  .arrow-label{position:absolute;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:#131620;border:1px solid rgba(148,163,184,.08);z-index:6;white-space:nowrap;pointer-events:auto;cursor:pointer;transition:all .15s}
+  .arrow-label:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171}
+  .arrow-label.fin{color:#4ade80}.arrow-label.op{color:#fbbf24}.arrow-label.ref{color:#60a5fa}
+
+  .legend{position:absolute;bottom:12px;left:12px;background:#161822;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:10px 14px;z-index:50;font-size:10px;display:flex;flex-direction:column;gap:5px}
+  .li{display:flex;align-items:center;gap:8px;color:#94a3b8}
+  .ll{width:28px;height:2px}
+
+  .instr{position:absolute;bottom:12px;right:12px;background:#161822;border:1px solid rgba(148,163,184,.08);border-radius:10px;padding:10px 14px;z-index:50;font-size:10px;color:#64748b;max-width:280px;line-height:1.6}
+  .instr strong{color:#94a3b8}
+
+  .toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><h1>Schéma interactif — Blocs + Flèches déplaçables</h1><p>Déplace les blocs ET les flèches (points ronds au milieu) pour me montrer ton schéma</p></div>
+  <div class="hdr-btns">
+    <button class="btn btn-g" onclick="resetAll()">Reset</button>
+    <button class="btn btn-p" onclick="saveSchema()">Envoyer le schéma</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="tb active" id="t-move" onclick="setMode('move')">✋<span class="tip">Déplacer blocs + flèches</span></button>
+  <button class="tb" id="t-conn" onclick="setMode('connect')">↗<span class="tip">Créer une flèche</span></button>
+  <button class="tb" id="t-del" onclick="setMode('delete')">✕<span class="tip">Clic sur label = supprimer</span></button>
+</div>
+
+<div id="canvas">
+  <svg id="lines">
+    <defs>
+      <marker id="a-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="rgba(34,197,94,.6)"/></marker>
+      <marker id="a-b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#3b82f6"/></marker>
+      <marker id="a-y" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#f59e0b"/></marker>
+      <marker id="a-p" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#a855f7"/></marker>
+      <marker id="a-r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#ef4444"/></marker>
+      <marker id="a-c" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#0ea5e9"/></marker>
+    </defs>
+  </svg>
+</div>
+
+<div class="legend">
+  <div class="li"><div class="ll" style="border-top:2px dashed rgba(34,197,94,.6);height:0"></div>Flux financier → journal</div>
+  <div class="li"><div class="ll" style="background:#f59e0b"></div>Opérationnel</div>
+  <div class="li"><div class="ll" style="background:#3b82f6"></div>Référence</div>
+  <div class="li" style="margin-top:4px;color:#60a5fa">● = point de courbure (déplaçable)</div>
+</div>
+
+<div class="instr">
+  <strong>✋ Déplacer</strong> — glisse les blocs + les points ronds (●) sur les flèches<br/>
+  <strong>↗ Flèche</strong> — clique source puis cible<br/>
+  <strong>✕ Supprimer</strong> — clique sur un label<br/>
+  <strong>Envoyer</strong> — sauvegarde tout
+</div>
+
+<div class="toast" id="toast">Schéma envoyé !</div>
+
+<script>
+const N=[
+  {id:'copropriete',nm:'Copropriété',sb:'nom, adresse, tantièmes',m:'core',x:380,y:25},
+  {id:'lot',nm:'Lot',sb:'n°, tantièmes',m:'core',x:570,y:25},
+  {id:'coproprietaire',nm:'Copropriétaire',sb:'nom, email',m:'core',x:720,y:25},
+
+  {id:'journal',nm:'★ Journal Comptable',sb:'SOURCE DE VÉRITÉ',m:'finance',x:50,y:150,st:1},
+  {id:'budget',nm:'Budget',sb:'prévisionnel',m:'finance',x:300,y:130},
+  {id:'appel',nm:'Appel de Fonds',sb:'par lot, échéance',m:'finance',x:460,y:130},
+  {id:'paiement',nm:'Paiement',sb:'virement, chèque',m:'finance',x:50,y:270},
+  {id:'facture',nm:'Facture Fourn.',sb:'montant HT/TTC',m:'finance',x:230,y:270},
+  {id:'impaye',nm:'Impayé',sb:'relances',m:'finance',x:430,y:270},
+  {id:'balance',nm:'v_lot_balance',sb:'VUE calculée',m:'finance',x:50,y:370},
+
+  {id:'prestataire',nm:'Prestataire',sb:'fournisseur',m:'maintenance',x:640,y:150},
+  {id:'contrat',nm:'Contrat',sb:'montant opérat.',m:'maintenance',x:800,y:150},
+  {id:'os',nm:'Ordre Service',sb:'devis = opérat.',m:'maintenance',x:800,y:250},
+  {id:'logbook',nm:'Carnet Entretien',sb:'historique',m:'maintenance',x:640,y:250},
+
+  {id:'ag',nm:'AG',sb:'date, format',m:'ag',x:640,y:370},
+  {id:'resolution',nm:'Résolution',sb:'article, majorité',m:'ag',x:800,y:370},
+  {id:'vote',nm:'Vote',sb:'pour/contre',m:'ag',x:960,y:370},
+  {id:'presence',nm:'Présence',sb:'signature',m:'ag',x:960,y:450},
+
+  {id:'vente',nm:'⚠ Vente',sb:'À CRÉER',m:'ventes',x:50,y:490},
+  {id:'wf-vente',nm:'⚠ Workflow Vente',sb:'6 étapes, À CRÉER',m:'ventes',x:240,y:490},
+  {id:'mutation',nm:'Mutation',sb:'transfert ALUR',m:'ventes',x:450,y:490},
+
+  {id:'messagerie',nm:'Messagerie',sb:'conversations',m:'communication',x:50,y:600},
+  {id:'mur',nm:'Mur / Forum',sb:'posts',m:'communication',x:230,y:600},
+  {id:'evenement',nm:'Événements',sb:'calendrier',m:'communication',x:410,y:600},
+
+  {id:'document',nm:'Document',sb:'catégorie, version',m:'documents',x:640,y:540},
+  {id:'dossier',nm:'Dossier GED',sb:'arborescence',m:'documents',x:840,y:540},
+];
+
+// cp = control point offset {cx, cy} relative to midpoint — user drags this
+let C=[
+  {f:'copropriete',t:'lot',lb:'1:N',tp:'ref',cx:0,cy:0},
+  {f:'lot',t:'coproprietaire',lb:'N:M',tp:'ref',cx:0,cy:0},
+  {f:'budget',t:'appel',lb:'génère',tp:'fin',cx:0,cy:0},
+  {f:'appel',t:'journal',lb:'→ écriture',tp:'fin',cx:0,cy:-20},
+  {f:'paiement',t:'journal',lb:'→ écriture',tp:'fin',cx:0,cy:0},
+  {f:'facture',t:'journal',lb:'→ écriture',tp:'fin',cx:0,cy:0},
+  {f:'journal',t:'balance',lb:'calcule',tp:'fin',cx:0,cy:0},
+  {f:'appel',t:'impaye',lb:'non payé',tp:'op',cx:0,cy:0},
+  {f:'prestataire',t:'contrat',lb:'1:N',tp:'op',cx:0,cy:0},
+  {f:'contrat',t:'os',lb:'1:N',tp:'op',cx:0,cy:0},
+  {f:'os',t:'logbook',lb:'trace',tp:'op',cx:0,cy:0},
+  {f:'os',t:'facture',lb:'facture → journal',tp:'fin',cx:0,cy:30},
+  {f:'ag',t:'resolution',lb:'1:N',tp:'ref',cx:0,cy:0},
+  {f:'resolution',t:'vote',lb:'1:N',tp:'ref',cx:0,cy:0},
+  {f:'ag',t:'presence',lb:'feuille',tp:'ref',cx:40,cy:0},
+  {f:'resolution',t:'budget',lb:'budget voté',tp:'fin',cx:0,cy:30},
+  {f:'vente',t:'wf-vente',lb:'6 étapes',tp:'op',cx:0,cy:0},
+  {f:'vente',t:'mutation',lb:'transfert',tp:'op',cx:0,cy:0},
+  {f:'mutation',t:'journal',lb:'ALUR → journal',tp:'fin',cx:-40,cy:-30},
+  {f:'vente',t:'lot',lb:'lot vendu',tp:'ref',cx:-60,cy:0},
+  {f:'document',t:'ag',lb:'PV, convoc',tp:'ref',cx:0,cy:0},
+  {f:'document',t:'os',lb:'devis, rapport',tp:'ref',cx:30,cy:0},
+  {f:'document',t:'vente',lb:'état daté',tp:'ref',cx:0,cy:20},
+];
+
+const canvas=document.getElementById('canvas'),svg=document.getElementById('lines');
+let mode='move',nEls={},handles=[],labels=[],dragNode=null,dragOff={x:0,y:0},dragHandle=null,connSrc=null;
+const origN=N.map(n=>({...n})),origC=C.map(c=>({...c}));
+
+// Marker map
+const MK={fin:'a-g',ref:'a-b',op:'a-y'};
+const CL={fin:'rgba(34,197,94,.6)',ref:'#3b82f6',op:'#f59e0b'};
+
+// ═══ RENDER NODES ═══
+N.forEach(n=>{
+  const e=document.createElement('div');
+  e.className=`node m-${n.m}${n.st?' st':''}`;
+  e.dataset.id=n.id;
+  e.style.left=n.x+'px';e.style.top=n.y+'px';
+  e.innerHTML=`<div class="nm">${n.nm}</div><div class="sb">${n.sb}</div>`;
+  e.addEventListener('mousedown',ev=>nodeDown(ev,n));
+  e.addEventListener('mouseup',ev=>nodeUp(ev,n));
+  canvas.appendChild(e);nEls[n.id]=e;
+});
+
+// ═══ GET EDGE POINTS ═══
+function edgePts(fid,tid){
+  const fe=nEls[fid],te=nEls[tid];
+  if(!fe||!te)return{fx:0,fy:0,tx:0,ty:0,mx:0,my:0};
+  const cr=canvas.getBoundingClientRect();
+  const fr=fe.getBoundingClientRect(),tr=te.getBoundingClientRect();
+  const fc={x:fr.left-cr.left+fr.width/2,y:fr.top-cr.top+fr.height/2};
+  const tc={x:tr.left-cr.left+tr.width/2,y:tr.top-cr.top+tr.height/2};
+  const a=Math.atan2(tc.y-fc.y,tc.x-fc.x);
+  function ep(cx,cy,hw,hh,ang){const c=Math.cos(ang),s=Math.sin(ang),t=Math.min(Math.abs(hw/c)||9e9,Math.abs(hh/s)||9e9);return{x:cx+c*t,y:cy+s*t}}
+  const fp=ep(fc.x,fc.y,fr.width/2+6,fr.height/2+6,a);
+  const tp=ep(tc.x,tc.y,tr.width/2+6,tr.height/2+6,a+Math.PI);
+  return{fx:fp.x,fy:fp.y,tx:tp.x,ty:tp.y,mx:(fp.x+tp.x)/2,my:(fp.y+tp.y)/2};
+}
+
+// ═══ RENDER CONNECTIONS ═══
+function render(){
+  svg.querySelectorAll('.cn').forEach(e=>e.remove());
+  handles.forEach(e=>e.remove());handles=[];
+  labels.forEach(e=>e.remove());labels=[];
+
+  C.forEach((c,i)=>{
+    const p=edgePts(c.f,c.t);
+    // Control point = midpoint + user offset
+    const cpx=p.mx+c.cx, cpy=p.my+c.cy;
+    const col=CL[c.tp]||'#3b82f6';
+    const mk=MK[c.tp]||'a-b';
+    const dash=c.tp==='fin';
+
+    // Draw quadratic bezier
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${p.fx},${p.fy} Q${cpx},${cpy} ${p.tx},${p.ty}`);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke',col);
+    path.setAttribute('stroke-width',dash?'2.2':'1.8');
+    if(dash)path.setAttribute('stroke-dasharray','8 4');
+    path.setAttribute('marker-end',`url(#${mk})`);
+    path.classList.add('cn');
+    path.style.pointerEvents='stroke';
+    path.style.cursor='pointer';
+    svg.appendChild(path);
+
+    // Drag handle at control point
+    const h=document.createElement('div');
+    h.className='arrow-handle';
+    h.style.left=cpx+'px';h.style.top=cpy+'px';
+    h.dataset.idx=i;
+    h.addEventListener('mousedown',ev=>{
+      if(mode!=='move')return;
+      ev.preventDefault();ev.stopPropagation();
+      dragHandle={idx:i,el:h,startX:ev.clientX,startY:ev.clientY,origCx:c.cx,origCy:c.cy};
+      h.classList.add('dragging');
+    });
+    canvas.appendChild(h);handles.push(h);
+
+    // Label near control point
+    if(c.lb){
+      const l=document.createElement('div');
+      const cls=c.tp==='fin'?'fin':c.tp==='op'?'op':'ref';
+      l.className=`arrow-label ${cls}`;
+      l.textContent=c.lb;
+      l.style.left=(cpx+10)+'px';l.style.top=(cpy-12)+'px';
+      l.dataset.idx=i;
+      l.addEventListener('click',()=>{if(mode==='delete'){C.splice(i,1);render();sendEv('del',c.f+'→'+c.t)}});
+      // Double click to rename
+      l.addEventListener('dblclick',()=>{
+        const v=prompt('Nouveau label :',c.lb);
+        if(v!==null){c.lb=v;render();}
+      });
+      canvas.appendChild(l);labels.push(l);
+    }
+  });
+}
+
+// ═══ MODE ═══
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('t-'+m).classList.add('active');
+  canvas.className=m==='connect'?'m-conn':'';
+  if(connSrc){nEls[connSrc].classList.remove('conn-src');connSrc=null;}
+}
+
+// ═══ NODE DRAG ═══
+function nodeDown(ev,n){
+  if(mode==='move'){
+    ev.preventDefault();dragNode=n;
+    const e=nEls[n.id],r=e.getBoundingClientRect();
+    dragOff.x=ev.clientX-r.left;dragOff.y=ev.clientY-r.top;
+    e.classList.add('dragging');
+  }
+  if(mode==='connect'){
+    ev.preventDefault();
+    if(!connSrc){connSrc=n.id;nEls[n.id].classList.add('conn-src');
+      Object.values(nEls).forEach(e=>{if(e.dataset.id!==n.id)e.classList.add('conn-tgt')});
+    }
+  }
+}
+function nodeUp(ev,n){
+  if(mode==='connect'&&connSrc&&connSrc!==n.id){
+    const lb=prompt('Label (ex: "1:N", "→ écriture", "référence") :');
+    if(lb!==null){
+      const tp=lb.includes('écriture')||lb.includes('journal')||lb.includes('ALUR')?'fin':
+               lb.includes('1:N')||lb.includes('N:M')||lb.includes('réf')?'ref':'op';
+      C.push({f:connSrc,t:n.id,lb,tp,cx:0,cy:0});
+      render();sendEv('add',connSrc+'→'+n.id+': '+lb);
+    }
+    nEls[connSrc].classList.remove('conn-src');
+    Object.values(nEls).forEach(e=>e.classList.remove('conn-tgt'));
+    connSrc=null;
+  }
+}
+
+// ═══ GLOBAL MOUSE ═══
+document.addEventListener('mousemove',ev=>{
+  // Node drag
+  if(dragNode){
+    const cr=canvas.getBoundingClientRect();
+    const x=ev.clientX-cr.left-dragOff.x,y=ev.clientY-cr.top-dragOff.y;
+    const e=nEls[dragNode.id];
+    e.style.left=x+'px';e.style.top=y+'px';
+    dragNode.x=x;dragNode.y=y;
+    render();
+  }
+  // Handle drag
+  if(dragHandle){
+    const dx=ev.clientX-dragHandle.startX,dy=ev.clientY-dragHandle.startY;
+    const c=C[dragHandle.idx];
+    if(c){c.cx=dragHandle.origCx+dx;c.cy=dragHandle.origCy+dy;render();}
+  }
+});
+
+document.addEventListener('mouseup',()=>{
+  if(dragNode){nEls[dragNode.id].classList.remove('dragging');dragNode=null;}
+  if(dragHandle){dragHandle.el.classList.remove('dragging');dragHandle=null;}
+});
+
+// ═══ ACTIONS ═══
+function resetAll(){
+  origN.forEach(o=>{const n=N.find(x=>x.id===o.id);if(n){n.x=o.x;n.y=o.y;nEls[n.id].style.left=o.x+'px';nEls[n.id].style.top=o.y+'px'}});
+  C.length=0;origC.forEach(o=>C.push({...o}));
+  render();
+}
+
+function saveSchema(){
+  const data={
+    nodes:N.map(n=>({id:n.id,name:n.nm,module:n.m,x:Math.round(n.x),y:Math.round(n.y)})),
+    connections:C.map(c=>({from:c.f,to:c.t,label:c.lb,type:c.tp,curveX:Math.round(c.cx),curveY:Math.round(c.cy)}))
+  };
+  sendEv('schema',JSON.stringify(data,null,2));
+  const t=document.getElementById('toast');t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);
+}
+
+function sendEv(type,val){
+  try{new Image().src='/event?type='+encodeURIComponent(type)+'&choice='+encodeURIComponent(type)+'&text='+encodeURIComponent(val||'')+'&t='+Date.now()}catch(e){}
+}
+
+render();
+</script>
+</body>
+</html>
