@@ -208,6 +208,42 @@ export interface Depense {
   deductible: number;
 }
 
+/** Taux de TVA applicables en France */
+export type TauxTVA = 20 | 10 | 5.5 | 2.1 | 0;
+
+/**
+ * Dépense étendue avec liaison aux postes budgétaires et détail TVA.
+ * Anciennement définie dans @/data/mock — déplacée ici car c'est un type métier.
+ */
+export interface DepenseEtendue extends Depense {
+  poste?: string;
+  // Détail TVA
+  montantHT?: number;
+  tauxTVA?: TauxTVA;
+  montantTVA?: number;
+  tvaDeductible?: boolean;
+  // Pièce justificative
+  pieceJointe?: string;
+  pieceJointeDetails?: {
+    id: string;
+    type: 'FACTURE' | 'AVOIR' | 'NOTE_CREDIT' | 'AUTRE';
+    factureId?: string;
+    fichierUrl?: string;
+    fichierNom: string;
+    dateAjout: string;
+    reference?: string;
+    montant?: number;
+  };
+  // Champs de validation
+  statut?: 'BROUILLON' | 'EN_ATTENTE_VALIDATION' | 'VALIDEE' | 'REJETEE';
+  budgetId?: string;
+  dateValidation?: string;
+  validateurId?: string;
+  commentaireRejet?: string;
+  dateCreation?: string;
+  dateDerniereModification?: string;
+}
+
 /**
  * Mouvement bancaire
  */

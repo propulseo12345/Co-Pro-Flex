@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ContratDetaille, TypeContrat } from '@/types';
-import { MOCK_TYPES_CONTRAT } from '@/data/mock';
+import { TYPES_CONTRAT } from '@/lib/constants/categories-contrat';
 import { Plus, Upload, X, FileText } from 'lucide-react';
 import { isValid, parseISO, format } from 'date-fns';
 import { DatePicker } from '@/components/ui/DatePicker';
@@ -180,7 +180,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                             <select style={errors.type ? inputErr : input} value={formData.type}
                                 onChange={e => setFormData({ ...formData, type: e.target.value as TypeContrat })}>
                                 <option value="">— Sélectionner un type —</option>
-                                {MOCK_TYPES_CONTRAT.map(type => (
+                                {TYPES_CONTRAT.map(type => (
                                     <option key={type.value} value={type.value}>{type.label}</option>
                                 ))}
                             </select>

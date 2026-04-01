@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Paperclip, Eye, Edit2, Send, CheckCircle, XCircle } from 'lucide-react';
-import { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import { PosteBudgetData } from '../types';
 import styles from './DepenseDetailModal.module.css';
 

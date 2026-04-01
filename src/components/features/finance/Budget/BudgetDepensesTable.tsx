@@ -6,7 +6,7 @@ import {
   Filter, ArrowUpDown, Search
 } from 'lucide-react';
 import { TruncatedText } from '@/components/ui';
-import { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import { PosteBudgetData, POSTE_COLORS, PosteBudget } from './types';
 import { DepenseStatusBadge } from './DepenseStatusBadge';
 import { PieceJustificativeCell } from './PieceJustificativeCell';

@@ -1,7 +1,7 @@
 'use client';
 
 import { ContratDetaille } from '@/types';
-import { MOCK_TYPES_CONTRAT } from '@/data/mock';
+import { TYPES_CONTRAT } from '@/lib/constants/categories-contrat';
 import { FileText, AlertTriangle, Shield, RefreshCw, Ban, Clock } from 'lucide-react';
 import clsx from 'clsx';
 import styles from './Contracts.module.css';
@@ -105,7 +105,7 @@ export default function ContractsTable({
                                 </td>
                                 <td>{contrat.fournisseur}</td>
                                 <td>
-                                    {MOCK_TYPES_CONTRAT.find(t => t.value === contrat.type)?.label || contrat.type}
+                                    {TYPES_CONTRAT.find(t => t.value === contrat.type)?.label || contrat.type}
                                 </td>
                                 <td>
                                     <div className={styles.reconductionCell}>

@@ -41,6 +41,8 @@ export type {
   IImpaye,
   IActionImpaye,
   IPaiement,
+  DepenseEtendue,
+  TauxTVA,
   // Maintenance
   IPrestataire,
   IContrat,

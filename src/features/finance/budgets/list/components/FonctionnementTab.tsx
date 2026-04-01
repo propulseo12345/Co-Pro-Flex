@@ -9,7 +9,7 @@ import {
 import { getExercicesList } from '@/lib/dates';
 import type { PosteBudget, PosteBudgetData } from '@/components/features/finance/Budget/types';
 import type { BudgetWithStatus } from '@/hooks/modules/useBudget';
-import type { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import styles from './FonctionnementTab.module.css';
 
 const AVAILABLE_YEARS = getExercicesList(4).map(y => parseInt(y));

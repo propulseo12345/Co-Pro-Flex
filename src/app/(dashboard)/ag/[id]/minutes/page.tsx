@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MOCK_ASSEMBLEES } from '@/data/mock';
 import { ArrowLeft, Download, FileText, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import styles from './minutes.module.css';
 import Link from 'next/link';
@@ -39,29 +38,6 @@ export default function AGMinutesPage() {
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement des données AG:', error);
-            }
-        } else {
-            // Fallback vers MOCK_ASSEMBLEES
-            const mockAg = MOCK_ASSEMBLEES.find(a => a.id === agId);
-            if (mockAg) {
-                setAgData({
-                    type: mockAg.type.toUpperCase() as 'ORDINAIRE' | 'EXTRAORDINAIRE',
-                    date: mockAg.date,
-                    heure: '',
-                    lieu: mockAg.lieu,
-                    adresse: mockAg.lieu
-                });
-                if (mockAg.ordreDuJour) {
-                    setResolutions(mockAg.ordreDuJour.map((res: any, index: number) => ({
-                        id: res.id || `res-${index}`,
-                        titre: res.titre,
-                        texte: res.description || res.titre,
-                        pour: res.pour || 0,
-                        contre: res.contre || 0,
-                        abstention: res.abstention || 0,
-                        resultat: res.resultat || 'ADOPTEE'
-                    })));
-                }
             }
         }
         setIsLoading(false);

@@ -32,7 +32,7 @@ import {
 } from '@/components/features/finance/Budget/types';
 import type { PosteEditorData } from '@/components/features/finance/Budget/PosteEditor';
 import { BudgetStatut, DepenseStatut } from '@/types/enums/statuts';
-import type { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import * as scheduleApi from '@/lib/budget/payment-schedules.api';
 import { computeAmounts, applyRetention, RETENTION_DURATION_MONTHS } from '@/lib/constants/payment-schedule-templates';
 

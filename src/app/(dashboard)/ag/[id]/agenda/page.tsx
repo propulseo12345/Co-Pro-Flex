@@ -12,8 +12,9 @@ import {
   InlineResolutionEditor,
   type Resolution
 } from '@/components/features/ag';
-import { MOCK_CONTRAT_SYNDIC } from '@/data/mock';
 import { useAgAgendaPage } from '@/features/ag/hooks/useAgAgendaPage';
+import { useSyndicContract } from '@/hooks/useSyndicContract';
+import { useCopro } from '@/providers/CoproContext';
 import { updateAgCurrentStep } from '@/lib/ag/api';
 import {
   CustomResolutionModal,
@@ -27,6 +28,8 @@ import styles from './agenda.module.css';
 export default function AgendaPage() {
   const params = useParams();
   const agId = params.id as string;
+  const { currentCoproId } = useCopro();
+  const { syndicInfo } = useSyndicContract(currentCoproId);
   const page = useAgAgendaPage({ agId });
   const [openCoproMenu, setOpenCoproMenu] = useState<string | null>(null);
   const [coproFilter, setCoproFilter] = useState('');
@@ -102,7 +105,7 @@ export default function AgendaPage() {
                 coproprietaires={page.coproprietairesForEditor}
                 presences={page.presences}
                 exercice={page.agFormData?.budgetExercice || (new Date().getFullYear() + 1).toString()}
-                gestionnaireNom={MOCK_CONTRAT_SYNDIC.nomSyndic}
+                gestionnaireNom={syndicInfo.nom || ''}
                 financingSchedule={page.financingSchedule}
                 onFinancingScheduleChange={page.onFinancingScheduleChange}
                 totalBudget={varName.includes('fonds') ? page.totalFondsAlur : page.totalBudget}

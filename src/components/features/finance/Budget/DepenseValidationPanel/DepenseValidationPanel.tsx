@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle, AlertCircle, Send } from 'lucide-react';
-import { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import styles from './DepenseValidationPanel.module.css';
 
 interface ValidationRequirement {

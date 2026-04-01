@@ -23,7 +23,7 @@ import type {
   ResolutionAG,
 } from '@/components/features/finance/Budget/types';
 import type { BudgetWithStatus, BudgetN1Data } from '@/hooks/modules/useBudget';
-import type { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 
 type DetailTab = 'echeancier' | 'documents' | 'historique';
 

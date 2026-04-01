@@ -1,7 +1,6 @@
 'use client';
 
 import { ContratDetaille, TemplateResiliation, ModeEnvoiResiliation } from '@/types';
-import { MOCK_INFORMATIONS_COPROPRIETE } from '@/data/mock';
 import { useState, useEffect, useId } from 'react';
 import { X, FileText, Mail, Download, CheckCircle, Printer, Info, ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
@@ -18,18 +17,22 @@ interface ResiliationModalProps {
     onConfirm: (data: TemplateResiliation) => void;
 }
 
-// Informations du syndic (en production, ces données viendraient d'une API ou d'un contexte)
+// Informations du syndic (en production, ces données viendront du contexte Supabase)
 const SYNDIC_INFO = {
-    nom: MOCK_INFORMATIONS_COPROPRIETE.syndic.nom,
-    representant: 'M. Jean DUPONT',
+    nom: '',
+    representant: '',
     fonction: 'Gestionnaire de copropriété',
-    adresse: `${MOCK_INFORMATIONS_COPROPRIETE.syndic.nom}, 15 rue de la République, 69001 Lyon`,
-    email: MOCK_INFORMATIONS_COPROPRIETE.syndic.email || '',
-    telephone: MOCK_INFORMATIONS_COPROPRIETE.syndic.telephone,
+    adresse: '',
+    email: '',
+    telephone: '',
 };
 
 export default function ResiliationModal({ contrat, onClose, onConfirm }: ResiliationModalProps) {
-    const { currentCoproId } = useCopro();
+    const { currentCoproId, currentCopro } = useCopro();
+    const coproNom = currentCopro?.name || '';
+    const coproAdresse = currentCopro?.address || '';
+    const coproCodePostal = currentCopro?.postal_code || '';
+    const coproVille = currentCopro?.city || '';
     const [step, setStep] = useState(1); // 1: Form, 2: Preview, 3: Mode d'envoi
     const [dateResiliation, setDateResiliation] = useState('');
     const [courrierTexte, setCourrierTexte] = useState('');
@@ -49,7 +52,6 @@ export default function ResiliationModal({ contrat, onClose, onConfirm }: Resili
 
     // Générer le texte prérempli avec les variables
     const generatePrefilledText = (dateEffet: string): string => {
-        const copropriete = MOCK_INFORMATIONS_COPROPRIETE;
         const dateEffetFormatted = dateEffet
             ? new Date(dateEffet).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
             : '{date_effet_résiliation}';
@@ -58,7 +60,7 @@ export default function ResiliationModal({ contrat, onClose, onConfirm }: Resili
 
 Madame, Monsieur,
 
-En ma qualité de syndic de la copropriété ${copropriete.nom}, sise ${copropriete.adresse}, ${copropriete.codePostal} ${copropriete.ville}, je vous informe par la présente de la décision de résilier le contrat de prestations de services référencé sous le numéro ${contrat.numeroContrat || contrat.id}, conclu avec votre société ${contrat.fournisseur}.
+En ma qualité de syndic de la copropriété ${coproNom}, sise ${coproAdresse}, ${coproCodePostal} ${coproVille}, je vous informe par la présente de la décision de résilier le contrat de prestations de services référencé sous le numéro ${contrat.numeroContrat || contrat.id}, conclu avec votre société ${contrat.fournisseur}.
 
 Conformément aux dispositions contractuelles, et notamment au délai de préavis de ${contrat.delaiResiliation || 60} jours, la résiliation prendra effet à compter du ${dateEffetFormatted}, la présente valant notification formelle de notre volonté de mettre un terme audit contrat.
 
@@ -97,19 +99,17 @@ ${SYNDIC_INFO.email} – ${SYNDIC_INFO.telephone}`;
             month: 'long',
             year: 'numeric'
         });
-
-        const copropriete = MOCK_INFORMATIONS_COPROPRIETE;
         // Convertir le texte en HTML avec les sauts de ligne
         const texteHTML = courrierTexte.replace(/\n/g, '<br/>');
 
         return `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
             <div style="text-align: right; margin-bottom: 40px; font-size: 0.9em;">
-                <strong>${copropriete.nom}</strong><br/>
-                ${copropriete.adresse}<br/>
-                ${copropriete.codePostal} ${copropriete.ville}<br/>
+                <strong>${coproNom}</strong><br/>
+                ${coproAdresse}<br/>
+                ${coproCodePostal} ${coproVille}<br/>
                 <br/>
-                ${copropriete.ville}, le ${aujourdhui}
+                ${coproVille}, le ${aujourdhui}
             </div>
 
             <div style="margin-bottom: 40px; font-size: 0.9em;">

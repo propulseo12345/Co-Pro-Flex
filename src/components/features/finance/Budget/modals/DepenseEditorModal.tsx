@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import { PosteBudgetData, PieceJointeDepense } from '../types';
 import { InvoiceUploadSection } from '../InvoiceUploadSection';
 import { DepenseValidationPanel } from '../DepenseValidationPanel';

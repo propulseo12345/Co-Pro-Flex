@@ -1,7 +1,7 @@
 'use client';
 
 import { Info, CheckCircle, Clock } from 'lucide-react';
-import { DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types/models/finance';
 import { getCompteLibelle, getCompteDetails } from '@/lib/constants/plan-comptable';
 import { formatCurrency } from '@/hooks/modules/useExpenses';
 import styles from './Expenses.module.css';

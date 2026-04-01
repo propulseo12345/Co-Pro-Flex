@@ -1,6 +1,5 @@
 'use client';
 
-import { MOCK_ASSEMBLEES } from '@/data/mock';
 import { ArrowLeft, CheckSquare, Square, Calendar, MapPin } from 'lucide-react';
 import styles from './checklist.module.css';
 import Link from 'next/link';
@@ -8,12 +7,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { ClosureRecap } from '@/components/features/ag/Closure/ClosureRecap';
+import { useAgDetail } from '@/hooks/modules/useAgData';
 
 export default function AGChecklistPage() {
     const params = useParams();
     const router = useRouter();
     const agId = params.id as string;
-    const ag = MOCK_ASSEMBLEES.find(a => a.id === agId);
+    const { meeting, isLoading } = useAgDetail(agId);
 
     const [showClosure, setShowClosure] = useState(false);
 
@@ -35,7 +35,11 @@ export default function AGChecklistPage() {
         router.push(`/ag/${agId}/pv`);
     };
 
-    if (!ag) {
+    if (isLoading) {
+        return <div className="container">Chargement...</div>;
+    }
+
+    if (!meeting) {
         return <div className="container">Assemblée non trouvée.</div>;
     }
 
@@ -72,10 +76,10 @@ export default function AGChecklistPage() {
                 </div>
                 <div className={styles.agInfo}>
                     <div className={styles.agInfoItem}>
-                        <Calendar size={16} aria-hidden="true" /> {new Date(ag.date).toLocaleDateString('fr-FR')}
+                        <Calendar size={16} aria-hidden="true" /> {new Date(meeting.meeting_date).toLocaleDateString('fr-FR')}
                     </div>
                     <div className={styles.agInfoItem}>
-                        <MapPin size={16} aria-hidden="true" /> {ag.lieu}
+                        <MapPin size={16} aria-hidden="true" /> {meeting.location || 'Lieu non défini'}
                     </div>
                 </div>
             </div>

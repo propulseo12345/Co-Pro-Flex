@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { X, Mail, Send, FileText } from 'lucide-react';
 import { Prestataire } from '@/types';
-import { MOCK_INFORMATIONS_COPROPRIETE, MOCK_PARAMETRES } from '@/data/mock';
+import { useCopro } from '@/providers/CoproContext';
 import styles from './ContactProviderModal.module.css';
 
 export type EmailTemplateType = 'demande_intervention' | 'declaration_sinistre' | 'renouvellement_contrat' | 'question_generale';
@@ -124,13 +124,12 @@ export function ContactProviderModal({ isOpen, prestataire, contrat, onClose }: 
   const [customSujet, setCustomSujet] = useState('');
   const [customCorps, setCustomCorps] = useState('');
 
-  const coproInfo = MOCK_INFORMATIONS_COPROPRIETE;
-  const coproParams = MOCK_PARAMETRES.informationsCopro;
+  const { currentCopro } = useCopro();
 
   const variables = useMemo(() => {
     const vars: Record<string, string> = {
-      COPRO_NOM: coproParams.nom || coproInfo.nom,
-      COPRO_ADRESSE: coproParams.adresse || `${coproInfo.adresse}, ${coproInfo.codePostal} ${coproInfo.ville}`,
+      COPRO_NOM: currentCopro?.name || '',
+      COPRO_ADRESSE: currentCopro ? [currentCopro.address, currentCopro.postal_code, currentCopro.city].filter(Boolean).join(', ') : '',
       PRESTATAIRE_NOM: prestataire?.nom || '',
       PRESTATAIRE_EMAIL: prestataire?.email || '',
     };
@@ -145,7 +144,7 @@ export function ContactProviderModal({ isOpen, prestataire, contrat, onClose }: 
     }
 
     return vars;
-  }, [coproInfo, coproParams, prestataire, contrat]);
+  }, [currentCopro, prestataire, contrat]);
 
   const currentTemplate = TEMPLATES.find(t => t.type === selectedTemplate) || TEMPLATES[0];
 
