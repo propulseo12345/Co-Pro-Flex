@@ -119,7 +119,7 @@
   padding: 12px 28px;
   border-radius: 8px;
   border: none;
-  background: #22c55e;
+  background: #3b82f6;
   color: white;
   font-size: 14px;
   font-weight: 700;
@@ -129,9 +129,9 @@
 }
 
 .btnFinish:hover {
-  background: #16a34a;
+  background: #2563eb;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btnFinish:disabled {

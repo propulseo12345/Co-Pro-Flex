@@ -141,7 +141,7 @@ export function Step4Comptes({ coproId, onComplete, onBack }: Step4Props) {
           onClick={handleFinish}
           disabled={isSaving}
         >
-          {isSaving ? 'Enregistrement...' : 'Terminer la configuration'}
+          {isSaving ? 'Enregistrement...' : 'Continuer'}
         </button>
       </div>
     </div>

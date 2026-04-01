@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
 import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
@@ -8,6 +8,9 @@ import { Step1Copropriete } from '@/components/features/onboarding/steps/Step1Co
 import { Step2Coproprietaires } from '@/components/features/onboarding/steps/Step2Coproprietaires';
 import { Step3LotsKeys } from '@/components/features/onboarding/steps/Step3LotsKeys';
 import { Step4Comptes } from '@/components/features/onboarding/steps/Step4Comptes';
+import { Step5Budget } from '@/components/features/onboarding/steps/Step5Budget';
+import { Step6AgAppels } from '@/components/features/onboarding/steps/Step6AgAppels';
+import { Step7RepriseSoldes } from '@/components/features/onboarding/steps/Step7RepriseSoldes';
 import styles from './onboarding.module.css';
 
 export default function OnboardingPage() {
@@ -21,6 +24,10 @@ export default function OnboardingPage() {
     completeStep,
     setCoproCreated,
   } = useOnboarding();
+
+  // State shared between steps 5-7
+  const [budgetId, setBudgetId] = useState<string | null>(null);
+  const [periodId, setPeriodId] = useState<string | null>(null);
 
   const handleStep1Complete = useCallback((coproId: string, coproName: string) => {
     setCoproCreated(coproId, coproName);
@@ -36,6 +43,20 @@ export default function OnboardingPage() {
   }, [completeStep]);
 
   const handleStep4Complete = useCallback(() => {
+    completeStep(4);
+  }, [completeStep]);
+
+  const handleStep5Complete = useCallback((newBudgetId: string | null, newPeriodId: string) => {
+    setBudgetId(newBudgetId);
+    setPeriodId(newPeriodId);
+    completeStep(5);
+  }, [completeStep]);
+
+  const handleStep6Complete = useCallback(() => {
+    completeStep(6);
+  }, [completeStep]);
+
+  const handleStep7Complete = useCallback(() => {
     router.push('/dashboard');
   }, [router]);
 
@@ -83,6 +104,30 @@ export default function OnboardingPage() {
             coproId={state.coproId}
             onComplete={handleStep4Complete}
             onBack={() => goToStep(3)}
+          />
+        )}
+        {currentStep === 5 && state.coproId && (
+          <Step5Budget
+            coproId={state.coproId}
+            onComplete={handleStep5Complete}
+            onBack={() => goToStep(4)}
+          />
+        )}
+        {currentStep === 6 && state.coproId && periodId && (
+          <Step6AgAppels
+            coproId={state.coproId}
+            budgetId={budgetId}
+            periodId={periodId}
+            onComplete={handleStep6Complete}
+            onBack={() => goToStep(5)}
+          />
+        )}
+        {currentStep === 7 && state.coproId && periodId && (
+          <Step7RepriseSoldes
+            coproId={state.coproId}
+            periodId={periodId}
+            onComplete={handleStep7Complete}
+            onBack={() => goToStep(6)}
           />
         )}
       </div>

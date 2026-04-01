@@ -8,6 +8,9 @@ const STEPS: OnboardingStep[] = [
   { id: 2, label: 'Copropriétaires' },
   { id: 3, label: 'Lots & Clés' },
   { id: 4, label: 'Comptes bancaires' },
+  { id: 5, label: 'Budget' },
+  { id: 6, label: 'AG & Appels' },
+  { id: 7, label: 'Reprise soldes' },
 ];
 
 export interface OnboardingState {

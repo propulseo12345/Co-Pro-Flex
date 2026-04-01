@@ -29,7 +29,7 @@ export function OnboardingStepper({
         const isClickable = step.id <= maxStepReached;
 
         return (
-          <div key={step.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div key={step.id} className={styles.stepWrapper}>
             {index > 0 && (
               <div className={`${styles.connector} ${isCompleted ? styles.completed : ''}`} />
             )}

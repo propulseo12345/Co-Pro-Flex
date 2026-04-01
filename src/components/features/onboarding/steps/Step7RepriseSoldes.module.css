@@ -1,0 +1,254 @@
+/* src/components/features/onboarding/steps/Step7RepriseSoldes.module.css */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.infoBox {
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  margin-bottom: 24px;
+  font-size: 12px;
+  color: #60a5fa;
+  line-height: 1.6;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.tableHead {
+  background: rgba(148, 163, 184, 0.04);
+}
+
+.th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.thRight {
+  composes: th;
+  text-align: right;
+}
+
+.tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.tr:last-child {
+  border-bottom: none;
+}
+
+.tr:hover {
+  background: rgba(148, 163, 184, 0.02);
+}
+
+.td {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.tdRef {
+  composes: td;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.tdOwner {
+  composes: td;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.tdInput {
+  padding: 6px 14px;
+}
+
+.soldeInput {
+  width: 130px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.04);
+  color: #e2e8f0;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.soldeInput:focus {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.soldeInput::placeholder {
+  color: #475569;
+}
+
+.soldePositive {
+  color: #ef4444;
+}
+
+.soldeNegative {
+  color: #22c55e;
+}
+
+.totalBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  margin-bottom: 24px;
+}
+
+.totalLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.totalAmount {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.totalPositive {
+  color: #ef4444;
+}
+
+.totalNegative {
+  color: #22c55e;
+}
+
+.totalZero {
+  color: #94a3b8;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.successBox {
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.successText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.errorMsg {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.btnBack {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(148, 163, 184, 0.04);
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnBack:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+}
+
+.btnFinish {
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnFinish:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btnFinish:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.skipBtn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: all 0.2s;
+}
+
+.skipBtn:hover {
+  color: #e2e8f0;
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+}
