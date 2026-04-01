@@ -111,6 +111,8 @@
   --nav-accent: #2563eb;
   --nav-text: #e2e8f0;
   --nav-text-muted: #8892a4;
+  --border-subtle: #1e293b;
+  --bg-surface: #1e293b;
 
   /* Spacing */
   --space-xs: 0.25rem;  /* 4px */
@@ -831,4 +833,13 @@ textarea:focus-visible,
   --glow-primary: none;
   --glow-success: none;
   --glow-warning: none;
+
+  /* Sidebar — light version */
+  --sidebar-nav-bg: #fffefa;
+  --highbar-bg: #f5f0e8;
+  --nav-accent: #4a72c0;
+  --nav-text: #3d3529;
+  --nav-text-muted: #8c7e6a;
+  --border-subtle: #ebe6dd;
+  --bg-surface: #f5f0e8;
 }
