@@ -1,10 +1,17 @@
 'use client';
 
+import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
 import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
+import { Step1Copropriete } from '@/components/features/onboarding/steps/Step1Copropriete';
+import { Step2Coproprietaires } from '@/components/features/onboarding/steps/Step2Coproprietaires';
+import { Step3LotsKeys } from '@/components/features/onboarding/steps/Step3LotsKeys';
+import { Step4Comptes } from '@/components/features/onboarding/steps/Step4Comptes';
 import styles from './onboarding.module.css';
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const {
     steps,
     currentStep,
@@ -14,6 +21,23 @@ export default function OnboardingPage() {
     completeStep,
     setCoproCreated,
   } = useOnboarding();
+
+  const handleStep1Complete = useCallback((coproId: string, coproName: string) => {
+    setCoproCreated(coproId, coproName);
+    completeStep(1);
+  }, [setCoproCreated, completeStep]);
+
+  const handleStep2Complete = useCallback(() => {
+    completeStep(2);
+  }, [completeStep]);
+
+  const handleStep3Complete = useCallback(() => {
+    completeStep(3);
+  }, [completeStep]);
+
+  const handleStep4Complete = useCallback(() => {
+    router.push('/dashboard');
+  }, [router]);
 
   return (
     <div className={styles.container}>
@@ -35,24 +59,31 @@ export default function OnboardingPage() {
 
       <div className={styles.stepContent}>
         {currentStep === 1 && (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-            Étape 1 — Création de la copropriété (à implémenter)
-          </p>
+          <Step1Copropriete
+            onComplete={handleStep1Complete}
+            existingCoproId={state.coproId}
+          />
         )}
-        {currentStep === 2 && (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-            Étape 2 — Copropriétaires (à implémenter)
-          </p>
+        {currentStep === 2 && state.coproId && (
+          <Step2Coproprietaires
+            coproId={state.coproId}
+            onComplete={handleStep2Complete}
+            onBack={() => goToStep(1)}
+          />
         )}
-        {currentStep === 3 && (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-            Étape 3 — Lots & Clés de répartition (à implémenter)
-          </p>
+        {currentStep === 3 && state.coproId && (
+          <Step3LotsKeys
+            coproId={state.coproId}
+            onComplete={handleStep3Complete}
+            onBack={() => goToStep(2)}
+          />
         )}
-        {currentStep === 4 && (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-            Étape 4 — Comptes bancaires (à implémenter)
-          </p>
+        {currentStep === 4 && state.coproId && (
+          <Step4Comptes
+            coproId={state.coproId}
+            onComplete={handleStep4Complete}
+            onBack={() => goToStep(3)}
+          />
         )}
       </div>
     </div>
