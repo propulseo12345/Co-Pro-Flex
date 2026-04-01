@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Users, Building2, DollarSign, Wrench,
   FileText, MessageSquare, Scale, Calendar,
   Calculator, Receipt, ArrowLeftRight, FolderOpen, Mail,
-  AlertTriangle, BookOpen, ClipboardList, BarChart3,
+  AlertTriangle, BookOpen, ClipboardList, BarChart3, Briefcase,
   type LucideIcon
 } from 'lucide-react';
 
@@ -21,6 +21,13 @@ export interface SubPage {
 }
 
 export const MODULES: ModuleConfig[] = [
+  {
+    id: 'portefeuille',
+    label: 'Portefeuille',
+    icon: Briefcase,
+    href: '/portefeuille',
+    subPages: [],
+  },
   {
     id: 'dashboard',
     label: 'Dashboard',
