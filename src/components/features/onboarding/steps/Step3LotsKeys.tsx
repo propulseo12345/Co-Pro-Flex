@@ -1,9 +1,11 @@
 // src/components/features/onboarding/steps/Step3LotsKeys.tsx
 'use client';
 
+import { useCallback } from 'react';
 import { StepHeader } from '../shared/StepHeader';
 import { LotsRepartitionGrid } from '@/components/features/lots/LotsRepartitionGrid';
 import { useLotsRepartitionGrid } from '@/hooks/modules/useLotsRepartitionGrid';
+import type { GridKeyColumn } from '@/hooks/modules/useLotsRepartitionGrid';
 import styles from './Step3LotsKeys.module.css';
 
 interface Step3Props {
@@ -13,8 +15,12 @@ interface Step3Props {
 }
 
 export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
-  const gridProps = useLotsRepartitionGrid(coproId);
-  const lotCount = gridProps.rows?.length ?? 0;
+  const { gridRows, keyColumns, updateWeight, setEditingLot, setEditingKey } = useLotsRepartitionGrid();
+
+  const handleEditKey = useCallback((key: GridKeyColumn) => {
+    setEditingKey(key as any);
+  }, [setEditingKey]);
+  const lotCount = gridRows?.length ?? 0;
   const hasLots = lotCount > 0;
 
   return (
@@ -31,7 +37,13 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
       </div>
 
       <div className={styles.gridWrapper}>
-        <LotsRepartitionGrid {...gridProps} />
+        <LotsRepartitionGrid
+          rows={gridRows}
+          keyColumns={keyColumns}
+          onEditLot={setEditingLot}
+          onEditKey={handleEditKey}
+          onUpdateWeight={updateWeight}
+        />
       </div>
 
       <div className={styles.footer}>
