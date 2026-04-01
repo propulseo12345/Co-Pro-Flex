@@ -6,7 +6,8 @@ import type {
   CategorieNote,
   PieceJointeNote,
 } from '@/types/models/impaye';
-import { getNotesJournalByImpayeId } from '@/data/mock';
+// TODO: Replace with Supabase query
+function getNotesJournalByImpayeId(_impayeId: number): NoteJournal[] { return []; }
 
 interface UseJournalRecouvrementOptions {
   impayeId: number;

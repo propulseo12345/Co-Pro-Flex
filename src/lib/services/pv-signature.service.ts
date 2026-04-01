@@ -13,7 +13,8 @@ import {
   PreRemplissageResult,
   LABELS_MODE_SIGNATURE,
 } from '@/types/models/pv-signature';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
+// MOCK_COPROPRIETAIRES removed — copro lookup now returns undefined for email/phone
+// TODO: Pass coproprietaires list from caller or query Supabase with coproId
 
 // Clé localStorage
 const STORAGE_KEY_PREFIX = 'pv-signatures-';
@@ -133,7 +134,7 @@ class PVSignatureService {
     // Président
     if (roles.presidentSeance?.nom) {
       const copro = roles.presidentSeance.coproprietaireId
-        ? MOCK_COPROPRIETAIRES.find(c => c.id === roles.presidentSeance.coproprietaireId)
+        ? null
         : null;
 
       const { prenom, nom } = this.parseFullName(roles.presidentSeance.nom);
@@ -159,7 +160,7 @@ class PVSignatureService {
     // Secrétaire
     if (roles.secretaireSeance?.nom) {
       const copro = roles.secretaireSeance.coproprietaireId
-        ? MOCK_COPROPRIETAIRES.find(c => c.id === roles.secretaireSeance.coproprietaireId)
+        ? null
         : null;
 
       const { prenom, nom } = this.parseFullName(roles.secretaireSeance.nom);
@@ -187,7 +188,7 @@ class PVSignatureService {
     // Scrutateur
     if (roles.scrutateur?.nom) {
       const copro = roles.scrutateur.coproprietaireId
-        ? MOCK_COPROPRIETAIRES.find(c => c.id === roles.scrutateur.coproprietaireId)
+        ? null
         : null;
 
       const { prenom, nom } = this.parseFullName(roles.scrutateur.nom);

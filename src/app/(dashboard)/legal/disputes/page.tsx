@@ -2,8 +2,10 @@
 
 import { AlertCircle, MessageSquare, FileText, Plus } from 'lucide-react';
 import styles from './disputes.module.css';
-import { MOCK_LITIGES } from '@/data/mock';
 import Link from 'next/link';
+
+// TODO: Replace with Supabase query when litiges table is created
+const MOCK_LITIGES: Array<{ id: string; titre: string; statut: string; priorite: string; type: string; dateOuverture: string; description: string; parties: string[] }> = [];
 
 export default function DisputesPage() {
     const getStatusBadge = (statut: string) => {

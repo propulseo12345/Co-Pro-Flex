@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { MOCK_COPROPRIETAIRES, type Coproprietaire } from '@/data/mock';
+import type { Coproprietaire } from '@/types';
 import {
   generateMockDataset,
   getMockDatasetStats,
   MOCK_DATASET_CONFIGS,
   type MockDatasetSize,
 } from '@/lib/utils/mock-generator';
+
+// Default empty array — no mock import
+const MOCK_COPROPRIETAIRES: Coproprietaire[] = [];
 
 const STORAGE_KEY = 'dev-mock-dataset-size';
 

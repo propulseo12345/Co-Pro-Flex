@@ -8,7 +8,9 @@
  */
 
 import { ContratAssurance, DocumentAssurance } from '@/types';
-import { MOCK_ASSURANCES_COPROPRIETE } from '@/data/mock';
+
+// TODO: Replace with Supabase query when assurances table is created
+const MOCK_ASSURANCES_COPROPRIETE: ContratAssurance[] = [];
 
 // Interface pour les résultats d'opération
 export interface ResultatOperation<T> {

@@ -1,12 +1,12 @@
 'use client';
 
-import { MOCK_PARAMETRES } from '@/data/mock';
 import { CreditCard, Shield, FileText, ChevronRight } from 'lucide-react';
 import styles from './settings.module.css';
 import Link from 'next/link';
 
 export default function SettingsPage() {
-    const { informationsCopro } = MOCK_PARAMETRES;
+    // TODO: Fetch from Supabase coproprietes table
+    const informationsCopro = { nom: '', adresse: '' };
 
     return (
         <div className="container">

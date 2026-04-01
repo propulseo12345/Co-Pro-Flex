@@ -4,7 +4,6 @@ import { X } from 'lucide-react';
 import type { Sale } from '@/types';
 import type { NewSaleForm } from '@/hooks/modules/useSalesPage';
 import { MOCK_LOTS } from '@/hooks/modules/useSalesPage';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import styles from '../../../app/(dashboard)/sales/sales.module.css';
 
 interface CreateSaleModalProps {
@@ -53,7 +52,6 @@ export function CreateSaleModal({ isOpen, onClose, newSale, onUpdate, onCreate }
             <label>Vendeur *</label>
             <select value={newSale.vendeurId} onChange={(e) => onUpdate({ vendeurId: e.target.value })} className={styles.select}>
               <option value="">Sélectionner un copropriétaire</option>
-              {MOCK_COPROPRIETAIRES.map(copro => (<option key={copro.id} value={copro.id}>{copro.nom}</option>))}
             </select>
           </div>
           <div className={styles.formGroup}><label>Acquéreur</label><input type="text" value={newSale.acquereur} onChange={(e) => onUpdate({ acquereur: e.target.value })} className={styles.input} placeholder="Nom de l'acquéreur" /></div>

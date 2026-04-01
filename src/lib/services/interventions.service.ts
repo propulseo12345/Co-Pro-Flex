@@ -8,7 +8,9 @@
  */
 
 import { InterventionCarnet } from '@/types';
-import { MOCK_INTERVENTIONS_CARNET } from '@/data/mock';
+
+// TODO: Replace with Supabase query / listLogbookEntries from @/lib/maintenance/api
+const MOCK_INTERVENTIONS_CARNET: InterventionCarnet[] = [];
 
 // Types pour les alertes d'interventions
 export type AlerteInterventionType =

@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { useNouvelleVenteForm } from '@/hooks/modules/useNouvelleVenteForm';
 import { NouvelleVenteForm, NouvelleVenteConfirmModal } from '@/components/features/ventes-impayes';
-import { MOCK_COPROPRIETAIRES, MOCK_LOTS } from '@/data/mock/nouvelle-vente.mock';
 import styles from './nouvelle-vente.module.css';
+
+// TODO: Replace with Supabase queries
+const MOCK_COPROPRIETAIRES: Array<{ id: string; nom: string; lots: string[]; email: string; telephone: string }> = [];
+const MOCK_LOTS: Array<{ id: string; type: string; proprietaire: string; tantiemes: number }> = [];
 
 export default function NouvelleVentePage() {
   const {

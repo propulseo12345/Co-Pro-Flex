@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import { MOCK_SALES, MOCK_COPROPRIETAIRES } from '@/data/mock';
 import type { Sale, SaleDocument, DocumentType, DocumentStatut } from '@/types';
 import { useVentesContext } from '@/providers/VentesProvider';
 
@@ -95,7 +94,7 @@ export function useSalesPage() {
     contextVentes = [];
   }
 
-  const initialSales = contextVentes.length > 0 ? contextVentes : MOCK_SALES as Sale[];
+  const initialSales = contextVentes.length > 0 ? contextVentes : [] as Sale[];
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(sales[0] || null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -119,7 +118,7 @@ export function useSalesPage() {
       return;
     }
 
-    const vendeur = MOCK_COPROPRIETAIRES.find(c => c.id === newSale.vendeurId);
+    const vendeur = { nom: newSale.vendeurId }; // TODO: Lookup from Supabase
     const newSaleData: Sale = {
       id: 'sale-' + Date.now(),
       lotIds: newSale.lotIds,

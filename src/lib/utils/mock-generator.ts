@@ -3,7 +3,7 @@
  * Permet de générer des jeux de données de 8/50/200 copropriétaires
  */
 
-import type { Coproprietaire } from '@/data/mock';
+import type { Coproprietaire } from '@/types';
 
 // Noms de famille français courants
 const NOMS = [

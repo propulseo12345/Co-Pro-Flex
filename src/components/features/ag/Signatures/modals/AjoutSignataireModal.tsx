@@ -9,7 +9,6 @@ import {
   LABELS_MODE_SIGNATURE,
   LABELS_TYPE_SIGNATAIRE
 } from '@/types/models/pv-signature';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
 import styles from './AjoutSignataireModal.module.css';
 
 interface Participant {
@@ -131,15 +130,7 @@ export function AjoutSignataireModal({
         setEmail(copro.email || '');
         setTelephone(copro.telephone || '');
       } else {
-        // Chercher dans MOCK_COPROPRIETAIRES
-        const copro = MOCK_COPROPRIETAIRES.find(c => c.id === personneId);
-        if (copro) {
-          const parts = copro.nom.split(' ');
-          setPrenom(parts.slice(0, -1).join(' '));
-          setNom(parts[parts.length - 1] || '');
-          setEmail(copro.email || '');
-          setTelephone(copro.telephone || '');
-        }
+        // Fallback: no additional lookup without mock data
       }
     } else if (typePersonne === 'gestionnaire' && gestionnaire) {
       setNom(gestionnaire.nom);
@@ -214,10 +205,10 @@ export function AjoutSignataireModal({
     }
   };
 
-  // Copropriétaires disponibles (non déjà signataires)
-  const coproprietairesDisponibles = MOCK_COPROPRIETAIRES.filter(
-    c => !signatairesExistants.some(s => s.personneId === c.id)
-  );
+  // Copropriétaires disponibles (non déjà signataires) — from participants prop
+  const coproprietairesDisponibles = participants
+    .filter(p => !signatairesExistants.some(s => s.personneId === p.coproprietaireId))
+    .map(p => ({ id: p.coproprietaireId, nom: p.coproprietaire.nom }));
 
   if (!isOpen) return null;
 

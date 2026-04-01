@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Users, Briefcase, User, Check, X, UserCheck, Building2 } from 'lucide-react';
-import type { Coproprietaire, Gestionnaire } from '@/data/mock';
+import type { Coproprietaire, Gestionnaire } from '@/types';
 import styles from './RoleSelect.module.css';
 
 export type RoleType = 'president' | 'secretaire' | 'scrutateur' | 'conseilTitulaire' | 'conseilSuppleant';

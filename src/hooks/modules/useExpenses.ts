@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { MOCK_DEPENSES_BUDGETS, MOCK_EXERCICE_ACTUEL, DepenseEtendue } from '@/data/mock';
+import type { DepenseEtendue } from '@/types';
+
+// TODO: Replace with Supabase queries
+const MOCK_DEPENSES_BUDGETS: DepenseEtendue[] = [];
+const MOCK_EXERCICE_ACTUEL = { id: '1', annee: String(new Date().getFullYear()), dateDebut: `${new Date().getFullYear()}-01-01`, dateFin: `${new Date().getFullYear()}-12-31`, statut: 'EN_COURS' as const };
 
 export type StatutFilter = 'TOUTES' | 'VALIDEE' | 'EN_ATTENTE_VALIDATION' | 'NON_VALIDEE';
 

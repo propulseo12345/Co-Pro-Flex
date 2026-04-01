@@ -7,7 +7,7 @@
 
 import type { VariablesContext, ModalitePaiement, TypeSyndic } from './variables';
 import type { ContratSyndic } from '@/types';
-import type { Gestionnaire, Coproprietaire } from '@/data/mock';
+import type { Gestionnaire, Coproprietaire } from '@/types';
 
 interface BuildContextOptions {
   // Données de la copropriété
@@ -174,8 +174,8 @@ export function buildVariablesContext(options: BuildContextOptions): VariablesCo
       adresse: copro.adressePostale
         ? `${copro.adressePostale.rue}, ${copro.adressePostale.codePostal} ${copro.adressePostale.ville}`
         : '',
-      lots: [{ numero: copro.lot, tantiemes: copro.tantiemes, type: 'appartement' }],
-      totalTantiemes: copro.tantiemes,
+      lots: [{ numero: copro.lot || '', tantiemes: copro.tantiemes || 0, type: 'appartement' }],
+      totalTantiemes: copro.tantiemes || 0,
     };
   }
 

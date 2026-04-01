@@ -8,7 +8,7 @@
  */
 
 import { replaceVariables as baseReplaceVariables } from '@/lib/constants/resolutions';
-import type { Coproprietaire } from '@/data/mock';
+import type { Coproprietaire } from '@/types';
 import type { ContratSyndic } from '@/types';
 import { LIBELLES_MODALITE_PAIEMENT, type ModalitePaiement } from '@/lib/documents/variables';
 

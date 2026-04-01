@@ -634,13 +634,33 @@ export interface Litige {
 // Gestion des lots
 export type TypeLot = 'APPARTEMENT' | 'STUDIO' | 'LOCAL_COMMERCIAL' | 'CAVE' | 'PARKING' | 'GARAGE' | 'MAISON' | 'LOGE';
 
+export interface AdressePostale {
+    rue: string;
+    codePostal: string;
+    ville: string;
+}
+
 export interface Coproprietaire {
+    id: string;
+    nom: string;
+    prenom?: string;
+    email: string;
+    telephone?: string;
+    adresse?: string;
+    lot?: string;
+    adressePostale?: AdressePostale;
+    tantiemes?: number;
+    accepteAvisElectronique?: boolean;
+}
+
+export interface Gestionnaire {
     id: string;
     nom: string;
     prenom: string;
     email: string;
     telephone?: string;
-    adresse?: string;
+    syndicId: string;
+    syndicNom: string;
 }
 
 export interface Lot {

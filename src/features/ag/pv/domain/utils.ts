@@ -1,5 +1,5 @@
 import type { Resolution, VoteData, ResolutionResult, AGData, Signataire, PresenceData, PVStats } from './types';
-import { MOCK_COPROPRIETAIRES } from '@/data/mock';
+import type { Coproprietaire } from '@/types';
 import type jsPDF from 'jspdf';
 import { generatePVPDF } from '@/lib/pdf/generatePVPDF';
 import type { ResolutionForPV, ParticipantForPV } from '@/lib/services/pv-generation.service';
@@ -66,7 +66,8 @@ export function generatePVText(
   agData: AGData,
   resolutions: Resolution[],
   votes: VoteData[],
-  signataires: Signataire[]
+  signataires: Signataire[],
+  coproprietaires: Coproprietaire[] = []
 ): string {
   const dateFormatted = new Date(agData.date).toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -82,7 +83,7 @@ export function generatePVText(
   text += `${agData.adresse}\n\n`;
 
   text += `PRÉSENTS ET REPRÉSENTÉS\n\n`;
-  const totalTantiemes = MOCK_COPROPRIETAIRES.reduce((sum, c) => sum + c.tantiemes, 0);
+  const totalTantiemes = coproprietaires.reduce((sum, c) => sum + (c.tantiemes || 0), 0);
   text += `Total des tantièmes : ${totalTantiemes}\n\n`;
 
   text += `ORDRE DU JOUR ET VOTES\n\n`;
@@ -138,7 +139,8 @@ export function generatePDFDocument(
   votes: VoteData[],
   presences: PresenceData[],
   signataires: Signataire[],
-  replaceVariables: (text: string) => string
+  replaceVariables: (text: string) => string,
+  coproprietaires: Coproprietaire[] = []
 ): jsPDF | null {
   if (!agData) return null;
 
@@ -170,11 +172,11 @@ export function generatePDFDocument(
   });
 
   const pvParticipants: ParticipantForPV[] = presences.map((p) => {
-    const copro = MOCK_COPROPRIETAIRES.find((c) => c.id === p.coproprietaireId);
+    const copro = coproprietaires.find((c) => c.id === p.coproprietaireId);
     let mandataire: string | undefined;
     if (p.statut === 'REPRESENTE') {
       if (p.mandataireId) {
-        const m = MOCK_COPROPRIETAIRES.find((c) => c.id === p.mandataireId);
+        const m = coproprietaires.find((c) => c.id === p.mandataireId);
         mandataire = m?.nom;
       } else {
         mandataire = p.mandataireManuel;

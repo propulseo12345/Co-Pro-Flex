@@ -8,14 +8,24 @@ import {
 } from 'lucide-react';
 import type { NouvelleVenteFormData } from '@/hooks/modules/useNouvelleVenteForm';
 import { formatLotType } from '@/hooks/modules/useNouvelleVenteForm';
-import {
-  MOCK_COPROPRIETAIRES,
-  MOCK_LOTS,
-  MOCK_NOTAIRES,
-  MOCK_ORDRES_SERVICE,
-  DOCUMENTS_DISPONIBLES
-} from '@/data/mock/nouvelle-vente.mock';
 import styles from '../../../app/(dashboard)/ventes-impayes/ventes/nouvelle/nouvelle-vente.module.css';
+
+// TODO: Replace with Supabase queries / props
+const MOCK_COPROPRIETAIRES: Array<{ id: string; nom: string; email: string; telephone: string }> = [];
+const MOCK_LOTS: Array<{ id: string; type: string; proprietaire: string; tantiemes: number }> = [];
+const MOCK_NOTAIRES: Array<{ id: string; nom: string; email: string; telephone: string; adresse: string }> = [];
+const MOCK_ORDRES_SERVICE: Array<{ id: string; titre: string; date: string; statut: string }> = [];
+
+interface DocumentOption { id: string; nom: string; description: string; obligatoire: boolean }
+const DOCUMENTS_DISPONIBLES: DocumentOption[] = [
+  { id: 'pre_etat_date', nom: 'Pre-etat date', description: 'Document preparatoire pour le compromis', obligatoire: true },
+  { id: 'etat_date', nom: 'Etat date', description: 'Etat des charges et provisions', obligatoire: true },
+  { id: 'certificat_art20', nom: 'Certificat article 20', description: 'Certificat de non-opposition a la vente', obligatoire: true },
+  { id: 'carnet_entretien', nom: 'Carnet d\'entretien', description: 'Historique des travaux et entretiens', obligatoire: false },
+  { id: 'reglement_copro', nom: 'Reglement de copropriete', description: 'Reglement et ses modificatifs', obligatoire: false },
+  { id: 'pv_ag', nom: 'PV des 3 dernieres AG', description: 'Proces-verbaux des assemblees generales', obligatoire: false },
+  { id: 'diagnostics', nom: 'Diagnostics techniques', description: 'DPE, amiante, plomb, etc.', obligatoire: false },
+];
 
 interface NouvelleVenteFormProps {
   formData: NouvelleVenteFormData;

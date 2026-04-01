@@ -1,13 +1,14 @@
 'use client';
 
 import { X, Paperclip } from 'lucide-react';
-import { DepenseEtendue, MOCK_DEPENSES_BUDGETS } from '@/data/mock';
+import type { DepenseEtendue } from '@/types';
 import { PosteBudget, PosteBudgetData, getProgressColor, getProgressPercentage } from '../types';
 import styles from '../Budget.module.css';
 
 interface PosteDetailModalProps {
   selectedPoste: PosteBudget;
   postesBudget: PosteBudgetData[];
+  depenses?: DepenseEtendue[];
   onClose: () => void;
   onSelectDepense: (depense: DepenseEtendue) => void;
 }
@@ -15,11 +16,12 @@ interface PosteDetailModalProps {
 export function PosteDetailModal({
   selectedPoste,
   postesBudget,
+  depenses = [],
   onClose,
   onSelectDepense,
 }: PosteDetailModalProps) {
   const posteData = postesBudget.find((p) => p.poste === selectedPoste);
-  const depensesPoste = MOCK_DEPENSES_BUDGETS.filter((d) => d.poste === selectedPoste);
+  const depensesPoste = depenses.filter((d) => d.poste === selectedPoste);
   const percentage = posteData ? getProgressPercentage(posteData.consomme, posteData.budgetVote) : 0;
   const color = posteData ? getProgressColor(posteData.consomme, posteData.budgetVote) : 'var(--success)';
 
