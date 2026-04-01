@@ -177,6 +177,18 @@ export function invalidateActiveCoproCache(): void {
   }
 }
 
+/**
+ * Change la copro active (utilisé par le portefeuille gestionnaire).
+ * Met à jour le cache mémoire + sessionStorage.
+ */
+export function setActiveCopro(id: string, name: string): void {
+  memoryCache = { id, name, timestamp: Date.now() };
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(STORAGE_KEY, id);
+    sessionStorage.setItem(COPRO_NAME_KEY, name);
+  }
+}
+
 // ============================================================================
 // REACT HOOK
 // ============================================================================
