@@ -149,7 +149,7 @@
     border-bottom: 1px solid var(--border-light); width: 100%; font-family: inherit;
     color: var(--text-primary);
 }
-.splitItem:hover { background: rgba(255, 255, 255, 0.02); }
+.splitItem:hover { background: rgba(var(--overlay-rgb), 0.02); }
 .splitItemActive { background: var(--primary-light); border-left: 3px solid var(--primary); }
 
 .splitItemLeft { display: flex; align-items: center; gap: 0.625rem; }

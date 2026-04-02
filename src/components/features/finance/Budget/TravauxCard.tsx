@@ -28,11 +28,11 @@ export function TravauxCard({ travaux, onOpenDetail }: TravauxCardProps) {
         <span className={styles.rowTitle}>{travaux.titre}</span>
         <span className={styles.rowSource}>{sourceLabel}</span>
         <span className={styles.rowStat}>{travaux.budgetVote.toLocaleString('fr-FR')} €</span>
-        <span className={styles.rowStat} style={{ color: '#f59e0b' }}>{budgetAppele.toLocaleString('fr-FR')} €</span>
-        <span className={styles.rowStat} style={{ color: '#22c55e' }}>{totalCollecte.toLocaleString('fr-FR')} €</span>
+        <span className={styles.rowStat} style={{ color: 'var(--warning)' }}>{budgetAppele.toLocaleString('fr-FR')} €</span>
+        <span className={styles.rowStat} style={{ color: 'var(--success)' }}>{totalCollecte.toLocaleString('fr-FR')} €</span>
         <span className={styles.rowProgress}>
           <span className={styles.miniBar}>
-            <span className={styles.miniFill} style={{ width: `${appelePct}%`, background: '#f59e0b' }} />
+            <span className={styles.miniFill} style={{ width: `${appelePct}%`, background: 'var(--warning)' }} />
           </span>
         </span>
         <span className={styles.rowAppels}>{travaux.appelsDeFonds.length} appel{travaux.appelsDeFonds.length !== 1 ? 's' : ''}</span>
@@ -48,15 +48,15 @@ export function TravauxCard({ travaux, onOpenDetail }: TravauxCardProps) {
             </div>
             <div className={styles.detailStat}>
               <span className={styles.detailLabel}>Appelé</span>
-              <span className={styles.detailValue} style={{ color: '#f59e0b' }}>{budgetAppele.toLocaleString('fr-FR')} €</span>
+              <span className={styles.detailValue} style={{ color: 'var(--warning)' }}>{budgetAppele.toLocaleString('fr-FR')} €</span>
             </div>
             <div className={styles.detailStat}>
               <span className={styles.detailLabel}>Collecté</span>
-              <span className={styles.detailValue} style={{ color: '#22c55e' }}>{totalCollecte.toLocaleString('fr-FR')} €</span>
+              <span className={styles.detailValue} style={{ color: 'var(--success)' }}>{totalCollecte.toLocaleString('fr-FR')} €</span>
             </div>
             <div className={styles.detailStat}>
               <span className={styles.detailLabel}>Reste à appeler</span>
-              <span className={styles.detailValue} style={{ color: restantAAppeler > 0 ? '#60a5fa' : '#94a3b8' }}>{restantAAppeler.toLocaleString('fr-FR')} €</span>
+              <span className={styles.detailValue} style={{ color: restantAAppeler > 0 ? 'var(--secondary)' : 'var(--text-secondary)' }}>{restantAAppeler.toLocaleString('fr-FR')} €</span>
             </div>
           </div>
 

@@ -1511,7 +1511,7 @@
     color: var(--text-tertiary);
     font-family: monospace;
     padding: var(--space-xs) var(--space-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(var(--overlay-rgb), 0.05);
     border-radius: var(--radius-sm);
     margin: 0;
 }

@@ -54,8 +54,8 @@ export default function VentesPage() {
       {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: '#fef3c7' }}>
-            <Clock size={24} style={{ color: '#92400e' }} aria-hidden="true" />
+          <div className={styles.statIcon} style={{ background: 'var(--badge-warning-bg)' }}>
+            <Clock size={24} style={{ color: 'var(--warning)' }} aria-hidden="true" />
           </div>
           <div className={styles.statContent}>
             <h3 className={styles.statValue}>{stats.enCours}</h3>
@@ -63,8 +63,8 @@ export default function VentesPage() {
           </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: '#d1fae5' }}>
-            <CheckCircle2 size={24} style={{ color: '#065f46' }} aria-hidden="true" />
+          <div className={styles.statIcon} style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
+            <CheckCircle2 size={24} style={{ color: 'var(--success)' }} aria-hidden="true" />
           </div>
           <div className={styles.statContent}>
             <h3 className={styles.statValue}>{stats.validated}</h3>
@@ -72,8 +72,8 @@ export default function VentesPage() {
           </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: '#dbeafe' }}>
-            <FileText size={24} style={{ color: '#1d4ed8' }} aria-hidden="true" />
+          <div className={styles.statIcon} style={{ background: 'var(--badge-info-bg)' }}>
+            <FileText size={24} style={{ color: 'var(--primary)' }} aria-hidden="true" />
           </div>
           <div className={styles.statContent}>
             <h3 className={styles.statValue}>{stats.documentsManquants}</h3>

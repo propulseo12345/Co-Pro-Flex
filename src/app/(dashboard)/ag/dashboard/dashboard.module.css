@@ -54,9 +54,9 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem 1rem;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(var(--overlay-rgb), 0.2);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(var(--overlay-rgb), 0.3);
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -64,7 +64,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.actionButton:hover { background-color: rgba(255, 255, 255, 0.3); transform: translateY(-1px); }
+.actionButton:hover { background-color: rgba(var(--overlay-rgb), 0.3); transform: translateY(-1px); }
 .actionButton:active { transform: translateY(0); }
 .actionButtonPrimary { background-color: white !important; color: var(--blue-700) !important; font-weight: 700; border-color: white !important; }
 .sessionCard .actionButtonPrimary { color: var(--amber-600) !important; }
@@ -74,7 +74,7 @@
   display: inline-flex;
   align-items: center;
   margin-left: auto;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(var(--overlay-rgb), 0.7);
   font-size: 0.8125rem;
   font-weight: 500;
   text-decoration: none;
@@ -98,11 +98,11 @@
 .newBrouillonBtn:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
 /* --- BADGES (card context) --- */
-.badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; background-color: rgba(255, 255, 255, 0.2); color: white; }
-.quorumBadge { background-color: rgba(255, 255, 255, 0.2); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; }
-.planifiee { background-color: rgba(255, 255, 255, 0.2); }
+.badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; background-color: rgba(var(--overlay-rgb), 0.2); color: white; }
+.quorumBadge { background-color: rgba(var(--overlay-rgb), 0.2); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; }
+.planifiee { background-color: rgba(var(--overlay-rgb), 0.2); }
 .convoquee { background-color: var(--primary-light); color: var(--primary); }
-.ready { background-color: rgba(255, 255, 255, 0.25); color: white; }
+.ready { background-color: rgba(var(--overlay-rgb), 0.25); color: white; }
 .closed { background-color: var(--bg-secondary); color: var(--text-secondary); }
 
 /* --- COMPACT CARD OVERRIDES --- */

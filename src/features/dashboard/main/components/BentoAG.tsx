@@ -42,7 +42,7 @@ export function BentoAG({ nextAgDate, nextAgId, nextAgType, nextAgResolutions }:
         </>
       ) : (
         <>
-          <div className={styles.agDate} style={{ color: '#94a3b8' }}>Aucune prévue</div>
+          <div className={styles.agDate} style={{ color: 'var(--text-secondary)' }}>Aucune prévue</div>
           <div style={{ flex: 1 }} />
           <Link href="/ag/new" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnFull}`}>
             Créer une AG

@@ -25,11 +25,11 @@ const C = {
   textSecondary: 'var(--text-secondary)',
   textTertiary: 'var(--text-tertiary)',
   textMuted: '#475569',
-  primary: '#3b82f6',
-  primaryHover: '#2563eb',
-  success: '#22c55e',
-  danger: '#ef4444',
-  warning: '#f59e0b',
+  primary: 'var(--primary)',
+  primaryHover: 'var(--primary-hover)',
+  success: 'var(--success)',
+  danger: 'var(--danger)',
+  warning: 'var(--warning)',
   successBg: 'rgba(34,197,94,0.1)',
   dangerBg: 'rgba(239,68,68,0.1)',
   warningBg: 'rgba(245,158,11,0.1)',
@@ -218,7 +218,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
         }}>
           <AlertTriangle size={18} style={{ color: (joursRestants <= 0 || alerteUrgente) ? C.danger : C.warning, flexShrink: 0, marginTop: 2 }} />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: joursRestants <= 0 ? '#f87171' : alerteUrgente ? '#f87171' : '#fbbf24', marginBottom: 2 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: joursRestants <= 0 ? 'var(--danger)' : alerteUrgente ? 'var(--danger)' : 'var(--warning)', marginBottom: 2 }}>
               {joursRestants <= 0 ? 'Contrat expiré' : alerteUrgente ? 'Renouvellement urgent' : 'Échéance proche'}
             </div>
             <div style={{ fontSize: 13, color: joursRestants <= 0 ? '#fca5a5' : alerteUrgente ? '#fca5a5' : '#fde68a' }}>
@@ -240,9 +240,9 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
           border: '1px solid rgba(59,130,246,0.25)',
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            <Clock size={18} style={{ color: '#60a5fa', flexShrink: 0, marginTop: 2 }} />
+            <Clock size={18} style={{ color: 'var(--secondary)', flexShrink: 0, marginTop: 2 }} />
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#60a5fa', marginBottom: 2 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--secondary)', marginBottom: 2 }}>
                 Renouvellement en attente de confirmation
               </div>
               <div style={{ fontSize: 13, color: '#93c5fd' }}>
@@ -297,7 +297,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '4px 12px', borderRadius: 8,
-                  background: C.dangerBg, color: '#f87171',
+                  background: C.dangerBg, color: 'var(--danger)',
                   fontSize: 12, fontWeight: 600, textDecoration: 'none',
                 }}
               >
@@ -338,7 +338,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
               <a href={`tel:${prestataire.telephone.replace(/\s/g, '')}`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '6px 14px', borderRadius: 8,
-                background: C.infoBg, color: '#60a5fa',
+                background: C.infoBg, color: 'var(--secondary)',
                 fontSize: 13, fontWeight: 500, textDecoration: 'none',
               }}>
                 <Phone size={14} /> {prestataire.telephone}
@@ -348,7 +348,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
               <a href={`mailto:${prestataire.email}`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '6px 14px', borderRadius: 8,
-                background: C.infoBg, color: '#60a5fa',
+                background: C.infoBg, color: 'var(--secondary)',
                 fontSize: 13, fontWeight: 500, textDecoration: 'none',
               }}>
                 <Mail size={14} /> {prestataire.email}
@@ -408,7 +408,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
                   {contrat.dateFin ? new Date(contrat.dateFin).toLocaleDateString('fr-FR') : 'Non définie'}
                 </span>
                 {contrat.dateFin && joursRestants <= 365 && (
-                  <span style={{ fontSize: 13, color: joursRestants <= 0 ? '#f87171' : alerteUrgente ? '#fca5a5' : C.textTertiary }}>
+                  <span style={{ fontSize: 13, color: joursRestants <= 0 ? 'var(--danger)' : alerteUrgente ? '#fca5a5' : C.textTertiary }}>
                     ({joursRestants <= 0 ? `+${Math.abs(joursRestants)}j` : `${joursRestants}j`})
                   </span>
                 )}
@@ -570,7 +570,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
                       style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         width: 30, height: 30, borderRadius: 6, border: `1px solid ${C.border}`,
-                        background: 'transparent', color: '#f87171', cursor: 'pointer',
+                        background: 'transparent', color: 'var(--danger)', cursor: 'pointer',
                       }}
                     >
                       <Trash2 size={14} />
@@ -596,7 +596,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {interventions.map(inter => {
               const statutColor = inter.statut === 'completed' || inter.statut === 'CLOTURE' ? C.success
-                : inter.statut === 'in_progress' || inter.statut === 'EN_COURS' ? '#60a5fa'
+                : inter.statut === 'in_progress' || inter.statut === 'EN_COURS' ? 'var(--secondary)'
                 : inter.statut === 'scheduled' || inter.statut === 'PLANIFIEE' ? C.warning
                 : C.textSecondary;
               return (

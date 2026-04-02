@@ -138,9 +138,9 @@ export function ProvidersFinanceView({
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         {[
           { label: 'TOTAL', value: String(allProviders.length), color: 'var(--text-main)' },
-          { label: 'ACTIFS', value: String(actifsCount), color: '#22c55e' },
+          { label: 'ACTIFS', value: String(actifsCount), color: 'var(--success)' },
           { label: 'INTERVENTIONS TOTAL', value: String(totalInterventions), color: 'var(--text-main)' },
-          { label: 'NOTE MOYENNE', value: `${avgRating} ★`, color: '#fbbf24' },
+          { label: 'NOTE MOYENNE', value: `${avgRating} ★`, color: 'var(--warning)' },
         ].map((kpi, i) => (
           <div key={i} style={{
             flex: 1, padding: '16px 20px',
@@ -196,7 +196,7 @@ export function ProvidersFinanceView({
                 background: isActive ? 'rgba(59,130,246,0.12)' : 'var(--surface)',
                 border: isActive ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(148,163,184,0.08)',
                 borderRadius: 10,
-                color: isActive ? '#3b82f6' : 'var(--text-secondary)',
+                color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
                 fontSize: 13, fontWeight: isActive ? 600 : 400,
                 cursor: 'pointer', whiteSpace: 'nowrap',
                 fontFamily: 'inherit', transition: 'all 0.2s',
@@ -231,14 +231,14 @@ export function ProvidersFinanceView({
                 padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
                 whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'inherit', border: 'none',
                 background: domainFilter === 'tous' ? 'rgba(59,130,246,0.12)' : 'transparent',
-                color: domainFilter === 'tous' ? '#3b82f6' : 'var(--text-tertiary)',
+                color: domainFilter === 'tous' ? 'var(--primary)' : 'var(--text-tertiary)',
               }}
             >
               Tous
               <span style={{
                 fontSize: 10, fontWeight: 600, padding: '0 5px', borderRadius: 8,
                 background: domainFilter === 'tous' ? 'rgba(59,130,246,0.2)' : 'rgba(148,163,184,0.08)',
-                color: domainFilter === 'tous' ? '#60a5fa' : 'var(--text-tertiary)',
+                color: domainFilter === 'tous' ? 'var(--secondary)' : 'var(--text-tertiary)',
               }}>
                 {filtered.length}
               </span>
@@ -315,7 +315,7 @@ export function ProvidersFinanceView({
                         </span>
                       ))}
                       {p.noteMoyenne != null && p.noteMoyenne > 0 && (
-                        <span style={{ color: '#fbbf24', fontSize: 11, marginLeft: 4 }}>
+                        <span style={{ color: 'var(--warning)', fontSize: 11, marginLeft: 4 }}>
                           ★ {p.noteMoyenne.toFixed(1)}
                         </span>
                       )}
@@ -323,7 +323,7 @@ export function ProvidersFinanceView({
                   </div>
                   <span style={{
                     width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                    background: p.actif ? '#22c55e' : 'var(--text-tertiary)',
+                    background: p.actif ? 'var(--success)' : 'var(--text-tertiary)',
                   }} />
                 </div>
               );
@@ -368,7 +368,7 @@ export function ProvidersFinanceView({
                 background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)',
                 borderRadius: 8, padding: 12, textAlign: 'center',
               }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#60a5fa' }}>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--secondary)' }}>
                   {selected.nombreInterventions || 0}
                 </div>
                 <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>
@@ -379,7 +379,7 @@ export function ProvidersFinanceView({
                 background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)',
                 borderRadius: 8, padding: 12, textAlign: 'center',
               }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#fbbf24' }}>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--warning)' }}>
                   {selected.noteMoyenne ? `${selected.noteMoyenne.toFixed(1)} ★` : '—'}
                 </div>
                 <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>
@@ -413,7 +413,7 @@ export function ProvidersFinanceView({
                 <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginBottom: 4 }}>
                   EMAIL
                 </div>
-                <div style={{ fontSize: 13, color: '#60a5fa', fontWeight: 500 }}>
+                <div style={{ fontSize: 13, color: 'var(--secondary)', fontWeight: 500 }}>
                   {selected.email || '—'}
                 </div>
               </div>

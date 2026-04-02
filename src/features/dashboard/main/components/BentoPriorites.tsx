@@ -60,13 +60,13 @@ export function BentoPriorites({ todos, hasTodos, hasMoreTodos, todosCount }: Be
             </div>
           ))}
           {hasMoreTodos && (
-            <Link href="/tasks" className={styles.actionLink} style={{ textAlign: 'center', padding: '8px', color: '#3b82f6' }}>
+            <Link href="/tasks" className={styles.actionLink} style={{ textAlign: 'center', padding: '8px', color: 'var(--primary)' }}>
               Voir les {todosCount} tâches →
             </Link>
           )}
         </div>
       ) : (
-        <div style={{ padding: '32px', textAlign: 'center', color: '#22c55e', fontSize: '14px' }}>
+        <div style={{ padding: '32px', textAlign: 'center', color: 'var(--success)', fontSize: '14px' }}>
           Aucune action urgente — tout est sous contrôle.
         </div>
       )}

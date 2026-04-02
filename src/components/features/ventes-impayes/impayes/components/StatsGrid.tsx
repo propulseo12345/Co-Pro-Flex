@@ -14,8 +14,8 @@ export function StatsGrid({ activeCount, montantTotal, nbMiseEnDemeure, nbConten
   return (
     <div className={styles.statsGrid}>
       <div className={styles.statCard}>
-        <div className={styles.statIcon} style={{ background: '#fee2e2' }}>
-          <AlertTriangle size={24} style={{ color: '#991b1b' }} aria-hidden="true" />
+        <div className={styles.statIcon} style={{ background: 'var(--badge-danger-bg)' }}>
+          <AlertTriangle size={24} style={{ color: 'var(--danger)' }} aria-hidden="true" />
         </div>
         <div className={styles.statContent}>
           <h3 className={styles.statValue}>{activeCount}</h3>
@@ -24,8 +24,8 @@ export function StatsGrid({ activeCount, montantTotal, nbMiseEnDemeure, nbConten
       </div>
 
       <div className={styles.statCard}>
-        <div className={styles.statIcon} style={{ background: '#fef3c7' }}>
-          <Euro size={24} style={{ color: '#92400e' }} aria-hidden="true" />
+        <div className={styles.statIcon} style={{ background: 'var(--badge-warning-bg)' }}>
+          <Euro size={24} style={{ color: 'var(--warning)' }} aria-hidden="true" />
         </div>
         <div className={styles.statContent}>
           <h3 className={styles.statValue}>{montantTotal.toLocaleString('fr-FR')} €</h3>
@@ -34,8 +34,8 @@ export function StatsGrid({ activeCount, montantTotal, nbMiseEnDemeure, nbConten
       </div>
 
       <div className={styles.statCard}>
-        <div className={styles.statIcon} style={{ background: '#fee2e2' }}>
-          <FileText size={24} style={{ color: '#dc2626' }} aria-hidden="true" />
+        <div className={styles.statIcon} style={{ background: 'var(--badge-danger-bg)' }}>
+          <FileText size={24} style={{ color: 'var(--danger)' }} aria-hidden="true" />
         </div>
         <div className={styles.statContent}>
           <h3 className={styles.statValue}>{nbMiseEnDemeure}</h3>
@@ -44,8 +44,8 @@ export function StatsGrid({ activeCount, montantTotal, nbMiseEnDemeure, nbConten
       </div>
 
       <div className={styles.statCard}>
-        <div className={styles.statIcon} style={{ background: '#fce7f3' }}>
-          <Gavel size={24} style={{ color: '#9d174d' }} aria-hidden="true" />
+        <div className={styles.statIcon} style={{ background: 'var(--badge-purple-bg)' }}>
+          <Gavel size={24} style={{ color: 'var(--purple-600)' }} aria-hidden="true" />
         </div>
         <div className={styles.statContent}>
           <h3 className={styles.statValue}>{nbContentieux}</h3>

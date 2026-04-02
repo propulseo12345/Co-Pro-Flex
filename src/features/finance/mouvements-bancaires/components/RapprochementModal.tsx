@@ -136,7 +136,7 @@ export function RapprochementModal({
                       {suggestion.ecart > 0.01 && (
                         <div className={styles.infoRow}>
                           <span className={styles.infoLabel}>Écart</span>
-                          <span style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--warning)', fontSize: '13px', fontWeight: 600 }}>
                             {formatMontant(suggestion.ecart)}
                           </span>
                         </div>

@@ -15,8 +15,8 @@ export function VentesRecentesSection({ ventes }: VentesRecentesSectionProps) {
     <div className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
         <div className={styles.sectionTitleGroup}>
-          <div className={styles.sectionIconWrapper} style={{ background: '#4f46e520' }}>
-            <Home size={20} style={{ color: '#4f46e5' }} aria-hidden="true" />
+          <div className={styles.sectionIconWrapper} style={{ background: 'rgba(139, 92, 246, 0.12)' }}>
+            <Home size={20} style={{ color: 'var(--purple-500)' }} aria-hidden="true" />
           </div>
           <h2 className={styles.sectionTitle}>Ventes récentes</h2>
         </div>

@@ -118,12 +118,12 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
             {/* Total row */}
             <tr className={styles.totalRow}>
               <td className={styles.totalLabel} colSpan={3}>Total</td>
-              <td className={styles.cellTantiemes} style={{ fontSize: 15, color: '#22c55e' }}>
+              <td className={styles.cellTantiemes} style={{ fontSize: 15, color: 'var(--success)' }}>
                 {totalTantiemes.toLocaleString('fr-FR')}
               </td>
               {columnTotals.map((ct, idx) => {
                 const isComplete = ct.lotsWithWeight === ct.totalLots;
-                const color = isComplete ? '#22c55e' : '#f59e0b';
+                const color = isComplete ? 'var(--success)' : 'var(--warning)';
                 return (
                   <td key={keyColumns[idx].key_id} className={styles.keyCell}>
                     <div className={styles.keyValueWrap}>

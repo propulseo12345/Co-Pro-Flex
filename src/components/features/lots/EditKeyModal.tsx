@@ -92,14 +92,14 @@ export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating 
             border: '1px solid rgba(59, 130, 246, 0.15)',
             borderRadius: '8px',
             fontSize: '12px',
-            color: '#94a3b8',
+            color: 'var(--text-secondary)',
             lineHeight: '1.5',
           }}>
-            <strong style={{ color: '#60a5fa' }}>Lots couverts :</strong> {keyData.lots_with_weight_count}/{keyData.lots_count}
+            <strong style={{ color: 'var(--secondary)' }}>Lots couverts :</strong> {keyData.lots_with_weight_count}/{keyData.lots_count}
             <br />
-            <strong style={{ color: '#60a5fa' }}>Total poids :</strong> {keyData.total_weight.toLocaleString('fr-FR')}
+            <strong style={{ color: 'var(--secondary)' }}>Total poids :</strong> {keyData.total_weight.toLocaleString('fr-FR')}
             {!keyData.is_complete && (
-              <span style={{ color: '#fbbf24', marginLeft: 8 }}>
+              <span style={{ color: 'var(--warning)', marginLeft: 8 }}>
                 ⚠ {keyData.lots_count - keyData.lots_with_weight_count} lot(s) sans poids
               </span>
             )}
@@ -110,7 +110,7 @@ export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating 
           {onDelete && (
             <button
               className={styles.cancelBtn}
-              style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+              style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
               onClick={() => {
                 if (keyData && window.confirm(`Supprimer la clé "${keyData.name}" ? Cette action est irréversible.`)) {
                   onDelete(keyData.key_id).then(success => { if (success) onClose(); });

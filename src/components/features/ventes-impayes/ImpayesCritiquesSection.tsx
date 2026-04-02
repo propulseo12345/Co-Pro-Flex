@@ -25,8 +25,8 @@ export function ImpayesCritiquesSection({
     <div className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
         <div className={styles.sectionTitleGroup}>
-          <div className={styles.sectionIconWrapper} style={{ background: '#ef444420' }}>
-            <AlertTriangle size={20} style={{ color: '#ef4444' }} aria-hidden="true" />
+          <div className={styles.sectionIconWrapper} style={{ background: 'rgba(239, 68, 68, 0.12)' }}>
+            <AlertTriangle size={20} style={{ color: 'var(--danger)' }} aria-hidden="true" />
           </div>
           <h2 className={styles.sectionTitle}>Impayés critiques</h2>
         </div>

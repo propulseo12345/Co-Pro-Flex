@@ -36,7 +36,7 @@ export function BentoActivite({ activities, hasActivities }: BentoActiviteProps)
           ))}
         </div>
       ) : (
-        <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '14px' }}>
           Aucune activité récente
         </div>
       )}

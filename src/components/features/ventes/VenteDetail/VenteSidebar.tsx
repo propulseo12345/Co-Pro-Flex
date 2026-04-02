@@ -100,7 +100,7 @@ export function VenteSidebar({ vente, linkedOrdresService, onLinkOS }: VenteSide
           )}
           {vente.dateNotificationArt6 && (
             <div className={styles.infoItem}>
-              <CheckCircle2 size={14} style={{ color: '#10b981' }} aria-hidden="true" />
+              <CheckCircle2 size={14} style={{ color: 'var(--success)' }} aria-hidden="true" />
               <span>Notif. Art.6 : {formatDate(vente.dateNotificationArt6)}</span>
             </div>
           )}

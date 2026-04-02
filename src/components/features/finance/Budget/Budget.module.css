@@ -2818,7 +2818,7 @@
     min-width: 18px;
     height: 18px;
     padding: 0 4px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(var(--overlay-rgb), 0.2);
     border-radius: 9px;
     font-size: 10px;
     font-weight: 700;

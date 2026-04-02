@@ -225,7 +225,7 @@ export function AccessRightsManager({
                   className={`${styles.levelCard} ${selectedLevel === NiveauConfidentialite.PUBLIC ? styles.levelCardActive : ''}`}
                   onClick={() => handleLevelChange(NiveauConfidentialite.PUBLIC)}
                 >
-                  <div className={styles.levelIcon} style={{ backgroundColor: '#10B98115', color: '#10B981' }}>
+                  <div className={styles.levelIcon} style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--success)' }}>
                     <Globe size={24} />
                   </div>
                   <div className={styles.levelInfo}>
@@ -242,7 +242,7 @@ export function AccessRightsManager({
                   className={`${styles.levelCard} ${selectedLevel === NiveauConfidentialite.CS_ONLY ? styles.levelCardActive : ''}`}
                   onClick={() => handleLevelChange(NiveauConfidentialite.CS_ONLY)}
                 >
-                  <div className={styles.levelIcon} style={{ backgroundColor: '#F59E0B15', color: '#F59E0B' }}>
+                  <div className={styles.levelIcon} style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', color: 'var(--warning)' }}>
                     <Users size={24} />
                   </div>
                   <div className={styles.levelInfo}>
@@ -259,7 +259,7 @@ export function AccessRightsManager({
                   className={`${styles.levelCard} ${selectedLevel === NiveauConfidentialite.SYNDIC_ONLY ? styles.levelCardActive : ''}`}
                   onClick={() => handleLevelChange(NiveauConfidentialite.SYNDIC_ONLY)}
                 >
-                  <div className={styles.levelIcon} style={{ backgroundColor: '#EF444415', color: '#EF4444' }}>
+                  <div className={styles.levelIcon} style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', color: 'var(--danger)' }}>
                     <Lock size={24} />
                   </div>
                   <div className={styles.levelInfo}>
@@ -276,7 +276,7 @@ export function AccessRightsManager({
                   className={`${styles.levelCard} ${selectedLevel === NiveauConfidentialite.CONFIDENTIEL ? styles.levelCardActive : ''}`}
                   onClick={() => handleLevelChange(NiveauConfidentialite.CONFIDENTIEL)}
                 >
-                  <div className={styles.levelIcon} style={{ backgroundColor: '#8B5CF615', color: '#8B5CF6' }}>
+                  <div className={styles.levelIcon} style={{ backgroundColor: 'rgba(139, 92, 246, 0.08)', color: 'var(--purple-500)' }}>
                     <Shield size={24} />
                   </div>
                   <div className={styles.levelInfo}>

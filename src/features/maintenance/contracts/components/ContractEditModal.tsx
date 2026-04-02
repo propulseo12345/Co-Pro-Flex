@@ -66,7 +66,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
         display: 'inline-flex', alignItems: 'center', gap: 6,
     };
     const btnSubmit: React.CSSProperties = {
-        padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
+        padding: '8px 16px', background: 'var(--primary)', border: 'none', borderRadius: 8,
         color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
         fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6,
     };
@@ -80,7 +80,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
             <div style={modal} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
                 <div style={header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <FileText size={18} style={{ color: '#3b82f6' }} />
+                        <FileText size={18} style={{ color: 'var(--primary)' }} />
                         <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)' }}>Modifier le contrat</span>
                     </div>
                     <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
@@ -92,7 +92,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
                     {/* Libellé + Numéro */}
                     <div style={row}>
                         <div style={group}>
-                            <label style={lbl}>Libellé du contrat <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={lbl}>Libellé du contrat <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <input style={input} value={editForm.nom}
                                 onChange={e => onFormChange({ ...editForm, nom: e.target.value })} />
                         </div>
@@ -106,7 +106,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
                     {/* Type + Prestataire */}
                     <div style={row}>
                         <div style={group}>
-                            <label style={lbl}>Type de contrat <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={lbl}>Type de contrat <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <select style={input} value={editForm.type}
                                 onChange={e => onFormChange({ ...editForm, type: e.target.value as ContractType | '' })}>
                                 <option value="">— Sélectionner —</option>
@@ -167,7 +167,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
                     {/* Coût + Délai */}
                     <div style={row}>
                         <div style={group}>
-                            <label style={lbl}>Coût annuel (€) <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={lbl}>Coût annuel (€) <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <input type="number" step="0.01" style={input} value={editForm.coutAnnuel}
                                 onChange={e => onFormChange({ ...editForm, coutAnnuel: e.target.value })} />
                         </div>
@@ -183,7 +183,7 @@ export function ContractEditModal({ editForm, prestataires, onFormChange, onSave
                         <label style={checkLabel}>
                             <input type="checkbox" checked={editForm.taciteReconduction}
                                 onChange={e => onFormChange({ ...editForm, taciteReconduction: e.target.checked })}
-                                style={{ accentColor: '#3b82f6', width: 16, height: 16 }} />
+                                style={{ accentColor: 'var(--primary)', width: 16, height: 16 }} />
                             Tacite reconduction
                         </label>
                     </div>

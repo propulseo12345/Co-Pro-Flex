@@ -94,7 +94,7 @@ function AssuranceEditContent({ params }: { params: Promise<{ id: string }> }) {
 function LoadingFallback() {
     return (
         <div className="container" style={{ padding: '2rem', textAlign: 'center' }}>
-            <div style={{ display: 'inline-block', width: '20px', height: '20px', border: '3px solid rgba(0,0,0,0.1)', borderTopColor: '#10B981', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ display: 'inline-block', width: '20px', height: '20px', border: '3px solid rgba(0,0,0,0.1)', borderTopColor: 'var(--success)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
         </div>
     );
 }

@@ -110,8 +110,8 @@ export function ContractsFinanceView({
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         {[
           { label: 'CONTRATS ACTIFS', value: String(actifs), color: undefined },
-          { label: 'EXPIRÉS', value: String(expires), color: expires > 0 ? '#ef4444' : undefined },
-          { label: 'EXPIRENT < 90J', value: String(expirentBientot), color: expirentBientot > 0 ? '#f59e0b' : undefined },
+          { label: 'EXPIRÉS', value: String(expires), color: expires > 0 ? 'var(--danger)' : undefined },
+          { label: 'EXPIRENT < 90J', value: String(expirentBientot), color: expirentBientot > 0 ? 'var(--warning)' : undefined },
           { label: 'COÛT ANNUEL TOTAL', value: `${coutTotal.toLocaleString('fr-FR')} €`, color: undefined, mono: true },
           { label: 'PRESTATAIRES LIÉS', value: String(prestatairesCount), color: undefined },
         ].map((kpi, i) => (
@@ -220,10 +220,10 @@ export function ContractsFinanceView({
               const isPending = !!pendingRenewals[contrat.id];
               const domain = contrat.type || 'AUTRE';
               const domainColor = DOMAINE_COLORS[domain] || 'var(--text-tertiary)';
-              const dotColor = isPending ? '#3b82f6'
-                : contrat.statut === 'ACTIF' ? '#22c55e'
-                : contrat.statut === 'A_RENOUVELER' ? '#f59e0b'
-                : contrat.statut === 'EXPIRE' ? '#ef4444' : 'var(--text-tertiary)';
+              const dotColor = isPending ? 'var(--primary)'
+                : contrat.statut === 'ACTIF' ? 'var(--success)'
+                : contrat.statut === 'A_RENOUVELER' ? 'var(--warning)'
+                : contrat.statut === 'EXPIRE' ? 'var(--danger)' : 'var(--text-tertiary)';
 
               return (
                 <tr key={contrat.id} onClick={() => onVoirDetails(contrat)}>
@@ -238,7 +238,7 @@ export function ContractsFinanceView({
                       {DOMAINE_LABELS[domain] || domain}
                     </span>
                   </td>
-                  <td style={{ color: isExpiring ? '#f59e0b' : 'var(--text-secondary)' }}>
+                  <td style={{ color: isExpiring ? 'var(--warning)' : 'var(--text-secondary)' }}>
                     {new Date(contrat.dateFin).toLocaleDateString('fr-FR')}
                   </td>
                   <td className={styles.tdRight} style={{
@@ -251,7 +251,7 @@ export function ContractsFinanceView({
                   <td>
                     {isPending ? (
                       <span className={`${styles.badge}`} style={{
-                        background: 'rgba(59,130,246,0.1)', color: '#60a5fa',
+                        background: 'rgba(59,130,246,0.1)', color: 'var(--secondary)',
                       }}>
                         En attente
                       </span>
@@ -264,7 +264,7 @@ export function ContractsFinanceView({
                   <td>
                     {isPending ? (
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button className={styles.actionLink} style={{ color: '#22c55e' }} onClick={(e) => {
+                        <button className={styles.actionLink} style={{ color: 'var(--success)' }} onClick={(e) => {
                           e.stopPropagation();
                           onConfirmerRenouvellement?.(contrat.id);
                         }}>

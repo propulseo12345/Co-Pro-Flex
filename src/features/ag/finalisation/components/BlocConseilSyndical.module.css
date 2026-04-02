@@ -201,5 +201,5 @@
 }
 
 /* Dark mode */
-[data-theme="dark"] .coproItem:hover { background: rgba(255, 255, 255, 0.05); }
-[data-theme="dark"] .selectedItem    { background: rgba(255, 255, 255, 0.05); }
+[data-theme="dark"] .coproItem:hover { background: rgba(var(--overlay-rgb), 0.05); }
+[data-theme="dark"] .selectedItem    { background: rgba(var(--overlay-rgb), 0.05); }

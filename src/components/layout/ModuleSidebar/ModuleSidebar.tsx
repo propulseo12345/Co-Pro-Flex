@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { Settings, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { getActiveModule } from '@/lib/config/navigation';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSidebar } from '@/providers/SidebarContext';
 import styles from './ModuleSidebar.module.css';
 
@@ -47,7 +46,6 @@ export default function ModuleSidebar() {
       </nav>
 
       <div className={styles.footer}>
-        {!collapsed && <ThemeToggle />}
         <Link href="/settings" className={styles.settingsLink} aria-label="Paramètres">
           <Settings size={16} />
         </Link>

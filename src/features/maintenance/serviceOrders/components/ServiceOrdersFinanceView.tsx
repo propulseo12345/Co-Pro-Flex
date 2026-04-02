@@ -8,17 +8,17 @@ import styles from '@/app/(dashboard)/maintenance/maintenance.module.css';
 
 const STATUT_CONFIG: Record<string, { label: string; color: string; badgeClass: string }> = {
   BROUILLON: { label: 'Brouillon', color: 'var(--text-tertiary)', badgeClass: 'badgeGray' },
-  A_ENVOYER: { label: 'À envoyer', color: '#A78BFA', badgeClass: 'badgePurple' },
-  ENVOYE: { label: 'Envoyé', color: '#A78BFA', badgeClass: 'badgePurple' },
-  EN_ATTENTE_PRESTATAIRE: { label: 'En attente', color: '#FBBF24', badgeClass: 'badgeAmber' },
-  REFUSE: { label: 'Refusé', color: '#EF4444', badgeClass: 'badgeRed' },
-  INTERVENTION_PROGRAMMEE: { label: 'Programmé', color: '#3b82f6', badgeClass: 'badgeBlue' },
-  EN_COURS: { label: 'En cours', color: '#FBBF24', badgeClass: 'badgeAmber' },
-  INTERVENTION_REALISEE: { label: 'Réalisé', color: '#34D399', badgeClass: 'badgeGreen' },
-  FACTURE: { label: 'Facturé', color: '#60A5FA', badgeClass: 'badgeBlue' },
-  PAYE: { label: 'Payé', color: '#34D399', badgeClass: 'badgeGreen' },
-  CLOTURE: { label: 'Clôturé', color: '#8892a4', badgeClass: 'badgeGray' },
-  ANNULE: { label: 'Annulé', color: '#EF4444', badgeClass: 'badgeRed' },
+  A_ENVOYER: { label: 'À envoyer', color: 'var(--purple-500)', badgeClass: 'badgePurple' },
+  ENVOYE: { label: 'Envoyé', color: 'var(--purple-500)', badgeClass: 'badgePurple' },
+  EN_ATTENTE_PRESTATAIRE: { label: 'En attente', color: 'var(--warning)', badgeClass: 'badgeAmber' },
+  REFUSE: { label: 'Refusé', color: 'var(--danger)', badgeClass: 'badgeRed' },
+  INTERVENTION_PROGRAMMEE: { label: 'Programmé', color: 'var(--primary)', badgeClass: 'badgeBlue' },
+  EN_COURS: { label: 'En cours', color: 'var(--warning)', badgeClass: 'badgeAmber' },
+  INTERVENTION_REALISEE: { label: 'Réalisé', color: 'var(--success)', badgeClass: 'badgeGreen' },
+  FACTURE: { label: 'Facturé', color: 'var(--secondary)', badgeClass: 'badgeBlue' },
+  PAYE: { label: 'Payé', color: 'var(--success)', badgeClass: 'badgeGreen' },
+  CLOTURE: { label: 'Clôturé', color: 'var(--text-secondary)', badgeClass: 'badgeGray' },
+  ANNULE: { label: 'Annulé', color: 'var(--danger)', badgeClass: 'badgeRed' },
 };
 
 const WORKFLOW_STEPS = ['BROUILLON', 'ENVOYE', 'EN_ATTENTE_PRESTATAIRE', 'INTERVENTION_PROGRAMMEE', 'EN_COURS', 'INTERVENTION_REALISEE', 'CLOTURE'];
@@ -106,10 +106,10 @@ export function ServiceOrdersFinanceView({
         {[
           { label: 'TOTAL', value: String(stats.total), filter: 'TOUS' },
           { label: 'BROUILLONS', value: String(stats.brouillons), color: 'var(--text-tertiary)', filter: 'draft' },
-          { label: 'EN ATTENTE', value: String(stats.enAttentePrestataire), color: '#fbbf24', filter: 'pending' },
-          { label: 'PROGRAMMÉS', value: String(stats.interventionProgrammee), color: '#60a5fa', filter: 'scheduled' },
-          { label: 'RÉALISÉS', value: String(stats.interventionRealisee), color: '#22c55e', filter: 'completed' },
-          { label: 'CLÔTURÉS', value: String(stats.clotures), color: '#a78bfa', filter: 'closed' },
+          { label: 'EN ATTENTE', value: String(stats.enAttentePrestataire), color: 'var(--warning)', filter: 'pending' },
+          { label: 'PROGRAMMÉS', value: String(stats.interventionProgrammee), color: 'var(--secondary)', filter: 'scheduled' },
+          { label: 'RÉALISÉS', value: String(stats.interventionRealisee), color: 'var(--success)', filter: 'completed' },
+          { label: 'CLÔTURÉS', value: String(stats.clotures), color: 'var(--purple-500)', filter: 'closed' },
         ].map((kpi) => {
           const isActive = statutFilter === kpi.filter;
           return (
@@ -162,7 +162,7 @@ export function ServiceOrdersFinanceView({
             const isActive = selected?.id === os.id;
             const cfg = STATUT_CONFIG[os.statut] || { label: os.statut, color: 'var(--text-tertiary)', badgeClass: 'badgeGray' };
             const avatarBg = os.urgence ? 'rgba(239,68,68,0.15)' : `${cfg.color}22`;
-            const avatarColor = os.urgence ? '#f87171' : cfg.color;
+            const avatarColor = os.urgence ? 'var(--danger)' : cfg.color;
             const avatarIcon = os.urgence ? '!' : os.statut === 'CLOTURE' ? '◉'
               : cfg.badgeClass === 'badgeGreen' ? '✓' : cfg.badgeClass === 'badgeAmber' ? '⏳' : '→';
 
@@ -179,11 +179,11 @@ export function ServiceOrdersFinanceView({
                   <div className={styles.splitItemName}>{os.numero || '—'} · {os.titre || '—'}</div>
                   <div className={styles.splitItemMeta}>
                     {os.fournisseurNom}
-                    {os.urgence && <span style={{ color: '#ef4444', marginLeft: 8 }}>Urgence</span>}
+                    {os.urgence && <span style={{ color: 'var(--danger)', marginLeft: 8 }}>Urgence</span>}
                   </div>
                 </div>
                 {os.montantEstime > 0 && (
-                  <span className={styles.splitItemAmount} style={{ color: '#ef4444' }}>
+                  <span className={styles.splitItemAmount} style={{ color: 'var(--danger)' }}>
                     -{os.montantEstime.toLocaleString('fr-FR')} €
                   </span>
                 )}
@@ -238,7 +238,7 @@ export function ServiceOrdersFinanceView({
             <div className={styles.detailStats}>
               <div className={styles.detailStatCard}>
                 <div className={styles.detailStatValue} style={{
-                  color: '#ef4444',
+                  color: 'var(--danger)',
                   fontFamily: "'SF Mono', 'Fira Code', monospace",
                   fontVariantNumeric: 'tabular-nums',
                 }}>
@@ -253,7 +253,7 @@ export function ServiceOrdersFinanceView({
                 <div className={styles.detailStatLabel}>Statut</div>
               </div>
               <div className={styles.detailStatCard}>
-                <div className={styles.detailStatValue} style={{ color: selected.urgence ? '#ef4444' : 'var(--text-main)' }}>
+                <div className={styles.detailStatValue} style={{ color: selected.urgence ? 'var(--danger)' : 'var(--text-main)' }}>
                   {selected.urgence ? 'Urgent' : 'Normal'}
                 </div>
                 <div className={styles.detailStatLabel}>Priorité</div>
@@ -262,7 +262,7 @@ export function ServiceOrdersFinanceView({
 
             {selected.description && (
               <div className={`${styles.descriptionBox} ${selected.urgence ? styles.descriptionBoxRed : styles.descriptionBoxBlue}`}>
-                <div className={styles.descriptionBoxLabel} style={{ color: selected.urgence ? '#f87171' : '#60a5fa' }}>
+                <div className={styles.descriptionBoxLabel} style={{ color: selected.urgence ? 'var(--danger)' : 'var(--secondary)' }}>
                   Description
                 </div>
                 <div className={styles.descriptionBoxText}>{selected.description}</div>
@@ -279,7 +279,7 @@ export function ServiceOrdersFinanceView({
               {onDelete && (
                 <button
                   className={topBarStyles.btnGhost}
-                  style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                  style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
                   onClick={() => selected.id && onDelete(selected.id)}
                 >
                   Supprimer

@@ -219,16 +219,16 @@
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(var(--overlay-rgb), 0.2);
   color: white;
 }
 
 .badgeQuorum { font-size: 0.875rem; }
 
 /* Badge status variants */
-.badgeDraft { background-color: rgba(255, 255, 255, 0.2); }
+.badgeDraft { background-color: rgba(var(--overlay-rgb), 0.2); }
 .badgeConvoked { background-color: var(--primary-light); color: var(--primary); }
-.badgeReady { background-color: rgba(255, 255, 255, 0.25); color: white; }
+.badgeReady { background-color: rgba(var(--overlay-rgb), 0.25); color: white; }
 .badgeClosed { background-color: var(--bg-secondary); color: var(--text-secondary); }
 .badgePvGenerated { background-color: rgba(139, 92, 246, 0.2); color: var(--purple-500); }
 .badgePvSigned { background-color: rgba(20, 184, 166, 0.2); color: var(--success); }

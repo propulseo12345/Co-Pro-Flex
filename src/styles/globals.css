@@ -23,6 +23,20 @@
   --info: #60A5FA; /* Blue-400 */
   --info-light: rgba(96, 165, 250, 0.15);
 
+  /* Overlay base (white in dark, black in light) */
+  --overlay-rgb: 255, 255, 255;
+
+  /* Finance accent colors (dark) */
+  --finance-accent: #adc6ff;
+  --finance-accent-bg: rgba(173, 198, 255, 0.1);
+  --finance-success: #34d399;
+  --finance-success-bg: rgba(52, 211, 153, 0.1);
+  --finance-warning: #ffb786;
+  --finance-warning-bg: rgba(255, 183, 134, 0.1);
+  --finance-danger: #ffb4ab;
+  --finance-danger-bg: rgba(255, 180, 171, 0.1);
+  --finance-track: rgba(148, 163, 184, 0.06);
+
   /* Colors - Neutral (dark mode — nav V1) */
   --background: #0f1117; /* Deep dark blue */
   --bg-secondary: #131620; /* Sidebar bg */
@@ -833,6 +847,20 @@ textarea:focus-visible,
   --glow-primary: none;
   --glow-success: none;
   --glow-warning: none;
+
+  /* Overlay base (black in light) */
+  --overlay-rgb: 0, 0, 0;
+
+  /* Finance accent colors (light — toned down) */
+  --finance-accent: #4a72c0;
+  --finance-accent-bg: rgba(74, 114, 192, 0.1);
+  --finance-success: #3d8f5e;
+  --finance-success-bg: rgba(61, 143, 94, 0.1);
+  --finance-warning: #c08040;
+  --finance-warning-bg: rgba(192, 128, 64, 0.1);
+  --finance-danger: #c45555;
+  --finance-danger-bg: rgba(196, 85, 85, 0.1);
+  --finance-track: rgba(0, 0, 0, 0.06);
 
   /* Sidebar — light version */
   --sidebar-nav-bg: #fffefa;

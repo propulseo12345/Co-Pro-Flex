@@ -51,7 +51,7 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: var(--radius-lg);
   font-size: 1rem;
   color: var(--text-secondary);
@@ -219,7 +219,7 @@
 .voteBar {
   height: 60px;
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   overflow: hidden;
   position: relative;
 }
@@ -278,7 +278,7 @@
   align-items: center;
   gap: var(--space-xl);
   padding: var(--space-lg) var(--space-xl);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: var(--radius-xl);
   border: 2px solid var(--border);
 }
@@ -343,7 +343,7 @@
   font-weight: 700;
   color: var(--text-main);
   padding: var(--space-md) var(--space-lg);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   border-radius: var(--radius-lg);
 }
 
@@ -432,7 +432,7 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -443,7 +443,7 @@
 }
 
 .controlButton:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(var(--overlay-rgb), 0.2);
   transform: scale(1.05);
 }
 

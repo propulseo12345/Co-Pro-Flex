@@ -87,14 +87,14 @@ export default function ComptabilitePage() {
   const isOpen = page.openPeriod.status === 'open';
 
   const kpis: FinanceKpi[] = [
-    { label: 'Total Débit', value: formatCurrency(page.totalDebit), color: '#ef4444' },
-    { label: 'Total Crédit', value: formatCurrency(page.totalCredit), color: '#22c55e' },
+    { label: 'Total Débit', value: formatCurrency(page.totalDebit), color: 'var(--danger)' },
+    { label: 'Total Crédit', value: formatCurrency(page.totalCredit), color: 'var(--success)' },
     {
       label: 'Écritures',
       value: String(page.filteredOperations.length),
-      color: '#3b82f6',
+      color: 'var(--primary)',
       trend: (
-        <span style={{ color: '#22c55e' }}>
+        <span style={{ color: 'var(--success)' }}>
           <CheckCircle size={12} /> Toutes comptabilisées
         </span>
       ),
@@ -102,9 +102,9 @@ export default function ComptabilitePage() {
     {
       label: 'État balance',
       value: page.isBalanced ? 'Équilibrée' : 'Déséquilibrée',
-      color: page.isBalanced ? '#22c55e' : '#ef4444',
+      color: page.isBalanced ? 'var(--success)' : 'var(--danger)',
       trend: !page.isBalanced ? (
-        <span style={{ color: '#ef4444' }}>
+        <span style={{ color: 'var(--danger)' }}>
           <AlertCircle size={12} /> Vérifier les écritures
         </span>
       ) : undefined,

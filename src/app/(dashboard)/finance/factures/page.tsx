@@ -30,7 +30,7 @@ export default function FacturesPage() {
 
   if (page.isLoading) {
     return (
-      <div className={styles.page} style={{ color: '#94a3b8', textAlign: 'center' }}>
+      <div className={styles.page} style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
         Chargement des factures...
       </div>
     );
@@ -55,9 +55,9 @@ export default function FacturesPage() {
       />
       <FinanceKpiStrip
         items={[
-          { label: 'Factures', value: String(page.kpiData.nombreFactures), color: '#3b82f6' },
-          { label: 'Total payé', value: formatCurrency(page.montantPaye), color: '#22c55e' },
-          { label: 'En retard', value: formatCurrency(page.kpiData.montantEchu), color: '#ef4444' },
+          { label: 'Factures', value: String(page.kpiData.nombreFactures), color: 'var(--primary)' },
+          { label: 'Total payé', value: formatCurrency(page.montantPaye), color: 'var(--success)' },
+          { label: 'En retard', value: formatCurrency(page.kpiData.montantEchu), color: 'var(--danger)' },
           { label: 'Cette semaine', value: `${page.kpiData.echeancesSemaine} éch.` },
         ] satisfies FinanceKpi[]}
       />

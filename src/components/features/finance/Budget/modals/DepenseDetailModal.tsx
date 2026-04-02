@@ -161,7 +161,7 @@ export function DepenseDetailModal({
             <div className={`${styles.attachmentCard} ${styles.attachmentPresent}`}>
               <Paperclip size={16} color="#4ade80" />
               <div className={styles.attachmentInfo}>
-                <div className={styles.attachmentTitle} style={{ color: '#4ade80' }}>Pièce justificative attachée</div>
+                <div className={styles.attachmentTitle} style={{ color: 'var(--success)' }}>Pièce justificative attachée</div>
                 <div className={styles.attachmentSub}>
                   {selectedDepense.pieceJointeDetails?.fichierNom || selectedDepense.pieceJointe}
                 </div>
@@ -171,7 +171,7 @@ export function DepenseDetailModal({
             <div className={`${styles.attachmentCard} ${styles.attachmentMissing}`}>
               <Paperclip size={16} color="#fbbf24" />
               <div className={styles.attachmentInfo}>
-                <div className={styles.attachmentTitle} style={{ color: '#fbbf24' }}>Aucune pièce justificative</div>
+                <div className={styles.attachmentTitle} style={{ color: 'var(--warning)' }}>Aucune pièce justificative</div>
                 <div className={styles.attachmentSub}>Une facture est obligatoire pour valider cette dépense.</div>
               </div>
             </div>

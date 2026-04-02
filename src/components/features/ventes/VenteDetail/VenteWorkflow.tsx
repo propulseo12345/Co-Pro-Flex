@@ -47,7 +47,7 @@ export function VenteWorkflow({ vente, documents, onAdvanceWorkflow }: VenteWork
 
                 {isCompleted && (
                   <div className={styles.stepDetails}>
-                    <CheckCircle2 size={14} style={{ color: '#10b981' }} aria-hidden="true" />
+                    <CheckCircle2 size={14} style={{ color: 'var(--success)' }} aria-hidden="true" />
                     <span>Étape complétée</span>
                   </div>
                 )}
@@ -83,7 +83,7 @@ export function VenteWorkflow({ vente, documents, onAdvanceWorkflow }: VenteWork
 
                 {isNext && (
                   <div className={styles.stepDetails}>
-                    <Clock size={14} style={{ color: '#6b7280' }} aria-hidden="true" />
+                    <Clock size={14} style={{ color: 'var(--text-tertiary)' }} aria-hidden="true" />
                     <span>En attente</span>
                   </div>
                 )}

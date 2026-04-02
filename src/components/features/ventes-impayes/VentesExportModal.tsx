@@ -64,8 +64,8 @@ export function VentesExportModal({
                   onClick={() => onExport('pdf')}
                   disabled={exportLoading}
                 >
-                  <div className={styles.exportIcon} style={{ background: '#fee2e2' }}>
-                    <FileText size={24} style={{ color: '#dc2626' }} aria-hidden="true" />
+                  <div className={styles.exportIcon} style={{ background: 'var(--badge-danger-bg)' }}>
+                    <FileText size={24} style={{ color: 'var(--danger)' }} aria-hidden="true" />
                   </div>
                   <div className={styles.exportInfo}>
                     <h4>Export PDF</h4>
@@ -78,8 +78,8 @@ export function VentesExportModal({
                   onClick={() => onExport('excel')}
                   disabled={exportLoading}
                 >
-                  <div className={styles.exportIcon} style={{ background: '#d1fae5' }}>
-                    <FileSpreadsheet size={24} style={{ color: '#059669' }} aria-hidden="true" />
+                  <div className={styles.exportIcon} style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
+                    <FileSpreadsheet size={24} style={{ color: 'var(--success)' }} aria-hidden="true" />
                   </div>
                   <div className={styles.exportInfo}>
                     <h4>Export Excel</h4>

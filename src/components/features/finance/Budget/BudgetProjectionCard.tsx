@@ -57,13 +57,13 @@ export function BudgetProjectionCard({
       <div className={styles.stats}>
         <div className={styles.stat}>
           <div className={styles.statLabel}>Projection totale</div>
-          <div className={styles.statValue} style={{ color: '#3b82f6' }}>
+          <div className={styles.statValue} style={{ color: 'var(--primary)' }}>
             {projectedYearEnd.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
           </div>
         </div>
         <div className={styles.stat}>
           <div className={styles.statLabel}>Écart vs budget</div>
-          <div className={styles.statValue} style={{ color: isWithinBudget ? '#22c55e' : '#ef4444' }}>
+          <div className={styles.statValue} style={{ color: isWithinBudget ? 'var(--success)' : 'var(--danger)' }}>
             {projectedDifference >= 0 ? '-' : '+'}{Math.abs(projectedDifference).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €
           </div>
         </div>
@@ -75,7 +75,7 @@ export function BudgetProjectionCard({
         </div>
         <div className={styles.stat}>
           <div className={styles.statLabel}>Fiabilité</div>
-          <div className={styles.statValue} style={{ color: fiabiliteNiveau === 'bonne' ? '#22c55e' : fiabiliteNiveau === 'faible' ? '#f59e0b' : '#e2e8f0' }}>
+          <div className={styles.statValue} style={{ color: fiabiliteNiveau === 'bonne' ? 'var(--success)' : fiabiliteNiveau === 'faible' ? 'var(--warning)' : 'var(--text-main)' }}>
             {fiabiliteLabels[fiabiliteNiveau]}
           </div>
         </div>

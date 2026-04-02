@@ -232,7 +232,7 @@
 }
 
 .actionsBtn:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--overlay-rgb), 0.04);
 }
 
 /* --- Maintenance card --- */
@@ -289,7 +289,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  color: rgba(255, 255, 255, 0.04);
+  color: rgba(var(--overlay-rgb), 0.04);
   transition: transform 0.5s ease;
 }
 

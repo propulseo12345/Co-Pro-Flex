@@ -3,8 +3,8 @@
 /* ============================== */
 .sidebar {
   width: 240px;
-  background: var(--sidebar-nav-bg, #0f1219);
-  border-right: 1px solid var(--border-subtle, #1e293b);
+  background: var(--sidebar-nav-bg);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -22,7 +22,7 @@
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: var(--border-subtle, #1e293b);
+  background: var(--border-subtle);
   border-radius: 2px;
 }
 
@@ -35,7 +35,7 @@
 /* ============================== */
 .logo {
   padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--border-subtle, #1e293b);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -53,7 +53,7 @@
 .logoIcon {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -72,19 +72,19 @@
 .logoTitle {
   font-weight: 700;
   font-size: 15px;
-  color: var(--nav-text, #e2e8f0);
+  color: var(--nav-text);
 }
 
 .logoSub {
   font-size: 10px;
-  color: var(--nav-text-muted, #64748b);
+  color: var(--nav-text-muted);
   margin-top: 1px;
 }
 
 .collapseBtn {
   background: none;
   border: none;
-  color: var(--nav-text-muted, #64748b);
+  color: var(--nav-text-muted);
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -93,8 +93,8 @@
 }
 
 .collapseBtn:hover {
-  color: var(--nav-text, #e2e8f0);
-  background: var(--bg-surface, #1e293b);
+  color: var(--nav-text);
+  background: var(--bg-surface);
 }
 
 /* ============================== */
@@ -111,7 +111,7 @@
   align-items: center;
   gap: 10px;
   padding: 9px 16px;
-  color: var(--nav-text-muted, #8892a4);
+  color: var(--nav-text-muted);
   font-size: 13px;
   text-decoration: none;
   border-left: 3px solid transparent;
@@ -119,19 +119,19 @@
 }
 
 .navItem:hover {
-  background: rgba(30, 41, 59, 0.3);
-  color: var(--nav-text, #c8cfd8);
+  background: var(--surface-hover);
+  color: var(--nav-text);
 }
 
 .navItemActive {
   background: rgba(59, 130, 246, 0.06);
-  border-left-color: var(--nav-accent, #3b82f6);
-  color: var(--nav-accent, #60a5fa);
+  border-left-color: var(--nav-accent);
+  color: var(--nav-accent);
   font-weight: 500;
 }
 
 .navItemActive:hover {
-  color: var(--nav-accent, #60a5fa);
+  color: var(--nav-accent);
 }
 
 .navIcon {
@@ -150,7 +150,7 @@
 .footer {
   margin-top: auto;
   padding: 8px 12px 12px;
-  border-top: 1px solid var(--border-subtle, #1e293b);
+  border-top: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
 
@@ -159,7 +159,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px 8px;
-  color: var(--nav-text-muted, #64748b);
+  color: var(--nav-text-muted);
   font-size: 12px;
   cursor: pointer;
   border-radius: 6px;
@@ -171,13 +171,13 @@
 }
 
 .footerItem:hover {
-  background: var(--bg-surface, #1e293b);
-  color: var(--nav-text, #94a3b8);
+  background: var(--bg-surface);
+  color: var(--nav-text);
 }
 
 .footerDivider {
   height: 1px;
-  background: var(--border-subtle, #1e293b);
+  background: var(--border-subtle);
   margin: 4px 0;
 }
 
@@ -191,14 +191,14 @@
 }
 
 .userInfo:hover {
-  background: var(--bg-surface, #1e293b);
+  background: var(--bg-surface);
 }
 
 .avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -214,7 +214,7 @@
 
 .userName {
   font-size: 12px;
-  color: var(--nav-text, #e2e8f0);
+  color: var(--nav-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -222,7 +222,7 @@
 
 .userRole {
   font-size: 10px;
-  color: var(--nav-text-muted, #64748b);
+  color: var(--nav-text-muted);
 }
 
 /* ============================== */

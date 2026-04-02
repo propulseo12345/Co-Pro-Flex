@@ -1,8 +1,9 @@
 'use client';
 
 /**
- * ThemeToggle - Désactivé (application dark-only)
- * @deprecated L'application n'utilise plus de toggle de thème
+ * ThemeToggle — Le toggle de thème est intégré directement
+ * dans UnifiedSidebar et GestionnaireSidebar.
+ * Ce composant n'est plus utilisé.
  */
 export default function ThemeToggle() {
   return null;

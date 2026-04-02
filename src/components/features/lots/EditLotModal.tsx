@@ -125,7 +125,7 @@ export function EditLotModal({ lot, onClose, onUpdate, onDelete, isMutating, own
             className={styles.cancelBtn}
             onClick={handleDelete}
             disabled={isMutating}
-            style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+            style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
           >
             Supprimer
           </button>

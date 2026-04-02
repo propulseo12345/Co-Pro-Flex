@@ -141,9 +141,9 @@ export function PortefeuilleSummary({ kpis, coproprietes }: PortefeuilleSummaryP
               {kpis.totalFacturesRetard} intervention{kpis.totalFacturesRetard > 1 ? 's' : ''} en cours sur l&apos;ensemble du parc immobilier.
             </p>
             <div className={styles.maintenanceAvatars}>
-              <div className={styles.maintenanceAvatar} style={{ background: 'rgba(173, 198, 255, 0.2)', color: '#adc6ff' }}>JD</div>
+              <div className={styles.maintenanceAvatar} style={{ background: 'rgba(173, 198, 255, 0.2)', color: 'var(--secondary)' }}>JD</div>
               <div className={styles.maintenanceAvatar} style={{ background: 'rgba(255, 183, 134, 0.2)', color: '#ffb786' }}>ML</div>
-              <div className={styles.maintenanceAvatar} style={{ background: '#33343b', color: '#94a3b8' }}>+4</div>
+              <div className={styles.maintenanceAvatar} style={{ background: '#33343b', color: 'var(--text-secondary)' }}>+4</div>
             </div>
           </div>
           <Wrench size={64} className={styles.maintenanceBg} />
@@ -165,7 +165,7 @@ export function PortefeuilleSummary({ kpis, coproprietes }: PortefeuilleSummaryP
               </div>
             ))}
             {prochaines.length === 0 && (
-              <p style={{ fontSize: 12, color: '#64748b' }}>Aucune AG programmee</p>
+              <p style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Aucune AG programmee</p>
             )}
           </div>
         </div>

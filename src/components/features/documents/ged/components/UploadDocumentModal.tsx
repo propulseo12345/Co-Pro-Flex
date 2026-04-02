@@ -288,7 +288,7 @@ export function UploadDocumentModal({
 }
 
 function FileIcon({ type }: { type: string }) {
-  if (type.includes('pdf')) return <FileText size={16} style={{ color: '#EF4444' }} />;
+  if (type.includes('pdf')) return <FileText size={16} style={{ color: 'var(--danger)' }} />;
   if (type.includes('image')) return <Image size={16} style={{ color: '#84CC16' }} />;
-  return <File size={16} style={{ color: '#6B7280' }} />;
+  return <File size={16} style={{ color: 'var(--text-tertiary)' }} />;
 }

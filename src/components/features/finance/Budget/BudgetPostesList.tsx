@@ -62,7 +62,7 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectDepense 
                 </span>
               </span>
               <span className={styles.rowPct} style={{ color }}>{pct.toFixed(1)}%</span>
-              <span className={styles.rowRest} style={{ color: isOver ? '#f87171' : isConsumed ? '#22c55e' : '#64748b' }}>
+              <span className={styles.rowRest} style={{ color: isOver ? 'var(--danger)' : isConsumed ? 'var(--success)' : 'var(--text-tertiary)' }}>
                 {isOver ? `-${Math.abs(rest).toLocaleString('fr-FR')}` : rest.toLocaleString('fr-FR')} €
               </span>
             </div>
@@ -76,11 +76,11 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectDepense 
                   </div>
                   <div className={styles.panelStat}>
                     <span className={styles.panelStatLabel}>Consommé</span>
-                    <span className={styles.panelStatValue} style={{ color: '#f59e0b' }}>{poste.consomme.toLocaleString('fr-FR')} €</span>
+                    <span className={styles.panelStatValue} style={{ color: 'var(--warning)' }}>{poste.consomme.toLocaleString('fr-FR')} €</span>
                   </div>
                   <div className={styles.panelStat}>
                     <span className={styles.panelStatLabel}>Restant</span>
-                    <span className={styles.panelStatValue} style={{ color: isOver ? '#f87171' : '#22c55e' }}>
+                    <span className={styles.panelStatValue} style={{ color: isOver ? 'var(--danger)' : 'var(--success)' }}>
                       {rest.toLocaleString('fr-FR')} €
                     </span>
                   </div>

@@ -197,7 +197,7 @@ export function NewFactureModal({ form, postesBudget, suppliers = [], createErro
             />
             {/* Avertissement non-bloquant si pas de PJ */}
             {(!form.piecesJointes || form.piecesJointes.length === 0) && (
-              <div className={styles.warningMessage} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', backgroundColor: 'var(--color-warning-bg, #fef3c7)', borderRadius: '0.375rem', color: 'var(--color-warning-text, #92400e)', fontSize: '0.875rem' }}>
+              <div className={styles.warningMessage} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', backgroundColor: 'var(--badge-warning-bg)', borderRadius: '0.375rem', color: 'var(--color-warning-text, #92400e)', fontSize: '0.875rem' }}>
                 <AlertCircle size={14} aria-hidden="true" style={{ flexShrink: 0 }} />
                 <span>Recommandé : joindre un justificatif (PDF, image…) pour cette facture</span>
               </div>

@@ -68,7 +68,7 @@ export function ExportModal({
                 </button>
 
                 <button className={styles.exportOption} onClick={() => onExport('excel')} disabled={isLoading}>
-                  <div className={styles.exportIcon} style={{ background: '#dcfce7', color: '#16a34a' }}>
+                  <div className={styles.exportIcon} style={{ background: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)' }}>
                     <FileSpreadsheet size={32} aria-hidden="true" />
                   </div>
                   <div className={styles.exportLabel}>

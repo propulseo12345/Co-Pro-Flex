@@ -362,9 +362,9 @@ export function SignDocumentModal({ document, onClose, onSign }: SignDocumentMod
                     gap: '0.5rem',
                     padding: '0.5rem 1rem',
                     cursor: 'pointer',
-                    background: modeSignature === 'electronique' ? '#dbeafe' : 'transparent',
+                    background: modeSignature === 'electronique' ? 'var(--badge-info-bg)' : 'transparent',
                     borderRadius: '6px',
-                    border: modeSignature === 'electronique' ? '1px solid #3b82f6' : '1px solid transparent'
+                    border: modeSignature === 'electronique' ? '1px solid var(--primary)' : '1px solid transparent'
                   }}
                 >
                   <PenTool size={16} aria-hidden="true" />
@@ -379,9 +379,9 @@ export function SignDocumentModal({ document, onClose, onSign }: SignDocumentMod
                     gap: '0.5rem',
                     padding: '0.5rem 1rem',
                     cursor: 'pointer',
-                    background: modeSignature === 'manuscrite' ? '#dbeafe' : 'transparent',
+                    background: modeSignature === 'manuscrite' ? 'var(--badge-info-bg)' : 'transparent',
                     borderRadius: '6px',
-                    border: modeSignature === 'manuscrite' ? '1px solid #3b82f6' : '1px solid transparent'
+                    border: modeSignature === 'manuscrite' ? '1px solid var(--primary)' : '1px solid transparent'
                   }}
                 >
                   <Upload size={16} aria-hidden="true" />
@@ -471,11 +471,11 @@ export function SignDocumentModal({ document, onClose, onSign }: SignDocumentMod
                       />
                     ) : (
                       <>
-                        <Upload size={32} style={{ color: '#9ca3af' }} aria-hidden="true" />
-                        <span style={{ fontSize: '0.938rem', color: '#6b7280' }}>
+                        <Upload size={32} style={{ color: 'var(--text-secondary)' }} aria-hidden="true" />
+                        <span style={{ fontSize: '0.938rem', color: 'var(--text-tertiary)' }}>
                           Cliquez pour importer une signature
                         </span>
-                        <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                           PNG ou JPG, max 2 Mo
                         </span>
                       </>

@@ -23,8 +23,8 @@ export function VenteAlerts({ vente, documents }: VenteAlertsProps) {
   return (
     <div className={styles.alertsGrid}>
       {vente.vendeur.impayes > 0 && (
-        <div className={styles.alertCard} style={{ background: '#fee2e2', borderColor: '#ef4444' }}>
-          <AlertTriangle size={20} style={{ color: '#ef4444' }} aria-hidden="true" />
+        <div className={styles.alertCard} style={{ background: 'var(--badge-danger-bg)', borderColor: 'var(--danger)' }}>
+          <AlertTriangle size={20} style={{ color: 'var(--danger)' }} aria-hidden="true" />
           <div>
             <strong>Impayés vendeur</strong>
             <p>Le vendeur a {vente.vendeur.impayes} € d&apos;impayés</p>
@@ -33,8 +33,8 @@ export function VenteAlerts({ vente, documents }: VenteAlertsProps) {
       )}
 
       {documentsManquants > 0 && (
-        <div className={styles.alertCard} style={{ background: '#fef3c7', borderColor: '#f59e0b' }}>
-          <Clock size={20} style={{ color: '#f59e0b' }} aria-hidden="true" />
+        <div className={styles.alertCard} style={{ background: 'var(--badge-warning-bg)', borderColor: 'var(--warning)' }}>
+          <Clock size={20} style={{ color: 'var(--warning)' }} aria-hidden="true" />
           <div>
             <strong>{documentsManquants} document(s) manquant(s)</strong>
             <p>Documents obligatoires à fournir</p>
@@ -43,8 +43,8 @@ export function VenteAlerts({ vente, documents }: VenteAlertsProps) {
       )}
 
       {documentsASigner > 0 && (
-        <div className={styles.alertCard} style={{ background: '#dbeafe', borderColor: '#0284c7' }}>
-          <Edit2 size={20} style={{ color: '#0284c7' }} aria-hidden="true" />
+        <div className={styles.alertCard} style={{ background: 'var(--badge-info-bg)', borderColor: 'var(--primary)' }}>
+          <Edit2 size={20} style={{ color: 'var(--primary)' }} aria-hidden="true" />
           <div>
             <strong>{documentsASigner} document(s) à signer</strong>
             <p>Signature syndic requise</p>

@@ -37,7 +37,7 @@ export function BentoBudget({ budgetPct, budgetVote, budgetRealise }: BentoBudge
         </>
       ) : (
         <>
-          <div className={styles.budgetPct} style={{ color: '#94a3b8' }}>—</div>
+          <div className={styles.budgetPct} style={{ color: 'var(--text-secondary)' }}>—</div>
           <div className={styles.budgetDetail}>Aucun budget voté</div>
           <div style={{ flex: 1 }} />
           <Link href="/finance/budget" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnFull}`}>

@@ -59,25 +59,25 @@ export function BudgetOverviewHero({
         <div className={styles.statsRow}>
           <div className={styles.stat}>
             <div className={styles.statLabel}>Consommé</div>
-            <div className={styles.statValue} style={{ color: '#f59e0b' }}>
+            <div className={styles.statValue} style={{ color: 'var(--warning)' }}>
               {totalConsomme.toLocaleString('fr-FR')} €
             </div>
             <div className={styles.statBar}>
-              <div className={styles.statBarFill} style={{ width: `${consumedPct}%`, background: '#f59e0b' }} />
+              <div className={styles.statBarFill} style={{ width: `${consumedPct}%`, background: 'var(--warning)' }} />
             </div>
           </div>
           <div className={styles.stat}>
             <div className={styles.statLabel}>Disponible</div>
-            <div className={styles.statValue} style={{ color: '#22c55e' }}>
+            <div className={styles.statValue} style={{ color: 'var(--success)' }}>
               {budgetRestant.toLocaleString('fr-FR')} €
             </div>
             <div className={styles.statBar}>
-              <div className={styles.statBarFill} style={{ width: `${100 - consumedPct}%`, background: '#22c55e' }} />
+              <div className={styles.statBarFill} style={{ width: `${100 - consumedPct}%`, background: 'var(--success)' }} />
             </div>
           </div>
           <div className={styles.stat}>
             <div className={styles.statLabel}>Postes en alerte</div>
-            <div className={styles.statValue} style={{ color: postesEnAlerte > 0 ? '#ef4444' : '#22c55e' }}>
+            <div className={styles.statValue} style={{ color: postesEnAlerte > 0 ? 'var(--danger)' : 'var(--success)' }}>
               {postesEnAlerte}
             </div>
             {postesEnAlerteLabels && (

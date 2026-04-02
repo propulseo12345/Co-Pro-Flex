@@ -258,11 +258,11 @@
 }
 
 .bubbleMine .bubbleTime {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(var(--overlay-rgb), 0.55);
 }
 
 .bubbleMine .readStatus {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(var(--overlay-rgb), 0.7);
 }
 
 .bubbleSender {

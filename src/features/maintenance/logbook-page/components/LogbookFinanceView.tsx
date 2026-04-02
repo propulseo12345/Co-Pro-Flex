@@ -8,11 +8,11 @@ import type { FiltreKpi, LogbookKpis, Intervention } from '@/components/features
 import styles from '@/app/(dashboard)/maintenance/maintenance.module.css';
 
 const STATUT_BADGE: Record<string, { label: string; color: string; badgeClass: string }> = {
-  EN_COURS: { label: 'En cours', color: '#FBBF24', badgeClass: 'badgeAmber' },
-  PLANIFIEE: { label: 'Planifiée', color: '#60A5FA', badgeClass: 'badgeBlue' },
-  TERMINEE: { label: 'Terminée', color: '#34D399', badgeClass: 'badgeGreen' },
-  URGENTE: { label: 'Urgent', color: '#EF4444', badgeClass: 'badgeRed' },
-  URGENT: { label: 'Urgent', color: '#EF4444', badgeClass: 'badgeRed' },
+  EN_COURS: { label: 'En cours', color: 'var(--warning)', badgeClass: 'badgeAmber' },
+  PLANIFIEE: { label: 'Planifiée', color: 'var(--secondary)', badgeClass: 'badgeBlue' },
+  TERMINEE: { label: 'Terminée', color: 'var(--success)', badgeClass: 'badgeGreen' },
+  URGENTE: { label: 'Urgent', color: 'var(--danger)', badgeClass: 'badgeRed' },
+  URGENT: { label: 'Urgent', color: 'var(--danger)', badgeClass: 'badgeRed' },
 };
 
 const KPI_CONFIG: Array<{
@@ -22,10 +22,10 @@ const KPI_CONFIG: Array<{
   color?: string;
   format?: 'currency';
 }> = [
-  { id: 'en_cours', label: 'EN COURS', kpiKey: 'enCours', color: '#FBBF24' },
+  { id: 'en_cours', label: 'EN COURS', kpiKey: 'enCours', color: 'var(--warning)' },
   { id: 'planifiees', label: 'PLANIFIÉES', kpiKey: 'planifiees' },
-  { id: 'cout_annee', label: 'COÛT ANNUEL', kpiKey: 'coutAnnee', color: '#ef4444', format: 'currency' },
-  { id: 'urgences', label: 'URGENCES', kpiKey: 'urgences', color: '#EF4444' },
+  { id: 'cout_annee', label: 'COÛT ANNUEL', kpiKey: 'coutAnnee', color: 'var(--danger)', format: 'currency' },
+  { id: 'urgences', label: 'URGENCES', kpiKey: 'urgences', color: 'var(--danger)' },
 ];
 
 interface LogbookFinanceViewProps {
@@ -187,7 +187,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
           style={interventionsTab.statutFilter !== 'TOUS' ? {
             background: 'rgba(59,130,246,0.12)',
             borderColor: 'rgba(59,130,246,0.4)',
-            color: '#3b82f6',
+            color: 'var(--primary)',
             fontWeight: 600,
           } : undefined}
         >
@@ -264,7 +264,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
               {interventions.map(intervention => {
                 const statut = STATUT_BADGE[intervention.statut] || {
                   label: intervention.statut,
-                  color: '#8892a4',
+                  color: 'var(--text-secondary)',
                   badgeClass: 'badgeGray',
                 };
                 return (
@@ -284,7 +284,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
                       {intervention.intervenant}
                     </td>
                     <td className={styles.tdRight} style={{
-                      color: '#ef4444', fontWeight: 600,
+                      color: 'var(--danger)', fontWeight: 600,
                       fontFamily: "'SF Mono', 'Fira Code', monospace",
                       fontVariantNumeric: 'tabular-nums',
                     }}>
@@ -319,7 +319,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
       {/* Fiche détail lecture seule */}
       {viewingIntervention && (() => {
         const v = viewingIntervention;
-        const st = STATUT_BADGE[v.statut] || { label: v.statut, color: '#8892a4', badgeClass: 'badgeGray' };
+        const st = STATUT_BADGE[v.statut] || { label: v.statut, color: 'var(--text-secondary)', badgeClass: 'badgeGray' };
         return (
           <div
             style={{
@@ -383,7 +383,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
                 {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
                   <div style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(148,163,184,0.06)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444', fontFamily: "'SF Mono', 'Fira Code', monospace", fontVariantNumeric: 'tabular-nums' }}>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--danger)', fontFamily: "'SF Mono', 'Fira Code', monospace", fontVariantNumeric: 'tabular-nums' }}>
                       {v.cout ? `${v.cout.toLocaleString('fr-FR')} €` : '—'}
                     </div>
                     <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-tertiary)', marginTop: 4 }}>Coût</div>
@@ -460,7 +460,7 @@ export function LogbookFinanceView({ data }: LogbookFinanceViewProps) {
                     interventionsTab.handlers.onEditIntervention(v);
                   }}
                   style={{
-                    padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
+                    padding: '8px 16px', background: 'var(--primary)', border: 'none', borderRadius: 8,
                     color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                   }}

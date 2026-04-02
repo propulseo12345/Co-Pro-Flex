@@ -118,11 +118,11 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
         fontSize: 13, color: 'var(--text-main)', background: 'var(--bg-secondary)',
         fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
     };
-    const inputErr: React.CSSProperties = { ...input, borderColor: '#ef4444' };
+    const inputErr: React.CSSProperties = { ...input, borderColor: 'var(--danger)' };
     const textarea: React.CSSProperties = { ...input, minHeight: 70, resize: 'vertical' };
     const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 };
     const group: React.CSSProperties = { marginBottom: 16 };
-    const errText: React.CSSProperties = { fontSize: 11, color: '#ef4444', marginTop: 4, display: 'block' };
+    const errText: React.CSSProperties = { fontSize: 11, color: 'var(--danger)', marginTop: 4, display: 'block' };
     const footer: React.CSSProperties = {
         padding: '12px 24px', borderTop: '1px solid rgba(148,163,184,0.08)',
         display: 'flex', justifyContent: 'flex-end', gap: 8,
@@ -133,7 +133,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
         color: 'var(--text-main)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
     };
     const btnSubmit: React.CSSProperties = {
-        padding: '8px 16px', background: '#3b82f6', border: 'none', borderRadius: 8,
+        padding: '8px 16px', background: 'var(--primary)', border: 'none', borderRadius: 8,
         color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer',
         fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6,
     };
@@ -147,7 +147,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
             <div style={modal} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
                 <div style={header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <FileText size={18} style={{ color: '#3b82f6' }} />
+                        <FileText size={18} style={{ color: 'var(--primary)' }} />
                         <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-main)' }}>Nouveau contrat</span>
                     </div>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
@@ -159,7 +159,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                     {/* Libellé + Numéro */}
                     <div style={row}>
                         <div style={group}>
-                            <label style={label}>Libellé du contrat <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={label}>Libellé du contrat <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <input style={errors.libelle ? inputErr : input} value={formData.libelle}
                                 onChange={e => setFormData({ ...formData, libelle: e.target.value })}
                                 placeholder="Ex: Maintenance Ascenseur" />
@@ -176,7 +176,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                     {/* Type + Prestataire */}
                     <div style={row}>
                         <div style={group}>
-                            <label style={label}>Type <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={label}>Type <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <select style={errors.type ? inputErr : input} value={formData.type}
                                 onChange={e => setFormData({ ...formData, type: e.target.value as TypeContrat })}>
                                 <option value="">— Sélectionner un type —</option>
@@ -187,7 +187,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                             {errors.type && <span style={errText}>{errors.type}</span>}
                         </div>
                         <div style={group}>
-                            <label style={label}>Prestataire <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={label}>Prestataire <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <select style={errors.prestataireId ? inputErr : input} value={formData.prestataireId}
                                 onChange={e => setFormData({ ...formData, prestataireId: e.target.value })}>
                                 <option value="">— Sélectionner un prestataire —</option>
@@ -252,7 +252,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                             <label style={checkLabel}>
                                 <input type="checkbox" checked={formData.taciteReconduction}
                                     onChange={e => setFormData({ ...formData, taciteReconduction: e.target.checked })}
-                                    style={{ accentColor: '#3b82f6', width: 16, height: 16 }} />
+                                    style={{ accentColor: 'var(--primary)', width: 16, height: 16 }} />
                                 Tacite reconduction
                             </label>
                         </div>
@@ -267,7 +267,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                     {/* Coût annuel + Réglementaire */}
                     <div style={row}>
                         <div style={group}>
-                            <label style={label}>Coût annuel (€) <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={label}>Coût annuel (€) <span style={{ color: 'var(--danger)' }}>*</span></label>
                             <input type="number" style={errors.coutAnnuel ? inputErr : input} value={formData.coutAnnuel}
                                 onChange={e => setFormData({ ...formData, coutAnnuel: e.target.value })}
                                 min="0" step="0.01" placeholder="0.00" />
@@ -277,7 +277,7 @@ export default function AddContractModal({ isOpen, onClose, prestataires, onAdd 
                             <label style={checkLabel}>
                                 <input type="checkbox" checked={formData.estReglementaire}
                                     onChange={e => setFormData({ ...formData, estReglementaire: e.target.checked })}
-                                    style={{ accentColor: '#3b82f6', width: 16, height: 16 }} />
+                                    style={{ accentColor: 'var(--primary)', width: 16, height: 16 }} />
                                 Contrat réglementaire
                             </label>
                         </div>

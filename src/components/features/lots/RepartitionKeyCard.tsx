@@ -69,7 +69,7 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDe
             <tbody>
               {detail.lines.map(line => (
                 <tr key={line.line_id}>
-                  <td style={{ fontWeight: 600, color: '#3b82f6' }}>{line.lot_ref}</td>
+                  <td style={{ fontWeight: 600, color: 'var(--primary)' }}>{line.lot_ref}</td>
                   <td>{line.lot_type || '-'}</td>
                   <td>
                     <input
@@ -121,7 +121,7 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDe
                   background: 'rgba(59, 130, 246, 0.1)',
                   border: '1px solid rgba(59, 130, 246, 0.3)',
                   borderRadius: '8px',
-                  color: '#3b82f6',
+                  color: 'var(--primary)',
                   fontSize: '12px',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
@@ -141,7 +141,7 @@ export function RepartitionKeyCard({ keyData, isSelected, onSelect, detail, onDe
                   background: 'transparent',
                   border: '1px solid rgba(239, 68, 68, 0.3)',
                   borderRadius: '8px',
-                  color: '#ef4444',
+                  color: 'var(--danger)',
                   fontSize: '12px',
                   cursor: 'pointer',
                   transition: 'all 0.15s',

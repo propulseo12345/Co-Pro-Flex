@@ -22,10 +22,10 @@ const C = {
   text: 'var(--text-main)',
   textSecondary: 'var(--text-secondary)',
   textTertiary: 'var(--text-tertiary)',
-  primary: '#3b82f6',
-  success: '#22c55e',
-  danger: '#ef4444',
-  warning: '#f59e0b',
+  primary: 'var(--primary)',
+  success: 'var(--success)',
+  danger: 'var(--danger)',
+  warning: 'var(--warning)',
   infoBg: 'rgba(59,130,246,0.1)',
 } as const;
 
@@ -151,7 +151,7 @@ function ProviderDetailContent({ id }: { id: string }) {
               <div>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: C.textTertiary }}>TÉLÉPHONE</div>
                 {prestataire.telephone ? (
-                  <a href={`tel:${prestataire.telephone}`} style={{ fontSize: 14, fontWeight: 500, color: '#60a5fa', textDecoration: 'none' }}>{prestataire.telephone}</a>
+                  <a href={`tel:${prestataire.telephone}`} style={{ fontSize: 14, fontWeight: 500, color: 'var(--secondary)', textDecoration: 'none' }}>{prestataire.telephone}</a>
                 ) : (
                   <span style={{ fontSize: 14, color: C.textTertiary }}>Non renseigné</span>
                 )}
@@ -163,7 +163,7 @@ function ProviderDetailContent({ id }: { id: string }) {
               <div>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: C.textTertiary }}>EMAIL</div>
                 {prestataire.email ? (
-                  <a href={`mailto:${prestataire.email}`} style={{ fontSize: 14, fontWeight: 500, color: '#60a5fa', textDecoration: 'none' }}>{prestataire.email}</a>
+                  <a href={`mailto:${prestataire.email}`} style={{ fontSize: 14, fontWeight: 500, color: 'var(--secondary)', textDecoration: 'none' }}>{prestataire.email}</a>
                 ) : (
                   <span style={{ fontSize: 14, color: C.textTertiary }}>Non renseigné</span>
                 )}
@@ -196,7 +196,7 @@ function ProviderDetailContent({ id }: { id: string }) {
             {prestataire.telephone && (
               <a href={`tel:${prestataire.telephone}`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px', borderRadius: 8, background: C.infoBg, color: '#60a5fa',
+                padding: '7px 14px', borderRadius: 8, background: C.infoBg, color: 'var(--secondary)',
                 fontSize: 13, fontWeight: 500, textDecoration: 'none',
               }}>
                 <Phone size={14} /> Appeler
@@ -205,7 +205,7 @@ function ProviderDetailContent({ id }: { id: string }) {
             {prestataire.email && (
               <a href={`mailto:${prestataire.email}`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px', borderRadius: 8, background: C.infoBg, color: '#60a5fa',
+                padding: '7px 14px', borderRadius: 8, background: C.infoBg, color: 'var(--secondary)',
                 fontSize: 13, fontWeight: 500, textDecoration: 'none',
               }}>
                 <Mail size={14} /> Email
@@ -221,11 +221,11 @@ function ProviderDetailContent({ id }: { id: string }) {
             <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 16 }}>Statistiques</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               <div style={{ background: C.cardSecondary, border: `1px solid ${C.borderLight}`, borderRadius: 8, padding: 14, textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#60a5fa' }}>{prestataire.nombreInterventions || 0}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--secondary)' }}>{prestataire.nombreInterventions || 0}</div>
                 <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: C.textTertiary, marginTop: 4 }}>Interventions</div>
               </div>
               <div style={{ background: C.cardSecondary, border: `1px solid ${C.borderLight}`, borderRadius: 8, padding: 14, textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#fbbf24' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--warning)' }}>
                   {prestataire.noteMoyenne ? `${prestataire.noteMoyenne.toFixed(1)} ★` : '—'}
                 </div>
                 <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', color: C.textTertiary, marginTop: 4 }}>Note moyenne</div>
@@ -334,7 +334,7 @@ function ProviderDetailContent({ id }: { id: string }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {prestataireInterventions.map(inter => {
               const statutColor = inter.statut === 'TERMINEE' ? C.success
-                : inter.statut === 'EN_COURS' ? '#60a5fa'
+                : inter.statut === 'EN_COURS' ? 'var(--secondary)'
                 : inter.statut === 'PLANIFIEE' ? C.warning : C.textSecondary;
               return (
                 <button key={inter.id} onClick={() => setSelectedIntervention(inter)} style={{
@@ -412,7 +412,7 @@ function ProviderDetailContent({ id }: { id: string }) {
       {selectedIntervention && (() => {
         const inter = selectedIntervention;
         const statutLabel = inter.statut === 'TERMINEE' ? 'Terminée' : inter.statut === 'EN_COURS' ? 'En cours' : 'Planifiée';
-        const statutColor = inter.statut === 'TERMINEE' ? C.success : inter.statut === 'EN_COURS' ? '#60a5fa' : C.warning;
+        const statutColor = inter.statut === 'TERMINEE' ? C.success : inter.statut === 'EN_COURS' ? 'var(--secondary)' : C.warning;
         const t = String(inter.type);
         const typeLabel = t === 'ENTRETIEN' ? 'Entretien' : t === 'REPARATION' ? 'Réparation' : t === 'INSPECTION' ? 'Inspection' : t;
         return (

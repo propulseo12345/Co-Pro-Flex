@@ -442,7 +442,7 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
                             <div>
                                 <div className={styles.docList}>
                                     {(currentData.piecesJointes || []).length === 0 ? (
-                                        <p style={{ color: '#64748b', fontSize: 13 }}>Aucune pièce jointe</p>
+                                        <p style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>Aucune pièce jointe</p>
                                     ) : (
                                         currentData.piecesJointes.map(pj => (
                                             <div
@@ -563,7 +563,7 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
                                 );
                             })}
                             {currentData.historique.length === 0 && (
-                                <p style={{ color: '#64748b', fontSize: 13 }}>Aucun historique</p>
+                                <p style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>Aucun historique</p>
                             )}
                         </div>
                     </div>

@@ -472,7 +472,7 @@
 }
 
 .statCard.primary .statIcon {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(var(--overlay-rgb), 0.2);
     color: white;
 }
 
