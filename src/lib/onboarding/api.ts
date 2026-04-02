@@ -9,9 +9,9 @@ export interface CoproCreate {
   address: string;
   city: string;
   postal_code: string;
-  nombre_batiments?: number;
-  annee_construction?: number;
-  siret_syndic?: string;
+  buildings_count?: number;
+  annee_construction?: string;
+  siret?: string;
   exercice_debut?: string;
 }
 
@@ -24,17 +24,91 @@ export async function createCopropriete(payload: CoproCreate) {
       address: payload.address.trim(),
       city: payload.city.trim(),
       postal_code: payload.postal_code.trim(),
-      nombre_batiments: payload.nombre_batiments || 1,
+      buildings_count: payload.buildings_count || 1,
       annee_construction: payload.annee_construction || null,
-      siret_syndic: payload.siret_syndic?.trim() || null,
+      siret: payload.siret?.trim() || null,
       exercice_debut: payload.exercice_debut || '01-01',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      onboarding_step: 2,
+      onboarding_max_step: 2,
     })
     .select('id, name')
     .single();
   if (error) return { data: null, error: new Error(error.message) };
   return { data: data as { id: string; name: string }, error: null };
+}
+
+// ═══ ONBOARDING STATE ═══
+
+export interface OnboardingCopro {
+  id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  postal_code: string | null;
+  onboarding_step: number;
+  onboarding_max_step: number;
+  created_at: string;
+}
+
+export async function listOnboardingCopros() {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('copros')
+    .select('id, name, address, city, postal_code, onboarding_step, onboarding_max_step, created_at')
+    .not('onboarding_step', 'is', null)
+    .order('created_at', { ascending: false });
+  if (error) return { data: null, error: new Error(error.message) };
+  return { data: data as OnboardingCopro[], error: null };
+}
+
+export async function getOnboardingState(coproId: string) {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('copros')
+    .select('id, name, onboarding_step, onboarding_max_step')
+    .eq('id', coproId)
+    .single();
+  if (error) return { data: null, error: new Error(error.message) };
+  return {
+    data: data as { id: string; name: string; onboarding_step: number | null; onboarding_max_step: number | null },
+    error: null,
+  };
+}
+
+export async function updateOnboardingStep(coproId: string, step: number, maxStep: number) {
+  const supabase = createUntypedClient();
+  const { error } = await supabase
+    .from('copros')
+    .update({ onboarding_step: step, onboarding_max_step: maxStep })
+    .eq('id', coproId);
+  if (error) return { success: false, error: new Error(error.message) };
+  return { success: true, error: null };
+}
+
+export async function completeOnboarding(coproId: string) {
+  const supabase = createUntypedClient();
+  const { error } = await supabase
+    .from('copros')
+    .update({ onboarding_step: null, onboarding_max_step: null })
+    .eq('id', coproId);
+  if (error) return { success: false, error: new Error(error.message) };
+  return { success: true, error: null };
+}
+
+export async function deleteOnboardingCopro(coproId: string) {
+  const supabase = createUntypedClient();
+  // Vérifier que c'est bien un onboarding en cours
+  const { data: copro } = await supabase
+    .from('copros')
+    .select('onboarding_step')
+    .eq('id', coproId)
+    .single();
+  if (!copro || copro.onboarding_step === null) {
+    return { success: false, error: new Error('Cette copropriété n\'est pas en cours d\'onboarding') };
+  }
+  const { error } = await supabase.from('copros').delete().eq('id', coproId);
+  if (error) return { success: false, error: new Error(error.message) };
+  return { success: true, error: null };
 }
 
 // ═══ COPROPRIETAIRES ═══
@@ -52,6 +126,11 @@ export interface CoproprietaireCreate {
 
 export async function createCoproprietaire(payload: CoproprietaireCreate) {
   const supabase = createUntypedClient();
+
+  // Mapper communication_preference vers les 2 booléens de la DB
+  const prefersEmail = !payload.communication_preference || payload.communication_preference !== 'courrier';
+  const prefersPaper = payload.communication_preference === 'courrier' || payload.communication_preference === 'les_deux';
+
   const { data, error } = await supabase
     .from('coproprietaires')
     .insert({
@@ -60,11 +139,10 @@ export async function createCoproprietaire(payload: CoproprietaireCreate) {
       first_name: payload.first_name?.trim() || null,
       email: payload.email?.trim() || null,
       phone: payload.phone?.trim() || null,
-      address: payload.address?.trim() || null,
+      address_line1: payload.address?.trim() || null,
       is_resident: payload.is_resident ?? true,
-      communication_preference: payload.communication_preference || 'email',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      prefers_email: prefersEmail,
+      prefers_paper: prefersPaper,
     })
     .select('id, last_name, first_name')
     .single();
@@ -104,37 +182,35 @@ export interface CompteCreate {
 
 export async function createCompteBancaire(payload: CompteCreate) {
   const supabase = createUntypedClient();
-  const accountNumber = payload.type === 'courant' ? '512000' : '512100';
+  const code = payload.type === 'courant' ? '512000' : '512100';
   const { data, error } = await supabase
     .from('accounts')
     .insert({
       copro_id: payload.copro_id,
-      account_number: accountNumber,
-      label: payload.label.trim(),
-      account_type: 'bank',
+      code,
+      name: payload.label.trim(),
+      account_type: 'asset',
       banque: payload.banque?.trim() || null,
       iban: payload.iban?.trim().replace(/\s/g, '') || null,
       bic: payload.bic?.trim() || null,
       initial_balance: payload.solde_initial || 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     })
-    .select('id, label')
+    .select('id, name')
     .single();
   if (error) return { data: null, error: new Error(error.message) };
-  return { data: data as { id: string; label: string }, error: null };
+  return { data: data as { id: string; name: string }, error: null };
 }
 
 export async function listComptesBancaires(coproId: string) {
   const supabase = createUntypedClient();
   const { data, error } = await supabase
     .from('accounts')
-    .select('id, label, account_number, banque, iban, bic, initial_balance')
+    .select('id, name, code, banque, iban, bic, initial_balance')
     .eq('copro_id', coproId)
     .eq('account_type', 'bank')
-    .order('account_number', { ascending: true });
+    .order('code', { ascending: true });
   if (error) return { data: null, error: new Error(error.message) };
-  return { data: data as Array<{ id: string; label: string; account_number: string; banque: string | null; iban: string | null; bic: string | null; initial_balance: number }>, error: null };
+  return { data: data as Array<{ id: string; name: string; code: string; banque: string | null; iban: string | null; bic: string | null; initial_balance: number }>, error: null };
 }
 
 // ═══ ACCOUNTING PERIOD ═══
@@ -294,7 +370,7 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
   if (blErr) return { data: null, error: new Error(blErr.message) };
   if (!budgetLines?.length) return { data: null, error: new Error('Aucune ligne de budget trouvée') };
 
-  // Group budget lines by repartition key
+  // Group budget lines by repartition key (keyId → total amount)
   const keyTotals = new Map<string, number>();
   for (const line of budgetLines as Array<{ amount: number; repartition_key_id: string }>) {
     const amt = Number(line.amount) || 0;
@@ -321,7 +397,7 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
   if (!found450) {
     const { data: n450, error: e450 } = await supabase
       .from('accounts')
-      .insert({ copro_id: coproId, code: '450', name: 'Copropriétaires', account_type: 'receivable', is_active: true })
+      .insert({ copro_id: coproId, code: '450', name: 'Copropriétaires', account_type: 'asset', is_active: true })
       .select('id').single();
     if (e450) return { data: null, error: new Error(e450.message) };
     acc450Id = n450.id as string;
@@ -332,7 +408,7 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
   if (!found701) {
     const { data: n701, error: e701 } = await supabase
       .from('accounts')
-      .insert({ copro_id: coproId, code: '701', name: 'Provisions pour charges', account_type: 'revenue', is_active: true })
+      .insert({ copro_id: coproId, code: '701', name: 'Provisions pour charges', account_type: 'income', is_active: true })
       .select('id').single();
     if (e701) return { data: null, error: new Error(e701.message) };
     acc701Id = n701.id as string;
@@ -340,16 +416,28 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
     acc701Id = found701.id;
   }
 
+  // Récupérer les noms des clés pour le détail
+  const keyIds = [...keyTotals.keys()];
+  const { data: keyNames } = await supabase
+    .from('repartition_keys')
+    .select('id, name')
+    .in('id', keyIds);
+  const keyNameMap: Record<string, string> = {};
+  for (const k of (keyNames || []) as Array<{ id: string; name: string }>) {
+    keyNameMap[k.id] = k.name;
+  }
+
   let totalCallsCreated = 0;
   let totalLinesCreated = 0;
+  const callDetails: Array<{ label: string; trimester: number; keyName: string; amount: number; lotsCount: number }> = [];
 
   for (let t = 1; t <= nbAppels; t++) {
     const issueMonth = schedule === 'annuel' ? 0 : schedule === 'semestriel' ? (t - 1) * 6 : (t - 1) * 3;
     const issueDate = new Date(year, issueMonth, 1).toISOString().split('T')[0];
     const dueDate = new Date(year, issueMonth + 1, 0).toISOString().split('T')[0];
-    const labelSuffix = nbAppels === 1 ? '' : ` - T${t}`;
+    const labelSuffix = nbAppels === 1 ? '' : schedule === 'semestriel' ? ` - S${t}` : ` - T${t}`;
 
-    for (const [keyId, totalAmount] of keyTotals) {
+    for (const [keyId, totalAmount] of Array.from(keyTotals.entries())) {
       const callAmount = Math.round((totalAmount / nbAppels) * 100) / 100;
 
       // Get lots for this key
@@ -396,9 +484,8 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
           issue_date: issueDate,
           due_date: dueDate,
           total_amount: callAmount,
-          status: 'issued',
+          status: 'draft',
           ledger_tx_id: ltx.id,
-          issued_at: new Date().toISOString(),
         })
         .select('id')
         .single();
@@ -423,6 +510,13 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
       if (!clErr) {
         totalCallsCreated++;
         totalLinesCreated += lines.length;
+        callDetails.push({
+          label: `Appel de fonds${labelSuffix}`,
+          trimester: t,
+          keyName: keyNameMap[String(keyId)] || 'Charges générales',
+          amount: callAmount,
+          lotsCount: lines.length,
+        });
       }
     }
   }
@@ -430,7 +524,15 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
   // Mark budget as validated
   await supabase.from('budgets').update({ status: 'validated', validated_at: new Date().toISOString() }).eq('id', budgetId);
 
-  return { data: { callsCreated: totalCallsCreated, linesCreated: totalLinesCreated }, error: null };
+  return {
+    data: {
+      callsCreated: totalCallsCreated,
+      linesCreated: totalLinesCreated,
+      details: callDetails,
+      totalAmount: callDetails.reduce((s, d) => s + d.amount, 0),
+    },
+    error: null,
+  };
 }
 
 // ═══ LOTS LIST (for Step 7) ═══
@@ -488,7 +590,7 @@ export async function saveRepriseSoldes(
   if (!found450) {
     const { data: n, error: e } = await supabase
       .from('accounts')
-      .insert({ copro_id: coproId, code: '450', name: 'Copropriétaires', account_type: 'receivable', is_active: true })
+      .insert({ copro_id: coproId, code: '450', name: 'Copropriétaires', account_type: 'asset', is_active: true })
       .select('id').single();
     if (e) return { data: null, error: new Error(e.message) };
     acc450Id = n.id as string;

@@ -116,6 +116,25 @@ export function useLotsRepartitionGrid() {
     });
   }, [lots, keys, allLines, searchQuery]);
 
+  // Wrap CRUD pour rafraîchir aussi les lignes de clé (pas seulement les lots)
+  const createLotAndRefresh = useCallback(async (payload: Parameters<typeof createLot>[0]) => {
+    const result = await createLot(payload);
+    if (result) await Promise.all([fetchAllLines(), refreshKeys()]);
+    return result;
+  }, [createLot, fetchAllLines, refreshKeys]);
+
+  const updateLotAndRefresh = useCallback(async (lotId: string, updates: Parameters<typeof updateLot>[1]) => {
+    const result = await updateLot(lotId, updates);
+    if (result) await fetchAllLines();
+    return result;
+  }, [updateLot, fetchAllLines]);
+
+  const deleteLotAndRefresh = useCallback(async (lotId: string) => {
+    const result = await deleteLot(lotId);
+    if (result) await Promise.all([fetchAllLines(), refreshKeys()]);
+    return result;
+  }, [deleteLot, fetchAllLines, refreshKeys]);
+
   // Update a weight
   const updateWeight = useCallback(async (keyId: string, lotId: string, weight: number) => {
     if (!currentCoproId) return;
@@ -155,10 +174,10 @@ export function useLotsRepartitionGrid() {
     searchQuery,
     setSearchQuery,
 
-    // Lot CRUD
-    createLot,
-    updateLot,
-    deleteLot,
+    // Lot CRUD (avec refresh des lignes de clé)
+    createLot: createLotAndRefresh,
+    updateLot: updateLotAndRefresh,
+    deleteLot: deleteLotAndRefresh,
     editingLot,
     setEditingLot,
     showCreateLotModal,

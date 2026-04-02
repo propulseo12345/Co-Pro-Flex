@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useActiveCopro } from '@/lib/copro/activeCopro';
+import { useActiveCopro, setActiveCopro, invalidateActiveCoproCache } from '@/lib/copro/activeCopro';
 import { createClient } from '@/lib/supabase/client';
 
 // ============================================================================
@@ -32,7 +32,7 @@ export interface CoproContextValue {
   // Actions
   // NOTE: setCurrentCoproId est conservé pour compatibilité future multi-copro
   // mais n'a aucun effet en mode Single Copro
-  setCurrentCoproId: (id: string) => void;
+  setCurrentCoproId: (id: string, name?: string) => void;
   refreshCopros: () => Promise<void>;
 
   // User role for current copro
@@ -66,22 +66,19 @@ export function CoproProvider({ children }: CoproProviderProps) {
   const { coproId: activeCoproId, coproName, isLoading: activeLoading, error: activeError, refresh: refreshActiveCopro } = useActiveCopro();
 
   const [currentCopro, setCurrentCopro] = useState<Copro | null>(null);
+  const [overrideCoproId, setOverrideCoproId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ID effectif : l'override local (set par onboarding/sélecteur) prime sur activeCopro
+  const effectiveCoproId = overrideCoproId || activeCoproId;
 
   // En mode single copro, la liste ne contient que la copro active
   const copros = currentCopro ? [currentCopro] : [];
 
   // Manager = admin or gestionnaire (défaut à true en mode single copro pour simplifier)
   const isManager = userRole === 'admin' || userRole === 'gestionnaire' || true;
-
-  // setCurrentCoproId - NO-OP en mode Single Copro
-  // Conservé pour compatibilité API future
-  const setCurrentCoproId = useCallback((_id: string) => {
-    // TODO: Multi-copro - réactiver cette logique
-    console.debug('[CoproContext] setCurrentCoproId appelé mais ignoré en mode Single Copro');
-  }, []);
 
   // Charger les détails de la copro active
   const loadCoproDetails = useCallback(async (coproId: string) => {
@@ -124,6 +121,17 @@ export function CoproProvider({ children }: CoproProviderProps) {
     }
   }, []);
 
+  // setCurrentCoproId - Bascule la copro active (cache + contexte + state local)
+  // Utilisé par l'onboarding et le futur sélecteur multi-copro
+  const setCurrentCoproId = useCallback((id: string, name?: string) => {
+    // 1. State local React — prise en compte immédiate
+    setOverrideCoproId(id);
+    // 2. Cache global (mémoire + sessionStorage) — persistance
+    setActiveCopro(id, name || '');
+    // 3. Recharger les détails depuis Supabase
+    loadCoproDetails(id).finally(() => setIsLoading(false));
+  }, [loadCoproDetails]);
+
   // Synchroniser avec activeCopro
   useEffect(() => {
     if (activeLoading) {
@@ -137,16 +145,16 @@ export function CoproProvider({ children }: CoproProviderProps) {
       return;
     }
 
-    if (activeCoproId) {
+    if (effectiveCoproId) {
       // Charger les détails complets
-      loadCoproDetails(activeCoproId).finally(() => {
+      loadCoproDetails(effectiveCoproId).finally(() => {
         setIsLoading(false);
       });
     } else {
       setError('Aucune copropriété disponible');
       setIsLoading(false);
     }
-  }, [activeCoproId, activeLoading, activeError, loadCoproDetails]);
+  }, [effectiveCoproId, activeLoading, activeError, loadCoproDetails]);
 
   // Refresh = recharger la copro active
   const refreshCopros = useCallback(async () => {
@@ -157,7 +165,7 @@ export function CoproProvider({ children }: CoproProviderProps) {
 
   const value: CoproContextValue = {
     currentCopro,
-    currentCoproId: activeCoproId,  // Mode Single Copro: utilise l'ID actif
+    currentCoproId: effectiveCoproId,  // Override local > activeCopro
     copros,
     isLoading,
     error,

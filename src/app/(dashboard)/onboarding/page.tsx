@@ -1,225 +1,128 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useOnboarding } from '@/hooks/modules/useOnboarding';
-import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
-import { Step1Copropriete } from '@/components/features/onboarding/steps/Step1Copropriete';
-import { Step2Coproprietaires } from '@/components/features/onboarding/steps/Step2Coproprietaires';
-import { Step3LotsKeys } from '@/components/features/onboarding/steps/Step3LotsKeys';
-import { Step4Comptes } from '@/components/features/onboarding/steps/Step4Comptes';
-import { Step5Budget } from '@/components/features/onboarding/steps/Step5Budget';
-import { Step6AgAppels } from '@/components/features/onboarding/steps/Step6AgAppels';
-import { Step7RepriseSoldes } from '@/components/features/onboarding/steps/Step7RepriseSoldes';
-import { StepContracts } from '@/components/features/onboarding/steps/StepContracts';
-import { StepDocuments } from '@/components/features/onboarding/steps/StepDocuments';
-import { StepCarnetEntretien } from '@/components/features/onboarding/steps/StepCarnetEntretien';
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { Plus, Trash2, ArrowRight, Building2, MapPin } from 'lucide-react';
+import { listOnboardingCopros, deleteOnboardingCopro } from '@/lib/onboarding/api';
+import { ONBOARDING_STEPS } from '@/hooks/modules/useOnboarding';
+import type { OnboardingCopro } from '@/lib/onboarding/api';
 import styles from './onboarding.module.css';
 
-export default function OnboardingPage() {
-  const router = useRouter();
-  const {
-    steps,
-    currentStep,
-    maxStepReached,
-    state,
-    goToStep,
-    completeStep,
-    setCoproCreated,
-  } = useOnboarding();
+export default function OnboardingManagePage() {
+  const [copros, setCopros] = useState<OnboardingCopro[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // State shared between steps 5-7
-  const [budgetId, setBudgetId] = useState<string | null>(null);
-  const [periodId, setPeriodId] = useState<string | null>(null);
+  const loadCopros = useCallback(async () => {
+    setIsLoading(true);
+    const { data } = await listOnboardingCopros();
+    setCopros(data || []);
+    setIsLoading(false);
+  }, []);
 
-  // Parallel steps: optional, available from step 4+
-  const [showContractsStep, setShowContractsStep] = useState(false);
-  const [showDocumentsStep, setShowDocumentsStep] = useState(false);
-  const [showCarnetStep, setShowCarnetStep] = useState(false);
+  useEffect(() => {
+    loadCopros();
+  }, [loadCopros]);
 
-  const handleStep1Complete = useCallback((coproId: string, coproName: string) => {
-    setCoproCreated(coproId, coproName);
-    completeStep(1);
-  }, [setCoproCreated, completeStep]);
+  const handleDelete = useCallback(async (id: string, name: string) => {
+    if (!confirm(`Supprimer « ${name} » et toutes ses données ? Cette action est irréversible.`)) return;
+    setDeletingId(id);
+    await deleteOnboardingCopro(id);
+    setCopros(prev => prev.filter(c => c.id !== id));
+    setDeletingId(null);
+  }, []);
 
-  const handleStep2Complete = useCallback(() => {
-    completeStep(2);
-  }, [completeStep]);
+  const getStepLabel = (step: number) => {
+    const s = ONBOARDING_STEPS.find(s => s.id === step);
+    return s?.label || `Étape ${step}`;
+  };
 
-  const handleStep3Complete = useCallback(() => {
-    completeStep(3);
-  }, [completeStep]);
-
-  const handleStep4Complete = useCallback(() => {
-    completeStep(4);
-  }, [completeStep]);
-
-  const handleStep5Complete = useCallback((newBudgetId: string | null, newPeriodId: string) => {
-    setBudgetId(newBudgetId);
-    setPeriodId(newPeriodId);
-    completeStep(5);
-  }, [completeStep]);
-
-  const handleStep6Complete = useCallback(() => {
-    completeStep(6);
-  }, [completeStep]);
-
-  const handleStep7Complete = useCallback(() => {
-    router.push('/dashboard');
-  }, [router]);
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Nouvelle copropriété</h1>
-        <p className={styles.subtitle}>
-          {state.coproName
-            ? `Configuration de « ${state.coproName} »`
-            : 'Configurez votre copropriété étape par étape'}
-        </p>
+        <h1 className={styles.title}>Onboarding</h1>
+        <p className={styles.subtitle}>Copropriétés en cours de configuration</p>
       </div>
 
-      <OnboardingStepper
-        steps={steps}
-        currentStep={currentStep}
-        maxStepReached={maxStepReached}
-        onStepClick={goToStep}
-      />
+      <div className={styles.topActions}>
+        <Link href="/onboarding/create" className={styles.newBtn}>
+          <Plus size={18} />
+          Nouvelle copropriété
+        </Link>
+      </div>
 
-      {/* Parallel steps — optional, available from step 4+ */}
-      {state.coproId && currentStep >= 4 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-          {!showContractsStep && (
-            <button
-              onClick={() => setShowContractsStep(true)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                border: '1px solid rgba(148, 163, 184, 0.08)',
-                background: 'rgba(148, 163, 184, 0.04)',
-                color: '#94a3b8',
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-              }}
-            >
-              + Contrats de maintenance
-            </button>
-          )}
-          {!showDocumentsStep && (
-            <button
-              onClick={() => setShowDocumentsStep(true)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                border: '1px solid rgba(148, 163, 184, 0.08)',
-                background: 'rgba(148, 163, 184, 0.04)',
-                color: '#94a3b8',
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-              }}
-            >
-              + Documents initiaux
-            </button>
-          )}
-          {!showCarnetStep && (
-            <button
-              onClick={() => setShowCarnetStep(true)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                border: '1px solid rgba(148, 163, 184, 0.08)',
-                background: 'rgba(148, 163, 184, 0.04)',
-                color: '#94a3b8',
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-              }}
-            >
-              + Carnet d&apos;entretien
-            </button>
-          )}
+      {isLoading && (
+        <div className={styles.loading}>Chargement...</div>
+      )}
+
+      {!isLoading && copros.length === 0 && (
+        <div className={styles.emptyState}>
+          <Building2 size={40} className={styles.emptyIcon} />
+          <p className={styles.emptyTitle}>Aucun onboarding en cours</p>
+          <p className={styles.emptyDesc}>
+            Cliquez sur « Nouvelle copropriété » pour commencer la configuration d&apos;une copropriété.
+          </p>
         </div>
       )}
 
-      {showContractsStep && state.coproId && (
-        <StepContracts
-          coproId={state.coproId}
-          onClose={() => setShowContractsStep(false)}
-        />
-      )}
+      {!isLoading && copros.length > 0 && (
+        <div className={styles.cardGrid}>
+          {copros.map(copro => {
+            const progress = ((copro.onboarding_step - 1) / (ONBOARDING_STEPS.length - 1)) * 100;
+            return (
+              <div key={copro.id} className={styles.card}>
+                <div className={styles.cardTop}>
+                  <div className={styles.cardInfo}>
+                    <h3 className={styles.cardName}>{copro.name}</h3>
+                    {(copro.address || copro.city) && (
+                      <div className={styles.cardAddress}>
+                        <MapPin size={12} />
+                        <span>{[copro.address, copro.postal_code, copro.city].filter(Boolean).join(', ')}</span>
+                      </div>
+                    )}
+                    <span className={styles.cardDate}>Créée le {formatDate(copro.created_at)}</span>
+                  </div>
+                </div>
 
-      {showDocumentsStep && state.coproId && (
-        <StepDocuments
-          coproId={state.coproId}
-          onClose={() => setShowDocumentsStep(false)}
-        />
-      )}
+                <div className={styles.cardProgress}>
+                  <div className={styles.progressHeader}>
+                    <span className={styles.progressLabel}>
+                      Étape {copro.onboarding_step} / {ONBOARDING_STEPS.length} — {getStepLabel(copro.onboarding_step)}
+                    </span>
+                    <span className={styles.progressPct}>{Math.round(progress)}%</span>
+                  </div>
+                  <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
 
-      {showCarnetStep && state.coproId && (
-        <StepCarnetEntretien
-          coproId={state.coproId}
-          onClose={() => setShowCarnetStep(false)}
-        />
+                <div className={styles.cardActions}>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => handleDelete(copro.id, copro.name)}
+                    disabled={deletingId === copro.id}
+                    title="Supprimer"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                  <Link href={`/onboarding/${copro.id}`} className={styles.resumeBtn}>
+                    Reprendre
+                    <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
-
-      <div className={styles.stepContent}>
-        {currentStep === 1 && (
-          <Step1Copropriete
-            onComplete={handleStep1Complete}
-            existingCoproId={state.coproId}
-          />
-        )}
-        {currentStep === 2 && state.coproId && (
-          <Step2Coproprietaires
-            coproId={state.coproId}
-            onComplete={handleStep2Complete}
-            onBack={() => goToStep(1)}
-          />
-        )}
-        {currentStep === 3 && state.coproId && (
-          <Step3LotsKeys
-            coproId={state.coproId}
-            onComplete={handleStep3Complete}
-            onBack={() => goToStep(2)}
-          />
-        )}
-        {currentStep === 4 && state.coproId && (
-          <Step4Comptes
-            coproId={state.coproId}
-            onComplete={handleStep4Complete}
-            onBack={() => goToStep(3)}
-          />
-        )}
-        {currentStep === 5 && state.coproId && (
-          <Step5Budget
-            coproId={state.coproId}
-            onComplete={handleStep5Complete}
-            onBack={() => goToStep(4)}
-          />
-        )}
-        {currentStep === 6 && state.coproId && periodId && (
-          <Step6AgAppels
-            coproId={state.coproId}
-            budgetId={budgetId}
-            periodId={periodId}
-            onComplete={handleStep6Complete}
-            onBack={() => goToStep(5)}
-          />
-        )}
-        {currentStep === 7 && state.coproId && periodId && (
-          <Step7RepriseSoldes
-            coproId={state.coproId}
-            periodId={periodId}
-            onComplete={handleStep7Complete}
-            onBack={() => goToStep(6)}
-          />
-        )}
-      </div>
     </div>
   );
 }

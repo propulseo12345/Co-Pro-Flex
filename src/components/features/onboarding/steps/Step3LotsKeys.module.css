@@ -4,20 +4,139 @@
   margin: 0 auto;
 }
 
-.info {
-  padding: 12px 20px;
-  border-radius: 8px;
-  background: rgba(59, 130, 246, 0.06);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  font-size: 12px;
+/* ═══ Actions bar ═══ */
+
+.actions {
+  display: flex;
+  gap: 10px;
   margin-bottom: 20px;
-  line-height: 1.5;
 }
 
-.gridWrapper {
-  min-height: 300px;
+.btnAddLot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+
+.btnAddLot:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btnAddKey {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.08));
+  background: rgba(148, 163, 184, 0.04);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnAddKey:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--text-main);
+}
+
+/* ═══ KPI strip ═══ */
+
+.kpiStrip {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kpi {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: var(--surface, var(--bg-tertiary, rgba(148, 163, 184, 0.04)));
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.08));
+}
+
+.kpiLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.kpiValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.kpiValueSuccess {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--success, #22c55e);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiValueBlue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary, #3b82f6);
+}
+
+/* ═══ Empty state ═══ */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px dashed var(--border, rgba(148, 163, 184, 0.12));
+  background: rgba(148, 163, 184, 0.02);
+}
+
+.emptyText {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.emptyHint {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  max-width: 420px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ═══ Grid ═══ */
+
+.gridWrapper {
+  min-height: 200px;
+}
+
+/* ═══ Footer ═══ */
 
 .footer {
   display: flex;
@@ -33,7 +152,7 @@
   border-radius: 8px;
   border: 1px solid var(--border-light);
   background: var(--border-light);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
@@ -42,8 +161,7 @@
 }
 
 .btnBack:hover {
-  background: var(--border-light);
-  color: var(--text-main, var(--text-main));
+  color: var(--text-main);
 }
 
 .btnNext {

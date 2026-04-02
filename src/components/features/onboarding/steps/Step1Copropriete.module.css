@@ -24,7 +24,7 @@
 .label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -38,7 +38,7 @@
   border-radius: 8px;
   border: 1px solid var(--border-light);
   background: var(--border-light);
-  color: var(--text-main, var(--text-main));
+  color: var(--text-main);
   font-size: 14px;
   font-family: inherit;
   outline: none;
@@ -52,6 +52,121 @@
 .input::placeholder {
   color: var(--text-muted, var(--text-tertiary));
 }
+
+/* ═══ Address search ═══ */
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 36px;
+  padding-right: 36px;
+  width: 100%;
+}
+
+.searchSpinner {
+  position: absolute;
+  right: 12px;
+  color: var(--text-tertiary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.suggestions {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface, var(--bg-tertiary));
+  overflow: hidden;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: var(--text-main);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.suggestionItem:hover {
+  background: var(--surface-hover, rgba(148, 163, 184, 0.06));
+}
+
+.suggestionIcon {
+  color: var(--primary, #3b82f6);
+  flex-shrink: 0;
+}
+
+.selectedAddress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--primary, #3b82f6);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ═══ Period pills ═══ */
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.08));
+  background: var(--border-light, rgba(148, 163, 184, 0.04));
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pill:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--text-main);
+}
+
+.pillActive {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: var(--primary, #3b82f6);
+  font-weight: 600;
+}
+
+/* ═══ Form footer ═══ */
 
 .error {
   font-size: 11px;

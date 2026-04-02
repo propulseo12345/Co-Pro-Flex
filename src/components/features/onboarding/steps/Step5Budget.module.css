@@ -1,6 +1,6 @@
 /* src/components/features/onboarding/steps/Step5Budget.module.css */
 .container {
-  max-width: 780px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
@@ -37,168 +37,229 @@
   background: rgba(245, 158, 11, 0.1);
 }
 
-.categorySection {
-  margin-bottom: 20px;
+/* ═══ Lines list ═══ */
+
+.linesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.categoryHeader {
+.lineCard {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.08));
+  background: var(--surface, rgba(148, 163, 184, 0.04));
+}
+
+.lineHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-radius: 8px 8px 0 0;
-  background: var(--border-light);
-  border: 1px solid var(--border-light);
-  border-bottom: none;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.categoryName {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-main);
+.lineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.categoryTotal {
-  font-size: 13px;
+.lineLabel {
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-secondary);
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+  flex: 1;
 }
 
-.categoryLines {
-  border: 1px solid var(--border-light);
-  border-radius: 0 0 8px 8px;
-}
-
-.lineRow {
-  display: grid;
-  grid-template-columns: 1fr 160px 180px 40px;
-  gap: 8px;
-  align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.lineRow:last-child {
-  border-bottom: none;
-}
-
-.input {
-  padding: 7px 10px;
+.lineLabelInput {
+  flex: 1;
+  padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid var(--border-light);
   background: var(--border-light);
   color: var(--text-main);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
-  width: 100%;
 }
 
-.input:focus {
+.lineLabelInput:focus {
   border-color: rgba(59, 130, 246, 0.4);
 }
 
-.input::placeholder {
-  color: var(--text-tertiary);
+.lineRemove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
 }
 
-.inputMoney {
+.lineRemove:hover {
+  color: #ef4444;
+}
+
+.lineFields {
+  display: flex;
+  gap: 10px;
+}
+
+.amountWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.amountInput {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  background: var(--border-light);
+  color: var(--text-main);
+  font-size: 14px;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
   text-align: right;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.select {
-  padding: 7px 10px;
-  border-radius: 6px;
+.amountInput:focus {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.amountInput::placeholder {
+  color: var(--text-muted, var(--text-tertiary));
+}
+
+.amountSuffix {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.keySelect {
+  width: 180px;
+  padding: 8px 10px;
+  border-radius: 8px;
   border: 1px solid var(--border-light);
   background: var(--border-light);
   color: var(--text-main);
   font-size: 12px;
   font-family: inherit;
   outline: none;
-  width: 100%;
   cursor: pointer;
 }
 
-.select option {
+.keySelect option {
   background: var(--surface);
   color: var(--text-main);
 }
 
-.removeBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: none;
-  background: rgba(239, 68, 68, 0.08);
-  color: #f87171;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+/* ═══ Empty state ═══ */
+
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px dashed var(--border, rgba(148, 163, 184, 0.12));
 }
 
-.removeBtn:hover {
-  background: rgba(239, 68, 68, 0.15);
-}
+/* ═══ Add button + dropdown ═══ */
 
-.addLineBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px dashed var(--border-light);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: all 0.2s;
-}
-
-.addLineBtn:hover {
-  border-color: rgba(59, 130, 246, 0.3);
-  color: #60a5fa;
-}
-
-.addCategoryRow {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
+.addWrapper {
+  position: relative;
   margin-bottom: 24px;
 }
 
-.addCategoryInput {
-  composes: input;
-  flex: 1;
-}
-
-.addCategoryBtn {
-  padding: 8px 16px;
-  border-radius: 6px;
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
   border: none;
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  font-size: 12px;
+  background: #3b82f6;
+  color: white;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap;
 }
 
-.addCategoryBtn:hover {
-  background: rgba(59, 130, 246, 0.25);
+.addBtn:hover {
+  background: #2563eb;
 }
+
+.chevronOpen {
+  transform: rotate(180deg);
+  transition: transform 0.2s;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  min-width: 260px;
+  padding: 6px 0;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.12));
+  background: var(--surface, var(--bg-tertiary, #1a1d2e));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  color: var(--text-main);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dropdownItem:hover {
+  background: var(--surface-hover, rgba(148, 163, 184, 0.06));
+}
+
+.dropdownDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--border, rgba(148, 163, 184, 0.08));
+  margin: 4px 12px;
+}
+
+.dropdownCustomIcon {
+  color: var(--text-tertiary);
+}
+
+/* ═══ Total bar ═══ */
 
 .totalBar {
   display: flex;
@@ -211,19 +272,32 @@
   margin-bottom: 24px;
 }
 
+.totalLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .totalLabel {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-main);
 }
 
+.totalCount {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
 .totalAmount {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #60a5fa;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-variant-numeric: tabular-nums;
 }
+
+/* ═══ Footer ═══ */
 
 .footer {
   display: flex;
@@ -248,7 +322,6 @@
 }
 
 .btnBack:hover {
-  background: var(--border-light);
   color: var(--text-main);
 }
 
@@ -275,11 +348,4 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-}
-
-.emptyState {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-tertiary);
-  font-size: 13px;
 }

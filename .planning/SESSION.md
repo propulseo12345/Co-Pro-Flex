@@ -1,24 +1,31 @@
-# Session State — 2026-04-02 11:30
+# Session State — 2026-04-03 01:30
 
 ## Branch
 v2
 
 ## Completed This Session
-- Code review light theme: identifié 3 critiques, 4 importants, 4 mineurs
-- FOUC fix: script inline dans layout.tsx pour appliquer data-theme avant React
-- Overlay variables: --overlay-rgb (blanc/noir) remplace 311 rgba(255,255,255) dans 38 CSS modules
-- Inline styles: ~115 couleurs hardcodées remplacées par var(--xxx) dans 47 TSX
-- Finance-v2 supprimé: routes, composants, CSS module (code mort, -1500 lignes)
-- GestionnaireSidebar: hover fix + fallbacks retirés
-- ThemeToggle + ModuleSidebar: nettoyage code mort
+- Step1: autocomplétion adresse BAN/IGN + pills période construction
+- Migrations DB: annee_construction, exercice_debut, cabinet_id, is_resident, banque/iban/bic/initial_balance, onboarding_step/max_step
+- Alignement API: noms colonnes (buildings_count, siret, code, name, address_line1, prefers_email/paper)
+- Fix CoproContext: setCurrentCoproId fonctionnel (override local + cache + reload)
+- Step3: boutons +Lot/+Clé, modales, KPI, auto-création clé "Charges générales", auto-sync poids tantièmes
+- Step4: flow connexion bancaire GoCardless (API routes + hook) + saisie manuelle
+- Step5: dropdown postes prédéfinis (pick & choose, pas tous imposés)
+- Step6: flow 3 phases (config → preview dates éditables → création restants uniquement)
+- Persistance display:none (state conservé entre étapes)
+- Refactor onboarding: /onboarding (gestion) + /onboarding/[id] (wizard) + /onboarding/create
+- Persistance DB: onboarding_step/max_step remplace localStorage
+- Fix account_type enum (bank→asset, receivable→asset, revenue→income)
+- Récupération budgetId/periodId au mount du wizard (reprendre step 6+)
 
 ## Next Task
-Tester visuellement le light theme sur toutes les pages (dashboard, AG, finance, maintenance, copropriétaires). Vérifier contraste, lisibilité et modals.
+1. CHECK: vérifier que la création d'appels de fonds pendant l'onboarding ne crée que les restants (pas de doublons) — tester le flow complet
+2. FEATURE: ajouter la possibilité d'importer des archives/documents pendant l'onboarding (StepDocuments réactivé ou nouvelle étape)
 
 ## Blockers
-None
+- GoCardless API keys pas configurées (connexion bancaire non testable en prod)
 
 ## Key Context
-- ~50 couleurs inline restantes (37 preview ignorées, 13 edge-cases production)
-- Variables finance ajoutées dans globals.css (--finance-accent, --finance-success, etc.) mais pas encore utilisées — à exploiter si besoin
-- Build OK, 94 fichiers modifiés dans le commit 86799dc
+- Les étapes parallèles (Contrats, Documents, Carnet) sont masquées du wizard — à réintégrer proprement
+- 3 copros de test en base avec onboarding_step renseigné (2e34=step4, fd41=step6, 075c=step3)
+- La copro fd41 a des appels T3/T4 brouillon à 485€ — données de test nettoyées

@@ -230,7 +230,34 @@ export async function createLot(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: { id: data.id }, error: null };
+  // Auto-créer les lignes de clé pour toutes les clés existantes (basis=tantiemes → weight=tantiemes_generaux)
+  const lotId = data.id as string;
+  const { data: activeKeys } = await supabase
+    .from('repartition_keys')
+    .select('id, basis, coverage_mode')
+    .eq('copro_id', payload.copro_id)
+    .eq('is_active', true);
+
+  if (activeKeys && activeKeys.length > 0) {
+    const keyLines = (activeKeys as Array<{ id: string; basis: string; coverage_mode: string }>)
+      .filter(k => k.coverage_mode === 'all_lots')
+      .map(k => ({
+        copro_id: payload.copro_id,
+        key_id: k.id,
+        lot_id: lotId,
+        weight: k.basis === 'tantiemes'
+          ? (payload.tantiemes_generaux || 0)
+          : k.basis === 'surface'
+            ? (payload.surface || 0)
+            : 0,
+      }));
+
+    if (keyLines.length > 0) {
+      await supabase.from('repartition_key_lines').insert(keyLines);
+    }
+  }
+
+  return { data: { id: lotId }, error: null };
 }
 
 /**

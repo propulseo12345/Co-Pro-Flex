@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
 import {
   ensureAccountingPeriod,
   listRepartitionKeys,
   createOnboardingBudget,
 } from '@/lib/onboarding/api';
+import { POSTES_BUDGET_ORDONNES } from '@/lib/constants/budget-postes';
 import type { BudgetLineCreate } from '@/lib/onboarding/api';
 import styles from './Step5Budget.module.css';
 
@@ -22,35 +23,21 @@ interface LocalLine {
   label: string;
   amount: string;
   keyId: string;
+  color?: string;
 }
-
-interface Category {
-  name: string;
-  lines: LocalLine[];
-}
-
-const DEFAULT_CATEGORIES = [
-  'Charges courantes',
-  'Entretien',
-  'Assurances',
-  'Honoraires',
-];
 
 function makeId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
 export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      name: 'Charges courantes',
-      lines: [{ id: makeId(), label: '', amount: '', keyId: '' }],
-    },
-  ]);
-  const [newCategoryName, setNewCategoryName] = useState('');
+  const [lines, setLines] = useState<LocalLine[]>([]);
   const [keys, setKeys] = useState<Array<{ id: string; name: string }>>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [periodId, setPeriodId] = useState<string | null>(null);
+  const [defaultKeyId, setDefaultKeyId] = useState<string>('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -59,48 +46,77 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
         listRepartitionKeys(coproId),
         ensureAccountingPeriod(coproId, currentYear),
       ]);
-      if (keysRes.data) setKeys(keysRes.data);
+
+      const loadedKeys = keysRes.data || [];
+      setKeys(loadedKeys);
       if (periodRes.data) setPeriodId(periodRes.data.id);
+
+      const generalKey = loadedKeys.find(k =>
+        k.name.toLowerCase().includes('charges générales') ||
+        k.name.toLowerCase().includes('charges generales') ||
+        k.name.toLowerCase().includes('généraux') ||
+        k.name.toLowerCase().includes('général')
+      );
+      setDefaultKeyId(generalKey?.id || loadedKeys[0]?.id || '');
     }
     load();
   }, [coproId]);
 
-  const total = useMemo(() => {
-    return categories.reduce((sum, cat) => {
-      return sum + cat.lines.reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
-    }, 0);
-  }, [categories]);
-
-  const updateLine = useCallback((catIdx: number, lineId: string, field: keyof LocalLine, value: string) => {
-    setCategories(prev => prev.map((cat, ci) => {
-      if (ci !== catIdx) return cat;
-      return {
-        ...cat,
-        lines: cat.lines.map(l => l.id === lineId ? { ...l, [field]: value } : l),
-      };
-    }));
+  // Fermer le dropdown au clic extérieur
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const addLine = useCallback((catIdx: number) => {
-    setCategories(prev => prev.map((cat, ci) => {
-      if (ci !== catIdx) return cat;
-      return { ...cat, lines: [...cat.lines, { id: makeId(), label: '', amount: '', keyId: '' }] };
-    }));
+  // Postes déjà ajoutés (par id prédéfini)
+  const addedPosteIds = useMemo(() => new Set(lines.map(l => l.id)), [lines]);
+
+  // Postes disponibles dans le dropdown (pas encore ajoutés)
+  const availablePostes = useMemo(() =>
+    POSTES_BUDGET_ORDONNES.filter(p => !addedPosteIds.has(p.id)),
+  [addedPosteIds]);
+
+  const total = useMemo(() =>
+    lines.reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0),
+  [lines]);
+
+  const addPredefini = useCallback((posteId: string) => {
+    const poste = POSTES_BUDGET_ORDONNES.find(p => p.id === posteId);
+    if (!poste) return;
+    setLines(prev => [...prev, {
+      id: poste.id,
+      label: poste.label,
+      amount: '',
+      keyId: defaultKeyId,
+      color: poste.color,
+    }]);
+    setShowDropdown(false);
+  }, [defaultKeyId]);
+
+  const addCustom = useCallback(() => {
+    setLines(prev => [...prev, {
+      id: makeId(),
+      label: '',
+      amount: '',
+      keyId: defaultKeyId,
+    }]);
+    setShowDropdown(false);
+  }, [defaultKeyId]);
+
+  const updateLine = useCallback((id: string, field: 'amount' | 'keyId' | 'label', value: string) => {
+    setLines(prev => prev.map(l =>
+      l.id === id ? { ...l, [field]: value } : l
+    ));
   }, []);
 
-  const removeLine = useCallback((catIdx: number, lineId: string) => {
-    setCategories(prev => prev.map((cat, ci) => {
-      if (ci !== catIdx) return cat;
-      return { ...cat, lines: cat.lines.filter(l => l.id !== lineId) };
-    }));
+  const removeLine = useCallback((id: string) => {
+    setLines(prev => prev.filter(l => l.id !== id));
   }, []);
-
-  const addCategory = useCallback(() => {
-    const name = newCategoryName.trim();
-    if (!name) return;
-    setCategories(prev => [...prev, { name, lines: [{ id: makeId(), label: '', amount: '', keyId: '' }] }]);
-    setNewCategoryName('');
-  }, [newCategoryName]);
 
   const handleSkip = useCallback(async () => {
     if (!periodId) return;
@@ -111,21 +127,18 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
     if (!periodId) return;
     setIsSaving(true);
 
-    // Collect all valid lines
     const allLines: BudgetLineCreate[] = [];
     let order = 0;
-    for (const cat of categories) {
-      for (const line of cat.lines) {
-        const amount = parseFloat(line.amount);
-        if (line.label.trim() && amount > 0 && line.keyId) {
-          allLines.push({
-            label: line.label.trim(),
-            amount,
-            repartition_key_id: line.keyId,
-            category: cat.name,
-            sort_order: order++,
-          });
-        }
+    for (const line of lines) {
+      const amount = parseFloat(line.amount);
+      if (line.label.trim() && amount > 0 && line.keyId) {
+        allLines.push({
+          label: line.label.trim(),
+          amount,
+          repartition_key_id: line.keyId,
+          category: line.label.trim(),
+          sort_order: order++,
+        });
       }
     }
 
@@ -145,13 +158,13 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
 
     setIsSaving(false);
     onComplete(result.data?.budgetId || null, periodId);
-  }, [coproId, periodId, categories, onComplete]);
+  }, [coproId, periodId, lines, onComplete]);
 
   return (
     <div className={styles.container}>
       <StepHeader
         title="Budget prévisionnel"
-        description="Saisissez les postes de dépenses prévus pour l'exercice en cours. Chaque poste est rattaché à une clé de répartition."
+        description="Ajoutez les postes de dépenses prévus pour l'exercice. Chaque poste est rattaché à une clé de répartition."
       />
 
       <div className={styles.skipBanner}>
@@ -159,80 +172,114 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
         <button className={styles.skipBtn} onClick={handleSkip}>Passer cette étape</button>
       </div>
 
-      {categories.map((cat, catIdx) => {
-        const catTotal = cat.lines.reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
-        return (
-          <div key={cat.name} className={styles.categorySection}>
-            <div className={styles.categoryHeader}>
-              <span className={styles.categoryName}>{cat.name}</span>
-              <span className={styles.categoryTotal}>
-                {catTotal.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-              </span>
-            </div>
-            <div className={styles.categoryLines}>
-              {cat.lines.map(line => (
-                <div key={line.id} className={styles.lineRow}>
-                  <input
-                    className={styles.input}
-                    placeholder="Libellé du poste"
-                    value={line.label}
-                    onChange={e => updateLine(catIdx, line.id, 'label', e.target.value)}
-                  />
-                  <input
-                    className={`${styles.input} ${styles.inputMoney}`}
-                    placeholder="0.00"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={line.amount}
-                    onChange={e => updateLine(catIdx, line.id, 'amount', e.target.value)}
-                  />
+      {/* Liste des postes ajoutés */}
+      {lines.length > 0 && (
+        <div className={styles.linesList}>
+          {lines.map(line => {
+            const isPredefini = POSTES_BUDGET_ORDONNES.some(p => p.id === line.id);
+            return (
+              <div key={line.id} className={styles.lineCard}>
+                <div className={styles.lineHeader}>
+                  {line.color && (
+                    <span className={styles.lineDot} style={{ background: line.color }} />
+                  )}
+                  {isPredefini ? (
+                    <span className={styles.lineLabel}>{line.label}</span>
+                  ) : (
+                    <input
+                      className={styles.lineLabelInput}
+                      value={line.label}
+                      onChange={e => updateLine(line.id, 'label', e.target.value)}
+                      placeholder="Nom du poste"
+                    />
+                  )}
+                  <button className={styles.lineRemove} onClick={() => removeLine(line.id)} title="Supprimer">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <div className={styles.lineFields}>
+                  <div className={styles.amountWrapper}>
+                    <input
+                      className={styles.amountInput}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={line.amount}
+                      onChange={e => updateLine(line.id, 'amount', e.target.value)}
+                    />
+                    <span className={styles.amountSuffix}>€ / an</span>
+                  </div>
                   <select
-                    className={styles.select}
+                    className={styles.keySelect}
                     value={line.keyId}
-                    onChange={e => updateLine(catIdx, line.id, 'keyId', e.target.value)}
+                    onChange={e => updateLine(line.id, 'keyId', e.target.value)}
                   >
-                    <option value="">Clé de répartition</option>
+                    <option value="">Clé</option>
                     {keys.map(k => (
                       <option key={k.id} value={k.id}>{k.name}</option>
                     ))}
                   </select>
-                  <button
-                    className={styles.removeBtn}
-                    onClick={() => removeLine(catIdx, line.id)}
-                    title="Supprimer"
-                  >
-                    <Trash2 size={14} />
-                  </button>
                 </div>
-              ))}
-              <button className={styles.addLineBtn} onClick={() => addLine(catIdx)}>
-                <Plus size={14} /> Ajouter un poste
-              </button>
-            </div>
-          </div>
-        );
-      })}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-      <div className={styles.addCategoryRow}>
-        <input
-          className={styles.addCategoryInput}
-          placeholder="Nouvelle catégorie (ex: Eau, Chauffage...)"
-          value={newCategoryName}
-          onChange={e => setNewCategoryName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && addCategory()}
-        />
-        <button className={styles.addCategoryBtn} onClick={addCategory}>
-          <Plus size={14} /> Catégorie
+      {/* Empty state */}
+      {lines.length === 0 && (
+        <div className={styles.emptyState}>
+          Aucun poste ajouté. Cliquez sur le bouton ci-dessous pour commencer.
+        </div>
+      )}
+
+      {/* Bouton ajouter + dropdown */}
+      <div className={styles.addWrapper} ref={dropdownRef}>
+        <button
+          className={styles.addBtn}
+          onClick={() => setShowDropdown(!showDropdown)}
+        >
+          <Plus size={16} />
+          Ajouter un poste
+          <ChevronDown size={14} className={showDropdown ? styles.chevronOpen : ''} />
         </button>
+
+        {showDropdown && (
+          <div className={styles.dropdown}>
+            {availablePostes.map(poste => (
+              <button
+                key={poste.id}
+                className={styles.dropdownItem}
+                onClick={() => addPredefini(poste.id)}
+              >
+                <span className={styles.dropdownDot} style={{ background: poste.color }} />
+                <span>{poste.label}</span>
+              </button>
+            ))}
+            {availablePostes.length > 0 && <div className={styles.dropdownDivider} />}
+            <button className={styles.dropdownItem} onClick={addCustom}>
+              <Plus size={14} className={styles.dropdownCustomIcon} />
+              <span>Poste personnalisé</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className={styles.totalBar}>
-        <span className={styles.totalLabel}>Total budget prévisionnel</span>
-        <span className={styles.totalAmount}>
-          {total.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-        </span>
-      </div>
+      {/* Total */}
+      {lines.length > 0 && (
+        <div className={styles.totalBar}>
+          <div className={styles.totalLeft}>
+            <span className={styles.totalLabel}>Total budget prévisionnel</span>
+            <span className={styles.totalCount}>
+              {lines.length} poste{lines.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          <span className={styles.totalAmount}>
+            {total.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+          </span>
+        </div>
+      )}
 
       <div className={styles.footer}>
         <button className={styles.btnBack} onClick={onBack}>Retour</button>

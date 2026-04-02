@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Building2 } from 'lucide-react';
+import { Search, MapPin, Loader2 } from 'lucide-react';
+import { useGoogleMapsAutocomplete } from '@/features/ag/new/hooks/useGoogleMapsAutocomplete';
 import { StepHeader } from '../shared/StepHeader';
 import { createCopropriete } from '@/lib/onboarding/api';
 import styles from './Step1Copropriete.module.css';
+
+const PERIODES_CONSTRUCTION = [
+  { value: 'avant-1965', label: 'Avant 1965' },
+  { value: '1965-1990', label: '1965 – 1990' },
+  { value: '1990-2012', label: '1990 – 2012' },
+  { value: 'apres-2012', label: 'Après 2012' },
+] as const;
+
+type PeriodeConstruction = typeof PERIODES_CONSTRUCTION[number]['value'];
 
 interface Step1Props {
   onComplete: (coproId: string, coproName: string) => void;
@@ -17,10 +27,31 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
   const [codePostal, setCodePostal] = useState('');
   const [ville, setVille] = useState('');
   const [nombreBatiments, setNombreBatiments] = useState('1');
-  const [anneeConstruction, setAnneeConstruction] = useState('');
+  const [periodeConstruction, setPeriodeConstruction] = useState<PeriodeConstruction | ''>('');
   const [siretSyndic, setSiretSyndic] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handlePlaceSelect = useCallback((place: { rue: string; codePostal: string; ville: string }) => {
+    setAdresse(place.rue);
+    setCodePostal(place.codePostal);
+    setVille(place.ville);
+    setErrors(prev => {
+      const next = { ...prev };
+      delete next.adresse;
+      delete next.codePostal;
+      delete next.ville;
+      return next;
+    });
+  }, []);
+
+  const {
+    searchValue,
+    suggestions,
+    isSearching,
+    setSearchValue,
+    selectSuggestion,
+  } = useGoogleMapsAutocomplete({ onPlaceSelect: handlePlaceSelect });
 
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
@@ -45,9 +76,9 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
       address: adresse.trim(),
       city: ville.trim(),
       postal_code: codePostal.trim(),
-      nombre_batiments: parseInt(nombreBatiments, 10) || 1,
-      annee_construction: anneeConstruction ? parseInt(anneeConstruction, 10) : undefined,
-      siret_syndic: siretSyndic || undefined,
+      buildings_count: parseInt(nombreBatiments, 10) || 1,
+      annee_construction: periodeConstruction || undefined,
+      siret: siretSyndic || undefined,
     });
     setIsSaving(false);
 
@@ -58,7 +89,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
     if (data) {
       onComplete(data.id, data.name);
     }
-  }, [validate, existingCoproId, nom, adresse, ville, codePostal, nombreBatiments, anneeConstruction, siretSyndic, onComplete]);
+  }, [validate, existingCoproId, nom, adresse, ville, codePostal, nombreBatiments, periodeConstruction, siretSyndic, onComplete]);
 
   return (
     <div>
@@ -81,12 +112,38 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
 
         <div className={styles.field}>
           <label className={styles.label}>Adresse <span className={styles.required}>*</span></label>
-          <input
-            className={styles.input}
-            value={adresse}
-            onChange={e => setAdresse(e.target.value)}
-            placeholder="12 rue des Fleurs"
-          />
+          <div className={styles.searchWrapper}>
+            <Search size={16} className={styles.searchIcon} />
+            <input
+              className={`${styles.input} ${styles.searchInput}`}
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              placeholder="Rechercher une adresse..."
+            />
+            {isSearching && <Loader2 size={16} className={styles.searchSpinner} />}
+          </div>
+          {suggestions.length > 0 && (
+            <ul className={styles.suggestions}>
+              {suggestions.map(s => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    className={styles.suggestionItem}
+                    onClick={() => selectSuggestion(s)}
+                  >
+                    <MapPin size={14} className={styles.suggestionIcon} />
+                    <span>{s.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {adresse && (
+            <div className={styles.selectedAddress}>
+              <MapPin size={14} />
+              <span>{adresse}, {codePostal} {ville}</span>
+            </div>
+          )}
           {errors.adresse && <span className={styles.error}>{errors.adresse}</span>}
         </div>
 
@@ -125,16 +182,19 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
             />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>Année de construction</label>
-            <input
-              className={styles.input}
-              type="number"
-              min="1800"
-              max="2026"
-              value={anneeConstruction}
-              onChange={e => setAnneeConstruction(e.target.value)}
-              placeholder="1985"
-            />
+            <label className={styles.label}>Période de construction</label>
+            <div className={styles.pills}>
+              {PERIODES_CONSTRUCTION.map(p => (
+                <button
+                  key={p.value}
+                  type="button"
+                  className={`${styles.pill} ${periodeConstruction === p.value ? styles.pillActive : ''}`}
+                  onClick={() => setPeriodeConstruction(prev => prev === p.value ? '' : p.value)}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
