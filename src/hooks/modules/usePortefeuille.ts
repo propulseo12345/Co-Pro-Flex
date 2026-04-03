@@ -264,7 +264,7 @@ export function usePortefeuille(): UsePortefeuilleReturn {
             budgetRestant: 0,
             budgetAlerteRisque: false,
             mouvementsNonRapproches: 0,
-            dernierRapprochement: null,
+            dernierRapprochement: undefined,
             prochaineAG: undefined,
             alertes: [],
             criticalityScore: 0,
