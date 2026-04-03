@@ -11,9 +11,6 @@ import type {
 } from './types';
 
 import {
-  MOCK_APPELS_EN_ATTENTE,
-  MOCK_FACTURES_EN_ATTENTE,
-  FOURNISSEURS_CONNUS,
   MOTS_CLES_DETECTION,
   HEURISTIQUES_LIBELLE,
 } from './constants';
@@ -64,12 +61,48 @@ export function calculerSoldesAvecValidation(
   };
 }
 
-export function genererSuggestions(mouvement: MouvementBancaire): SuggestionCategorie[] {
+interface AppelEnAttente {
+  id: string;
+  coproprietaire: string;
+  montant: number;
+  periode: string;
+}
+
+interface FactureEnAttente {
+  id: string;
+  fournisseur: string;
+  montant: number;
+  description: string;
+}
+
+interface FournisseurConnu {
+  nom: string;
+  compte: string;
+  label: string;
+  motsClés: string[];
+}
+
+interface GenererSuggestionsOptions {
+  appelsEnAttente?: AppelEnAttente[];
+  facturesEnAttente?: FactureEnAttente[];
+  fournisseursConnus?: FournisseurConnu[];
+}
+
+export function genererSuggestions(
+  mouvement: MouvementBancaire,
+  options: GenererSuggestionsOptions = {}
+): SuggestionCategorie[] {
+  const {
+    appelsEnAttente = [],
+    facturesEnAttente = [],
+    fournisseursConnus = [],
+  } = options;
+
   const suggestions: SuggestionCategorie[] = [];
   const libelleLower = mouvement.libelle.toLowerCase();
 
   if (mouvement.type === 'ENTREE') {
-    const appelCorrespondant = MOCK_APPELS_EN_ATTENTE.find(
+    const appelCorrespondant = appelsEnAttente.find(
       a => Math.abs(a.montant - mouvement.montant) < 0.01
     );
     if (appelCorrespondant) {
@@ -92,11 +125,11 @@ export function genererSuggestions(mouvement: MouvementBancaire): SuggestionCate
   }
 
   if (mouvement.type === 'SORTIE') {
-    const factureCorrespondante = MOCK_FACTURES_EN_ATTENTE.find(
+    const factureCorrespondante = facturesEnAttente.find(
       f => Math.abs(f.montant - Math.abs(mouvement.montant)) < 0.01
     );
     if (factureCorrespondante) {
-      const fournisseur = FOURNISSEURS_CONNUS.find(
+      const fournisseur = fournisseursConnus.find(
         f => f.nom.toUpperCase() === factureCorrespondante.fournisseur.toUpperCase()
       );
       suggestions.push({
@@ -117,7 +150,7 @@ export function genererSuggestions(mouvement: MouvementBancaire): SuggestionCate
     }
   }
 
-  for (const fournisseur of FOURNISSEURS_CONNUS) {
+  for (const fournisseur of fournisseursConnus) {
     const motTrouve = fournisseur.motsClés.find(mot => libelleLower.includes(mot));
     if (motTrouve) {
       if (!suggestions.some(s => s.entiteReference?.nom === fournisseur.nom)) {
