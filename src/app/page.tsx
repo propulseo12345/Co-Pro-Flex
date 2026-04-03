@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { DM_Serif_Display, Instrument_Serif, Inter } from 'next/font/google';
 import styles from './page.module.css';
 import { DiscoverSection } from '@/components/features/accueil/DiscoverSection';
@@ -31,7 +32,7 @@ export default function AccueilPage() {
           {/* Navigation */}
           <nav className={styles.nav}>
             <div className={styles.logo}>
-              CoProFlex
+              <Image src="/CoProFlex_logo_transparent.png" alt="CoProFlex" width={300} height={200} priority style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
             </div>
 
             <div className={styles.navLinks}>

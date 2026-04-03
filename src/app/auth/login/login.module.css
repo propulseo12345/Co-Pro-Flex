@@ -22,16 +22,13 @@
   margin-bottom: 32px;
 }
 
-.logo {
-  font-size: 32px;
-  font-weight: 800;
-  color: #052641;
-  margin: 0 0 4px;
-  letter-spacing: -0.5px;
-}
-
-.logoAccent {
-  color: #55AC63;
+.logoImg {
+  margin: 0 auto 8px;
+  display: block;
+  height: auto;
+  width: 340px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .subtitle {

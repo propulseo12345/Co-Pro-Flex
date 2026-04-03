@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import styles from './login.module.css';
 
@@ -31,7 +32,7 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/dashboard');
+        router.push('/portefeuille');
         router.refresh();
       }
     } catch {
@@ -57,7 +58,7 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h1 className={styles.logo}>CoPro<span className={styles.logoAccent}>Flex</span></h1>
+          <Image src="/CoProFlex_logo_transparent.png" alt="CoProFlex" width={300} height={200} priority className={styles.logoImg} />
           <p className={styles.subtitle}>Connexion à votre espace</p>
         </div>
 

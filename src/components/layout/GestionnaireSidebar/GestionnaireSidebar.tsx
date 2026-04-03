@@ -36,18 +36,39 @@ export default function GestionnaireSidebar() {
       <nav className={styles.nav}>
         {GESTIONNAIRE_MODULES.map((mod) => {
           const Icon = mod.icon;
-          const isActive = pathname === mod.href || pathname.startsWith(mod.href + '/');
+          const isModuleActive = pathname === mod.href
+            || pathname.startsWith(mod.href + '/')
+            || mod.subPages?.some(sp => pathname === sp.href || pathname.startsWith(sp.href + '/'));
 
           return (
-            <Link
-              key={mod.id}
-              href={mod.href}
-              className={clsx(styles.navItem, isActive && styles.navItemActive)}
-              title={collapsed ? mod.label : undefined}
-            >
-              <Icon size={18} className={styles.navIcon} />
-              {!collapsed && <span className={styles.navLabel}>{mod.label}</span>}
-            </Link>
+            <div key={mod.id}>
+              <Link
+                href={mod.href}
+                className={clsx(styles.navItem, isModuleActive && styles.navItemActive)}
+                title={collapsed ? mod.label : undefined}
+              >
+                <Icon size={18} className={styles.navIcon} />
+                {!collapsed && <span className={styles.navLabel}>{mod.label}</span>}
+              </Link>
+              {isModuleActive && !collapsed && mod.subPages && mod.subPages.length > 0 && (
+                <div className={styles.subPages}>
+                  {mod.subPages.map((sp) => {
+                    const SubIcon = sp.icon;
+                    const isSubActive = pathname === sp.href || pathname.startsWith(sp.href + '/');
+                    return (
+                      <Link
+                        key={sp.href}
+                        href={sp.href}
+                        className={clsx(styles.subItem, isSubActive && styles.subItemActive)}
+                      >
+                        {SubIcon && <SubIcon size={14} className={styles.subIcon} />}
+                        <span>{sp.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>

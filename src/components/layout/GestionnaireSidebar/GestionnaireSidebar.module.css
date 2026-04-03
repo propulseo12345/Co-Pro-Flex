@@ -145,6 +145,40 @@
 }
 
 /* ============================== */
+/* SUB PAGES                      */
+/* ============================== */
+.subPages {
+  overflow: hidden;
+}
+
+.subItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px 7px 42px;
+  color: var(--nav-text-muted);
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.12s;
+  border-left: 3px solid transparent;
+}
+
+.subItem:hover {
+  background: var(--surface-hover);
+  color: var(--nav-text);
+}
+
+.subItemActive {
+  color: var(--nav-accent);
+  font-weight: 500;
+}
+
+.subIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* ============================== */
 /* FOOTER                         */
 /* ============================== */
 .footer {

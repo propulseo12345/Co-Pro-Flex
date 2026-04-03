@@ -35,7 +35,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('coproflex-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}})()`,
+            __html: `(function(){try{var t=localStorage.getItem('coproflex-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else document.documentElement.setAttribute('data-theme','light')}catch(e){document.documentElement.setAttribute('data-theme','light')}})()`,
           }}
         />
       </head>
