@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import type {
   ICoproprietePortefeuille,
   IPortefeuilleKPIs,
@@ -228,15 +229,66 @@ export interface UsePortefeuilleReturn {
 
 export function usePortefeuille(): UsePortefeuilleReturn {
   const [recherche, setRecherche] = useState('');
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dbCopros, setDbCopros] = useState<ICoproprietePortefeuille[] | null>(null);
+
+  // Charger les copros depuis Supabase
+  useEffect(() => {
+    async function fetchCopros() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('copros')
+          .select('id, name, address, city, postal_code')
+          .order('created_at', { ascending: true });
+
+        if (error || !data || data.length === 0) {
+          // Fallback sur les mocks
+          setDbCopros(null);
+        } else {
+          // Mapper les données Supabase vers le format portefeuille
+          const mapped: ICoproprietePortefeuille[] = data.map((c) => ({
+            id: c.id,
+            nom: c.name,
+            adresse: [c.address, c.city, c.postal_code].filter(Boolean).join(', ') || 'Adresse non renseignée',
+            nombreLots: 0,
+            exerciceCourant: new Date().getFullYear(),
+            soldeDisponible: 0,
+            totalImpayes: 0,
+            nombreImpayes: 0,
+            tauxRecouvrement: 100,
+            facturesEnRetard: 0,
+            montantFacturesRetard: 0,
+            budgetTotal: 0,
+            budgetConsomme: 0,
+            budgetRestant: 0,
+            budgetAlerteRisque: false,
+            mouvementsNonRapproches: 0,
+            dernierRapprochement: null,
+            prochaineAG: undefined,
+            alertes: [],
+            criticalityScore: 0,
+          }));
+          setDbCopros(mapped);
+        }
+      } catch {
+        setDbCopros(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchCopros();
+  }, []);
 
   const coproprietes = useMemo(() => {
+    if (dbCopros) return dbCopros;
+    // Fallback sur les mocks
     const enriched = MOCK_COPROPRIETES.map(c => ({
       ...c,
       criticalityScore: calculateCriticalityScore(c),
     }));
     return enriched.sort((a, b) => b.criticalityScore - a.criticalityScore);
-  }, []);
+  }, [dbCopros]);
 
   const filteredCoproprietes = useMemo(() => {
     if (!recherche) return coproprietes;
