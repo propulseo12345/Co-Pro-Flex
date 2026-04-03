@@ -397,48 +397,14 @@ export function parseCSVBancaire(csvContent: string): MouvementBancaireBase[] {
 
 export function genererSuggestionsRapprochement(
   mouvement: MouvementBancaire,
-  ecritures: EcritureComptable[]
+  _ecritures: EcritureComptable[]
 ): SuggestionRapprochement[] {
-  const suggestions: SuggestionRapprochement[] = [];
-  const montantMvt = Math.abs(mouvement.montant);
-  const dateMvt = new Date(mouvement.date);
-
-  for (const ecriture of ecritures) {
-    if (ecriture.rapproche) continue;
-
-    const montantEc = ecriture.credit > 0 ? ecriture.credit : ecriture.debit;
-    const dateEc = new Date(ecriture.date);
-    const ecart = Math.abs(montantMvt - montantEc);
-    const ecartJours = Math.abs(dateMvt.getTime() - dateEc.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (ecart < 0.01 && ecartJours <= 3) {
-      suggestions.push({
-        ecritureId: ecriture.id,
-        confiance: 'haute',
-        raison: 'Montant identique et dates proches',
-        ecart: 0,
-      });
-    } else if (ecart < 0.01 && ecartJours <= 15) {
-      suggestions.push({
-        ecritureId: ecriture.id,
-        confiance: 'moyenne',
-        raison: 'Montant identique',
-        ecart: 0,
-      });
-    } else if (ecart / montantMvt < 0.05 && ecartJours <= 7) {
-      suggestions.push({
-        ecritureId: ecriture.id,
-        confiance: 'basse',
-        raison: `Montant proche (écart: ${ecart.toFixed(2)} €)`,
-        ecart,
-      });
-    }
-  }
-
-  return suggestions.sort((a, b) => {
-    const ordre = { haute: 0, moyenne: 1, basse: 2 };
-    return ordre[a.confiance] - ordre[b.confiance];
-  });
+  // Legacy wrapper — le rapprochement passe maintenant par le matching engine
+  // avec des factures/paiements Supabase. Cette fonction retourne un tableau vide
+  // quand appelée avec des écritures. Le vrai rapprochement est dans matching-engine.ts
+  void _ecritures;
+  void mouvement;
+  return [];
 }
 
 export function calculerEcartSoldes(

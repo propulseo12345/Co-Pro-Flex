@@ -410,6 +410,7 @@ export function useMouvementsBancairesPage() {
         if (currentCoproId && openPeriod) {
           const result = await importMutation.mutate({
             period_id: openPeriod.id,
+            account_id: compteActuel?.id || '',
             movements: mouvementsImportes.map(m => ({
               bank_date: m.date,
               value_date: (m as { dateValeur?: string }).dateValeur || m.date,

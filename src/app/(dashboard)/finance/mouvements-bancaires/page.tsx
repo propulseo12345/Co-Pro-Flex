@@ -178,7 +178,6 @@ export default function MouvementsBancairesPage() {
           {hook.activeTab === 'rapprochement' && (
             <SplitReconciliation
               suggestions={hook.suggestionsRapprochementBatch}
-              ecritures={hook.ecrituresComptables}
               onApply={hook.handleBatchRapprocher}
               isMutating={hook.isMutating}
               ecartSoldes={hook.ecartSoldes?.ecart ?? 0}
