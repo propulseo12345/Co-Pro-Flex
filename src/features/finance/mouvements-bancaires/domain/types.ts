@@ -130,9 +130,11 @@ export interface EcritureComptable {
 }
 
 export interface SuggestionRapprochement {
-  ecritureId: string;
+  targetType: 'supplier_payment' | 'payment' | 'ecriture';
+  targetId: string;
+  label: string;
+  montant: number;
   confiance: 'haute' | 'moyenne' | 'basse';
-  raison: string;
   ecart: number;
 }
 
@@ -180,3 +182,41 @@ export interface ICompteComptable {
 
 export type WorkflowMode = 'table' | 'workflow';
 export type WorkflowTab = 'import' | 'categorisation' | 'rapprochement' | 'cloture';
+
+// Types pour les données Supabase (matching/rapprochement)
+export interface SupplierForMatching {
+  id: string;
+  name: string;
+}
+
+export interface InvoiceForMatching {
+  id: string;
+  supplier_id: string | null;
+  supplier_name: string | null;
+  invoice_number: string | null;
+  invoice_date: string;
+  due_date: string | null;
+  label: string | null;
+  total_amount: number;
+  status: string;
+}
+
+export interface PaymentForMatching {
+  id: string;
+  lot_id: string | null;
+  amount: number;
+  payment_date: string;
+  method: string;
+  reference: string | null;
+}
+
+export interface MatchingContext {
+  suppliers: SupplierForMatching[];
+  pendingInvoices: InvoiceForMatching[];
+  allMouvements: MouvementBancaireBase[];
+}
+
+export interface RapprochementContext {
+  pendingInvoices: InvoiceForMatching[];
+  unmatchedPayments: PaymentForMatching[];
+}
