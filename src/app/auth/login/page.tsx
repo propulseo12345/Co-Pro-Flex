@@ -57,7 +57,7 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h1 className={styles.title}>CoProFlex</h1>
+          <h1 className={styles.logo}>CoPro<span className={styles.logoAccent}>Flex</span></h1>
           <p className={styles.subtitle}>Connexion à votre espace</p>
         </div>
 
@@ -108,6 +108,12 @@ export default function LoginPage() {
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
+
+        <div className={styles.divider}>
+          <span className={styles.dividerLine} />
+          <span className={styles.dividerText}>Démo</span>
+          <span className={styles.dividerLine} />
+        </div>
 
         <div className={styles.demo}>
           <p className={styles.demoTitle}>Comptes de démonstration</p>
