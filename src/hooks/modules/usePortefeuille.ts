@@ -281,13 +281,7 @@ export function usePortefeuille(): UsePortefeuilleReturn {
   }, []);
 
   const coproprietes = useMemo(() => {
-    if (dbCopros) return dbCopros;
-    // Fallback sur les mocks
-    const enriched = MOCK_COPROPRIETES.map(c => ({
-      ...c,
-      criticalityScore: calculateCriticalityScore(c),
-    }));
-    return enriched.sort((a, b) => b.criticalityScore - a.criticalityScore);
+    return dbCopros ?? [];
   }, [dbCopros]);
 
   const filteredCoproprietes = useMemo(() => {
