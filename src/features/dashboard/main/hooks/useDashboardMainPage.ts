@@ -12,6 +12,8 @@ import { DASHBOARD_MAX_PRIORITIES, DASHBOARD_MAX_ACTIVITIES } from '@/lib/featur
 
 export interface KpisData {
   current_balance: number;
+  tresorerie_courante?: number;
+  tresorerie_travaux?: number;
   unpaid_total: number;
   next_ag_date: string | null;
   next_ag_id: string | null;

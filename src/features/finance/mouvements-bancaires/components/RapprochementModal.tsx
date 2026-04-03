@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { ArrowLeftRight, CheckCircle, Sparkles, ChevronDown, Send } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeftRight, CheckCircle, Sparkles, Send } from 'lucide-react';
 import type {
   MouvementBancaire,
   SuggestionRapprochement,
-  EcritureComptable,
 } from '../domain/types';
 import styles from '../../../../app/(dashboard)/finance/mouvements-bancaires/mouvements-bancaires.module.css';
 
@@ -13,9 +12,8 @@ interface RapprochementModalProps {
   isOpen: boolean;
   mouvement: MouvementBancaire | null;
   suggestions: SuggestionRapprochement[];
-  ecritures: EcritureComptable[];
   onClose: () => void;
-  onRapprocher: (ecritureId: string) => void;
+  onRapprocher: (targetId: string, targetType?: string) => void;
   isMutating: boolean;
 }
 
@@ -23,16 +21,11 @@ export function RapprochementModal({
   isOpen,
   mouvement,
   suggestions,
-  ecritures,
   onClose,
   onRapprocher,
   isMutating,
 }: RapprochementModalProps) {
-  const [selectedEcritureId, setSelectedEcritureId] = useState('');
-
-  const ecrituresNonRapprochees = useMemo(() => {
-    return ecritures.filter(ec => !ec.rapproche);
-  }, [ecritures]);
+  const [selectedTargetId, setSelectedTargetId] = useState('');
 
   if (!isOpen || !mouvement) return null;
 
@@ -40,23 +33,18 @@ export function RapprochementModal({
     n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
 
   const bestSuggestion = suggestions.length > 0 ? suggestions[0] : null;
-  const ecritureSelectionnee = selectedEcritureId
-    ? ecritures.find(ec => ec.id === selectedEcritureId)
-    : bestSuggestion
-      ? ecritures.find(ec => ec.id === bestSuggestion.ecritureId)
-      : null;
-
-  const activeEcritureId = selectedEcritureId || bestSuggestion?.ecritureId || '';
+  const activeTargetId = selectedTargetId || bestSuggestion?.targetId || '';
+  const activeSuggestion = suggestions.find(s => s.targetId === activeTargetId);
 
   const handleValidate = () => {
-    if (activeEcritureId) {
-      onRapprocher(activeEcritureId);
-      setSelectedEcritureId('');
+    if (activeTargetId) {
+      onRapprocher(activeTargetId, activeSuggestion?.targetType);
+      setSelectedTargetId('');
     }
   };
 
   const handleClose = () => {
-    setSelectedEcritureId('');
+    setSelectedTargetId('');
     onClose();
   };
 
@@ -91,12 +79,6 @@ export function RapprochementModal({
                 {mouvement.type === 'ENTREE' ? '+' : ''}{formatMontant(mouvement.montant)}
               </span>
             </div>
-            {mouvement.compteComptable && (
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Catégorie</span>
-                <span className={styles.infoValue}>{mouvement.compteComptable}</span>
-              </div>
-            )}
           </div>
 
           {/* Suggestions du moteur */}
@@ -108,29 +90,27 @@ export function RapprochementModal({
               </div>
               <div className={styles.suggestionsList}>
                 {suggestions.map(suggestion => {
-                  const ecriture = ecritures.find(ec => ec.id === suggestion.ecritureId);
-                  if (!ecriture) return null;
-                  const isSelected = activeEcritureId === suggestion.ecritureId;
+                  const isSelected = activeTargetId === suggestion.targetId;
 
                   return (
                     <div
-                      key={suggestion.ecritureId}
+                      key={suggestion.targetId}
                       className={`${styles.suggestionCard} ${isSelected ? styles.suggestionCardSelected : ''}`}
-                      onClick={() => setSelectedEcritureId(suggestion.ecritureId)}
+                      onClick={() => setSelectedTargetId(suggestion.targetId)}
                     >
                       <div className={styles.suggestionCardHeader}>
                         <span className={styles.suggestionCompte}>
                           <ArrowLeftRight size={12} />
-                          {ecriture.compte} — {ecriture.piece}
+                          {suggestion.label}
+                        </span>
+                        <span className={`${styles.badge} ${suggestion.confiance === 'haute' ? styles.badgeSuccess : styles.badgeWarning}`}>
+                          {suggestion.confiance}
                         </span>
                       </div>
-                      <div className={styles.suggestionRaison}>
-                        {suggestion.raison}
-                      </div>
                       <div className={styles.infoRow}>
-                        <span className={styles.infoLabel}>Montant écriture</span>
+                        <span className={styles.infoLabel}>Montant</span>
                         <span className={styles.infoValue}>
-                          {formatMontant(ecriture.debit > 0 ? ecriture.debit : ecriture.credit)}
+                          {formatMontant(suggestion.montant)}
                         </span>
                       </div>
                       {suggestion.ecart > 0.01 && (
@@ -153,41 +133,23 @@ export function RapprochementModal({
             </div>
           )}
 
-          {/* Sélection manuelle */}
-          <div className={styles.formGroup}>
-            <label>
-              {suggestions.length > 0
-                ? 'Ou sélectionner manuellement une écriture'
-                : 'Sélectionner une écriture comptable'}
-            </label>
-            <select
-              value={selectedEcritureId}
-              onChange={(e) => setSelectedEcritureId(e.target.value)}
-            >
-              <option value="">
-                {bestSuggestion ? 'Utiliser la suggestion ci-dessus' : 'Choisir une écriture...'}
-              </option>
-              {ecrituresNonRapprochees.map(ec => (
-                <option key={ec.id} value={ec.id}>
-                  {ec.date} — {ec.compte} — {ec.libelle} ({formatMontant(ec.debit > 0 ? ec.debit : ec.credit)})
-                </option>
-              ))}
-            </select>
-          </div>
+          {suggestions.length === 0 && (
+            <div className={styles.mouvementInfo}>
+              <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+                Aucune correspondance automatique trouvée pour ce mouvement.
+              </p>
+            </div>
+          )}
 
-          {/* Résumé du rapprochement */}
-          {ecritureSelectionnee && (
+          {/* Résumé */}
+          {activeSuggestion && (
             <div className={styles.mouvementInfo}>
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Rapprochement</span>
                 <span className={styles.infoValue}>
                   <ArrowLeftRight size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                  {ecritureSelectionnee.compte} — {ecritureSelectionnee.piece}
+                  {activeSuggestion.label}
                 </span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Écriture</span>
-                <span className={styles.infoValue}>{ecritureSelectionnee.libelle}</span>
               </div>
             </div>
           )}
@@ -200,7 +162,7 @@ export function RapprochementModal({
           <button
             className={styles.saveButton}
             onClick={handleValidate}
-            disabled={!activeEcritureId || isMutating}
+            disabled={!activeTargetId || isMutating}
           >
             <Send size={18} />
             {isMutating ? 'Validation...' : 'Valider le rapprochement'}

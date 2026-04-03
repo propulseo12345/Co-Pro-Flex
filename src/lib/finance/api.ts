@@ -1538,24 +1538,6 @@ export async function listBankAccounts(coproId: string): Promise<ApiResult<BankA
   };
 }
 
-export interface SupplierBasic {
-  id: string;
-  name: string;
-  copro_id: string;
-}
-
-export async function listSuppliers(coproId: string): Promise<ApiResult<SupplierBasic[]>> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase
-    .from('suppliers')
-    .select('id, name, copro_id')
-    .eq('copro_id', coproId)
-    .eq('is_active', true);
-
-  if (error) return { data: null, error: error.message };
-  return { data: (data || []) as SupplierBasic[], error: null };
-}
-
 export interface PendingInvoice {
   id: string;
   copro_id: string;

@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm -f test-ag-roles.mjs debug-ag-roles.html)"
+      "Bash(rm -f test-ag-roles.mjs debug-ag-roles.html)",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(npx next:*)"
     ],
     "deny": [],
     "ask": []
