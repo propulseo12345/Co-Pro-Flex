@@ -1,22 +1,24 @@
-# Session State — 2026-04-03 23:55
+# Session State — 2026-04-04 01:05
 
 ## Branch
 v2
 
 ## Completed This Session
-- Fix soldes copropriétaires: v_coproprietaires_overview basé sur v_lot_balance (ledger) au lieu de v_owner_financial_summary (appels de fonds)
-- Fix trésorerie dashboard: v_dashboard_kpis cherche codes LIKE '512%'/'502%' au lieu de code exact (compat onboarding 512000/512100)
-- LP illustrations: nouvelles images hero (gauche+droite) converties WebP lossless + illustration accompagnement WebP
-- LP hero: taille illustrations ×1.95, image gauche décalée -50px
-- Fix sidebar: lien Landing Page corrigé → / avec target _blank
+- Toggle dark/light demos LP: context React + variables CSS dans demo-shared.module.css, 8 composants demo migrés
+- Preview da-preview.html: toggle dark/light ajouté avec palette light
+- Illustrations hero: tailles en vw (responsive zoom), agrandies 3x +10%, décalée gauche -30px
+- Demo frame: réduit de 10% (810x468)
+- Textes LP: tirets longs supprimés, "personnes réelles" → "professionnels"
+- Logo: agrandi 2x +20% (101px)
+- Hero content: monté de 30px, demo descendue de 30px
 
 ## Next Task
-Nettoyer fichiers inutiles dans public/velorah/illustrations/ (illustration-support.png/.svg, illustrations-sides.png, illustration-haussmann-left/garden-right anciens)
+Commit + push + deploy Vercel des ajustements LP (tailles images, textes, logo, spacing)
 
 ## Blockers
 None
 
 ## Key Context
-- v_lot_balance en base a des colonnes différentes du fichier migration local (balance vs solde, inclut coproprietaire_id)
-- Next.js Image optimization détruit la transparence WebP → utiliser unoptimized prop
-- Fichier migration locale 20260403_fix_coproprietaires_solde_ledger.sql corrigé mais décalé vs v_lot_balance réelle en base
+- DemoThemeProvider enveloppe DiscoverSection + 3 FeatureGrid dans page.tsx, light mode par défaut
+- Les illustrations utilisent vw + max-width + aspect-ratio pour stabilité au zoom
+- FeatureGrid est resté Server Component, DemoThemeToggle/Wrapper sont des Client Components séparés

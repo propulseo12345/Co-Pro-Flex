@@ -103,8 +103,8 @@ export function DiscoverSection() {
         </h1>
 
         <p className={styles.heroDesc}>
-          AG en quelques clics, finances en temps réel, documents centralisés
-          — une seule plateforme pour le gestionnaire et les copropriétaires.
+          AG en quelques clics, finances en temps réel, documents centralisés.
+          Une seule plateforme pour le gestionnaire et les copropriétaires.
           Fini les appels, les mails perdus et les ressaisies.
         </p>
 

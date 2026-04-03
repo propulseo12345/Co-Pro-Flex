@@ -27,7 +27,7 @@ export function Support() {
               Un accompagnement humain, de vrais experts
             </h2>
             <p className={styles.description}>
-              De la migration de vos données à votre première AG en ligne, notre équipe est à vos côtés à chaque étape. Pas de chatbot, pas de FAQ interminable — des personnes réelles qui connaissent votre métier.
+              De la migration de vos données à votre première AG en ligne, notre équipe est à vos côtés à chaque étape. Pas de chatbot, pas de FAQ interminable, des professionnels qui connaissent votre métier.
             </p>
             <button className={styles.ctaButton}>Parler à un expert</button>
 

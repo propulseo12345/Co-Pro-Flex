@@ -33,7 +33,7 @@ export default function AccueilPage() {
           {/* Navigation */}
           <nav className={styles.nav}>
             <div className={styles.logo}>
-              <Image src="/CoProFlex_logo_transparent.png" alt="CoProFlex" width={300} height={200} priority style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
+              <Image src="/CoProFlex_logo_transparent.png" alt="CoProFlex" width={300} height={200} priority style={{ height: '101px', width: 'auto', objectFit: 'contain' }} />
             </div>
 
             <div className={styles.navLinks}>
@@ -68,15 +68,15 @@ export default function AccueilPage() {
             label="Assemblées Générales"
             labelColor="#FC5F35"
             title="Des AG aussi simples que vos réunions d'équipe"
-            description="Chaque résolution votée en temps réel, chaque résultat visible par tous. Le gestionnaire pilote, les copropriétaires suivent — plus aucune zone d'ombre."
+            description="Chaque résolution votée en temps réel, chaque résultat visible par tous. Le gestionnaire pilote, les copropriétaires suivent. Plus aucune zone d'ombre."
             testimonial={{
-              quote: "Plus de recomptage, plus de PV à rédiger après coup. Tout est calculé et généré en direct — mes copropriétaires voient les résultats en même temps que moi.",
+              quote: "Plus de recomptage, plus de PV à rédiger après coup. Tout est calculé et généré en direct, mes copropriétaires voient les résultats en même temps que moi.",
               author: "Marie Dupont",
               role: "Syndic professionnelle, Nexity",
               bgColor: "#FC5F35",
             }}
             cards={[
-              { type: 'large', title: 'Votes en direct, résultats instantanés', description: 'Résultats instantanés, majorités calculées automatiquement — art. 24, 25, 26. Plus aucune erreur de comptage.', demo: <DemoAgVotes /> },
+              { type: 'large', title: 'Votes en direct, résultats instantanés', description: 'Résultats instantanés, majorités calculées automatiquement (art. 24, 25, 26). Plus aucune erreur de comptage.', demo: <DemoAgVotes /> },
               { type: 'large', title: 'PV prêt à être généré, signé et partagé', description: "Plus besoin de rédiger après l'AG. Le procès-verbal est prêt, partagé et signable immédiatement.", demo: <DemoAgPv /> },
               { type: 'small', title: 'Résolutions conformes pré-rédigées, personnalisables par chaque gestionnaire', icon: Vote },
               { type: 'small', title: 'Vote à distance & par correspondance intégrés', icon: FileText },
@@ -89,7 +89,7 @@ export default function AccueilPage() {
             label="Finance"
             labelColor="#55AC63"
             title="Chaque euro suivi, chaque copropriétaire informé"
-            description="Budget, appels de fonds, paiements — gestionnaires et copropriétaires accèdent aux mêmes chiffres, en temps réel. Plus d'appels pour savoir où en est son solde."
+            description="Budget, appels de fonds, paiements : gestionnaires et copropriétaires accèdent aux mêmes chiffres, en temps réel. Plus d'appels pour savoir où en est son solde."
             testimonial={{
               quote: "Mes copropriétaires consultent leur solde et leurs échéances sans m'appeler. Les relances partent toutes seules. J'ai récupéré des heures chaque semaine.",
               author: "Thomas Bernard",
@@ -97,8 +97,8 @@ export default function AccueilPage() {
               bgColor: "#55AC63",
             }}
             cards={[
-              { type: 'large', title: 'Budgets lisibles, accessibles à tous', description: 'Prévisionnel, travaux et ALUR — le gestionnaire pilote, les copropriétaires suivent en toute transparence.', demo: <DemoFinance /> },
-              { type: 'large', title: 'Appels de fonds & échéanciers automatiques', description: 'Génération, envoi, suivi des paiements et relances — zéro saisie manuelle, zéro oubli.', demo: <DemoAppelsFonds /> },
+              { type: 'large', title: 'Budgets lisibles, accessibles à tous', description: 'Prévisionnel, travaux et ALUR. Le gestionnaire pilote, les copropriétaires suivent en toute transparence.', demo: <DemoFinance /> },
+              { type: 'large', title: 'Appels de fonds & échéanciers automatiques', description: 'Génération, envoi, suivi des paiements et relances. Zéro saisie manuelle, zéro oubli.', demo: <DemoAppelsFonds /> },
               { type: 'small', title: 'Impayés détectés, relances automatiques', icon: PiggyBank },
               { type: 'small', title: 'Comptabilité complète, accessible en temps réel', icon: Receipt },
             ]}
@@ -110,16 +110,16 @@ export default function AccueilPage() {
             label="Maintenance & Documents"
             labelColor="#0081F1"
             title="Votre copropriété sous contrôle, vos documents à portée de clic"
-            description="Carnet d'entretien, ordres de service, GED — une seule plateforme pour le gestionnaire et les copropriétaires. Plus aucune information perdue, plus aucun appel pour retrouver un document."
+            description="Carnet d'entretien, ordres de service, GED : une seule plateforme pour le gestionnaire et les copropriétaires. Plus aucune information perdue, plus aucun appel pour retrouver un document."
             testimonial={{
-              quote: "Avant, les copropriétaires m'appelaient pour chaque document. Maintenant tout est en ligne — ils trouvent, je gagne du temps, tout le monde y voit clair.",
+              quote: "Avant, les copropriétaires m'appelaient pour chaque document. Maintenant tout est en ligne, ils trouvent, je gagne du temps, tout le monde y voit clair.",
               author: "Sophie Laurent",
               role: "Présidente du conseil syndical",
               bgColor: "#0081F1",
             }}
             cards={[
               { type: 'large', title: 'Maintenance centralisée et traçable', description: 'Historique complet des interventions, accessible au gestionnaire et aux copropriétaires.', demo: <DemoMaintenance /> },
-              { type: 'large', title: 'Tous vos documents, un seul endroit', description: 'PV, règlements, contrats, diagnostics — classés, accessibles 24/7, partagés avec les copropriétaires.', demo: <DemoDocuments /> },
+              { type: 'large', title: 'Tous vos documents, un seul endroit', description: 'PV, règlements, contrats, diagnostics. Classés, accessibles 24/7, partagés avec les copropriétaires.', demo: <DemoDocuments /> },
               { type: 'small', title: 'Aucun contrat oublié, chaque échéance anticipée', icon: Wrench },
               { type: 'small', title: 'Documents centralisés, toujours retrouvables', icon: FolderOpen },
             ]}
