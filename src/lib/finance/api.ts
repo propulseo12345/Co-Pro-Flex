@@ -113,6 +113,7 @@ export interface BankMovementOverview {
   id: string;
   copro_id: string;
   period_id: string;
+  account_id: string;
   bank_date: string;
   value_date: string | null;
   amount_signed: number;
@@ -699,6 +700,7 @@ export async function listBankMovements(
 export interface ImportBankMovementPayload {
   copro_id: string;
   period_id: string;
+  account_id: string;
   movements: Array<{
     bank_date: string;
     value_date?: string;
@@ -1497,4 +1499,122 @@ export async function updateEmailTemplate(
   }
 
   return { data: undefined, error: null };
+}
+
+// ============================================================================
+// BANK ACCOUNTS, SUPPLIERS, INVOICES, PAYMENTS
+// ============================================================================
+
+export interface BankAccountWithBalance {
+  account_id: string;
+  copro_id: string;
+  code: string;
+  name: string;
+  banque: string | null;
+  iban: string | null;
+  initial_balance: number;
+  movements_total: number;
+  computed_balance: number;
+}
+
+export async function listBankAccounts(coproId: string): Promise<ApiResult<BankAccountWithBalance[]>> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('v_account_balances')
+    .select('*')
+    .eq('copro_id', coproId)
+    .order('code');
+
+  if (error) return { data: null, error: error.message };
+
+  return {
+    data: (data || []).map((d: Record<string, unknown>) => ({
+      ...d,
+      initial_balance: Number(d.initial_balance) || 0,
+      movements_total: Number(d.movements_total) || 0,
+      computed_balance: Number(d.computed_balance) || 0,
+    })) as BankAccountWithBalance[],
+    error: null,
+  };
+}
+
+export interface SupplierBasic {
+  id: string;
+  name: string;
+  copro_id: string;
+}
+
+export async function listSuppliers(coproId: string): Promise<ApiResult<SupplierBasic[]>> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('suppliers')
+    .select('id, name, copro_id')
+    .eq('copro_id', coproId)
+    .eq('is_active', true);
+
+  if (error) return { data: null, error: error.message };
+  return { data: (data || []) as SupplierBasic[], error: null };
+}
+
+export interface PendingInvoice {
+  id: string;
+  copro_id: string;
+  supplier_id: string | null;
+  supplier_name: string | null;
+  invoice_number: string | null;
+  invoice_date: string;
+  due_date: string | null;
+  label: string | null;
+  total_amount: number;
+  status: string;
+}
+
+export async function listPendingInvoices(coproId: string): Promise<ApiResult<PendingInvoice[]>> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('supplier_invoices')
+    .select('id, copro_id, supplier_id, invoice_number, invoice_date, due_date, label, total_amount, status, suppliers(name)')
+    .eq('copro_id', coproId)
+    .in('status', ['pending', 'validated', 'approved']);
+
+  if (error) return { data: null, error: error.message };
+
+  return {
+    data: (data || []).map((d: Record<string, unknown>) => ({
+      ...d,
+      total_amount: Number(d.total_amount) || 0,
+      supplier_name: (d.suppliers as Record<string, unknown>)?.name as string || null,
+    })) as PendingInvoice[],
+    error: null,
+  };
+}
+
+export interface UnmatchedPayment {
+  id: string;
+  copro_id: string;
+  lot_id: string | null;
+  amount: number;
+  payment_date: string;
+  method: string;
+  reference: string | null;
+  status: string;
+}
+
+export async function listUnmatchedPayments(coproId: string): Promise<ApiResult<UnmatchedPayment[]>> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('payments')
+    .select('id, copro_id, lot_id, amount, payment_date, method, reference, status')
+    .eq('copro_id', coproId)
+    .eq('status', 'validated');
+
+  if (error) return { data: null, error: error.message };
+
+  return {
+    data: (data || []).map((d: Record<string, unknown>) => ({
+      ...d,
+      amount: Number(d.amount) || 0,
+    })) as UnmatchedPayment[],
+    error: null,
+  };
 }
