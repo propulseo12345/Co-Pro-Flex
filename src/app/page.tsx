@@ -52,7 +52,7 @@ export default function AccueilPage() {
               </a>
             </div>
 
-            <Link href="/dashboard" className={styles.navCta}>
+            <Link href="/auth/login" className={styles.navCta}>
               Se connecter
             </Link>
           </nav>
