@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode, type ComponentType } from 'react';
 import Image from 'next/image';
 import {
-  ChevronLeft, ChevronRight, Play,
+  ChevronLeft, ChevronRight, Play, Sun, Moon,
   LayoutDashboard, Vote, PiggyBank, Wrench, FolderOpen, MessageCircle,
 } from 'lucide-react';
 import styles from './DiscoverSection.module.css';
+import { useDemoTheme } from './DemoThemeContext';
 import { DemoDashboard } from './demos/DemoDashboard';
 import { DemoAg } from './demos/DemoAg';
 import { DemoFinance } from './demos/DemoFinance';
@@ -38,6 +39,7 @@ export function DiscoverSection() {
   const [activeTab, setActiveTab] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
+  const { demoTheme, toggleDemoTheme } = useDemoTheme();
   const animRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
@@ -168,6 +170,14 @@ export function DiscoverSection() {
         })}
 
         <button
+          className={`${styles.arrowBtn} ${styles.themeToggleBtn}`}
+          onClick={toggleDemoTheme}
+          aria-label={`Basculer en mode ${demoTheme === 'dark' ? 'light' : 'dark'}`}
+        >
+          {demoTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+
+        <button
           className={`${styles.arrowBtn} ${styles.arrowBtnNext}`}
           onClick={goNext}
           aria-label="Onglet suivant"
@@ -205,7 +215,7 @@ export function DiscoverSection() {
         </button>
       </div>
 
-      <div className={styles.screenshotFrame}>
+      <div className={styles.screenshotFrame} data-demo-theme={demoTheme}>
         {TABS[activeTab].demo}
       </div>
 

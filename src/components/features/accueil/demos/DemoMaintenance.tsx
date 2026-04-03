@@ -51,7 +51,7 @@ export function DemoMaintenance() {
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 {item.priority === 'high' && (
-                  <span className={styles.priorityDot} style={{ background: '#ef4444', width: 6, height: 6 }} />
+                  <span className={styles.priorityDot} style={{ background: 'var(--demo-danger)', width: 6, height: 6 }} />
                 )}
                 <span className={styles.cardTitle}>{item.title}</span>
               </div>

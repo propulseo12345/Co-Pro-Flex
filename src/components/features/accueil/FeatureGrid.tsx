@@ -1,6 +1,8 @@
 import type { ComponentType, ReactNode } from 'react';
 import Image from 'next/image';
 import styles from './FeatureGrid.module.css';
+import { DemoThemeWrapper } from './DemoThemeWrapper';
+import { DemoThemeToggle } from './DemoThemeToggle';
 
 interface FeatureGridProps {
   label: string;
@@ -34,6 +36,7 @@ export function FeatureGrid({
   cards,
 }: FeatureGridProps) {
   const bgClass = background === 'cream' ? styles.sectionBgCream : styles.sectionBgWhite;
+  const hasDemo = cards.some((c) => c.demo);
 
   return (
     <section className={`${styles.section} ${bgClass}`}>
@@ -46,6 +49,7 @@ export function FeatureGrid({
         </span>
         <h2 className={styles.title}>{title}</h2>
         <p className={styles.description}>{description}</p>
+        {hasDemo && <DemoThemeToggle labelColor={labelColor} />}
       </div>
 
       <div className={styles.grid}>
@@ -67,7 +71,9 @@ export function FeatureGrid({
             return (
               <div key={i} className={styles.cardLarge}>
                 {card.demo ? (
-                  <div className={styles.cardDemo}>{card.demo}</div>
+                  <DemoThemeWrapper className={styles.cardDemo}>
+                    {card.demo}
+                  </DemoThemeWrapper>
                 ) : card.screenshot ? (
                   <Image
                     className={styles.cardImage}

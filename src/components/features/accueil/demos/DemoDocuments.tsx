@@ -57,15 +57,15 @@ export function DemoDocuments() {
                 <tr key={file.name} className={styles.tableRow}>
                   <td className={styles.tableCell}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <FileText size={14} color="#3b82f6" />
+                      <FileText size={14} style={{ color: 'var(--demo-primary)' }} />
                       {file.name}
                     </div>
                   </td>
                   <td className={styles.tableCell}>
                     <span className={`${styles.badge} ${styles.badgeNeutral}`}>{file.category}</span>
                   </td>
-                  <td className={styles.tableCell} style={{ color: '#64748b' }}>{file.date}</td>
-                  <td className={styles.tableCell} style={{ textAlign: 'right', color: '#64748b' }}>{file.size}</td>
+                  <td className={styles.tableCell} style={{ color: 'var(--demo-text-tertiary)' }}>{file.date}</td>
+                  <td className={styles.tableCell} style={{ textAlign: 'right', color: 'var(--demo-text-tertiary)' }}>{file.size}</td>
                 </tr>
               ))}
             </tbody>

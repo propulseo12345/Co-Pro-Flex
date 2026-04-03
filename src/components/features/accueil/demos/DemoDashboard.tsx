@@ -16,9 +16,9 @@ const BADGE_LABELS: Record<string, string> = {
 };
 
 const ACTIVITY_DOTS: Record<string, string> = {
-  success: '#22c55e',
-  info: '#3b82f6',
-  warning: '#f59e0b',
+  success: 'var(--demo-success)',
+  info: 'var(--demo-primary)',
+  warning: 'var(--demo-warning)',
 };
 
 export function DemoDashboard() {

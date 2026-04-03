@@ -159,6 +159,16 @@
   color: var(--pg-accent);
 }
 
+.themeToggleBtn {
+  color: var(--pg-yellow);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.themeToggleBtn:hover {
+  border-color: var(--pg-yellow);
+  color: var(--pg-yellow);
+}
+
 .arrowBtnNext {
   overflow: visible;
 }

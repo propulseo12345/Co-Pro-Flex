@@ -9,6 +9,7 @@ import { Sizes } from '@/components/features/accueil/Sizes';
 import { Support } from '@/components/features/accueil/Support';
 import { CtaSection } from '@/components/features/accueil/CtaSection';
 import { Footer } from '@/components/features/accueil/Footer';
+import { DemoThemeProvider } from '@/components/features/accueil/DemoThemeContext';
 import { Vote, FileText, PiggyBank, Receipt, Wrench, FolderOpen } from 'lucide-react';
 import { DemoAgVotes } from '@/components/features/accueil/demos/DemoAgVotes';
 import { DemoAgPv } from '@/components/features/accueil/demos/DemoAgPv';
@@ -58,6 +59,7 @@ export default function AccueilPage() {
             </Link>
           </nav>
 
+          <DemoThemeProvider>
           <DiscoverSection />
 
           {/* Section — AG */}
@@ -122,6 +124,8 @@ export default function AccueilPage() {
               { type: 'small', title: 'Documents centralisés, toujours retrouvables', icon: FolderOpen },
             ]}
           />
+
+          </DemoThemeProvider>
 
           <Testimonials />
           <Sizes />

@@ -5,9 +5,9 @@ import styles from './demo-shared.module.css';
 import { DEMO_AG_VOTES } from './demoData';
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  'Adoptée': { bg: 'rgba(34, 197, 94, 0.1)', color: '#4ade80' },
-  'Rejetée': { bg: 'rgba(239, 68, 68, 0.1)', color: '#f87171' },
-  'En cours': { bg: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa' },
+  'Adoptée': { bg: 'var(--demo-badge-success-bg)', color: 'var(--demo-success-bright)' },
+  'Rejetée': { bg: 'var(--demo-badge-danger-bg)', color: 'var(--demo-danger-bright)' },
+  'En cours': { bg: 'var(--demo-badge-info-bg)', color: 'var(--demo-secondary)' },
 };
 
 export function DemoAgVotes() {
@@ -31,19 +31,19 @@ export function DemoAgVotes() {
       <div className={styles.kpiStrip}>
         <div className={styles.kpiCard}>
           <div className={styles.kpiLabel}>Résolutions</div>
-          <div className={styles.kpiValue} style={{ color: '#e2e8f0', fontSize: 18 }}>{summary.total}</div>
+          <div className={styles.kpiValue} style={{ color: 'var(--demo-text)', fontSize: 18 }}>{summary.total}</div>
         </div>
         <div className={styles.kpiCard}>
           <div className={styles.kpiLabel}>Adoptées</div>
-          <div className={styles.kpiValue} style={{ color: '#22c55e', fontSize: 18 }}>{summary.adoptees}</div>
+          <div className={styles.kpiValue} style={{ color: 'var(--demo-success)', fontSize: 18 }}>{summary.adoptees}</div>
         </div>
         <div className={styles.kpiCard}>
           <div className={styles.kpiLabel}>Rejetées</div>
-          <div className={styles.kpiValue} style={{ color: '#ef4444', fontSize: 18 }}>{summary.rejetees}</div>
+          <div className={styles.kpiValue} style={{ color: 'var(--demo-danger)', fontSize: 18 }}>{summary.rejetees}</div>
         </div>
         <div className={styles.kpiCard}>
           <div className={styles.kpiLabel}>En cours</div>
-          <div className={styles.kpiValue} style={{ color: '#3b82f6', fontSize: 18 }}>{summary.enCours}</div>
+          <div className={styles.kpiValue} style={{ color: 'var(--demo-primary)', fontSize: 18 }}>{summary.enCours}</div>
         </div>
       </div>
 
@@ -56,8 +56,8 @@ export function DemoAgVotes() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {r.status === 'Adoptée'
-                    ? <CheckCircle size={14} color="#4ade80" />
-                    : <XCircle size={14} color="#f87171" />
+                    ? <CheckCircle size={14} style={{ color: 'var(--demo-success-bright)' }} />
+                    : <XCircle size={14} style={{ color: 'var(--demo-danger-bright)' }} />
                   }
                   <span className={styles.cardTitle}>{r.title}</span>
                 </div>
@@ -68,22 +68,22 @@ export function DemoAgVotes() {
                   {r.status}
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: '#64748b' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--demo-text-tertiary)' }}>
                 <span>{r.article}</span>
                 <span style={{ margin: '0 4px' }}>·</span>
-                <span style={{ color: '#4ade80' }}>Pour {r.pour}%</span>
+                <span style={{ color: 'var(--demo-success-bright)' }}>Pour {r.pour}%</span>
                 <span style={{ margin: '0 2px' }}>·</span>
-                <span style={{ color: '#f87171' }}>Contre {r.contre}%</span>
+                <span style={{ color: 'var(--demo-danger-bright)' }}>Contre {r.contre}%</span>
                 <span style={{ margin: '0 2px' }}>·</span>
-                <span style={{ color: '#94a3b8' }}>Abst. {r.abstention}%</span>
+                <span style={{ color: 'var(--demo-text-secondary)' }}>Abst. {r.abstention}%</span>
               </div>
               <div className={styles.progressBar} style={{ height: 6 }}>
                 <div style={{
                   display: 'flex', height: '100%', borderRadius: 2, overflow: 'hidden',
                 }}>
-                  <div style={{ width: `${r.pour}%`, background: '#22c55e' }} />
-                  <div style={{ width: `${r.contre}%`, background: '#ef4444' }} />
-                  <div style={{ width: `${r.abstention}%`, background: '#475569' }} />
+                  <div style={{ width: `${r.pour}%`, background: 'var(--demo-success)' }} />
+                  <div style={{ width: `${r.contre}%`, background: 'var(--demo-danger)' }} />
+                  <div style={{ width: `${r.abstention}%`, background: 'var(--demo-text-muted)' }} />
                 </div>
               </div>
             </div>

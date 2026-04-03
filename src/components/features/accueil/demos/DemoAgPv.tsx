@@ -30,22 +30,17 @@ export function DemoAgPv() {
         {/* Preview document */}
         <div>
           <div className={styles.sectionTitle}>Aperçu du PV</div>
-          <div style={{
-            background: '#1a1d2e',
-            border: '1px solid rgba(148, 163, 184, 0.08)',
-            borderRadius: 10,
-            padding: 20,
-          }}>
+          <div className={styles.kpiCard} style={{ padding: 20 }}>
             {sections.map((s, i) => (
               <div key={i} style={{ marginBottom: i < sections.length - 1 ? 16 : 0 }}>
                 <div style={{
-                  fontSize: 11, fontWeight: 700, color: '#60a5fa',
+                  fontSize: 11, fontWeight: 700, color: 'var(--demo-secondary)',
                   marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px',
                 }}>
                   {s.title}
                 </div>
                 <div style={{
-                  fontSize: 11, lineHeight: 1.6, color: '#94a3b8',
+                  fontSize: 11, lineHeight: 1.6, color: 'var(--demo-text-secondary)',
                 }}>
                   {s.content}
                 </div>
@@ -53,8 +48,8 @@ export function DemoAgPv() {
             ))}
             <div style={{
               marginTop: 16, paddingTop: 12,
-              borderTop: '1px solid rgba(148, 163, 184, 0.08)',
-              fontSize: 10, color: '#475569', textAlign: 'center',
+              borderTop: '1px solid var(--demo-border)',
+              fontSize: 10, color: 'var(--demo-text-muted)', textAlign: 'center',
             }}>
               … suite sur {meta.pages} pages
             </div>
@@ -67,18 +62,18 @@ export function DemoAgPv() {
           <div className={styles.cardList}>
             <div className={styles.card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <FileText size={14} color="#3b82f6" />
+                <FileText size={14} style={{ color: 'var(--demo-primary)' }} />
                 <span className={styles.cardTitle}>Statut</span>
               </div>
               <span className={`${styles.badge} ${styles.badgeSuccess}`}>{meta.status}</span>
             </div>
             <div className={styles.card}>
               <span className={styles.cardTitle}>Pages</span>
-              <span style={{ fontSize: 12, color: '#94a3b8' }}>{meta.pages}</span>
+              <span style={{ fontSize: 12, color: 'var(--demo-text-secondary)' }}>{meta.pages}</span>
             </div>
             <div className={styles.card}>
               <span className={styles.cardTitle}>Signatures</span>
-              <span style={{ fontSize: 12, color: meta.signataires.fait === meta.signataires.total ? '#4ade80' : '#fbbf24' }}>
+              <span style={{ fontSize: 12, color: meta.signataires.fait === meta.signataires.total ? 'var(--demo-success-bright)' : 'var(--demo-warning-bright)' }}>
                 {meta.signataires.fait} / {meta.signataires.total}
               </span>
             </div>

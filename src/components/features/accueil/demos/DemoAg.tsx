@@ -32,21 +32,21 @@ export function DemoAg() {
               <span className={`${styles.badge} ${styles.badgeInfo}`}>{nextAg.status}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#94a3b8' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }} className={styles.cardMeta}>
                 <Calendar size={12} />
                 {nextAg.date}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#94a3b8' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }} className={styles.cardMeta}>
                 <MapPin size={12} />
                 {nextAg.location}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#94a3b8' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }} className={styles.cardMeta}>
                 <Users size={12} />
                 {nextAg.participants} — Quorum {nextAg.quorum}
               </div>
             </div>
             <div className={styles.progressBar}>
-              <div className={styles.progressFill} style={{ width: nextAg.quorum, background: '#3b82f6' }} />
+              <div className={styles.progressFill} style={{ width: nextAg.quorum, background: 'var(--demo-primary)' }} />
             </div>
           </div>
 
@@ -73,7 +73,7 @@ export function DemoAg() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{
                     width: 22, height: 22, borderRadius: 6,
-                    background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa',
+                    background: 'var(--demo-badge-info-bg)', color: 'var(--demo-secondary)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 10, fontWeight: 700, flexShrink: 0,
                   }}>
@@ -84,7 +84,7 @@ export function DemoAg() {
                     <div className={styles.cardMeta}>{r.article}</div>
                   </div>
                 </div>
-                <FileText size={14} color="#64748b" />
+                <FileText size={14} style={{ color: 'var(--demo-text-tertiary)' }} />
               </div>
             ))}
           </div>

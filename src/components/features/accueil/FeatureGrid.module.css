@@ -74,6 +74,28 @@
   font-family: var(--pg-font-body);
 }
 
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--pg-border);
+  background: transparent;
+  font-family: var(--pg-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pg-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.themeToggle:hover {
+  color: var(--label-color);
+  border-color: var(--label-color);
+}
+
 .grid {
   display: grid;
   grid-template-columns: 280px 1fr 1fr;
