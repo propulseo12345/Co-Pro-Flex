@@ -1,23 +1,22 @@
-# Session State — 2026-04-03 21:50
+# Session State — 2026-04-03 23:55
 
 ## Branch
 v2
 
 ## Completed This Session
-- Portefeuille branché v_dashboard_kpis (solde, impayés, prochaine AG réels)
-- Onboarding déplacé de (dashboard) vers (gestionnaire) — indépendant du CoproProvider
-- Hooks lots refactorés avec coproId optionnel + useCoproSafe()
-- Step7 branché sur listLotsWithOwners (lots visibles)
-- Membership admin auto-créé à la création de copro (fix RLS)
-- saveRepriseSoldes : draft → entries → posted (fix trigger)
+- Fix soldes copropriétaires: v_coproprietaires_overview basé sur v_lot_balance (ledger) au lieu de v_owner_financial_summary (appels de fonds)
+- Fix trésorerie dashboard: v_dashboard_kpis cherche codes LIKE '512%'/'502%' au lieu de code exact (compat onboarding 512000/512100)
+- LP illustrations: nouvelles images hero (gauche+droite) converties WebP lossless + illustration accompagnement WebP
+- LP hero: taille illustrations ×1.95, image gauche décalée -50px
+- Fix sidebar: lien Landing Page corrigé → / avec target _blank
 
 ## Next Task
-Fix vue copropriétaires : le solde utilise v_owner_financial_summary (basé sur call_for_funds_lines) au lieu de ledger_entries. Migrer vers v_lot_balance ou créer une vue qui somme les ledger_entries par lot/copropriétaire.
+Nettoyer fichiers inutiles dans public/velorah/illustrations/ (illustration-support.png/.svg, illustrations-sides.png, illustration-haussmann-left/garden-right anciens)
 
 ## Blockers
 None
 
 ## Key Context
-- v_owner_financial_summary JOIN call_for_funds_lines → ne voit pas les ledger_entries de reprise de soldes
-- v_lot_balance (migration 20260125) calcule déjà debit/credit par lot depuis ledger_entries — réutilisable
-- user_is_copro_manager vérifie table memberships (pas copro_members)
+- v_lot_balance en base a des colonnes différentes du fichier migration local (balance vs solde, inclut coproprietaire_id)
+- Next.js Image optimization détruit la transparence WebP → utiliser unoptimized prop
+- Fichier migration locale 20260403_fix_coproprietaires_solde_ledger.sql corrigé mais décalé vs v_lot_balance réelle en base
