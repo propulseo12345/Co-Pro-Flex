@@ -34,6 +34,17 @@ export async function createCopropriete(payload: CoproCreate) {
     .select('id, name')
     .single();
   if (error) return { data: null, error: new Error(error.message) };
+
+  // Créer le membership admin pour le gestionnaire qui crée la copro
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user && data) {
+    await supabase.from('memberships').insert({
+      user_id: user.id,
+      copro_id: (data as { id: string }).id,
+      role: 'admin',
+    });
+  }
+
   return { data: data as { id: string; name: string }, error: null };
 }
 
@@ -540,21 +551,18 @@ export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
 export async function listLots(coproId: string) {
   const supabase = createUntypedClient();
   const { data, error } = await supabase
-    .from('lots')
-    .select('id, ref, type, coproprietaires(last_name, first_name)')
+    .from('v_lots_with_owners')
+    .select('id, ref, type, owner_display_name')
     .eq('copro_id', coproId)
     .order('ref');
   if (error) return { data: null, error: new Error(error.message) };
   return {
-    data: (data || []).map((l: Record<string, unknown>) => {
-      const owner = l.coproprietaires as { last_name: string; first_name: string | null } | null;
-      return {
-        id: l.id as string,
-        ref: l.ref as string,
-        type: l.type as string | null,
-        ownerName: owner ? `${owner.last_name} ${owner.first_name || ''}`.trim() : null,
-      };
-    }),
+    data: (data || []).map((l: Record<string, unknown>) => ({
+      id: l.id as string,
+      ref: l.ref as string,
+      type: l.type as string | null,
+      ownerName: (l.owner_display_name as string | null) || null,
+    })),
     error: null,
   };
 }
@@ -623,8 +631,7 @@ export async function saveRepriseSoldes(
       tx_date: new Date().toISOString().split('T')[0],
       label: 'Reprise de soldes — Soldes initiaux',
       source_type: 'opening',
-      status: 'posted',
-      posted_at: new Date().toISOString(),
+      status: 'draft',
     })
     .select('id')
     .single();
@@ -690,6 +697,13 @@ export async function saveRepriseSoldes(
 
   const { error: entErr } = await supabase.from('ledger_entries').insert(ledgerEntries);
   if (entErr) return { data: null, error: new Error(entErr.message) };
+
+  // Passer la transaction en posted maintenant que les écritures sont créées
+  const { error: postErr } = await supabase
+    .from('ledger_transactions')
+    .update({ status: 'posted', posted_at: new Date().toISOString() })
+    .eq('id', ltx.id as string);
+  if (postErr) return { data: null, error: new Error(postErr.message) };
 
   return { data: { count: nonZeroEntries.length }, error: null };
 }

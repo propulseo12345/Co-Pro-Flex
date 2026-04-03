@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useCopro } from '@/providers/CoproContext';
+import { useCoproSafe } from '@/providers/CoproContext';
 import * as lotsApi from '@/lib/lots/api';
 import type {
   LotWithOwner,
@@ -42,8 +42,9 @@ export interface UseLotsReturn {
   };
 }
 
-export function useLots(): UseLotsReturn {
-  const { currentCoproId } = useCopro();
+export function useLots(coproIdParam?: string): UseLotsReturn {
+  const ctx = useCoproSafe();
+  const currentCoproId = coproIdParam ?? ctx?.currentCoproId ?? null;
   const [lots, setLots] = useState<LotWithOwner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,8 +163,9 @@ export interface UseLotReturn {
   refresh: () => Promise<void>;
 }
 
-export function useLot(lotId: string | null): UseLotReturn {
-  const { currentCoproId } = useCopro();
+export function useLot(lotId: string | null, coproIdParam?: string): UseLotReturn {
+  const ctx = useCoproSafe();
+  const currentCoproId = coproIdParam ?? ctx?.currentCoproId ?? null;
   const [lot, setLot] = useState<LotWithOwner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -212,8 +214,9 @@ export interface UseRepartitionKeysReturn {
   isMutating: boolean;
 }
 
-export function useRepartitionKeys(): UseRepartitionKeysReturn {
-  const { currentCoproId } = useCopro();
+export function useRepartitionKeys(coproIdParam?: string): UseRepartitionKeysReturn {
+  const ctx = useCoproSafe();
+  const currentCoproId = coproIdParam ?? ctx?.currentCoproId ?? null;
   const [keys, setKeys] = useState<RepartitionKeyWithTotals[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -341,8 +344,9 @@ export interface UseRepartitionKeyDetailReturn {
   isMutating: boolean;
 }
 
-export function useRepartitionKeyDetail(keyId: string | null): UseRepartitionKeyDetailReturn {
-  const { currentCoproId } = useCopro();
+export function useRepartitionKeyDetail(keyId: string | null, coproIdParam?: string): UseRepartitionKeyDetailReturn {
+  const ctx = useCoproSafe();
+  const currentCoproId = coproIdParam ?? ctx?.currentCoproId ?? null;
   const [key, setKey] = useState<RepartitionKeyWithTotals | null>(null);
   const [lines, setLines] = useState<RepartitionKeyLineDetailed[]>([]);
   const [validation, setValidation] = useState<ValidationResult | null>(null);

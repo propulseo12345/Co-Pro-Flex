@@ -2,20 +2,19 @@
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCopro } from '@/providers/CoproContext';
+import { setActiveCopro } from '@/lib/copro/activeCopro';
 import { Step1Copropriete } from '@/components/features/onboarding/steps/Step1Copropriete';
 import styles from '../onboarding.module.css';
 
 export default function OnboardingCreatePage() {
   const router = useRouter();
-  const { setCurrentCoproId } = useCopro();
 
   const handleComplete = useCallback((coproId: string, coproName: string) => {
-    // Basculer le contexte global sur la nouvelle copro
-    setCurrentCoproId(coproId, coproName);
+    // Mémoriser la copro créée pour les étapes suivantes
+    setActiveCopro(coproId, coproName);
     // Rediriger vers le wizard
     router.replace(`/onboarding/${coproId}`);
-  }, [setCurrentCoproId, router]);
+  }, [router]);
 
   return (
     <div className={styles.container}>

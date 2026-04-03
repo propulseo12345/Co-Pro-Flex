@@ -196,6 +196,15 @@ export function useCopro(): CoproContextValue {
   return context;
 }
 
+/**
+ * Version safe de useCopro — retourne null si pas de CoproProvider.
+ * Utile pour les hooks partagés entre dashboard (avec provider) et
+ * onboarding (sans provider, coproId passé en paramètre).
+ */
+export function useCoproSafe(): CoproContextValue | null {
+  return useContext(CoproContext) ?? null;
+}
+
 // ============================================================================
 // SELECTOR COMPONENT - DÉSACTIVÉ EN MODE SINGLE COPRO
 // ============================================================================

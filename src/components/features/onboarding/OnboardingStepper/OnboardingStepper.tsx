@@ -24,7 +24,7 @@ export function OnboardingStepper({
   return (
     <div className={styles.stepper}>
       {steps.map((step, index) => {
-        const isCompleted = step.id < currentStep;
+        const isCompleted = step.id < maxStepReached;
         const isActive = step.id === currentStep;
         const isClickable = step.id <= maxStepReached;
 

@@ -6,7 +6,6 @@ import { Plus } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
 import { LotsRepartitionGrid, CreateLotModal, EditLotModal, CreateKeyModal, EditKeyModal } from '@/components/features/lots';
 import { useLotsRepartitionGrid } from '@/hooks/modules/useLotsRepartitionGrid';
-import { useCopro } from '@/providers/CoproContext';
 import type { RepartitionKeyWithTotals, RepartitionBasis } from '@/lib/lots/api';
 import styles from './Step3LotsKeys.module.css';
 
@@ -17,7 +16,6 @@ interface Step3Props {
 }
 
 export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
-  const { currentCoproId } = useCopro();
   const {
     keyColumns, gridRows, stats, isLoading, isMutating,
     createLot, updateLot, deleteLot,
@@ -29,7 +27,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
     updateWeight,
     owners, assignOwner,
     refresh,
-  } = useLotsRepartitionGrid();
+  } = useLotsRepartitionGrid(coproId);
 
   // Auto-créer la clé "Charges générales" si aucune clé n'existe
   const defaultKeyCreated = useRef(false);
@@ -50,7 +48,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
   // Map GridKeyColumn → RepartitionKeyWithTotals pour EditKeyModal
   const editingKeyData: RepartitionKeyWithTotals | null = editingKey ? {
     key_id: editingKey.key_id,
-    copro_id: currentCoproId || coproId,
+    copro_id: coproId,
     name: editingKey.name,
     description: null,
     basis: editingKey.basis as RepartitionBasis,
@@ -66,12 +64,12 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
     setEditingKey({
       ...key,
       basis: key.basis as RepartitionBasis,
-      copro_id: currentCoproId || coproId,
+      copro_id: coproId,
       description: null,
       coverage_mode: 'all_lots' as const,
       is_active: true,
     });
-  }, [setEditingKey, currentCoproId, coproId]);
+  }, [setEditingKey, coproId]);
 
   return (
     <div className={styles.container}>

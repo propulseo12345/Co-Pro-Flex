@@ -7,125 +7,6 @@ import type {
   IPortefeuilleKPIs,
 } from '@/types/models/portefeuille';
 
-// =============================================================================
-// MOCK DATA (sera remplacé par Supabase)
-// =============================================================================
-
-const MOCK_COPROPRIETES: Omit<ICoproprietePortefeuille, 'criticalityScore'>[] = [
-  {
-    id: 'copro-1',
-    nom: 'Résidence Les Lilas',
-    adresse: '15 rue des Lilas, 75011 Paris',
-    nombreLots: 24,
-    exerciceCourant: 2025,
-    soldeDisponible: 45230.50,
-    totalImpayes: 3542.80,
-    nombreImpayes: 4,
-    tauxRecouvrement: 87.2,
-    facturesEnRetard: 2,
-    montantFacturesRetard: 1250.00,
-    budgetTotal: 85000,
-    budgetConsomme: 42500,
-    budgetRestant: 42500,
-    budgetAlerteRisque: false,
-    mouvementsNonRapproches: 3,
-    dernierRapprochement: '2025-01-15',
-    prochaineAG: '2026-05-15',
-    alertes: [
-      { id: 'alert-1', type: 'IMPAYE', severite: 'critique', titre: 'Impayés critiques', description: '2 copropriétaires avec retard > 90 jours', montant: 2845.50, lien: '/finance/unpaid' },
-      { id: 'alert-2', type: 'FACTURE', severite: 'warning', titre: 'Factures en attente', description: '2 factures à échéance dépassée', montant: 1250.00, lien: '/finance/factures' },
-    ],
-  },
-  {
-    id: 'copro-2',
-    nom: 'Le Clos Saint-Martin',
-    adresse: '8 avenue Saint-Martin, 75003 Paris',
-    nombreLots: 42,
-    exerciceCourant: 2025,
-    soldeDisponible: 78450.00,
-    totalImpayes: 0,
-    nombreImpayes: 0,
-    tauxRecouvrement: 100,
-    facturesEnRetard: 0,
-    montantFacturesRetard: 0,
-    budgetTotal: 125000,
-    budgetConsomme: 95000,
-    budgetRestant: 30000,
-    budgetAlerteRisque: true,
-    mouvementsNonRapproches: 0,
-    dernierRapprochement: '2025-01-20',
-    alertes: [
-      { id: 'alert-3', type: 'BUDGET', severite: 'warning', titre: 'Budget à risque', description: 'Consommation à 76% avec 5 mois restants', montant: 30000, lien: '/finance/budgets' },
-    ],
-  },
-  {
-    id: 'copro-3',
-    nom: 'Domaine de la Forêt',
-    adresse: '120 boulevard de la Forêt, 92400 Courbevoie',
-    nombreLots: 68,
-    exerciceCourant: 2025,
-    soldeDisponible: 125800.00,
-    totalImpayes: 8920.40,
-    nombreImpayes: 7,
-    tauxRecouvrement: 78.5,
-    facturesEnRetard: 5,
-    montantFacturesRetard: 4580.00,
-    budgetTotal: 180000,
-    budgetConsomme: 72000,
-    budgetRestant: 108000,
-    budgetAlerteRisque: false,
-    mouvementsNonRapproches: 12,
-    dernierRapprochement: '2024-12-28',
-    prochaineAG: '2026-04-20',
-    alertes: [
-      { id: 'alert-4', type: 'IMPAYE', severite: 'critique', titre: 'Impayés importants', description: "7 copropriétaires en situation d'impayé", montant: 8920.40, lien: '/finance/unpaid' },
-      { id: 'alert-5', type: 'RAPPROCHEMENT', severite: 'critique', titre: 'Rapprochement en retard', description: '12 mouvements non rapprochés depuis 24 jours', lien: '/finance/mouvements-bancaires' },
-      { id: 'alert-6', type: 'FACTURE', severite: 'warning', titre: 'Factures en retard', description: '5 factures à traiter', montant: 4580.00, lien: '/finance/factures' },
-    ],
-  },
-  {
-    id: 'copro-4',
-    nom: 'Résidence Haussmann',
-    adresse: '45 boulevard Haussmann, 75009 Paris',
-    nombreLots: 18,
-    exerciceCourant: 2025,
-    soldeDisponible: 32100.00,
-    totalImpayes: 756.20,
-    nombreImpayes: 1,
-    tauxRecouvrement: 95.8,
-    facturesEnRetard: 1,
-    montantFacturesRetard: 890.00,
-    budgetTotal: 52000,
-    budgetConsomme: 18200,
-    budgetRestant: 33800,
-    budgetAlerteRisque: false,
-    mouvementsNonRapproches: 1,
-    dernierRapprochement: '2025-01-18',
-    alertes: [
-      { id: 'alert-7', type: 'CONTRAT', severite: 'warning', titre: 'Contrat à renouveler', description: 'Assurance MRH expire dans 30 jours', dateEcheance: '2025-02-21', lien: '/maintenance/contracts' },
-    ],
-  },
-  {
-    id: 'copro-5',
-    nom: 'Les Jardins du Parc',
-    adresse: '5 allée des Jardins, 94300 Vincennes',
-    nombreLots: 35,
-    exerciceCourant: 2025,
-    soldeDisponible: 56780.00,
-    totalImpayes: 0,
-    nombreImpayes: 0,
-    tauxRecouvrement: 100,
-    facturesEnRetard: 0,
-    montantFacturesRetard: 0,
-    budgetTotal: 95000,
-    budgetConsomme: 38000,
-    budgetRestant: 57000,
-    budgetAlerteRisque: false,
-    mouvementsNonRapproches: 0,
-    dernierRapprochement: '2025-01-21',
-    alertes: [],
-  },
-];
 
 // =============================================================================
 // CRITICALITY SCORE
@@ -246,37 +127,59 @@ export function usePortefeuille(): UsePortefeuilleReturn {
           // Silently ignore
         }
 
-        const { data, error } = await supabase
-          .from('copros')
-          .select('id, name, address, city, postal_code')
-          .order('created_at', { ascending: true });
+        // Récupérer copros + KPIs en parallèle
+        const [coprosResult, kpisResult] = await Promise.all([
+          supabase
+            .from('copros')
+            .select('id, name, address, city, postal_code')
+            .order('created_at', { ascending: true }),
+          supabase
+            .from('v_dashboard_kpis')
+            .select('copro_id, current_balance, unpaid_total, critical_unpaid_count, next_ag_date'),
+        ]);
 
-        if (error || !data) {
+        if (coprosResult.error || !coprosResult.data) {
           setDbCopros([]);
         } else {
+          // Indexer les KPIs par copro_id pour lookup rapide
+          const kpiMap = new Map<string, {
+            current_balance: number | null;
+            unpaid_total: number | null;
+            critical_unpaid_count: number | null;
+            next_ag_date: string | null;
+          }>();
+          if (kpisResult.data) {
+            for (const k of kpisResult.data) {
+              if (k.copro_id) kpiMap.set(k.copro_id, k);
+            }
+          }
+
           // Mapper les données Supabase vers le format portefeuille
-          const mapped: ICoproprietePortefeuille[] = data.map((c) => ({
-            id: c.id,
-            nom: c.name,
-            adresse: [c.address, c.city, c.postal_code].filter(Boolean).join(', ') || 'Adresse non renseignée',
-            nombreLots: 0,
-            exerciceCourant: new Date().getFullYear(),
-            soldeDisponible: 0,
-            totalImpayes: 0,
-            nombreImpayes: 0,
-            tauxRecouvrement: 100,
-            facturesEnRetard: 0,
-            montantFacturesRetard: 0,
-            budgetTotal: 0,
-            budgetConsomme: 0,
-            budgetRestant: 0,
-            budgetAlerteRisque: false,
-            mouvementsNonRapproches: 0,
-            dernierRapprochement: undefined,
-            prochaineAG: undefined,
-            alertes: [],
-            criticalityScore: 0,
-          }));
+          const mapped: ICoproprietePortefeuille[] = coprosResult.data.map((c) => {
+            const kpi = kpiMap.get(c.id);
+            return {
+              id: c.id,
+              nom: c.name,
+              adresse: [c.address, c.city, c.postal_code].filter(Boolean).join(', ') || 'Adresse non renseignée',
+              nombreLots: 0,
+              exerciceCourant: new Date().getFullYear(),
+              soldeDisponible: kpi?.current_balance ?? 0,
+              totalImpayes: kpi?.unpaid_total ?? 0,
+              nombreImpayes: kpi?.critical_unpaid_count ?? 0,
+              tauxRecouvrement: 100,
+              facturesEnRetard: 0,
+              montantFacturesRetard: 0,
+              budgetTotal: 0,
+              budgetConsomme: 0,
+              budgetRestant: 0,
+              budgetAlerteRisque: false,
+              mouvementsNonRapproches: 0,
+              dernierRapprochement: undefined,
+              prochaineAG: kpi?.next_ag_date ?? undefined,
+              alertes: [],
+              criticalityScore: 0,
+            };
+          });
           setDbCopros(mapped);
         }
       } catch {

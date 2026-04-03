@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLots } from '@/hooks/modules/useLotsData';
 import { useRepartitionKeys } from '@/hooks/modules/useLotsData';
-import { useCopro } from '@/providers/CoproContext';
+import { useCoproSafe } from '@/providers/CoproContext';
 import { createClient } from '@/lib/supabase/client';
 import type { LotWithOwner, RepartitionKeyWithTotals, RepartitionKeyLineDetailed } from '@/lib/lots/api';
 import * as lotsApi from '@/lib/lots/api';
@@ -27,10 +27,11 @@ export interface GridRow {
 
 const KEY_COLORS = ['#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899', '#10b981', '#f97316', '#6366f1', '#14b8a6'];
 
-export function useLotsRepartitionGrid() {
-  const { currentCoproId } = useCopro();
-  const { lots, isLoading: lotsLoading, error: lotsError, refresh: refreshLots, createLot, updateLot, deleteLot, isMutating: lotsMutating, stats } = useLots();
-  const { keys, isLoading: keysLoading, error: keysError, refresh: refreshKeys, createKey, updateKey, deleteKey, isMutating: keysMutating } = useRepartitionKeys();
+export function useLotsRepartitionGrid(coproIdParam?: string) {
+  const ctx = useCoproSafe();
+  const currentCoproId = coproIdParam ?? ctx?.currentCoproId ?? null;
+  const { lots, isLoading: lotsLoading, error: lotsError, refresh: refreshLots, createLot, updateLot, deleteLot, isMutating: lotsMutating, stats } = useLots(coproIdParam);
+  const { keys, isLoading: keysLoading, error: keysError, refresh: refreshKeys, createKey, updateKey, deleteKey, isMutating: keysMutating } = useRepartitionKeys(coproIdParam);
 
   const [allLines, setAllLines] = useState<RepartitionKeyLineDetailed[]>([]);
   const [linesLoading, setLinesLoading] = useState(true);

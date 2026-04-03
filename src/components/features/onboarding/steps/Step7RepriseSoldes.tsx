@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { StepHeader } from '../shared/StepHeader';
-import { listLots, saveRepriseSoldes } from '@/lib/onboarding/api';
+import { listLotsWithOwners } from '@/lib/lots/api';
+import { saveRepriseSoldes } from '@/lib/onboarding/api';
 import type { SoldeInitialEntry } from '@/lib/onboarding/api';
 import styles from './Step7RepriseSoldes.module.css';
 
@@ -29,8 +30,15 @@ export function Step7RepriseSoldes({ coproId, periodId, onComplete, onBack }: St
 
   useEffect(() => {
     async function load() {
-      const res = await listLots(coproId);
-      if (res.data) setLots(res.data);
+      const { data } = await listLotsWithOwners(coproId);
+      if (data) {
+        setLots(data.map(l => ({
+          id: l.id,
+          ref: l.ref,
+          type: l.type,
+          ownerName: l.owner_display_name || null,
+        })));
+      }
     }
     load();
   }, [coproId]);

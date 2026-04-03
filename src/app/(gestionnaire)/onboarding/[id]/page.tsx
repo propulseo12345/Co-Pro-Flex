@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useCopro } from '@/providers/CoproContext';
+import { setActiveCopro } from '@/lib/copro/activeCopro';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
 import { ensureAccountingPeriod } from '@/lib/onboarding/api';
 import { createClient } from '@/lib/supabase/client';
@@ -19,8 +19,6 @@ export default function OnboardingWizardPage() {
   const router = useRouter();
   const params = useParams();
   const coproId = params.id as string;
-  const { setCurrentCoproId } = useCopro();
-
   const {
     steps,
     currentStep,
@@ -36,12 +34,12 @@ export default function OnboardingWizardPage() {
   const [budgetId, setBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
 
-  // Sync CoproContext au mount
+  // Mémoriser la copro active pour les steps qui en ont besoin
   useEffect(() => {
     if (coproId) {
-      setCurrentCoproId(coproId, coproName || '');
+      setActiveCopro(coproId, coproName || '');
     }
-  }, [coproId, coproName]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [coproId, coproName]);
 
   // Récupérer budgetId + periodId depuis la DB si on reprend à step 5+
   useEffect(() => {
@@ -80,7 +78,7 @@ export default function OnboardingWizardPage() {
 
   const handleStep7Complete = useCallback(async () => {
     await finishOnboarding();
-    router.push('/dashboard');
+    router.push('/portefeuille');
   }, [finishOnboarding, router]);
 
   if (isLoading) {
