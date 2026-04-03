@@ -13,9 +13,10 @@ export function Support() {
           {/* Left: illustration */}
           <div className={styles.illustrationWrap}>
             <Image
-              src="/velorah/illustrations/illustration-support.svg"
-              alt="Support illustration"
+              src="/velorah/illustrations/illustration-accompagnement.webp"
+              alt="Équipe d'experts accompagnant les gestionnaires de copropriété"
               fill
+              unoptimized
               className={styles.illustration}
             />
           </div>

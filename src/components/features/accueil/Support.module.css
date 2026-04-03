@@ -33,8 +33,7 @@
 .illustrationWrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 480px;
+  min-height: 300px;
 }
 
 .illustration {

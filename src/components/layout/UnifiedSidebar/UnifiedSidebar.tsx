@@ -262,7 +262,7 @@ export default function UnifiedSidebar() {
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           {!collapsed && <span>{theme === 'dark' ? 'Thème clair' : 'Thème sombre'}</span>}
         </button>
-        <Link href="/preview/velorah" className={styles.footerItem} title="Landing Page">
+        <Link href="/" className={styles.footerItem} title="Landing Page" target="_blank">
           <Globe size={16} />
           {!collapsed && <span>Landing Page</span>}
         </Link>

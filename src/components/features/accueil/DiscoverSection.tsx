@@ -117,17 +117,19 @@ export function DiscoverSection() {
 
       <div className={styles.illustrationLeft}>
         <Image
-          src="/velorah/illustrations/illustration-left.png"
+          src="/velorah/illustrations/illustration-left.webp"
           alt="Immeuble haussmannien avec gestionnaire"
           fill
+          unoptimized
           sizes="300px"
         />
       </div>
       <div className={styles.illustrationRight}>
         <Image
-          src="/velorah/illustrations/illustration-right.png"
+          src="/velorah/illustrations/illustration-right.webp"
           alt="Bureau de gestion immobilière"
           fill
+          unoptimized
           sizes="300px"
         />
       </div>
