@@ -18,6 +18,8 @@ const createUntypedClient = () => createClient() as any;
 export interface DashboardKpis {
   copro_id: string;
   current_balance: number;
+  tresorerie_courante?: number;
+  tresorerie_travaux?: number;
   unpaid_total: number;
   critical_unpaid_count: number;
   next_ag_date: string | null;
@@ -93,7 +95,8 @@ function getSupabaseClient() {
 export async function getDashboardKpis(coproId: string): Promise<ApiResult<DashboardKpis>> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('v_dashboard_kpis')
     .select('*')
     .eq('copro_id', coproId)
@@ -106,11 +109,16 @@ export async function getDashboardKpis(coproId: string): Promise<ApiResult<Dashb
         data: {
           copro_id: coproId,
           current_balance: 0,
+          tresorerie_courante: 0,
+          tresorerie_travaux: 0,
           unpaid_total: 0,
           critical_unpaid_count: 0,
           next_ag_date: null,
           next_ag_id: null,
           next_ag_title: null,
+          budget_vote: 0,
+          budget_realise: 0,
+          budget_pct: 0,
         },
         error: null,
       };
@@ -118,7 +126,20 @@ export async function getDashboardKpis(coproId: string): Promise<ApiResult<Dashb
     return { data: null, error: error.message };
   }
 
-  return { data: data as DashboardKpis, error: null };
+  // Supabase retourne les numeric en string — cast en number
+  const kpis: DashboardKpis = {
+    ...data,
+    current_balance: Number(data.current_balance) || 0,
+    tresorerie_courante: Number(data.tresorerie_courante) || 0,
+    tresorerie_travaux: Number(data.tresorerie_travaux) || 0,
+    unpaid_total: Number(data.unpaid_total) || 0,
+    critical_unpaid_count: Number(data.critical_unpaid_count) || 0,
+    budget_vote: Number(data.budget_vote) || 0,
+    budget_realise: Number(data.budget_realise) || 0,
+    budget_pct: Number(data.budget_pct) || 0,
+  };
+
+  return { data: kpis, error: null };
 }
 
 // ============================================================================
@@ -207,6 +228,7 @@ export async function getDashboardData(coproId: string): Promise<ApiResult<Dashb
   const kpis = kpisResult.data!;
 
   // Supplement with annexe KPIs (best-effort, non-blocking)
+  // La vue v_dashboard_kpis fournit déjà tresorerie, budget — la RPC complète les champs manquants
   try {
     const periodResult = await getActiveAccountingPeriod(coproId);
     if (!periodResult.error && periodResult.data) {
@@ -216,13 +238,9 @@ export async function getDashboardData(coproId: string): Promise<ApiResult<Dashb
         { p_copro_id: coproId, p_period_id: periodResult.data.id }
       );
       if (annexeKpis) {
-        kpis.budget_vote = annexeKpis.budget_vote ?? 0;
-        kpis.budget_realise = annexeKpis.budget_realise ?? 0;
-        kpis.budget_pct = annexeKpis.budget_pct ?? 0;
-        kpis.tresorerie = annexeKpis.tresorerie ?? 0;
-        kpis.provisions_travaux = annexeKpis.provisions_travaux ?? 0;
-        kpis.travaux_en_cours = annexeKpis.travaux_en_cours ?? 0;
-        kpis.nb_travaux_ouverts = annexeKpis.nb_travaux_ouverts ?? 0;
+        // Ne pas écraser les valeurs déjà fournies par la vue
+        kpis.travaux_en_cours = annexeKpis.travaux_en_cours ?? kpis.travaux_en_cours ?? 0;
+        kpis.nb_travaux_ouverts = annexeKpis.nb_travaux_ouverts ?? kpis.nb_travaux_ouverts ?? 0;
       }
     }
   } catch {

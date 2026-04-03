@@ -59,8 +59,8 @@ export default function DashboardPage() {
       <div className={styles.bento}>
         <BentoTresorerie
           balance={kpis.current_balance}
-          compteCourant={kpis.tresorerie ?? kpis.current_balance}
-          fondsTravaux={kpis.provisions_travaux ?? 0}
+          compteCourant={kpis.tresorerie_courante ?? kpis.current_balance}
+          fondsTravaux={kpis.tresorerie_travaux ?? 0}
         />
 
         <BentoAG

@@ -18,14 +18,14 @@ export function BentoBudget({ budgetPct, budgetVote, budgetRealise }: BentoBudge
       <div className={styles.label}>Budget {new Date().getFullYear()}</div>
       {hasBudget ? (
         <>
-          <div className={styles.budgetPct}>{budgetPct} %</div>
+          <div className={styles.budgetPct} style={{ color: '#3b82f6' }}>{budgetPct} %</div>
           <div className={styles.progressTrack}>
             <div
               className={styles.progressFill}
-              style={{ width: `${Math.min(budgetPct, 100)}%` }}
+              style={{ width: `${Math.min(budgetPct ?? 0, 100)}%`, background: '#3b82f6' }}
             />
           </div>
-          <div className={styles.budgetDetail}>
+          <div className={styles.budgetDetail} style={{ color: '#6B7A8D' }}>
             <span className={styles.mono}>{formatCurrency(budgetRealise ?? 0)}</span>
             {' consommés sur '}
             <span className={styles.mono}>{formatCurrency(budgetVote)}</span>

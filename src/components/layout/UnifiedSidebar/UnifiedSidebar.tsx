@@ -12,6 +12,7 @@ import { MODULES, getActiveModule } from '@/lib/config/navigation';
 import { searchRoutes, SearchableRoute } from '@/lib/config/search';
 import { useSidebar } from '@/providers/SidebarContext';
 import { useTheme } from '@/providers/ThemeProvider';
+import { useCopro } from '@/providers/CoproContext';
 import styles from './UnifiedSidebar.module.css';
 
 export default function UnifiedSidebar() {
@@ -20,6 +21,7 @@ export default function UnifiedSidebar() {
   const activeModule = getActiveModule(pathname);
   const { collapsed, toggle } = useSidebar();
   const { theme, toggleTheme } = useTheme();
+  const { currentCopro } = useCopro();
 
   // Expanded modules state — active module starts expanded
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
@@ -148,10 +150,12 @@ export default function UnifiedSidebar() {
       {!collapsed && (
         <div className={styles.coproSelector}>
           <div className={styles.coproName}>
-            Résidence Les Lilas
+            {currentCopro?.name ?? 'Chargement...'}
             <ChevronDown size={12} className={styles.coproChevron} />
           </div>
-          <div className={styles.coproAddress}>12 rue des Lilas, 75011 Paris</div>
+          <div className={styles.coproAddress}>
+            {currentCopro ? [currentCopro.address, currentCopro.city].filter(Boolean).join(', ') : ''}
+          </div>
         </div>
       )}
 

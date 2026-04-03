@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { getCurrentBusinessYear, formatDateFR } from '@/lib/time/period';
 import { useDashboardData, type DashboardTodo, type DashboardActivity } from '@/hooks/modules/useDashboardData';
+import { useCopro } from '@/providers/CoproContext';
 import { DASHBOARD_MAX_PRIORITIES, DASHBOARD_MAX_ACTIVITIES } from '@/lib/features/flags';
 
 // ============================================================================
@@ -87,8 +88,9 @@ export function formatRelativeTime(dateStr: string): string {
 
 export function useDashboardMainPage(): UseDashboardMainPageResult {
   const { data, isLoading, isRefreshing, error, isEmpty, refresh } = useDashboardData();
+  const { currentCopro } = useCopro();
 
-  const coproName = 'Résidence Les Lilas';
+  const coproName = currentCopro?.name ?? 'Chargement...';
 
   const computedData = useMemo((): ComputedDashboardData | null => {
     if (!data) return null;

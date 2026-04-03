@@ -237,14 +237,22 @@ export function usePortefeuille(): UsePortefeuilleReturn {
     async function fetchCopros() {
       try {
         const supabase = createClient();
+
+        // Assurer le membership dev (même mécanisme que activeCopro)
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabase as any).rpc('ensure_dev_membership', { p_copro_id: null });
+        } catch {
+          // Silently ignore
+        }
+
         const { data, error } = await supabase
           .from('copros')
           .select('id, name, address, city, postal_code')
           .order('created_at', { ascending: true });
 
-        if (error || !data || data.length === 0) {
-          // Fallback sur les mocks
-          setDbCopros(null);
+        if (error || !data) {
+          setDbCopros([]);
         } else {
           // Mapper les données Supabase vers le format portefeuille
           const mapped: ICoproprietePortefeuille[] = data.map((c) => ({
@@ -272,7 +280,7 @@ export function usePortefeuille(): UsePortefeuilleReturn {
           setDbCopros(mapped);
         }
       } catch {
-        setDbCopros(null);
+        setDbCopros([]);
       } finally {
         setIsLoading(false);
       }
