@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { MailSidebar, MailList, MailReader, ComposeModal } from '@/features/communication/mail/components';
 import { useMailbox } from '@/features/communication/mail/hooks';
 import styles from './mail.module.css';

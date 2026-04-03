@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import { UnifiedSidebar } from '@/components/layout/UnifiedSidebar';
 import { ThemeProvider } from '@/providers/ThemeProvider';
