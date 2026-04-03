@@ -127,6 +127,22 @@ export function useSuppliers() {
 }
 
 // ============================================================================
+// BANK ACCOUNTS, PENDING INVOICES, UNMATCHED PAYMENTS
+// ============================================================================
+
+export function useBankAccounts() {
+  return useFinanceQuery(financeApi.listBankAccounts);
+}
+
+export function usePendingInvoices() {
+  return useFinanceQuery(financeApi.listPendingInvoices);
+}
+
+export function useUnmatchedPayments() {
+  return useFinanceQuery(financeApi.listUnmatchedPayments);
+}
+
+// ============================================================================
 // BANK MOVEMENTS
 // ============================================================================
 

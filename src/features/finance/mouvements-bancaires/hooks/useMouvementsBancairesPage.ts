@@ -17,11 +17,11 @@ import type {
   EntiteLiee,
   WorkflowMode,
   WorkflowTab,
+  CompteBancaire,
+  MatchingContext,
+  RapprochementContext,
 } from '../domain/types';
 import {
-  MOCK_COMPTE_COURANT,
-  MOCK_COMPTE_TRAVAUX,
-  MOCK_ECRITURES_COMPTABLES,
   PLAN_COMPTABLE_ESSENTIEL,
 } from '../domain/constants';
 import { genererSuggestionsBatch, genererRapprochementsBatch } from '../domain/matching-engine';
@@ -39,16 +39,85 @@ import {
   getTempsJusquaSync,
 } from '../domain/utils';
 import { useCopro } from '@/providers/CoproContext';
-import { useBankMovements, useImportBankMovement, useReconcileBankMovement, useCategorizeBankMovement, useOpenPeriod } from '@/hooks/modules/useFinanceData';
+import {
+  useBankMovements,
+  useImportBankMovement,
+  useReconcileBankMovement,
+  useCategorizeBankMovement,
+  useOpenPeriod,
+  useBankAccounts,
+  usePendingInvoices,
+  useUnmatchedPayments,
+  useSuppliers,
+} from '@/hooks/modules/useFinanceData';
+import type { BankAccountWithBalance } from '@/lib/finance/api';
+
+// ============================================================================
+// HELPERS: conversion Supabase BankAccount -> local CompteBancaire
+// ============================================================================
+
+const DEFAULT_COMPTE_COURANT: CompteBancaire = {
+  id: '1',
+  nom: 'Compte courant copropriete',
+  type: 'courant',
+  iban: '',
+  soldeInitial: 0,
+  derniereMaj: new Date().toISOString(),
+};
+
+const DEFAULT_COMPTE_TRAVAUX: CompteBancaire = {
+  id: '2',
+  nom: 'Compte fonds de travaux',
+  type: 'travaux',
+  iban: '',
+  soldeInitial: 0,
+  derniereMaj: new Date().toISOString(),
+};
+
+function bankAccountToCompteBancaire(
+  account: BankAccountWithBalance,
+  type: TypeCompte
+): CompteBancaire {
+  return {
+    id: account.account_id,
+    nom: account.name,
+    type,
+    iban: account.iban || '',
+    soldeInitial: account.initial_balance,
+    derniereMaj: new Date().toISOString(),
+  };
+}
 
 export function useMouvementsBancairesPage() {
   const router = useRouter();
   const { currentCoproId } = useCopro();
   const { data: supabaseBankMovements, isLoading, error, refresh } = useBankMovements();
   const { data: openPeriod } = useOpenPeriod();
+  const { data: bankAccounts } = useBankAccounts();
+  const { data: supabaseSuppliers } = useSuppliers();
+  const { data: supabasePendingInvoices } = usePendingInvoices();
+  const { data: supabaseUnmatchedPayments } = useUnmatchedPayments();
   const importMutation = useImportBankMovement();
   const reconcileMutation = useReconcileBankMovement();
   const categorizeMutation = useCategorizeBankMovement();
+
+  // ============================================================================
+  // Derive compteCourant / compteTravaux from Supabase bank_accounts
+  // ============================================================================
+
+  const compteCourant: CompteBancaire = useMemo(() => {
+    if (!bankAccounts || bankAccounts.length === 0) return DEFAULT_COMPTE_COURANT;
+    // Convention: le compte courant a un code commencant par "512" (banque) ou est le premier
+    const cc = bankAccounts.find(a => a.code?.startsWith('512')) || bankAccounts[0];
+    return bankAccountToCompteBancaire(cc, 'courant');
+  }, [bankAccounts]);
+
+  const compteTravaux: CompteBancaire = useMemo(() => {
+    if (!bankAccounts || bankAccounts.length < 2) return DEFAULT_COMPTE_TRAVAUX;
+    // Le compte travaux est le deuxieme compte (ou celui qui n'est pas le courant)
+    const ct = bankAccounts.find(a => a.account_id !== compteCourant.id) || bankAccounts[1];
+    return bankAccountToCompteBancaire(ct, 'travaux');
+  }, [bankAccounts, compteCourant.id]);
 
   // Enhanced refresh that updates timestamp
   const refreshWithTimestamp = useCallback(async () => {
@@ -70,10 +139,10 @@ export function useMouvementsBancairesPage() {
       categorise: mov.status === 'matched' || !!mov.account_code,
       categorie: (mov.account_category as CategorieComptable) || undefined,
       compteComptable: mov.account_code ? `${mov.account_code}` : undefined,
-      accountId: (mov as unknown as Record<string, unknown>).account_id as string || '1',
+      accountId: (mov as unknown as Record<string, unknown>).account_id as string || compteCourant.id,
       statutRapprochement: mov.status === 'matched' ? 'rapproche' as const : 'non_rapproche' as const,
     }));
-  }, [supabaseBankMovements]);
+  }, [supabaseBankMovements, compteCourant.id]);
 
   const [compteActif, setCompteActif] = useState<TypeCompte>('courant');
 
@@ -119,8 +188,8 @@ export function useMouvementsBancairesPage() {
   const [rapprochementFilter, setRapprochementFilter] = useState<'tous' | 'rapproche' | 'non_rapproche'>('tous');
   const [showSlideOver, setShowSlideOver] = useState(false);
 
-  // Initialize with empty array - will be populated from Supabase ledger entries
-  const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>(MOCK_ECRITURES_COMPTABLES);
+  // Ecritures comptables — initialized empty, will be populated from Supabase ledger entries
+  const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>([]);
   const [selectedMouvementRapprochement, setSelectedMouvementRapprochement] = useState<MouvementBancaire | null>(null);
   const [suggestionsRapprochement, setSuggestionsRapprochement] = useState<SuggestionRapprochement[]>([]);
   const [showRapprochementModal, setShowRapprochementModal] = useState(false);
@@ -129,7 +198,7 @@ export function useMouvementsBancairesPage() {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>('table');
   const [activeTab, setActiveTab] = useState<WorkflowTab>('categorisation');
 
-  const compteActuel = compteActif === 'courant' ? MOCK_COMPTE_COURANT : MOCK_COMPTE_TRAVAUX;
+  const compteActuel = compteActif === 'courant' ? compteCourant : compteTravaux;
 
   // Bug fix: filtrer les mouvements par compte actif (accountId)
   const mouvementsFiltresParCompte = useMemo(() => {
@@ -168,16 +237,48 @@ export function useMouvementsBancairesPage() {
     return { ...result, mouvementsNonRapproches };
   }, [soldeActuel, ecrituresComptables, mouvements]);
 
-  // Batch suggestions (matching engine)
+  // ============================================================================
+  // Build MatchingContext & RapprochementContext from Supabase data
+  // ============================================================================
+
+  const matchingContext: MatchingContext = useMemo(() => ({
+    suppliers: (supabaseSuppliers || []).map(s => ({ id: s.id, name: s.name })),
+    pendingInvoices: (supabasePendingInvoices || []).map(inv => ({
+      id: inv.id,
+      supplier_id: inv.supplier_id,
+      supplier_name: inv.supplier_name,
+      invoice_number: inv.invoice_number,
+      invoice_date: inv.invoice_date,
+      due_date: inv.due_date,
+      label: inv.label,
+      total_amount: inv.total_amount,
+      status: inv.status,
+    })),
+    allMouvements: mouvementsBase,
+  }), [supabaseSuppliers, supabasePendingInvoices, mouvementsBase]);
+
+  const rapprochementContext: RapprochementContext = useMemo(() => ({
+    pendingInvoices: matchingContext.pendingInvoices,
+    unmatchedPayments: (supabaseUnmatchedPayments || []).map(p => ({
+      id: p.id,
+      lot_id: p.lot_id,
+      amount: p.amount,
+      payment_date: p.payment_date,
+      method: p.method,
+      reference: p.reference,
+    })),
+  }), [matchingContext.pendingInvoices, supabaseUnmatchedPayments]);
+
+  // Batch suggestions (matching engine) — now fed with Supabase context
   const suggestionsCategorisation = useMemo(() => {
     const nonCategorises = mouvements.filter(m => !m.categorise);
-    return genererSuggestionsBatch(nonCategorises, mouvements);
-  }, [mouvements]);
+    return genererSuggestionsBatch(nonCategorises, matchingContext);
+  }, [mouvements, matchingContext]);
 
   const suggestionsRapprochementBatch = useMemo(() => {
     const aRapprocher = mouvements.filter(m => m.categorise && m.statutRapprochement !== 'rapproche');
-    return genererRapprochementsBatch(aRapprocher, ecrituresComptables);
-  }, [mouvements, ecrituresComptables]);
+    return genererRapprochementsBatch(aRapprocher, rapprochementContext);
+  }, [mouvements, rapprochementContext]);
 
   const isMouvementRapproche = useCallback((mouvementId: string) => {
     return ecrituresComptables.some(ec => ec.mouvementRapproche === mouvementId);
@@ -257,7 +358,7 @@ export function useMouvementsBancairesPage() {
           mode: 'manuel',
           statut: 'succes',
           nombreMouvements: mouvements.length,
-          message: 'Synchronisation manuelle réussie',
+          message: 'Synchronisation manuelle reussie',
           details: {
             nouveauxMouvements,
             mouvementsMisAJour: Math.floor(Math.random() * 3),
@@ -274,7 +375,7 @@ export function useMouvementsBancairesPage() {
         setStatutConnexion(prev => ({
           ...prev,
           statut: 'erreur',
-          messageErreur: 'Timeout de connexion avec la banque. Veuillez réessayer.'
+          messageErreur: 'Timeout de connexion avec la banque. Veuillez reessayer.'
         }));
 
         const nouvelleSync: HistoriqueSynchronisation = {
@@ -341,7 +442,7 @@ export function useMouvementsBancairesPage() {
               mode: 'manuel',
               statut: 'succes',
               nombreMouvements: result.data?.imported || mouvementsImportes.length,
-              message: `Import ${importType.toUpperCase()} réussi (${importFile.name})`,
+              message: `Import ${importType.toUpperCase()} reussi (${importFile.name})`,
               details: {
                 nouveauxMouvements: result.data?.imported || mouvementsImportes.length,
                 mouvementsMisAJour: 0,
@@ -364,7 +465,7 @@ export function useMouvementsBancairesPage() {
             mode: 'manuel',
             statut: 'succes',
             nombreMouvements: mouvementsImportes.length,
-            message: `Import ${importType.toUpperCase()} réussi (${importFile.name})`,
+            message: `Import ${importType.toUpperCase()} reussi (${importFile.name})`,
             details: {
               nouveauxMouvements: mouvementsImportes.length,
               mouvementsMisAJour: 0,
@@ -384,7 +485,7 @@ export function useMouvementsBancairesPage() {
           mode: 'manuel',
           statut: 'echec',
           nombreMouvements: 0,
-          message: `Aucun mouvement trouvé dans le fichier ${importFile.name}`,
+          message: `Aucun mouvement trouve dans le fichier ${importFile.name}`,
           details: { nouveauxMouvements: 0, mouvementsMisAJour: 0, erreurs: 1 }
         };
         setHistoriqueSync(prev => [nouvelleSync, ...prev.slice(0, 9)]);
@@ -544,9 +645,9 @@ export function useMouvementsBancairesPage() {
 
     try {
       // Call Supabase reconcile API
-      const result = await reconcileMutation.mutate({
+      await reconcileMutation.mutate({
         bank_movement_id: selectedMouvementRapprochement.id,
-        target_type: 'other', // Could be 'payment' or 'supplier_payment' based on ecriture type
+        target_type: 'other',
         target_id: ecritureId,
       });
 
@@ -583,7 +684,7 @@ export function useMouvementsBancairesPage() {
         })
       );
       await Promise.all(promises);
-      // Mise à jour locale
+      // Mise a jour locale
       setMouvementsBase(prev => prev.map(m => {
         const sel = selections.get(m.id);
         if (!sel) return m;
@@ -596,7 +697,7 @@ export function useMouvementsBancairesPage() {
   }, [reconcileMutation]);
 
   const handleBatchRapprocher = useCallback(async (
-    matches: Map<string, string> // mouvementId → ecritureId
+    matches: Map<string, string> // mouvementId -> ecritureId
   ) => {
     setIsMutating(true);
     try {
@@ -608,7 +709,7 @@ export function useMouvementsBancairesPage() {
         })
       );
       await Promise.all(promises);
-      // Mise à jour locale
+      // Mise a jour locale
       setMouvementsBase(prev => prev.map(m => {
         const ecritureId = matches.get(m.id);
         if (!ecritureId) return m;
@@ -700,8 +801,8 @@ export function useMouvementsBancairesPage() {
     ecartSoldes,
     totalEntrees,
     totalSorties,
-    compteCourant: MOCK_COMPTE_COURANT,
-    compteTravaux: MOCK_COMPTE_TRAVAUX,
+    compteCourant,
+    compteTravaux,
 
     // Setters
     setCompteActif,
@@ -753,8 +854,6 @@ export function useMouvementsBancairesPage() {
 
     // Constants
     PLAN_COMPTABLE_ESSENTIEL,
-    MOCK_COMPTE_COURANT,
-    MOCK_COMPTE_TRAVAUX,
   };
 }
 
