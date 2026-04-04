@@ -8,7 +8,6 @@ import styles from './LpNav.module.css';
 
 const NAV_LINKS = [
   { label: 'Accueil', href: '/' },
-  { label: 'Fonctionnalités', href: '/#fonctionnalites' },
   { label: 'Tarifs', href: '/tarifs' },
   { label: 'Comment ça marche', href: '/comment-ca-marche' },
   { label: 'Contact', href: '/contact' },
