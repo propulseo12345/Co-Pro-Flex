@@ -58,7 +58,7 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <Image src="/CoProFlex_logo_transparent.png" alt="CoProFlex" width={300} height={200} priority className={styles.logoImg} />
+          <Image src="/CoProFlex_transparent.png" alt="CoProFlex" width={300} height={200} priority className={styles.logoImg} />
           <p className={styles.subtitle}>Connexion à votre espace</p>
         </div>
 

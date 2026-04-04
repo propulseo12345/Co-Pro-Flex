@@ -28,7 +28,7 @@ export function LpNav() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
           <Image
-            src="/CoProFlex_logo_transparent.png"
+            src="/CoProFlex_transparent.png"
             alt="CoProFlex"
             width={300}
             height={200}
