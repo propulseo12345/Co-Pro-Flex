@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { BLOG_ARTICLES } from '@/data/blog-articles';
+import { formatDateLongFR } from '@/lib/dates';
 import { CtaBanner } from '@/components/features/marketing/CtaBanner';
 import styles from './page.module.css';
 
@@ -10,14 +11,6 @@ const CATEGORY_CLASS: Record<string, string> = {
   Réglementaire: styles.categoryReglementaire,
   Conseils: styles.categoryConseils,
 };
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 interface BlogArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -82,7 +75,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
               {article.author.name}, {article.author.role}
             </span>
             <span className={styles.metaSep} aria-hidden="true" />
-            <span>{formatDate(article.date)}</span>
+            <span>{formatDateLongFR(article.date)}</span>
             <span className={styles.metaSep} aria-hidden="true" />
             <span>{article.readTime} de lecture</span>
           </div>
@@ -113,7 +106,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
                 <div className={styles.meta}>
                   <span>{rel.author.name}</span>
                   <span className={styles.metaSep} aria-hidden="true" />
-                  <span>{formatDate(rel.date)}</span>
+                  <span>{formatDateLongFR(rel.date)}</span>
                 </div>
               </Link>
             ))}

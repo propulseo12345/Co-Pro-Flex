@@ -1,0 +1,122 @@
+/* ── FaqAccordion — shared FAQ component ── */
+
+/* ── Wrapper ── */
+
+.faqSection {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.faqTitle {
+  font-family: var(--pg-font-display);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--pg-text);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+/* ── Flat variant (default) ── */
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.faqItem[open] .faqChevron {
+  transform: rotate(180deg);
+}
+
+.faqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pg-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+.faqQuestion::marker {
+  content: '';
+}
+
+.faqChevron {
+  color: var(--pg-text-secondary);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.faqAnswer {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0 0 20px;
+}
+
+/* ── Card variant ── */
+
+.card .faqList {
+  gap: 12px;
+}
+
+.card .faqItem {
+  background: var(--pg-bg-white, #fff);
+  border: 1px solid var(--pg-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.card .faqItem[open] {
+  border-color: var(--pg-accent);
+}
+
+.card .faqQuestion {
+  padding: 20px 24px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.card .faqQuestion::after {
+  content: '+';
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--pg-text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.card .faqItem[open] .faqQuestion::after {
+  content: '\2212';
+}
+
+.card .faqChevron {
+  display: none;
+}
+
+.card .faqAnswer {
+  padding: 0 24px 20px;
+  font-size: 14px;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 600px) {
+  .faqQuestion {
+    font-size: 15px;
+  }
+}

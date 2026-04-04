@@ -269,75 +269,6 @@
 
 /* ── FAQ ── */
 
-.faqSection {
-  max-width: 720px;
-  margin: 64px auto 0;
-}
-
-.faqTitle {
-  font-family: var(--pg-font-display);
-  font-size: 28px;
-  font-weight: 400;
-  color: var(--pg-text);
-  text-align: center;
-  margin: 0 0 32px;
-}
-
-.faqList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.faqItem {
-  background: var(--pg-bg-white, #fff);
-  border: 1px solid var(--pg-border);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 0.2s ease;
-}
-
-.faqItem[open] {
-  border-color: var(--pg-accent);
-}
-
-.faqQuestion {
-  padding: 20px 24px;
-  font-family: var(--pg-font-body);
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--pg-text);
-  cursor: pointer;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.faqQuestion::-webkit-details-marker {
-  display: none;
-}
-
-.faqQuestion::after {
-  content: '+';
-  font-size: 20px;
-  font-weight: 300;
-  color: var(--pg-text-secondary);
-  transition: transform 0.2s ease;
-}
-
-.faqItem[open] .faqQuestion::after {
-  content: '\2212';
-}
-
-.faqAnswer {
-  padding: 0 24px 20px;
-  margin: 0;
-  font-family: var(--pg-font-body);
-  font-size: 14px;
-  color: var(--pg-text-secondary);
-  line-height: 1.7;
-}
 
 /* ── Responsive ── */
 
@@ -361,13 +292,5 @@
 
   .formCard {
     padding: 24px;
-  }
-
-  .faqSection {
-    margin-top: 48px;
-  }
-
-  .faqTitle {
-    font-size: 24px;
   }
 }

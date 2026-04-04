@@ -10,6 +10,7 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import { PageHero } from '@/components/features/marketing/PageHero';
+import { FaqAccordion } from '@/components/features/marketing/FaqAccordion';
 import { ContactForm } from './ContactForm';
 import styles from './page.module.css';
 
@@ -130,17 +131,7 @@ export default function ContactPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className={styles.faqSection}>
-        <h2 className={styles.faqTitle}>Questions fréquentes</h2>
-        <div className={styles.faqList}>
-          {FAQ_ITEMS.map((item) => (
-            <details key={item.question} className={styles.faqItem}>
-              <summary className={styles.faqQuestion}>{item.question}</summary>
-              <p className={styles.faqAnswer}>{item.answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <FaqAccordion items={FAQ_ITEMS} title="Questions fréquentes" variant="card" />
     </div>
   );
 }

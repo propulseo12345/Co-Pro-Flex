@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { categories } from './data';
+import { FaqAccordion } from '@/components/features/marketing/FaqAccordion';
 import styles from './page.module.css';
 
 export function FaqContent() {
@@ -29,19 +29,7 @@ export function FaqContent() {
       </div>
 
       {/* FAQ Items */}
-      <section className={styles.faqSection}>
-        <div className={styles.faqList}>
-          {activeCat.items.map((item) => (
-            <details key={item.question} className={styles.faqItem}>
-              <summary className={styles.faqQuestion}>
-                <span>{item.question}</span>
-                <ChevronDown size={18} className={styles.faqChevron} />
-              </summary>
-              <p className={styles.faqAnswer}>{item.answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <FaqAccordion items={activeCat.items} />
     </>
   );
 }

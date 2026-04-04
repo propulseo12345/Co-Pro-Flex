@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Check, X, ChevronDown } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { plans, comparisonRows, faqItems } from './data';
+import { FaqAccordion } from '@/components/features/marketing/FaqAccordion';
 import styles from './page.module.css';
 
 export function PricingContent() {
@@ -122,20 +123,7 @@ export function PricingContent() {
       </section>
 
       {/* FAQ */}
-      <section className={styles.faqSection}>
-        <h2 className={styles.faqTitle}>Questions fréquentes</h2>
-        <div className={styles.faqList}>
-          {faqItems.map((item) => (
-            <details key={item.question} className={styles.faqItem}>
-              <summary className={styles.faqQuestion}>
-                <span>{item.question}</span>
-                <ChevronDown size={18} className={styles.faqChevron} />
-              </summary>
-              <p className={styles.faqAnswer}>{item.answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <FaqAccordion items={faqItems} title="Questions fréquentes" />
     </>
   );
 }

@@ -47,7 +47,7 @@
 
 .heroTitle em {
   font-style: italic;
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-display), serif;
   color: var(--pg-text-secondary);
   font-weight: 400;
 }

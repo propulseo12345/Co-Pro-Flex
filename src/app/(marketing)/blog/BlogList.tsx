@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { BLOG_ARTICLES, BLOG_CATEGORIES } from '@/data/blog-articles';
 import type { IBlogArticle } from '@/data/blog-articles';
+import { formatDateLongFR } from '@/lib/dates';
 import styles from './page.module.css';
 
 const CATEGORY_CLASS: Record<IBlogArticle['category'], string> = {
@@ -11,14 +12,6 @@ const CATEGORY_CLASS: Record<IBlogArticle['category'], string> = {
   Réglementaire: styles.categoryReglementaire,
   Conseils: styles.categoryConseils,
 };
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 export function BlogList() {
   const [activeCategory, setActiveCategory] = useState<string>('Tous');
@@ -56,7 +49,7 @@ export function BlogList() {
           <div className={styles.meta}>
             <span>{featured.author.name}</span>
             <span className={styles.metaSep} aria-hidden="true" />
-            <span>{formatDate(featured.date)}</span>
+            <span>{formatDateLongFR(featured.date)}</span>
             <span className={styles.metaSep} aria-hidden="true" />
             <span>{featured.readTime} de lecture</span>
           </div>
@@ -78,7 +71,7 @@ export function BlogList() {
             <div className={styles.meta}>
               <span>{article.author.name}</span>
               <span className={styles.metaSep} aria-hidden="true" />
-              <span>{formatDate(article.date)}</span>
+              <span>{formatDateLongFR(article.date)}</span>
               <span className={styles.metaSep} aria-hidden="true" />
               <span>{article.readTime}</span>
             </div>

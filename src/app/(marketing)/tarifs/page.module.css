@@ -326,70 +326,6 @@
 
 /* ── FAQ ── */
 
-.faqSection {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 24px 64px;
-}
-
-.faqTitle {
-  font-family: var(--pg-font-display);
-  font-size: 32px;
-  font-weight: 400;
-  color: var(--pg-text);
-  text-align: center;
-  margin: 0 0 32px;
-}
-
-.faqList {
-  display: flex;
-  flex-direction: column;
-}
-
-.faqItem {
-  border-bottom: 1px solid var(--pg-border);
-}
-
-.faqItem[open] .faqChevron {
-  transform: rotate(180deg);
-}
-
-.faqQuestion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 20px 0;
-  font-family: var(--pg-font-body);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--pg-text);
-  cursor: pointer;
-  list-style: none;
-}
-
-.faqQuestion::-webkit-details-marker {
-  display: none;
-}
-
-.faqQuestion::marker {
-  content: '';
-}
-
-.faqChevron {
-  color: var(--pg-text-secondary);
-  flex-shrink: 0;
-  transition: transform 0.25s ease;
-}
-
-.faqAnswer {
-  font-family: var(--pg-font-body);
-  font-size: 15px;
-  color: var(--pg-text-secondary);
-  line-height: 1.7;
-  margin: 0;
-  padding: 0 0 20px;
-}
 
 /* ── Responsive ── */
 
@@ -423,14 +359,6 @@
   .thFeature,
   .tdFeature {
     min-width: 140px;
-  }
-
-  .faqSection {
-    padding: 0 20px 48px;
-  }
-
-  .faqQuestion {
-    font-size: 15px;
   }
 
   .planTagline {
