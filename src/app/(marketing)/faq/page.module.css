@@ -1,0 +1,138 @@
+/* ── FAQ Page ── */
+
+.page {
+  padding-bottom: 32px;
+}
+
+/* ── Category Tabs ── */
+
+.tabsWrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabsWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 4px;
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 9999px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.tab {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--pg-text-secondary);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--pg-text);
+  background: rgba(5, 38, 65, 0.03);
+}
+
+.tabActive {
+  background: var(--pg-bg-white);
+  color: var(--pg-text);
+  border: 1px solid var(--pg-border);
+  box-shadow: 0 1px 3px rgba(5, 38, 65, 0.06);
+}
+
+/* ── FAQ Items ── */
+
+.faqSection {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.faqItem[open] .faqChevron {
+  transform: rotate(180deg);
+}
+
+.faqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pg-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+.faqQuestion::marker {
+  content: '';
+}
+
+.faqChevron {
+  color: var(--pg-text-secondary);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.faqAnswer {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0 0 20px;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 600px) {
+  .tabs {
+    justify-content: flex-start;
+    border-radius: 12px;
+  }
+
+  .tab {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+
+  .faqSection {
+    padding: 32px 20px 48px;
+  }
+
+  .faqQuestion {
+    font-size: 15px;
+  }
+}

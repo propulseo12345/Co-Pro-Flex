@@ -1,0 +1,301 @@
+/* ── Comment ca marche Page ── */
+
+.page {
+  padding-bottom: 32px;
+}
+
+/* ── Steps ── */
+
+.stepsSection {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.stepCard {
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: all 0.25s ease;
+}
+
+.stepCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(5, 38, 65, 0.06);
+}
+
+.stepNumber {
+  display: inline-block;
+  font-family: var(--pg-font-display);
+  font-size: 48px;
+  font-weight: 400;
+  color: var(--pg-accent);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.stepTitle {
+  font-family: var(--pg-font-display);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--pg-text);
+  margin: 0 0 10px;
+}
+
+.stepDescription {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0 0 20px;
+}
+
+.stepBullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepBullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text);
+  line-height: 1.5;
+}
+
+.bulletCheck {
+  color: var(--pg-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Before / After ── */
+
+.comparisonSection {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.comparisonTitle {
+  font-family: var(--pg-font-display);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--pg-text);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.comparisonGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--pg-bg-white);
+}
+
+.comparisonHeader {
+  font-family: var(--pg-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 20px;
+}
+
+.comparisonHeaderBefore {
+  background: rgba(252, 95, 53, 0.06);
+  color: var(--pg-orange);
+  border-bottom: 1px solid var(--pg-border);
+  border-right: 1px solid var(--pg-border);
+}
+
+.comparisonHeaderAfter {
+  background: rgba(85, 172, 99, 0.06);
+  color: var(--pg-green);
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.comparisonRow {
+  display: contents;
+}
+
+.comparisonCell {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+}
+
+.comparisonRow:last-child .comparisonCell {
+  border-bottom: none;
+}
+
+.cellBefore {
+  color: var(--pg-text-secondary);
+  border-right: 1px solid var(--pg-border);
+  background: rgba(252, 95, 53, 0.02);
+}
+
+.cellAfter {
+  color: var(--pg-text);
+  font-weight: 500;
+  background: rgba(85, 172, 99, 0.02);
+}
+
+/* ── Testimonial ── */
+
+.testimonialSection {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.testimonial {
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  margin: 0;
+}
+
+.testimonialQuote {
+  font-family: var(--pg-font-body);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--pg-text);
+  line-height: 1.8;
+  margin: 0 0 28px;
+  font-style: italic;
+}
+
+.testimonialFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--pg-border);
+}
+
+.testimonialAuthor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.testimonialAuthor strong {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pg-text);
+}
+
+.testimonialAuthor span {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: var(--pg-text-secondary);
+}
+
+.testimonialResult {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.resultValue {
+  font-family: var(--pg-font-display);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--pg-green);
+  line-height: 1;
+}
+
+.resultLabel {
+  font-family: var(--pg-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pg-text-secondary);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .stepsGrid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .testimonialFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .testimonialResult {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .stepsSection {
+    padding: 32px 20px 48px;
+  }
+
+  .comparisonSection {
+    padding: 0 12px 48px;
+  }
+
+  .comparisonGrid {
+    grid-template-columns: 1fr;
+    border-radius: 12px;
+  }
+
+  .comparisonHeaderBefore {
+    border-right: none;
+  }
+
+  .cellBefore {
+    border-right: none;
+    border-bottom: none;
+    padding-bottom: 8px;
+  }
+
+  .cellAfter {
+    padding-top: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+  }
+
+  .comparisonRow:last-child .cellAfter {
+    border-bottom: none;
+  }
+
+  .testimonialSection {
+    padding: 0 20px 48px;
+  }
+
+  .testimonial {
+    padding: 28px 24px;
+  }
+
+  .testimonialQuote {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,219 @@
+/* ── Comparaison Page ── */
+
+.page {
+  padding-bottom: 32px;
+}
+
+/* ── Table ── */
+
+.tableSection {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--pg-border);
+  border-radius: 12px;
+  background: var(--pg-bg-white);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--pg-font-body);
+}
+
+.table th,
+.table td {
+  padding: 14px 20px;
+  text-align: center;
+}
+
+.thFeature {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--pg-text-tertiary);
+  background: rgba(5, 38, 65, 0.03);
+  border-bottom: 1px solid var(--pg-border);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.thPlan {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pg-text);
+  background: rgba(5, 38, 65, 0.03);
+  border-bottom: 1px solid var(--pg-border);
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+.thHighlighted {
+  color: var(--pg-accent);
+  background: rgba(48, 121, 255, 0.06);
+}
+
+.tdFeature {
+  text-align: left;
+  font-size: 14px;
+  color: var(--pg-text);
+  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+  position: sticky;
+  left: 0;
+  background: var(--pg-bg-white);
+  z-index: 1;
+}
+
+.rowEven .tdFeature {
+  background: rgba(5, 38, 65, 0.015);
+}
+
+.tdValue {
+  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+}
+
+.tdHighlighted {
+  background: rgba(48, 121, 255, 0.03);
+}
+
+.rowEven {
+  background: rgba(5, 38, 65, 0.015);
+}
+
+.rowEven .tdHighlighted {
+  background: rgba(48, 121, 255, 0.05);
+}
+
+/* ── Cell Icons ── */
+
+.iconCheck {
+  color: var(--pg-green);
+}
+
+.iconPartial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  font-weight: 700;
+  color: #f59e0b;
+  line-height: 1;
+}
+
+.iconCross {
+  color: #ef4444;
+}
+
+.iconNa {
+  color: var(--pg-text-tertiary);
+}
+
+/* ── Legend ── */
+
+.legend {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: var(--pg-text-secondary);
+}
+
+/* ── Advantage Cards ── */
+
+.advantagesSection {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.advantagesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.advantageCard {
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: all 0.25s ease;
+}
+
+.advantageCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(5, 38, 65, 0.06);
+}
+
+.advantageTitle {
+  font-family: var(--pg-font-display);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--pg-text);
+  margin: 0 0 10px;
+}
+
+.advantageDescription {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .advantagesGrid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .tableSection {
+    padding: 32px 12px 48px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .thFeature,
+  .tdFeature {
+    min-width: 140px;
+  }
+
+  .thPlan {
+    min-width: 100px;
+    font-size: 11px;
+  }
+
+  .legend {
+    gap: 16px;
+  }
+
+  .advantagesSection {
+    padding: 0 20px 48px;
+  }
+}

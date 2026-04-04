@@ -1,0 +1,28 @@
+/* ── Marketing Layout Shell ── */
+
+.lpShell {
+  min-height: 100vh;
+  background: #FEF5E4;
+  font-family: 'Inter', sans-serif;
+  color: #052641;
+
+  /* LP palette variables — scoped to marketing pages only */
+  --pg-bg: #FEF5E4;
+  --pg-bg-white: #FFFFFF;
+  --pg-text: #052641;
+  --pg-text-secondary: #807E7A;
+  --pg-text-tertiary: #AAAAAA;
+  --pg-accent: #3079FF;
+  --pg-orange: #FC5F35;
+  --pg-yellow: #FFA211;
+  --pg-green: #55AC63;
+  --pg-blue: #0081F1;
+  --pg-border: #E2DFD8;
+  --pg-font-display: 'DM Serif Display', serif;
+  --pg-font-body: 'Inter', sans-serif;
+}
+
+.main {
+  position: relative;
+  z-index: 1;
+}

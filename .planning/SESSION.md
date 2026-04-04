@@ -1,24 +1,23 @@
-# Session State — 2026-04-04 01:05
+# Session State — 2026-04-04 15:30
 
 ## Branch
 v2
 
 ## Completed This Session
-- Toggle dark/light demos LP: context React + variables CSS dans demo-shared.module.css, 8 composants demo migrés
-- Preview da-preview.html: toggle dark/light ajouté avec palette light
-- Illustrations hero: tailles en vw (responsive zoom), agrandies 3x +10%, décalée gauche -30px
-- Demo frame: réduit de 10% (810x468)
-- Textes LP: tirets longs supprimés, "personnes réelles" → "professionnels"
-- Logo: agrandi 2x +20% (101px)
-- Hero content: monté de 30px, demo descendue de 30px
+- Route group (marketing): layout partagé, LpNav avec menu mobile, Footer avec vrais liens
+- Composants partagés: PageHero, CtaBanner, SectionHeader
+- Migration homepage vers (marketing)/page.tsx, suppression ancien page.tsx
+- 18 pages marketing créées: fonctionnalités (hub + 6 détails), tarifs, contact, à propos, FAQ, sécurité, comment ça marche, comparaison, blog (index + [slug]), mentions légales, CGU, confidentialité
+- SEO: sitemap.ts, robots.ts, JSON-LD FAQPage
+- Code review + fix 9 issues: metadata Server Components, inline styles → CSS vars, accents français, liens morts, accessibilité formulaire
 
 ## Next Task
-Commit + push + deploy Vercel des ajustements LP (tailles images, textes, logo, spacing)
+Nice-to-have restants: extraire FaqAccordion partagé (dupliqué 3x), factoriser formatDate blog, normaliser breakpoints responsive, supprimer font Instrument Serif inutile
 
 ## Blockers
 None
 
 ## Key Context
-- DemoThemeProvider enveloppe DiscoverSection + 3 FeatureGrid dans page.tsx, light mode par défaut
-- Les illustrations utilisent vw + max-width + aspect-ratio pour stabilité au zoom
-- FeatureGrid est resté Server Component, DemoThemeToggle/Wrapper sont des Client Components séparés
+- Build Turbopack crashe (bug interne), utiliser NEXT_TURBOPACK=0 pour build webpack
+- Les données FAQ sont dans faq/data.ts (séparé du client component pour permettre l'import serveur)
+- Contenu complet rédigé dans docs/content/marketing-content.md

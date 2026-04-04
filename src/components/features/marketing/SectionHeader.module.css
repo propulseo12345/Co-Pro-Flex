@@ -1,0 +1,55 @@
+.header {
+  margin-bottom: 40px;
+}
+
+.centered {
+  text-align: center;
+}
+
+.label {
+  display: inline-block;
+  font-family: var(--pg-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--label-color, var(--pg-accent));
+  border: 1px solid var(--label-color, var(--pg-accent));
+  border-radius: 9999px;
+  padding: 4px 14px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--pg-font-display);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--pg-text);
+  line-height: 1.2;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+
+.description {
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 640px;
+}
+
+.centered .description {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 26px;
+  }
+
+  .description {
+    font-size: 15px;
+  }
+}

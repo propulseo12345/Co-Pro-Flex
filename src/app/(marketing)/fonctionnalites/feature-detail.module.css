@@ -1,0 +1,171 @@
+/* Shared styles for all feature detail pages */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* Before / After */
+
+.beforeAfter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.beforeColumn {
+  background: #fef0f0;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.afterColumn {
+  background: #f0fef4;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.beforeTitle,
+.afterTitle {
+  font-family: var(--pg-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.beforeTitle {
+  color: #c0392b;
+}
+
+.afterTitle {
+  color: #27ae60;
+}
+
+.beforeList,
+.afterList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.beforeList li,
+.afterList li {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--pg-text);
+  position: relative;
+  padding-left: 24px;
+}
+
+.beforeList li::before {
+  content: '✗';
+  position: absolute;
+  left: 0;
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.afterList li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+/* Demo Section */
+
+.demoSection {
+  max-width: 900px;
+  margin: 0 auto 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pg-border);
+}
+
+/* Features Grid */
+
+.features {
+  margin-bottom: 48px;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.featureItem {
+  background: var(--pg-bg-white);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--pg-border);
+}
+
+.featureTitle {
+  font-family: var(--pg-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pg-text);
+  margin: 0 0 8px;
+}
+
+.featureDesc {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Testimonial */
+
+.testimonial {
+  background: var(--pg-bg-white);
+  padding: 32px;
+  border-left: 4px solid var(--pg-accent);
+  border-radius: 12px;
+  margin-bottom: 48px;
+}
+
+.quoteText {
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--pg-text);
+  line-height: 1.7;
+  margin: 0 0 16px;
+}
+
+.quoteAuthor {
+  font-family: var(--pg-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pg-text);
+  margin: 0;
+}
+
+.quoteRole {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: var(--pg-text-secondary);
+  margin: 4px 0 0;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .beforeAfter {
+    grid-template-columns: 1fr;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,373 @@
+/* ── Contact Page ── */
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* ── Split layout ── */
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Left column */
+
+.left {
+  padding-top: 8px;
+}
+
+.trustList {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-bottom: 48px;
+}
+
+.trustItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.trustIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(48, 121, 255, 0.08);
+  color: var(--pg-accent);
+}
+
+.trustTitle {
+  margin: 0 0 2px;
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pg-text);
+}
+
+.trustDesc {
+  margin: 0;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.5;
+}
+
+/* Contact info */
+
+.contactInfo {
+  padding: 24px;
+  background: var(--pg-bg-white, #fff);
+  border: 1px solid var(--pg-border);
+  border-radius: 12px;
+}
+
+.contactInfoTitle {
+  margin: 0 0 16px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--pg-text-secondary);
+}
+
+.contactRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text);
+  line-height: 1.5;
+}
+
+.contactRow + .contactRow {
+  margin-top: 12px;
+}
+
+.contactIcon {
+  flex-shrink: 0;
+  color: var(--pg-text-secondary);
+}
+
+/* Right column — form card */
+
+.right {
+  position: sticky;
+  top: 100px;
+}
+
+.formCard {
+  background: var(--pg-bg-white, #fff);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.formTitle {
+  margin: 0 0 28px;
+  font-family: var(--pg-font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--pg-text);
+  line-height: 1.25;
+}
+
+/* Form */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.label {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pg-text);
+}
+
+.input,
+.select,
+.textarea {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text);
+  background: var(--pg-bg-white, #fff);
+  border: 1px solid var(--pg-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--pg-text-tertiary, #aaa);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--pg-accent);
+  box-shadow: 0 0 0 3px rgba(48, 121, 255, 0.1);
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23807E7A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Checkbox */
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox input[type='checkbox'] {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--pg-accent);
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: var(--pg-text-secondary);
+  line-height: 1.5;
+}
+
+/* Submit */
+
+.submitBtn {
+  width: 100%;
+  padding: 14px 24px;
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: white;
+  background: var(--pg-accent);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(48, 121, 255, 0.3);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Success state */
+
+.successMessage {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.successIcon {
+  color: #55AC63;
+  margin-bottom: 16px;
+}
+
+.successTitle {
+  margin: 0 0 8px;
+  font-family: var(--pg-font-display);
+  font-size: 22px;
+  color: var(--pg-text);
+}
+
+.successDesc {
+  margin: 0;
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+}
+
+/* ── FAQ ── */
+
+.faqSection {
+  max-width: 720px;
+  margin: 64px auto 0;
+}
+
+.faqTitle {
+  font-family: var(--pg-font-display);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--pg-text);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faqItem {
+  background: var(--pg-bg-white, #fff);
+  border: 1px solid var(--pg-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.faqItem[open] {
+  border-color: var(--pg-accent);
+}
+
+.faqQuestion {
+  padding: 20px 24px;
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--pg-text);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.faqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+.faqQuestion::after {
+  content: '+';
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--pg-text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.faqItem[open] .faqQuestion::after {
+  content: '\2212';
+}
+
+.faqAnswer {
+  padding: 0 24px 20px;
+  margin: 0;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 0 20px 60px;
+  }
+
+  .split {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .right {
+    position: static;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+
+  .formCard {
+    padding: 24px;
+  }
+
+  .faqSection {
+    margin-top: 48px;
+  }
+
+  .faqTitle {
+    font-size: 24px;
+  }
+}

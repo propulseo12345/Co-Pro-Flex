@@ -1,0 +1,6 @@
+/* ── Homepage sections wrapper ── */
+
+.playgroundSection {
+  position: relative;
+  z-index: 1;
+}

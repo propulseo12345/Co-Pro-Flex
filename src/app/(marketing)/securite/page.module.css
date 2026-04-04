@@ -1,0 +1,214 @@
+/* ── Securite Page ── */
+
+.page {
+  padding-bottom: 32px;
+}
+
+/* ── Trust Badges ── */
+
+.badgesSection {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.badgesSection::-webkit-scrollbar {
+  display: none;
+}
+
+.badgesRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.badgeIcon {
+  color: var(--pg-accent);
+  flex-shrink: 0;
+}
+
+.badgeLabel {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pg-text);
+}
+
+/* ── Security Grid ── */
+
+.gridSection {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.card {
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(5, 38, 65, 0.06);
+}
+
+.cardIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(48, 121, 255, 0.08);
+  margin-bottom: 20px;
+}
+
+.cardIcon {
+  color: var(--pg-accent);
+}
+
+.cardTitle {
+  font-family: var(--pg-font-display);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--pg-text);
+  margin: 0 0 10px;
+}
+
+.cardDescription {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Data Residency ── */
+
+.residencySection {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.residencyContent {
+  margin-top: 32px;
+}
+
+.residencyContent p {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+  line-height: 1.8;
+  margin: 0 0 16px;
+}
+
+.residencyContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── RGPD ── */
+
+.rgpdSection {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.rgpdContent {
+  margin-top: 32px;
+}
+
+.rgpdContent p {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+  line-height: 1.8;
+  margin: 0 0 24px;
+}
+
+.rightsList {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rightsItem {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text);
+  line-height: 1.6;
+  padding: 14px 20px;
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 10px;
+}
+
+.dpoContact {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+}
+
+.dpoLink {
+  color: var(--pg-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dpoLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .badgesRow {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .gridSection {
+    padding: 48px 20px;
+  }
+
+  .residencySection,
+  .rgpdSection {
+    padding: 0 20px 48px;
+  }
+}

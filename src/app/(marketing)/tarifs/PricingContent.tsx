@@ -1,0 +1,141 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Check, X, ChevronDown } from 'lucide-react';
+import { plans, comparisonRows, faqItems } from './data';
+import styles from './page.module.css';
+
+export function PricingContent() {
+  const [isAnnual, setIsAnnual] = useState(false);
+
+  return (
+    <>
+      {/* Billing toggle */}
+      <div className={styles.toggleWrapper}>
+        <button
+          type="button"
+          className={`${styles.toggleOption} ${!isAnnual ? styles.toggleActive : ''}`}
+          onClick={() => setIsAnnual(false)}
+        >
+          Mensuel
+        </button>
+        <button
+          type="button"
+          className={`${styles.toggleOption} ${isAnnual ? styles.toggleActive : ''}`}
+          onClick={() => setIsAnnual(true)}
+        >
+          Annuel
+          <span className={styles.toggleBadge}>-17%</span>
+        </button>
+      </div>
+      {isAnnual && <p className={styles.toggleHint}>2 mois offerts avec la facturation annuelle</p>}
+
+      {/* Pricing cards */}
+      <section className={styles.pricingSection}>
+        <div className={styles.pricingGrid}>
+          {plans.map((plan) => {
+            const price = isAnnual ? plan.annual : plan.monthly;
+            const isCustom = price === 'Sur devis';
+            return (
+              <div
+                key={plan.slug}
+                className={`${styles.pricingCard} ${plan.highlighted ? styles.pricingCardHighlighted : ''}`}
+              >
+                {plan.highlighted && <span className={styles.recommendedBadge}>Recommandé</span>}
+                <h3 className={styles.planName}>{plan.name}</h3>
+                <p className={styles.planTagline}>{plan.tagline}</p>
+                <div className={styles.priceBlock}>
+                  {isCustom ? (
+                    <span className={styles.priceCustom}>{price}</span>
+                  ) : (
+                    <>
+                      <span className={styles.priceValue}>{price}&euro;</span>
+                      <span className={styles.priceUnit}>{plan.unit}</span>
+                    </>
+                  )}
+                </div>
+                {!isCustom && isAnnual && (
+                  <p className={styles.priceSavings}>
+                    au lieu de {plan.monthly}&euro;{plan.unit}
+                  </p>
+                )}
+                <Link
+                  href={plan.ctaHref}
+                  className={`${styles.planCta} ${plan.highlighted ? styles.planCtaPrimary : styles.planCtaSecondary}`}
+                >
+                  {plan.cta}
+                </Link>
+                <ul className={styles.featureList}>
+                  {plan.features.map((feat) => (
+                    <li key={feat} className={styles.featureItem}>
+                      <Check size={14} className={styles.featureCheck} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Comparison table */}
+      <section className={styles.comparisonSection}>
+        <h2 className={styles.comparisonTitle}>Comparatif détaillé</h2>
+        <div className={styles.tableWrapper}>
+          <table className={styles.comparisonTable}>
+            <thead>
+              <tr>
+                <th className={styles.thFeature}>Fonctionnalité</th>
+                <th className={styles.thPlan}>Essentiel</th>
+                <th className={`${styles.thPlan} ${styles.thHighlighted}`}>Professionnel</th>
+                <th className={styles.thPlan}>Entreprise</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonRows.map((row, idx) => (
+                <tr key={row.feature} className={idx % 2 === 0 ? styles.rowEven : ''}>
+                  <td className={styles.tdFeature}>{row.feature}</td>
+                  {(['essentiel', 'professionnel', 'entreprise'] as const).map((plan) => {
+                    const val = row[plan];
+                    return (
+                      <td
+                        key={plan}
+                        className={`${styles.tdValue} ${plan === 'professionnel' ? styles.tdHighlighted : ''}`}
+                      >
+                        {val === true ? (
+                          <Check size={16} className={styles.checkIcon} />
+                        ) : val === false ? (
+                          <X size={16} className={styles.crossIcon} />
+                        ) : (
+                          <span className={styles.textValue}>{val}</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className={styles.faqSection}>
+        <h2 className={styles.faqTitle}>Questions fréquentes</h2>
+        <div className={styles.faqList}>
+          {faqItems.map((item) => (
+            <details key={item.question} className={styles.faqItem}>
+              <summary className={styles.faqQuestion}>
+                <span>{item.question}</span>
+                <ChevronDown size={18} className={styles.faqChevron} />
+              </summary>
+              <p className={styles.faqAnswer}>{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}

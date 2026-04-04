@@ -1,0 +1,439 @@
+/* ── Tarifs Page ── */
+
+.page {
+  padding-bottom: 32px;
+}
+
+/* ── Billing Toggle ── */
+
+.toggleWrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin: 0 auto 8px;
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 9999px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.toggleOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--pg-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.toggleActive {
+  background: var(--pg-text);
+  color: var(--pg-bg);
+}
+
+.toggleBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(85, 172, 99, 0.15);
+  color: #55AC63;
+}
+
+.toggleHint {
+  text-align: center;
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: #55AC63;
+  font-weight: 500;
+  margin: 8px 0 0;
+}
+
+/* ── Pricing Cards ── */
+
+.pricingSection {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.pricingCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--pg-bg-white);
+  border: 1px solid var(--pg-border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: all 0.25s ease;
+}
+
+.pricingCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(5, 38, 65, 0.06);
+}
+
+.pricingCardHighlighted {
+  border-color: var(--pg-accent);
+  border-width: 2px;
+  box-shadow: 0 4px 20px rgba(48, 121, 255, 0.1);
+}
+
+.recommendedBadge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--pg-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 16px;
+  border-radius: 9999px;
+  background: var(--pg-accent);
+  color: white;
+  white-space: nowrap;
+}
+
+.planName {
+  font-family: var(--pg-font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--pg-text);
+  margin: 0 0 8px;
+}
+
+.planTagline {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  min-height: 44px;
+}
+
+.priceBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.priceValue {
+  font-family: var(--pg-font-display);
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--pg-text);
+  line-height: 1;
+}
+
+.priceUnit {
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text-secondary);
+  font-weight: 500;
+}
+
+.priceCustom {
+  font-family: var(--pg-font-display);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--pg-text);
+  line-height: 1;
+}
+
+.priceSavings {
+  font-family: var(--pg-font-body);
+  font-size: 13px;
+  color: var(--pg-text-tertiary);
+  margin: 4px 0 0;
+  text-decoration: line-through;
+}
+
+.planCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  text-decoration: none;
+  margin: 24px 0;
+  transition: all 0.2s ease;
+}
+
+.planCtaPrimary {
+  background: var(--pg-accent);
+  color: white;
+  border: none;
+}
+
+.planCtaPrimary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(48, 121, 255, 0.3);
+}
+
+.planCtaSecondary {
+  background: transparent;
+  color: var(--pg-text);
+  border: 1px solid var(--pg-border);
+}
+
+.planCtaSecondary:hover {
+  border-color: var(--pg-text-secondary);
+  background: rgba(5, 38, 65, 0.03);
+}
+
+.featureList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  color: var(--pg-text);
+  line-height: 1.5;
+}
+
+.featureCheck {
+  color: var(--pg-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Comparison Table ── */
+
+.comparisonSection {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.comparisonTitle {
+  font-family: var(--pg-font-display);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--pg-text);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--pg-border);
+  border-radius: 12px;
+  background: var(--pg-bg-white);
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--pg-font-body);
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 14px 20px;
+  text-align: center;
+}
+
+.thFeature {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--pg-text-tertiary);
+  background: rgba(5, 38, 65, 0.03);
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.thPlan {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pg-text);
+  background: rgba(5, 38, 65, 0.03);
+  border-bottom: 1px solid var(--pg-border);
+  min-width: 120px;
+}
+
+.thHighlighted {
+  color: var(--pg-accent);
+  background: rgba(48, 121, 255, 0.04);
+}
+
+.tdFeature {
+  text-align: left;
+  font-size: 14px;
+  color: var(--pg-text);
+  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+}
+
+.tdValue {
+  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+}
+
+.tdHighlighted {
+  background: rgba(48, 121, 255, 0.02);
+}
+
+.rowEven {
+  background: rgba(5, 38, 65, 0.015);
+}
+
+.checkIcon {
+  color: var(--pg-green);
+}
+
+.crossIcon {
+  color: var(--pg-text-tertiary);
+}
+
+.textValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pg-text);
+}
+
+/* ── FAQ ── */
+
+.faqSection {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.faqTitle {
+  font-family: var(--pg-font-display);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--pg-text);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--pg-border);
+}
+
+.faqItem[open] .faqChevron {
+  transform: rotate(180deg);
+}
+
+.faqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  font-family: var(--pg-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pg-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+.faqQuestion::marker {
+  content: '';
+}
+
+.faqChevron {
+  color: var(--pg-text-secondary);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.faqAnswer {
+  font-family: var(--pg-font-body);
+  font-size: 15px;
+  color: var(--pg-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0 0 20px;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 900px) {
+  .pricingGrid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .pricingCardHighlighted {
+    order: -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .pricingSection {
+    padding: 32px 20px 48px;
+  }
+
+  .comparisonSection {
+    padding: 0 12px 48px;
+  }
+
+  .comparisonTable th,
+  .comparisonTable td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .thFeature,
+  .tdFeature {
+    min-width: 140px;
+  }
+
+  .faqSection {
+    padding: 0 20px 48px;
+  }
+
+  .faqQuestion {
+    font-size: 15px;
+  }
+
+  .planTagline {
+    min-height: auto;
+  }
+}
