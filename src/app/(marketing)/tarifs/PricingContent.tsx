@@ -7,6 +7,12 @@ import { plans, comparisonRows, faqItems } from './data';
 import { FaqAccordion } from '@/components/features/marketing/FaqAccordion';
 import styles from './page.module.css';
 
+function getCardClass(slug: string, highlighted: boolean): string {
+  if (highlighted) return `${styles.pricingCard} ${styles.pricingCardHighlighted}`;
+  if (slug === 'entreprise') return `${styles.pricingCard} ${styles.pricingCardEntreprise}`;
+  return styles.pricingCard;
+}
+
 export function PricingContent() {
   const [isAnnual, setIsAnnual] = useState(false);
 
@@ -39,10 +45,7 @@ export function PricingContent() {
             const price = isAnnual ? plan.annual : plan.monthly;
             const isCustom = price === 'Sur devis';
             return (
-              <div
-                key={plan.slug}
-                className={`${styles.pricingCard} ${plan.highlighted ? styles.pricingCardHighlighted : ''}`}
-              >
+              <div key={plan.slug} className={getCardClass(plan.slug, plan.highlighted)}>
                 {plan.highlighted && <span className={styles.recommendedBadge}>Recommandé</span>}
                 <h3 className={styles.planName}>{plan.name}</h3>
                 <p className={styles.planTagline}>{plan.tagline}</p>
@@ -67,6 +70,7 @@ export function PricingContent() {
                 >
                   {plan.cta}
                 </Link>
+                <hr className={styles.divider} />
                 <ul className={styles.featureList}>
                   {plan.features.map((feat) => (
                     <li key={feat} className={styles.featureItem}>
@@ -83,15 +87,30 @@ export function PricingContent() {
 
       {/* Comparison table */}
       <section className={styles.comparisonSection}>
-        <h2 className={styles.comparisonTitle}>Comparatif détaillé</h2>
+        <h2 className={styles.comparisonTitle}>Comparatif détaillé des offres</h2>
         <div className={styles.tableWrapper}>
           <table className={styles.comparisonTable}>
-            <thead>
-              <tr>
+            <thead className={styles.tableHead}>
+              <tr className={styles.headerRow}>
                 <th className={styles.thFeature}>Fonctionnalité</th>
-                <th className={styles.thPlan}>Essentiel</th>
-                <th className={`${styles.thPlan} ${styles.thHighlighted}`}>Professionnel</th>
-                <th className={styles.thPlan}>Entreprise</th>
+                <th className={styles.thPlan}>
+                  <span className={styles.thPlanName}>Essentiel</span>
+                  <Link href="/contact" className={`${styles.thPlanCta} ${styles.thCtaSecondary}`}>
+                    Essai gratuit
+                  </Link>
+                </th>
+                <th className={`${styles.thPlan} ${styles.thHighlighted}`}>
+                  <span className={styles.thPlanName}>Professionnel</span>
+                  <Link href="/contact" className={`${styles.thPlanCta} ${styles.thCtaPrimary}`}>
+                    Essai gratuit
+                  </Link>
+                </th>
+                <th className={styles.thPlan}>
+                  <span className={styles.thPlanName}>Entreprise</span>
+                  <Link href="/contact" className={`${styles.thPlanCta} ${styles.thCtaSecondary}`}>
+                    Nous contacter
+                  </Link>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -106,9 +125,9 @@ export function PricingContent() {
                         className={`${styles.tdValue} ${plan === 'professionnel' ? styles.tdHighlighted : ''}`}
                       >
                         {val === true ? (
-                          <Check size={16} className={styles.checkIcon} />
+                          <Check size={18} className={styles.checkIcon} />
                         ) : val === false ? (
-                          <X size={16} className={styles.crossIcon} />
+                          <X size={18} className={styles.crossIcon} />
                         ) : (
                           <span className={styles.textValue}>{val}</span>
                         )}

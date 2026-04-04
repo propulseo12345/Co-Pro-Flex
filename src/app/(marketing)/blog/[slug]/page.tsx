@@ -117,7 +117,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
       <CtaBanner
         text="Simplifiez votre gestion de copropriété"
         buttonText="Découvrir CoProFlex"
-        buttonHref="/fonctionnalites"
+        buttonHref="/#fonctionnalites"
       />
     </>
   );

@@ -59,7 +59,7 @@
   margin: 8px 0 0;
 }
 
-/* ── Pricing Cards ── */
+/* ── Pricing Cards (Figma-inspired) ── */
 
 .pricingSection {
   max-width: 1100px;
@@ -79,55 +79,69 @@
   display: flex;
   flex-direction: column;
   background: var(--pg-bg-white);
-  border: 1px solid var(--pg-border);
-  border-radius: 16px;
-  padding: 32px 28px;
+  border-top: 3px solid #222;
+  border-left: 3px solid #222;
+  border-right: 6px solid #222;
+  border-bottom: 6px solid #222;
+  border-radius: 24px;
+  padding: 32px 24px;
   transition: all 0.25s ease;
 }
 
 .pricingCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(5, 38, 65, 0.06);
+  box-shadow: 0 8px 24px rgba(5, 38, 65, 0.08);
 }
 
 .pricingCardHighlighted {
-  border-color: var(--pg-accent);
-  border-width: 2px;
-  box-shadow: 0 4px 20px rgba(48, 121, 255, 0.1);
+  background: #f8f3ff;
+  border-color: #e3b4fa;
+}
+
+.pricingCardEntreprise {
+  background: #fdf2ec;
+  border-color: #ffcd9f;
 }
 
 .recommendedBadge {
   position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 16px;
+  right: 16px;
   font-family: var(--pg-font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 4px 16px;
-  border-radius: 9999px;
-  background: var(--pg-accent);
-  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: #e3b4fa;
+  color: #333;
   white-space: nowrap;
 }
 
 .planName {
   font-family: var(--pg-font-display);
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 700;
   color: var(--pg-text);
   margin: 0 0 8px;
+}
+
+.pricingCardHighlighted .planName {
+  color: #9333ea;
+}
+
+.pricingCardEntreprise .planName {
+  color: #c2610c;
 }
 
 .planTagline {
   font-family: var(--pg-font-body);
   font-size: 14px;
   color: var(--pg-text-secondary);
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0 0 24px;
-  min-height: 44px;
+  min-height: 42px;
 }
 
 .priceBlock {
@@ -139,23 +153,23 @@
 
 .priceValue {
   font-family: var(--pg-font-display);
-  font-size: 40px;
-  font-weight: 400;
+  font-size: 36px;
+  font-weight: 700;
   color: var(--pg-text);
   line-height: 1;
 }
 
 .priceUnit {
   font-family: var(--pg-font-body);
-  font-size: 14px;
-  color: var(--pg-text-secondary);
-  font-weight: 500;
+  font-size: 16px;
+  color: var(--pg-text-tertiary);
+  font-weight: 600;
 }
 
 .priceCustom {
   font-family: var(--pg-font-display);
   font-size: 32px;
-  font-weight: 400;
+  font-weight: 700;
   color: var(--pg-text);
   line-height: 1;
 }
@@ -174,35 +188,58 @@
   justify-content: center;
   font-family: var(--pg-font-body);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   padding: 14px 24px;
-  border-radius: 9999px;
+  border-radius: 8px;
   text-decoration: none;
   margin: 24px 0;
   transition: all 0.2s ease;
 }
 
 .planCtaPrimary {
-  background: var(--pg-accent);
+  background: #ff6928;
   color: white;
   border: none;
 }
 
 .planCtaPrimary:hover {
-  background: #2563eb;
+  background: #e55a1b;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(48, 121, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 105, 40, 0.3);
 }
 
 .planCtaSecondary {
   background: transparent;
   color: var(--pg-text);
-  border: 1px solid var(--pg-border);
+  border: 2px solid var(--pg-text);
 }
 
 .planCtaSecondary:hover {
-  border-color: var(--pg-text-secondary);
-  background: rgba(5, 38, 65, 0.03);
+  background: var(--pg-text);
+  color: var(--pg-bg-white);
+}
+
+.planDocsLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pg-text-secondary);
+  text-decoration: none;
+  margin-bottom: 24px;
+}
+
+.planDocsLink:hover {
+  color: var(--pg-text);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid rgba(5, 38, 65, 0.1);
+  margin: 0 0 20px;
 }
 
 .featureList {
@@ -230,28 +267,36 @@
   margin-top: 2px;
 }
 
-/* ── Comparison Table ── */
+.featureCross {
+  color: var(--pg-text-tertiary);
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.4;
+}
+
+/* ── Comparison Table (Figma-inspired) ── */
 
 .comparisonSection {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px 64px;
 }
 
 .comparisonTitle {
   font-family: var(--pg-font-display);
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 400;
   color: var(--pg-text);
   text-align: center;
-  margin: 0 0 32px;
+  margin: 0 0 40px;
 }
 
 .tableWrapper {
   overflow-x: auto;
-  border: 1px solid var(--pg-border);
-  border-radius: 12px;
+  border: 3px solid var(--pg-accent);
+  border-radius: 24px;
   background: var(--pg-bg-white);
+  box-shadow: 4px 4px 0px 0px var(--pg-accent);
 }
 
 .comparisonTable {
@@ -260,46 +305,101 @@
   font-family: var(--pg-font-body);
 }
 
-.comparisonTable th,
-.comparisonTable td {
-  padding: 14px 20px;
-  text-align: center;
+/* Table Header */
+
+.tableHead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.headerRow {
+  background: var(--pg-bg-white);
 }
 
 .thFeature {
   text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--pg-text-tertiary);
-  background: rgba(5, 38, 65, 0.03);
-  border-bottom: 1px solid var(--pg-border);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--pg-text);
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(48, 121, 255, 0.15);
+  width: 25%;
 }
 
 .thPlan {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--pg-text);
-  background: rgba(5, 38, 65, 0.03);
-  border-bottom: 1px solid var(--pg-border);
-  min-width: 120px;
+  text-align: center;
+  padding: 20px 12px;
+  border-bottom: 1px solid rgba(48, 121, 255, 0.15);
+  width: 25%;
+  vertical-align: middle;
 }
 
-.thHighlighted {
+.thPlanName {
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--pg-text);
+  margin-bottom: 10px;
+}
+
+.thPlanCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pg-font-body);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.thCtaPrimary {
+  background: #ff6928;
+  color: white;
+}
+
+.thCtaPrimary:hover {
+  background: #e55a1b;
+  transform: translateY(-1px);
+}
+
+.thCtaSecondary {
+  background: transparent;
+  color: var(--pg-text);
+  border: 2px solid var(--pg-text);
+}
+
+.thCtaSecondary:hover {
+  background: var(--pg-text);
+  color: var(--pg-bg-white);
+}
+
+.thHighlighted .thPlanName {
   color: var(--pg-accent);
-  background: rgba(48, 121, 255, 0.04);
+}
+
+/* Table Body */
+
+.comparisonTable td {
+  padding: 16px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(48, 121, 255, 0.08);
 }
 
 .tdFeature {
   text-align: left;
   font-size: 14px;
+  font-weight: 600;
   color: var(--pg-text);
-  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
 }
 
 .tdValue {
-  border-bottom: 1px solid rgba(226, 223, 216, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pg-text);
 }
 
 .tdHighlighted {
@@ -307,7 +407,7 @@
 }
 
 .rowEven {
-  background: rgba(5, 38, 65, 0.015);
+  background: rgba(48, 121, 255, 0.03);
 }
 
 .checkIcon {
@@ -316,16 +416,14 @@
 
 .crossIcon {
   color: var(--pg-text-tertiary);
+  opacity: 0.4;
 }
 
 .textValue {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--pg-text);
 }
-
-/* ── FAQ ── */
-
 
 /* ── Responsive ── */
 
@@ -338,6 +436,14 @@
 
   .pricingCardHighlighted {
     order: -1;
+  }
+
+  .comparisonTitle {
+    font-size: 28px;
+  }
+
+  .tableWrapper {
+    border-radius: 16px;
   }
 }
 
@@ -363,5 +469,14 @@
 
   .planTagline {
     min-height: auto;
+  }
+
+  .thPlanCta {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .thPlanName {
+    font-size: 14px;
   }
 }

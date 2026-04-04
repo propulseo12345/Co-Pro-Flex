@@ -23,28 +23,23 @@ export const metadata = {
 const TRUST_ITEMS = [
   {
     icon: Clock,
-    title: 'Réponse rapide',
-    description: 'Notre équipe vous recontacte sous 2 heures ouvrées.',
+    title: 'Réponse sous 2h',
   },
   {
     icon: Monitor,
-    title: 'Démonstration personnalisée',
-    description: 'Pas de démo générique. On part de votre situation réelle.',
+    title: 'Démo personnalisée',
   },
   {
     icon: ArrowRightLeft,
     title: 'Migration incluse',
-    description: "On s'occupe d'importer vos données existantes.",
   },
   {
     icon: ShieldCheck,
     title: 'Sans engagement',
-    description: 'Essayez pendant 30 jours, annulez en un clic.',
   },
   {
     icon: MapPin,
-    title: 'Données hébergées en France',
-    description: 'Conformes RGPD, serveurs français.',
+    title: 'Données en France',
   },
 ] as const;
 
@@ -59,18 +54,32 @@ const FAQ_ITEMS = [
   {
     question: 'Combien de temps dure une démonstration ?',
     answer:
-      'Environ 30 minutes. On commence par comprendre votre situation, puis on vous montre les fonctionnalités qui vous concernent. Pas de discours commercial générique : on se concentre sur vos besoins réels.',
+      'Environ 30 minutes. On commence par comprendre votre situation, puis on vous montre les fonctionnalités qui vous concernent. Pas de discours commercial générique.',
   },
   {
     question: "Est-ce que la démo m'engage à quelque chose ?",
     answer:
-      "Absolument pas. La démonstration est gratuite et sans engagement. Vous pouvez poser toutes vos questions, découvrir la plateforme, et prendre votre décision tranquillement. Aucune carte bancaire n'est demandée.",
+      "Absolument pas. La démonstration est gratuite et sans engagement. Vous pouvez poser toutes vos questions et prendre votre décision tranquillement. Aucune carte bancaire n'est demandée.",
   },
   {
-    question:
-      "Je ne suis pas très à l'aise avec l'informatique. Est-ce un problème ?",
+    question: "Je ne suis pas très à l'aise avec l'informatique. Est-ce un problème ?",
     answer:
-      "Pas du tout. CoProFlex a été conçu pour être accessible à tous, y compris aux personnes qui ne sont pas à l'aise avec les outils numériques. L'interface est simple, et notre équipe vous accompagne à chaque étape.",
+      "Pas du tout. CoProFlex a été conçu pour être accessible à tous. L'interface est simple, et notre équipe vous accompagne à chaque étape.",
+  },
+  {
+    question: 'Combien coûte CoProFlex ?',
+    answer:
+      'À partir de 1,58€/lot/mois en facturation annuelle. Consultez notre page Tarifs pour le détail des plans Essentiel, Professionnel et Entreprise.',
+  },
+  {
+    question: 'Puis-je essayer gratuitement ?',
+    answer:
+      "Oui, 30 jours d'essai gratuit avec accès à toutes les fonctionnalités du plan Professionnel. Sans carte bancaire.",
+  },
+  {
+    question: 'Comment se passe la migration de mes données ?',
+    answer:
+      "Notre équipe s'occupe d'importer vos données existantes : copropriétaires, lots, tantièmes, documents. Comptez 48h ouvrables pour une migration standard.",
   },
 ] as const;
 
@@ -81,29 +90,27 @@ export default function ContactPage() {
     <div className={styles.page}>
       <PageHero
         title="Parlons de votre gestion de copropriété"
-        subtitle="Que vous soyez syndic professionnel, bénévole ou membre d'un conseil syndical, notre équipe vous répond sous 2 heures ouvrées pour organiser une démonstration personnalisée."
+        subtitle="Que vous soyez syndic professionnel, bénévole ou membre d'un conseil syndical, notre équipe vous répond sous 2 heures ouvrées."
       />
 
-      {/* ── Split layout ── */}
+      {/* ── Trust strip ── */}
+      <div className={styles.trustStrip}>
+        {TRUST_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.title} className={styles.trustPill}>
+              <Icon size={16} />
+              <span>{item.title}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Split: FAQ left + Form right ── */}
       <section className={styles.split}>
-        {/* Left column */}
+        {/* Left column — FAQ + coordonnées */}
         <div className={styles.left}>
-          <div className={styles.trustList}>
-            {TRUST_ITEMS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.title} className={styles.trustItem}>
-                  <div className={styles.trustIcon}>
-                    <Icon size={20} />
-                  </div>
-                  <div>
-                    <p className={styles.trustTitle}>{item.title}</p>
-                    <p className={styles.trustDesc}>{item.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <FaqAccordion items={FAQ_ITEMS} title="Questions fréquentes" />
 
           <div className={styles.contactInfo}>
             <h3 className={styles.contactInfoTitle}>Coordonnées</h3>
@@ -119,19 +126,19 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Right column */}
+        {/* Right column — form */}
         <div className={styles.right}>
           <div className={styles.formCard}>
             <h2 className={styles.formTitle}>
-              Demandez votre démonstration gratuite
+              Comment pouvons-nous vous aider ?
             </h2>
+            <p className={styles.formSubtitle}>
+              Décrivez-nous votre situation en quelques mots. Notre équipe vous recontacte pour organiser une démonstration adaptée à vos besoins.
+            </p>
             <ContactForm />
           </div>
         </div>
       </section>
-
-      {/* ── FAQ ── */}
-      <FaqAccordion items={FAQ_ITEMS} title="Questions fréquentes" variant="card" />
     </div>
   );
 }

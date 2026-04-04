@@ -6,13 +6,6 @@ const BASE_URL = 'https://coproflex.fr';
 export default function sitemap(): MetadataRoute.Sitemap {
   const marketingPages = [
     '',
-    '/fonctionnalites',
-    '/fonctionnalites/ag',
-    '/fonctionnalites/finance',
-    '/fonctionnalites/maintenance',
-    '/fonctionnalites/documents',
-    '/fonctionnalites/communication',
-    '/fonctionnalites/dashboard',
     '/tarifs',
     '/contact',
     '/a-propos',
@@ -30,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${BASE_URL}${path}`,
     lastModified: new Date(),
     changeFrequency: path === '/blog' ? 'weekly' : 'monthly',
-    priority: path === '' ? 1 : path === '/fonctionnalites' || path === '/tarifs' ? 0.9 : 0.7,
+    priority: path === '' ? 1 : path === '/tarifs' ? 0.9 : 0.7,
   }));
 
   const blogPages: MetadataRoute.Sitemap = BLOG_ARTICLES.map((article) => ({
