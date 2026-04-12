@@ -1,5 +1,5 @@
 import type { IPPTCopropriete } from '@/types';
-import { TravauxPrevisionnelStatut } from '@/types/enums';
+import { TravauxPrevisionnelStatut, TypeTravauxPrevisionnel } from '@/types/enums';
 
 export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
   {
@@ -11,7 +11,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-1',
         titre: 'Ravalement de façade',
-        type: 'FACADE',
+        type: TypeTravauxPrevisionnel.FACADE,
         datePrevisionnelle: '2027-06-01',
         montantEstime: 85000,
         montantVote: 87500,
@@ -29,7 +29,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-2',
         titre: 'Remplacement chaudière collective',
-        type: 'CHAUFFAGE',
+        type: TypeTravauxPrevisionnel.CHAUFFAGE,
         datePrevisionnelle: '2026-10-01',
         montantEstime: 42000,
         statut: TravauxPrevisionnelStatut.EN_COURS,
@@ -45,7 +45,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-3',
         titre: 'Étanchéité toiture terrasse',
-        type: 'ETANCHEITE',
+        type: TypeTravauxPrevisionnel.ETANCHEITE,
         datePrevisionnelle: '2028-04-01',
         montantEstime: 28000,
         statut: TravauxPrevisionnelStatut.PREVU,
@@ -61,7 +61,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-4',
         titre: 'Mise aux normes ascenseur',
-        type: 'ASCENSEUR',
+        type: TypeTravauxPrevisionnel.ASCENSEUR,
         datePrevisionnelle: '2029-01-01',
         montantEstime: 35000,
         statut: TravauxPrevisionnelStatut.A_L_ETUDE,
@@ -77,7 +77,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-5',
         titre: 'Réfection parkings souterrains',
-        type: 'AUTRE',
+        type: TypeTravauxPrevisionnel.AUTRE,
         datePrevisionnelle: '2025-08-01',
         dateRealisation: '2025-09-15',
         montantEstime: 18000,
@@ -103,7 +103,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-6',
         titre: "Peinture cage d'escalier",
-        type: 'AUTRE',
+        type: TypeTravauxPrevisionnel.AUTRE,
         datePrevisionnelle: '2026-07-01',
         montantEstime: 12000,
         statut: TravauxPrevisionnelStatut.VOTE,
@@ -119,7 +119,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-7',
         titre: 'Remplacement menuiseries',
-        type: 'FACADE',
+        type: TypeTravauxPrevisionnel.FACADE,
         datePrevisionnelle: '2030-01-01',
         montantEstime: 65000,
         statut: TravauxPrevisionnelStatut.A_L_ETUDE,
@@ -143,7 +143,7 @@ export const MOCK_PPT_COPROPRIETES: IPPTCopropriete[] = [
       {
         id: 'trav-8',
         titre: 'Rénovation espaces verts',
-        type: 'ESPACES_VERTS',
+        type: TypeTravauxPrevisionnel.ESPACES_VERTS,
         datePrevisionnelle: '2026-05-01',
         montantEstime: 22000,
         statut: TravauxPrevisionnelStatut.EN_COURS,

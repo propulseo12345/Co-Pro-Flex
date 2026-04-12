@@ -5,14 +5,14 @@ import type { TravauxPrevisionnelStatut, TypeTravauxPrevisionnel } from '@/types
 export interface ITravauxPPT {
   id: string;
   titre: string;
-  type: TypeTravauxPrevisionnel | string;
+  type: TypeTravauxPrevisionnel;
   datePrevisionnelle: string;
   dateVote?: string;
   dateRealisation?: string;
   montantEstime: number;
   montantVote?: number;
   montantReel?: number;
-  statut: TravauxPrevisionnelStatut | string;
+  statut: TravauxPrevisionnelStatut;
   priorite: 'FAIBLE' | 'NORMALE' | 'HAUTE' | 'CRITIQUE';
   description?: string;
   etapes: IEtapeTravaux[];

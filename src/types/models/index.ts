@@ -20,3 +20,4 @@ export * from './pv-template';
 export * from './etat-date';
 export * from './portefeuille';
 export * from './dossier';
+export * from './conformite';
