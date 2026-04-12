@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import type { IDPE, ClasseDPE } from '@/types';
+import type { IDPE, ClasseDPE, IDPEHistorique } from '@/types';
 import { MOCK_DPE_LIST } from '@/components/features/conformite/dpe/mock-data';
 
 interface UseDPEOptions {
@@ -38,7 +38,7 @@ export type DPERenewData = {
 export function useDPE({ coproprieteId }: UseDPEOptions = {}) {
   const [dpeData, setDpeData] = useState<IDPE[]>(MOCK_DPE_LIST);
 
-  const coproprietes = useMemo(() => dpeData, [dpeData]);
+  const coproprietes = dpeData;
 
   const selectedDPE = useMemo(() => {
     if (!coproprieteId) return null;
@@ -60,7 +60,7 @@ export function useDPE({ coproprieteId }: UseDPEOptions = {}) {
     setDpeData(prev =>
       prev.map(d => {
         if (d.id !== dpeId) return d;
-        const newEntry = {
+        const newEntry: IDPEHistorique = {
           id: `h-${Date.now()}`,
           dateDiagnostic: data.datePrevue,
           classeEnergie: d.classeEnergie,
