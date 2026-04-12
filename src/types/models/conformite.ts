@@ -45,6 +45,7 @@ export interface IDPEHistorique {
   dateDiagnostic: string;
   classeEnergie: ClasseDPE;
   diagnostiqueur: string;
+  notes?: string;
 }
 
 export interface IDPE {

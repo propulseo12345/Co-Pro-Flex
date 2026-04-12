@@ -65,6 +65,7 @@ export function useDPE({ coproprieteId }: UseDPEOptions = {}) {
           dateDiagnostic: data.datePrevue,
           classeEnergie: d.classeEnergie,
           diagnostiqueur: data.diagnostiqueur || d.diagnostiqueur,
+          ...(data.notes.trim() !== '' && { notes: data.notes.trim() }),
         };
         return { ...d, historique: [...d.historique, newEntry] };
       })

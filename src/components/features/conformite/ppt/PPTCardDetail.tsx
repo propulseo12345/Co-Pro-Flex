@@ -10,7 +10,7 @@ interface PPTCardDetailProps {
   travail: ITravauxPPT;
   onClose: () => void;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 function EtapeIcon({ statut }: { statut: IEtapeTravaux['statut'] }) {
