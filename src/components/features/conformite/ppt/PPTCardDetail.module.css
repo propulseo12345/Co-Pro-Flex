@@ -1,0 +1,131 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.modal {
+  background: #1a1d2e;
+  border: 1px solid rgba(148,163,184,0.08);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.meta {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.closeBtn {
+  background: rgba(148,163,184,0.06);
+  border: 1px solid rgba(148,163,184,0.08);
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: rgba(148,163,184,0.12);
+}
+
+.desc {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.timelineLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.etape {
+  display: flex;
+  gap: 14px;
+}
+
+.etapeLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.connector {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  margin: 4px 0;
+}
+
+.etapeContent {
+  padding-bottom: 20px;
+  flex: 1;
+}
+
+.etapeLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.etapeDate {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.etapeMontant {
+  font-size: 13px;
+  font-weight: 500;
+  color: #22c55e;
+  font-family: 'SF Mono', monospace;
+  margin-top: 4px;
+}
+
+.etapeComment {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
