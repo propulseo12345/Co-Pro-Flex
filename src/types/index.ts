@@ -150,3 +150,16 @@ export type { VisioProvider } from './enums/ag-format';
 
 // Export types Projector
 export * from './projector';
+
+// Export types Conformité (PPT, DPE, Factur-X)
+export type {
+  ITravauxPPT,
+  IEtapeTravaux,
+  IPPTCopropriete,
+  ClasseDPE,
+  StatutDPE,
+  IDPEHistorique,
+  IDPE,
+  StatutFacturX,
+  IFactureFacturX,
+} from './models/conformite';
