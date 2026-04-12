@@ -29,7 +29,7 @@ export function DPERenewModal({ diagnostiqueurActuel, onSave, onClose }: DPERene
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+      <div className={styles.modal} role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <div className={styles.title}>Planifier le renouvellement DPE</div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Fermer">

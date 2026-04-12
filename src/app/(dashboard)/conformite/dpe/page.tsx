@@ -48,7 +48,8 @@ export default function DPEGestionnairePage() {
             diagnostiqueurActuel={selectedDPE.diagnostiqueur}
             onSave={data => {
               planifierRenouvellement(selectedDPE.id, data);
-              const dateFormatted = new Date(data.datePrevue).toLocaleDateString('fr-FR');
+              const [y, m, d] = data.datePrevue.split('-').map(Number);
+              const dateFormatted = new Date(y, m - 1, d).toLocaleDateString('fr-FR');
               showToast({ type: 'success', message: `Renouvellement DPE planifié pour le ${dateFormatted}` });
             }}
             onClose={() => setShowRenewModal(false)}
