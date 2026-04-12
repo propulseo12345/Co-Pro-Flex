@@ -969,14 +969,14 @@
     background: rgba(59, 130, 246, 0.2);
     border: 1px solid var(--badge-info-text);
     border-radius: var(--radius-sm);
-    color: var(--badge-info-bg);
+    color: var(--badge-info-text);
     cursor: pointer;
     transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .variableButton:hover {
     background: rgba(59, 130, 246, 0.35);
-    border-color: var(--badge-info-bg);
+    border-color: var(--badge-info-text);
     transform: translateY(-1px);
 }
 
@@ -988,24 +988,24 @@
 .variableButtonMissing {
     background: rgba(59, 130, 246, 0.2);
     border: 1px solid var(--badge-info-text);
-    color: var(--badge-info-bg);
+    color: var(--badge-info-text);
 }
 
 .variableButtonMissing:hover {
     background: rgba(59, 130, 246, 0.35);
-    border-color: var(--badge-info-bg);
-    color: var(--badge-info-bg);
+    border-color: var(--badge-info-text);
+    color: var(--badge-info-text);
 }
 
 .variableButtonFilled {
     background: rgba(34, 197, 94, 0.22);
     border-color: var(--success-dark);
-    color: var(--badge-success-bg);
+    color: var(--badge-success-text);
 }
 
 .variableButtonFilled:hover {
     background: rgba(34, 197, 94, 0.34);
-    color: var(--badge-success-bg);
+    color: var(--badge-success-text);
 }
 
 .variablePlaceholderLabel {
@@ -1038,7 +1038,7 @@
     border-radius: var(--radius-sm);
     border: 1px solid var(--badge-info-text);
     background: rgba(59, 130, 246, 0.2);
-    color: var(--badge-info-bg);
+    color: var(--badge-info-text);
     cursor: pointer;
     font-size: 0.95em;
     font-weight: 600;
@@ -1048,7 +1048,7 @@
 
 .selectMenuTrigger:hover {
     background: rgba(59, 130, 246, 0.35);
-    border-color: var(--badge-info-bg);
+    border-color: var(--badge-info-text);
 }
 
 .selectMenuTrigger:focus-visible {
@@ -1357,12 +1357,12 @@
 .variableButtonPrefilled {
     background: rgba(34, 197, 94, 0.22);
     border-color: var(--success-dark);
-    color: var(--badge-success-bg);
+    color: var(--badge-success-text);
 }
 
 .variableButtonPrefilled:hover {
     background: rgba(34, 197, 94, 0.32);
-    color: var(--badge-success-bg);
+    color: var(--badge-success-text);
 }
 
 /* ========================================

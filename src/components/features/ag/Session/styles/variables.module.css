@@ -14,14 +14,14 @@
     background: rgba(59, 130, 246, 0.2);
     border: 1px solid var(--badge-info-text);
     border-radius: var(--radius-sm);
-    color: var(--badge-info-bg);
+    color: var(--badge-info-text);
     cursor: pointer;
     transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .variableButton:hover {
     background: rgba(59, 130, 246, 0.35);
-    border-color: var(--badge-info-bg);
+    border-color: var(--badge-info-text);
     transform: translateY(-1px);
 }
 
@@ -39,18 +39,18 @@
 .variableButtonMissing:hover {
     background: rgba(245, 158, 11, 0.35);
     border-color: var(--warning);
-    color: var(--badge-warning-bg);
+    color: var(--badge-warning-text);
 }
 
 .variableButtonFilled {
     background: rgba(96, 165, 250, 0.2);
     border-color: var(--secondary);
-    color: var(--badge-info-bg);
+    color: var(--badge-info-text);
 }
 
 .variableButtonFilled:hover {
     background: rgba(59, 130, 246, 0.45);
-    color: var(--badge-info-bg);
+    color: var(--badge-info-text);
 }
 
 /* Wrapper pour variable avec dropdown preremplissage */
