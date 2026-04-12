@@ -3,6 +3,7 @@
 import { X, CheckCircle, Clock, Circle } from 'lucide-react';
 import clsx from 'clsx';
 import type { ITravauxPPT, IEtapeTravaux } from '@/types';
+import { formatEur } from '@/lib/utils/format';
 import styles from './PPTCardDetail.module.css';
 
 interface PPTCardDetailProps {
@@ -14,10 +15,6 @@ function EtapeIcon({ statut }: { statut: IEtapeTravaux['statut'] }) {
   if (statut === 'FAIT') return <CheckCircle size={16} className={styles.iconFait} />;
   if (statut === 'EN_COURS') return <Clock size={16} className={styles.iconEnCours} />;
   return <Circle size={16} className={styles.iconAVenir} />;
-}
-
-function formatEur(n: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 }
 
 export function PPTCardDetail({ travail, onClose }: PPTCardDetailProps) {

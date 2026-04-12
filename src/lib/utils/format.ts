@@ -58,6 +58,19 @@ export function formatMontant(montant: number): string {
 }
 
 /**
+ * Formate un montant en euros sans décimales (arrondi à l'unité)
+ * @param montant - Montant en euros
+ * @returns Chaîne formatée (ex: "1 500 €")
+ */
+export function formatEur(montant: number): string {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+    }).format(montant);
+}
+
+/**
  * Parse un montant depuis une chaîne (gère les formats français)
  * @param value - Chaîne à parser (ex: "1 500,00", "1500.00")
  * @returns Montant en nombre ou NaN si invalide

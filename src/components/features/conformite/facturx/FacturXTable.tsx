@@ -4,6 +4,7 @@ import { CheckCircle, Clock, Minus, Download, Loader2, FileCode } from 'lucide-r
 import clsx from 'clsx';
 import type { IFactureFacturX, StatutFacturX } from '@/types';
 import type { FacturXFilter } from '@/hooks/useFacturX';
+import { formatEur } from '@/lib/utils/format';
 import styles from './FacturXTable.module.css';
 
 type FacturXConfig = { label: string; badgeClass: string };
@@ -29,9 +30,6 @@ const FILTERS: { value: FacturXFilter; label: string }[] = [
   { value: 'NON_APPLICABLE', label: 'Non applicable' },
 ];
 
-function formatEur(n: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
-}
 
 function FacturXBadge({ statut }: { statut: StatutFacturX }) {
   const cfg = FACTURX_CONFIG[statut];

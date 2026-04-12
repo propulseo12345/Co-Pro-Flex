@@ -4,6 +4,7 @@ import { Euro } from 'lucide-react';
 import clsx from 'clsx';
 import type { ITravauxPPT } from '@/types';
 import { TravauxPrevisionnelStatut } from '@/types/enums';
+import { formatEur } from '@/lib/utils/format';
 import styles from './PPTKanban.module.css';
 
 const COLONNES: { statut: TravauxPrevisionnelStatut; label: string; dotClass: string }[] = [
@@ -23,9 +24,6 @@ interface PPTKanbanProps {
   onCardClick: (travail: ITravauxPPT) => void;
 }
 
-function formatEur(n: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
-}
 
 export function PPTKanban({ travauxByStatut, onCardClick }: PPTKanbanProps) {
   return (
@@ -52,6 +50,7 @@ export function PPTKanban({ travauxByStatut, onCardClick }: PPTKanbanProps) {
               {travaux.map(t => (
                 <button
                   key={t.id}
+                  type="button"
                   className={styles.card}
                   onClick={() => onCardClick(t)}
                 >

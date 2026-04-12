@@ -3,6 +3,7 @@
 import { Download, RotateCcw, AlertTriangle, Info } from 'lucide-react';
 import clsx from 'clsx';
 import type { IDPE, StatutDPE } from '@/types';
+import { formatEur } from '@/lib/utils/format';
 import { DPEEnergyScale } from './DPEEnergyScale';
 import { DPEHistorique } from './DPEHistorique';
 import styles from './DPEFicheDetail.module.css';
@@ -19,10 +20,6 @@ const STATUT_ALERT: Record<StatutDPE, AlertConfig> = {
 function AlertIcon({ statut }: { statut: StatutDPE }) {
   if (statut === 'VALIDE') return <Info size={15} />;
   return <AlertTriangle size={15} />;
-}
-
-function formatEur(n: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 }
 
 interface DPEFicheDetailProps {
