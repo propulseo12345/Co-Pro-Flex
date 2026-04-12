@@ -1,20 +1,21 @@
 'use client';
 
 import { Euro } from 'lucide-react';
+import clsx from 'clsx';
 import type { ITravauxPPT } from '@/types';
 import { TravauxPrevisionnelStatut } from '@/types/enums';
 import styles from './PPTKanban.module.css';
 
-const COLONNES: { statut: TravauxPrevisionnelStatut; label: string; color: string }[] = [
-  { statut: TravauxPrevisionnelStatut.A_L_ETUDE, label: "À l'étude", color: '#64748b' },
-  { statut: TravauxPrevisionnelStatut.PREVU,     label: 'Prévu',      color: '#f59e0b' },
-  { statut: TravauxPrevisionnelStatut.VOTE,      label: 'Voté en AG', color: '#60a5fa' },
-  { statut: TravauxPrevisionnelStatut.EN_COURS,  label: 'En cours',   color: '#3b82f6' },
-  { statut: TravauxPrevisionnelStatut.TERMINE,   label: 'Terminé',    color: '#22c55e' },
+const COLONNES: { statut: TravauxPrevisionnelStatut; label: string; dotClass: string }[] = [
+  { statut: TravauxPrevisionnelStatut.A_L_ETUDE, label: "À l'étude", dotClass: styles.dotEtude },
+  { statut: TravauxPrevisionnelStatut.PREVU,     label: 'Prévu',      dotClass: styles.dotPrevu },
+  { statut: TravauxPrevisionnelStatut.VOTE,      label: 'Voté en AG', dotClass: styles.dotVote },
+  { statut: TravauxPrevisionnelStatut.EN_COURS,  label: 'En cours',   dotClass: styles.dotEnCours },
+  { statut: TravauxPrevisionnelStatut.TERMINE,   label: 'Terminé',    dotClass: styles.dotTermine },
 ];
 
-const PRIORITE_COLORS: Record<ITravauxPPT['priorite'], string> = {
-  FAIBLE: '#64748b', NORMALE: '#94a3b8', HAUTE: '#f59e0b', CRITIQUE: '#ef4444',
+const PRIORITE_CLASS: Record<ITravauxPPT['priorite'], string> = {
+  FAIBLE: styles.prioFaible, NORMALE: styles.prioNormale, HAUTE: styles.prioHaute, CRITIQUE: styles.prioCritique,
 };
 
 interface PPTKanbanProps {
@@ -37,7 +38,7 @@ export function PPTKanban({ travauxByStatut, onCardClick }: PPTKanbanProps) {
           <div key={col.statut} className={styles.column}>
             <div className={styles.colHeader}>
               <div className={styles.colTitle}>
-                <span className={styles.colDot} style={{ background: col.color }} />
+                <span className={clsx(styles.colDot, col.dotClass)} />
                 {col.label}
                 <span className={styles.colCount}>{travaux.length}</span>
               </div>
@@ -56,7 +57,7 @@ export function PPTKanban({ travauxByStatut, onCardClick }: PPTKanbanProps) {
                 >
                   <div className={styles.cardTop}>
                     <span className={styles.cardTitle}>{t.titre}</span>
-                    <span className={styles.cardPrio} style={{ color: PRIORITE_COLORS[t.priorite] }}>
+                    <span className={clsx(styles.cardPrio, PRIORITE_CLASS[t.priorite])}>
                       {t.priorite}
                     </span>
                   </div>

@@ -9,7 +9,7 @@ const YEARS = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
 
 export type PPTFilter = 'TOUTES' | 'A_COMPLETER' | 'EN_RETARD' | 'A_JOUR';
 
-function getStatutGlobal(copro: IPPTCopropriete): PPTFilter {
+export function getStatutGlobal(copro: IPPTCopropriete): PPTFilter {
   if (copro.travaux.length === 0) return 'A_COMPLETER';
   const hasEnRetard = copro.travaux.some(t =>
     t.statut === TravauxPrevisionnelStatut.EN_COURS &&

@@ -13,6 +13,7 @@ export function PPTYearSelector({ years, selectedYear, onSelect }: PPTYearSelect
   return (
     <div className={styles.container}>
       <button
+        type="button"
         className={clsx(styles.pill, selectedYear === null && styles.pillActive)}
         onClick={() => onSelect(null)}
       >
@@ -21,6 +22,7 @@ export function PPTYearSelector({ years, selectedYear, onSelect }: PPTYearSelect
       {years.map(year => (
         <button
           key={year}
+          type="button"
           className={clsx(styles.pill, selectedYear === year && styles.pillActive)}
           onClick={() => onSelect(year)}
         >

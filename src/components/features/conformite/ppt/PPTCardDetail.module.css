@@ -129,3 +129,9 @@
   color: #64748b;
   margin-top: 4px;
 }
+
+.iconFait    { color: #22c55e; }
+.iconEnCours { color: #3b82f6; }
+.iconAVenir  { color: #475569; }
+.connectorFait   { background: #22c55e; }
+.connectorAVenir { background: #1e293b; }

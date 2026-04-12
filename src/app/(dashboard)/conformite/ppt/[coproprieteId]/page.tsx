@@ -37,7 +37,7 @@ export default function PPTDetailPage() {
         title={`PPT — ${selectedCopro.nom}`}
         subtitle={`${selectedCopro.nbLots} lots · ${selectedCopro.travaux.length} travaux planifiés`}
         actions={
-          <button className={styles.backBtn} onClick={() => router.push('/conformite/ppt')}>
+          <button type="button" className={styles.backBtn} onClick={() => router.push('/conformite/ppt')}>
             <ArrowLeft size={14} /> Retour à la liste
           </button>
         }

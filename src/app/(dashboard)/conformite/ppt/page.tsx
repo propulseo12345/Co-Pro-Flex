@@ -25,6 +25,7 @@ export default function PPTGestionnairePage() {
             {FILTERS.map(f => (
               <button
                 key={f.value}
+                type="button"
                 className={filter === f.value ? styles.filterActive : styles.filter}
                 onClick={() => setFilter(f.value)}
               >

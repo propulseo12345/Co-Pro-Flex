@@ -5,6 +5,7 @@ import { ArrowRight, Building2, AlertTriangle, CheckCircle, Clock } from 'lucide
 import clsx from 'clsx';
 import type { IPPTCopropriete } from '@/types';
 import { TravauxPrevisionnelStatut } from '@/types/enums';
+import { getStatutGlobal } from '@/hooks/usePPT';
 import styles from './PPTGestionnaireGrid.module.css';
 
 interface PPTGestionnaireGridProps {
@@ -17,12 +18,10 @@ function getProgressPercent(travaux: IPPTCopropriete['travaux']): number {
   return Math.round((termines / travaux.length) * 100);
 }
 
-function getStatutLabel(copro: IPPTCopropriete): { label: string; variant: 'success' | 'warning' | 'danger' | 'neutral' } {
-  if (copro.travaux.length === 0) return { label: 'À compléter', variant: 'neutral' };
-  const hasEnRetard = copro.travaux.some(
-    t => t.statut === TravauxPrevisionnelStatut.EN_COURS && new Date(t.datePrevisionnelle) < new Date()
-  );
-  if (hasEnRetard) return { label: 'En retard', variant: 'danger' };
+function getVariant(copro: IPPTCopropriete): { label: string; variant: 'success' | 'danger' | 'neutral' } {
+  const statut = getStatutGlobal(copro);
+  if (statut === 'A_COMPLETER') return { label: 'À compléter', variant: 'neutral' };
+  if (statut === 'EN_RETARD') return { label: 'En retard', variant: 'danger' };
   return { label: 'À jour', variant: 'success' };
 }
 
@@ -41,7 +40,7 @@ export function PPTGestionnaireGrid({ coproprietes }: PPTGestionnaireGridProps) 
   return (
     <div className={styles.grid}>
       {coproprietes.map(copro => {
-        const { label, variant } = getStatutLabel(copro);
+        const { label, variant } = getVariant(copro);
         const progress = getProgressPercent(copro.travaux);
         const byStatut = {
           aEtude: copro.travaux.filter(t => t.statut === TravauxPrevisionnelStatut.A_L_ETUDE).length,
@@ -68,11 +67,11 @@ export function PPTGestionnaireGrid({ coproprietes }: PPTGestionnaireGridProps) 
             </div>
 
             <div className={styles.statRow}>
-              <span className={styles.stat}><span className={styles.statDot} style={{ background: '#64748b' }} />{byStatut.aEtude} à l&apos;étude</span>
-              <span className={styles.stat}><span className={styles.statDot} style={{ background: '#f59e0b' }} />{byStatut.prevu} prévus</span>
-              <span className={styles.stat}><span className={styles.statDot} style={{ background: '#60a5fa' }} />{byStatut.vote} votés</span>
-              <span className={styles.stat}><span className={styles.statDot} style={{ background: '#3b82f6' }} />{byStatut.enCours} en cours</span>
-              <span className={styles.stat}><span className={styles.statDot} style={{ background: '#22c55e' }} />{byStatut.termine} terminés</span>
+              <span className={styles.stat}><span className={clsx(styles.statDot, styles.dotEtude)} />{byStatut.aEtude} à l&apos;étude</span>
+              <span className={styles.stat}><span className={clsx(styles.statDot, styles.dotPrevu)} />{byStatut.prevu} prévus</span>
+              <span className={styles.stat}><span className={clsx(styles.statDot, styles.dotVote)} />{byStatut.vote} votés</span>
+              <span className={styles.stat}><span className={clsx(styles.statDot, styles.dotEnCours)} />{byStatut.enCours} en cours</span>
+              <span className={styles.stat}><span className={clsx(styles.statDot, styles.dotTermine)} />{byStatut.termine} terminés</span>
             </div>
 
             <div className={styles.progressWrap}>
@@ -83,6 +82,7 @@ export function PPTGestionnaireGrid({ coproprietes }: PPTGestionnaireGridProps) 
             </div>
 
             <button
+              type="button"
               className={styles.ctaBtn}
               onClick={() => router.push(`/conformite/ppt/${copro.coproprieteId}`)}
             >
