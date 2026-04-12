@@ -254,8 +254,8 @@ export function useMouvementsBancairesPage() {
       total_amount: inv.total_amount,
       status: inv.status,
     })),
-    allMouvements: mouvementsBase,
-  }), [supabaseSuppliers, supabasePendingInvoices, mouvementsBase]);
+    allMouvements: mouvementsFiltresParCompte,
+  }), [supabaseSuppliers, supabasePendingInvoices, mouvementsFiltresParCompte]);
 
   const rapprochementContext: RapprochementContext = useMemo(() => ({
     pendingInvoices: matchingContext.pendingInvoices,
