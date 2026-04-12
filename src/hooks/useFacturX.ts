@@ -3,14 +3,16 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { IFactureFacturX, StatutFacturX } from '@/types';
 import { MOCK_FACTURES_FACTURX } from '@/components/features/conformite/facturx/mock-data';
+import { useToast } from '@/providers/ToastProvider';
 
 export type FacturXFilter = 'TOUS' | StatutFacturX;
 
 interface UseFacturXOptions {
-  coproNom?: string; // Filtre par nom de copropriété (CoproContext)
+  coproNom?: string;
 }
 
 export function useFacturX({ coproNom }: UseFacturXOptions = {}) {
+  const { showToast } = useToast();
   const [factures, setFactures] = useState<IFactureFacturX[]>(MOCK_FACTURES_FACTURX);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FacturXFilter>('TOUS');
@@ -29,6 +31,7 @@ export function useFacturX({ coproNom }: UseFacturXOptions = {}) {
   }, [factures, filter, coproNom]);
 
   const genererFacturX = useCallback(async (factureId: string) => {
+    const facture = factures.find(f => f.id === factureId);
     setLoadingId(factureId);
     await new Promise(resolve => setTimeout(resolve, 1500));
     setFactures(prev =>
@@ -39,15 +42,18 @@ export function useFacturX({ coproNom }: UseFacturXOptions = {}) {
       ),
     );
     setLoadingId(null);
-  }, []);
+    if (facture) {
+      showToast({ type: 'success', message: `Factur-X généré pour la facture ${facture.numero}` });
+    }
+  }, [factures, showToast]);
 
-  const telecharger = useCallback((_factureId: string) => {
-    // Phase 1 — mock : téléchargement simulé
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = `facturx-${_factureId}.pdf`;
-    link.click();
-  }, []);
+  const telecharger = useCallback((factureId: string) => {
+    const facture = factures.find(f => f.id === factureId);
+    showToast({
+      type: 'info',
+      message: `Téléchargement simulé — ${facture?.numero ?? factureId} (PDF/A-3 disponible après intégration backend)`,
+    });
+  }, [factures, showToast]);
 
   return {
     factures: filteredFactures,
