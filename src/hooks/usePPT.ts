@@ -27,20 +27,21 @@ export function usePPT({ coproprieteId }: UsePPTOptions = {}) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [filter, setFilter] = useState<PPTFilter>('TOUTES');
   const [selectedTravail, setSelectedTravail] = useState<ITravauxPPT | null>(null);
+  const [coproData, setCoproData] = useState<IPPTCopropriete[]>(MOCK_PPT_COPROPRIETES);
 
   // Vue gestionnaire : toutes les copros
   const coproprietes = useMemo(() => {
-    if (filter === 'TOUTES') return MOCK_PPT_COPROPRIETES;
-    return MOCK_PPT_COPROPRIETES.filter(c => getStatutGlobal(c) === filter);
-  }, [filter]);
+    if (filter === 'TOUTES') return coproData;
+    return coproData.filter(c => getStatutGlobal(c) === filter);
+  }, [coproData, filter]);
 
   // Vue détail : copro sélectionnée
   // Fallback au premier mock si l'ID ne correspond pas (mode dev sans Supabase)
   const selectedCopro = useMemo(() => {
     if (!coproprieteId) return null;
-    return MOCK_PPT_COPROPRIETES.find(c => c.coproprieteId === coproprieteId)
-      ?? MOCK_PPT_COPROPRIETES[0];
-  }, [coproprieteId]);
+    return coproData.find(c => c.coproprieteId === coproprieteId)
+      ?? coproData[0];
+  }, [coproprieteId, coproData]);
 
   // Travaux filtrés par année
   const travaux = useMemo(() => {
@@ -76,6 +77,62 @@ export function usePPT({ coproprieteId }: UsePPTOptions = {}) {
     setSelectedTravail(null);
   }, []);
 
+  const addTravail = useCallback((targetCoproId: string, data: Omit<ITravauxPPT, 'id' | 'etapes'>) => {
+    const ts = Date.now();
+    const newTravail: ITravauxPPT = {
+      ...data,
+      id: `trav-${ts}`,
+      etapes: [
+        { id: `e1-${ts}`, label: 'Devis', statut: 'A_VENIR' },
+        { id: `e2-${ts}`, label: 'Vote en AG', statut: 'A_VENIR' },
+        { id: `e3-${ts}`, label: 'Commande', statut: 'A_VENIR' },
+        { id: `e4-${ts}`, label: 'Intervention', statut: 'A_VENIR' },
+        { id: `e5-${ts}`, label: 'Réception', statut: 'A_VENIR' },
+      ],
+    };
+    setCoproData(prev =>
+      prev.map(c =>
+        c.coproprieteId === targetCoproId
+          ? { ...c, travaux: [...c.travaux, newTravail], derniereMAJ: new Date().toISOString().slice(0, 10) }
+          : c
+      )
+    );
+  }, []);
+
+  const updateTravail = useCallback((targetCoproId: string, travailId: string, data: Partial<Omit<ITravauxPPT, 'id' | 'etapes'>>) => {
+    setCoproData(prev =>
+      prev.map(c =>
+        c.coproprieteId === targetCoproId
+          ? {
+              ...c,
+              derniereMAJ: new Date().toISOString().slice(0, 10),
+              travaux: c.travaux.map(t =>
+                t.id === travailId ? { ...t, ...data } : t
+              ),
+            }
+          : c
+      )
+    );
+    setSelectedTravail(prev =>
+      prev?.id === travailId ? { ...prev, ...data } : prev
+    );
+  }, []);
+
+  const deleteTravail = useCallback((targetCoproId: string, travailId: string) => {
+    setCoproData(prev =>
+      prev.map(c =>
+        c.coproprieteId === targetCoproId
+          ? {
+              ...c,
+              derniereMAJ: new Date().toISOString().slice(0, 10),
+              travaux: c.travaux.filter(t => t.id !== travailId),
+            }
+          : c
+      )
+    );
+    setSelectedTravail(prev => (prev?.id === travailId ? null : prev));
+  }, []);
+
   return {
     coproprietes,
     filter,
@@ -89,6 +146,9 @@ export function usePPT({ coproprieteId }: UsePPTOptions = {}) {
     selectedTravail,
     openTravailDetail,
     closeTravailDetail,
+    addTravail,
+    updateTravail,
+    deleteTravail,
     isLoading: false,
   };
 }
