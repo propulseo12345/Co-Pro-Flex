@@ -102,7 +102,7 @@ export default function PPTGestionnairePage() {
             onClose={closeTravailDetail}
             onEdit={() => openEditModal(selectedTravail)}
             onDelete={() => {
-              const coproId = currentCoproId ?? '';
+              const coproId = currentCoproId ?? (coproprietes[0]?.coproprieteId ?? '');
               deleteTravail(coproId, selectedTravail.id);
               showToast({ type: 'info', message: `Travail "${selectedTravail.titre}" supprimé` });
               closeTravailDetail();
