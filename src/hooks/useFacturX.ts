@@ -33,17 +33,20 @@ export function useFacturX({ coproNom }: UseFacturXOptions = {}) {
   const genererFacturX = useCallback(async (factureId: string) => {
     const facture = factures.find(f => f.id === factureId);
     setLoadingId(factureId);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setFactures(prev =>
-      prev.map(f =>
-        f.id === factureId
-          ? { ...f, statutFacturX: 'GENERE', dateGeneration: new Date().toISOString().slice(0, 10) }
-          : f,
-      ),
-    );
-    setLoadingId(null);
-    if (facture) {
-      showToast({ type: 'success', message: `Factur-X généré pour la facture ${facture.numero}` });
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setFactures(prev =>
+        prev.map(f =>
+          f.id === factureId
+            ? { ...f, statutFacturX: 'GENERE', dateGeneration: new Date().toISOString().slice(0, 10) }
+            : f,
+        ),
+      );
+      if (facture) {
+        showToast({ type: 'success', message: `Factur-X généré pour la facture ${facture.numero}` });
+      }
+    } finally {
+      setLoadingId(null);
     }
   }, [factures, showToast]);
 
