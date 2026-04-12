@@ -1,0 +1,32 @@
+.empty { font-size: 13px; color: #64748b; }
+
+.table { width: 100%; border-collapse: collapse; }
+
+.table th {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  text-align: left;
+  background: rgba(148,163,184,0.04);
+  border-bottom: 1px solid rgba(148,163,184,0.04);
+}
+
+.table td {
+  font-size: 13px;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(148,163,184,0.04);
+}
+
+.classe {
+  display: inline-block;
+  background: rgba(59,130,246,0.1);
+  color: #60a5fa;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-weight: 700;
+  font-size: 13px;
+}

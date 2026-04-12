@@ -1,0 +1,44 @@
+.scale { display: flex; flex-direction: column; gap: 4px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+
+.rowActive { opacity: 1; }
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.barA { background: #15803d; }
+.barB { background: #16a34a; }
+.barC { background: #65a30d; }
+.barD { background: #ca8a04; }
+.barE { background: #ea580c; }
+.barF { background: #dc2626; }
+.barG { background: #991b1b; }
+
+.range {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.arrow {
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-left: 4px;
+}

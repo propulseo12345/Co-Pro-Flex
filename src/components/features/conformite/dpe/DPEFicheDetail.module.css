@@ -1,0 +1,67 @@
+.layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.left, .right { display: flex; flex-direction: column; gap: 16px; }
+
+.card {
+  background: #1a1d2e;
+  border: 1px solid rgba(148,163,184,0.08);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin: 0; }
+.fields dt { font-size: 11px; color: #64748b; font-weight: 500; }
+.fields dd { font-size: 13px; color: #e2e8f0; margin: 0; }
+.mono { font-family: 'SF Mono', monospace; font-variant-numeric: tabular-nums; }
+
+.actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+.btnPrimary {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #3b82f6; color: #fff; border: none;
+  border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background 0.15s;
+}
+.btnPrimary:hover { background: #2563eb; }
+
+.btnGhost {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(148,163,184,0.06); color: #94a3b8;
+  border: 1px solid rgba(148,163,184,0.08);
+  border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btnGhost:hover { background: rgba(148,163,184,0.1); color: #e2e8f0; }
+
+.alertBanner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; font-size: 13px; }
+.alertInfo    { background: rgba(59,130,246,0.1);  border: 1px solid rgba(59,130,246,0.3);  color: #60a5fa; }
+.alertWarning { background: rgba(245,158,11,0.1);  border: 1px solid rgba(245,158,11,0.3);  color: #fbbf24; }
+.alertDanger  { background: rgba(239,68,68,0.1);   border: 1px solid rgba(239,68,68,0.3);   color: #f87171; }
+.alertNeutral { background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.3); color: #94a3b8; }
+
+.travailRow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(148,163,184,0.04);
+  font-size: 13px; color: #e2e8f0;
+}
+.travailRow:last-child { border-bottom: none; }
+
+.empty { font-size: 13px; color: #64748b; }
