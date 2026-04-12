@@ -9,6 +9,8 @@ import styles from './PPTCardDetail.module.css';
 interface PPTCardDetailProps {
   travail: ITravauxPPT;
   onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
 function EtapeIcon({ statut }: { statut: IEtapeTravaux['statut'] }) {
@@ -17,7 +19,7 @@ function EtapeIcon({ statut }: { statut: IEtapeTravaux['statut'] }) {
   return <Circle size={16} className={styles.iconAVenir} />;
 }
 
-export function PPTCardDetail({ travail, onClose }: PPTCardDetailProps) {
+export function PPTCardDetail({ travail, onClose, onEdit, onDelete }: PPTCardDetailProps) {
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="ppt-modal-title" onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -28,7 +30,14 @@ export function PPTCardDetail({ travail, onClose }: PPTCardDetailProps) {
               {travail.type} · Estimation : {formatEur(travail.montantEstime)}
             </div>
           </div>
-          <button type="button" aria-label="Fermer" className={styles.closeBtn} onClick={onClose}><X size={18} /></button>
+          <div className={styles.headerActions}>
+            <button type="button" className={styles.editBtn} onClick={onEdit} aria-label="Modifier ce travail">
+              Modifier
+            </button>
+            <button type="button" aria-label="Fermer" className={styles.closeBtn} onClick={onClose}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {travail.description && (

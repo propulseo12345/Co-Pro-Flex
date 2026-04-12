@@ -51,7 +51,12 @@ export default function PPTDetailPage() {
       <PPTKanban travauxByStatut={travauxByStatut} onCardClick={openTravailDetail} />
 
       {selectedTravail && (
-        <PPTCardDetail travail={selectedTravail} onClose={closeTravailDetail} />
+        <PPTCardDetail
+          travail={selectedTravail}
+          onClose={closeTravailDetail}
+          onEdit={() => { /* édition non disponible sur cette vue */ }}
+          onDelete={() => { /* suppression non disponible sur cette vue */ }}
+        />
       )}
     </div>
   );

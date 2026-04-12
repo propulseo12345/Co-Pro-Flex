@@ -1,12 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { FinanceTopBar } from '@/components/layout/FinanceTopBar';
 import { PPTGestionnaireGrid } from '@/components/features/conformite/ppt/PPTGestionnaireGrid';
 import { PPTYearSelector } from '@/components/features/conformite/ppt/PPTYearSelector';
 import { PPTKanban } from '@/components/features/conformite/ppt/PPTKanban';
 import { PPTCardDetail } from '@/components/features/conformite/ppt/PPTCardDetail';
+import { PPTTravailModal } from '@/components/features/conformite/ppt/PPTTravailModal';
 import { usePPT, type PPTFilter } from '@/hooks/usePPT';
 import { useCopro } from '@/providers/CoproContext';
+import { useToast } from '@/providers/ToastProvider';
+import type { ITravauxPPT } from '@/types';
 import styles from './ppt.module.css';
 
 const FILTERS: { value: PPTFilter; label: string }[] = [
@@ -18,6 +22,7 @@ const FILTERS: { value: PPTFilter; label: string }[] = [
 
 export default function PPTGestionnairePage() {
   const { currentCoproId } = useCopro();
+  const { showToast } = useToast();
 
   const {
     coproprietes,
@@ -31,7 +36,47 @@ export default function PPTGestionnairePage() {
     selectedTravail,
     openTravailDetail,
     closeTravailDetail,
+    addTravail,
+    updateTravail,
+    deleteTravail,
   } = usePPT({ coproprieteId: currentCoproId ?? undefined });
+
+  const [travailModal, setTravailModal] = useState<{
+    open: boolean;
+    travail: ITravauxPPT | null;
+  }>({ open: false, travail: null });
+
+  function openCreateModal() {
+    setTravailModal({ open: true, travail: null });
+  }
+
+  function openEditModal(t: ITravauxPPT) {
+    closeTravailDetail();
+    setTravailModal({ open: true, travail: t });
+  }
+
+  function closeModal() {
+    setTravailModal({ open: false, travail: null });
+  }
+
+  function handleSave(data: Omit<ITravauxPPT, 'id' | 'etapes'>) {
+    const coproId = currentCoproId ?? (coproprietes[0]?.coproprieteId ?? '');
+    if (travailModal.travail) {
+      updateTravail(coproId, travailModal.travail.id, data);
+      showToast({ type: 'success', message: `Travail "${data.titre}" mis à jour` });
+    } else {
+      addTravail(coproId, data);
+      showToast({ type: 'success', message: `Travail "${data.titre}" ajouté au PPT` });
+    }
+  }
+
+  function handleDelete() {
+    if (!travailModal.travail) return;
+    const coproId = currentCoproId ?? (coproprietes[0]?.coproprieteId ?? '');
+    deleteTravail(coproId, travailModal.travail.id);
+    showToast({ type: 'info', message: `Travail "${travailModal.travail.titre}" supprimé` });
+    closeModal();
+  }
 
   // Vue copropriété spécifique (CoproContext actif)
   if (currentCoproId && selectedCopro) {
@@ -40,6 +85,11 @@ export default function PPTGestionnairePage() {
         <FinanceTopBar
           title="Plan Pluriannuel de Travaux"
           subtitle={`${selectedCopro.nom} · ${selectedCopro.nbLots} lots · ${selectedCopro.travaux.length} travaux planifiés`}
+          actions={
+            <button type="button" className={styles.btnAdd} onClick={openCreateModal}>
+              + Ajouter un travail
+            </button>
+          }
         />
         <div className={styles.yearRow}>
           <span className={styles.yearLabel}>Filtrer par année :</span>
@@ -47,7 +97,25 @@ export default function PPTGestionnairePage() {
         </div>
         <PPTKanban travauxByStatut={travauxByStatut} onCardClick={openTravailDetail} />
         {selectedTravail && (
-          <PPTCardDetail travail={selectedTravail} onClose={closeTravailDetail} />
+          <PPTCardDetail
+            travail={selectedTravail}
+            onClose={closeTravailDetail}
+            onEdit={() => openEditModal(selectedTravail)}
+            onDelete={() => {
+              const coproId = currentCoproId ?? '';
+              deleteTravail(coproId, selectedTravail.id);
+              showToast({ type: 'info', message: `Travail "${selectedTravail.titre}" supprimé` });
+              closeTravailDetail();
+            }}
+          />
+        )}
+        {travailModal.open && (
+          <PPTTravailModal
+            travail={travailModal.travail}
+            onSave={handleSave}
+            onDelete={travailModal.travail ? handleDelete : undefined}
+            onClose={closeModal}
+          />
         )}
       </div>
     );
