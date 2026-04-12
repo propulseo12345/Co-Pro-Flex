@@ -3,6 +3,7 @@ import {
   FileText, MessageSquare, Scale, Calendar,
   Calculator, Receipt, ArrowLeftRight, FolderOpen, Mail,
   AlertTriangle, BookOpen, ClipboardList, BarChart3,
+  ShieldCheck, Zap, FileCode,
   type LucideIcon
 } from 'lucide-react';
 
@@ -73,6 +74,17 @@ export const MODULES: ModuleConfig[] = [
       { label: 'Prestataires', href: '/maintenance/providers', icon: Users },
       { label: 'Ordres de service', href: '/maintenance/service-orders', icon: Wrench },
       { label: 'PPT', href: '/maintenance/ppt', icon: Calendar },
+    ],
+  },
+  {
+    id: 'conformite',
+    label: 'Conformité 2026',
+    icon: ShieldCheck,
+    href: '/conformite/ppt',
+    subPages: [
+      { label: 'PPT', href: '/conformite/ppt', icon: ClipboardList },
+      { label: 'DPE Collectif', href: '/conformite/dpe', icon: Zap },
+      { label: 'Factur-X', href: '/conformite/facturx', icon: FileCode },
     ],
   },
   {
