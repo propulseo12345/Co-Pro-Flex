@@ -24,9 +24,11 @@ function AlertIcon({ statut }: { statut: StatutDPE }) {
 
 interface DPEFicheDetailProps {
   dpe: IDPE;
+  onEdit?: () => void;
+  onPlanifier?: () => void;
 }
 
-export function DPEFicheDetail({ dpe }: DPEFicheDetailProps) {
+export function DPEFicheDetail({ dpe, onEdit, onPlanifier }: DPEFicheDetailProps) {
   const alert = STATUT_ALERT[dpe.statut];
 
   return (
@@ -52,9 +54,16 @@ export function DPEFicheDetail({ dpe }: DPEFicheDetailProps) {
             <button type="button" className={styles.btnPrimary} aria-label="Télécharger le DPE en PDF">
               <Download size={14} /> Télécharger PDF
             </button>
-            <button type="button" className={styles.btnGhost} aria-label="Planifier le renouvellement du DPE">
-              <RotateCcw size={14} /> Planifier renouvellement
-            </button>
+            {onEdit && (
+              <button type="button" className={styles.btnGhost} onClick={onEdit} aria-label="Modifier la fiche DPE">
+                Modifier
+              </button>
+            )}
+            {onPlanifier && (
+              <button type="button" className={styles.btnGhost} onClick={onPlanifier} aria-label="Planifier le renouvellement du DPE">
+                <RotateCcw size={14} /> Planifier renouvellement
+              </button>
+            )}
           </div>
         </div>
       </div>
