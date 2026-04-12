@@ -1,11 +1,11 @@
-.empty { font-size: 13px; color: #64748b; }
+.empty { font-size: 13px; color: var(--text-tertiary); }
 
 .table { width: 100%; border-collapse: collapse; }
 
 .table th {
   font-size: 10px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 8px 12px;
@@ -16,7 +16,7 @@
 
 .table td {
   font-size: 13px;
-  color: #e2e8f0;
+  color: var(--text-main);
   padding: 10px 12px;
   border-bottom: 1px solid rgba(148,163,184,0.04);
 }

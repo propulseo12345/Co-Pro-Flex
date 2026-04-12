@@ -1,6 +1,6 @@
 .notFound {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   padding: 40px 0;
   text-align: center;
 }
@@ -10,7 +10,7 @@
   align-items: center;
   gap: 6px;
   background: rgba(148, 163, 184, 0.06);
-  color: #94a3b8;
+  color: var(--text-secondary);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 8px;
   padding: 7px 14px;
@@ -21,5 +21,5 @@
 
 .backBtn:hover {
   background: rgba(148, 163, 184, 0.1);
-  color: #e2e8f0;
+  color: var(--text-main);
 }

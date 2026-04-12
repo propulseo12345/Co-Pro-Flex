@@ -10,7 +10,7 @@
   border-radius: 99px;
   border: 1px solid rgba(148,163,184,0.12);
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -19,7 +19,7 @@
 
 .pill:hover {
   background: rgba(148,163,184,0.06);
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .pillActive {
