@@ -38,7 +38,11 @@ export function DPEEditModal({ dpe, onSave, onClose }: DPEEditModalProps) {
   function validate(): boolean {
     const next: FormErrors = {};
     if (!form.dateDiagnostic) next.dateDiagnostic = 'Requis';
-    if (!form.dateExpiration) next.dateExpiration = 'Requis';
+    if (!form.dateExpiration) {
+      next.dateExpiration = 'Requis';
+    } else if (form.dateDiagnostic && form.dateExpiration <= form.dateDiagnostic) {
+      next.dateExpiration = 'Doit être postérieure à la date de diagnostic';
+    }
     if (!form.diagnostiqueur.trim()) next.diagnostiqueur = 'Requis';
     if (!form.numeroADEME.trim()) next.numeroADEME = 'Requis';
     if (form.consoEnergie <= 0) next.consoEnergie = 'Doit être > 0';
@@ -154,7 +158,7 @@ export function DPEEditModal({ dpe, onSave, onClose }: DPEEditModalProps) {
                 type="number"
                 className={clsx(styles.input, errors.consoEnergie && styles.error)}
                 value={form.consoEnergie}
-                onChange={e => set('consoEnergie', parseFloat(e.target.value) || 0)}
+                onChange={e => set('consoEnergie', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                 min="1"
                 step="1"
               />
@@ -167,7 +171,7 @@ export function DPEEditModal({ dpe, onSave, onClose }: DPEEditModalProps) {
                 type="number"
                 className={clsx(styles.input, errors.emissionsGES && styles.error)}
                 value={form.emissionsGES}
-                onChange={e => set('emissionsGES', parseFloat(e.target.value) || 0)}
+                onChange={e => set('emissionsGES', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                 min="1"
                 step="1"
               />
