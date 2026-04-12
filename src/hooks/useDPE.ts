@@ -11,10 +11,12 @@ interface UseDPEOptions {
 export function useDPE({ coproprieteId }: UseDPEOptions = {}) {
   const coproprietes = useMemo(() => MOCK_DPE_LIST, []);
 
-  const selectedDPE = useMemo(
-    () => coproprieteId ? MOCK_DPE_LIST.find(d => d.coproprieteId === coproprieteId) ?? null : null,
-    [coproprieteId]
-  );
+  // Fallback au premier mock si l'ID ne correspond pas (mode dev sans Supabase)
+  const selectedDPE = useMemo(() => {
+    if (!coproprieteId) return null;
+    return MOCK_DPE_LIST.find(d => d.coproprieteId === coproprieteId)
+      ?? MOCK_DPE_LIST[0];
+  }, [coproprieteId]);
 
   return {
     coproprietes,

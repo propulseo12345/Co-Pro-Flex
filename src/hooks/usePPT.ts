@@ -35,10 +35,12 @@ export function usePPT({ coproprieteId }: UsePPTOptions = {}) {
   }, [filter]);
 
   // Vue détail : copro sélectionnée
-  const selectedCopro = useMemo(
-    () => coproprieteId ? MOCK_PPT_COPROPRIETES.find(c => c.coproprieteId === coproprieteId) ?? null : null,
-    [coproprieteId]
-  );
+  // Fallback au premier mock si l'ID ne correspond pas (mode dev sans Supabase)
+  const selectedCopro = useMemo(() => {
+    if (!coproprieteId) return null;
+    return MOCK_PPT_COPROPRIETES.find(c => c.coproprieteId === coproprieteId)
+      ?? MOCK_PPT_COPROPRIETES[0];
+  }, [coproprieteId]);
 
   // Travaux filtrés par année
   const travaux = useMemo(() => {

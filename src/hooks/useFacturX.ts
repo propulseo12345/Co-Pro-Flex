@@ -6,15 +6,27 @@ import { MOCK_FACTURES_FACTURX } from '@/components/features/conformite/facturx/
 
 export type FacturXFilter = 'TOUS' | StatutFacturX;
 
-export function useFacturX() {
+interface UseFacturXOptions {
+  coproNom?: string; // Filtre par nom de copropriété (CoproContext)
+}
+
+export function useFacturX({ coproNom }: UseFacturXOptions = {}) {
   const [factures, setFactures] = useState<IFactureFacturX[]>(MOCK_FACTURES_FACTURX);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FacturXFilter>('TOUS');
 
   const filteredFactures = useMemo(() => {
-    if (filter === 'TOUS') return factures;
-    return factures.filter(f => f.statutFacturX === filter);
-  }, [factures, filter]);
+    let result = factures;
+    if (coproNom) {
+      result = result.filter(f =>
+        f.copropriete.toLowerCase().includes(coproNom.toLowerCase())
+      );
+    }
+    if (filter !== 'TOUS') {
+      result = result.filter(f => f.statutFacturX === filter);
+    }
+    return result;
+  }, [factures, filter, coproNom]);
 
   const genererFacturX = useCallback(async (factureId: string) => {
     setLoadingId(factureId);
