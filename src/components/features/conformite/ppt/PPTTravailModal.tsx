@@ -47,12 +47,28 @@ function toFormData(t: ITravauxPPT): TravailFormData {
   };
 }
 
+// Fix 3 — Libellés lisibles pour TypeTravauxPrevisionnel
+const TYPE_LABELS: Record<TypeTravauxPrevisionnel, string> = {
+  [TypeTravauxPrevisionnel.TOITURE]: 'Toiture',
+  [TypeTravauxPrevisionnel.FACADE]: 'Façade',
+  [TypeTravauxPrevisionnel.CHAUFFAGE]: 'Chauffage',
+  [TypeTravauxPrevisionnel.ASCENSEUR]: 'Ascenseur',
+  [TypeTravauxPrevisionnel.ELECTRICITE]: 'Électricité',
+  [TypeTravauxPrevisionnel.PLOMBERIE]: 'Plomberie',
+  [TypeTravauxPrevisionnel.ESPACES_VERTS]: 'Espaces verts',
+  [TypeTravauxPrevisionnel.ETANCHEITE]: 'Étanchéité',
+  [TypeTravauxPrevisionnel.ACCESSIBILITE]: 'Accessibilité',
+  [TypeTravauxPrevisionnel.SECURITE]: 'Sécurité',
+  [TypeTravauxPrevisionnel.AUTRE]: 'Autre',
+};
+
 export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTravailModalProps) {
   const isEdit = travail !== null;
   const [form, setForm] = useState<TravailFormData>(
-    travail ? toFormData(travail) : DEFAULT_FORM
+    travail ? toFormData(travail) : () => ({ ...DEFAULT_FORM })
   );
   const [errors, setErrors] = useState<Partial<Record<keyof TravailFormData, string>>>({});
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   function set<K extends keyof TravailFormData>(key: K, value: TravailFormData[K]) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -100,8 +116,9 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
         <div className={styles.body}>
           {/* Titre */}
           <div className={styles.field}>
-            <label className={styles.label}>Titre *</label>
+            <label htmlFor="ppt-titre" className={styles.label}>Titre *</label>
             <input
+              id="ppt-titre"
               type="text"
               className={clsx(styles.input, errors.titre && styles.error)}
               value={form.titre}
@@ -115,20 +132,22 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
           {/* Type + Statut */}
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label}>Type de travaux</label>
+              <label htmlFor="ppt-type" className={styles.label}>Type de travaux</label>
               <select
+                id="ppt-type"
                 className={styles.select}
                 value={form.type}
                 onChange={e => set('type', e.target.value as TypeTravauxPrevisionnel)}
               >
                 {Object.values(TypeTravauxPrevisionnel).map(v => (
-                  <option key={v} value={v}>{v}</option>
+                  <option key={v} value={v}>{TYPE_LABELS[v]}</option>
                 ))}
               </select>
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Statut</label>
+              <label htmlFor="ppt-statut" className={styles.label}>Statut</label>
               <select
+                id="ppt-statut"
                 className={styles.select}
                 value={form.statut}
                 onChange={e => set('statut', e.target.value as TravauxPrevisionnelStatut)}
@@ -145,8 +164,9 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
           {/* Date + Montant */}
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label}>Date prévisionnelle *</label>
+              <label htmlFor="ppt-date" className={styles.label}>Date prévisionnelle *</label>
               <input
+                id="ppt-date"
                 type="date"
                 className={clsx(styles.input, errors.datePrevisionnelle && styles.error)}
                 value={form.datePrevisionnelle}
@@ -155,8 +175,9 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
               {errors.datePrevisionnelle && <span className={styles.errorMsg}>{errors.datePrevisionnelle}</span>}
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Montant estimé (€) *</label>
+              <label htmlFor="ppt-montant" className={styles.label}>Montant estimé (€) *</label>
               <input
+                id="ppt-montant"
                 type="number"
                 className={clsx(styles.input, errors.montantEstime && styles.error)}
                 value={form.montantEstime}
@@ -171,8 +192,9 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
 
           {/* Priorité */}
           <div className={styles.field}>
-            <label className={styles.label}>Priorité</label>
+            <label htmlFor="ppt-priorite" className={styles.label}>Priorité</label>
             <select
+              id="ppt-priorite"
               className={styles.select}
               value={form.priorite}
               onChange={e => set('priorite', e.target.value as ITravauxPPT['priorite'])}
@@ -186,8 +208,9 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
 
           {/* Description */}
           <div className={styles.field}>
-            <label className={styles.label}>Description (optionnel)</label>
+            <label htmlFor="ppt-description" className={styles.label}>Description (optionnel)</label>
             <textarea
+              id="ppt-description"
               className={styles.textarea}
               value={form.description}
               onChange={e => set('description', e.target.value)}
@@ -199,11 +222,25 @@ export function PPTTravailModal({ travail, onSave, onDelete, onClose }: PPTTrava
 
         <div className={styles.footer}>
           {isEdit && onDelete && (
-            <button type="button" className={styles.btnDanger} onClick={onDelete}>
-              Supprimer
-            </button>
+            confirmDelete ? (
+              <button
+                type="button"
+                className={styles.btnDangerConfirm}
+                onClick={onDelete}
+              >
+                Confirmer la suppression
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.btnDanger}
+                onClick={() => setConfirmDelete(true)}
+              >
+                Supprimer
+              </button>
+            )
           )}
-          <button type="button" className={styles.btnCancel} onClick={onClose}>Annuler</button>
+          <button type="button" className={styles.btnCancel} onClick={() => { setConfirmDelete(false); onClose(); }}>Annuler</button>
           <button type="button" className={styles.btnSave} onClick={handleSubmit}>
             {isEdit ? 'Enregistrer' : 'Ajouter'}
           </button>

@@ -181,3 +181,20 @@
 .btnDanger:hover {
   background: rgba(239, 68, 68, 0.1);
 }
+
+.btnDangerConfirm {
+  padding: 8px 16px;
+  background: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: auto;
+  transition: background 0.15s;
+}
+
+.btnDangerConfirm:hover {
+  background: #dc2626;
+}
