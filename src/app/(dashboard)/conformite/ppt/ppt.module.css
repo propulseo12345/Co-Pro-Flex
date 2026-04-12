@@ -1,0 +1,36 @@
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #131620;
+  border: 1px solid rgba(148,163,184,0.08);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.filter {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter:hover {
+  background: rgba(148,163,184,0.06);
+  color: #e2e8f0;
+}
+
+.filterActive {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #1a1d2e;
+  color: #e2e8f0;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+}
