@@ -1,0 +1,42 @@
+<h2>PPT + DPE Tracker — Quelle architecture ?</h2>
+<p class="subtitle">3 approches pour intégrer le module conformité dans CoProFlex</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Approche Minimale — PPT seul, DPE en pièce jointe</h3>
+      <p>On construit uniquement le module PPT avec kanban 10 ans + timeline. Le DPE reste dans la GED comme document technique (déjà en place). Rapide à livrer, focus sur l'argument commercial principal.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pour</h4><ul><li>Livrable en 1 semaine</li><li>Focus sur la vraie valeur (PPT)</li><li>Simple à tester avec design partners</li></ul></div>
+        <div class="cons"><h4>Contre</h4><ul><li>DPE pas tracké avec alertes</li><li>Argument "conformité 2026" incomplet</li><li>À refactorer plus tard</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Approche Équilibrée — Page unique PPT + DPE avec onglets ⭐ Recommandée</h3>
+      <p>Une seule page <code>/maintenance/ppt</code> avec deux onglets : <strong>PPT</strong> (kanban 10 ans, drill-down timeline) et <strong>DPE</strong> (statut par copropriété, date d'expiration, alertes). Reste sous Maintenance dans la nav.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pour</h4><ul><li>Module "Conformité 2026" complet en une page</li><li>Suit le pattern des autres modules (onglets)</li><li>Argument commercial fort (PPT + DPE = les 2 obligations 2026)</li><li>Réutilise les composants existants</li></ul></div>
+        <div class="cons"><h4>Contre</h4><ul><li>2-3 semaines de dev</li><li>Page potentiellement chargée</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Approche Ambitieuse — Nouveau module "Conformité 2026" dans la nav</h3>
+      <p>Créer un module dédié <strong>Conformité</strong> dans la navigation principale, avec sous-pages : PPT, DPE, e-Invoicing Factur-X, alertes réglementaires globales. Devient le centre de la proposition de valeur 2026.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pour</h4><ul><li>Différenciateur marketing maximal</li><li>Extensible (Factur-X, autres réformes)</li><li>Met la conformité au cœur de la nav</li></ul></div>
+        <div class="cons"><h4>Contre</h4><ul><li>4-6 semaines de dev</li><li>Nav déjà chargée (8 modules)</li><li>Risque de suringénierie pour v1</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

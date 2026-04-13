@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conformité 2026 — v3 Drill-down DPE</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; font-size: 13px; }
+.app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar { width: 210px; background: #131620; border-right: 1px solid rgba(148,163,184,0.08); padding: 14px 8px; flex-shrink: 0; overflow-y: auto; }
+.sidebar-logo { padding: 6px 12px 18px; font-size: 15px; font-weight: 700; color: #e2e8f0; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 6px; color: #94a3b8; font-size: 13px; cursor: pointer; margin-bottom: 2px; }
+.nav-item:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+.nav-item.active { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.nav-sub { margin-left: 26px; margin-bottom: 6px; }
+.nav-sub-item { padding: 5px 12px; border-radius: 5px; color: #64748b; font-size: 12px; cursor: pointer; margin-bottom: 1px; }
+.nav-sub-item:hover { color: #94a3b8; background: rgba(148,163,184,0.04); }
+.nav-sub-item.active { color: #60a5fa; background: rgba(59,130,246,0.08); font-weight: 600; }
+.nav-divider { height: 1px; background: rgba(148,163,184,0.06); margin: 8px 12px; }
+.badge-new { background: rgba(34,197,94,0.15); color: #4ade80; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: auto; letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; background: #0f1117; display: flex; flex-direction: column; }
+
+/* TOPBAR */
+.topbar { background: #161822; border-bottom: 1px solid rgba(148,163,184,0.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar h1 { font-size: 20px; font-weight: 700; color: #e2e8f0; }
+.topbar p { font-size: 12px; color: #64748b; margin-top: 2px; }
+.topbar-right { display: flex; gap: 8px; }
+.btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; }
+.btn-primary { background: #3b82f6; color: white; }
+.btn-ghost { background: rgba(148,163,184,0.06); color: #94a3b8; border: 1px solid rgba(148,163,184,0.08); }
+.btn-sm { padding: 4px 11px; font-size: 11px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; }
+.btn-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.btn-green { background: rgba(34,197,94,0.1); color: #4ade80; }
+.btn-orange { background: rgba(245,158,11,0.1); color: #fbbf24; }
+
+/* MODULE TABS */
+.module-tabs { display: flex; gap: 2px; padding: 0 24px; border-bottom: 1px solid rgba(148,163,184,0.08); background: #161822; flex-shrink: 0; }
+.module-tab { padding: 10px 18px; font-size: 13px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 7px; }
+.module-tab:hover:not(.active) { color: #94a3b8; }
+.module-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+.tab-pill { font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 20px; }
+.tp-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.tp-warn { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.tp-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+/* PANELS */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* KPI STRIP */
+.kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; padding: 18px 24px; }
+.kpi { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 14px 18px; }
+.kpi-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.kpi-val { font-size: 22px; font-weight: 700; }
+.kpi-sub { font-size: 11px; color: #64748b; margin-top: 3px; }
+.c-blue { color: #60a5fa; } .c-green { color: #4ade80; } .c-orange { color: #fbbf24; } .c-red { color: #f87171; } .c-purple { color: #a78bfa; }
+
+/* BREADCRUMB */
+.breadcrumb { padding: 14px 24px 4px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #64748b; }
+.bc-link { color: #60a5fa; cursor: pointer; font-weight: 500; }
+.bc-link:hover { text-decoration: underline; }
+.bc-sep { color: #475569; }
+.bc-cur { color: #94a3b8; }
+
+/* SECTION HEADER */
+.section-hd { padding: 14px 24px 12px; display: flex; align-items: center; justify-content: space-between; }
+.section-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+.search-filter { display: flex; gap: 8px; align-items: center; }
+.search-box { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); border-radius: 8px; padding: 6px 12px; font-size: 12px; color: #e2e8f0; width: 200px; outline: none; }
+.filter-pill { background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.08); border-radius: 20px; padding: 4px 12px; font-size: 11px; color: #64748b; cursor: pointer; }
+.filter-pill.active { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); color: #60a5fa; }
+
+/* ──────── SHARED COPRO GRID ──────── */
+.copro-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 0 24px 24px; }
+.copro-card { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px 18px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; }
+.copro-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-1px); }
+.copro-card.danger { border-color: rgba(239,68,68,0.2); }
+.copro-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.copro-name { font-size: 14px; font-weight: 700; color: #e2e8f0; }
+.copro-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+.status-badge { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 6px; white-space: nowrap; }
+.sb-ok { background: rgba(34,197,94,0.1); color: #4ade80; }
+.sb-warn { background: rgba(245,158,11,0.1); color: #fbbf24; }
+.sb-late { background: rgba(239,68,68,0.1); color: #f87171; }
+.copro-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.copro-row-lbl { font-size: 11px; color: #64748b; }
+.copro-row-val { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+.copro-footer { margin-top: 12px; display: flex; justify-content: flex-end; }
+.dpe-prog { height: 4px; background: rgba(148,163,184,0.1); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.dp-fill { height: 100%; border-radius: 2px; }
+.fill-g { background: #4ade80; } .fill-y { background: #fbbf24; } .fill-r { background: #f87171; }
+.dpe-cls { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; font-size: 13px; font-weight: 800; }
+.dc-B { background: rgba(34,197,94,0.15); color: #86efac; }
+.dc-C { background: rgba(96,165,250,0.15); color: #93c5fd; }
+.dc-D { background: rgba(251,191,36,0.15); color: #fde68a; }
+.dc-E { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+/* ──────── DPE DETAIL VIEW ──────── */
+.dpe-detail-grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 18px 24px 24px; align-items: start; }
+
+/* Fiche DPE gauche */
+.dpe-fiche { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; overflow: hidden; }
+.dpe-fiche-header { padding: 20px; background: #131620; border-bottom: 1px solid rgba(148,163,184,0.08); }
+.dpe-fiche-copro { font-size: 16px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+.dpe-fiche-lots { font-size: 12px; color: #64748b; }
+
+.dpe-class-big {
+  display: flex; align-items: center; justify-content: center;
+  margin: 20px; height: 100px; border-radius: 12px;
+  font-size: 56px; font-weight: 900;
+}
+.dcb-C { background: rgba(96,165,250,0.12); color: #60a5fa; border: 2px solid rgba(96,165,250,0.2); }
+.dcb-E { background: rgba(245,158,11,0.1); color: #fbbf24; border: 2px solid rgba(245,158,11,0.2); }
+
+.dpe-scale { padding: 0 20px 20px; }
+.dpe-scale-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.scale-bar { display: flex; gap: 3px; }
+.scale-item { flex: 1; padding: 4px 2px; text-align: center; border-radius: 4px; font-size: 10px; font-weight: 800; }
+.sc-A { background: rgba(34,197,94,0.25); color: #4ade80; }
+.sc-B { background: rgba(74,222,128,0.2); color: #86efac; }
+.sc-C { background: rgba(96,165,250,0.25); color: #60a5fa; border: 2px solid #60a5fa; }
+.sc-D { background: rgba(251,191,36,0.15); color: #fde68a; }
+.sc-E { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.sc-F { background: rgba(249,115,22,0.15); color: #fb923c; }
+.sc-G { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.dpe-fields { padding: 16px 20px; border-top: 1px solid rgba(148,163,184,0.06); }
+.dpe-field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(148,163,184,0.04); }
+.dpe-field:last-child { border-bottom: none; }
+.df-lbl { font-size: 11px; color: #64748b; }
+.df-val { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+.df-val.warn { color: #fbbf24; }
+.df-val.ok { color: #4ade80; }
+
+.dpe-actions { padding: 16px 20px; border-top: 1px solid rgba(148,163,184,0.08); display: flex; flex-direction: column; gap: 8px; }
+.dpe-action-btn { width: 100%; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid; display: flex; align-items: center; gap: 8px; }
+.dab-blue { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); color: #60a5fa; }
+.dab-ghost { background: transparent; border-color: rgba(148,163,184,0.1); color: #94a3b8; }
+.dab-orange { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: #fbbf24; }
+
+/* Right column */
+.dpe-right { display: flex; flex-direction: column; gap: 14px; }
+
+/* Alert */
+.alert-banner { padding: 12px 16px; border-radius: 8px; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+.ab-warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+.ab-info { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); color: #60a5fa; }
+.alert-banner strong { font-weight: 700; }
+
+/* Travaux recommandés */
+.card-section { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; overflow: hidden; }
+.cs-header { padding: 14px 18px; border-bottom: 1px solid rgba(148,163,184,0.08); display: flex; align-items: center; justify-content: space-between; }
+.cs-title { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+.cs-subtitle { font-size: 11px; color: #64748b; margin-top: 2px; }
+.travaux-list { padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; }
+.travail-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #131620; border-radius: 8px; border-left: 3px solid; }
+.ti-blue { border-left-color: #60a5fa; } .ti-orange { border-left-color: #fbbf24; } .ti-green { border-left-color: #4ade80; }
+.ti-content { flex: 1; }
+.ti-title { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+.ti-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+.ti-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
+.tib-ppt { background: rgba(167,139,250,0.1); color: #a78bfa; }
+.tib-reco { background: rgba(96,165,250,0.1); color: #60a5fa; }
+.tib-done { background: rgba(34,197,94,0.1); color: #4ade80; }
+.ti-amt { font-size: 12px; font-weight: 700; color: #60a5fa; font-family: 'SF Mono', monospace; white-space: nowrap; }
+
+/* Historique DPE */
+.history-list { padding: 12px 18px; display: flex; flex-direction: column; gap: 6px; }
+.hist-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #131620; border-radius: 8px; }
+.hist-dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; flex-shrink: 0; }
+.hist-dot.current { background: #4ade80; }
+.hist-content { flex: 1; }
+.hist-title { font-size: 12px; font-weight: 600; color: #94a3b8; }
+.hist-title.current { color: #e2e8f0; }
+.hist-meta { font-size: 11px; color: #475569; margin-top: 1px; }
+.hist-cls { font-size: 18px; font-weight: 800; }
+
+/* Attestation */
+.doc-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-top: 1px solid rgba(148,163,184,0.06); }
+.doc-icon { width: 36px; height: 36px; background: rgba(239,68,68,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.doc-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+.doc-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+/* ──────── PPT PANEL (condensé) ──────── */
+.ppt-copro-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 0 24px 24px; }
+.ppt-copro-card { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 16px 18px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; }
+.ppt-copro-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-1px); }
+.pcc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.pcc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+.pcc-stat { text-align: center; background: #131620; border-radius: 8px; padding: 8px 4px; }
+.pcc-stat-val { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.pcc-stat-lbl { font-size: 10px; color: #64748b; }
+.pcc-budget { font-size: 12px; color: #64748b; display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(148,163,184,0.06); }
+.pcc-budget-val { font-size: 13px; font-weight: 700; color: #60a5fa; font-family: 'SF Mono', monospace; }
+.pcc-footer { margin-top: 10px; display: flex; justify-content: flex-end; }
+
+/* ──────── KANBAN ──────── */
+.year-bar { padding: 4px 24px 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.year-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; font-weight: 600; }
+.year-pill { padding: 4px 13px; border-radius: 20px; font-size: 12px; font-weight: 600; background: rgba(148,163,184,0.06); color: #64748b; cursor: pointer; border: 1px solid rgba(148,163,184,0.08); }
+.year-pill.active { background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+.year-pill.has-data { color: #94a3b8; }
+.kanban-wrap { padding: 0 24px 24px; }
+.kanban-lbl { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.kanban { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+.kcol { background: #1a1d2e; border: 1px solid rgba(148,163,184,0.08); border-radius: 12px; padding: 12px; }
+.kcol-head { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid rgba(148,163,184,0.06); }
+.kdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dk-grey { background: #94a3b8; } .dk-blue { background: #60a5fa; } .dk-purple { background: #a78bfa; } .dk-yellow { background: #fbbf24; } .dk-green { background: #4ade80; }
+.kcol-name { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+.kcol-cnt { margin-left: auto; background: rgba(148,163,184,0.1); color: #94a3b8; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 20px; }
+.kcard { background: #131620; border: 1px solid rgba(148,163,184,0.06); border-radius: 8px; padding: 10px 12px; margin-bottom: 7px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; }
+.kcard:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-1px); }
+.kcard-title { font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px; }
+.kcard-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
+.tag-r { background: rgba(251,191,36,0.1); color: #fbbf24; }
+.tag-f { background: rgba(96,165,250,0.1); color: #60a5fa; }
+.tag-h { background: rgba(248,113,113,0.1); color: #f87171; }
+.tag-e { background: rgba(167,139,250,0.1); color: #a78bfa; }
+.kcard-amt { font-size: 11px; color: #60a5fa; font-weight: 600; font-family: 'SF Mono', monospace; }
+.kcard-meta { font-size: 10px; color: #475569; margin-top: 3px; }
+.kempty { border: 1px dashed rgba(148,163,184,0.1); border-radius: 8px; padding: 14px; text-align: center; color: #475569; font-size: 11px; }
+
+/* ──────── FACTUR-X ──────── */
+.fx-info { margin: 16px 24px 0; padding: 14px 18px; background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); border-radius: 8px; font-size: 12px; color: #94a3b8; line-height: 1.6; }
+.fx-info strong { color: #60a5fa; }
+.table-wrap { padding: 18px 24px 24px; }
+.table-lbl { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+table.t { width: 100%; border-collapse: collapse; }
+table.t th { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; text-align: left; background: rgba(148,163,184,0.04); border-bottom: 1px solid rgba(148,163,184,0.06); }
+table.t td { padding: 10px 12px; border-bottom: 1px solid rgba(148,163,184,0.04); font-size: 12px; }
+table.t tr:hover td { background: rgba(148,163,184,0.03); }
+.mono { font-family: 'SF Mono', monospace; font-variant-numeric: tabular-nums; }
+.fxb { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 5px; }
+.fxb-ok { background: rgba(34,197,94,0.1); color: #4ade80; }
+.fxb-pend { background: rgba(245,158,11,0.1); color: #fbbf24; }
+.fxb-draft { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+.alert-top { margin: 14px 24px 0; padding: 12px 16px; background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; font-size: 12px; color: #fbbf24; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">CoProFlex</div>
+    <div class="nav-item"><span>🏠</span> Dashboard</div>
+    <div class="nav-item"><span>👥</span> AG</div>
+    <div class="nav-item"><span>🏢</span> Copropriété</div>
+    <div class="nav-item"><span>💰</span> Finance</div>
+    <div class="nav-item"><span>🔧</span> Maintenance</div>
+    <div class="nav-divider"></div>
+    <div class="nav-item active"><span>✅</span> Conformité 2026 <span class="badge-new">Nouveau</span></div>
+    <div class="nav-sub">
+      <div class="nav-sub-item" onclick="goTab('ppt',this)">PPT — Plan de travaux</div>
+      <div class="nav-sub-item active" onclick="goTab('dpe',this)">DPE Collectif</div>
+      <div class="nav-sub-item" onclick="goTab('fx',this)">Factur-X</div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span>📁</span> Documents</div>
+    <div class="nav-item"><span>💬</span> Communication</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div><h1 id="tb-title">DPE Collectif</h1><p id="tb-sub">Vue globale gestionnaire — statut des diagnostics sur toutes vos copropriétés</p></div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost">📊 Rapport PDF</button>
+        <button class="btn btn-primary" id="tb-cta">+ Enregistrer un DPE</button>
+      </div>
+    </div>
+
+    <div class="module-tabs">
+      <div class="module-tab" id="mtab-ppt" onclick="goTab('ppt',null)">📋 PPT — Plan de travaux <span class="tab-pill tp-blue">6 copros</span></div>
+      <div class="module-tab active" id="mtab-dpe" onclick="goTab('dpe',null)">🏠 DPE Collectif <span class="tab-pill tp-warn">2 alertes</span></div>
+      <div class="module-tab" id="mtab-fx" onclick="goTab('fx',null)">🧾 Factur-X <span class="tab-pill tp-green">Prêt</span></div>
+    </div>
+
+    <!-- ══════════ PPT PANEL ══════════ -->
+    <div class="panel" id="panel-ppt">
+      <div id="ppt-list">
+        <div class="kpi-strip">
+          <div class="kpi"><div class="kpi-label">Budget total 10 ans</div><div class="kpi-val c-blue">4 820 000 €</div><div class="kpi-sub">6 copropriétés</div></div>
+          <div class="kpi"><div class="kpi-label">PPT conformes</div><div class="kpi-val c-green">4</div><div class="kpi-sub">à jour</div></div>
+          <div class="kpi"><div class="kpi-label">À mettre à jour</div><div class="kpi-val c-orange">1</div><div class="kpi-sub">> 3 ans</div></div>
+          <div class="kpi"><div class="kpi-label">En retard</div><div class="kpi-val c-red">1</div><div class="kpi-sub">PPT manquant</div></div>
+        </div>
+        <div class="section-hd">
+          <div class="section-title">Mes copropriétés — cliquer pour voir le PPT détaillé</div>
+          <div class="search-filter">
+            <input class="search-box" placeholder="🔍 Rechercher…">
+            <div class="filter-pill active">Toutes</div>
+            <div class="filter-pill">⚠️ Alertes</div>
+            <div class="filter-pill">✓ Conformes</div>
+          </div>
+        </div>
+        <div class="ppt-copro-grid">
+          <div class="ppt-copro-card" onclick="openPPT('Résidence du Parc','24 lots · Lyon 6e')">
+            <div class="pcc-header"><div><div class="copro-name">Résidence du Parc</div><div class="copro-meta">24 lots · Lyon 6e</div></div><span class="status-badge sb-ok">✓ PPT à jour</span></div>
+            <div class="pcc-stats"><div class="pcc-stat"><div class="pcc-stat-val c-blue">7</div><div class="pcc-stat-lbl">Travaux</div></div><div class="pcc-stat"><div class="pcc-stat-val c-purple">2</div><div class="pcc-stat-lbl">Votés</div></div><div class="pcc-stat"><div class="pcc-stat-val c-orange">5</div><div class="pcc-stat-lbl">Prévus</div></div></div>
+            <div class="pcc-budget"><span>Budget estimé</span><span class="pcc-budget-val">680 000 €</span></div>
+            <div class="pcc-footer"><button class="btn-sm btn-blue">Voir le PPT →</button></div>
+          </div>
+          <div class="ppt-copro-card" onclick="openPPT('Le Clos Fleuri','18 lots · Lyon 3e')">
+            <div class="pcc-header"><div><div class="copro-name">Le Clos Fleuri</div><div class="copro-meta">18 lots · Lyon 3e</div></div><span class="status-badge sb-ok">✓ PPT à jour</span></div>
+            <div class="pcc-stats"><div class="pcc-stat"><div class="pcc-stat-val c-blue">4</div><div class="pcc-stat-lbl">Travaux</div></div><div class="pcc-stat"><div class="pcc-stat-val c-purple">1</div><div class="pcc-stat-lbl">Voté</div></div><div class="pcc-stat"><div class="pcc-stat-val c-orange">3</div><div class="pcc-stat-lbl">Prévus</div></div></div>
+            <div class="pcc-budget"><span>Budget estimé</span><span class="pcc-budget-val">290 000 €</span></div>
+            <div class="pcc-footer"><button class="btn-sm btn-blue">Voir le PPT →</button></div>
+          </div>
+          <div class="ppt-copro-card" onclick="openPPT('Tour Bellevue','42 lots · Villeurbanne')" style="border-color:rgba(245,158,11,0.2)">
+            <div class="pcc-header"><div><div class="copro-name">Tour Bellevue</div><div class="copro-meta">42 lots · Villeurbanne</div></div><span class="status-badge sb-warn">⚠️ À mettre à jour</span></div>
+            <div class="pcc-stats"><div class="pcc-stat"><div class="pcc-stat-val c-blue">12</div><div class="pcc-stat-lbl">Travaux</div></div><div class="pcc-stat"><div class="pcc-stat-val c-purple">3</div><div class="pcc-stat-lbl">Votés</div></div><div class="pcc-stat"><div class="pcc-stat-val c-orange">9</div><div class="pcc-stat-lbl">Prévus</div></div></div>
+            <div class="pcc-budget"><span>Budget estimé</span><span class="pcc-budget-val">1 450 000 €</span></div>
+            <div class="pcc-footer"><button class="btn-sm btn-blue">Voir le PPT →</button></div>
+          </div>
+          <div class="ppt-copro-card" onclick="openPPT('Les Acacias','12 lots · Lyon 8e')" style="border-color:rgba(239,68,68,0.2)">
+            <div class="pcc-header"><div><div class="copro-name">Les Acacias</div><div class="copro-meta">12 lots · Lyon 8e</div></div><span class="status-badge sb-late">✗ PPT manquant</span></div>
+            <div class="pcc-stats"><div class="pcc-stat"><div class="pcc-stat-val c-red">0</div><div class="pcc-stat-lbl">Travaux</div></div><div class="pcc-stat"><div class="pcc-stat-val c-red">0</div><div class="pcc-stat-lbl">Votés</div></div><div class="pcc-stat"><div class="pcc-stat-val c-red">0</div><div class="pcc-stat-lbl">Prévus</div></div></div>
+            <div class="pcc-budget"><span style="color:#f87171">Obligation légale non remplie</span><span class="pcc-budget-val c-red">—</span></div>
+            <div class="pcc-footer"><button class="btn-sm btn-green">+ Créer le PPT</button></div>
+          </div>
+          <div class="ppt-copro-card" onclick="openPPT('Villa Montana','8 lots · Caluire')">
+            <div class="pcc-header"><div><div class="copro-name">Villa Montana</div><div class="copro-meta">8 lots · Caluire</div></div><span class="status-badge sb-ok">✓ PPT à jour</span></div>
+            <div class="pcc-stats"><div class="pcc-stat"><div class="pcc-stat-val c-blue">3</div><div class="pcc-stat-lbl">Travaux</div></div><div class="pcc-stat"><div class="pcc-stat-val c-purple">0</div><div class="pcc-stat-lbl">Votés</div></div><div class="pcc-stat"><div class="pcc-stat-val c-orange">3</div><div class="pcc-stat-lbl">Prévus</div></div></div>
+            <div class="pcc-budget"><span>Budget estimé</span><span class="pcc-budget-val">145 000 €</span></div>
+            <div class="pcc-footer"><button class="btn-sm btn-blue">Voir le PPT →</button></div>
+          </div>
+          <div class="ppt-copro-card" onclick="openPPT('Résidence Saint-Exupéry','31 lots · Décines')">
+            <div class="pcc-header"><div><div class="copro-name">Résidence Saint-Exupéry</div><div class="copro-meta">31 lots · Décines</div></div><span class="status-badge sb-ok">✓ PPT à jour</span></div>
+            <div class="pcc-stats"><div class="pcc-stat"><div class="pcc-stat-val c-blue">9</div><div class="pcc-stat-lbl">Travaux</div></div><div class="pcc-stat"><div class="pcc-stat-val c-purple">4</div><div class="pcc-stat-lbl">Votés</div></div><div class="pcc-stat"><div class="pcc-stat-val c-orange">5</div><div class="pcc-stat-lbl">Prévus</div></div></div>
+            <div class="pcc-budget"><span>Budget estimé</span><span class="pcc-budget-val">920 000 €</span></div>
+            <div class="pcc-footer"><button class="btn-sm btn-blue">Voir le PPT →</button></div>
+          </div>
+        </div>
+      </div>
+      <div id="ppt-detail" style="display:none">
+        <div class="breadcrumb"><span class="bc-link" onclick="backPPT()">← Toutes mes copropriétés</span><span class="bc-sep">/</span><span class="bc-cur" id="ppt-bc">Résidence du Parc</span><span class="bc-sep">/</span><span class="bc-cur">PPT</span></div>
+        <div class="kpi-strip">
+          <div class="kpi"><div class="kpi-label">Budget 10 ans</div><div class="kpi-val c-blue">680 000 €</div><div class="kpi-sub" id="ppt-kpi-name">Résidence du Parc</div></div>
+          <div class="kpi"><div class="kpi-label">Travaux votés</div><div class="kpi-val c-green">2</div><div class="kpi-sub">197 000 € engagés</div></div>
+          <div class="kpi"><div class="kpi-label">À planifier</div><div class="kpi-val c-orange">5</div><div class="kpi-sub">483 000 € estimés</div></div>
+          <div class="kpi"><div class="kpi-label">Conformité PPT</div><div class="kpi-val c-green">✓ OK</div><div class="kpi-sub">Mis à jour 10/04/2026</div></div>
+        </div>
+        <div class="year-bar">
+          <span class="year-label">Année</span>
+          <div class="year-pill active" onclick="selY(this,'2026','4 travaux · 280 000 €')">2026</div>
+          <div class="year-pill has-data" onclick="selY(this,'2027','3 travaux · 195 000 €')">2027</div>
+          <div class="year-pill has-data" onclick="selY(this,'2028','2 travaux · 340 000 €')">2028</div>
+          <div class="year-pill" onclick="selY(this,'2029','0 travaux')">2029</div>
+          <div class="year-pill" onclick="selY(this,'2030','0 travaux')">2030</div>
+          <div class="year-pill has-data" onclick="selY(this,'2031','1 travail · 430 000 €')">2031</div>
+          <div class="year-pill" onclick="selY(this,'2032','0 travaux')">2032</div>
+          <div class="year-pill" onclick="selY(this,'2033','0 travaux')">2033</div>
+          <div class="year-pill" onclick="selY(this,'2034','0 travaux')">2034</div>
+          <div class="year-pill" onclick="selY(this,'2035','0 travaux')">2035</div>
+        </div>
+        <div class="kanban-wrap">
+          <div class="kanban-lbl" id="kbn-lbl">Travaux 2026 — 4 travaux · 280 000 €</div>
+          <div class="kanban">
+            <div class="kcol"><div class="kcol-head"><div class="kdot dk-grey"></div><div class="kcol-name">À l'étude</div><div class="kcol-cnt">1</div></div><div class="kcard"><div class="kcard-title">Étanchéité toiture bât. A</div><div class="kcard-tag tag-r">Toiture</div><div class="kcard-amt">45 000 €</div><div class="kcard-meta">Priorité haute</div></div></div>
+            <div class="kcol"><div class="kcol-head"><div class="kdot dk-blue"></div><div class="kcol-name">Prévu</div><div class="kcol-cnt">2</div></div><div class="kcard"><div class="kcard-title">Ravalement façade</div><div class="kcard-tag tag-f">Façade</div><div class="kcard-amt">120 000 €</div><div class="kcard-meta">T3 2026</div></div><div class="kcard"><div class="kcard-title">Remplacement chaudière</div><div class="kcard-tag tag-h">Chauffage</div><div class="kcard-amt">38 000 €</div><div class="kcard-meta">T4 2026</div></div></div>
+            <div class="kcol"><div class="kcol-head"><div class="kdot dk-purple"></div><div class="kcol-name">Voté en AG</div><div class="kcol-cnt">1</div></div><div class="kcard"><div class="kcard-title">Normes électriques</div><div class="kcard-tag tag-e">Électricité</div><div class="kcard-amt">77 000 €</div><div class="kcard-meta">AG 15/03/2026 · Art. 25</div></div></div>
+            <div class="kcol"><div class="kcol-head"><div class="kdot dk-yellow"></div><div class="kcol-name">En cours</div><div class="kcol-cnt">0</div></div><div class="kempty">Aucun</div></div>
+            <div class="kcol"><div class="kcol-head"><div class="kdot dk-green"></div><div class="kcol-name">Terminé</div><div class="kcol-cnt">0</div></div><div class="kempty">Aucun</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ DPE PANEL ══════════ -->
+    <div class="panel active" id="panel-dpe">
+
+      <!-- VUE LISTE gestionnaire -->
+      <div id="dpe-list">
+        <div class="kpi-strip">
+          <div class="kpi"><div class="kpi-label">Copropriétés suivies</div><div class="kpi-val c-blue">6</div><div class="kpi-sub">DPE collectif obligatoire</div></div>
+          <div class="kpi"><div class="kpi-label">DPE valides</div><div class="kpi-val c-green">4</div><div class="kpi-sub">Moins de 10 ans</div></div>
+          <div class="kpi"><div class="kpi-label">À renouveler</div><div class="kpi-val c-orange">1</div><div class="kpi-sub">Expire dans 6 mois</div></div>
+          <div class="kpi"><div class="kpi-label">En retard</div><div class="kpi-val c-red">1</div><div class="kpi-sub">Obligation non remplie</div></div>
+        </div>
+        <div class="alert-top">⚠️ <span><strong>Alerte conformité :</strong> "Les Acacias" n'a pas de DPE collectif enregistré. Obligation légale depuis le 01/01/2026.</span></div>
+        <div class="section-hd" style="margin-top:8px">
+          <div class="section-title">Mes copropriétés — cliquer pour voir le DPE détaillé</div>
+          <div class="search-filter">
+            <input class="search-box" placeholder="🔍 Rechercher…">
+            <div class="filter-pill active">Toutes</div>
+            <div class="filter-pill">⚠️ Alertes</div>
+            <div class="filter-pill">✓ Valides</div>
+          </div>
+        </div>
+        <div class="copro-grid">
+          <div class="copro-card" onclick="openDPE('Résidence du Parc','24 lots · Lyon 6e','C','15/06/2023','15/06/2033','ok','30')">
+            <div class="copro-card-header"><div><div class="copro-name">Résidence du Parc</div><div class="copro-meta">24 lots · Lyon 6e</div></div><span class="status-badge sb-ok">✓ Valide</span></div>
+            <div class="copro-row"><div class="copro-row-lbl">Classe énergétique</div><div class="dpe-cls dc-C">C</div></div>
+            <div class="copro-row"><div class="copro-row-lbl">Expiration</div><div class="copro-row-val">15/06/2033</div></div>
+            <div class="dpe-prog"><div class="dp-fill fill-g" style="width:30%"></div></div>
+            <div class="copro-footer"><button class="btn-sm btn-blue">Voir le DPE →</button></div>
+          </div>
+          <div class="copro-card" onclick="openDPE('Le Clos Fleuri','18 lots · Lyon 3e','D','03/02/2024','03/02/2034','ok','20')">
+            <div class="copro-card-header"><div><div class="copro-name">Le Clos Fleuri</div><div class="copro-meta">18 lots · Lyon 3e</div></div><span class="status-badge sb-ok">✓ Valide</span></div>
+            <div class="copro-row"><div class="copro-row-lbl">Classe énergétique</div><div class="dpe-cls dc-D">D</div></div>
+            <div class="copro-row"><div class="copro-row-lbl">Expiration</div><div class="copro-row-val">03/02/2034</div></div>
+            <div class="dpe-prog"><div class="dp-fill fill-g" style="width:20%"></div></div>
+            <div class="copro-footer"><button class="btn-sm btn-blue">Voir le DPE →</button></div>
+          </div>
+          <div class="copro-card" onclick="openDPE('Tour Bellevue','42 lots · Villeurbanne','E','12/10/2016','12/10/2026','warn','90')">
+            <div class="copro-card-header"><div><div class="copro-name">Tour Bellevue</div><div class="copro-meta">42 lots · Villeurbanne</div></div><span class="status-badge sb-warn">⏳ Expire bientôt</span></div>
+            <div class="copro-row"><div class="copro-row-lbl">Classe énergétique</div><div class="dpe-cls dc-E">E</div></div>
+            <div class="copro-row"><div class="copro-row-lbl">Expiration</div><div class="copro-row-val" style="color:#fbbf24">12/10/2026</div></div>
+            <div class="dpe-prog"><div class="dp-fill fill-y" style="width:90%"></div></div>
+            <div class="copro-footer"><button class="btn-sm btn-orange">⚠️ Renouveler →</button></div>
+          </div>
+          <div class="copro-card danger" onclick="openDPE('Les Acacias','12 lots · Lyon 8e','?','—','—','late','0')">
+            <div class="copro-card-header"><div><div class="copro-name">Les Acacias</div><div class="copro-meta">12 lots · Lyon 8e</div></div><span class="status-badge sb-late">✗ Manquant</span></div>
+            <div class="copro-row"><div class="copro-row-lbl">Classe</div><div class="copro-row-val c-red">Non renseigné</div></div>
+            <div class="copro-row"><div class="copro-row-lbl">Obligation depuis</div><div class="copro-row-val c-red">01/01/2026</div></div>
+            <div class="copro-footer"><button class="btn-sm btn-green">+ Enregistrer →</button></div>
+          </div>
+          <div class="copro-card" onclick="openDPE('Villa Montana','8 lots · Caluire','B','28/05/2025','28/05/2035','ok','10')">
+            <div class="copro-card-header"><div><div class="copro-name">Villa Montana</div><div class="copro-meta">8 lots · Caluire</div></div><span class="status-badge sb-ok">✓ Valide</span></div>
+            <div class="copro-row"><div class="copro-row-lbl">Classe énergétique</div><div class="dpe-cls dc-B">B</div></div>
+            <div class="copro-row"><div class="copro-row-lbl">Expiration</div><div class="copro-row-val">28/05/2035</div></div>
+            <div class="dpe-prog"><div class="dp-fill fill-g" style="width:10%"></div></div>
+            <div class="copro-footer"><button class="btn-sm btn-blue">Voir le DPE →</button></div>
+          </div>
+          <div class="copro-card" onclick="openDPE('Résidence Saint-Exupéry','31 lots · Décines','D','07/09/2022','07/09/2032','ok','45')">
+            <div class="copro-card-header"><div><div class="copro-name">Résidence Saint-Exupéry</div><div class="copro-meta">31 lots · Décines</div></div><span class="status-badge sb-ok">✓ Valide</span></div>
+            <div class="copro-row"><div class="copro-row-lbl">Classe énergétique</div><div class="dpe-cls dc-D">D</div></div>
+            <div class="copro-row"><div class="copro-row-lbl">Expiration</div><div class="copro-row-val">07/09/2032</div></div>
+            <div class="dpe-prog"><div class="dp-fill fill-g" style="width:45%"></div></div>
+            <div class="copro-footer"><button class="btn-sm btn-blue">Voir le DPE →</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VUE DÉTAIL copropriété -->
+      <div id="dpe-detail" style="display:none">
+        <div class="breadcrumb"><span class="bc-link" onclick="backDPE()">← Toutes mes copropriétés</span><span class="bc-sep">/</span><span class="bc-cur" id="dpe-bc">Résidence du Parc</span><span class="bc-sep">/</span><span class="bc-cur">DPE Collectif</span></div>
+
+        <div class="dpe-detail-grid">
+          <!-- Fiche DPE gauche -->
+          <div class="dpe-fiche">
+            <div class="dpe-fiche-header">
+              <div class="dpe-fiche-copro" id="dfe-name">Résidence du Parc</div>
+              <div class="dpe-fiche-lots" id="dfe-lots">24 lots · Lyon 6e</div>
+            </div>
+            <div class="dpe-class-big dcb-C" id="dfe-cls">C</div>
+            <div class="dpe-scale">
+              <div class="dpe-scale-label">Échelle de performance</div>
+              <div class="scale-bar">
+                <div class="scale-item sc-A">A</div>
+                <div class="scale-item sc-B">B</div>
+                <div class="scale-item sc-C" id="scale-active">C</div>
+                <div class="scale-item sc-D">D</div>
+                <div class="scale-item sc-E">E</div>
+                <div class="scale-item sc-F">F</div>
+                <div class="scale-item sc-G">G</div>
+              </div>
+            </div>
+            <div class="dpe-fields">
+              <div class="dpe-field"><div class="df-lbl">Date du DPE</div><div class="df-val" id="dfe-date">15/06/2023</div></div>
+              <div class="dpe-field"><div class="df-lbl">Expiration</div><div class="df-val" id="dfe-exp">15/06/2033</div></div>
+              <div class="dpe-field"><div class="df-lbl">Diagnostiqueur</div><div class="df-val">Eco-Diag Lyon SAS</div></div>
+              <div class="dpe-field"><div class="df-lbl">N° ADEME</div><div class="df-val mono">2612E0837142A</div></div>
+              <div class="dpe-field"><div class="df-lbl">Conso. énergie</div><div class="df-val">145 kWh/m²/an</div></div>
+              <div class="dpe-field"><div class="df-lbl">Émissions GES</div><div class="df-val">32 kg CO₂/m²/an</div></div>
+            </div>
+            <div class="dpe-actions">
+              <button class="dpe-action-btn dab-blue">📄 Télécharger le DPE PDF</button>
+              <button class="dpe-action-btn dab-orange">🔄 Planifier le renouvellement</button>
+              <button class="dpe-action-btn dab-ghost">✏️ Modifier les informations</button>
+            </div>
+          </div>
+
+          <!-- Colonne droite -->
+          <div class="dpe-right">
+
+            <div class="alert-banner ab-info">
+              ℹ️ <span>Ce DPE est valide jusqu'en <strong>juin 2033</strong>. Aucune action requise à ce stade. Pensez à planifier le renouvellement à partir de <strong>2032</strong>.</span>
+            </div>
+
+            <!-- Travaux recommandés -->
+            <div class="card-section">
+              <div class="cs-header">
+                <div><div class="cs-title">Travaux recommandés suite au DPE</div><div class="cs-subtitle">Issus du rapport du diagnostiqueur · Lien avec le PPT</div></div>
+                <button class="btn-sm btn-blue">+ Ajouter au PPT</button>
+              </div>
+              <div class="travaux-list">
+                <div class="travail-item ti-orange">
+                  <div class="ti-content"><div class="ti-title">Isolation combles perdus (R≥7)</div><div class="ti-meta">Recommandé par diagnostiqueur · Gain estimé : -20 kWh/m²/an</div></div>
+                  <span class="ti-badge tib-ppt">Dans le PPT</span>
+                  <div class="ti-amt">28 000 €</div>
+                </div>
+                <div class="travail-item ti-blue">
+                  <div class="ti-content"><div class="ti-title">Remplacement menuiseries bât. B</div><div class="ti-meta">Double vitrage — Recommandé priorité 2</div></div>
+                  <span class="ti-badge tib-reco">À planifier</span>
+                  <div class="ti-amt">45 000 €</div>
+                </div>
+                <div class="travail-item ti-green">
+                  <div class="ti-content"><div class="ti-title">Régulation chauffage (robinets TRV)</div><div class="ti-meta">Réalisé en mars 2025</div></div>
+                  <span class="ti-badge tib-done">✓ Réalisé</span>
+                  <div class="ti-amt">8 200 €</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Historique DPE -->
+            <div class="card-section">
+              <div class="cs-header"><div><div class="cs-title">Historique des DPE</div></div></div>
+              <div class="history-list">
+                <div class="hist-item">
+                  <div class="hist-dot current"></div>
+                  <div class="hist-content"><div class="hist-title current">DPE Collectif 2023 — en cours</div><div class="hist-meta">Eco-Diag Lyon · valide jusqu'au 15/06/2033</div></div>
+                  <div class="hist-cls c-blue">C</div>
+                </div>
+                <div class="hist-item">
+                  <div class="hist-dot"></div>
+                  <div class="hist-content"><div class="hist-title">DPE Collectif 2013 — expiré</div><div class="hist-meta">Cabinet Thermique Rhône · expiré le 15/06/2023</div></div>
+                  <div class="hist-cls" style="color:#475569">D</div>
+                </div>
+              </div>
+              <!-- Lien doc PDF -->
+              <div class="doc-item">
+                <div class="doc-icon">📕</div>
+                <div><div class="doc-name">DPE_Collectif_Résidence_du_Parc_2023.pdf</div><div class="doc-meta">Ajouté le 18/06/2023 · 2,4 Mo</div></div>
+                <button class="btn-sm btn-blue" style="margin-left:auto">⬇ Télécharger</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ FACTUR-X PANEL ══════════ -->
+    <div class="panel" id="panel-fx">
+      <div class="kpi-strip">
+        <div class="kpi"><div class="kpi-label">Statut conformité</div><div class="kpi-val c-green">✓ Prêt</div><div class="kpi-sub">Opérationnel sept. 2026</div></div>
+        <div class="kpi"><div class="kpi-label">Factures Factur-X</div><div class="kpi-val c-blue">2</div><div class="kpi-sub">générées ce mois</div></div>
+        <div class="kpi"><div class="kpi-label">Format supporté</div><div class="kpi-val" style="font-size:14px;color:#a78bfa;font-weight:700">Factur-X / UBL</div><div class="kpi-sub">Profil EN 16931</div></div>
+        <div class="kpi"><div class="kpi-label">Obligation légale</div><div class="kpi-val c-orange">Sept. 2026</div><div class="kpi-sub">Réforme e-invoicing FR</div></div>
+      </div>
+      <div class="fx-info"><strong>Qu'est-ce que Factur-X ?</strong> À partir de septembre 2026, chaque facture émise doit être au format hybride <strong>PDF + XML structuré</strong>. CoProFlex génère ce format automatiquement pour chaque facture validée.</div>
+      <div class="table-wrap" style="margin-top:18px">
+        <div class="table-lbl">Factures récentes — Statut Factur-X</div>
+        <table class="t">
+          <thead><tr><th>Facture</th><th>Prestataire</th><th>Copropriété</th><th>Montant HT</th><th>Statut</th><th>Factur-X</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">FAC-2026-0042</td><td>Plomberie Martin</td><td>Résidence du Parc</td><td class="mono">3 450,00 €</td><td><span class="fxb fxb-ok">Validée</span></td><td><span class="fxb fxb-ok">✓ Généré</span></td><td><button class="btn-sm btn-blue">⬇ Télécharger</button></td></tr>
+            <tr><td class="mono">FAC-2026-0041</td><td>Électricité Dupont</td><td>Tour Bellevue</td><td class="mono">1 820,00 €</td><td><span class="fxb fxb-ok">Validée</span></td><td><span class="fxb fxb-ok">✓ Généré</span></td><td><button class="btn-sm btn-blue">⬇ Télécharger</button></td></tr>
+            <tr><td class="mono">FAC-2026-0040</td><td>Ascenseurs Otis</td><td>Le Clos Fleuri</td><td class="mono">12 300,00 €</td><td><span class="fxb fxb-pend">À valider</span></td><td><span class="fxb fxb-draft">En attente</span></td><td><button class="btn-sm btn-green">⚡ Valider</button></td></tr>
+            <tr><td class="mono">FAC-2026-0039</td><td>Jardins & Co</td><td>Villa Montana</td><td class="mono">680,00 €</td><td><span class="fxb fxb-ok">Payée</span></td><td><span class="fxb fxb-ok">✓ Archivé</span></td><td><button class="btn-sm btn-blue">⬇ Télécharger</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const topbars = {
+  ppt: { title:'Plan Pluriannuel de Travaux', sub:'Vue globale gestionnaire — 6 copropriétés · Loi Climat et Résilience', cta:'+ Ajouter un travail' },
+  dpe: { title:'DPE Collectif', sub:'Vue globale gestionnaire — statut des diagnostics sur toutes vos copropriétés', cta:'+ Enregistrer un DPE' },
+  fx:  { title:'Factur-X — E-invoicing', sub:'Vue globale gestionnaire — conformité facturation électronique sept. 2026', cta:'📤 Exporter en masse' }
+};
+function goTab(key, sideEl) {
+  ['ppt','dpe','fx'].forEach(k => { document.getElementById('mtab-'+k).classList.remove('active'); document.getElementById('panel-'+k).classList.remove('active'); });
+  document.getElementById('mtab-'+key).classList.add('active');
+  document.getElementById('panel-'+key).classList.add('active');
+  if (sideEl) { document.querySelectorAll('.nav-sub-item').forEach(x => x.classList.remove('active')); sideEl.classList.add('active'); }
+  const d = topbars[key];
+  document.getElementById('tb-title').textContent = d.title;
+  document.getElementById('tb-sub').textContent = d.sub;
+  document.getElementById('tb-cta').textContent = d.cta;
+  if (key==='ppt') { document.getElementById('ppt-list').style.display='block'; document.getElementById('ppt-detail').style.display='none'; }
+  if (key==='dpe') { document.getElementById('dpe-list').style.display='block'; document.getElementById('dpe-detail').style.display='none'; }
+}
+// PPT
+function openPPT(name, meta) {
+  document.getElementById('ppt-list').style.display='none'; document.getElementById('ppt-detail').style.display='block';
+  document.getElementById('ppt-bc').textContent=name; document.getElementById('ppt-kpi-name').textContent=name+' · '+meta;
+  document.getElementById('tb-sub').textContent=name+' — PPT détaillé sur 10 ans';
+}
+function backPPT() { document.getElementById('ppt-list').style.display='block'; document.getElementById('ppt-detail').style.display='none'; document.getElementById('tb-sub').textContent=topbars.ppt.sub; }
+function selY(el,year,label) { document.querySelectorAll('.year-pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); document.getElementById('kbn-lbl').textContent='Travaux '+year+' — '+label; }
+// DPE
+function openDPE(name, lots, cls, dateIn, dateExp, status, pct) {
+  document.getElementById('dpe-list').style.display='none'; document.getElementById('dpe-detail').style.display='block';
+  document.getElementById('dpe-bc').textContent=name;
+  document.getElementById('dfe-name').textContent=name; document.getElementById('dfe-lots').textContent=lots;
+  document.getElementById('dfe-cls').textContent=cls; document.getElementById('dfe-date').textContent=dateIn; document.getElementById('dfe-exp').textContent=dateExp;
+  const tb = document.getElementById('tb-sub'); tb.textContent=name+' — DPE Collectif · Détail';
+  // style classe
+  const clsEl = document.getElementById('dfe-cls');
+  clsEl.className='dpe-class-big';
+  if(cls==='C') clsEl.classList.add('dcb-C');
+  else if(cls==='E') clsEl.classList.add('dcb-E');
+  else clsEl.style.cssText='display:flex;align-items:center;justify-content:center;margin:20px;height:100px;border-radius:12px;font-size:56px;font-weight:900;background:rgba(148,163,184,0.1);color:#64748b';
+}
+function backDPE() { document.getElementById('dpe-list').style.display='block'; document.getElementById('dpe-detail').style.display='none'; document.getElementById('tb-sub').textContent=topbars.dpe.sub; }
+</script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette — Module Conformité 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; font-size: 13px; }
+
+  .preview-label {
+    text-align: center;
+    padding: 16px;
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+  }
+
+  .app-shell {
+    display: flex;
+    height: calc(100vh - 48px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    background: #131620;
+    border-right: 1px solid rgba(148,163,184,0.08);
+    padding: 16px 8px;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 8px 12px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: rgba(148,163,184,0.06); color: #e2e8f0; }
+  .nav-item.active { background: rgba(59,130,246,0.12); color: #60a5fa; }
+  .nav-item .icon { font-size: 14px; width: 18px; text-align: center; }
+  .nav-sub {
+    margin-left: 28px;
+    margin-bottom: 8px;
+  }
+  .nav-sub-item {
+    padding: 5px 12px;
+    border-radius: 5px;
+    color: #64748b;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 1px;
+  }
+  .nav-sub-item:hover { color: #94a3b8; background: rgba(148,163,184,0.04); }
+  .nav-sub-item.active { color: #60a5fa; background: rgba(59,130,246,0.08); }
+  .nav-divider { height: 1px; background: rgba(148,163,184,0.06); margin: 8px 12px; }
+
+  /* NOUVEAU badge */
+  .badge-new {
+    background: rgba(34,197,94,0.15);
+    color: #4ade80;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    background: #0f1117;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: #161822;
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar-left h1 { font-size: 20px; font-weight: 700; color: #e2e8f0; }
+  .topbar-left p { font-size: 13px; color: #64748b; margin-top: 2px; }
+  .topbar-right { display: flex; gap: 8px; align-items: center; }
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-ghost {
+    background: rgba(148,163,184,0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(148,163,184,0.08);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 16px 24px 0;
+    border-bottom: 1px solid rgba(148,163,184,0.08);
+  }
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+  .tab:hover:not(.active) { color: #94a3b8; }
+
+  /* KPI STRIP */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 20px 24px;
+  }
+  .kpi-card {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .kpi-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: #64748b; margin-top: 4px; }
+  .text-blue { color: #60a5fa; }
+  .text-green { color: #4ade80; }
+  .text-orange { color: #fbbf24; }
+  .text-red { color: #f87171; }
+
+  /* YEAR SELECTOR */
+  .year-nav {
+    padding: 0 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .year-nav-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .year-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(148,163,184,0.06);
+    color: #64748b;
+    cursor: pointer;
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .year-pill.active {
+    background: rgba(59,130,246,0.15);
+    color: #60a5fa;
+    border-color: rgba(59,130,246,0.3);
+  }
+  .year-pill.has-items { color: #94a3b8; }
+
+  /* KANBAN */
+  .kanban-area { padding: 0 24px 24px; }
+  .kanban-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+  .kanban-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .kanban-col {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .kanban-col-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+  }
+  .kanban-col-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-study { background: #94a3b8; }
+  .dot-planned { background: #60a5fa; }
+  .dot-voted { background: #a78bfa; }
+  .dot-ongoing { background: #fbbf24; }
+  .dot-done { background: #4ade80; }
+  .kanban-col-title { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kanban-count {
+    margin-left: auto;
+    background: rgba(148,163,184,0.1);
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+  .kanban-card {
+    background: #131620;
+    border: 1px solid rgba(148,163,184,0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .kanban-card:hover { border-color: rgba(59,130,246,0.3); }
+  .kanban-card-title { font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; }
+  .kanban-card-type {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .type-toiture { background: rgba(251,191,36,0.1); color: #fbbf24; }
+  .type-facade { background: rgba(96,165,250,0.1); color: #60a5fa; }
+  .type-chauffage { background: rgba(248,113,113,0.1); color: #f87171; }
+  .type-elec { background: rgba(167,139,250,0.1); color: #a78bfa; }
+  .type-autre { background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .kanban-card-amount { font-size: 11px; color: #60a5fa; font-weight: 600; font-family: 'SF Mono', monospace; }
+  .kanban-card-year { font-size: 10px; color: #64748b; margin-top: 4px; }
+
+  /* EMPTY COL */
+  .kanban-empty {
+    border: 1px dashed rgba(148,163,184,0.1);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    color: #475569;
+    font-size: 11px;
+  }
+
+  /* TIMELINE DRILL-DOWN (visible quand on clique sur une année) */
+  .timeline-panel {
+    background: #1a1d2e;
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 0 24px 24px;
+  }
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .timeline-year-badge {
+    background: rgba(59,130,246,0.15);
+    color: #60a5fa;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 8px;
+  }
+  .timeline-title { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+  .timeline-subtitle { font-size: 12px; color: #64748b; }
+  .timeline-list { display: flex; flex-direction: column; gap: 10px; }
+  .timeline-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: #131620;
+    border-radius: 8px;
+    border-left: 3px solid;
+  }
+  .tl-voted { border-left-color: #a78bfa; }
+  .tl-planned { border-left-color: #60a5fa; }
+  .timeline-item-left { flex: 1; }
+  .timeline-item-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .timeline-item-meta { font-size: 11px; color: #64748b; margin-top: 3px; }
+  .timeline-item-amount { font-size: 14px; font-weight: 700; color: #60a5fa; font-family: 'SF Mono', monospace; white-space: nowrap; }
+  .timeline-item-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .status-voted { background: rgba(167,139,250,0.1); color: #a78bfa; }
+  .status-planned { background: rgba(96,165,250,0.1); color: #60a5fa; }
+</style>
+</head>
+<body>
+
+<div class="preview-label">🎨 Maquette — Module Conformité 2026 · CoProFlex · Cliquer = sélectionner</div>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">CoProFlex</div>
+
+    <div class="nav-item"><span class="icon">🏠</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">👥</span> AG</div>
+    <div class="nav-item"><span class="icon">🏢</span> Copropriété</div>
+    <div class="nav-item"><span class="icon">💰</span> Finance</div>
+    <div class="nav-item"><span class="icon">🔧</span> Maintenance</div>
+    <div class="nav-divider"></div>
+
+    <!-- NOUVEAU MODULE -->
+    <div class="nav-item active"><span class="icon">✅</span> Conformité 2026 <span class="badge-new">Nouveau</span></div>
+    <div class="nav-sub">
+      <div class="nav-sub-item active">PPT — Plan de travaux</div>
+      <div class="nav-sub-item">DPE Collectif</div>
+      <div class="nav-sub-item">Factur-X</div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span class="icon">📁</span> Documents</div>
+    <div class="nav-item"><span class="icon">💬</span> Communication</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Plan Pluriannuel de Travaux</h1>
+        <p>Planification des travaux sur 10 ans · Loi Climat et Résilience 2025-2026</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-ghost">📊 Rapport PDF</button>
+        <button class="btn-primary">+ Ajouter un travail</button>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active">Vue Kanban (10 ans)</div>
+      <div class="tab">Timeline</div>
+      <div class="tab">Tableau</div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Budget total estimé</div>
+        <div class="kpi-value text-blue">1 245 000 €</div>
+        <div class="kpi-sub">sur 10 ans</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Travaux votés</div>
+        <div class="kpi-value text-green">3</div>
+        <div class="kpi-sub">420 000 € engagés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">À planifier</div>
+        <div class="kpi-value text-orange">7</div>
+        <div class="kpi-sub">825 000 € estimés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Conformité PPT</div>
+        <div class="kpi-value text-green">✓ OK</div>
+        <div class="kpi-sub">Mis à jour le 12/04/2026</div>
+      </div>
+    </div>
+
+    <!-- YEAR SELECTOR -->
+    <div class="year-nav">
+      <span class="year-nav-label">Année</span>
+      <div class="year-pill active">2026</div>
+      <div class="year-pill has-items">2027</div>
+      <div class="year-pill has-items">2028</div>
+      <div class="year-pill">2029</div>
+      <div class="year-pill">2030</div>
+      <div class="year-pill has-items">2031</div>
+      <div class="year-pill">2032</div>
+      <div class="year-pill">2033</div>
+      <div class="year-pill">2034</div>
+      <div class="year-pill">2035</div>
+    </div>
+
+    <!-- KANBAN 2026 -->
+    <div class="kanban-area">
+      <div class="kanban-section-label">Travaux 2026 — 4 travaux · 280 000 €</div>
+      <div class="kanban-grid">
+
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <div class="kanban-col-dot dot-study"></div>
+            <div class="kanban-col-title">À l'étude</div>
+            <div class="kanban-count">1</div>
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-title">Étanchéité toiture bât. A</div>
+            <div class="kanban-card-type type-toiture">Toiture</div>
+            <div class="kanban-card-amount">45 000 €</div>
+            <div class="kanban-card-year">Issu PPT · Priorité haute</div>
+          </div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <div class="kanban-col-dot dot-planned"></div>
+            <div class="kanban-col-title">Prévu</div>
+            <div class="kanban-count">2</div>
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-title">Ravalement façade principale</div>
+            <div class="kanban-card-type type-facade">Façade</div>
+            <div class="kanban-card-amount">120 000 €</div>
+            <div class="kanban-card-year">T3 2026</div>
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-title">Remplacement chaudière</div>
+            <div class="kanban-card-type type-chauffage">Chauffage</div>
+            <div class="kanban-card-amount">38 000 €</div>
+            <div class="kanban-card-year">T4 2026</div>
+          </div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <div class="kanban-col-dot dot-voted"></div>
+            <div class="kanban-col-title">Voté en AG</div>
+            <div class="kanban-count">1</div>
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-title">Mise aux normes électriques</div>
+            <div class="kanban-card-type type-elec">Électricité</div>
+            <div class="kanban-card-amount">77 000 €</div>
+            <div class="kanban-card-year">AG 15/03/2026 · Art. 25</div>
+          </div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <div class="kanban-col-dot dot-ongoing"></div>
+            <div class="kanban-col-title">En cours</div>
+            <div class="kanban-count">0</div>
+          </div>
+          <div class="kanban-empty">Aucun travail en cours</div>
+        </div>
+
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <div class="kanban-col-dot dot-done"></div>
+            <div class="kanban-col-title">Terminé</div>
+            <div class="kanban-count">0</div>
+          </div>
+          <div class="kanban-empty">Aucun travail terminé</div>
+        </div>
+
+      </div>
+
+      <!-- TIMELINE DRILL-DOWN (click sur une card) -->
+      <div class="kanban-section-label" style="margin-top:8px;">Détail sélectionné — Ravalement façade principale</div>
+      <div class="timeline-panel">
+        <div class="timeline-header">
+          <div class="timeline-year-badge">2026</div>
+          <div>
+            <div class="timeline-title">Ravalement façade principale</div>
+            <div class="timeline-subtitle">Façade · 120 000 € estimés · T3 2026 · Issu du PPT 2024</div>
+          </div>
+        </div>
+        <div class="timeline-list">
+          <div class="timeline-item tl-planned">
+            <div class="timeline-item-left">
+              <div class="timeline-item-title">Demande de devis prestataires</div>
+              <div class="timeline-item-meta">Prévu mai 2026 · 3 devis à obtenir</div>
+            </div>
+            <span class="timeline-item-status status-planned">Planifié</span>
+          </div>
+          <div class="timeline-item tl-planned">
+            <div class="timeline-item-left">
+              <div class="timeline-item-title">Vote en AG extraordinaire</div>
+              <div class="timeline-item-meta">Prévu juin 2026 · Article 25</div>
+            </div>
+            <span class="timeline-item-status status-planned">Planifié</span>
+          </div>
+          <div class="timeline-item tl-voted">
+            <div class="timeline-item-left">
+              <div class="timeline-item-title">Début des travaux</div>
+              <div class="timeline-item-meta">Estimé septembre 2026</div>
+            </div>
+            <div class="timeline-item-amount">120 000 €</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Simple nav interaction
+document.querySelectorAll('.nav-sub-item').forEach(el => {
+  el.onclick = () => {
+    document.querySelectorAll('.nav-sub-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+  };
+});
+document.querySelectorAll('.year-pill').forEach(el => {
+  el.onclick = () => {
+    document.querySelectorAll('.year-pill').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+  };
+});
+document.querySelectorAll('.tab').forEach(el => {
+  el.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+  };
+});
+</script>
+
+</body>
+</html>
