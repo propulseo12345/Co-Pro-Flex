@@ -6,8 +6,11 @@ export interface SearchableRoute {
     category: string;
 }
 
+// Routes canoniques alignées sur la navigation (src/lib/config/navigation.ts).
+// Ne PAS ajouter ici d'ancienne route doublon (invoices, bank-movements, budget-current,
+// unpaid, social, sales…) — elles sont redirigées dans next.config.ts.
 export const searchableRoutes: SearchableRoute[] = [
-    // Dashboard
+    // Principal
     {
         title: 'Tableau de bord',
         description: 'Vue d\'ensemble de la copropriété',
@@ -15,201 +18,117 @@ export const searchableRoutes: SearchableRoute[] = [
         keywords: ['dashboard', 'tableau', 'bord', 'accueil', 'home', 'vue', 'ensemble'],
         category: 'Principal'
     },
+
+    // Assemblées Générales
     {
-        title: 'Accueil',
-        description: 'Page d\'accueil',
-        path: '/',
-        keywords: ['accueil', 'home', 'début', 'start'],
-        category: 'Principal'
+        title: 'Tableau de bord AG',
+        description: 'Vue d\'ensemble des assemblées générales',
+        path: '/ag/dashboard',
+        keywords: ['assemblée', 'ag', 'dashboard', 'tableau', 'bord', 'réunion'],
+        category: 'Assemblées'
+    },
+    {
+        title: 'Nouvelle AG',
+        description: 'Créer une assemblée générale',
+        path: '/ag/new',
+        keywords: ['nouvelle', 'ag', 'assemblée', 'créer', 'convocation'],
+        category: 'Assemblées'
+    },
+    {
+        title: 'Bibliothèque des résolutions',
+        description: 'Modèles et résolutions personnalisées',
+        path: '/ag/resolutions',
+        keywords: ['résolution', 'résolutions', 'vote', 'décision', 'ag', 'bibliothèque', 'modèle'],
+        category: 'Assemblées'
+    },
+
+    // Copropriété
+    {
+        title: 'Copropriétaires',
+        description: 'Annuaire des copropriétaires',
+        path: '/coproprietaires',
+        keywords: ['copropriétaire', 'copropriétaires', 'propriétaire', 'annuaire', 'occupant'],
+        category: 'Copropriété'
+    },
+    {
+        title: 'Lots & Répartition',
+        description: 'Lots, tantièmes et clés de répartition',
+        path: '/coproprietaires/lots',
+        keywords: ['lot', 'lots', 'tantième', 'tantièmes', 'clé', 'répartition', 'charges', 'quote-part'],
+        category: 'Copropriété'
     },
 
     // Finance
     {
-        title: 'Finance',
-        description: 'Gestion financière',
-        path: '/finance',
-        keywords: ['finance', 'financier', 'argent', 'comptabilité', 'compta'],
+        title: 'Comptabilité',
+        description: 'Grand livre, balance, compte de gestion',
+        path: '/finance/comptabilite',
+        keywords: ['comptabilité', 'compta', 'grand livre', 'balance', 'écriture', 'finance'],
+        category: 'Finance'
+    },
+    {
+        title: 'Budgets',
+        description: 'Budget de fonctionnement, travaux et fonds ALUR',
+        path: '/finance/budgets',
+        keywords: ['budget', 'budgets', 'prévisionnel', 'travaux', 'alur', 'finance'],
+        category: 'Finance'
+    },
+    {
+        title: 'Factures',
+        description: 'Factures fournisseurs',
+        path: '/finance/factures',
+        keywords: ['facture', 'factures', 'fournisseur', 'paiement', 'finance'],
+        category: 'Finance'
+    },
+    {
+        title: 'Appels de fonds',
+        description: 'Gestion des appels de fonds',
+        path: '/finance/appels-fonds',
+        keywords: ['appel', 'fonds', 'charges', 'cotisation', 'provision', 'finance'],
+        category: 'Finance'
+    },
+    {
+        title: 'Mouvements bancaires',
+        description: 'Relevés, catégorisation et rapprochement',
+        path: '/finance/mouvements-bancaires',
+        keywords: ['banque', 'bancaire', 'mouvement', 'relevé', 'rapprochement', 'compte', 'finance'],
+        category: 'Finance'
+    },
+    {
+        title: 'États datés',
+        description: 'Pré-états datés et états datés',
+        path: '/finance/etats-dates',
+        keywords: ['état', 'daté', 'datés', 'mutation', 'vente', 'finance'],
         category: 'Finance'
     },
     {
         title: 'Tantièmes et clés de répartition',
         description: 'Gérez la répartition des charges',
         path: '/finance/tantiemes',
-        keywords: ['tantième', 'tantièmes', 'clé', 'clés', 'répartition', 'charges', 'quote-part', 'pourcentage', 'vote', 'ag', 'finance'],
+        keywords: ['tantième', 'tantièmes', 'clé', 'clés', 'répartition', 'charges', 'finance'],
         category: 'Finance'
-    },
-    {
-        title: 'Budget',
-        description: 'Gestion des budgets',
-        path: '/finance/budgets',
-        keywords: ['budget', 'budgets', 'prévisionnel', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Budget courant',
-        description: 'Budget de l\'exercice en cours',
-        path: '/finance/budget-current',
-        keywords: ['budget', 'courant', 'actuel', 'exercice', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Budget travaux',
-        description: 'Budget dédié aux travaux',
-        path: '/finance/budget-works',
-        keywords: ['budget', 'travaux', 'rénovation', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Factures',
-        description: 'Gestion des factures',
-        path: '/finance/invoices',
-        keywords: ['facture', 'factures', 'invoice', 'paiement', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Nouvelle facture',
-        description: 'Créer une nouvelle facture',
-        path: '/finance/invoices/new',
-        keywords: ['nouvelle', 'facture', 'créer', 'ajouter', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Paiement factures',
-        description: 'Paiement des factures',
-        path: '/finance/invoices/payment',
-        keywords: ['paiement', 'facture', 'payer', 'régler', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Transactions',
-        description: 'Historique des transactions',
-        path: '/finance/transactions',
-        keywords: ['transaction', 'transactions', 'historique', 'opération', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Mouvements bancaires',
-        description: 'Relevés bancaires',
-        path: '/finance/bank-movements',
-        keywords: ['banque', 'bancaire', 'mouvement', 'relevé', 'compte', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Appels de fonds',
-        description: 'Gestion des appels de fonds',
-        path: '/finance/calls',
-        keywords: ['appel', 'fonds', 'charges', 'cotisation', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Impayés',
-        description: 'Gestion des impayés',
-        path: '/finance/unpaid',
-        keywords: ['impayé', 'impayés', 'retard', 'dette', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Relances impayés',
-        description: 'Relances pour les impayés',
-        path: '/finance/unpaid/reminders',
-        keywords: ['relance', 'impayé', 'rappel', 'retard', 'finance'],
-        category: 'Finance'
-    },
-    {
-        title: 'Virements',
-        description: 'Gestion des virements',
-        path: '/finance/transfer',
-        keywords: ['virement', 'transfert', 'banque', 'finance'],
-        category: 'Finance'
-    },
-
-    // Documents
-    {
-        title: 'Documents',
-        description: 'Gestion documentaire',
-        path: '/documents',
-        keywords: ['document', 'documents', 'fichier', 'pdf'],
-        category: 'Documents'
-    },
-    {
-        title: 'Grand livre',
-        description: 'Grand livre comptable',
-        path: '/documents/ledger',
-        keywords: ['grand', 'livre', 'comptable', 'document'],
-        category: 'Documents'
-    },
-    {
-        title: 'Grand livre complet',
-        description: 'Grand livre complet',
-        path: '/documents/ledger/full',
-        keywords: ['grand', 'livre', 'complet', 'comptable', 'document'],
-        category: 'Documents'
-    },
-    {
-        title: 'Balance',
-        description: 'Balance comptable',
-        path: '/documents/balance',
-        keywords: ['balance', 'comptable', 'document'],
-        category: 'Documents'
-    },
-    {
-        title: 'Compte de charges',
-        description: 'Relevé des charges',
-        path: '/documents/expenses',
-        keywords: ['charge', 'charges', 'dépense', 'document'],
-        category: 'Documents'
-    },
-    {
-        title: 'Clôture',
-        description: 'Documents de clôture',
-        path: '/documents/closing',
-        keywords: ['clôture', 'fin', 'exercice', 'document'],
-        category: 'Documents'
-    },
-    {
-        title: 'GED',
-        description: 'Gestion électronique des documents',
-        path: '/documents/ged',
-        keywords: ['ged', 'gestion', 'électronique', 'document', 'archive'],
-        category: 'Documents'
-    },
-
-    // Assemblées Générales
-    {
-        title: 'Assemblées Générales',
-        description: 'Gestion des AG',
-        path: '/ag',
-        keywords: ['assemblée', 'ag', 'général', 'réunion', 'vote'],
-        category: 'Assemblées'
-    },
-    {
-        title: 'Tableau de bord AG',
-        description: 'Vue d\'ensemble des AG',
-        path: '/ag/dashboard',
-        keywords: ['assemblée', 'ag', 'dashboard', 'tableau', 'bord'],
-        category: 'Assemblées'
-    },
-    {
-        title: 'Résolutions',
-        description: 'Gestion des résolutions',
-        path: '/ag/resolutions',
-        keywords: ['résolution', 'résolutions', 'vote', 'décision', 'ag'],
-        category: 'Assemblées'
-    },
-    {
-        title: 'Assemblées',
-        description: 'Liste des assemblées',
-        path: '/ag',
-        keywords: ['assemblée', 'assemblées', 'réunion', 'ag'],
-        category: 'Assemblées'
     },
 
     // Maintenance
     {
-        title: 'Maintenance',
-        description: 'Gestion de la maintenance',
-        path: '/maintenance',
-        keywords: ['maintenance', 'entretien', 'réparation', 'technique'],
+        title: 'Carnet d\'entretien',
+        description: 'Carnet d\'entretien de l\'immeuble',
+        path: '/maintenance/logbook',
+        keywords: ['carnet', 'entretien', 'historique', 'intervention', 'maintenance'],
+        category: 'Maintenance'
+    },
+    {
+        title: 'Contrats',
+        description: 'Contrats de maintenance et assurances',
+        path: '/maintenance/contracts',
+        keywords: ['contrat', 'contrats', 'maintenance', 'abonnement', 'assurance'],
+        category: 'Maintenance'
+    },
+    {
+        title: 'Prestataires',
+        description: 'Annuaire des prestataires',
+        path: '/maintenance/providers',
+        keywords: ['prestataire', 'prestataires', 'fournisseur', 'annuaire', 'contact', 'maintenance'],
         category: 'Maintenance'
     },
     {
@@ -219,80 +138,77 @@ export const searchableRoutes: SearchableRoute[] = [
         keywords: ['ordre', 'service', 'os', 'intervention', 'maintenance'],
         category: 'Maintenance'
     },
+
+    // Conformité
     {
-        title: 'Nouvel ordre de service',
-        description: 'Créer un ordre de service',
-        path: '/maintenance/service-orders/new',
-        keywords: ['nouveau', 'ordre', 'service', 'créer', 'maintenance'],
-        category: 'Maintenance'
+        title: 'PPT',
+        description: 'Plan pluriannuel de travaux',
+        path: '/conformite/ppt',
+        keywords: ['ppt', 'plan', 'pluriannuel', 'travaux', 'conformité'],
+        category: 'Conformité'
     },
     {
-        title: 'Annuaire',
-        description: 'Annuaire des prestataires',
-        path: '/maintenance/directory',
-        keywords: ['annuaire', 'prestataire', 'contact', 'fournisseur', 'maintenance'],
-        category: 'Maintenance'
+        title: 'DPE Collectif',
+        description: 'Diagnostic de performance énergétique',
+        path: '/conformite/dpe',
+        keywords: ['dpe', 'diagnostic', 'énergie', 'performance', 'conformité'],
+        category: 'Conformité'
     },
     {
-        title: 'Contrats',
-        description: 'Gestion des contrats',
-        path: '/maintenance/contracts',
-        keywords: ['contrat', 'contrats', 'maintenance', 'abonnement'],
-        category: 'Maintenance'
-    },
-    {
-        title: 'Carnet d\'entretien',
-        description: 'Carnet d\'entretien de l\'immeuble',
-        path: '/maintenance/logbook',
-        keywords: ['carnet', 'entretien', 'historique', 'maintenance'],
-        category: 'Maintenance'
+        title: 'Factur-X',
+        description: 'Facturation électronique conforme',
+        path: '/conformite/facturx',
+        keywords: ['factur-x', 'facturx', 'facture', 'électronique', 'conformité'],
+        category: 'Conformité'
     },
 
-    // Social
+    // Documents
     {
-        title: 'Social',
-        description: 'Espace social et communication',
-        path: '/social',
-        keywords: ['social', 'communauté', 'résidents', 'communication'],
-        category: 'Social'
+        title: 'GED — Mes documents',
+        description: 'Gestion électronique des documents',
+        path: '/documents/ged',
+        keywords: ['ged', 'document', 'documents', 'fichier', 'pdf', 'archive'],
+        category: 'Documents'
+    },
+
+    // Communication
+    {
+        title: 'Communication',
+        description: 'Mail, messagerie et mur',
+        path: '/communication',
+        keywords: ['communication', 'annonce', 'information', 'diffusion'],
+        category: 'Communication'
     },
     {
-        title: 'Événements',
-        description: 'Calendrier des événements',
-        path: '/social/events',
-        keywords: ['événement', 'événements', 'calendrier', 'social'],
-        category: 'Social'
+        title: 'Mail',
+        description: 'Courrier officiel',
+        path: '/communication/mail',
+        keywords: ['mail', 'courrier', 'email', 'lettre', 'communication'],
+        category: 'Communication'
     },
     {
-        title: 'Nouvel événement',
-        description: 'Créer un événement',
-        path: '/social/events/new',
-        keywords: ['nouveau', 'événement', 'créer', 'social'],
-        category: 'Social'
+        title: 'Messagerie',
+        description: 'Messagerie privée',
+        path: '/communication/messagerie',
+        keywords: ['messagerie', 'message', 'chat', 'conversation', 'communication'],
+        category: 'Communication'
     },
     {
-        title: 'Forum',
-        description: 'Forum de discussion',
-        path: '/social/forum',
-        keywords: ['forum', 'discussion', 'débat', 'social'],
-        category: 'Social'
-    },
-    {
-        title: 'Nouvelle discussion',
-        description: 'Créer une discussion',
-        path: '/social/forum/new',
-        keywords: ['nouveau', 'discussion', 'sujet', 'forum', 'social'],
-        category: 'Social'
-    },
-    {
-        title: 'Messages',
-        description: 'Messagerie',
-        path: '/social/messages',
-        keywords: ['message', 'messages', 'messagerie', 'communication', 'social'],
-        category: 'Social'
+        title: 'Mur',
+        description: 'Mur communautaire',
+        path: '/communication/mur',
+        keywords: ['mur', 'communautaire', 'forum', 'post', 'communication'],
+        category: 'Communication'
     },
 
     // Contentieux
+    {
+        title: 'Impayés',
+        description: 'Suivi et recouvrement des impayés',
+        path: '/contentieux/impayes',
+        keywords: ['impayé', 'impayés', 'retard', 'dette', 'relance', 'recouvrement', 'contentieux'],
+        category: 'Contentieux'
+    },
     {
         title: 'Litiges',
         description: 'Gestion des litiges',
@@ -300,37 +216,11 @@ export const searchableRoutes: SearchableRoute[] = [
         keywords: ['litige', 'litiges', 'conflit', 'juridique', 'contentieux'],
         category: 'Contentieux'
     },
-    {
-        title: 'Impayés',
-        description: 'Suivi et recouvrement des impayés',
-        path: '/contentieux/impayes',
-        keywords: ['impayé', 'impayés', 'retard', 'dette', 'contentieux'],
-        category: 'Contentieux'
-    },
-
-    // Communication
-    {
-        title: 'Communication',
-        description: 'Outils de communication',
-        path: '/communication',
-        keywords: ['communication', 'annonce', 'information', 'diffusion'],
-        category: 'Communication'
-    },
-
-    // Ventes
-    {
-        title: 'Ventes',
-        description: 'Gestion des ventes',
-        path: '/sales',
-        keywords: ['vente', 'ventes', 'cession', 'lot'],
-        category: 'Ventes'
-    },
-
 
     // Paramètres
     {
         title: 'Paramètres',
-        description: 'Configuration de l\'application',
+        description: 'Configuration de la copropriété',
         path: '/settings',
         keywords: ['paramètre', 'paramètres', 'configuration', 'réglage', 'settings'],
         category: 'Paramètres'

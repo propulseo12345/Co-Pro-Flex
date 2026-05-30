@@ -22,7 +22,7 @@ export default function MaintenancePage() {
             title: 'Annuaire professionnels',
             description: 'Coordonnées des prestataires',
             icon: Users,
-            href: '/maintenance/directory'
+            href: '/maintenance/providers'
         },
         {
             title: 'Ordres de service',
