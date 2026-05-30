@@ -29,7 +29,7 @@ function getPriorityBtnClass(priority: number): string {
   return styles.btnOutlineBlue;
 }
 
-export function BentoPriorites({ todos, hasTodos, hasMoreTodos, todosCount }: BentoPrioritesProps) {
+export function BentoPriorites({ todos, hasTodos }: BentoPrioritesProps) {
   return (
     <div className={`${styles.card} ${styles.span2}`}>
       <div className={styles.label}>À traiter maintenant</div>
@@ -59,11 +59,7 @@ export function BentoPriorites({ todos, hasTodos, hasMoreTodos, todosCount }: Be
               </div>
             </div>
           ))}
-          {hasMoreTodos && (
-            <Link href="/tasks" className={styles.actionLink} style={{ textAlign: 'center', padding: '8px', color: 'var(--primary)' }}>
-              Voir les {todosCount} tâches →
-            </Link>
-          )}
+          {/* TODO go-live: lien "Voir les N tâches" (/tasks) masqué — page inexistante, à rebrancher quand la vue tâches existera */}
         </div>
       ) : (
         <div style={{ padding: '32px', textAlign: 'center', color: 'var(--success)', fontSize: '14px' }}>

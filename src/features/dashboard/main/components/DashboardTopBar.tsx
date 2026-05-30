@@ -32,7 +32,7 @@ export function DashboardTopBar({
         <Link href="/finance/appels-fonds" className={`${styles.btn} ${styles.btnPill} ${styles.btnGhost}`}>
           Appel de fonds
         </Link>
-        <Link href="/finance/invoices" className={`${styles.btn} ${styles.btnPill} ${styles.btnGhost}`}>
+        <Link href="/finance/factures" className={`${styles.btn} ${styles.btnPill} ${styles.btnGhost}`}>
           Nouvelle facture
         </Link>
         <button

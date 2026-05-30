@@ -95,7 +95,7 @@ export const MODULES: ModuleConfig[] = [
     subPages: [
       { label: 'GED — Mes documents', href: '/documents/ged', icon: FolderOpen },
       { label: 'Courrier officiel', href: '/communication/mail', icon: Mail },
-      { label: 'État daté', href: '/documents/etat-date', icon: FileText },
+      { label: 'État daté', href: '/finance/etats-dates', icon: FileText },
     ],
   },
   {

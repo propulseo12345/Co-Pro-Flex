@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Shield, FileText, ChevronRight } from 'lucide-react';
+import { CreditCard, FileText, ChevronRight } from 'lucide-react';
 import styles from './settings.module.css';
 import Link from 'next/link';
 
@@ -18,14 +18,7 @@ export default function SettingsPage() {
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>Copropriétaires</h2>
                         <div className={styles.cardGrid}>
-                            <Link href="/settings/visibility" className={styles.card}>
-                                <div className={styles.cardIcon}><Shield size={24} aria-hidden="true" /></div>
-                                <div className={styles.cardContent}>
-                                    <h3>Visibilité des informations</h3>
-                                    <p>Qui peut voir quoi ?</p>
-                                </div>
-                                <ChevronRight className={styles.chevron} aria-hidden="true" />
-                            </Link>
+                            {/* TODO go-live: carte "Visibilité des informations" (/settings/visibility) masquée — feature à construire avec les rôles copro (#14) */}
 
                             <Link href="/settings/info" className={styles.card}>
                                 <div className={styles.cardIcon}><FileText size={24} aria-hidden="true" /></div>
@@ -60,8 +53,7 @@ export default function SettingsPage() {
                         <h3 className={styles.sidebarTitle}>Copropriété</h3>
                         <p className={styles.coproName}>{informationsCopro.nom}</p>
                         <p className={styles.coproAddress}>{informationsCopro.adresse}</p>
-                        <div className={styles.divider} />
-                        <Link href="/invoices" className={styles.link}>Mes factures CoProFlex</Link>
+                        {/* TODO go-live: lien "Mes factures CoProFlex" (/invoices) masqué — à rebrancher avec la facturation cabinet */}
                     </div>
                 </div>
             </div>

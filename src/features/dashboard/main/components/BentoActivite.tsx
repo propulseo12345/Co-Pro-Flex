@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { formatRelativeTime, type DashboardActivity } from '../hooks/useDashboardMainPage';
 import styles from '@/app/(dashboard)/dashboard/dashboard.module.css';
 
@@ -21,9 +20,7 @@ export function BentoActivite({ activities, hasActivities }: BentoActiviteProps)
     <div className={`${styles.card} ${styles.span2}`}>
       <div className={styles.activityHeader}>
         <div className={styles.label} style={{ marginBottom: 0 }}>Activité récente</div>
-        <Link href="/activity" className={styles.activityLink}>
-          Tout voir →
-        </Link>
+        {/* TODO go-live: lien "Tout voir" (/activity) masqué — page inexistante, à rebrancher quand la vue activité existera */}
       </div>
       {hasActivities ? (
         <div className={styles.activityItems}>

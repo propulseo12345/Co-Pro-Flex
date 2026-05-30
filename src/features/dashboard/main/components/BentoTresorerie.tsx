@@ -26,10 +26,10 @@ export function BentoTresorerie({ balance, compteCourant, fondsTravaux }: BentoT
           </div>
         </div>
         <div className={styles.tresorerieActions}>
-          <Link href="/finance/treasury" className={`${styles.btn} ${styles.btnGhost}`}>
+          <Link href="/finance/comptabilite" className={`${styles.btn} ${styles.btnGhost}`}>
             Voir les comptes
           </Link>
-          <Link href="/finance/treasury/rapprochement" className={`${styles.btn} ${styles.btnGhost}`}>
+          <Link href="/finance/mouvements-bancaires" className={`${styles.btn} ${styles.btnGhost}`}>
             Rapprocher
           </Link>
         </div>
