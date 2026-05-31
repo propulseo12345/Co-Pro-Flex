@@ -18,7 +18,7 @@ export default function CallDetailPage() {
   const router = useRouter();
   const callId = params.callId as string;
 
-  const { call, lines, stats, isLoading } = useAppelsFondsDetail(callId);
+  const { call, lots, stats, isLoading } = useAppelsFondsDetail(callId);
   const [relanceLine, setRelanceLine] = useState<CallLineDetailed | null>(null);
 
   if (isLoading) {
@@ -44,7 +44,7 @@ export default function CallDetailPage() {
   const subtitle = [
     `Echeance : ${new Date(call.due_date).toLocaleDateString('fr-FR')}`,
     call.issued_at ? `Emis le ${new Date(call.issued_at).toLocaleDateString('fr-FR')}` : null,
-    `Cle : ${call.repartition_key_name}`,
+    call.repartition_key_name ? `Cles : ${call.repartition_key_name}` : null,
   ].filter(Boolean).join(' \u00B7 ');
 
   const statItems: StatItem[] = [
@@ -95,7 +95,7 @@ export default function CallDetailPage() {
         callStatus={call.status}
       />
       <StatsGrid items={statItems} />
-      <CoproTable lines={lines} onRemind={handleRemind} onRelance={(line) => setRelanceLine(line)} />
+      <CoproTable lots={lots} onRemind={handleRemind} onRelance={(line) => setRelanceLine(line)} />
       {relanceLine && call && (
         <RelanceModal
           line={relanceLine}

@@ -201,6 +201,91 @@
   color: var(--text-tertiary);
 }
 
+/* ── Détail dépliable par lot (ventilation par clé) ── */
+.thChevron {
+  width: 40px;
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border);
+}
+
+.tdChevron {
+  composes: td;
+  width: 40px;
+  text-align: center;
+  padding: 12px 8px;
+}
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
+  transition: color 150ms, background 150ms;
+}
+
+.expandBtn:hover {
+  color: var(--text-main);
+  background: var(--surface-hover);
+}
+
+.breakdownRow {
+  background: var(--bg-secondary);
+}
+
+.breakdownCell {
+  padding: 12px 16px 14px 56px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.breakdownTitle {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.breakdownList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.breakdownItem {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 24px;
+  align-items: center;
+  font-size: 13px;
+  max-width: 460px;
+}
+
+.breakdownKey {
+  color: var(--text-main);
+}
+
+.breakdownWeight {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdownAmount {
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .tableContainer {

@@ -13,6 +13,32 @@ export interface EnrichedCallLine extends CallLineDetailed {
   reminderLevel: ReminderLevel;
 }
 
+/** Ventilation par clé de répartition d'une ligne d'appel, pour un lot donné */
+export interface CallKeyBreakdown {
+  repartition_key_id: string | null;
+  key_name: string;
+  amount_due: number;
+  amount_paid: number;
+  lot_weight: number;
+  key_total_weight: number;
+}
+
+/** Un lot = total agrégé toutes clés + détail par clé (modèle appel agrégé) */
+export interface CallLotRow {
+  lot_id: string;
+  lot_ref: string;
+  owner_name: string | null;
+  lot_tantiemes: number;
+  amount_due: number;
+  amount_paid: number;
+  remaining: number;
+  status: 'unpaid' | 'partial' | 'paid';
+  reminderLevel: ReminderLevel;
+  breakdown: CallKeyBreakdown[];
+  /** Ligne synthétique (montants agrégés du lot) pour alimenter la relance */
+  relanceLine: CallLineDetailed;
+}
+
 function useCallById(callId: string) {
   const [data, setData] = useState<financeApi.CallForFundsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,12 +92,15 @@ export function useAppelsFondsDetail(callId: string) {
     if (!lines) return { called: 0, paid: 0, remaining: 0, paidCount: 0, totalCount: 0 };
     const called = lines.reduce((s, l) => s + l.amount_due, 0);
     const paid = lines.reduce((s, l) => s + l.amount_paid, 0);
+    // Une ligne par (lot × clé) : on compte les LOTS, pas les lignes.
+    const lotIds = new Set(lines.map(l => l.lot_id));
+    const lotsWithUnpaid = new Set(lines.filter(l => l.status !== 'paid').map(l => l.lot_id));
     return {
       called,
       paid,
       remaining: called - paid,
-      paidCount: lines.filter(l => l.status === 'paid').length,
-      totalCount: lines.length,
+      paidCount: lotIds.size - lotsWithUnpaid.size,
+      totalCount: lotIds.size,
     };
   }, [lines]);
 
@@ -89,9 +118,76 @@ export function useAppelsFondsDetail(callId: string) {
     });
   }, [lines, levelsByLot]);
 
+  // Regroupement par lot : 1 bloc par lot (total agrégé) + ventilation par clé
+  const lots: CallLotRow[] = useMemo(() => {
+    if (!lines) return [];
+    const byLot = new Map<string, CallLineDetailed[]>();
+    for (const l of lines) {
+      const arr = byLot.get(l.lot_id) ?? [];
+      arr.push(l);
+      byLot.set(l.lot_id, arr);
+    }
+
+    const rows: CallLotRow[] = [];
+    for (const [lotId, lotLines] of byLot) {
+      const first = lotLines[0];
+      const amount_due = lotLines.reduce((s, l) => s + l.amount_due, 0);
+      const amount_paid = lotLines.reduce((s, l) => s + l.amount_paid, 0);
+      const remaining = Math.round((amount_due - amount_paid) * 100) / 100;
+      const status: 'unpaid' | 'partial' | 'paid' =
+        remaining <= 0.005 ? 'paid' : amount_paid > 0 ? 'partial' : 'unpaid';
+      const reminderLevel = (status === 'paid' ? 0 : levelsByLot.get(lotId) ?? 0) as ReminderLevel;
+
+      const breakdown: CallKeyBreakdown[] = lotLines
+        .map(l => ({
+          repartition_key_id: l.repartition_key_id,
+          key_name: l.repartition_key_name ?? 'Sans clé',
+          amount_due: l.amount_due,
+          amount_paid: l.amount_paid,
+          lot_weight: l.lot_weight,
+          key_total_weight: l.key_total_weight,
+        }))
+        .sort((a, b) => a.key_name.localeCompare(b.key_name));
+
+      const relanceLine: CallLineDetailed = {
+        ...first,
+        amount_due,
+        amount_paid,
+        amount_remaining: remaining,
+        status,
+        // Ligne agrégée (toutes clés) : pas de clé unique représentative
+        repartition_key_id: null,
+        repartition_key_name: null,
+      };
+
+      rows.push({
+        lot_id: lotId,
+        lot_ref: first.lot_ref,
+        owner_name: first.owner_name,
+        lot_tantiemes: first.lot_tantiemes,
+        amount_due,
+        amount_paid,
+        remaining,
+        status,
+        reminderLevel,
+        breakdown,
+        relanceLine,
+      });
+    }
+
+    // Tri : mise en demeure en haut, payés en bas, puis par référence de lot
+    return rows.sort((a, b) => {
+      if (a.status === 'paid' && b.status !== 'paid') return 1;
+      if (a.status !== 'paid' && b.status === 'paid') return -1;
+      if (b.reminderLevel !== a.reminderLevel) return b.reminderLevel - a.reminderLevel;
+      return a.lot_ref.localeCompare(b.lot_ref);
+    });
+  }, [lines, levelsByLot]);
+
   return {
     call,
     lines: enrichedLines,
+    lots,
     stats,
     isLoading: callLoading || linesLoading || remindersLoading,
     paymentLoading,

@@ -49,7 +49,8 @@ export function buildTrimesterCards(
 
     const keysMap = new Map<string, number>();
     for (const c of trimCalls) {
-      keysMap.set(c.repartition_key_name, (keysMap.get(c.repartition_key_name) ?? 0) + c.total_amount);
+      const keyName = c.repartition_key_name ?? '—';
+      keysMap.set(keyName, (keysMap.get(keyName) ?? 0) + c.total_amount);
     }
 
     cards.push({
