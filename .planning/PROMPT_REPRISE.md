@@ -88,6 +88,25 @@ Raison : un seed propre (WP6) nettoie les artefacts de test ET donne des donnée
 
 ---
 
+## 2bis. 🔍 REVUE DE CODE (fin de session) — à traiter
+
+**Corrigé sur le moment :** fichier migration `…150000` — bloc `v_unpaid_by_lot` retiré (il échouait au rejeu : la vue existe déjà avec d'autres colonnes ; rien à recréer). Aligné sur la base réelle.
+
+**Vrais points à corriger (par gravité) :**
+1. **[moyen-haut] `validate_budget_expense` / période fermée** : marque la dépense `validated` + renvoie `success:true` même quand elle ne poste PAS (période non ouverte) → réintroduit la divergence « consommé≠réalisé » en silence. Fix : bloquer la validation si période non ouverte (RAISE) **ou** surfacer `posted:false` côté front avec un avertissement.
+2. **[moyen-haut] `fn_annexe_2.total_i_charges.ex_clos_realise`** (→ dashboard `budget_realise`) somme **`product_lines` (classe 7, produits)** au lieu de **`charge_lines` (classe 6, charges)**. Pré-existant mais exposé : le « budget réalisé » du dashboard affiche peut-être les produits au lieu des charges. **À vérifier métier puis corriger** (l.173/175 de `…140000`).
+3. **[moyen, défensif] `create_ledger_transaction` renvoie `success:true` même si déséquilibré** (reste `draft`, non posté). Mes RPC testent `success` et pas `status='posted'`. Inoffensif aujourd'hui (écritures équilibrées par construction) mais piège latent → durcir : vérifier que la tx est bien `posted`.
+4. **[moyen] `post_owner_payment` + `allocate_payment` (branche `p_call_line_ids`)** : ne filtre pas par `lot_id` ni n'exclut les appels `cancelled` → on peut lettrer un paiement du lot A sur des lignes du lot B / d'un appel annulé, crédit 450-x sur le mauvais lot. Fix : garder que les `call_line_ids` ⊂ lot du paiement et appel non annulé.
+5. **[moyen] Idempotence des paiements** : `post_owner_payment` (et partiellement `post_supplier_payment`) — double-clic = double encaissement. Fix : clé d'idempotence ou garde UI.
+6. **[moyen, design] `activate_ag_decisions` atomique** : une seule résolution en échec (ex. clé incomplète) fait rollback de TOUTE l'activation de l'AG, sans trace `failed`. Trade-off voulu — prévoir message d'erreur clair, ou isolation+compensation par action.
+7. **[mineur] `src/lib/budget/api.ts` cas VALIDEE** : ne remet plus `rejection_comment` à NULL → dépense rejetée puis re-validée garde son ancien motif. Fix : `validate_budget_expense` peut remettre `rejection_comment=NULL`.
+8. **[mineur] `generate_calls_from_ag_payload`** : Σ des N appels ≠ total voté (arrondi non rattrapé sur le dernier appel) — quelques centimes d'écart budget/appels.
+9. **[mineur] `v_budget_consumption_by_account`** filtre le réalisé par `tx_date ∈ [start,end]` alors que `fn_annexe_2` filtre par `period_id` → 2 sémantiques de période pour le même « réalisé » (divergence sur écritures de cut-off/antidatées).
+
+**Faux positifs écartés :** nature `budget_type` inconnue (enum = current/works/alur seulement) ; échec de renommage de colonnes sur `v_budget_consumption`/`v_general_ledger` (les vues existantes avaient DÉJÀ ces noms — l'application a réussi).
+
+---
+
 ## 3. Gotchas / garde-fous
 - **On ne poste que dans une période `open`** (post_ledger_transaction le vérifie). Seul **2027** est ouvert.
 - **Le classifier bloque les suppressions et migrations non explicitement consenties** → demander l'OK user avant tout DELETE / `apply_migration`.
