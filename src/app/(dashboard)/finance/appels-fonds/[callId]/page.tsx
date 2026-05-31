@@ -8,6 +8,7 @@ import { DetailHeader } from '@/features/finance/appels-fonds/components/DetailH
 import { StatsGrid } from '@/features/finance/appels-fonds/components/StatsGrid';
 import { CoproTable } from '@/features/finance/appels-fonds/components/CoproTable';
 import { RelanceModal } from '@/features/finance/appels-fonds/components/RelanceModal';
+import { PaymentModal } from '@/features/finance/appels-fonds/components/PaymentModal';
 import { formatEuros } from '@/features/finance/appels-fonds/utils';
 import type { CallLineDetailed } from '@/lib/finance/api';
 import type { StatItem } from '@/features/finance/appels-fonds/components/StatsGrid';
@@ -18,8 +19,9 @@ export default function CallDetailPage() {
   const router = useRouter();
   const callId = params.callId as string;
 
-  const { call, lots, stats, isLoading } = useAppelsFondsDetail(callId);
+  const { call, lots, stats, isLoading, recordPayment, paymentLoading, refresh } = useAppelsFondsDetail(callId);
   const [relanceLine, setRelanceLine] = useState<CallLineDetailed | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   if (isLoading) {
     return (
@@ -80,7 +82,7 @@ export default function CallDetailPage() {
   const handleBack = () => router.push('/finance/appels-fonds');
   const handleGeneratePdf = () => { /* TODO: Task 16 */ };
   const handleSend = () => { /* TODO: Task 17 */ };
-  const handleRecordPayment = () => { /* TODO: Task 17 */ };
+  const handleRecordPayment = () => setShowPayment(true);
   const handleRemind = (_lineId: string) => { /* TODO: relance */ };
 
   return (
@@ -103,6 +105,16 @@ export default function CallDetailPage() {
           coproName="Copropriete"
           syndicName="Le Syndic"
           onClose={() => setRelanceLine(null)}
+        />
+      )}
+      {showPayment && (
+        <PaymentModal
+          lots={lots}
+          periodId={call.period_id}
+          isSubmitting={paymentLoading}
+          recordPayment={recordPayment}
+          onClose={() => setShowPayment(false)}
+          onRecorded={refresh}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useCallLines, useRecordPayment } from '@/hooks/modules/useFinanceData';
 import * as financeApi from '@/lib/finance/api';
 import type { DetailStats } from '../types';
@@ -42,6 +42,7 @@ export interface CallLotRow {
 function useCallById(callId: string) {
   const [data, setData] = useState<financeApi.CallForFundsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,9 +52,11 @@ function useCallById(callId: string) {
       if (!cancelled) setIsLoading(false);
     });
     return () => { cancelled = true; };
-  }, [callId]);
+  }, [callId, reloadToken]);
 
-  return { data, isLoading };
+  const refresh = useCallback(() => setReloadToken(t => t + 1), []);
+
+  return { data, isLoading, refresh };
 }
 
 /** Charge les relances envoyees pour cette copro et calcule le niveau par lot */
@@ -83,9 +86,14 @@ function useReminderLevels(coproId: string | undefined) {
 }
 
 export function useAppelsFondsDetail(callId: string) {
-  const { data: call, isLoading: callLoading } = useCallById(callId);
-  const { data: lines, isLoading: linesLoading } = useCallLines(callId);
+  const { data: call, isLoading: callLoading, refresh: refreshCall } = useCallById(callId);
+  const { data: lines, isLoading: linesLoading, refresh: refreshLines } = useCallLines(callId);
   const { mutate: doRecordPayment, isLoading: paymentLoading } = useRecordPayment();
+
+  const refresh = useCallback(async () => {
+    refreshCall();
+    await refreshLines();
+  }, [refreshCall, refreshLines]);
   const { levelsByLot, isLoading: remindersLoading } = useReminderLevels(call?.copro_id);
 
   const stats: DetailStats = useMemo(() => {
@@ -192,5 +200,6 @@ export function useAppelsFondsDetail(callId: string) {
     isLoading: callLoading || linesLoading || remindersLoading,
     paymentLoading,
     recordPayment: doRecordPayment,
+    refresh,
   };
 }
