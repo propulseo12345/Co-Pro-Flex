@@ -581,14 +581,26 @@ export async function updateExpenseStatus(
   rejectionComment?: string
 ): Promise<void> {
   const supabase = createUntypedClient();
-  const dbStatus = mapExpenseStatusToDb(status);
 
+  // Valider une dépense = la comptabiliser au grand livre (Débit 6xx / Crédit 401)
+  // via la RPC dédiée (idempotente, ne poste que si la période est ouverte).
+  if (status === DepenseStatut.VALIDEE) {
+    const { data, error } = await supabase.rpc('validate_budget_expense', {
+      p_expense_id: expenseId,
+    });
+    if (error) {
+      throw new Error(`Failed to validate expense: ${error.message}`);
+    }
+    if (data && data.success === false) {
+      throw new Error(data.error || 'Validation de la dépense échouée');
+    }
+    return;
+  }
+
+  const dbStatus = mapExpenseStatusToDb(status);
   const updates: Record<string, unknown> = { status: dbStatus };
 
-  if (status === DepenseStatut.VALIDEE) {
-    updates.validated_at = new Date().toISOString();
-    updates.rejection_comment = null;
-  } else if (status === DepenseStatut.REJETEE) {
+  if (status === DepenseStatut.REJETEE) {
     updates.rejection_comment = rejectionComment || null;
     updates.validated_at = null;
   }
