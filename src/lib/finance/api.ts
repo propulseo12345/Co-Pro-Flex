@@ -19,8 +19,8 @@ export interface CallForFundsOverview {
   copro_id: string;
   period_id: string;
   budget_id: string | null;
-  repartition_key_id: string;
-  repartition_key_name: string;
+  repartition_key_id: string | null;
+  repartition_key_name: string | null;
   label: string;
   trimester: number | null;
   issue_date: string;
@@ -53,9 +53,11 @@ export interface CallLineDetailed {
   amount_remaining: number;
   status: 'unpaid' | 'partial' | 'paid';
   owner_name: string | null;
-  repartition_key_id: string;
+  repartition_key_id: string | null;
+  repartition_key_name: string | null;
   lot_weight: number;
   key_total_weight: number;
+  lot_tantiemes: number;
 }
 
 export interface UnpaidByLot {
@@ -329,103 +331,37 @@ export interface CreateCallPayload {
 }
 
 export async function createCall(payload: CreateCallPayload): Promise<ApiResult<{ call_id: string; ledger_tx_id: string }>> {
-  const supabase = getSupabaseClient();
+  const supabase = createUntypedClient();
   const { copro_id, period_id, budget_id, repartition_key_id, label, trimester, issue_date, due_date, total_amount, description } = payload;
 
-  try {
-    // 1. Get lots with weights
-    const { data: lots, error: lotsErr } = await supabase
-      .from('repartition_key_lines')
-      .select('lot_id, weight')
-      .eq('key_id', repartition_key_id);
-    if (lotsErr) throw new Error(`Lots: ${lotsErr.message}`);
-    if (!lots || lots.length === 0) throw new Error('Aucun lot trouvé pour cette clé de répartition');
+  // Route canonique : la RPC post_call_for_funds crée l'appel mono-clé ET son
+  // écriture au grand livre (D 450-x par lot avec lot_id / C 701·702·105 selon
+  // la nature du budget). Remplace l'ancien chemin client qui écrivait à tort sur
+  // un compte « 450 » sans lot_id (cassé). Les appels budgétaires agrégés
+  // multi-clés passent, eux, par post_budget_call_for_funds (chemin AG).
+  const { data, error } = await supabase.rpc('post_call_for_funds', {
+    p_copro_id: copro_id,
+    p_period_id: period_id,
+    p_budget_id: budget_id ?? null,
+    p_repartition_key_id: repartition_key_id,
+    p_label: label,
+    p_trimester: trimester ?? null,
+    p_issue_date: issue_date,
+    p_due_date: due_date,
+    p_total_amount: total_amount,
+    p_description: description ?? null,
+  });
 
-    const totalWeight = lots.reduce((sum: number, l: { weight: number }) => sum + Number(l.weight), 0);
-
-    // 2. Get accounts 450 & 701
-    const { data: accounts, error: accErr } = await supabase
-      .from('accounts')
-      .select('id, code')
-      .eq('copro_id', copro_id)
-      .in('code', ['450', '701']);
-    if (accErr) throw new Error(`Comptes: ${accErr.message}`);
-
-    const acc450 = accounts?.find((a: { code: string }) => a.code === '450');
-    const acc701 = accounts?.find((a: { code: string }) => a.code === '701');
-    if (!acc450 || !acc701) throw new Error('Comptes 450 ou 701 manquants');
-
-    // 3. Create ledger transaction
-    const { data: ltx, error: ltxErr } = await supabase
-      .from('ledger_transactions')
-      .insert({
-        copro_id, period_id,
-        tx_date: issue_date,
-        label: `Appel de fonds: ${label}`,
-        source_type: 'call_for_funds',
-        status: 'draft',
-      })
-      .select('id')
-      .single();
-    if (ltxErr) throw new Error(`Transaction: ${ltxErr.message}`);
-
-    // 4. Create ledger entries
-    const { error: entErr } = await supabase
-      .from('ledger_entries')
-      .insert([
-        { copro_id, period_id, tx_id: ltx.id, account_id: acc450.id, direction: 'debit', amount: total_amount, entry_label: `Appel: ${label}` },
-        { copro_id, period_id, tx_id: ltx.id, account_id: acc701.id, direction: 'credit', amount: total_amount, entry_label: `Appel: ${label}` },
-      ]);
-    if (entErr) throw new Error(`Écritures: ${entErr.message}`);
-
-    // 5. Post the transaction
-    const { error: postErr } = await supabase
-      .from('ledger_transactions')
-      .update({ status: 'posted', posted_at: new Date().toISOString() })
-      .eq('id', ltx.id);
-    if (postErr) throw new Error(`Post transaction: ${postErr.message}`);
-
-    // 6. Create call_for_funds (was step 5)
-    const { data: call, error: callErr } = await supabase
-      .from('call_for_funds')
-      .insert({
-        copro_id, period_id,
-        budget_id: budget_id || null,
-        repartition_key_id, label,
-        trimester: trimester || null,
-        issue_date, due_date, total_amount,
-        status: 'issued',
-        ledger_tx_id: ltx.id,
-        issued_at: new Date().toISOString(),
-        description: description || null,
-      })
-      .select('id')
-      .single();
-    if (callErr) throw new Error(`Appel: ${callErr.message}`);
-
-    // 7. Create lines per lot (with rounding delta on last lot)
-    const lines = lots.map((l: { lot_id: string; weight: number }) => ({
-      copro_id,
-      call_id: call.id,
-      lot_id: l.lot_id,
-      amount_due: Math.round((total_amount * Number(l.weight) / totalWeight) * 100) / 100,
-    }));
-
-    const linesTotal = lines.reduce((sum: number, l: { amount_due: number }) => sum + l.amount_due, 0);
-    const delta = Math.round((total_amount - linesTotal) * 100) / 100;
-    if (lines.length > 0 && delta !== 0) {
-      lines[lines.length - 1].amount_due += delta;
-    }
-
-    const { error: linesErr } = await supabase
-      .from('call_for_funds_lines')
-      .insert(lines);
-    if (linesErr) throw new Error(`Lignes: ${linesErr.message}`);
-
-    return { data: { call_id: call.id, ledger_tx_id: ltx.id }, error: null };
-  } catch (err) {
-    return { data: null, error: err instanceof Error ? err.message : 'Erreur inconnue' };
+  if (error) {
+    return { data: null, error: error.message };
   }
+
+  const res = (data ?? {}) as { success?: boolean; call_id?: string; ledger_tx_id?: string; error?: string };
+  if (!res.success || !res.call_id || !res.ledger_tx_id) {
+    return { data: null, error: res.error ?? "Échec de la création de l'appel de fonds" };
+  }
+
+  return { data: { call_id: res.call_id, ledger_tx_id: res.ledger_tx_id }, error: null };
 }
 
 // ============================================================================
