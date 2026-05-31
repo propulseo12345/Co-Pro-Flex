@@ -668,6 +668,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
     }
 
     // Activate AG decisions
+    let activationFailed = false;
     try {
       const supabase = createUntypedClient();
       const { data: result, error } = await supabase.rpc('activate_ag_decisions', {
@@ -686,6 +687,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
             `Cause : ${error.message}\n\n` +
             'Corrigez la résolution concernée, puis relancez la validation des signatures.'
         );
+        activationFailed = true;
       } else if (result) {
         const typedResult = result as { activated: number; failed: number };
         setActivationResult(typedResult);
@@ -700,9 +702,16 @@ export function usePVPage({ agId }: UsePVPageProps) {
       }
     } catch (err) {
       logger.error('PV: Activation error', { agId, error: err instanceof Error ? err.message : 'Unknown' });
+      activationFailed = true;
     }
 
     setShowSignatairesModal(false);
+
+    // Activation échouée : on NE finalise PAS le PV (pas de passage en "signé",
+    // pas d'avancement de l'AG) pour que le syndic corrige la résolution fautive
+    // et relance la validation des signatures, conformément au message affiché.
+    if (activationFailed) return;
+
     setIsSigned(true);
     await saveDraft(agId, 'signataires', signataires, 'ag-signataires-' + agId);
     await saveDraft(agId, 'milestones', { pvSigned: true }, 'ag-pv-signed-' + agId);
