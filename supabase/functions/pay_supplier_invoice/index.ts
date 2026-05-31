@@ -21,6 +21,7 @@ interface PayInvoiceRequest {
   payment_date: string;
   method?: string;
   reference?: string;
+  idempotency_key?: string;
 }
 
 function jsonResponse(body: object, status = 200) {
@@ -43,7 +44,7 @@ Deno.serve(async (req: Request) => {
     );
 
     const body: PayInvoiceRequest = await req.json();
-    const { copro_id, period_id, supplier_invoice_id, amount, payment_date, method, reference } = body;
+    const { copro_id, period_id, supplier_invoice_id, amount, payment_date, method, reference, idempotency_key } = body;
 
     if (!copro_id || !period_id || !supplier_invoice_id || !amount || !payment_date) {
       return jsonResponse({ error: "Missing required fields" }, 400);
@@ -57,6 +58,7 @@ Deno.serve(async (req: Request) => {
       p_payment_date: payment_date,
       p_method: method ?? "bank_transfer",
       p_reference: reference ?? null,
+      p_idempotency_key: idempotency_key ?? null,
     });
 
     if (error) return jsonResponse({ error: "Failed to pay supplier invoice", detail: error.message }, 500);

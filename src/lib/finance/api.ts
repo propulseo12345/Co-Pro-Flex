@@ -413,6 +413,8 @@ export interface RecordPaymentPayload {
   method?: string;
   reference?: string;
   call_line_ids?: string[];
+  /** Clé d'idempotence (UUID généré une fois par tentative de paiement) : évite le double encaissement. */
+  idempotency_key?: string;
 }
 
 export async function recordPayment(payload: RecordPaymentPayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; allocations: Array<{ call_line_id: string; amount_allocated: number }> }>> {
@@ -553,6 +555,8 @@ export interface PaySupplierInvoicePayload {
   payment_date: string;
   method?: string;
   reference?: string;
+  /** Clé d'idempotence (UUID généré une fois par tentative de paiement) : évite le double règlement. */
+  idempotency_key?: string;
 }
 
 export async function paySupplierInvoice(payload: PaySupplierInvoicePayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; invoice_status: string }>> {
