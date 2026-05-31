@@ -7,10 +7,11 @@ import type { CallLotRow } from '../hooks/useAppelsFondsDetail';
 import { formatEuros } from '../utils';
 import styles from '../styles/PaymentModal.module.css';
 
-type PaymentMethod = 'bank_transfer' | 'card' | 'check' | 'cash' | 'other';
+type PaymentMethod = 'bank_transfer' | 'direct_debit' | 'card' | 'check' | 'cash' | 'other';
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   bank_transfer: 'Virement',
+  direct_debit: 'Prélèvement SEPA',
   check: 'Chèque',
   card: 'Carte',
   cash: 'Espèces',
