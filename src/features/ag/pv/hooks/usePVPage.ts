@@ -670,11 +670,23 @@ export function usePVPage({ agId }: UsePVPageProps) {
     // Activate AG decisions
     try {
       const supabase = createUntypedClient();
-      const { data: result } = await supabase.rpc('activate_ag_decisions', {
+      const { data: result, error } = await supabase.rpc('activate_ag_decisions', {
         p_ag_id: agId,
       });
 
-      if (result) {
+      if (error) {
+        // Sur un RAISE Postgres, PostgREST renvoie l'échec dans `error` (pas de throw JS).
+        // Sans ce traitement, l'échec d'activation passait totalement inaperçu :
+        // le syndic voyait « signatures validées » alors qu'aucun budget/appel n'était généré.
+        logger.error('PV: Activation échouée', { agId, code: error.code, message: error.message });
+        setActivationResult({ activated: 0, failed: 1 });
+        setShowActivationRecap(true);
+        alert(
+          "L'activation des décisions de l'AG a échoué : aucun budget / appel de fonds n'a été généré.\n\n" +
+            `Cause : ${error.message}\n\n` +
+            'Corrigez la résolution concernée, puis relancez la validation des signatures.'
+        );
+      } else if (result) {
         const typedResult = result as { activated: number; failed: number };
         setActivationResult(typedResult);
 
