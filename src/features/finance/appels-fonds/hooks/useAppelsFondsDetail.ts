@@ -197,7 +197,10 @@ export function useAppelsFondsDetail(callId: string) {
     lines: enrichedLines,
     lots,
     stats,
-    isLoading: callLoading || linesLoading || remindersLoading,
+    // Spinner plein écran au 1er chargement seulement : sur un refetch (après
+    // paiement), on garde l'écran monté — sinon la modale est démontée et son
+    // état "succès" ne s'affiche jamais.
+    isLoading: (callLoading || linesLoading || remindersLoading) && !call,
     paymentLoading,
     recordPayment: doRecordPayment,
     refresh,
