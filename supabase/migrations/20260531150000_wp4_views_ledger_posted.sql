@@ -59,15 +59,8 @@ LEFT JOIN LATERAL (
 WHERE b.status IN ('validated', 'closed');
 
 -- ---- 4.9 : impayé canonique = appels échus non lettrés ----------------------
-CREATE OR REPLACE VIEW public.v_unpaid_by_lot AS
-SELECT cfl.copro_id, cfl.lot_id,
-    sum(cfl.amount_due - cfl.amount_paid) AS unpaid_amount,
-    count(*) AS overdue_lines,
-    min(cf.due_date) AS oldest_due_date,
-    CURRENT_DATE - min(cf.due_date) AS days_overdue
-FROM call_for_funds_lines cfl
-JOIN call_for_funds cf ON cf.id = cfl.call_id
-WHERE cf.status <> 'cancelled'
-  AND cf.due_date < CURRENT_DATE
-  AND cfl.amount_due > cfl.amount_paid
-GROUP BY cfl.copro_id, cfl.lot_id;
+-- NOTE : la vue v_unpaid_by_lot EXISTE DÉJÀ (migration 20260125_niveau2e) et est
+-- déjà correcte (cf.status NOT IN draft/cancelled, cf.due_date < CURRENT_DATE,
+-- HAVING sum(amount_due - amount_paid) > 0, groupée par lot avec owner_name/ref).
+-- On ne la recrée donc PAS ici : un CREATE OR REPLACE avec un jeu de colonnes
+-- différent échouerait ("cannot drop columns from view"). Rien à appliquer.
