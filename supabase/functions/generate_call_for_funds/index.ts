@@ -39,10 +39,16 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Service role : appel de fonds déclenché côté serveur (verify_jwt=false)
+    // Auth obligatoire : endpoint qui meut de l'argent (création d'appels de fonds).
+    // On exige un JWT valide et on agit avec les droits de l'utilisateur (pas service-role).
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return jsonResponse({ error: "Missing Authorization header" }, 401);
+    }
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } },
     );
 
     const body: GenerateCallRequest = await req.json();
