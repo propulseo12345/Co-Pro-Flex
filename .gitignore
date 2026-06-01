@@ -45,3 +45,16 @@ nul
 
 # Backups locaux (migration Supabase)
 .backup/
+
+# Artefacts locaux (CLI Supabase) — non versionnés
+supabase/.temp/
+
+# Assets binaires métier (documents/vidéos/retours) — hors dépôt de code.
+# Motifs en * pour couvrir les deux encodages de noms accentués.
+/coproflex_reel.mp4
+/Cat*gorisation.png
+/Logique metier/
+/Ads*/
+/Retour DB/
+/Retour Pastel/
+/Pr*sentation*/
