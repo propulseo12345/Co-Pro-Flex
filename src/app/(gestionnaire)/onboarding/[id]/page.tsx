@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { setActiveCopro } from '@/lib/copro/activeCopro';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
 import { ensureAccountingPeriod } from '@/lib/onboarding/api';
+import type { OnboardingCallPlan, SoldeOpeningEntry } from '@/lib/onboarding/api';
 import { createClient } from '@/lib/supabase/client';
 import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
 import { Step2Coproprietaires } from '@/components/features/onboarding/steps/Step2Coproprietaires';
@@ -13,6 +14,7 @@ import { Step4Comptes } from '@/components/features/onboarding/steps/Step4Compte
 import { Step5Budget } from '@/components/features/onboarding/steps/Step5Budget';
 import { Step6AgAppels } from '@/components/features/onboarding/steps/Step6AgAppels';
 import { Step7RepriseSoldes } from '@/components/features/onboarding/steps/Step7RepriseSoldes';
+import { Step8Finalisation } from '@/components/features/onboarding/steps/Step8Finalisation';
 import styles from '../onboarding.module.css';
 
 export default function OnboardingWizardPage() {
@@ -30,9 +32,11 @@ export default function OnboardingWizardPage() {
     finishOnboarding,
   } = useOnboarding(coproId);
 
-  // State partagé entre steps 5-7
+  // State partagé entre steps 5-8
   const [budgetId, setBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
+  const [callPlan, setCallPlan] = useState<OnboardingCallPlan | null>(null);
+  const [openingEntries, setOpeningEntries] = useState<SoldeOpeningEntry[]>([]);
 
   // Mémoriser la copro active pour les steps qui en ont besoin
   useEffect(() => {
@@ -154,10 +158,9 @@ export default function OnboardingWizardPage() {
               coproId={coproId}
               budgetId={budgetId}
               periodId={periodId}
-              onComplete={() => completeStep(6)}
+              onComplete={(plan) => { setCallPlan(plan); completeStep(6); }}
               onBack={() => goToStep(5)}
             />
-            {/* NOTE: capture du plan (Step8 finalisation) câblée au lot suivant — l'argument est ignoré ici. */}
           </div>
         )}
         {periodId && maxStepReached >= 7 && (
@@ -165,8 +168,21 @@ export default function OnboardingWizardPage() {
             <Step7RepriseSoldes
               coproId={coproId}
               periodId={periodId}
-              onComplete={handleStep7Complete}
+              onComplete={(entries) => { setOpeningEntries(entries); completeStep(7); }}
               onBack={() => goToStep(6)}
+            />
+          </div>
+        )}
+        {periodId && maxStepReached >= 8 && (
+          <div style={{ display: currentStep === 8 ? undefined : 'none' }}>
+            <Step8Finalisation
+              coproId={coproId}
+              periodId={periodId}
+              budgetId={budgetId}
+              callPlan={callPlan}
+              openingEntries={openingEntries}
+              onFinalized={handleStep7Complete}
+              onBack={() => goToStep(7)}
             />
           </div>
         )}

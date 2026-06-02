@@ -12,6 +12,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   { id: 5, label: 'Budget' },
   { id: 6, label: 'AG & Appels' },
   { id: 7, label: 'Reprise soldes' },
+  { id: 8, label: 'Finalisation' },
 ];
 
 export function useOnboarding(coproId: string) {
