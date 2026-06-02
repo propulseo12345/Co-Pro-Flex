@@ -32,7 +32,6 @@ DECLARE
   v_key_asc uuid := gen_random_uuid();
   v_lot_ids uuid[] := ARRAY[gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid()];
   v_co_ids  uuid[] := ARRAY[gen_random_uuid(), gen_random_uuid(), gen_random_uuid()];
-  i int;
 BEGIN
   -- 1) Copro fraîche
   INSERT INTO copros (id, name, address, city, postal_code, buildings_count, lots_count, total_tantiemes, exercice_debut)
@@ -69,7 +68,7 @@ BEGIN
 
   -- 7) key_lines : générale = tantièmes sur 4 lots ; eau = lot1,2 ; ascenseur = lot3,4
   INSERT INTO repartition_key_lines (id, key_id, copro_id, lot_id, weight)
-  SELECT gen_random_uuid(), v_key_gen, v_new, v_lot_ids[i], 250 FROM generate_series(1,4) i;
+  SELECT gen_random_uuid(), v_key_gen, v_new, v_lot_ids[gs.idx], 250 FROM generate_series(1,4) AS gs(idx);
   INSERT INTO repartition_key_lines (id, key_id, copro_id, lot_id, weight) VALUES
     (gen_random_uuid(), v_key_eau, v_new, v_lot_ids[1], 50),
     (gen_random_uuid(), v_key_eau, v_new, v_lot_ids[2], 50);
