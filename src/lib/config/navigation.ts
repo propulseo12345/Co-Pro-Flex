@@ -61,6 +61,7 @@ export const MODULES: ModuleConfig[] = [
       { label: 'Factures', href: '/finance/factures', icon: Receipt },
       { label: 'Appels de fonds', href: '/finance/appels-fonds', icon: DollarSign },
       { label: 'Mouvements bancaires', href: '/finance/mouvements-bancaires', icon: ArrowLeftRight },
+      { label: 'Diagnostic', href: '/finance/diagnostic', icon: ShieldCheck },
     ],
   },
   {
