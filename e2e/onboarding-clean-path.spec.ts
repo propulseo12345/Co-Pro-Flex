@@ -1,0 +1,249 @@
+/**
+ * E2E — Parcours complet du wizard d'onboarding réparé (smoke "chemin propre").
+ *
+ * Objectif : prouver qu'une copropriété créée de bout en bout via le VRAI wizard
+ * (Step 1 → Step 8) produit un grand livre propre :
+ *   - `audit_finance_integrity(copro_id)` ne renvoie AUCUNE ligne (0 écart),
+ *   - au moins 1 `call_for_funds` au statut `issued` a bien été posté.
+ *
+ * Preuve UI : Step 8 ("Enregistrer et vérifier") ne redirige vers /portefeuille
+ * QUE si l'audit est propre (audit=0 ET compte d'attente 471/472 soldé).
+ * Voir Step8Finalisation.tsx + auditOnboardingBooks() : si un écart subsiste,
+ * l'étape reste affichée avec les écarts -> le toHaveURL(/portefeuille/) échouerait.
+ *
+ * Pré-requis (env, identiques aux specs AG existantes) :
+ *   - NEXT_PUBLIC_SUPABASE_URL
+ *   - SUPABASE_SERVICE_ROLE_KEY      (assertions DB en service-role)
+ *   - E2E_USER_EMAIL / E2E_USER_PASSWORD (optionnel : sinon compte démo admin)
+ *   - serveur dev lancé (webServer Playwright) + comptes démo seedés
+ *
+ * NOTE robustesse : Step 7 (reprise de soldes) est volontairement SKIPPÉ ("Passer").
+ * Saisir un solde d'un seul côté pose la contrepartie sur le compte d'attente 472,
+ * qui resterait non soldé -> l'audit de finalisation BLOQUE (waitingBalance != 0)
+ * et la redirection /portefeuille n'aurait jamais lieu. Skip = chemin propre garanti.
+ */
+
+import { test, expect, type Page, type Locator } from '@playwright/test';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+// Identifiants de test : env dédiées, sinon compte de démonstration (cf. /auth/login).
+const LOGIN_EMAIL = process.env.E2E_USER_EMAIL ?? 'admin@coproflex.fr';
+const LOGIN_PASSWORD = process.env.E2E_USER_PASSWORD ?? 'password123';
+
+// Client admin (service-role) pour les assertions DB directes — pattern repris des specs AG.
+function getAdminClient(): SupabaseClient {
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    auth: { persistSession: false },
+  });
+}
+
+/**
+ * Connexion via la VRAIE page de login de l'app (aucun helper d'auth n'existe dans le repo).
+ * Reproduit le formulaire de src/app/auth/login/page.tsx (#email, #password, "Se connecter")
+ * qui redirige vers /portefeuille en cas de succès.
+ */
+async function login(page: Page): Promise<void> {
+  await page.goto('/auth/login');
+  await page.locator('#email').fill(LOGIN_EMAIL);
+  await page.locator('#password').fill(LOGIN_PASSWORD);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await expect(page).toHaveURL(/\/portefeuille/, { timeout: 30000 });
+}
+
+/**
+ * Le wizard rend toutes les étapes déjà atteintes mais masque les inactives via
+ * `display:none` (cf. /onboarding/[id]/page.tsx). Pour éviter les violations strict-mode
+ * (boutons dupliqués "Continuer"/"Retour"), on scope chaque action sur le bloc d'étape
+ * VISIBLE en s'appuyant sur le titre (StepHeader -> <h2>).
+ */
+function stepBlock(page: Page, headingText: string): Locator {
+  return page
+    .locator('div')
+    .filter({ has: page.getByRole('heading', { name: headingText }) })
+    .filter({ visible: true })
+    .last();
+}
+
+test.describe('Onboarding — chemin propre (audit = 0)', () => {
+  const uniqueName = `CLEAN-E2E-${Date.now()}`;
+  let coproId: string | null = null;
+
+  test.afterAll(async () => {
+    // Nettoyage best-effort de la copro de test (cascade attendue sur les tables liées).
+    if (coproId) {
+      const supabase = getAdminClient();
+      await supabase.from('copros').delete().eq('id', coproId);
+    }
+  });
+
+  test('parcours complet wizard -> redirection /portefeuille + audit propre', async ({ page }) => {
+    test.setTimeout(120_000);
+
+    // ── 1) Connexion ──────────────────────────────────────────────────────────
+    await login(page);
+
+    // ── 2) Step 1 : créer la copropriété ──────────────────────────────────────
+    await page.goto('/onboarding/create');
+
+    // Nom de la copro (placeholder "Résidence Les Lilas").
+    await page.getByPlaceholder('Résidence Les Lilas').fill(uniqueName);
+
+    // ⚠️ ADRESSE : le champ `adresse` n'est rempli QUE via l'autocomplete Google Maps
+    // (handlePlaceSelect). On tape dans la recherche puis on clique la 1re suggestion.
+    // Dépend d'une clé Maps configurée en local — d'où le TODO ci-dessous.
+    const addressSearch = page.getByPlaceholder('Rechercher une adresse...');
+    await addressSearch.fill('1 rue de la Paix Paris');
+    // TODO vérifier le sélecteur : la liste de suggestions (styles.suggestionItem) est un
+    // <button> dans <ul.suggestions>. On prend le premier item proposé.
+    const firstSuggestion = page.locator('ul li button').first();
+    await firstSuggestion.click({ timeout: 10000 }).catch(async () => {
+      // Repli si l'autocomplete n'est pas disponible : remplir CP/Ville directement.
+      // (N'alimente PAS `adresse` -> la validation Step 1 échouera ; à ajuster selon l'env.)
+      // TODO vérifier : sans clé Google Maps, prévoir un mock OU un fallback de saisie adresse.
+    });
+
+    // Code postal (placeholder "75001") + Ville (placeholder "Paris").
+    // Si l'autocomplete a déjà rempli ces champs, fill() les écrase sans dommage.
+    await page.getByPlaceholder('75001').fill('75001');
+    await page.getByPlaceholder('Paris').fill('Paris');
+
+    await page.getByRole('button', { name: 'Créer et continuer' }).click();
+
+    // Redirection vers /onboarding/{coproId} (Step 2).
+    await page.waitForURL(/\/onboarding\/[0-9a-f-]+$/, { timeout: 30000 });
+    const m = page.url().match(/\/onboarding\/([0-9a-f-]+)$/);
+    expect(m).toBeTruthy();
+    coproId = m![1];
+
+    // Récupérer le copro_id en DB par le nom unique (double-vérification).
+    const admin = getAdminClient();
+    {
+      const { data, error } = await admin
+        .from('copros')
+        .select('id')
+        .eq('name', uniqueName)
+        .single();
+      expect(error).toBeNull();
+      expect(data?.id).toBe(coproId);
+    }
+
+    // ── 3) Step 2 : ajouter 2 copropriétaires ─────────────────────────────────
+    const s2 = stepBlock(page, 'Copropriétaires');
+    // Formulaire d'ajout rapide : placeholders "Nom *", "Prénom", "Email".
+    // Le bouton d'ajout est une icône (UserPlus) sans libellé -> dernier <button> de la ligne d'ajout.
+    // TODO vérifier le sélecteur du bouton "ajouter" (icône UserPlus, pas de texte).
+    async function addCoproprietaire(nom: string, prenom: string, email: string): Promise<void> {
+      await s2.getByPlaceholder('Nom *').fill(nom);
+      await s2.getByPlaceholder('Prénom').fill(prenom);
+      await s2.getByPlaceholder('Email').fill(email);
+      // Le bouton d'ajout est désactivé tant que "Nom" est vide ; ici il est actif.
+      await s2.locator('button:not([disabled])').last().click();
+      // Attendre l'apparition de la ligne dans le tableau.
+      await expect(s2.getByText(nom, { exact: false }).first()).toBeVisible();
+    }
+    await addCoproprietaire('Martin', 'Alice', 'alice.martin@example.com');
+    await addCoproprietaire('Durand', 'Bob', 'bob.durand@example.com');
+
+    // "Continuer (N copropriétaires)".
+    await s2.getByRole('button', { name: /^Continuer \(/ }).click();
+
+    // ── 4) Step 3 : créer 2 lots (500/500) avec propriétaire ──────────────────
+    const s3 = stepBlock(page, 'Lots & Clés de répartition');
+    // La clé "Charges générales" (base tantièmes, all_lots) est AUTO-CRÉÉE par Step3 :
+    // elle couvre les 2 lots -> pas de création de clé manuelle nécessaire.
+
+    async function createLot(ref: string, tantiemes: string, ownerLabel: string): Promise<void> {
+      await s3.getByRole('button', { name: 'Ajouter un lot' }).click();
+      // Modale "Nouveau lot" (CreateLotModal).
+      const modal = page
+        .locator('div')
+        .filter({ has: page.getByRole('heading', { name: 'Nouveau lot' }) })
+        .filter({ visible: true })
+        .last();
+      await modal.getByPlaceholder('ex: A-101').fill(ref);
+      await modal.getByPlaceholder('ex: 500').fill(tantiemes);
+      // Sélection du propriétaire (select "Propriétaire", options = display_name des copros).
+      // TODO vérifier le label exact de l'option (display_name = "Prénom Nom" ou "Nom Prénom" ?).
+      await modal.locator('select').last().selectOption({ label: ownerLabel }).catch(async () => {
+        // Repli : sélectionner par index (1re option réelle après "— Aucun —").
+        await modal.locator('select').last().selectOption({ index: 1 });
+      });
+      await modal.getByRole('button', { name: 'Créer le lot' }).click();
+      // La modale se ferme après création.
+      await expect(modal).toBeHidden({ timeout: 10000 });
+    }
+
+    // TODO vérifier : ownerLabel dépend du format display_name renvoyé par la vue lots.
+    await createLot('A-101', '500', 'Alice Martin');
+    await createLot('A-102', '500', 'Bob Durand');
+
+    // "Continuer (2 lots)".
+    await s3.getByRole('button', { name: /^Continuer \(/ }).click();
+
+    // ── 5) Step 4 : comptes bancaires -> on SAUTE (saisie manuelle vide) ───────
+    const s4 = stepBlock(page, 'Comptes bancaires');
+    // "Continuer" est désactivé en mode "choose" : on bascule en "Saisie manuelle",
+    // puis on continue sans rien saisir (les 2 comptes 512000/512100 seront créés à 0).
+    await s4.getByRole('button', { name: 'Saisie manuelle' }).click();
+    await s4.getByRole('button', { name: 'Continuer' }).click();
+
+    // ── 6) Step 5 : 1 ligne de budget sur la clé générale ─────────────────────
+    const s5 = stepBlock(page, 'Budget prévisionnel');
+    await s5.getByRole('button', { name: 'Ajouter un poste' }).click();
+    // Le dropdown propose les postes prédéfinis : "Honoraires syndic" mappe sur 621
+    // (compte de charge réel) -> pas de bascule 628/avertissement.
+    await page.getByRole('button', { name: 'Honoraires syndic' }).click();
+    // Saisir le montant (input number, placeholder "0.00"). La clé est pré-sélectionnée
+    // (defaultKeyId = "Charges générales").
+    await s5.getByPlaceholder('0.00').first().fill('4000');
+    await s5.getByRole('button', { name: 'Continuer' }).click();
+
+    // ── 7) Step 6 : fréquence Annuel, 0 déjà émis, date AG, valider 1 appel ────
+    const s6 = stepBlock(page, 'Appels de fonds');
+    // Fréquence "Annuel (1)".
+    await s6.getByRole('button', { name: /^Annuel/ }).click();
+    // "Aucun" appel déjà émis.
+    await s6.getByRole('button', { name: 'Aucun' }).click();
+    // Date de l'AG (input type=date).
+    await s6.locator('input[type="date"]').fill('2026-01-15');
+    // "Voir les appels (1)".
+    await s6.getByRole('button', { name: /^Voir les appels/ }).click();
+    // "Valider ces 1 appel".
+    await s6.getByRole('button', { name: /^Valider ces/ }).click();
+
+    // ── 8) Step 7 : reprise des soldes -> "Passer" (chemin propre, cf. en-tête) ─
+    const s7 = stepBlock(page, 'Reprise de soldes');
+    await s7.getByRole('button', { name: 'Passer' }).click();
+
+    // ── 9) Step 8 : finalisation ──────────────────────────────────────────────
+    const s8 = stepBlock(page, 'Finalisation');
+    await s8.getByRole('button', { name: 'Enregistrer et vérifier' }).click();
+
+    // ── 10) Preuve UI : redirection /portefeuille => audit propre ─────────────
+    await expect(page).toHaveURL(/\/portefeuille/, { timeout: 30000 });
+
+    // ── 11) Assertions DB ─────────────────────────────────────────────────────
+    // 11a) audit_finance_integrity -> 0 ligne.
+    {
+      const { data, error } = await admin.rpc('audit_finance_integrity', {
+        p_copro_id: coproId,
+      });
+      expect(error).toBeNull();
+      expect(Array.isArray(data) ? data.length : -1).toBe(0);
+    }
+
+    // 11b) Au moins 1 call_for_funds "issued" pour cette copro.
+    {
+      const { data, error } = await admin
+        .from('call_for_funds')
+        .select('id, status')
+        .eq('copro_id', coproId)
+        .eq('status', 'issued');
+      expect(error).toBeNull();
+      expect((data ?? []).length).toBeGreaterThanOrEqual(1);
+    }
+  });
+});
