@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCopro } from '@/providers/CoproContext';
 import { createClient } from '@/lib/supabase/client';
 import type { Database } from '@/types/supabase';
@@ -29,14 +29,30 @@ interface UseFinanceDiagnosticResult {
  * filets V0). Aucune mutation.
  */
 export function useFinanceDiagnostic(): UseFinanceDiagnosticResult {
-  const { currentCoproId } = useCopro();
+  const { currentCoproId, isLoading: coproLoading, error: coproError } = useCopro();
   const [issues, setIssues] = useState<IntegrityIssue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Compteur de requêtes : ignore les réponses obsolètes (changement de copro
+  // pendant un fetch en vol → on ne doit pas écrire le résultat d'une autre copro).
+  const reqRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const reqId = ++reqRef.current;
+
+    // Copro active pas encore résolue : NE PAS dégrader en « tout au vert ».
     if (!currentCoproId) {
-      setIsLoading(false);
+      setIssues([]);
+      if (coproError) {
+        setError(coproError);
+        setIsLoading(false);
+      } else if (coproLoading) {
+        setError(null);
+        setIsLoading(true); // le contexte résout encore la copro active
+      } else {
+        setError('Aucune copropriété active sélectionnée.');
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -49,6 +65,9 @@ export function useFinanceDiagnostic(): UseFinanceDiagnosticResult {
       .select('*')
       .eq('copro_id', currentCoproId);
 
+    // Réponse obsolète (la copro active a changé entre-temps) → on l'ignore.
+    if (reqId !== reqRef.current) return;
+
     if (fetchError) {
       setError(fetchError.message);
       setIssues([]);
@@ -57,7 +76,7 @@ export function useFinanceDiagnostic(): UseFinanceDiagnosticResult {
     }
 
     setIsLoading(false);
-  }, [currentCoproId]);
+  }, [currentCoproId, coproLoading, coproError]);
 
   useEffect(() => {
     refresh();
