@@ -39,7 +39,8 @@ export function getResolutionResult(resolution: Resolution, votes: VoteData[]): 
   if (resolution.resultat === 'ADOPTEE' || resolution.resultat === 'REJETEE') {
     adopte = resolution.resultat === 'ADOPTEE';
   } else if (total > 0) {
-    adopte = (pour / total) * 100 > 50;
+    // Majorité simple (repli) : pour > contre — abstentions hors décompte (cohérent avec checkMajority / RPC)
+    adopte = pour > contre;
   } else {
     adopte = false;
   }

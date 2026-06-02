@@ -194,8 +194,8 @@ export function useSessionVoting({
   ) => {
     if (!passerelleResolution || !passerelleVoteInitial || !stats) return;
 
-    const voixExprimees = stats.pour + stats.contre + stats.abstention;
-    const adoptedArt24 = voixExprimees > 0 && stats.pour > (voixExprimees / 2);
+    // Art. 24 (second vote passerelle 25-1) : pour > contre (abstentions et défaillants hors décompte)
+    const adoptedArt24 = stats.pour > stats.contre;
     const resultat = adoptedArt24 ? 'ADOPTEE' : 'REJETEE';
 
     const passerelleData: PasserelleMajorite = {

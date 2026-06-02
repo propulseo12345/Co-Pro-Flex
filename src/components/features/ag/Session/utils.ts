@@ -43,17 +43,17 @@ export const checkMajority = (
   // Use provided totals or compute from votes
   const totalTantiemes = options?.totalTantiemes ?? stats.total;
   const totalCoproprietaires = options?.totalCoproprietaires ?? 0;
-  const voixExprimees = stats.pour + stats.contre + stats.abstention;
   const resolutionVotes = votes.filter(v => v.resolutionId === resolution.id);
 
   switch (majoriteType) {
     case 'ART_24': {
-      const majoriteVoixExprimees = voixExprimees > 0 && stats.pour > (voixExprimees / 2);
+      // Art. 24 : majorité simple = pour > contre (abstentions et défaillants hors décompte) — aligné sur la RPC calculate_resolution_result
+      const majoriteSimple = stats.pour > stats.contre;
       return {
-        adopted: majoriteVoixExprimees,
-        reason: majoriteVoixExprimees
-          ? `Adoptée : ${stats.pour} tantièmes pour sur ${voixExprimees} tantièmes exprimés (majorité simple requise)`
-          : `Rejetée : ${stats.pour} tantièmes pour sur ${voixExprimees} tantièmes exprimés (majorité simple requise)`
+        adopted: majoriteSimple,
+        reason: majoriteSimple
+          ? `Adoptée : ${stats.pour} tantièmes pour contre ${stats.contre} (majorité simple, abstentions exclues)`
+          : `Rejetée : ${stats.pour} tantièmes pour contre ${stats.contre} (majorité simple, abstentions exclues)`
       };
     }
 
@@ -78,15 +78,13 @@ export const checkMajority = (
     }
 
     case 'ART_25_1': {
-      // Passerelle 25→24 : second vote à la majorité simple des voix exprimées (Art. 24)
-      const voixExprimees = stats.pour + stats.contre + stats.abstention;
-      const seuilArt24 = voixExprimees > 0 ? Math.floor(voixExprimees / 2) + 1 : 1;
-      const adoptedArt251 = voixExprimees > 0 && stats.pour >= seuilArt24;
+      // Passerelle 25→24 : second vote à la majorité simple de l'Art. 24 = pour > contre (abstentions exclues)
+      const adoptedArt251 = stats.pour > stats.contre;
       return {
         adopted: adoptedArt251,
         reason: adoptedArt251
-          ? `Adoptée (passerelle 25-1) : ${stats.pour} tantièmes pour sur ${voixExprimees} exprimés (seuil: ${seuilArt24})`
-          : `Rejetée (passerelle 25-1) : ${stats.pour} tantièmes pour sur ${voixExprimees} exprimés (seuil requis: ${seuilArt24})`
+          ? `Adoptée (passerelle 25-1) : ${stats.pour} tantièmes pour contre ${stats.contre} (majorité simple, abstentions exclues)`
+          : `Rejetée (passerelle 25-1) : ${stats.pour} tantièmes pour contre ${stats.contre} (majorité simple, abstentions exclues)`
       };
     }
 
