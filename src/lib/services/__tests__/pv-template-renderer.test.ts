@@ -4,6 +4,7 @@
 
 import { PVTemplateRenderer } from '../pv-template-renderer';
 import type { IPVRenderContext, IPVTemplateSpec, IPVSection } from '@/types/models/pv-template';
+import { extractVariablesFromText, validateTemplateVariables, isValidVariable } from '@/lib/constants/pv-variables';
 
 describe('PVTemplateRenderer', () => {
     let renderer: PVTemplateRenderer;
@@ -282,8 +283,7 @@ describe('PVTemplateRenderer', () => {
 });
 
 describe('Variable validation', () => {
-    // Import validation helpers
-    const { extractVariablesFromText, validateTemplateVariables, isValidVariable } = require('@/lib/constants/pv-variables');
+    // extractVariablesFromText / validateTemplateVariables / isValidVariable importés en tête de fichier
 
     it('should extract variables from text', () => {
         const text = 'Hello {{copro.nom}}, your AG is on {{ag.date}}';

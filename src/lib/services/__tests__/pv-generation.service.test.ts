@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 /**
  * Tests unitaires pour le service de génération PV
  */
@@ -82,7 +84,9 @@ describe('pv-generation.service', () => {
 
     describe('getLatestJobForAG', () => {
         it('should return null if no jobs exist', () => {
-            const job = getLatestJobForAG('ag-123');
+            // agId jamais utilisé ailleurs : le store activeJobs (Map mémoire) n'est pas
+            // réinitialisé entre tests, donc on isole via un identifiant dédié.
+            const job = getLatestJobForAG('ag-sans-aucun-job');
             expect(job).toBeNull();
         });
 
@@ -131,15 +135,15 @@ describe('PV Document operations', () => {
     });
 
     describe('getPVDocument', () => {
-        it('should return null for non-existent document', () => {
-            const doc = getPVDocument('non-existent');
+        it('should return null for non-existent document', async () => {
+            const doc = await getPVDocument('non-existent');
             expect(doc).toBeNull();
         });
     });
 
     describe('getPVDocumentForAG', () => {
-        it('should return null if no document exists', () => {
-            const doc = getPVDocumentForAG('ag-123');
+        it('should return null if no document exists', async () => {
+            const doc = await getPVDocumentForAG('ag-123');
             expect(doc).toBeNull();
         });
     });
@@ -155,12 +159,12 @@ describe('Vote calculations', () => {
         totalTantiemes: number
     ) => {
         const total = pour + contre + abstention;
-        const seuilArt24 = Math.floor(total / 2) + 1;
         const seuilArt25 = Math.floor(totalTantiemes / 2) + 1;
 
         switch (majorite) {
             case 'ART_24':
-                return pour >= seuilArt24;
+                // Majorité simple art. 24 : pour > contre (abstentions hors décompte)
+                return pour > contre;
             case 'ART_25':
                 return pour >= seuilArt25;
             default:
@@ -173,8 +177,8 @@ describe('Vote calculations', () => {
         expect(calculateVoteResult(60, 40, 0, 'ART_24', 1000)).toBe(true);
         // 40 pour, 60 contre sur 100 présents
         expect(calculateVoteResult(40, 60, 0, 'ART_24', 1000)).toBe(false);
-        // 50/50 avec abstentions
-        expect(calculateVoteResult(50, 40, 10, 'ART_24', 1000)).toBe(false); // 50 < 51 (seuil)
+        // 50 pour > 40 contre : adoptée (les abstentions ne comptent pas au dénominateur, art. 24)
+        expect(calculateVoteResult(50, 40, 10, 'ART_24', 1000)).toBe(true);
     });
 
     it('should correctly calculate Article 25 majority (absolute majority)', () => {
