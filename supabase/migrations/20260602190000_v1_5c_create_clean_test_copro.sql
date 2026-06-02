@@ -64,8 +64,8 @@ BEGIN
   -- 6) Clés : générale (tous lots) + eau (lot1,2) + ascenseur (lot3,4) — created_at décalé pour ordre déterministe
   INSERT INTO repartition_keys (id, copro_id, name, basis, is_active, coverage_mode, category, created_at) VALUES
     (v_key_gen, v_new, 'Clé générale',   'tantiemes', true, 'all_lots', 'general', now() - interval '3 min'),
-    (v_key_eau, v_new, 'Clé eau',        'custom',    true, 'custom',   'special', now() - interval '2 min'),
-    (v_key_asc, v_new, 'Clé ascenseur',  'custom',    true, 'custom',   'special', now() - interval '1 min');
+    (v_key_eau, v_new, 'Clé eau',        'custom',    true, 'subset',   'special', now() - interval '2 min'),
+    (v_key_asc, v_new, 'Clé ascenseur',  'custom',    true, 'subset',   'special', now() - interval '1 min');
 
   -- 7) key_lines : générale = tantièmes sur 4 lots ; eau = lot1,2 ; ascenseur = lot3,4
   INSERT INTO repartition_key_lines (id, key_id, copro_id, lot_id, weight)
