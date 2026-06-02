@@ -11,6 +11,8 @@ const ISSUE_TYPE_LABELS: Record<string, string> = {
   OVER_PAID: 'Trop payé',
   CALL_VS_BUDGET_MISMATCH: 'Appels ≠ budget',
   LOT_GL_MISMATCH: 'Relevé ≠ Grand Livre',
+  SOURCE_ID_MISSING: 'Sans pièce (source_id)',
+  CHAPEAU_450_POSTED: 'Chapeau 450 mouvementé',
 };
 
 /** Libellé lisible d'un issue_type (fallback : la valeur brute). */
@@ -26,6 +28,8 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
   payment: 'Paiement',
   budget: 'Budget',
   lot: 'Lot',
+  ledger_transaction: 'Écriture',
+  account: 'Compte',
 };
 
 export function entityTypeLabel(entityType: string | null): string {
