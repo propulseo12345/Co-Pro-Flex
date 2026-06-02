@@ -143,7 +143,7 @@ describe('PV Document operations', () => {
 
     describe('getPVDocumentForAG', () => {
         it('should return null if no document exists', async () => {
-            const doc = await getPVDocumentForAG('ag-123');
+            const doc = await getPVDocumentForAG('ag-sans-document', 'copro-test');
             expect(doc).toBeNull();
         });
     });
