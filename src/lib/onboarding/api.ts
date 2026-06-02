@@ -45,6 +45,17 @@ export async function createCopropriete(payload: CoproCreate) {
     });
   }
 
+  // Provisionner le plan comptable canonique (82 comptes, 450-1..5, chapeau non-postable).
+  // Idempotent côté SQL (ON CONFLICT DO NOTHING).
+  if (data) {
+    const { error: chartErr } = await supabase.rpc('provision_copro_chart', {
+      p_copro_id: (data as { id: string }).id,
+    });
+    if (chartErr) {
+      return { data: null, error: new Error(`Plan comptable non provisionné : ${chartErr.message}`) };
+    }
+  }
+
   return { data: data as { id: string; name: string }, error: null };
 }
 
@@ -298,31 +309,35 @@ export async function createOnboardingBudget(
 ) {
   const supabase = createUntypedClient();
 
-  // Ensure a default expense account exists (code 6xx)
-  let accountId: string;
-  const { data: existingAcc } = await supabase
-    .from('accounts')
-    .select('id')
-    .eq('copro_id', coproId)
-    .eq('code', '600')
-    .maybeSingle();
+  // Résoudre le compte de charge par catégorie depuis le plan provisionné.
+  // Map catégorie (code de ligne budget) -> compte de charge canonique.
+  const CHARGE_ACCOUNT_BY_CATEGORY: Record<string, string> = {
+    '601': '601', '602': '602', '604': '604', '605': '605',
+    '606': '606', '611': '611', '614': '614', '615': '615',
+    '616': '616', '621': '621', '622': '622', '623': '623', '628': '628',
+  };
 
-  if (existingAcc) {
-    accountId = existingAcc.id as string;
-  } else {
-    const { data: newAcc, error: accErr } = await supabase
-      .from('accounts')
-      .insert({
-        copro_id: coproId,
-        code: '600',
-        name: 'Charges de copropriété',
-        account_type: 'expense',
-        is_active: true,
-      })
-      .select('id')
-      .single();
-    if (accErr) return { data: null, error: new Error(accErr.message) };
-    accountId = newAcc.id as string;
+  const { data: chargeAccounts } = await supabase
+    .from('accounts')
+    .select('id, code')
+    .eq('copro_id', coproId)
+    .like('code', '6%');
+  const chargeByCode = new Map<string, string>();
+  for (const a of (chargeAccounts || []) as Array<{ id: string; code: string }>) {
+    chargeByCode.set(a.code, a.id);
+  }
+
+  // Défaut : 628 (charges diverses). Si absent du plan -> erreur explicite (plan non provisionné).
+  const defaultChargeId = chargeByCode.get('628');
+  if (!defaultChargeId) {
+    return { data: null, error: new Error('Plan comptable incomplet : compte 628 absent. La copro a-t-elle été provisionnée (provision_copro_chart) ?') };
+  }
+
+  function resolveChargeAccount(category: string): { id: string; mappedToDefault: boolean } {
+    const targetCode = CHARGE_ACCOUNT_BY_CATEGORY[category];
+    const id = targetCode ? chargeByCode.get(targetCode) : undefined;
+    if (id) return { id, mappedToDefault: false };
+    return { id: defaultChargeId!, mappedToDefault: true };
   }
 
   // Create budget
@@ -340,210 +355,99 @@ export async function createOnboardingBudget(
     .single();
   if (budgetErr) return { data: null, error: new Error(budgetErr.message) };
 
-  // Create budget lines
+  // Create budget lines (compte de charge résolu par catégorie, pas un 600 unique)
+  const unmappedCategories: string[] = [];
   if (lines.length > 0) {
-    const budgetLines = lines.map(l => ({
-      copro_id: coproId,
-      budget_id: budget.id,
-      account_id: accountId,
-      repartition_key_id: l.repartition_key_id,
-      label: l.label.trim(),
-      code: l.category,
-      amount: l.amount,
-      sort_order: l.sort_order,
-    }));
+    const budgetLines = lines.map(l => {
+      const { id: accountId, mappedToDefault } = resolveChargeAccount(l.category);
+      if (mappedToDefault) unmappedCategories.push(l.category);
+      return {
+        copro_id: coproId,
+        budget_id: budget.id,
+        account_id: accountId,
+        repartition_key_id: l.repartition_key_id,
+        label: l.label.trim(),
+        code: l.category,
+        amount: l.amount,
+        sort_order: l.sort_order,
+      };
+    });
     const { error: linesErr } = await supabase.from('budget_lines').insert(budgetLines);
     if (linesErr) return { data: null, error: new Error(linesErr.message) };
   }
 
-  return { data: { budgetId: budget.id as string }, error: null };
-}
-
-// ═══ CALLS FOR FUNDS (STEP 6) ═══
-
-export interface GenerateCallsPayload {
-  coproId: string;
-  periodId: string;
-  budgetId: string;
-  schedule: 'annuel' | 'semestriel' | 'trimestriel';
-  agDate: string;
-}
-
-export async function generateCallsFromBudget(payload: GenerateCallsPayload) {
-  const supabase = createUntypedClient();
-  const { coproId, periodId, budgetId, schedule, agDate } = payload;
-
-  // Get budget lines with their repartition key
-  const { data: budgetLines, error: blErr } = await supabase
-    .from('budget_lines')
-    .select('id, amount, repartition_key_id')
-    .eq('budget_id', budgetId);
-  if (blErr) return { data: null, error: new Error(blErr.message) };
-  if (!budgetLines?.length) return { data: null, error: new Error('Aucune ligne de budget trouvée') };
-
-  // Group budget lines by repartition key (keyId → total amount)
-  const keyTotals = new Map<string, number>();
-  for (const line of budgetLines as Array<{ amount: number; repartition_key_id: string }>) {
-    const amt = Number(line.amount) || 0;
-    keyTotals.set(line.repartition_key_id, (keyTotals.get(line.repartition_key_id) || 0) + amt);
-  }
-
-  // Determine number of calls and dates
-  const nbAppels = schedule === 'annuel' ? 1 : schedule === 'semestriel' ? 2 : 4;
-  const year = new Date(agDate).getFullYear();
-
-  // Ensure accounts 450 and 701 exist
-  const { data: accounts } = await supabase
-    .from('accounts')
-    .select('id, code')
-    .eq('copro_id', coproId)
-    .in('code', ['450', '701']);
-
-  let acc450Id: string;
-  let acc701Id: string;
-  const accountsList = (accounts || []) as Array<{ id: string; code: string }>;
-  const found450 = accountsList.find(a => a.code === '450');
-  const found701 = accountsList.find(a => a.code === '701');
-
-  if (!found450) {
-    const { data: n450, error: e450 } = await supabase
-      .from('accounts')
-      .insert({ copro_id: coproId, code: '450', name: 'Copropriétaires', account_type: 'asset', is_active: true })
-      .select('id').single();
-    if (e450) return { data: null, error: new Error(e450.message) };
-    acc450Id = n450.id as string;
-  } else {
-    acc450Id = found450.id;
-  }
-
-  if (!found701) {
-    const { data: n701, error: e701 } = await supabase
-      .from('accounts')
-      .insert({ copro_id: coproId, code: '701', name: 'Provisions pour charges', account_type: 'income', is_active: true })
-      .select('id').single();
-    if (e701) return { data: null, error: new Error(e701.message) };
-    acc701Id = n701.id as string;
-  } else {
-    acc701Id = found701.id;
-  }
-
-  // Récupérer les noms des clés pour le détail
-  const keyIds = [...keyTotals.keys()];
-  const { data: keyNames } = await supabase
-    .from('repartition_keys')
-    .select('id, name')
-    .in('id', keyIds);
-  const keyNameMap: Record<string, string> = {};
-  for (const k of (keyNames || []) as Array<{ id: string; name: string }>) {
-    keyNameMap[k.id] = k.name;
-  }
-
-  let totalCallsCreated = 0;
-  let totalLinesCreated = 0;
-  const callDetails: Array<{ label: string; trimester: number; keyName: string; amount: number; lotsCount: number }> = [];
-
-  for (let t = 1; t <= nbAppels; t++) {
-    const issueMonth = schedule === 'annuel' ? 0 : schedule === 'semestriel' ? (t - 1) * 6 : (t - 1) * 3;
-    const issueDate = new Date(year, issueMonth, 1).toISOString().split('T')[0];
-    const dueDate = new Date(year, issueMonth + 1, 0).toISOString().split('T')[0];
-    const labelSuffix = nbAppels === 1 ? '' : schedule === 'semestriel' ? ` - S${t}` : ` - T${t}`;
-
-    for (const [keyId, totalAmount] of Array.from(keyTotals.entries())) {
-      const callAmount = Math.round((totalAmount / nbAppels) * 100) / 100;
-
-      // Get lots for this key
-      const { data: keyLines } = await supabase
-        .from('repartition_key_lines')
-        .select('lot_id, weight')
-        .eq('key_id', keyId);
-      if (!keyLines?.length) continue;
-
-      const totalWeight = (keyLines as Array<{ weight: number }>).reduce((s, l) => s + Number(l.weight), 0);
-
-      // Create ledger transaction
-      const { data: ltx, error: ltxErr } = await supabase
-        .from('ledger_transactions')
-        .insert({
-          copro_id: coproId,
-          period_id: periodId,
-          tx_date: issueDate,
-          label: `Appel de fonds${labelSuffix}`,
-          source_type: 'call_for_funds',
-          status: 'posted',
-          posted_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single();
-      if (ltxErr) continue;
-
-      // Create ledger entries (debit 450, credit 701)
-      await supabase.from('ledger_entries').insert([
-        { copro_id: coproId, period_id: periodId, tx_id: ltx.id, account_id: acc450Id, direction: 'debit', amount: callAmount, entry_label: `Appel${labelSuffix}` },
-        { copro_id: coproId, period_id: periodId, tx_id: ltx.id, account_id: acc701Id, direction: 'credit', amount: callAmount, entry_label: `Appel${labelSuffix}` },
-      ]);
-
-      // Create call_for_funds
-      const { data: call, error: callErr } = await supabase
-        .from('call_for_funds')
-        .insert({
-          copro_id: coproId,
-          period_id: periodId,
-          budget_id: budgetId,
-          repartition_key_id: keyId,
-          label: `Appel de fonds${labelSuffix}`,
-          trimester: t,
-          issue_date: issueDate,
-          due_date: dueDate,
-          total_amount: callAmount,
-          status: 'draft',
-          ledger_tx_id: ltx.id,
-        })
-        .select('id')
-        .single();
-      if (callErr) continue;
-
-      // Create call lines per lot
-      const lines = (keyLines as Array<{ lot_id: string; weight: number }>).map(l => ({
-        copro_id: coproId,
-        call_id: call.id,
-        lot_id: l.lot_id,
-        amount_due: Math.round((callAmount * Number(l.weight) / totalWeight) * 100) / 100,
-      }));
-
-      // Fix rounding
-      const linesTotal = lines.reduce((s, l) => s + l.amount_due, 0);
-      const delta = Math.round((callAmount - linesTotal) * 100) / 100;
-      if (lines.length > 0 && delta !== 0) {
-        lines[lines.length - 1].amount_due += delta;
-      }
-
-      const { error: clErr } = await supabase.from('call_for_funds_lines').insert(lines);
-      if (!clErr) {
-        totalCallsCreated++;
-        totalLinesCreated += lines.length;
-        callDetails.push({
-          label: `Appel de fonds${labelSuffix}`,
-          trimester: t,
-          keyName: keyNameMap[String(keyId)] || 'Charges générales',
-          amount: callAmount,
-          lotsCount: lines.length,
-        });
-      }
-    }
-  }
-
-  // Mark budget as validated
-  await supabase.from('budgets').update({ status: 'validated', validated_at: new Date().toISOString() }).eq('id', budgetId);
-
   return {
     data: {
-      callsCreated: totalCallsCreated,
-      linesCreated: totalLinesCreated,
-      details: callDetails,
-      totalAmount: callDetails.reduce((s, d) => s + d.amount, 0),
+      budgetId: budget.id as string,
+      unmappedCategories: [...new Set(unmappedCategories)],
     },
     error: null,
   };
+}
+
+// ═══ CALLS FOR FUNDS (postage canonique, fin de wizard) ═══
+
+export interface OnboardingCallPlan {
+  schedule: 'annuel' | 'semestriel' | 'trimestriel';
+  alreadyDone: number;        // échéances déjà émises avant l'entrée dans l'outil
+  installments: Array<{       // uniquement les échéances RESTANTES
+    index: number;            // 1-based, position dans l'exercice
+    label: string;
+    issueDate: string;        // YYYY-MM-DD
+    dueDate: string;          // YYYY-MM-DD
+  }>;
+}
+
+export async function postOnboardingCalls(
+  coproId: string,
+  periodId: string,
+  budgetId: string,
+  plan: OnboardingCallPlan
+) {
+  const supabase = createUntypedClient();
+  const count = plan.schedule === 'annuel' ? 1 : plan.schedule === 'semestriel' ? 2 : 4;
+
+  // Idempotence : si des appels non annulés existent déjà pour ce budget, ne pas reposter
+  // (re-clic de finalisation après échec partiel).
+  const { data: existing } = await supabase
+    .from('call_for_funds')
+    .select('id')
+    .eq('budget_id', budgetId)
+    .neq('status', 'cancelled')
+    .limit(1);
+  if (existing && existing.length > 0) {
+    return { data: { posted: 0, skipped: true }, error: null };
+  }
+
+  for (const inst of plan.installments) {
+    const { data, error } = await supabase.rpc('post_budget_call_for_funds', {
+      p_copro_id: coproId,
+      p_period_id: periodId,
+      p_budget_id: budgetId,
+      p_label: inst.label,
+      p_trimester: inst.index,
+      p_issue_date: inst.issueDate,
+      p_due_date: inst.dueDate,
+      p_fraction: 1.0,
+      p_installment_index: inst.index,
+      p_installment_count: count,
+    });
+    if (error) {
+      return { data: null, error: new Error(`Appel ${inst.label} : ${error.message}`) };
+    }
+    if (data && (data as { success?: boolean }).success === false) {
+      return { data: null, error: new Error(`Appel ${inst.label} : ${(data as { error?: string }).error || 'échec RPC'}`) };
+    }
+  }
+
+  // Marquer le budget validé
+  const { error: budErr } = await supabase
+    .from('budgets')
+    .update({ status: 'validated', validated_at: new Date().toISOString() })
+    .eq('id', budgetId);
+  if (budErr) return { data: null, error: new Error(budErr.message) };
+
+  return { data: { posted: plan.installments.length }, error: null };
 }
 
 // ═══ LOTS LIST (for Step 7) ═══
@@ -567,143 +471,141 @@ export async function listLots(coproId: string) {
   };
 }
 
-// ═══ REPRISE SOLDES (STEP 7) ═══
+// ═══ REPRISE SOLDES (postage canonique, fin de wizard) ═══
 
-export interface SoldeInitialEntry {
+export type SoldeNature = 'current' | 'works' | 'alur';
+
+export interface SoldeOpeningEntry {
   lotId: string;
-  amount: number;
+  nature: SoldeNature;   // 450-1 (current), 450-2 (works), 450-5 (alur)
+  amount: number;        // > 0 = le lot doit ; < 0 = avoir
 }
 
-export async function saveRepriseSoldes(
+export async function postOnboardingOpeningBalances(
   coproId: string,
   periodId: string,
-  entries: SoldeInitialEntry[]
+  entries: SoldeOpeningEntry[]
 ) {
   const supabase = createUntypedClient();
+  const nonZero = entries.filter(e => e.amount !== 0);
+  if (nonZero.length === 0) return { data: { count: 0 }, error: null };
 
-  // Ensure accounts 450 (copropriétaires) and 120 (report à nouveau)
-  const { data: accounts } = await supabase
+  // Idempotence : si une reprise d'ouverture existe déjà pour cette période, ne pas reposter.
+  const { data: existingTx } = await supabase
+    .from('ledger_transactions')
+    .select('id')
+    .eq('copro_id', coproId)
+    .eq('period_id', periodId)
+    .eq('source_type', 'opening_balance')
+    .limit(1);
+  if (existingTx && existingTx.length > 0) {
+    return { data: { count: 0, skipped: true }, error: null };
+  }
+
+  // Résoudre les sous-comptes 450-x par nature présente
+  const naturesUsed = [...new Set(nonZero.map(e => e.nature))];
+  const tiersAccount: Record<string, string> = {};
+  for (const nature of naturesUsed) {
+    const { data, error } = await supabase.rpc('resolve_lot_tiers_account', {
+      p_copro_id: coproId,
+      p_nature: nature,
+    });
+    if (error || !data) {
+      return { data: null, error: new Error(`Compte 450 nature '${nature}' introuvable : ${error?.message || 'plan non provisionné'}`) };
+    }
+    tiersAccount[nature] = data as string;
+  }
+
+  // Comptes d'attente 471 (débiteur) / 472 (créditeur)
+  const { data: waitAcc } = await supabase
     .from('accounts')
     .select('id, code')
     .eq('copro_id', coproId)
-    .in('code', ['450', '120']);
-
-  const accountsList = (accounts || []) as Array<{ id: string; code: string }>;
-  let acc450Id: string;
-  let acc120Id: string;
-
-  const found450 = accountsList.find(a => a.code === '450');
-  const found120 = accountsList.find(a => a.code === '120');
-
-  if (!found450) {
-    const { data: n, error: e } = await supabase
-      .from('accounts')
-      .insert({ copro_id: coproId, code: '450', name: 'Copropriétaires', account_type: 'asset', is_active: true })
-      .select('id').single();
-    if (e) return { data: null, error: new Error(e.message) };
-    acc450Id = n.id as string;
-  } else {
-    acc450Id = found450.id;
+    .in('code', ['471', '472']);
+  const waitById = new Map<string, string>();
+  for (const a of (waitAcc || []) as Array<{ id: string; code: string }>) waitById.set(a.code, a.id);
+  const acc471 = waitById.get('471');
+  const acc472 = waitById.get('472');
+  if (!acc471 || !acc472) {
+    return { data: null, error: new Error('Comptes d\'attente 471/472 absents (plan non provisionné ?)') };
   }
 
-  if (!found120) {
-    const { data: n, error: e } = await supabase
-      .from('accounts')
-      .insert({ copro_id: coproId, code: '120', name: 'Report à nouveau', account_type: 'equity', is_active: true })
-      .select('id').single();
-    if (e) return { data: null, error: new Error(e.message) };
-    acc120Id = n.id as string;
-  } else {
-    acc120Id = found120.id;
-  }
+  // Construire les écritures : D/C 450-x/lot, contrepartie en compte d'attente
+  type Entry = { account_id: string; lot_id?: string; direction: 'debit' | 'credit'; amount: number; entry_label: string };
+  const ledgerEntries: Entry[] = [];
+  let totalDebit = 0;  // somme des soldes dus (450 débité)
+  let totalCredit = 0; // somme des avoirs (450 crédité)
 
-  const nonZeroEntries = entries.filter(e => e.amount !== 0);
-  if (nonZeroEntries.length === 0) return { data: { count: 0 }, error: null };
-
-  const totalAmount = nonZeroEntries.reduce((s, e) => s + Math.abs(e.amount), 0);
-
-  // Create one ledger transaction for the opening balance
-  const { data: ltx, error: ltxErr } = await supabase
-    .from('ledger_transactions')
-    .insert({
-      copro_id: coproId,
-      period_id: periodId,
-      tx_date: new Date().toISOString().split('T')[0],
-      label: 'Reprise de soldes — Soldes initiaux',
-      source_type: 'opening',
-      status: 'draft',
-    })
-    .select('id')
-    .single();
-  if (ltxErr) return { data: null, error: new Error(ltxErr.message) };
-
-  // Create ledger entries per lot
-  const ledgerEntries: Array<Record<string, unknown>> = [];
-
-  for (const entry of nonZeroEntries) {
-    // Positive amount = lot owes money (debit 450 for receivable)
-    // Negative amount = lot has credit (credit 450)
-    if (entry.amount > 0) {
-      ledgerEntries.push({
-        copro_id: coproId,
-        period_id: periodId,
-        tx_id: ltx.id,
-        account_id: acc450Id,
-        direction: 'debit',
-        amount: entry.amount,
-        lot_id: entry.lotId,
-        entry_label: 'Solde initial — dû',
-      });
+  for (const e of nonZero) {
+    const acc = tiersAccount[e.nature];
+    if (e.amount > 0) {
+      ledgerEntries.push({ account_id: acc, lot_id: e.lotId, direction: 'debit', amount: e.amount, entry_label: 'Solde d\'ouverture — dû' });
+      totalDebit += e.amount;
     } else {
-      ledgerEntries.push({
-        copro_id: coproId,
-        period_id: periodId,
-        tx_id: ltx.id,
-        account_id: acc450Id,
-        direction: 'credit',
-        amount: Math.abs(entry.amount),
-        lot_id: entry.lotId,
-        entry_label: 'Solde initial — avoir',
-      });
+      ledgerEntries.push({ account_id: acc, lot_id: e.lotId, direction: 'credit', amount: Math.abs(e.amount), entry_label: 'Solde d\'ouverture — avoir' });
+      totalCredit += Math.abs(e.amount);
     }
   }
 
-  // Counterpart entry on 120 (report à nouveau)
-  const totalDebit = nonZeroEntries.filter(e => e.amount > 0).reduce((s, e) => s + e.amount, 0);
-  const totalCredit = nonZeroEntries.filter(e => e.amount < 0).reduce((s, e) => s + Math.abs(e.amount), 0);
-
+  // Contrepartie en compte d'attente (à solder avant gel)
   if (totalDebit > 0) {
-    ledgerEntries.push({
-      copro_id: coproId,
-      period_id: periodId,
-      tx_id: ltx.id,
-      account_id: acc120Id,
-      direction: 'credit',
-      amount: totalDebit,
-      entry_label: 'Report à nouveau — contrepartie débits',
-    });
+    ledgerEntries.push({ account_id: acc472, direction: 'credit', amount: totalDebit, entry_label: 'Attente reprise — contrepartie débits' });
   }
   if (totalCredit > 0) {
-    ledgerEntries.push({
-      copro_id: coproId,
-      period_id: periodId,
-      tx_id: ltx.id,
-      account_id: acc120Id,
-      direction: 'debit',
-      amount: totalCredit,
-      entry_label: 'Report à nouveau — contrepartie crédits',
-    });
+    ledgerEntries.push({ account_id: acc471, direction: 'debit', amount: totalCredit, entry_label: 'Attente reprise — contrepartie crédits' });
   }
 
-  const { error: entErr } = await supabase.from('ledger_entries').insert(ledgerEntries);
-  if (entErr) return { data: null, error: new Error(entErr.message) };
+  // Une SEULE transaction atomique, auto-postée (équilibre garanti par construction)
+  const { data, error } = await supabase.rpc('create_ledger_transaction', {
+    p_copro_id: coproId,
+    p_period_id: periodId,
+    p_tx_date: new Date().toISOString().split('T')[0],
+    p_label: 'Reprise des soldes d\'ouverture',
+    p_source_type: 'opening_balance',
+    p_source_id: periodId,
+    p_entries: ledgerEntries,
+    p_auto_post: true,
+  });
+  if (error) return { data: null, error: new Error(error.message) };
+  if (data && (data as { success?: boolean }).success === false) {
+    return { data: null, error: new Error((data as { error?: string }).error || 'échec reprise') };
+  }
 
-  // Passer la transaction en posted maintenant que les écritures sont créées
-  const { error: postErr } = await supabase
-    .from('ledger_transactions')
-    .update({ status: 'posted', posted_at: new Date().toISOString() })
-    .eq('id', ltx.id as string);
-  if (postErr) return { data: null, error: new Error(postErr.message) };
+  return { data: { count: nonZero.length }, error: null };
+}
 
-  return { data: { count: nonZeroEntries.length }, error: null };
+// ═══ VÉRIFICATION FINALE ═══
+
+export interface OnboardingAuditIssue {
+  entity_type: string;
+  issue_type: string;
+  description: string;
+  difference: number | null;
+}
+
+export async function auditOnboardingBooks(coproId: string) {
+  const supabase = createUntypedClient();
+
+  // 1) Écarts d'intégrité du grand livre
+  const { data: issues, error: issuesErr } = await supabase
+    .rpc('audit_finance_integrity', { p_copro_id: coproId });
+  if (issuesErr) return { data: null, error: new Error(issuesErr.message) };
+
+  // 2) Solde net des comptes d'attente 471/472 (doit être 0 avant gel)
+  const { data: waitEntries, error: waitErr } = await supabase
+    .from('ledger_entries')
+    .select('amount, direction, accounts!inner(code, copro_id)')
+    .eq('accounts.copro_id', coproId)
+    .in('accounts.code', ['471', '472']);
+  if (waitErr) return { data: null, error: new Error(waitErr.message) };
+
+  let waitingBalance = 0;
+  for (const e of (waitEntries || []) as Array<{ amount: number; direction: string }>) {
+    waitingBalance += e.direction === 'debit' ? Number(e.amount) : -Number(e.amount);
+  }
+
+  const issueList = (issues || []) as OnboardingAuditIssue[];
+  const clean = issueList.length === 0 && Math.abs(waitingBalance) < 0.01;
+
+  return { data: { clean, issues: issueList, waitingBalance }, error: null };
 }
