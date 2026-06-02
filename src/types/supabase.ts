@@ -16090,13 +16090,14 @@ export type Database = {
       approve_period: { Args: { p_period_id: string }; Returns: Json }
       archive_ag: { Args: { p_ag_id: string }; Returns: Json }
       audit_finance_integrity: {
-        Args: { p_copro_id?: string; p_fix_issues?: boolean }
+        Args: { p_copro_id?: string }
         Returns: {
           actual_amount: number
+          copro_id: string
+          difference: number
           entity_id: string
           entity_type: string
           expected_amount: number
-          fixed: boolean
           issue_type: string
         }[]
       }
@@ -16323,6 +16324,15 @@ export type Database = {
           p_unpaid_amount: number
         }
         Returns: string
+      }
+      create_test_copro: { Args: { p_tag?: string }; Returns: string }
+      create_test_copro_seeded: {
+        Args: {
+          p_budget_total?: number
+          p_tag?: string
+          p_unpaid_count?: number
+        }
+        Returns: Json
       }
       cutoff_entry_pair: {
         Args: {
