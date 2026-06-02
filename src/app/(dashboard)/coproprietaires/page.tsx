@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, ChevronDown, Edit, Trash2, RefreshCw } from 'lucide-react';
+import { Search, ChevronDown, Edit, Trash2, RefreshCw, Plus } from 'lucide-react';
 import { useCoproprietairesPage } from '@/hooks/modules/useCoproprietairesPage';
 import { CoproprietairesTable, CoproprietaireEditModal } from '@/components/features/coproprietaires';
 import { LoadingState, ErrorState, EmptyState } from '@/components/ui/DataState/DataState';
@@ -12,8 +12,8 @@ export default function CoproprietairesPage() {
   const {
     activeTab, handleTabChange, searchQuery, setSearchQuery, filteredData,
     openMenuId, setOpenMenuId, menuPosition, menuRef, buttonRefs,
-    editingCopro, setEditingCopro, editForm, setEditForm,
-    handleEdit, handleSave, handleDelete, getDataForTab,
+    editingCopro, isCreating, editForm, setEditForm,
+    handleEdit, handleCreateNew, handleCloseModal, handleSave, handleDelete, getDataForTab,
     isLoading, error, refresh, isSaving,
   } = useCoproprietairesPage();
 
@@ -36,6 +36,9 @@ export default function CoproprietairesPage() {
           <p>Annuaire et suivi des copropriétaires</p>
         </div>
         <div className={styles.topBarActions}>
+          <button className="btn btn-primary" onClick={handleCreateNew}>
+            <Plus size={16} aria-hidden="true" /> Nouveau copropriétaire
+          </button>
           <button className={styles.refreshBtn} onClick={() => refresh()} disabled={isLoading}>
             <RefreshCw size={16} className={isLoading ? styles.spinning : ''} />
           </button>
@@ -136,9 +139,10 @@ export default function CoproprietairesPage() {
       {/* Edit Modal */}
       <CoproprietaireEditModal
         copro={editingCopro}
+        isCreating={isCreating}
         form={editForm}
         onFormChange={setEditForm}
-        onClose={() => setEditingCopro(null)}
+        onClose={handleCloseModal}
         onSave={handleSave}
         isSaving={isSaving}
       />

@@ -10,10 +10,12 @@ import { useCopro } from '@/providers/CoproContext';
 import {
   listCoproprietaires,
   getCoproprietaire,
+  createCoproprietaire,
   updateCoproprietaire,
   archiveCoproprietaire,
   listLotsWithOwners,
   type CoproprietaireOverview,
+  type CoproprietaireCreate,
   type CoproprietaireUpdate,
   type LotWithOwner,
 } from '@/lib/owners/api';
@@ -39,6 +41,7 @@ interface UseCoproprietairesReturn {
 
   // Actions
   refresh: () => Promise<void>;
+  create: (data: CoproprietaireCreate) => Promise<{ success: boolean; error: string | null }>;
   update: (id: string, data: CoproprietaireUpdate) => Promise<{ success: boolean; error: string | null }>;
   archive: (id: string) => Promise<{ success: boolean; error: string | null }>;
 }
@@ -106,6 +109,31 @@ export function useCoproprietaires(
     }
   }, [autoFetch, fetchData]);
 
+  const create = useCallback(
+    async (data: CoproprietaireCreate) => {
+      if (!currentCoproId) {
+        return { success: false, error: 'Aucune copropriété sélectionnée' };
+      }
+
+      const { data: created, error: createError } = await createCoproprietaire(
+        currentCoproId,
+        data
+      );
+
+      if (createError) {
+        return { success: false, error: createError.message };
+      }
+
+      // Ajoute en tête de liste localement
+      if (created && isMounted.current) {
+        setCoproprietaires((prev) => [created, ...prev]);
+      }
+
+      return { success: true, error: null };
+    },
+    [currentCoproId]
+  );
+
   const update = useCallback(
     async (id: string, data: CoproprietaireUpdate) => {
       if (!currentCoproId) {
@@ -162,6 +190,7 @@ export function useCoproprietaires(
     isLoading,
     error,
     refresh: fetchData,
+    create,
     update,
     archive,
   };

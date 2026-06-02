@@ -11,6 +11,7 @@ function formatPhone(value: string): string {
 
 interface CoproprietaireEditModalProps {
   copro: Coproprietaire | null;
+  isCreating?: boolean;
   form: Partial<Coproprietaire>;
   onFormChange: (form: Partial<Coproprietaire>) => void;
   onClose: () => void;
@@ -18,14 +19,14 @@ interface CoproprietaireEditModalProps {
   isSaving?: boolean;
 }
 
-export function CoproprietaireEditModal({ copro, form, onFormChange, onClose, onSave, isSaving = false }: CoproprietaireEditModalProps) {
-  if (!copro) return null;
+export function CoproprietaireEditModal({ copro, isCreating = false, form, onFormChange, onClose, onSave, isSaving = false }: CoproprietaireEditModalProps) {
+  if (!copro && !isCreating) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2>Modifier le copropriétaire</h2>
+          <h2>{isCreating ? 'Ajouter un copropriétaire' : 'Modifier le copropriétaire'}</h2>
           <button className={styles.modalClose} onClick={onClose} aria-label="Fermer"><X size={20} aria-hidden="true" /></button>
         </div>
         <div className={styles.modalContent}>

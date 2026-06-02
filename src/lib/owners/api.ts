@@ -62,6 +62,25 @@ export interface CoproprietaireUpdate {
   notes?: string | null;
 }
 
+export interface CoproprietaireCreate {
+  is_company?: boolean;
+  company_name?: string | null;
+  civility?: string | null;
+  first_name?: string | null;
+  last_name: string;
+  email?: string | null;
+  phone?: string | null;
+  mobile?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  prefers_email?: boolean;
+  prefers_paper?: boolean;
+  notes?: string | null;
+}
+
 export interface LotWithOwner {
   id: string;
   copro_id: string;
@@ -146,6 +165,48 @@ export async function getCoproprietaire(
   }
 
   return { data: data as CoproprietaireOverview, error: null };
+}
+
+/**
+ * Crée un copropriétaire et retourne sa fiche complète (depuis la vue overview).
+ * La vue inclut les copropriétaires sans lot (owner_type par défaut = COPROPRIETAIRE).
+ */
+export async function createCoproprietaire(
+  coproId: string,
+  payload: CoproprietaireCreate
+): Promise<{ data: CoproprietaireOverview | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+
+  const { data, error } = await supabase
+    .from('coproprietaires')
+    .insert({
+      copro_id: coproId,
+      is_company: payload.is_company ?? false,
+      company_name: payload.company_name?.trim() || null,
+      civility: payload.civility ?? null,
+      first_name: payload.first_name?.trim() || null,
+      last_name: payload.last_name.trim(),
+      email: payload.email?.trim() || null,
+      phone: payload.phone?.trim() || null,
+      mobile: payload.mobile?.trim() || null,
+      address_line1: payload.address_line1?.trim() || null,
+      address_line2: payload.address_line2?.trim() || null,
+      city: payload.city?.trim() || null,
+      postal_code: payload.postal_code?.trim() || null,
+      country: payload.country?.trim() || null,
+      prefers_email: payload.prefers_email ?? true,
+      prefers_paper: payload.prefers_paper ?? false,
+      notes: payload.notes?.trim() || null,
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    return { data: null, error: new Error(error.message) };
+  }
+
+  // Relit la fiche complète depuis la vue (solde, owner_type, etc.)
+  return getCoproprietaire(coproId, (data as { id: string }).id);
 }
 
 /**

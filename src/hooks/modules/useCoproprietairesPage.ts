@@ -9,7 +9,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useCoproprietaires, type OwnerType } from './useCoproData';
-import type { CoproprietaireOverview, CoproprietaireUpdate } from '@/lib/owners/api';
+import type { CoproprietaireOverview, CoproprietaireCreate, CoproprietaireUpdate } from '@/lib/owners/api';
 
 // ============================================================================
 // TYPES (compatibilité avec l'interface existante)
@@ -68,6 +68,16 @@ function mapToUpdate(form: Partial<Coproprietaire>): CoproprietaireUpdate {
   };
 }
 
+// Mapper les données UI vers le payload de création Supabase
+function mapToCreate(form: Partial<Coproprietaire>): CoproprietaireCreate {
+  return {
+    last_name: (form.nom || '').trim(),
+    first_name: form.prenom?.trim() || null,
+    mobile: form.telephone?.trim() || null,
+    email: form.email?.trim() || null,
+  };
+}
+
 // ============================================================================
 // HOOK
 // ============================================================================
@@ -80,6 +90,7 @@ export function useCoproprietairesPage() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
   const [editingCopro, setEditingCopro] = useState<Coproprietaire | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Coproprietaire>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -88,7 +99,7 @@ export function useCoproprietairesPage() {
 
   // Fetch data based on active tab
   const supabaseType: OwnerType = activeTab === 'LOCATAIRE' ? 'ALL' : activeTab;
-  const { coproprietaires: rawData, isLoading, error, refresh, update, archive } = useCoproprietaires({
+  const { coproprietaires: rawData, isLoading, error, refresh, create, update, archive } = useCoproprietaires({
     type: supabaseType,
   });
 
@@ -163,10 +174,40 @@ export function useCoproprietairesPage() {
     setOpenMenuId(null);
   }, []);
 
-  const handleSave = useCallback(async () => {
-    if (!editingCopro) return;
+  const handleCreateNew = useCallback(() => {
+    setEditingCopro(null);
+    setEditForm({});
+    setIsCreating(true);
+    setOpenMenuId(null);
+  }, []);
 
+  const handleCloseModal = useCallback(() => {
+    setEditingCopro(null);
+    setIsCreating(false);
+    setEditForm({});
+  }, []);
+
+  const handleSave = useCallback(async () => {
     setIsSaving(true);
+
+    // Mode création
+    if (isCreating) {
+      const { success, error: createError } = await create(mapToCreate(editForm));
+      setIsSaving(false);
+      if (!success) {
+        alert(`Erreur lors de la création: ${createError}`);
+        return;
+      }
+      setIsCreating(false);
+      setEditForm({});
+      return;
+    }
+
+    // Mode édition
+    if (!editingCopro) {
+      setIsSaving(false);
+      return;
+    }
     const updateData = mapToUpdate(editForm);
     const { success, error: saveError } = await update(editingCopro.id, updateData);
     setIsSaving(false);
@@ -178,7 +219,7 @@ export function useCoproprietairesPage() {
 
     setEditingCopro(null);
     setEditForm({});
-  }, [editingCopro, editForm, update]);
+  }, [isCreating, editingCopro, editForm, create, update]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir archiver ce copropriétaire ? Il sera marqué comme ancien copropriétaire.')) {
@@ -209,11 +250,14 @@ export function useCoproprietairesPage() {
     buttonRefs,
     editingCopro,
     setEditingCopro,
+    isCreating,
     editForm,
     setEditForm,
 
     // Handlers
     handleEdit,
+    handleCreateNew,
+    handleCloseModal,
     handleSave,
     handleDelete,
     getDataForTab,
