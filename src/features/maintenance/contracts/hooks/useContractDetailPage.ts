@@ -9,7 +9,7 @@ import type {
   ProviderOverview,
   LogbookOverview,
   ContractType,
-} from '@/types/supabase';
+} from '@/types/domain';
 
 // Contract type labels - must match all values from ContractType enum
 const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {

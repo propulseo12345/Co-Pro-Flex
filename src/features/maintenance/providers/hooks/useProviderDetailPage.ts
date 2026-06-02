@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Prestataire, InterventionDetaille, ContratDetaille, DomaineActivite } from '@/types';
-import type { Provider, LogbookOverview, ContractOverview } from '@/types/supabase';
+import type { Provider, LogbookOverview, ContractOverview } from '@/types/domain';
 import { useToast } from '@/providers/ToastProvider';
 import { useProviders, useLogbook, useContracts as useContractsSupabase } from '@/hooks/modules/useMaintenanceData';
 
@@ -137,7 +137,7 @@ export function useProviderDetailPage(id: string) {
                 provider_name_snapshot: prestataire?.nom || '',
                 entry_type: 'entretien',
                 copro_id: '',
-            } as unknown as import('@/types/supabase').LogbookEntryInsert);
+            } as unknown as import('@/types/domain').LogbookEntryInsert);
             showToast({ type: 'success', message: 'Intervention ajoutée avec succès' });
         } catch (err) {
             console.error('[useProviderDetailPage] Supabase createEntry error:', err);
@@ -160,7 +160,7 @@ export function useProviderDetailPage(id: string) {
                 siret: data.siren,
                 contact_name: data.contactReferent,
                 contact_role: data.fonctionContact,
-                domains: data.domaines?.map(d => d.toLowerCase()) as unknown as import('@/types/supabase').ProviderDomain[],
+                domains: data.domaines?.map(d => d.toLowerCase()) as unknown as import('@/types/domain').ProviderDomain[],
             });
         } catch (err) {
             console.error('[useProviderDetailPage] Supabase updateProvider error:', err);

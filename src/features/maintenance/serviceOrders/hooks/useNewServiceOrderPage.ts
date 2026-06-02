@@ -24,7 +24,7 @@ import {
     getAlerteIncoherence
 } from '@/lib/utils/intervention-coherence';
 import { useServiceOrders, useProviders, useContracts } from '@/hooks/modules/useMaintenanceData';
-import type { ServiceOrderInsert, ProviderOverview, ContractOverview } from '@/types/supabase';
+import type { ServiceOrderInsert, ProviderOverview, ContractOverview } from '@/types/domain';
 
 export interface ServiceOrderFormData {
     typeOrdre: TypeOrdreService;

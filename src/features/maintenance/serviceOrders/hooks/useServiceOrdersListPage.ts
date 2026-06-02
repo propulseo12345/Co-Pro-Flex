@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
 import { generatePdfDownload } from '@/lib/utils/service-order';
-import type { ServiceOrderOverview, ServiceOrderStatus } from '@/types/supabase';
+import type { ServiceOrderOverview, ServiceOrderStatus } from '@/types/domain';
 
 // Map Supabase status to legacy status for PDF generation compatibility
 function mapStatusToLegacy(status: ServiceOrderStatus): string {

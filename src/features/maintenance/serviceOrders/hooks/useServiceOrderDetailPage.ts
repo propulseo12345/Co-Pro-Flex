@@ -7,7 +7,7 @@ import { OrdreService, PieceJointeOS, ModificationHistoriqueOS, StatutOrdreServi
 import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
 import { useCopro } from '@/providers/CoproContext';
 import { uploadDocument } from '@/lib/documents/api';
-import type { ServiceOrderOverview, ServiceOrderEvent, ServiceOrderStatus } from '@/types/supabase';
+import type { ServiceOrderOverview, ServiceOrderEvent, ServiceOrderStatus } from '@/types/domain';
 import { createClient } from '@/lib/supabase/client';
 
 // ============================================================================

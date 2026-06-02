@@ -1,7 +1,7 @@
 'use client';
 
 import { ContractEditForm } from '../hooks/useContractDetailPage';
-import type { ContractType } from '@/types/supabase';
+import type { ContractType } from '@/types/domain';
 import { Prestataire } from '@/types';
 import { X, Save, FileText } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';

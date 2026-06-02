@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProviders } from '@/hooks/modules/useMaintenanceData';
 import { useToast } from '@/providers/ToastProvider';
-import type { ProviderOverview, ProviderInsert, ProviderCategory, ProviderDomain } from '@/types/supabase';
+import type { ProviderOverview, ProviderInsert, ProviderCategory, ProviderDomain } from '@/types/domain';
 
 // Domain labels for display - must match ProviderDomain enum
 const DOMAIN_LABELS: Record<ProviderDomain, string> = {

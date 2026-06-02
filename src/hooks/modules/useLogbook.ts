@@ -12,7 +12,7 @@ import {
 import { useCopro } from '@/providers/CoproContext';
 import { useSyndicContract } from '@/hooks/useSyndicContract';
 import { createClient } from '@/lib/supabase/client';
-import type { LogbookOverview, LogbookAlert, LogbookEntryInsert } from '@/types/supabase';
+import type { LogbookOverview, LogbookAlert, LogbookEntryInsert } from '@/types/domain';
 import type {
     Intervention,
     InterventionFormData,

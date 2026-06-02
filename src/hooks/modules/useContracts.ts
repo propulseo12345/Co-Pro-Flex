@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { ContratDetaille, ContratSyndic, StatutContrat, TypeContrat, TemplateResiliation, Prestataire } from '@/types';
-import type { ContractInsert } from '@/types/supabase';
+import type { ContractInsert } from '@/types/domain';
 import { CATEGORIES_CONTRAT, type CategorieContrat } from '@/lib/constants/categories-contrat';
 import { getUniquePrestataires, formatMontant } from '@/components/features/maintenance/Contracts/utils';
 import type { ExportFormat } from '@/components/features/maintenance/Contracts/types';
@@ -154,7 +154,7 @@ export function useContracts() {
                 tacit_renewal: updatedContrat.taciteReconduction ?? false,
                 notice_months: updatedContrat.delaiResiliation ? Math.round(updatedContrat.delaiResiliation / 30) : null,
                 description: updatedContrat.description || null,
-            } as unknown as Partial<import('@/types/supabase').Contract>);
+            } as unknown as Partial<import('@/types/domain').Contract>);
         } catch (err) {
             console.error('[Supabase] Failed to sync contract update:', err);
         }

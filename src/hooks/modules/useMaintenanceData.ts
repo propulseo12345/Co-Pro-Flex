@@ -22,7 +22,7 @@ import type {
   MaintenanceStats,
   ProviderCategory,
   ServiceOrderStatus,
-} from '@/types/supabase';
+} from '@/types/domain';
 
 // Helper: Create untyped client for tables/views not yet in generated types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

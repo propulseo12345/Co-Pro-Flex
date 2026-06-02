@@ -1926,6 +1926,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "ag_resolutions_linked_budget_id_fkey"
+            columns: ["linked_budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "ag_resolutions_linked_work_budget_id_fkey"
             columns: ["linked_work_budget_id"]
             isOneToOne: false
@@ -1958,6 +1965,13 @@ export type Database = {
             columns: ["linked_work_budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "ag_resolutions_linked_work_budget_id_fkey"
+            columns: ["linked_work_budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
         ]
@@ -2252,6 +2266,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "alur_transfers_alur_budget_id_fkey"
+            columns: ["alur_budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "alur_transfers_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -2312,6 +2333,13 @@ export type Database = {
             columns: ["destination_budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_destination_budget_id_fkey"
+            columns: ["destination_budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
         ]
@@ -2602,6 +2630,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "budget_expenses_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "budget_expenses_budget_line_id_fkey"
             columns: ["budget_line_id"]
             isOneToOne: false
@@ -2757,6 +2792,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "budget_lines_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "budget_lines_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -2891,6 +2933,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_payment_schedules_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
           {
@@ -3256,6 +3305,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "call_for_funds_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
           {
@@ -4966,6 +5022,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "documents_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
           {
@@ -11063,6 +11126,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "alur_transfers_alur_budget_id_fkey"
+            columns: ["alur_budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "alur_transfers_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -11116,6 +11186,13 @@ export type Database = {
             columns: ["destination_budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_destination_budget_id_fkey"
+            columns: ["destination_budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
         ]
@@ -11290,6 +11367,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "budget_lines_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "budget_lines_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -11384,6 +11468,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_expenses_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
           {
@@ -11530,6 +11621,13 @@ export type Database = {
             referencedColumns: ["budget_id"]
           },
           {
+            foreignKeyName: "budget_lines_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "budget_lines_copro_id_fkey"
             columns: ["copro_id"]
             isOneToOne: false
@@ -11661,6 +11759,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
           {
@@ -12036,6 +12141,59 @@ export type Database = {
           },
         ]
       }
+      v_call_vs_budget_mismatch: {
+        Row: {
+          actual_calls_total: number | null
+          budget_id: string | null
+          budget_label: string | null
+          budget_status: Database["public"]["Enums"]["budget_status"] | null
+          budget_type: Database["public"]["Enums"]["budget_type"] | null
+          copro_id: string | null
+          created_at: string | null
+          difference: number | null
+          expected_budget_total: number | null
+          nb_calls: number | null
+          period_id: string | null
+          version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_kpis"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "budgets_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "v_maintenance_stats"
+            referencedColumns: ["copro_id"]
+          },
+          {
+            foreignKeyName: "budgets_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "v_accounting_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_calls_collection_stats: {
         Row: {
           amount_called: number | null
@@ -12153,6 +12311,13 @@ export type Database = {
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "v_budgets_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "call_for_funds_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_call_vs_budget_mismatch"
             referencedColumns: ["budget_id"]
           },
           {
@@ -13965,6 +14130,18 @@ export type Database = {
             referencedColumns: ["coproprietaire_id"]
           },
         ]
+      }
+      v_lot_vs_gl_mismatch: {
+        Row: {
+          copro_id: string | null
+          difference: number | null
+          gl_balance: number | null
+          lot_id: string | null
+          lot_ref: string | null
+          owner_name: string | null
+          statement_balance: number | null
+        }
+        Relationships: []
       }
       v_lots_with_owners: {
         Row: {
@@ -17641,34 +17818,3 @@ export const Constants = {
     },
   },
 } as const
-
-// ─── Derived type aliases for maintenance module ───────────────────────────────
-// These provide convenient aliases used across the codebase.
-
-// Table Row types
-export type Provider = Tables<'providers'>;
-export type Contract = Tables<'contracts'>;
-export type LogbookEntry = Tables<'logbook_entries'>;
-export type ServiceOrder = Tables<'service_orders'>;
-export type ServiceOrderEvent = Tables<'service_order_events'>;
-
-// Table Insert types
-export type ProviderInsert = TablesInsert<'providers'>;
-export type ContractInsert = TablesInsert<'contracts'>;
-export type LogbookEntryInsert = TablesInsert<'logbook_entries'>;
-export type ServiceOrderInsert = TablesInsert<'service_orders'>;
-
-// View types (overview / alerts)
-export type ProviderOverview = Tables<'v_providers_overview'>;
-export type ContractOverview = Tables<'v_contracts_overview'>;
-export type ContractAlert = Tables<'v_contracts_alerts'>;
-export type LogbookOverview = Tables<'v_logbook_overview'>;
-export type LogbookAlert = Tables<'v_logbook_alerts'>;
-export type ServiceOrderOverview = Tables<'v_service_orders_overview'>;
-export type MaintenanceStats = Tables<'v_maintenance_stats'>;
-
-// Enum types
-export type ContractType = Enums<'contract_type'>;
-export type ProviderCategory = Enums<'provider_category'>;
-export type ProviderDomain = Enums<'provider_domain'>;
-export type ServiceOrderStatus = Enums<'service_order_status'>;
