@@ -157,6 +157,7 @@ export default function OnboardingWizardPage() {
               onComplete={() => completeStep(6)}
               onBack={() => goToStep(5)}
             />
+            {/* NOTE: capture du plan (Step8 finalisation) câblée au lot suivant — l'argument est ignoré ici. */}
           </div>
         )}
         {periodId && maxStepReached >= 7 && (
