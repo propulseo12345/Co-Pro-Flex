@@ -37,6 +37,17 @@
   background: rgba(245, 158, 11, 0.1);
 }
 
+.warningBanner {
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
 /* ═══ Lines list ═══ */
 
 .linesList {

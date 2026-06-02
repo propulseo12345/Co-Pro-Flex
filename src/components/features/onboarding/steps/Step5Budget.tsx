@@ -34,6 +34,8 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
   const [lines, setLines] = useState<LocalLine[]>([]);
   const [keys, setKeys] = useState<Array<{ id: string; name: string }>>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [warning, setWarning] = useState<string | null>(null);
+  const [savedBudgetId, setSavedBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
   const [defaultKeyId, setDefaultKeyId] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -125,7 +127,15 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
 
   const handleSave = useCallback(async () => {
     if (!periodId) return;
+
+    // Budget déjà créé (1er clic) + warning affiché : 2e clic = poursuivre malgré le 628.
+    if (savedBudgetId) {
+      onComplete(savedBudgetId, periodId);
+      return;
+    }
+
     setIsSaving(true);
+    setWarning(null);
 
     const allLines: BudgetLineCreate[] = [];
     let order = 0;
@@ -160,8 +170,27 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
     );
 
     setIsSaving(false);
-    onComplete(result.data?.budgetId || null, periodId);
-  }, [coproId, periodId, lines, onComplete]);
+
+    const newBudgetId = result.data?.budgetId || null;
+
+    // Postes tombés sur le compte par défaut 628 (Divers) : avertir sans bloquer.
+    // On affiche le bandeau et on attend un second clic « Continuer » pour avancer
+    // (sinon l'étape se ferme et l'avertissement ne serait jamais vu).
+    const unmapped = result.data?.unmappedCategories ?? [];
+    if (unmapped.length > 0 && newBudgetId) {
+      const labels = unmapped.map(cat => {
+        const matched = lines.find(l => (isPostePredefini(l.id) ? l.id : l.label.trim()) === cat);
+        return matched?.label.trim() || cat;
+      });
+      setWarning(
+        `Postes sans compte de charge dédié, imputés en 628 (Divers) : ${labels.join(', ')}. Modifiable plus tard dans les Paramètres.`
+      );
+      setSavedBudgetId(newBudgetId);
+      return;
+    }
+
+    onComplete(newBudgetId, periodId);
+  }, [coproId, periodId, lines, onComplete, savedBudgetId]);
 
   return (
     <div className={styles.container}>
@@ -174,6 +203,12 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
         <span className={styles.skipText}>Pas encore de budget voté ? Vous pourrez le créer plus tard.</span>
         <button className={styles.skipBtn} onClick={handleSkip}>Passer cette étape</button>
       </div>
+
+      {warning && (
+        <div className={styles.warningBanner} role="alert">
+          {warning}
+        </div>
+      )}
 
       {/* Liste des postes ajoutés */}
       {lines.length > 0 && (
@@ -291,7 +326,7 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
           onClick={handleSave}
           disabled={isSaving || !periodId}
         >
-          {isSaving ? 'Enregistrement...' : 'Continuer'}
+          {isSaving ? 'Enregistrement...' : warning ? 'Continuer malgré tout' : 'Continuer'}
         </button>
       </div>
     </div>
