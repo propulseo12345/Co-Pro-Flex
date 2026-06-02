@@ -301,6 +301,21 @@ export interface BudgetLineCreate {
   sort_order: number;
 }
 
+// Défaut codé — destiné à devenir modulable dans les Paramètres (override par copro en base). Source unique.
+// Indexé par id de poste (cf. POSTES_BUDGET_PREDEFINIS), valeur = code du compte de charge canonique.
+export const DEFAULT_POSTE_CHARGE_ACCOUNT: Record<string, string> = {
+  eau: '601',
+  electricite: '602',
+  chauffage: '603',
+  assurance: '616',
+  menage: '611',
+  ascenseur: '614',
+  espaces_verts: '615',
+  entretien: '615',
+  honoraires_syndic: '621',
+  divers: '628',
+};
+
 export async function createOnboardingBudget(
   coproId: string,
   periodId: string,
@@ -308,14 +323,6 @@ export async function createOnboardingBudget(
   lines: BudgetLineCreate[]
 ) {
   const supabase = createUntypedClient();
-
-  // Résoudre le compte de charge par catégorie depuis le plan provisionné.
-  // Map catégorie (code de ligne budget) -> compte de charge canonique.
-  const CHARGE_ACCOUNT_BY_CATEGORY: Record<string, string> = {
-    '601': '601', '602': '602', '604': '604', '605': '605',
-    '606': '606', '611': '611', '614': '614', '615': '615',
-    '616': '616', '621': '621', '622': '622', '623': '623', '628': '628',
-  };
 
   const { data: chargeAccounts } = await supabase
     .from('accounts')
@@ -333,8 +340,10 @@ export async function createOnboardingBudget(
     return { data: null, error: new Error('Plan comptable incomplet : compte 628 absent. La copro a-t-elle été provisionnée (provision_copro_chart) ?') };
   }
 
-  function resolveChargeAccount(category: string): { id: string; mappedToDefault: boolean } {
-    const targetCode = CHARGE_ACCOUNT_BY_CATEGORY[category];
+  // Résolution par id de poste (ex. 'eau' -> '601') depuis la table par défaut.
+  // Une ligne en texte libre (pas d'id de poste prédéfini) ne matche pas -> tombe sur 628 + warning.
+  function resolveChargeAccount(posteId: string): { id: string; mappedToDefault: boolean } {
+    const targetCode = DEFAULT_POSTE_CHARGE_ACCOUNT[posteId];
     const id = targetCode ? chargeByCode.get(targetCode) : undefined;
     if (id) return { id, mappedToDefault: false };
     return { id: defaultChargeId!, mappedToDefault: true };

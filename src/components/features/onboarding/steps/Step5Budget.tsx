@@ -8,7 +8,7 @@ import {
   listRepartitionKeys,
   createOnboardingBudget,
 } from '@/lib/onboarding/api';
-import { POSTES_BUDGET_ORDONNES } from '@/lib/constants/budget-postes';
+import { POSTES_BUDGET_ORDONNES, isPostePredefini } from '@/lib/constants/budget-postes';
 import type { BudgetLineCreate } from '@/lib/onboarding/api';
 import styles from './Step5Budget.module.css';
 
@@ -132,11 +132,14 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
     for (const line of lines) {
       const amount = parseFloat(line.amount);
       if (line.label.trim() && amount > 0 && line.keyId) {
+        // Poste prédéfini : line.id EST l'id de poste (ex. 'eau') -> mapping vers le compte de charge.
+        // Poste personnalisé (texte libre) : on envoie le libellé, qui tombera sur 628 + warning.
+        const category = isPostePredefini(line.id) ? line.id : line.label.trim();
         allLines.push({
           label: line.label.trim(),
           amount,
           repartition_key_id: line.keyId,
-          category: line.label.trim(),
+          category,
           sort_order: order++,
         });
       }
