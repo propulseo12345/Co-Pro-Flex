@@ -39,8 +39,16 @@ export function getResolutionResult(resolution: Resolution, votes: VoteData[]): 
   if (resolution.resultat === 'ADOPTEE' || resolution.resultat === 'REJETEE') {
     adopte = resolution.resultat === 'ADOPTEE';
   } else if (total > 0) {
-    // Majorité simple (repli) : pour > contre — abstentions hors décompte (cohérent avec checkMajority / RPC)
-    adopte = pour > contre;
+    // Repli (résolution non encore finalisée en base). Art.24 / 25-1 = majorité simple :
+    // pour > contre (abstentions hors décompte). Les majorités RENFORCÉES (25 absolue, 26 double)
+    // gardent le calcul antérieur — on n'a pas ici le seuil fiable (tantièmes totaux / nb copros) ;
+    // la source unique reste la RPC calculate_resolution_result (correction complète = V5.1).
+    const maj = (resolution.majorite ?? '').toUpperCase().replace(/[-_]/g, '');
+    if (maj === 'ART24' || maj === 'ART251') {
+      adopte = pour > contre;
+    } else {
+      adopte = (pour / total) * 100 > 50;
+    }
   } else {
     adopte = false;
   }
