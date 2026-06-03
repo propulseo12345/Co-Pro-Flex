@@ -1079,3 +1079,40 @@ export async function checkAgWaitingBalanceGuard(
     error: null,
   };
 }
+
+/**
+ * Résout le copro_id propriétaire d'une AG (depuis ag_meetings). Utilisé en repli fail-closed
+ * (FIX 4) quand le contexte React (currentCoproId) est vide : la garde 471/472 ne doit JAMAIS
+ * être contournée en silence faute de coproId.
+ */
+export async function resolveCoproIdForAg(
+  agId: string
+): Promise<{ data: string | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('ag_meetings')
+    .select('copro_id')
+    .eq('id', agId)
+    .maybeSingle();
+  if (error) return { data: null, error: new Error(error.message) };
+  return { data: (data as { copro_id: string | null } | null)?.copro_id ?? null, error: null };
+}
+
+/**
+ * L'AG comporte-t-elle un arrêté des comptes (APPROVE_ACCOUNTS) en attente d'activation ?
+ * Détection par agId SEUL (sans coproId) : permet de bloquer fail-closed (FIX 4) même quand
+ * le coproId reste indéterminable.
+ */
+export async function agHasPendingAccountClosure(
+  agId: string
+): Promise<{ data: boolean | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+  const { count, error } = await supabase
+    .from('ag_pending_actions')
+    .select('id', { count: 'exact', head: true })
+    .eq('ag_id', agId)
+    .eq('action_type', 'APPROVE_ACCOUNTS')
+    .eq('status', 'pending');
+  if (error) return { data: null, error: new Error(error.message) };
+  return { data: (count ?? 0) > 0, error: null };
+}

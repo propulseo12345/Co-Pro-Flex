@@ -16,7 +16,11 @@ import { LABELS_MODE_SIGNATURE } from '@/types/models/pv-signature';
 import { saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import { logger } from '@/lib/utils/logger';
 import { updateAgCurrentStep } from '@/lib/ag/api';
-import { checkAgWaitingBalanceGuard } from '@/lib/onboarding/api';
+import {
+  checkAgWaitingBalanceGuard,
+  resolveCoproIdForAg,
+  agHasPendingAccountClosure,
+} from '@/lib/onboarding/api';
 import { shouldBlockAccountClosure } from '@/lib/onboarding/ag-guard-rules';
 import { updateAgStatus } from '@/lib/ag/api/meetings.api';
 import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
@@ -649,31 +653,43 @@ export function usePVPage({ agId }: UsePVPageProps) {
   };
 
   const handleSendSignatureRequests = async () => {
+    // 1) VALIDATION DE SAISIE (aucun effet de bord) — abandonne avant tout enregistrement.
     if (modeSignature === 'electronique') {
       const missingEmails = signataires.filter((s) => !s.email);
       if (missingEmails.length > 0) {
         alert(`Veuillez renseigner l'email pour : ${missingEmails.map((s) => s.roleLabel).join(', ')}`);
         return;
       }
-
-      await saveDraft(agId, 'signataires', signataires, 'ag-signataires-' + agId);
-      alert(`Demandes de signature envoyées à :\n${signataires.map((s) => `- ${s.prenom} ${s.nom} (${s.email})`).join('\n')}`);
     } else {
       const incomplets = signataires.filter((s) => !s.nom || !s.prenom);
       if (incomplets.length > 0) {
         alert(`Veuillez renseigner le nom et prénom pour : ${incomplets.map((s) => s.roleLabel).join(', ')}`);
         return;
       }
-
-      await saveDraft(agId, 'signataires', signataires, 'ag-signataires-' + agId);
-      alert(`Signatures physiques validées pour :\n${signataires.map((s) => `- ${s.prenom} ${s.nom} (${s.roleLabel})`).join('\n')}`);
     }
 
-    // Pré-validation AG (spec §7) : si l'AG arrête les comptes et que la reprise n'est pas
-    // terminée (471/472 ≠ 0), on REFUSE d'activer les décisions AVANT activate_ag_decisions
-    // (jamais un RAISE dans la boucle SQL qui annulerait toute l'AG).
-    if (currentCoproId) {
-      const guard = await checkAgWaitingBalanceGuard(agId, currentCoproId);
+    // 2) GARDE 471/472 (FIX 4 + FIX 9) — AVANT tout effet de bord (saveDraft + alertes de
+    //    succès) : sinon on affichait « Signatures validées » puis on bloquait (message
+    //    contradictoire). Pré-validation spec §7 : si l'AG arrête les comptes et que la
+    //    reprise n'est pas terminée (471/472 ≠ 0), on REFUSE d'activer AVANT
+    //    activate_ag_decisions (jamais un RAISE dans la boucle SQL).
+    //
+    //    FAIL-CLOSED : on résout le coproId de façon fiable (contexte React, sinon depuis l'AG
+    //    en base). Si une action APPROVE_ACCOUNTS est en attente et que le coproId reste
+    //    indéterminable -> on BLOQUE (jamais de contournement silencieux de la garde).
+    let guardCoproId = currentCoproId || null;
+    if (!guardCoproId) {
+      const resolved = await resolveCoproIdForAg(agId);
+      if (resolved.error) {
+        logger.error('PV: résolution coproId pour garde 471/472 échouée', { agId, message: resolved.error.message });
+        alert(`Vérification préalable impossible : ${resolved.error.message}`);
+        return;
+      }
+      guardCoproId = resolved.data;
+    }
+
+    if (guardCoproId) {
+      const guard = await checkAgWaitingBalanceGuard(agId, guardCoproId);
       if (guard.error) {
         logger.error('PV: garde 471/472 échouée', { agId, message: guard.error.message });
         alert(`Vérification préalable impossible : ${guard.error.message}`);
@@ -688,6 +704,33 @@ export function usePVPage({ agId }: UsePVPageProps) {
         );
         return;
       }
+    } else {
+      // coproId indéterminable : on ne peut PAS vérifier le 471/472. Si l'AG comporte un
+      // arrêté des comptes -> on bloque (fail-closed) plutôt que de laisser passer.
+      const closure = await agHasPendingAccountClosure(agId);
+      if (closure.error) {
+        logger.error('PV: détection arrêté des comptes échouée', { agId, message: closure.error.message });
+        alert(`Vérification préalable impossible : ${closure.error.message}`);
+        return;
+      }
+      if (closure.data) {
+        logger.error('PV: garde 471/472 non vérifiable (coproId introuvable) avec arrêté des comptes en attente', { agId });
+        alert(
+          "Impossible d'arrêter les comptes : la copropriété de cette AG est introuvable, " +
+            'la reprise des soldes (471/472) ne peut pas être vérifiée.\n\n' +
+            'Rechargez la page ou rouvrez l\'AG depuis le portefeuille, puis relancez la validation des signatures.'
+        );
+        return;
+      }
+      // Pas d'arrêté des comptes : aucune garde financière requise, on peut continuer.
+    }
+
+    // 3) EFFETS DE BORD DE SUCCÈS (après garde validée) : enregistrement + alerte de succès.
+    await saveDraft(agId, 'signataires', signataires, 'ag-signataires-' + agId);
+    if (modeSignature === 'electronique') {
+      alert(`Demandes de signature envoyées à :\n${signataires.map((s) => `- ${s.prenom} ${s.nom} (${s.email})`).join('\n')}`);
+    } else {
+      alert(`Signatures physiques validées pour :\n${signataires.map((s) => `- ${s.prenom} ${s.nom} (${s.roleLabel})`).join('\n')}`);
     }
 
     // Activate AG decisions
