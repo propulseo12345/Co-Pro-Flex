@@ -103,18 +103,32 @@ export function rebuildFormFromLines(
   asOfDate: string | null,
   bankAccounts: AccountRef[],
   planAccounts: AccountRef[],
+  periodStart?: string,
 ): { form: BalanceFormState; lotValues: Record<string, string> } {
   const { bankIdByCode, autresIdByCode, chargeIdByCode, produitIdByCode } =
     buildCodeIndex(bankAccounts, planAccounts);
 
-  const form: BalanceFormState = { ...EMPTY_FORM, midYear: !!asOfDate, asOfDate: asOfDate || '' };
+  // midYear = reprise en cours d'année = date de reprise STRICTEMENT postérieure au début
+  // de période. Une reprise plein-exercice est désormais postée à as_of_date = periodStart
+  // (cf. save) : sans cette comparaison, rebuild re-cochait midYear à chaque ré-ouverture.
+  // Si periodStart est inconnu, on retombe sur l'ancien comportement (présence d'une date).
+  const isMidYear = asOfDate != null && (periodStart == null || asOfDate !== periodStart);
+  const form: BalanceFormState = { ...EMPTY_FORM, midYear: isMidYear, asOfDate: asOfDate || '' };
   const lotValues: Record<string, string> = {};
+
+  // Map EXPLICITE sous-compte 450-x -> colonne de SoldesParLotTable. Les natures non
+  // gérées par la grille de reprise (450-3 avance, 450-4 prêt) sont volontairement absentes :
+  // on SKIP la ligne plutôt que de la reclasser silencieusement en ALUR (perte de sens).
+  const COL_BY_450: Record<string, 'current' | 'works' | 'alur'> = {
+    '450-1': 'current', '450-2': 'works', '450-5': 'alur',
+  };
 
   for (const ln of lines) {
     const code = ln.accountCode;
     if (ln.lotId && code.startsWith('450-')) {
-      const col = code === '450-1' ? 'current' : code === '450-2' ? 'works' : 'alur';
-      lotValues[`${ln.lotId}:${col}`] = String(ln.amount);
+      const col = COL_BY_450[code];
+      if (col) lotValues[`${ln.lotId}:${col}`] = String(ln.amount);
+      // 450-3/450-4 (ou tout suffixe inconnu) : non éditables ici -> ignorés.
     } else if (ln.lotId && code === '103') {
       lotValues[`${ln.lotId}:avance`] = String(ln.amount);
     } else if (code === '105') {
@@ -259,7 +273,7 @@ export function useRepriseSoldes(
         // ORDRE : on hydrate à partir de banksRes.data/planRes.data (arguments locaux),
         // PAS du state bankAccounts/planAccounts qui n'est pas encore appliqué (même cycle). [P0-A]
         const { form: nextForm, lotValues: nextLotValues } = rebuildFormFromLines(
-          openRes.data.lines, openRes.data.asOfDate, banks, plan
+          openRes.data.lines, openRes.data.asOfDate, banks, plan, periodStart
         );
         setForm(nextForm);
         setLotValues(nextLotValues);
@@ -268,7 +282,7 @@ export function useRepriseSoldes(
     }
     load();
     return () => { cancelled = true; };
-  }, [coproId, periodId]);
+  }, [coproId, periodId, periodStart]);
 
   const setLotValue = useCallback((lotId: string, col: LotCol, value: string) => {
     setLotValues(prev => ({ ...prev, [`${lotId}:${col}`]: value }));
@@ -281,7 +295,11 @@ export function useRepriseSoldes(
       { form, lotValues, bankCodeById, autresCodeById, chargeCodeById, produitCodeById },
       lots
     );
-    const rawAsOf = form.midYear && form.asOfDate ? form.asOfDate : new Date().toISOString().split('T')[0];
+    // Reprise plein-exercice (midYear=false) -> date = 1er jour de la période (periodStart),
+    // PAS aujourd'hui : sinon rebuild re-coche midYear à la ré-ouverture (date ≠ periodStart)
+    // et affiche une date de reprise fantaisiste. Fallback today si periodStart inconnu.
+    const fullExerciseDate = periodStart ?? new Date().toISOString().split('T')[0];
+    const rawAsOf = form.midYear && form.asOfDate ? form.asOfDate : fullExerciseDate;
     // Garantit as_of_date ∈ [start, end] de la période ciblée (si les bornes sont connues). [P1]
     const asOf = periodStart && periodEnd ? clampAsOfDate(rawAsOf, periodStart, periodEnd) : rawAsOf;
     const res = await setOnboardingOpeningBalance(coproId, periodId, asOf, lines);

@@ -149,6 +149,34 @@ describe('rebuildFormFromLines (P0-A : ré-hydratation complète)', () => {
     expect(form.asOfDate).toBe('2026-06-01');
   });
 
+  it('FIX 7 : 450-3 / 450-4 NE sont PAS reclassés en ALUR (skip silencieux évité)', () => {
+    const linesWithUnknown450: OpeningBalanceLine[] = [
+      { accountCode: '450-1', lotId: 'lot-1', amount: 500, nature: 'current' },
+      { accountCode: '450-5', lotId: 'lot-1', amount: 200, nature: 'alur' },
+      { accountCode: '450-3', lotId: 'lot-1', amount: 999 }, // avance -> non éditable ici
+      { accountCode: '450-4', lotId: 'lot-1', amount: 888 }, // prêt -> non éditable ici
+    ];
+    const { lotValues } = rebuildFormFromLines(linesWithUnknown450, '2026-01-01', bankAccounts, planAccounts, '2026-01-01');
+    expect(lotValues['lot-1:current']).toBe('500');
+    expect(lotValues['lot-1:alur']).toBe('200'); // SEULEMENT la vraie ligne ALUR (450-5)
+    // 450-3/450-4 ignorés : ils ne polluent PAS la colonne ALUR.
+    expect(lotValues['lot-1:alur']).not.toBe('999');
+    expect(lotValues['lot-1:alur']).not.toBe('888');
+  });
+
+  it('FIX 6 : reprise plein-exercice (as_of_date == periodStart) NE coche PAS midYear', () => {
+    const lines: OpeningBalanceLine[] = [
+      { accountCode: '450-1', lotId: 'lot-1', amount: 500, nature: 'current' },
+      { accountCode: '105', lotId: null, amount: -1000 },
+    ];
+    // as_of_date == début de période -> plein exercice, midYear doit rester FALSE.
+    const { form } = rebuildFormFromLines(lines, '2026-01-01', bankAccounts, planAccounts, '2026-01-01');
+    expect(form.midYear).toBe(false);
+    // as_of_date strictement après le début -> reprise en cours d'année.
+    const mid = rebuildFormFromLines(lines, '2026-06-15', bankAccounts, planAccounts, '2026-01-01');
+    expect(mid.form.midYear).toBe(true);
+  });
+
   it('ROUND-TRIP : buildOpeningLines -> get(simulé) -> rebuild -> buildOpeningLines est stable', () => {
     // 1) Saisie initiale complète (toutes natures), telle que produite par l'UI.
     const idx = buildCodeIndex(bankAccounts, planAccounts);
@@ -200,5 +228,27 @@ describe('rebuildFormFromLines (P0-A : ré-hydratation complète)', () => {
     // La banque DOIT survivre au round-trip (cœur de la régression P0-A).
     expect(linesB).toContainEqual({ accountCode: '512000', lotId: null, amount: 4200 });
     expect(linesB).toContainEqual({ accountCode: '512100', lotId: null, amount: 900 });
+  });
+
+  it('ROUND-TRIP FIX 6 : reprise plein-exercice reste midYear=false après rebuild', () => {
+    // Saisie plein-exercice (midYear=false) : pas de 6xx/7xx, juste un solde de lot.
+    const idx = buildCodeIndex(bankAccounts, planAccounts);
+    const invert = (m: Record<string, string>) =>
+      Object.fromEntries(Object.entries(m).map(([code, id]) => [id, code]));
+    const inputs: RepriseInputs = {
+      form: { ...emptyForm, midYear: false },
+      lotValues: { 'lot-1:current': '500' },
+      bankCodeById: invert(idx.bankIdByCode),
+      autresCodeById: invert(idx.autresIdByCode),
+      chargeCodeById: invert(idx.chargeIdByCode),
+      produitCodeById: invert(idx.produitIdByCode),
+    };
+    const linesA = buildOpeningLines(inputs, lots);
+    // save() poste à as_of_date = periodStart pour une reprise plein-exercice.
+    const periodStart = '2026-01-01';
+    const { form } = rebuildFormFromLines(linesA, periodStart, bankAccounts, planAccounts, periodStart);
+    // La case « reprise en cours d'année » NE doit PAS se re-cocher.
+    expect(form.midYear).toBe(false);
+    expect(form.asOfDate).toBe(periodStart);
   });
 });
