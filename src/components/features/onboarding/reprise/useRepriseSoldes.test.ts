@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { buildOpeningLines, type RepriseInputs } from '@/components/features/onboarding/reprise/useRepriseSoldes';
+import {
+  buildOpeningLines,
+  buildCodeIndex,
+  rebuildFormFromLines,
+  type RepriseInputs,
+} from '@/components/features/onboarding/reprise/useRepriseSoldes';
+import type { OpeningBalanceLine } from '@/lib/onboarding/api';
 
 const lots = [
   { id: 'lot-1', ref: 'A-101', ownerName: 'Alice' },
@@ -81,5 +87,118 @@ describe('buildOpeningLines', () => {
     const lines = buildOpeningLines(inputs, lots);
     expect(lines).toContainEqual({ accountCode: '601', lotId: null, amount: 100 });
     expect(lines).toContainEqual({ accountCode: '701', lotId: null, amount: -900 });
+  });
+});
+
+// ── Comptes utilisés pour les tests de ré-hydratation (id + code) ──
+const bankAccounts = [
+  { id: 'acc-512', code: '512000' },   // compte courant
+  { id: 'acc-502', code: '512100' },   // fonds travaux (même préfixe 512, autre compte)
+];
+const planAccounts = [
+  { id: 'acc-601', code: '601' },      // charge
+  { id: 'acc-701', code: '701' },      // produit
+  { id: 'acc-468', code: '468' },      // « autre » compte de bilan (classe 4)
+];
+
+describe('buildCodeIndex (factorisation index code -> account_id)', () => {
+  it('classe banque/charges/produits/autres, sans confondre les codes 512x', () => {
+    const idx = buildCodeIndex(bankAccounts, planAccounts);
+    expect(idx.bankIdByCode).toEqual({ '512000': 'acc-512', '512100': 'acc-502' });
+    expect(idx.chargeIdByCode).toEqual({ '601': 'acc-601' });
+    expect(idx.produitIdByCode).toEqual({ '701': 'acc-701' });
+    expect(idx.autresIdByCode).toEqual({ '468': 'acc-468' });
+  });
+});
+
+describe('rebuildFormFromLines (P0-A : ré-hydratation complète)', () => {
+  // Simule get_opening_balance : amount signé (debit +, credit -), exposé par account_code.
+  const linesFromGet: OpeningBalanceLine[] = [
+    { accountCode: '450-1', lotId: 'lot-1', amount: 500, nature: 'current' },
+    { accountCode: '103', lotId: 'lot-2', amount: 300 },
+    { accountCode: '105', lotId: null, amount: -1000 },   // réserve ALUR (crédit)
+    { accountCode: '401', lotId: null, amount: -200 },    // dette fournisseur (crédit)
+    { accountCode: '110', lotId: null, amount: 50 },
+    { accountCode: '120', lotId: null, amount: 80 },
+    { accountCode: '512000', lotId: null, amount: 4200 }, // BANQUE
+    { accountCode: '512100', lotId: null, amount: 900 },  // 2e BANQUE
+    { accountCode: '468', lotId: null, amount: 75 },      // AUTRE
+    { accountCode: '601', lotId: null, amount: 100 },     // CHARGE -> active midYear
+    { accountCode: '701', lotId: null, amount: -900 },    // PRODUIT (crédit, signé négatif)
+  ];
+
+  it('restaure banque/autres/6-7 (et plus seulement 450/103/105/401/110/120)', () => {
+    const { form, lotValues } = rebuildFormFromLines(linesFromGet, '2026-06-01', bankAccounts, planAccounts);
+    // lots
+    expect(lotValues['lot-1:current']).toBe('500');
+    expect(lotValues['lot-2:avance']).toBe('300');
+    // essentiels
+    expect(form.fondsAlur).toBe('1000');
+    expect(form.fournisseurs).toBe('200');
+    expect(form.report110).toBe('50');
+    expect(form.report120).toBe('80');
+    // BANQUE restaurée par account_id (régression P0-A)
+    expect(form.bankBalances['acc-512']).toBe('4200');
+    expect(form.bankBalances['acc-502']).toBe('900');
+    // AUTRE restauré
+    expect(form.autres['acc-468']).toBe('75');
+    // 6/7 restaurés + midYear activé, produit ré-inversé en positif
+    expect(form.charges['acc-601']).toBe('100');
+    expect(form.produits['acc-701']).toBe('900');
+    expect(form.midYear).toBe(true);
+    expect(form.asOfDate).toBe('2026-06-01');
+  });
+
+  it('ROUND-TRIP : buildOpeningLines -> get(simulé) -> rebuild -> buildOpeningLines est stable', () => {
+    // 1) Saisie initiale complète (toutes natures), telle que produite par l'UI.
+    const idx = buildCodeIndex(bankAccounts, planAccounts);
+    const invert = (m: Record<string, string>) =>
+      Object.fromEntries(Object.entries(m).map(([code, id]) => [id, code]));
+    const initialForm = {
+      ...emptyForm,
+      midYear: true,
+      asOfDate: '2026-06-01',
+      bankBalances: { 'acc-512': '4200', 'acc-502': '900' },
+      fondsAlur: '1000',
+      fournisseurs: '200',
+      report110: '50',
+      report120: '80',
+      autres: { 'acc-468': '75' },
+      charges: { 'acc-601': '100' },
+      produits: { 'acc-701': '900' },
+    };
+    const initialInputs: RepriseInputs = {
+      form: initialForm,
+      lotValues: { 'lot-1:current': '500', 'lot-2:avance': '300' },
+      bankCodeById: invert(idx.bankIdByCode),
+      autresCodeById: invert(idx.autresIdByCode),
+      chargeCodeById: invert(idx.chargeIdByCode),
+      produitCodeById: invert(idx.produitIdByCode),
+    };
+    const linesA = buildOpeningLines(initialInputs, lots);
+
+    // 2) get_opening_balance renvoie les MÊMES lignes (signe debit+/credit-), par account_code.
+    //    buildOpeningLines produit déjà ce format -> on les réutilise telles quelles.
+    // 3) Ré-hydratation depuis ces lignes.
+    const { form, lotValues } = rebuildFormFromLines(linesA, '2026-06-01', bankAccounts, planAccounts);
+
+    // 4) Re-construction des lignes depuis le form ré-hydraté.
+    const reInputs: RepriseInputs = {
+      form,
+      lotValues,
+      bankCodeById: invert(idx.bankIdByCode),
+      autresCodeById: invert(idx.autresIdByCode),
+      chargeCodeById: invert(idx.chargeIdByCode),
+      produitCodeById: invert(idx.produitIdByCode),
+    };
+    const linesB = buildOpeningLines(reInputs, lots);
+
+    // Les deux jeux de lignes doivent être identiques (à l'ordre près) -> aucune perte.
+    const sortKey = (l: OpeningBalanceLine) => `${l.accountCode}|${l.lotId ?? ''}`;
+    const sort = (arr: OpeningBalanceLine[]) => [...arr].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+    expect(sort(linesB)).toEqual(sort(linesA));
+    // La banque DOIT survivre au round-trip (cœur de la régression P0-A).
+    expect(linesB).toContainEqual({ accountCode: '512000', lotId: null, amount: 4200 });
+    expect(linesB).toContainEqual({ accountCode: '512100', lotId: null, amount: 900 });
   });
 });

@@ -38,6 +38,111 @@ function num(raw: string | undefined): number {
   return Number.isFinite(v) ? v : 0;
 }
 
+/** Comptes globaux gérés en littéral par l'« Essentiel » (jamais dans la section « Autres »). */
+const ESSENTIAL_CODES = new Set(['105', '110', '120', '401']);
+/** Un compte est-il un compte de trésorerie (banque/livret) ? Codes 512x / 502x. */
+function isBankCode(code: string): boolean {
+  return code.startsWith('512') || code.startsWith('502');
+}
+
+interface AccountRef { id: string; code: string }
+
+/**
+ * Index code → account_id, factorisé pour rester cohérent avec buildOpeningLines
+ * et la classification de BalanceEntreeForm.
+ *  - bank      : 512x/502x (résolus par account_id, jamais le code nu)
+ *  - autres    : classes 1-5 hors essentiels (105/110/120/401), hors banque, hors 450/103
+ *  - charges   : 6xx
+ *  - produits  : 7xx
+ * Les comptes globaux essentiels (105/110/120/401) et 450/103 ne sont PAS indexés ici :
+ * ils sont reconstruits par code littéral / par lot.
+ */
+export interface CodeIndex {
+  bankIdByCode: Record<string, string>;
+  autresIdByCode: Record<string, string>;
+  chargeIdByCode: Record<string, string>;
+  produitIdByCode: Record<string, string>;
+}
+
+export function buildCodeIndex(bankAccounts: AccountRef[], planAccounts: AccountRef[]): CodeIndex {
+  const bankIds = new Set(bankAccounts.map(b => b.id));
+  const bankIdByCode: Record<string, string> = {};
+  for (const b of bankAccounts) bankIdByCode[b.code] = b.id;
+
+  const autresIdByCode: Record<string, string> = {};
+  const chargeIdByCode: Record<string, string> = {};
+  const produitIdByCode: Record<string, string> = {};
+  for (const a of planAccounts) {
+    if (/^6/.test(a.code)) { chargeIdByCode[a.code] = a.id; continue; }
+    if (/^7/.test(a.code)) { produitIdByCode[a.code] = a.id; continue; }
+    // classes 1-5 hors essentiels, hors banque, hors 450/103
+    if (
+      /^[1-5]/.test(a.code) &&
+      !ESSENTIAL_CODES.has(a.code) &&
+      !bankIds.has(a.id) &&
+      !a.code.startsWith('450') &&
+      a.code !== '103'
+    ) {
+      autresIdByCode[a.code] = a.id;
+    }
+  }
+  return { bankIdByCode, autresIdByCode, chargeIdByCode, produitIdByCode };
+}
+
+/**
+ * Reconstruit l'état du formulaire ({form, lotValues}) depuis les lignes renvoyées par
+ * get_opening_balance (qui exposent account_code, PAS account_id). MIROIR EXACT de
+ * buildOpeningLines : restaure TOUTES les natures (banque/autres/6-7), sinon une
+ * ré-édition + Enregistrer effacerait ces lignes (DELETE+repost total côté moteur). [P0-A]
+ *
+ * Pur, testable sans DOM.
+ */
+export function rebuildFormFromLines(
+  lines: OpeningBalanceLine[],
+  asOfDate: string | null,
+  bankAccounts: AccountRef[],
+  planAccounts: AccountRef[],
+): { form: BalanceFormState; lotValues: Record<string, string> } {
+  const { bankIdByCode, autresIdByCode, chargeIdByCode, produitIdByCode } =
+    buildCodeIndex(bankAccounts, planAccounts);
+
+  const form: BalanceFormState = { ...EMPTY_FORM, midYear: !!asOfDate, asOfDate: asOfDate || '' };
+  const lotValues: Record<string, string> = {};
+
+  for (const ln of lines) {
+    const code = ln.accountCode;
+    if (ln.lotId && code.startsWith('450-')) {
+      const col = code === '450-1' ? 'current' : code === '450-2' ? 'works' : 'alur';
+      lotValues[`${ln.lotId}:${col}`] = String(ln.amount);
+    } else if (ln.lotId && code === '103') {
+      lotValues[`${ln.lotId}:avance`] = String(ln.amount);
+    } else if (code === '105') {
+      form.fondsAlur = String(Math.abs(ln.amount));
+    } else if (code === '401') {
+      form.fournisseurs = String(Math.abs(ln.amount));
+    } else if (code === '110') {
+      form.report110 = String(ln.amount);
+    } else if (code === '120') {
+      form.report120 = String(ln.amount);
+    } else if (isBankCode(code)) {
+      const id = bankIdByCode[code];
+      if (id) form.bankBalances[id] = String(ln.amount);
+    } else if (code.startsWith('6')) {
+      const id = chargeIdByCode[code];
+      if (id) { form.charges[id] = String(ln.amount); form.midYear = true; }
+    } else if (code.startsWith('7')) {
+      const id = produitIdByCode[code];
+      // get renvoie le produit signé négatif (crédit) : on ré-inverse pour la saisie (positive).
+      if (id) { form.produits[id] = String(-ln.amount); form.midYear = true; }
+    } else {
+      const id = autresIdByCode[code];
+      if (id) form.autres[id] = String(ln.amount);
+    }
+  }
+
+  return { form, lotValues };
+}
+
 export function buildOpeningLines(inputs: RepriseInputs, lots: LotRow[]): OpeningBalanceLine[] {
   const lines: OpeningBalanceLine[] = [];
   const { form, lotValues } = inputs;
@@ -115,34 +220,16 @@ export function useRepriseSoldes(coproId: string, periodId: string): UseRepriseS
   const [form, setForm] = useState<BalanceFormState>(EMPTY_FORM);
   const [lotValues, setLotValues] = useState<Record<string, string>>({});
 
-  // Index code par account_id pour le mapping inverse
-  const bankCodeById = Object.fromEntries(bankAccounts.map(a => [a.id, a.code]));
-  const essentialCodes = new Set(['105', '110', '120', '401']);
-  const bankIds = new Set(bankAccounts.map(b => b.id));
-  const autresCodeById = Object.fromEntries(
-    planAccounts.filter(a => /^[1-5]/.test(a.code) && !essentialCodes.has(a.code) && !bankIds.has(a.id))
-      .map(a => [a.id, a.code]));
-  const chargeCodeById = Object.fromEntries(planAccounts.filter(a => /^6/.test(a.code)).map(a => [a.id, a.code]));
-  const produitCodeById = Object.fromEntries(planAccounts.filter(a => /^7/.test(a.code)).map(a => [a.id, a.code]));
-
-  // Pré-remplit le formulaire depuis une reprise existante (ré-édition).
-  const hydrateFromLines = useCallback((lines: OpeningBalanceLine[], asOfDate: string | null) => {
-    const nextForm: BalanceFormState = { ...EMPTY_FORM, midYear: !!asOfDate, asOfDate: asOfDate || '' };
-    const nextLotValues: Record<string, string> = {};
-    for (const ln of lines) {
-      if (ln.lotId && ln.accountCode.startsWith('450-')) {
-        const col = ln.accountCode === '450-1' ? 'current' : ln.accountCode === '450-2' ? 'works' : 'alur';
-        nextLotValues[`${ln.lotId}:${col}`] = String(ln.amount);
-      } else if (ln.lotId && ln.accountCode === '103') {
-        nextLotValues[`${ln.lotId}:avance`] = String(ln.amount);
-      } else if (ln.accountCode === '105') nextForm.fondsAlur = String(Math.abs(ln.amount));
-      else if (ln.accountCode === '401') nextForm.fournisseurs = String(Math.abs(ln.amount));
-      else if (ln.accountCode === '110') nextForm.report110 = String(ln.amount);
-      else if (ln.accountCode === '120') nextForm.report120 = String(ln.amount);
-    }
-    setForm(nextForm);
-    setLotValues(nextLotValues);
-  }, []);
+  // Maps account_id -> code consommées par buildOpeningLines. On les dérive du MÊME
+  // index (code -> account_id) que la ré-hydratation, en l'inversant : ainsi save() et
+  // rebuildFormFromLines couvrent exactement le même périmètre de comptes (miroir). [P0-A]
+  const invert = (m: Record<string, string>) =>
+    Object.fromEntries(Object.entries(m).map(([code, id]) => [id, code]));
+  const codeIndex = buildCodeIndex(bankAccounts, planAccounts);
+  const bankCodeById = invert(codeIndex.bankIdByCode);
+  const autresCodeById = invert(codeIndex.autresIdByCode);
+  const chargeCodeById = invert(codeIndex.chargeIdByCode);
+  const produitCodeById = invert(codeIndex.produitIdByCode);
 
   useEffect(() => {
     let cancelled = false;
@@ -157,17 +244,25 @@ export function useRepriseSoldes(coproId: string, periodId: string): UseRepriseS
       if (lotsRes.data) setLots(lotsRes.data.map(
         (l: { id: string; ref: string; ownerName: string | null }) => ({ id: l.id, ref: l.ref, ownerName: l.ownerName })
       ));
-      if (banksRes.data) setBankAccounts(banksRes.data.map(b => ({ id: b.id, name: b.name, code: b.code })));
-      if (planRes.data) setPlanAccounts(planRes.data.map(a => ({ id: a.id, code: a.code, name: a.name })));
+      const banks = banksRes.data ?? [];
+      const plan = planRes.data ?? [];
+      if (banksRes.data) setBankAccounts(banks.map(b => ({ id: b.id, name: b.name, code: b.code })));
+      if (planRes.data) setPlanAccounts(plan.map(a => ({ id: a.id, code: a.code, name: a.name })));
       if (openRes.data) {
         setResidual(openRes.data.residual);
-        hydrateFromLines(openRes.data.lines, openRes.data.asOfDate);
+        // ORDRE : on hydrate à partir de banksRes.data/planRes.data (arguments locaux),
+        // PAS du state bankAccounts/planAccounts qui n'est pas encore appliqué (même cycle). [P0-A]
+        const { form: nextForm, lotValues: nextLotValues } = rebuildFormFromLines(
+          openRes.data.lines, openRes.data.asOfDate, banks, plan
+        );
+        setForm(nextForm);
+        setLotValues(nextLotValues);
       }
       setIsLoading(false);
     }
     load();
     return () => { cancelled = true; };
-  }, [coproId, periodId, hydrateFromLines]);
+  }, [coproId, periodId]);
 
   const setLotValue = useCallback((lotId: string, col: LotCol, value: string) => {
     setLotValues(prev => ({ ...prev, [`${lotId}:${col}`]: value }));
