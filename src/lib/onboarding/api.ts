@@ -237,12 +237,18 @@ export async function listComptesBancaires(coproId: string) {
   const supabase = createUntypedClient();
   // Comptes bancaires = comptes d'actif de trésorerie (512x banque, 502x livret travaux).
   // L'enum account_type N'A PAS de valeur 'bank' -> on filtre par account_type='asset' + code.
+  // On EXCLUT les codes nus '512' (« Banque ») et '502' (« Livret A ») créés par
+  // provision_copro_chart : ce sont des comptes chapeau génériques, pas de vrais comptes
+  // bancaires. Seuls les comptes ouverts à l'étape 4 (512000/512100…) doivent apparaître,
+  // sinon BalanceEntreeForm affiche des lignes banque fantômes / risque de postage erroné.
   const { data, error } = await supabase
     .from('accounts')
     .select('id, name, code, banque, iban, bic, initial_balance')
     .eq('copro_id', coproId)
     .eq('account_type', 'asset')
     .or('code.like.512%,code.like.502%')
+    .neq('code', '512')
+    .neq('code', '502')
     .order('code', { ascending: true });
   if (error) return { data: null, error: new Error(error.message) };
   return { data: data as Array<{ id: string; name: string; code: string; banque: string | null; iban: string | null; bic: string | null; initial_balance: number }>, error: null };

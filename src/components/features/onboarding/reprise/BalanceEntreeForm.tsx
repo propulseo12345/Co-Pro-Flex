@@ -54,11 +54,15 @@ export function BalanceEntreeForm({ state, bankAccounts, planAccounts, onChange 
     onChange({ ...state, [field]: { ...state[field], [accountId]: value } });
   }, [state, onChange]);
 
-  // Classes 1-5 hors comptes déjà couverts par « Essentiel » (105, 110, 120, 401, banques)
-  const essentialCodes = new Set(['105', '110', '120', '401']);
+  // Classes 1-5 hors comptes déjà couverts ailleurs :
+  //  - « Essentiel » : 105, 110, 120, 401, banques
+  //  - GÉRÉ PAR LOT : 103 (avance), saisi dans la colonne « Avance » de SoldesParLotTable
+  //    -> ne JAMAIS l'exposer en champ global (sinon buildCodeIndex l'exclut côté save et la
+  //    saisie globale est silencieusement perdue). Cohérent avec buildCodeIndex (useRepriseSoldes).
+  const excludedCodes = new Set(['105', '110', '120', '401', '103']);
   const bankIds = new Set(bankAccounts.map(b => b.id));
   const autresAccounts = planAccounts.filter(a =>
-    /^[1-5]/.test(a.code) && !essentialCodes.has(a.code) && !bankIds.has(a.id)
+    /^[1-5]/.test(a.code) && !excludedCodes.has(a.code) && !bankIds.has(a.id)
   );
   const charges6 = planAccounts.filter(a => /^6/.test(a.code));
   const produits7 = planAccounts.filter(a => /^7/.test(a.code));
