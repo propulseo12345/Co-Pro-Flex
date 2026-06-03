@@ -17,10 +17,12 @@
  *   - E2E_USER_EMAIL / E2E_USER_PASSWORD (optionnel : sinon compte démo admin)
  *   - serveur dev lancé (webServer Playwright) + comptes démo seedés
  *
- * NOTE robustesse : Step 7 (reprise de soldes) est volontairement SKIPPÉ ("Passer").
- * Saisir un solde d'un seul côté pose la contrepartie sur le compte d'attente 472,
- * qui resterait non soldé -> l'audit de finalisation BLOQUE (waitingBalance != 0)
- * et la redirection /portefeuille n'aurait jamais lieu. Skip = chemin propre garanti.
+ * NOTE : post-as-you-go. Les appels sont POSTÉS à la validation de Step 6 (route
+ * idempotente postOnboardingCalls) ; la reprise est ENREGISTRÉE à la validation de
+ * Step 7 (setOnboardingOpeningBalance, non bloquante). Step 8 ne re-poste rien : il
+ * LIT l'état réel (auditOnboardingBooks = liste blanche, 471/472 non bloquant).
+ * Ici on saisit une reprise ÉQUILIBRÉE (un report 120 contrebalancé par un solde
+ * banque) -> net 471/472 = 0 -> audit propre -> redirection /portefeuille.
  */
 
 import { test, expect, type Page, type Locator } from '@playwright/test';
@@ -203,24 +205,52 @@ test.describe('Onboarding — chemin propre (audit = 0)', () => {
 
     // ── 7) Step 6 : fréquence Annuel, 0 déjà émis, date AG, valider 1 appel ────
     const s6 = stepBlock(page, 'Appels de fonds');
-    // Fréquence "Annuel (1)".
     await s6.getByRole('button', { name: /^Annuel/ }).click();
-    // "Aucun" appel déjà émis.
     await s6.getByRole('button', { name: 'Aucun' }).click();
-    // Date de l'AG (input type=date).
     await s6.locator('input[type="date"]').fill('2026-01-15');
-    // "Voir les appels (1)".
     await s6.getByRole('button', { name: /^Voir les appels/ }).click();
-    // "Valider ces 1 appel".
+    // Post-as-you-go : ce clic POSTE l'appel (idempotent) AVANT d'avancer.
     await s6.getByRole('button', { name: /^Valider ces/ }).click();
 
-    // ── 8) Step 7 : reprise des soldes -> "Passer" (chemin propre, cf. en-tête) ─
-    const s7 = stepBlock(page, 'Reprise de soldes');
-    await s7.getByRole('button', { name: 'Passer' }).click();
+    // 7bis) Assertions DB immédiates (I13) : l'appel est issued ET le budget validé.
+    {
+      const { data: calls, error: callErr } = await admin
+        .from('call_for_funds')
+        .select('id, status')
+        .eq('copro_id', coproId)
+        .eq('status', 'issued');
+      expect(callErr).toBeNull();
+      expect((calls ?? []).length).toBeGreaterThanOrEqual(1);
 
-    // ── 9) Step 8 : finalisation ──────────────────────────────────────────────
+      const { data: budgets, error: budErr } = await admin
+        .from('budgets')
+        .select('id, status')
+        .eq('copro_id', coproId)
+        .eq('budget_type', 'current');
+      expect(budErr).toBeNull();
+      expect((budgets ?? []).some(b => b.status === 'validated')).toBe(true);
+    }
+
+    // ── 8) Step 7 : reprise ÉQUILIBRÉE (report 120 = solde banque) -> 471/472 = 0 ─
+    const s7 = stepBlock(page, 'Reprise de soldes');
+    // "Report à nouveau — courant" (120) et le 1er compte bancaire reçoivent le MÊME
+    // montant : le débit (banque, actif) équilibre le crédit (report 120) -> net 0.
+    // Les champs sont des <input type=number> ; on cible par leur libellé proche.
+    const reportField = s7.locator('input[type="number"]').first(); // 1er champ banque
+    await reportField.fill('1000');
+    // Champ "Report à nouveau — courant" : on le repère via le label "120".
+    const report120 = s7
+      .locator('div')
+      .filter({ hasText: /Report à nouveau — courant/ })
+      .locator('input[type="number"]')
+      .last();
+    await report120.fill('1000');
+    // Enregistrer (non bloquant). Le bouton wizard est "Enregistrer et continuer".
+    await s7.getByRole('button', { name: /Enregistrer et continuer/ }).click();
+
+    // ── 9) Step 8 : finalisation (lit la DB, ne re-poste rien) ─────────────────
     const s8 = stepBlock(page, 'Finalisation');
-    await s8.getByRole('button', { name: 'Enregistrer et vérifier' }).click();
+    await s8.getByRole('button', { name: 'Vérifier et terminer' }).click();
 
     // ── 10) Preuve UI : redirection /portefeuille => audit propre ─────────────
     await expect(page).toHaveURL(/\/portefeuille/, { timeout: 30000 });
