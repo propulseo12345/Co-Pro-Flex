@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { setActiveCopro } from '@/lib/copro/activeCopro';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
-import { resolveOnboardingPeriod } from '@/lib/onboarding/api';
+import { getOrCreateOnboardingPeriod } from '@/lib/onboarding/api';
 import type { OnboardingCallPlan } from '@/lib/onboarding/api';
 import { createClient } from '@/lib/supabase/client';
 import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
@@ -50,10 +50,11 @@ export default function OnboardingWizardPage() {
   // Récupérer budgetId + periodId depuis la DB si on reprend à step 5+
   useEffect(() => {
     if (currentStep >= 5 && coproId && !isLoading) {
-      // Period : on cible la période portant DÉJÀ la reprise (sinon l'ouverte, sinon créée),
-      // pas l'année civile en dur — sinon on viserait une période ≠ de la reprise. [P1]
+      // Period : on cible la période portant DÉJÀ la reprise (sinon l'ouverte, sinon on la
+      // crée via l'exercice contenant aujourd'hui). On est DANS le wizard -> création autorisée
+      // (helper canonique partagé avec Step5Budget : une seule période d'onboarding cohérente).
       if (!periodId) {
-        resolveOnboardingPeriod(coproId).then(res => {
+        getOrCreateOnboardingPeriod(coproId).then(res => {
           if (res.data) {
             setPeriodId(res.data.id);
             setPeriodStart(res.data.start);

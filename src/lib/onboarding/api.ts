@@ -269,6 +269,24 @@ function deriveExercicePeriod(exerciceDebut: string | null, year: number): { sta
   return { start: iso(start), end: iso(end), name: label };
 }
 
+/**
+ * Année d'exercice CONTENANT la date `today`, dérivée de `exercice_debut` (MM-DD).
+ * Pour un exercice civil (01-01) c'est l'année de `today`. Pour un exercice décalé
+ * (ex. 07-01), si today est en janvier on vise l'exercice ouvert l'année PRÉCÉDENTE
+ * (juil. N-1 → juin N) — JAMAIS getFullYear() brut, qui ciblerait juil. N → juin N+1.
+ */
+export function deriveExerciceYearForDate(exerciceDebut: string | null, today: Date): number {
+  const md = /^\d{2}-\d{2}$/.test(exerciceDebut ?? '') ? (exerciceDebut as string) : '01-01';
+  const [mm, dd] = md.split('-').map(Number);
+  const y = today.getUTCFullYear();
+  // Début d'exercice de l'année civile courante (UTC, comparé à today en UTC).
+  const startThisYear = Date.UTC(y, mm - 1, dd);
+  const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  // Si today est AVANT le début d'exercice de l'année courante, on est dans l'exercice
+  // ouvert l'année précédente.
+  return todayUTC < startThisYear ? y - 1 : y;
+}
+
 export async function ensureAccountingPeriod(coproId: string, year: number) {
   const supabase = createUntypedClient();
 
@@ -315,20 +333,17 @@ export interface ResolvedPeriod {
 }
 
 /**
- * Cible LA bonne période pour set/get_opening_balance, dans cet ordre (spec P1) :
+ * Lecture SEULE de la période d'onboarding (aucune création), partagée par
+ * resolveOnboardingPeriod et getOrCreateOnboardingPeriod. Ordre (spec P1) :
  *   1) la période portant déjà une tx source_type='opening_onboarding' (la reprise existe) ;
  *   2) sinon, l'unique période status='open' de la copro ;
- *   3) sinon, on la crée via la dérivation d'exercice (fallback année courante OK, copro neuve).
- *
- * Évite de viser/créer une période ≠ de celle portant la reprise quand l'exercice ≠ année
- * civile (ou onboarding à cheval déc/janv) : sinon get_opening_balance renvoie vide et
- * l'alerte 471/472, copro-wide, ne se solde jamais.
+ *   3) sinon -> null (pas de période d'onboarding identifiable).
  */
-export async function resolveOnboardingPeriod(
+async function readOnboardingPeriod(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   coproId: string
 ): Promise<{ data: ResolvedPeriod | null; error: Error | null }> {
-  const supabase = createUntypedClient();
-
   // 1) Période d'une reprise d'onboarding déjà postée
   const { data: openingTx, error: txErr } = await supabase
     .from('ledger_transactions')
@@ -368,8 +383,48 @@ export async function resolveOnboardingPeriod(
     return { data: { id: p.id, start: p.start_date, end: p.end_date }, error: null };
   }
 
-  // 3) Fallback : créer via la dérivation d'exercice (année civile courante acceptable, copro neuve)
-  const year = new Date().getFullYear();
+  // 3) Aucune période d'onboarding identifiable.
+  return { data: null, error: null };
+}
+
+/**
+ * RÉSOLUTION SEULE (FIX 2b) : cible LA période d'onboarding existante SANS jamais en créer.
+ * Renvoie null si aucune tx opening_onboarding ET aucune période open. Destinée au chemin
+ * alerte/modal : on ne doit JAMAIS créer une période parasite en effet de bord d'un clic
+ * sur l'alerte. La CRÉATION reste réservée au wizard via getOrCreateOnboardingPeriod.
+ */
+export async function resolveOnboardingPeriod(
+  coproId: string
+): Promise<{ data: ResolvedPeriod | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+  return readOnboardingPeriod(supabase, coproId);
+}
+
+/**
+ * CRÉATION canonique (FIX 3) : la SEULE voie autorisée à créer la période d'onboarding.
+ * (1) période portant une tx opening_onboarding, sinon (2) l'unique période open, sinon
+ * (3) CRÉE la période de l'exercice CONTENANT AUJOURD'HUI — année dérivée de
+ * copros.exercice_debut (deriveExerciceYearForDate), PAS getFullYear() brut. Garantit
+ * une période d'onboarding unique et cohérente entre budget, appels et reprise.
+ */
+export async function getOrCreateOnboardingPeriod(
+  coproId: string
+): Promise<{ data: ResolvedPeriod | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+
+  // 1-2) Lecture seule (réutilise exactement la logique du chemin résolution).
+  const read = await readOnboardingPeriod(supabase, coproId);
+  if (read.error) return read;
+  if (read.data) return read;
+
+  // 3) Création : exercice contenant aujourd'hui, dérivé de exercice_debut.
+  const { data: copro, error: coproErr } = await supabase
+    .from('copros').select('exercice_debut').eq('id', coproId).single();
+  if (coproErr) return { data: null, error: new Error(coproErr.message) };
+
+  const year = deriveExerciceYearForDate(
+    (copro as { exercice_debut: string | null }).exercice_debut, new Date()
+  );
   const { data: created, error: createErr } = await ensureAccountingPeriod(coproId, year);
   if (createErr || !created) {
     return { data: null, error: createErr ?? new Error('Impossible de résoudre la période de reprise.') };

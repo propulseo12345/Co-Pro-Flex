@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
 import {
-  ensureAccountingPeriod,
+  getOrCreateOnboardingPeriod,
   listRepartitionKeys,
   createOnboardingBudget,
 } from '@/lib/onboarding/api';
@@ -43,10 +43,13 @@ export function Step5Budget({ coproId, onComplete, onBack }: Step5Props) {
 
   useEffect(() => {
     async function load() {
-      const currentYear = new Date().getFullYear();
+      // Période d'onboarding canonique : réutilise la période portant la reprise / l'unique
+      // période ouverte, sinon crée l'exercice CONTENANT aujourd'hui (dérivé de exercice_debut).
+      // Évite que budget et reprise atterrissent sur des périodes différentes (exercice décalé,
+      // onboarding à cheval sur l'année).
       const [keysRes, periodRes] = await Promise.all([
         listRepartitionKeys(coproId),
-        ensureAccountingPeriod(coproId, currentYear),
+        getOrCreateOnboardingPeriod(coproId),
       ]);
 
       const loadedKeys = keysRes.data || [];
