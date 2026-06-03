@@ -637,6 +637,100 @@ export async function postOnboardingOpeningBalances(
   return { data: { count: nonZero.length }, error: null };
 }
 
+// ═══ REPRISE SOLDES — MOTEUR set/get_opening_balance (canonique) ═══
+
+export type OpeningBalanceNature = 'current' | 'works' | 'advance' | 'loan' | 'alur';
+
+export interface OpeningBalanceLine {
+  accountCode: string;            // '450' (+nature), '450-1', '103', '105', '401', '110', '120', '512000', '601', '701'…
+  lotId?: string | null;          // requis pour 450-x et 103 ; absent pour les comptes globaux
+  amount: number;                 // signé : > 0 = au débit (l'actif/tiers doit) ; < 0 = au crédit
+  nature?: OpeningBalanceNature;  // requis si accountCode === '450' (nu)
+}
+
+export interface OpeningBalanceResult {
+  success: boolean;
+  residual: number;
+  linesCount: number;
+  asOfDate: string;
+}
+
+export async function setOnboardingOpeningBalance(
+  coproId: string,
+  periodId: string,
+  asOfDate: string,            // YYYY-MM-DD, garanti ∈ [start,end] par ensureAccountingPeriod
+  lines: OpeningBalanceLine[]
+): Promise<{ data: OpeningBalanceResult | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+  const payload = lines
+    .filter(l => l.amount !== 0)
+    .map(l => ({
+      account_code: l.accountCode,
+      lot_id: l.lotId ?? null,
+      amount: l.amount,
+      nature: l.nature ?? null,
+    }));
+
+  const { data, error } = await supabase.rpc('set_opening_balance', {
+    p_copro_id: coproId,
+    p_period_id: periodId,
+    p_as_of_date: asOfDate,
+    p_lines: payload,
+  });
+  if (error) return { data: null, error: new Error(error.message) };
+
+  const res = data as { success?: boolean; error?: string; residual?: number; lines_count?: number; as_of_date?: string };
+  if (!res?.success) {
+    return { data: null, error: new Error(res?.error || 'Échec de la reprise des soldes') };
+  }
+  return {
+    data: {
+      success: true,
+      residual: Number(res.residual ?? 0),
+      linesCount: Number(res.lines_count ?? 0),
+      asOfDate: res.as_of_date ?? asOfDate,
+    },
+    error: null,
+  };
+}
+
+export interface OpeningBalanceSnapshot {
+  lines: OpeningBalanceLine[];
+  residual: number;
+  asOfDate: string | null;
+}
+
+export async function getOnboardingOpeningBalance(
+  coproId: string,
+  periodId: string
+): Promise<{ data: OpeningBalanceSnapshot | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase.rpc('get_opening_balance', {
+    p_copro_id: coproId,
+    p_period_id: periodId,
+  });
+  if (error) return { data: null, error: new Error(error.message) };
+
+  const res = data as {
+    lines?: Array<{ account_code: string; lot_id: string | null; amount: number; nature: string | null }>;
+    residual?: number;
+    as_of_date?: string | null;
+  };
+  return {
+    data: {
+      lines: (res?.lines ?? []).map(l => ({
+        accountCode: l.account_code,
+        lotId: l.lot_id,
+        amount: Number(l.amount),
+        nature: (l.nature as OpeningBalanceNature | null) ?? undefined,
+      })),
+      residual: Number(res?.residual ?? 0),
+      asOfDate: res?.as_of_date ?? null,
+    },
+    error: null,
+  };
+}
+
 // ═══ VÉRIFICATION FINALE ═══
 
 export interface OnboardingAuditIssue {
