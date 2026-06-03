@@ -54,6 +54,15 @@ export async function createCopropriete(payload: CoproCreate) {
     if (chartErr) {
       return { data: null, error: new Error(`Plan comptable non provisionné : ${chartErr.message}`) };
     }
+
+    // provision_copro_chart est idempotent (son entier de retour vaut 0 au re-run) :
+    // vérifier un compte sentinelle (450-1) confirme que le plan est réellement présent.
+    const { count: sentinel, error: chkErr } = await supabase
+      .from('accounts').select('id', { count: 'exact', head: true })
+      .eq('copro_id', (data as { id: string }).id).eq('code', '450-1');
+    if (chkErr || !sentinel) {
+      return { data: null, error: new Error('Plan comptable incomplet après provisionnement (450-1 absent).') };
+    }
   }
 
   return { data: data as { id: string; name: string }, error: null };
@@ -500,13 +509,16 @@ export async function postOnboardingOpeningBalances(
   if (nonZero.length === 0) return { data: { count: 0 }, error: null };
 
   // Idempotence : si une reprise d'ouverture existe déjà pour cette période, ne pas reposter.
-  const { data: existingTx } = await supabase
+  const { data: existingTx, error: existTxErr } = await supabase
     .from('ledger_transactions')
     .select('id')
     .eq('copro_id', coproId)
     .eq('period_id', periodId)
     .eq('source_type', 'opening_balance')
     .limit(1);
+  if (existTxErr) {
+    return { data: null, error: new Error(`Vérification idempotence reprise : ${existTxErr.message}`) };
+  }
   if (existingTx && existingTx.length > 0) {
     return { data: { count: 0, skipped: true }, error: null };
   }
