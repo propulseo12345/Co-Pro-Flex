@@ -383,20 +383,54 @@ export async function createOnboardingBudget(
     return { id: defaultChargeId!, mappedToDefault: true };
   }
 
-  // Create budget
-  const { data: budget, error: budgetErr } = await supabase
+  // I6 — Au plus UN budget 'current' par (copro, période). Si un budget existe déjà :
+  //   - s'il est référencé par des appels émis (verrouillé) -> on le RÉUTILISE tel quel
+  //     (et on ne recrée pas de lignes : retour anticipé pour éviter les doublons) ;
+  //   - sinon (draft sans appel) -> on le réutilise et on remplace ses lignes.
+  const { data: existingBudget, error: existBudgetErr } = await supabase
     .from('budgets')
-    .insert({
-      copro_id: coproId,
-      period_id: periodId,
-      budget_type: 'current',
-      name,
-      status: 'draft',
-      version: 1,
-    })
-    .select('id')
-    .single();
-  if (budgetErr) return { data: null, error: new Error(budgetErr.message) };
+    .select('id, status')
+    .eq('copro_id', coproId)
+    .eq('period_id', periodId)
+    .eq('budget_type', 'current')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (existBudgetErr) return { data: null, error: new Error(existBudgetErr.message) };
+
+  let budget: { id: string };
+  if (existingBudget) {
+    // Le budget est-il verrouillé (des appels non annulés le référencent) ?
+    const { count: callCount, error: callErr } = await supabase
+      .from('call_for_funds')
+      .select('id', { count: 'exact', head: true })
+      .eq('budget_id', (existingBudget as { id: string }).id)
+      .neq('status', 'cancelled');
+    if (callErr) return { data: null, error: new Error(callErr.message) };
+    budget = { id: (existingBudget as { id: string }).id };
+    if ((callCount ?? 0) > 0) {
+      // Verrouillé : on ne touche plus aux lignes -> retour idempotent.
+      return { data: { budgetId: budget.id, unmappedCategories: [] }, error: null };
+    }
+    // Draft non verrouillé : on purge les anciennes lignes avant de réinsérer.
+    const { error: delErr } = await supabase.from('budget_lines').delete().eq('budget_id', budget.id);
+    if (delErr) return { data: null, error: new Error(delErr.message) };
+  } else {
+    const { data: created, error: budgetErr } = await supabase
+      .from('budgets')
+      .insert({
+        copro_id: coproId,
+        period_id: periodId,
+        budget_type: 'current',
+        name,
+        status: 'draft',
+        version: 1,
+      })
+      .select('id')
+      .single();
+    if (budgetErr) return { data: null, error: new Error(budgetErr.message) };
+    budget = { id: (created as { id: string }).id };
+  }
 
   // Create budget lines (compte de charge résolu par catégorie, pas un 600 unique)
   const unmappedCategories: string[] = [];
