@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { setActiveCopro } from '@/lib/copro/activeCopro';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
 import { ensureAccountingPeriod } from '@/lib/onboarding/api';
-import type { OnboardingCallPlan, SoldeOpeningEntry } from '@/lib/onboarding/api';
+import type { OnboardingCallPlan } from '@/lib/onboarding/api';
 import { createClient } from '@/lib/supabase/client';
 import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
 import { Step2Coproprietaires } from '@/components/features/onboarding/steps/Step2Coproprietaires';
@@ -13,7 +13,7 @@ import { Step3LotsKeys } from '@/components/features/onboarding/steps/Step3LotsK
 import { Step4Comptes } from '@/components/features/onboarding/steps/Step4Comptes';
 import { Step5Budget } from '@/components/features/onboarding/steps/Step5Budget';
 import { Step6AgAppels } from '@/components/features/onboarding/steps/Step6AgAppels';
-import { Step7RepriseSoldes } from '@/components/features/onboarding/steps/Step7RepriseSoldes';
+import { RepriseSoldes } from '@/components/features/onboarding/reprise/RepriseSoldes';
 import { Step8Finalisation } from '@/components/features/onboarding/steps/Step8Finalisation';
 import styles from '../onboarding.module.css';
 
@@ -36,7 +36,6 @@ export default function OnboardingWizardPage() {
   const [budgetId, setBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
   const [callPlan, setCallPlan] = useState<OnboardingCallPlan | null>(null);
-  const [openingEntries, setOpeningEntries] = useState<SoldeOpeningEntry[]>([]);
 
   // Mémoriser la copro active pour les steps qui en ont besoin
   useEffect(() => {
@@ -165,11 +164,13 @@ export default function OnboardingWizardPage() {
         )}
         {periodId && maxStepReached >= 7 && (
           <div style={{ display: currentStep === 7 ? undefined : 'none' }}>
-            <Step7RepriseSoldes
+            <RepriseSoldes
               coproId={coproId}
               periodId={periodId}
-              onComplete={(entries) => { setOpeningEntries(entries); completeStep(7); }}
+              onSaved={() => completeStep(7)}
+              onSkip={() => completeStep(7)}
               onBack={() => goToStep(6)}
+              saveLabel="Enregistrer et continuer"
             />
           </div>
         )}
@@ -177,12 +178,9 @@ export default function OnboardingWizardPage() {
           <div style={{ display: currentStep === 8 ? undefined : 'none' }}>
             <Step8Finalisation
               coproId={coproId}
-              periodId={periodId}
-              budgetId={budgetId}
-              callPlan={callPlan}
-              openingEntries={openingEntries}
               onFinalized={handleFinalize}
               onBack={() => goToStep(7)}
+              onEditReprise={() => goToStep(7)}
             />
           </div>
         )}

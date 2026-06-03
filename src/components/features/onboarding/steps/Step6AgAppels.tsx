@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
 import { createClient } from '@/lib/supabase/client';
+import { postOnboardingCalls } from '@/lib/onboarding/api';
 import type { OnboardingCallPlan } from '@/lib/onboarding/api';
 import styles from './Step6AgAppels.module.css';
 
@@ -38,6 +39,7 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
   const [alreadyDone, setAlreadyDone] = useState<number>(0);
   const [agDate, setAgDate] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
   const [budgetTotal, setBudgetTotal] = useState<number>(0);
 
   // Preview des appels éditables
@@ -109,8 +111,8 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
     setCallPreviews(prev => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p));
   }, []);
 
-  // Capture seule : on remonte le plan, le postage se fait à la finalisation.
-  const handleConfirm = useCallback(() => {
+  // Post-as-you-go : on POSTE les appels ici (route idempotente), puis on remonte le plan.
+  const handleConfirm = useCallback(async () => {
     if (!budgetId) { onComplete(null); return; }
     const plan: OnboardingCallPlan = {
       schedule,
@@ -122,8 +124,15 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
         dueDate: p.dueDate,
       })),
     };
+    if (plan.installments.length > 0) {
+      setIsPosting(true);
+      setError(null);
+      const r = await postOnboardingCalls(coproId, periodId, budgetId, plan);
+      setIsPosting(false);
+      if (r.error) { setError(r.error.message); return; }
+    }
     onComplete(plan);
-  }, [budgetId, schedule, alreadyDone, callPreviews, onComplete]);
+  }, [budgetId, coproId, periodId, schedule, alreadyDone, callPreviews, onComplete]);
 
   return (
     <div className={styles.container}>
@@ -269,8 +278,10 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
           <button className={styles.btnNext} onClick={() => onComplete(null)}>Continuer</button>
         )}
         {budgetId && phase === 'preview' && (
-          <button className={styles.btnNext} onClick={handleConfirm}>
-            Valider ces {callPreviews.length} appel{callPreviews.length > 1 ? 's' : ''}
+          <button className={styles.btnNext} onClick={handleConfirm} disabled={isPosting}>
+            {isPosting
+              ? 'Émission…'
+              : `Valider ces ${callPreviews.length} appel${callPreviews.length > 1 ? 's' : ''}`}
           </button>
         )}
       </div>
