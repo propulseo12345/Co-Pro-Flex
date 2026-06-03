@@ -425,19 +425,60 @@ export async function postOnboardingCalls(
   const supabase = createUntypedClient();
   const count = plan.schedule === 'annuel' ? 1 : plan.schedule === 'semestriel' ? 2 : 4;
 
-  // Idempotence : si des appels non annulés existent déjà pour ce budget, ne pas reposter
-  // (re-clic de finalisation après échec partiel).
-  const { data: existing } = await supabase
-    .from('call_for_funds')
-    .select('id')
-    .eq('budget_id', budgetId)
-    .neq('status', 'cancelled')
-    .limit(1);
-  if (existing && existing.length > 0) {
-    return { data: { posted: 0, skipped: true }, error: null };
+  // Pré-validation : toutes les clés de répartition du budget doivent être complètes
+  // AVANT de poster quoi que ce soit (sinon post_budget_call_for_funds RAISE en cours de
+  // boucle et laisse un état partiel). On vérifie chaque clé distincte via la RPC.
+  const { data: budgetLineKeys, error: keysErr } = await supabase
+    .from('budget_lines')
+    .select('repartition_key_id')
+    .eq('budget_id', budgetId);
+  if (keysErr) {
+    return { data: null, error: new Error(`Vérification des clés de répartition : ${keysErr.message}`) };
+  }
+  const distinctKeyIds = [
+    ...new Set(
+      ((budgetLineKeys || []) as Array<{ repartition_key_id: string | null }>)
+        .map(l => l.repartition_key_id)
+        .filter((id): id is string => !!id)
+    ),
+  ];
+  for (const keyId of distinctKeyIds) {
+    const { data: isComplete, error: completeErr } = await supabase.rpc('repartition_key_is_complete', {
+      p_key_id: keyId,
+    });
+    if (completeErr) {
+      return { data: null, error: new Error(`Vérification clé de répartition : ${completeErr.message}`) };
+    }
+    if (isComplete !== true) {
+      return {
+        data: null,
+        error: new Error('Clé de répartition incomplète — complétez la répartition avant d\'émettre les appels.'),
+      };
+    }
   }
 
+  // Idempotence PAR ÉCHÉANCE : on lit les appels non annulés déjà postés pour ce budget avec
+  // leur trimestre, puis on ne reposte que les échéances manquantes (re-clic après échec partiel).
+  const { data: existing, error: existErr } = await supabase
+    .from('call_for_funds')
+    .select('trimester')
+    .eq('budget_id', budgetId)
+    .neq('status', 'cancelled');
+  if (existErr) {
+    return { data: null, error: new Error(`Vérification idempotence appels : ${existErr.message}`) };
+  }
+  const postedTrimesters = new Set<number>(
+    ((existing || []) as Array<{ trimester: number | null }>)
+      .map(c => c.trimester)
+      .filter((t): t is number => t !== null && t !== undefined)
+  );
+
+  let posted = 0;
   for (const inst of plan.installments) {
+    // L'index 1-based de l'échéance correspond au trimester du call_for_funds.
+    if (postedTrimesters.has(inst.index)) {
+      continue;
+    }
     const { data, error } = await supabase.rpc('post_budget_call_for_funds', {
       p_copro_id: coproId,
       p_period_id: periodId,
@@ -456,16 +497,17 @@ export async function postOnboardingCalls(
     if (data && (data as { success?: boolean }).success === false) {
       return { data: null, error: new Error(`Appel ${inst.label} : ${(data as { error?: string }).error || 'échec RPC'}`) };
     }
+    posted += 1;
   }
 
-  // Marquer le budget validé
+  // Marquer le budget validé (même si tout était déjà posté : re-clic après échec partiel)
   const { error: budErr } = await supabase
     .from('budgets')
     .update({ status: 'validated', validated_at: new Date().toISOString() })
     .eq('id', budgetId);
   if (budErr) return { data: null, error: new Error(budErr.message) };
 
-  return { data: { posted: plan.installments.length }, error: null };
+  return { data: { posted }, error: null };
 }
 
 // ═══ LOTS LIST (for Step 7) ═══
