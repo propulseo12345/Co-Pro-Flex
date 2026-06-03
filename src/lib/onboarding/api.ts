@@ -833,3 +833,45 @@ export async function auditOnboardingBooks(
     error: null,
   };
 }
+
+/**
+ * Preuve positive (spec §6 / I7) : compte les appels RÉELLEMENT émis (status ∉ draft/cancelled)
+ * pour le dernier budget 'validated' de la copro, lu EN BASE (pas la mémoire React).
+ * Retour :
+ *  - hasValidatedBudget : un budget 'validated' existe-t-il ?
+ *  - issuedCallCount    : nombre d'appels émis rattachés à ce budget.
+ * La DÉCISION de bloquer (plan vide vs plan non vide) est prise par l'appelant (Step8).
+ */
+export async function getValidatedBudgetCallProof(
+  coproId: string
+): Promise<{ data: { hasValidatedBudget: boolean; budgetId: string | null; issuedCallCount: number } | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+
+  const { data: budget, error: budgetErr } = await supabase
+    .from('budgets')
+    .select('id')
+    .eq('copro_id', coproId)
+    .eq('budget_type', 'current')
+    .eq('status', 'validated')
+    .order('validated_at', { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+  if (budgetErr) return { data: null, error: new Error(budgetErr.message) };
+
+  if (!budget) {
+    return { data: { hasValidatedBudget: false, budgetId: null, issuedCallCount: 0 }, error: null };
+  }
+
+  const budgetId = (budget as { id: string }).id;
+  const { count, error: callErr } = await supabase
+    .from('call_for_funds')
+    .select('id', { count: 'exact', head: true })
+    .eq('budget_id', budgetId)
+    .not('status', 'in', '(draft,cancelled)');
+  if (callErr) return { data: null, error: new Error(callErr.message) };
+
+  return {
+    data: { hasValidatedBudget: true, budgetId, issuedCallCount: count ?? 0 },
+    error: null,
+  };
+}
