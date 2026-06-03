@@ -10,6 +10,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // vitest 4.1.x : le pool de threads par défaut corrompt le contexte de test partagé
+    // entre fichiers exécutés en parallèle (chaque fichier sauf le premier échoue avec
+    // « Cannot read properties of undefined (reading 'config') »). On force le pool `forks`
+    // sans parallélisme de fichiers : suite stable et verte. À réévaluer si vitest corrige.
+    pool: 'forks',
+    fileParallelism: false,
     include: [
       'src/**/*.test.ts',
       'src/**/*.test.tsx',
