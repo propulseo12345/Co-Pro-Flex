@@ -7,6 +7,7 @@ import {
   listComptesBancaires,
   listComptesPlan,
   listLots,
+  clampAsOfDate,
   type OpeningBalanceLine,
 } from '@/lib/onboarding/api';
 import type { BalanceFormState, BankAccount, PlanAccount } from './BalanceEntreeForm';
@@ -209,7 +210,12 @@ interface UseRepriseSoldesResult {
   save: () => Promise<{ ok: boolean; residual: number }>;
 }
 
-export function useRepriseSoldes(coproId: string, periodId: string): UseRepriseSoldesResult {
+export function useRepriseSoldes(
+  coproId: string,
+  periodId: string,
+  periodStart?: string,
+  periodEnd?: string,
+): UseRepriseSoldesResult {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -275,14 +281,16 @@ export function useRepriseSoldes(coproId: string, periodId: string): UseRepriseS
       { form, lotValues, bankCodeById, autresCodeById, chargeCodeById, produitCodeById },
       lots
     );
-    const asOf = form.midYear && form.asOfDate ? form.asOfDate : new Date().toISOString().split('T')[0];
+    const rawAsOf = form.midYear && form.asOfDate ? form.asOfDate : new Date().toISOString().split('T')[0];
+    // Garantit as_of_date ∈ [start, end] de la période ciblée (si les bornes sont connues). [P1]
+    const asOf = periodStart && periodEnd ? clampAsOfDate(rawAsOf, periodStart, periodEnd) : rawAsOf;
     const res = await setOnboardingOpeningBalance(coproId, periodId, asOf, lines);
     setIsSaving(false);
     if (res.error) { setError(res.error.message); return { ok: false, residual }; }
     const newResidual = res.data?.residual ?? 0;
     setResidual(newResidual);
     return { ok: true, residual: newResidual };
-  }, [form, lotValues, lots, coproId, periodId, residual,
+  }, [form, lotValues, lots, coproId, periodId, periodStart, periodEnd, residual,
       bankCodeById, autresCodeById, chargeCodeById, produitCodeById]);
 
   return {

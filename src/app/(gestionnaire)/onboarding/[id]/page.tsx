@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { setActiveCopro } from '@/lib/copro/activeCopro';
 import { useOnboarding } from '@/hooks/modules/useOnboarding';
-import { ensureAccountingPeriod } from '@/lib/onboarding/api';
+import { resolveOnboardingPeriod } from '@/lib/onboarding/api';
 import type { OnboardingCallPlan } from '@/lib/onboarding/api';
 import { createClient } from '@/lib/supabase/client';
 import { OnboardingStepper } from '@/components/features/onboarding/OnboardingStepper/OnboardingStepper';
@@ -35,6 +35,9 @@ export default function OnboardingWizardPage() {
   // State partagé entre steps 5-8
   const [budgetId, setBudgetId] = useState<string | null>(null);
   const [periodId, setPeriodId] = useState<string | null>(null);
+  // Bornes de la période de reprise (clamp de la date de reprise, step 7). [P1]
+  const [periodStart, setPeriodStart] = useState<string | null>(null);
+  const [periodEnd, setPeriodEnd] = useState<string | null>(null);
   const [callPlan, setCallPlan] = useState<OnboardingCallPlan | null>(null);
 
   // Mémoriser la copro active pour les steps qui en ont besoin
@@ -47,12 +50,15 @@ export default function OnboardingWizardPage() {
   // Récupérer budgetId + periodId depuis la DB si on reprend à step 5+
   useEffect(() => {
     if (currentStep >= 5 && coproId && !isLoading) {
-      const year = new Date().getFullYear();
-
-      // Period
+      // Period : on cible la période portant DÉJÀ la reprise (sinon l'ouverte, sinon créée),
+      // pas l'année civile en dur — sinon on viserait une période ≠ de la reprise. [P1]
       if (!periodId) {
-        ensureAccountingPeriod(coproId, year).then(res => {
-          if (res.data) setPeriodId(res.data.id);
+        resolveOnboardingPeriod(coproId).then(res => {
+          if (res.data) {
+            setPeriodId(res.data.id);
+            setPeriodStart(res.data.start);
+            setPeriodEnd(res.data.end);
+          }
         });
       }
 
@@ -167,6 +173,8 @@ export default function OnboardingWizardPage() {
             <RepriseSoldes
               coproId={coproId}
               periodId={periodId}
+              periodStart={periodStart ?? undefined}
+              periodEnd={periodEnd ?? undefined}
               onSaved={() => completeStep(7)}
               onSkip={() => completeStep(7)}
               onBack={() => goToStep(6)}

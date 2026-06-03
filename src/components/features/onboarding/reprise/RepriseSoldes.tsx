@@ -11,6 +11,9 @@ import styles from './RepriseSoldes.module.css';
 interface RepriseSoldesProps {
   coproId: string;
   periodId: string;
+  /** Bornes de la période ciblée — servent à borner la date de reprise (clamp). [P1] */
+  periodStart?: string;
+  periodEnd?: string;
   /** Wizard : avance à l'étape suivante après save. Autonome : ferme le panneau. */
   onSaved?: (residual: number) => void;
   /** Wizard : retour. Absent en mode autonome. */
@@ -21,8 +24,8 @@ interface RepriseSoldesProps {
   onSkip?: () => void;
 }
 
-export function RepriseSoldes({ coproId, periodId, onSaved, onBack, saveLabel, onSkip }: RepriseSoldesProps) {
-  const r = useRepriseSoldes(coproId, periodId);
+export function RepriseSoldes({ coproId, periodId, periodStart, periodEnd, onSaved, onBack, saveLabel, onSkip }: RepriseSoldesProps) {
+  const r = useRepriseSoldes(coproId, periodId, periodStart, periodEnd);
 
   const handleSave = useCallback(async () => {
     const { ok, residual } = await r.save();

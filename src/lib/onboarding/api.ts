@@ -302,6 +302,75 @@ export function clampAsOfDate(asOf: string, start: string, end: string): string 
   return asOf;
 }
 
+export interface ResolvedPeriod {
+  id: string;
+  start: string;
+  end: string;
+}
+
+/**
+ * Cible LA bonne période pour set/get_opening_balance, dans cet ordre (spec P1) :
+ *   1) la période portant déjà une tx source_type='opening_onboarding' (la reprise existe) ;
+ *   2) sinon, l'unique période status='open' de la copro ;
+ *   3) sinon, on la crée via la dérivation d'exercice (fallback année courante OK, copro neuve).
+ *
+ * Évite de viser/créer une période ≠ de celle portant la reprise quand l'exercice ≠ année
+ * civile (ou onboarding à cheval déc/janv) : sinon get_opening_balance renvoie vide et
+ * l'alerte 471/472, copro-wide, ne se solde jamais.
+ */
+export async function resolveOnboardingPeriod(
+  coproId: string
+): Promise<{ data: ResolvedPeriod | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+
+  // 1) Période d'une reprise d'onboarding déjà postée
+  const { data: openingTx, error: txErr } = await supabase
+    .from('ledger_transactions')
+    .select('period_id')
+    .eq('copro_id', coproId)
+    .eq('source_type', 'opening_onboarding')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (txErr) return { data: null, error: new Error(txErr.message) };
+
+  if (openingTx?.period_id) {
+    const { data: p, error: pErr } = await supabase
+      .from('accounting_periods')
+      .select('id, start_date, end_date')
+      .eq('id', (openingTx as { period_id: string }).period_id)
+      .single();
+    if (pErr) return { data: null, error: new Error(pErr.message) };
+    return {
+      data: { id: p.id as string, start: p.start_date as string, end: p.end_date as string },
+      error: null,
+    };
+  }
+
+  // 2) Unique période ouverte de la copro
+  const { data: openPeriods, error: openErr } = await supabase
+    .from('accounting_periods')
+    .select('id, start_date, end_date')
+    .eq('copro_id', coproId)
+    .eq('status', 'open')
+    .order('start_date', { ascending: false });
+  if (openErr) return { data: null, error: new Error(openErr.message) };
+
+  if (openPeriods && openPeriods.length > 0) {
+    // S'il y en a plusieurs (cas anormal), on prend la plus récente — déterministe.
+    const p = openPeriods[0] as { id: string; start_date: string; end_date: string };
+    return { data: { id: p.id, start: p.start_date, end: p.end_date }, error: null };
+  }
+
+  // 3) Fallback : créer via la dérivation d'exercice (année civile courante acceptable, copro neuve)
+  const year = new Date().getFullYear();
+  const { data: created, error: createErr } = await ensureAccountingPeriod(coproId, year);
+  if (createErr || !created) {
+    return { data: null, error: createErr ?? new Error('Impossible de résoudre la période de reprise.') };
+  }
+  return { data: { id: created.id, start: created.start, end: created.end }, error: null };
+}
+
 // ═══ REPARTITION KEYS ═══
 
 export async function listRepartitionKeys(coproId: string) {
