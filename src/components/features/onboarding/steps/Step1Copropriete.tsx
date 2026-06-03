@@ -138,12 +138,12 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
               ))}
             </ul>
           )}
-          {adresse && (
-            <div className={styles.selectedAddress}>
-              <MapPin size={14} />
-              <span>{adresse}, {codePostal} {ville}</span>
-            </div>
-          )}
+          <input
+            className={styles.input}
+            value={adresse}
+            onChange={e => setAdresse(e.target.value)}
+            placeholder="Numéro et rue (ex. 12 rue des Lilas)"
+          />
           {errors.adresse && <span className={styles.error}>{errors.adresse}</span>}
         </div>
 

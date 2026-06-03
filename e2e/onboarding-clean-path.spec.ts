@@ -93,22 +93,11 @@ test.describe('Onboarding — chemin propre (audit = 0)', () => {
     // Nom de la copro (placeholder "Résidence Les Lilas").
     await page.getByPlaceholder('Résidence Les Lilas').fill(uniqueName);
 
-    // ⚠️ ADRESSE : le champ `adresse` n'est rempli QUE via l'autocomplete Google Maps
-    // (handlePlaceSelect). On tape dans la recherche puis on clique la 1re suggestion.
-    // Dépend d'une clé Maps configurée en local — d'où le TODO ci-dessous.
-    const addressSearch = page.getByPlaceholder('Rechercher une adresse...');
-    await addressSearch.fill('1 rue de la Paix Paris');
-    // TODO vérifier le sélecteur : la liste de suggestions (styles.suggestionItem) est un
-    // <button> dans <ul.suggestions>. On prend le premier item proposé.
-    const firstSuggestion = page.locator('ul li button').first();
-    await firstSuggestion.click({ timeout: 10000 }).catch(async () => {
-      // Repli si l'autocomplete n'est pas disponible : remplir CP/Ville directement.
-      // (N'alimente PAS `adresse` -> la validation Step 1 échouera ; à ajuster selon l'env.)
-      // TODO vérifier : sans clé Google Maps, prévoir un mock OU un fallback de saisie adresse.
-    });
-
+    // ADRESSE : depuis le fallback de saisie manuelle (Lot 0.1), les champs rue/CP/ville
+    // sont TOUJOURS saisissables directement. L'autocomplete BAN/IGN (data.geopf.fr) n'est
+    // qu'un raccourci de pré-remplissage — on ne dépend plus de lui ici (robuste en CI / hors-ligne).
+    await page.getByPlaceholder(/Numéro et rue/).fill('1 rue de la Paix');
     // Code postal (placeholder "75001") + Ville (placeholder "Paris").
-    // Si l'autocomplete a déjà rempli ces champs, fill() les écrase sans dommage.
     await page.getByPlaceholder('75001').fill('75001');
     await page.getByPlaceholder('Paris').fill('Paris');
 
