@@ -249,35 +249,56 @@ export async function listComptesBancaires(coproId: string) {
 
 // ═══ ACCOUNTING PERIOD ═══
 
+/** Bornes d'un exercice : start dérivé de exercice_debut (MM-DD) + année, end = start + 1 an - 1 jour. */
+function deriveExercicePeriod(exerciceDebut: string | null, year: number): { start: string; end: string; name: string } {
+  // exerciceDebut au format 'MM-DD' (défaut '01-01'). On tolère un format vide/invalide -> civil.
+  const md = /^\d{2}-\d{2}$/.test(exerciceDebut ?? '') ? (exerciceDebut as string) : '01-01';
+  const [mm, dd] = md.split('-').map(Number);
+  const start = new Date(Date.UTC(year, mm - 1, dd));
+  const end = new Date(Date.UTC(year + 1, mm - 1, dd));
+  end.setUTCDate(end.getUTCDate() - 1); // start + 1 an - 1 jour
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const label = mm === 1 && dd === 1 ? `Exercice ${year}` : `Exercice ${iso(start)} → ${iso(end)}`;
+  return { start: iso(start), end: iso(end), name: label };
+}
+
 export async function ensureAccountingPeriod(coproId: string, year: number) {
   const supabase = createUntypedClient();
-  const startDate = `${year}-01-01`;
-  const endDate = `${year}-12-31`;
 
-  // Check if period already exists
+  // Dériver les bornes de l'exercice de CETTE copro (pas l'année civile en dur).
+  const { data: copro, error: coproErr } = await supabase
+    .from('copros').select('exercice_debut').eq('id', coproId).single();
+  if (coproErr) return { data: null, error: new Error(coproErr.message) };
+  const { start, end, name } = deriveExercicePeriod(
+    (copro as { exercice_debut: string | null }).exercice_debut, year
+  );
+
+  // Période déjà existante ?
   const { data: existing } = await supabase
     .from('accounting_periods')
-    .select('id')
+    .select('id, start_date, end_date')
     .eq('copro_id', coproId)
-    .eq('start_date', startDate)
-    .eq('end_date', endDate)
+    .eq('start_date', start)
+    .eq('end_date', end)
     .maybeSingle();
-
-  if (existing) return { data: { id: existing.id as string }, error: null };
+  if (existing) {
+    return { data: { id: existing.id as string, start, end }, error: null };
+  }
 
   const { data, error } = await supabase
     .from('accounting_periods')
-    .insert({
-      copro_id: coproId,
-      name: `Exercice ${year}`,
-      start_date: startDate,
-      end_date: endDate,
-      status: 'open',
-    })
+    .insert({ copro_id: coproId, name, start_date: start, end_date: end, status: 'open' })
     .select('id')
     .single();
   if (error) return { data: null, error: new Error(error.message) };
-  return { data: { id: data.id as string }, error: null };
+  return { data: { id: data.id as string, start, end }, error: null };
+}
+
+/** Garantit qu'une date de reprise tombe dans l'exercice ; sinon la borne à start/end. */
+export function clampAsOfDate(asOf: string, start: string, end: string): string {
+  if (asOf < start) return start;
+  if (asOf > end) return end;
+  return asOf;
 }
 
 // ═══ REPARTITION KEYS ═══
