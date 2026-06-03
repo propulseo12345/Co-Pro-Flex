@@ -80,7 +80,7 @@ export default function OnboardingWizardPage() {
     completeStep(5);
   }, [completeStep]);
 
-  const handleStep7Complete = useCallback(async () => {
+  const handleFinalize = useCallback(async () => {
     await finishOnboarding();
     router.push('/portefeuille');
   }, [finishOnboarding, router]);
@@ -181,7 +181,7 @@ export default function OnboardingWizardPage() {
               budgetId={budgetId}
               callPlan={callPlan}
               openingEntries={openingEntries}
-              onFinalized={handleStep7Complete}
+              onFinalized={handleFinalize}
               onBack={() => goToStep(7)}
             />
           </div>
