@@ -755,6 +755,29 @@ export async function getOnboardingOpeningBalance(
   };
 }
 
+export interface ComptePlanItem {
+  id: string;
+  code: string;
+  name: string;
+}
+
+/** Comptes imputables des classes 1 à 5 (hors 450-x et 471/472, déjà couverts par l'Essentiel/résidu).
+ *  Sert à la section repliable « Autres comptes » de l'écran de reprise. */
+export async function listComptesPlan(coproId: string) {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('id, code, name')
+    .eq('copro_id', coproId)
+    .eq('is_postable', true)
+    .or('code.like.1%,code.like.2%,code.like.3%,code.like.4%,code.like.5%')
+    .not('code', 'like', '450%')
+    .not('code', 'in', '("471","472")')
+    .order('code', { ascending: true });
+  if (error) return { data: null, error: new Error(error.message) };
+  return { data: data as ComptePlanItem[], error: null };
+}
+
 // ═══ VÉRIFICATION FINALE ═══
 
 export interface OnboardingAuditIssue {
