@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { X, Loader2, CheckCircle2 } from 'lucide-react';
-import type { ApiResult, RecordPaymentPayload } from '@/lib/finance/api';
+import type { ApiResult, PaymentNatureFilter, RecordPaymentPayload } from '@/lib/finance/api';
 import type { CallLotRow } from '../hooks/useAppelsFondsDetail';
 import { formatEuros } from '../utils';
 import styles from '../styles/PaymentModal.module.css';
@@ -16,6 +16,12 @@ const METHOD_LABELS: Record<PaymentMethod, string> = {
   card: 'Carte',
   cash: 'Espèces',
   other: 'Autre',
+};
+
+const NATURE_LABELS: Record<PaymentNatureFilter, string> = {
+  current: 'Courant',
+  works: 'Travaux',
+  alur: 'ALUR (fonds travaux)',
 };
 
 type RecordPaymentResult = ApiResult<{
@@ -49,6 +55,7 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
   const [amount, setAmount] = useState<string>(defaultLot ? String(defaultLot.remaining) : '');
   const [paymentDate, setPaymentDate] = useState<string>(todayISO());
   const [method, setMethod] = useState<PaymentMethod>('bank_transfer');
+  const [natureFilter, setNatureFilter] = useState<'' | PaymentNatureFilter>('');
   const [reference, setReference] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<boolean>(false);
@@ -75,6 +82,7 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
       method,
       reference: reference.trim() || undefined,
       idempotency_key: idempotencyKey,
+      nature_filter: natureFilter || undefined,
     });
 
     if (result.error) {
@@ -159,6 +167,22 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
                   />
                 </label>
               </div>
+
+              <label className={styles.field}>
+                <span className={styles.label}>Imputer sur la nature (optionnel)</span>
+                <select
+                  className={styles.input}
+                  value={natureFilter}
+                  onChange={(e) => setNatureFilter(e.target.value as '' | PaymentNatureFilter)}
+                >
+                  <option value="">Toutes natures (FIFO)</option>
+                  {(Object.keys(NATURE_LABELS) as PaymentNatureFilter[]).map((n) => (
+                    <option key={n} value={n}>
+                      {NATURE_LABELS[n]}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
               {selectedLot && numericAmount > selectedLot.remaining + 0.005 && (
                 <div className={styles.hint}>

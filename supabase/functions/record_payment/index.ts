@@ -23,6 +23,7 @@ interface RecordPaymentRequest {
   reference?: string;
   call_line_ids?: string[];
   idempotency_key?: string;
+  nature_filter?: string;
 }
 
 function jsonResponse(body: object, status = 200) {
@@ -45,7 +46,7 @@ Deno.serve(async (req: Request) => {
     );
 
     const body: RecordPaymentRequest = await req.json();
-    const { copro_id, period_id, lot_id, amount, payment_date, method, reference, call_line_ids, idempotency_key } = body;
+    const { copro_id, period_id, lot_id, amount, payment_date, method, reference, call_line_ids, idempotency_key, nature_filter } = body;
 
     if (!copro_id || !period_id || !lot_id || !amount || !payment_date) {
       return jsonResponse({ error: "Missing required fields" }, 400);
@@ -61,6 +62,7 @@ Deno.serve(async (req: Request) => {
       p_reference: reference ?? null,
       p_call_line_ids: call_line_ids ?? null,
       p_idempotency_key: idempotency_key ?? null,
+      p_nature_filter: nature_filter ?? null,
     });
 
     if (error) return jsonResponse({ error: "Failed to record payment", detail: error.message }, 500);

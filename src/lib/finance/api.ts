@@ -404,6 +404,12 @@ export async function listPayments(coproId: string): Promise<ApiResult<PaymentOv
   return { data: data as PaymentOverview[], error: null };
 }
 
+/**
+ * Nature de fonds ciblée pour l'imputation (reprend l'enum Postgres `budget_type`).
+ * Absent = imputation multi-nature FIFO (défaut légal, art. 1342-10 du Code civil).
+ */
+export type PaymentNatureFilter = 'current' | 'works' | 'alur';
+
 export interface RecordPaymentPayload {
   copro_id: string;
   period_id: string;
@@ -415,6 +421,8 @@ export interface RecordPaymentPayload {
   call_line_ids?: string[];
   /** Clé d'idempotence (UUID généré une fois par tentative de paiement) : évite le double encaissement. */
   idempotency_key?: string;
+  /** Restreint l'imputation FIFO aux appels de cette nature (cloisonnement). Absent = toutes natures. */
+  nature_filter?: PaymentNatureFilter;
 }
 
 export async function recordPayment(payload: RecordPaymentPayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; allocations: Array<{ call_line_id: string; amount_allocated: number }> }>> {
