@@ -9,6 +9,13 @@
   padding: 24px;
 }
 
+/* --- Alertes reprise à terminer (net 471/472 != 0) --- */
+.repriseAlerts {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0;
+}
+
 /* --- Header --- */
 .header {
   display: flex;
