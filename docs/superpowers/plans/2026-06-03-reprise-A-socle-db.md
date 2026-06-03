@@ -215,7 +215,7 @@ Attendu : `ROLLBACK_TEST_OK`.
 ```sql
 SELECT count(*) AS nb_lots, round(sum(balance),2) AS total_creances
 FROM v_lot_balance
-WHERE copro_id = '22222222-2222-2222-2222-222222222222';
+WHERE copro_id = '22222222-aaaa-bbbb-cccc-222222222222';
 ```
 (Adapter l'UUID si besoin : `SELECT id FROM copros WHERE name ILIKE '%Clos Saint-Michel%'`.)
 Attendu : mêmes nombres qu'avant la migration (aucun 103/lot historique → inchangé). Comparer au besoin avec une capture préalable.
@@ -423,7 +423,7 @@ Attendu : `PROOF issues=0 wait=0`.
 `execute_sql` :
 ```sql
 SELECT count(*) AS ecarts_attendus_g3
-FROM audit_finance_integrity('22222222-2222-2222-2222-222222222222');
+FROM audit_finance_integrity('22222222-aaaa-bbbb-cccc-222222222222');
 ```
 Attendu : le **même** nombre d'anomalies qu'avant le plan (cadre G3 : artefacts historiques connus). Comparer à la valeur de référence notée avant Task 1. **Aucune nouvelle anomalie** ne doit apparaître du fait des migrations.
 
