@@ -875,3 +875,43 @@ export async function getValidatedBudgetCallProof(
     error: null,
   };
 }
+
+/**
+ * Garde de pré-validation AG (spec §7) : appelée AVANT activate_ag_decisions.
+ * Détecte si l'AG `agId` comporte une action APPROVE_ACCOUNTS en attente (arrêté des
+ * comptes) et calcule le solde net 471/472 de la copro. La décision finale de bloquer
+ * est prise par shouldBlockAccountClosure (règle pure).
+ */
+export async function checkAgWaitingBalanceGuard(
+  agId: string,
+  coproId: string
+): Promise<{ data: { hasAccountClosure: boolean; waitingBalance: number } | null; error: Error | null }> {
+  const supabase = createUntypedClient();
+
+  // 1) L'AG comporte-t-elle un arrêté des comptes en attente d'activation ?
+  const { count: closureCount, error: actErr } = await supabase
+    .from('ag_pending_actions')
+    .select('id', { count: 'exact', head: true })
+    .eq('ag_id', agId)
+    .eq('action_type', 'APPROVE_ACCOUNTS')
+    .eq('status', 'pending');
+  if (actErr) return { data: null, error: new Error(actErr.message) };
+
+  // 2) Solde net 471/472 de la copro
+  const { data: waitEntries, error: waitErr } = await supabase
+    .from('ledger_entries')
+    .select('amount, direction, accounts!inner(code, copro_id)')
+    .eq('accounts.copro_id', coproId)
+    .in('accounts.code', ['471', '472']);
+  if (waitErr) return { data: null, error: new Error(waitErr.message) };
+
+  let waitingBalance = 0;
+  for (const e of (waitEntries || []) as Array<{ amount: number; direction: string }>) {
+    waitingBalance += e.direction === 'debit' ? Number(e.amount) : -Number(e.amount);
+  }
+
+  return {
+    data: { hasAccountClosure: (closureCount ?? 0) > 0, waitingBalance },
+    error: null,
+  };
+}

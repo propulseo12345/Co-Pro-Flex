@@ -16,6 +16,8 @@ import { LABELS_MODE_SIGNATURE } from '@/types/models/pv-signature';
 import { saveDraft, isValidUUID } from '@/lib/ag/draft-persistence';
 import { logger } from '@/lib/utils/logger';
 import { updateAgCurrentStep } from '@/lib/ag/api';
+import { checkAgWaitingBalanceGuard } from '@/lib/onboarding/api';
+import { shouldBlockAccountClosure } from '@/lib/onboarding/ag-guard-rules';
 import { updateAgStatus } from '@/lib/ag/api/meetings.api';
 import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 
@@ -665,6 +667,27 @@ export function usePVPage({ agId }: UsePVPageProps) {
 
       await saveDraft(agId, 'signataires', signataires, 'ag-signataires-' + agId);
       alert(`Signatures physiques validées pour :\n${signataires.map((s) => `- ${s.prenom} ${s.nom} (${s.roleLabel})`).join('\n')}`);
+    }
+
+    // Pré-validation AG (spec §7) : si l'AG arrête les comptes et que la reprise n'est pas
+    // terminée (471/472 ≠ 0), on REFUSE d'activer les décisions AVANT activate_ag_decisions
+    // (jamais un RAISE dans la boucle SQL qui annulerait toute l'AG).
+    if (currentCoproId) {
+      const guard = await checkAgWaitingBalanceGuard(agId, currentCoproId);
+      if (guard.error) {
+        logger.error('PV: garde 471/472 échouée', { agId, message: guard.error.message });
+        alert(`Vérification préalable impossible : ${guard.error.message}`);
+        return;
+      }
+      if (guard.data && shouldBlockAccountClosure(guard.data)) {
+        const wb = guard.data.waitingBalance.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+        alert(
+          "Impossible d'arrêter les comptes : la reprise des soldes n'est pas terminée.\n\n" +
+            `Compte d'attente 471/472 non soldé : ${wb}.\n\n` +
+            'Complétez la reprise (banque, réserves, report) pour ramener ce solde à 0, puis relancez la validation des signatures.'
+        );
+        return;
+      }
     }
 
     // Activate AG decisions
