@@ -1,15 +1,18 @@
-import assert from 'node:assert/strict';
+import { describe, it, expect } from 'vitest';
 import { shouldBlockAccountClosure } from '@/lib/onboarding/ag-guard-rules';
 
-// 1) Arrêté des comptes demandé + 471/472 != 0 -> bloque.
-assert.equal(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: 150 }), true);
-assert.equal(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: -0.5 }), true);
+describe('shouldBlockAccountClosure', () => {
+  it('arrêté des comptes demandé + 471/472 != 0 -> bloque', () => {
+    expect(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: 150 })).toBe(true);
+    expect(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: -0.5 })).toBe(true);
+  });
 
-// 2) Arrêté des comptes demandé + 471/472 == 0 (tolérance) -> ne bloque pas.
-assert.equal(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: 0 }), false);
-assert.equal(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: 0.005 }), false);
+  it('arrêté des comptes demandé + 471/472 == 0 (tolérance) -> ne bloque pas', () => {
+    expect(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: 0 })).toBe(false);
+    expect(shouldBlockAccountClosure({ hasAccountClosure: true, waitingBalance: 0.005 })).toBe(false);
+  });
 
-// 3) Pas d'arrêté des comptes dans l'AG -> jamais bloqué, même si 471/472 != 0.
-assert.equal(shouldBlockAccountClosure({ hasAccountClosure: false, waitingBalance: 999 }), false);
-
-console.log('ag-guard-rules.test OK');
+  it('pas d\'arrêté des comptes dans l\'AG -> jamais bloqué, même si 471/472 != 0', () => {
+    expect(shouldBlockAccountClosure({ hasAccountClosure: false, waitingBalance: 999 })).toBe(false);
+  });
+});
