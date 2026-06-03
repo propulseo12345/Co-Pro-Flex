@@ -178,6 +178,22 @@
   margin-bottom: 16px;
 }
 
+.warningMsg {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  font-size: 12px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.warningMsg ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
 .footer {
   display: flex;
   justify-content: space-between;
