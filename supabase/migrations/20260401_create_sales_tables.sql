@@ -625,64 +625,12 @@ END;
 $$;
 
 -- ============================================================================
--- VIEW: v_unpaid_by_lot
--- Vue des impayés par lot pour le module impayés/relances
--- Requise par v_unpaid_with_reminders
+-- VIEW: v_unpaid_by_lot — def MORTE retirée (jamais appliquée en live, shape divergent).
+-- La définition vivante/canonique vit dans 20260125_niveau2e_finance_metier.sql,
+-- durcie ensuite par 20260603110000 (exclusion onboarding, I5).
+-- v_unpaid_with_reminders (recréée ci-dessous) consomme `SELECT u.*` -> aucune
+-- colonne nommée n'est requise ici.
 -- ============================================================================
-
-CREATE OR REPLACE VIEW v_unpaid_by_lot AS
-SELECT
-  cfl.copro_id,
-  cfl.lot_id,
-  l.ref AS lot_ref,
-  l.type AS lot_type,
-  lo.coproprietaire_id AS owner_id,
-  COALESCE(
-    CASE WHEN cp.is_company THEN cp.company_name
-    ELSE CONCAT(cp.first_name, ' ', cp.last_name)
-    END,
-    'Inconnu'
-  ) AS owner_name,
-  cp.email AS owner_email,
-  cp.phone AS owner_phone,
-
-  -- Montants agrégés
-  SUM(cfl.amount_due) AS total_due,
-  SUM(cfl.amount_paid) AS total_paid,
-  SUM(cfl.amount_due - cfl.amount_paid) AS unpaid_amount,
-
-  -- Nombre de lignes impayées
-  COUNT(*) AS unpaid_lines_count,
-
-  -- Date d'échéance la plus ancienne
-  MIN(cf.due_date) AS oldest_due_date,
-
-  -- Jours de retard
-  GREATEST(CURRENT_DATE - MIN(cf.due_date), 0) AS days_overdue,
-
-  -- Sévérité
-  CASE
-    WHEN SUM(cfl.amount_due - cfl.amount_paid) <= 100 THEN 'MINOR'
-    WHEN SUM(cfl.amount_due - cfl.amount_paid) <= 500 THEN 'MEDIUM'
-    WHEN SUM(cfl.amount_due - cfl.amount_paid) <= 2000 THEN 'HIGH'
-    ELSE 'CRITICAL'
-  END AS severity
-
-FROM call_for_funds_lines cfl
-JOIN call_for_funds cf ON cf.id = cfl.call_id
-JOIN lots l ON l.id = cfl.lot_id
-LEFT JOIN lot_owners lo ON lo.lot_id = cfl.lot_id
-  AND lo.end_date IS NULL
-  AND lo.is_primary = true
-LEFT JOIN coproprietaires cp ON cp.id = lo.coproprietaire_id
-WHERE cfl.amount_paid < cfl.amount_due
-  AND cf.due_date < CURRENT_DATE
-  AND cf.status IN ('issued', 'partially_paid')
-GROUP BY cfl.copro_id, cfl.lot_id, l.ref, l.type,
-         lo.coproprietaire_id, cp.is_company, cp.company_name,
-         cp.first_name, cp.last_name, cp.email, cp.phone;
-
-COMMENT ON VIEW v_unpaid_by_lot IS 'Impayés agrégés par lot à partir des lignes d''appels de fonds en retard';
 
 -- ============================================================================
 -- Recreate v_unpaid_with_reminders to reference v_unpaid_by_lot
