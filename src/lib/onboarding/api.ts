@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { hasBlockingIssue, splitAuditIssues } from '@/lib/onboarding/audit-rules';
 
 const createUntypedClient = () => createClient() as any;
 
@@ -787,7 +788,20 @@ export interface OnboardingAuditIssue {
   difference: number | null;
 }
 
-export async function auditOnboardingBooks(coproId: string) {
+export interface OnboardingAuditResult {
+  /** clean = aucune faute de la liste blanche (spec §6). N'inclut PAS la preuve positive (cf. Step8). */
+  clean: boolean;
+  /** Anomalies bloquantes (liste blanche) — empêchent la finalisation. */
+  blockingIssues: OnboardingAuditIssue[];
+  /** Anomalies non bloquantes (LOT_GL_MISMATCH, CALL_VS_BUDGET_MISMATCH…) — affichées en avertissement. */
+  warningIssues: OnboardingAuditIssue[];
+  /** Solde net des comptes d'attente 471/472. ≠ 0 = avertissement persistant « reprise à terminer ». */
+  waitingBalance: number;
+}
+
+export async function auditOnboardingBooks(
+  coproId: string
+): Promise<{ data: OnboardingAuditResult | null; error: Error | null }> {
   const supabase = createUntypedClient();
 
   // 1) Écarts d'intégrité du grand livre
@@ -795,7 +809,7 @@ export async function auditOnboardingBooks(coproId: string) {
     .rpc('audit_finance_integrity', { p_copro_id: coproId });
   if (issuesErr) return { data: null, error: new Error(issuesErr.message) };
 
-  // 2) Solde net des comptes d'attente 471/472 (doit être 0 avant gel)
+  // 2) Solde net des comptes d'attente 471/472 (avertissement, jamais bloquant — spec §5/§6)
   const { data: waitEntries, error: waitErr } = await supabase
     .from('ledger_entries')
     .select('amount, direction, accounts!inner(code, copro_id)')
@@ -809,7 +823,13 @@ export async function auditOnboardingBooks(coproId: string) {
   }
 
   const issueList = (issues || []) as OnboardingAuditIssue[];
-  const clean = issueList.length === 0 && Math.abs(waitingBalance) < 0.01;
+  const { blocking, warnings } = splitAuditIssues(issueList);
 
-  return { data: { clean, issues: issueList, waitingBalance }, error: null };
+  // clean = AUCUNE faute de la liste blanche. Le 471/472 et les mismatches NE comptent PAS.
+  const clean = !hasBlockingIssue(issueList);
+
+  return {
+    data: { clean, blockingIssues: blocking, warningIssues: warnings, waitingBalance },
+    error: null,
+  };
 }
