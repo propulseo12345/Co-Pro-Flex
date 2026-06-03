@@ -234,11 +234,14 @@ export async function createCompteBancaire(payload: CompteCreate) {
 
 export async function listComptesBancaires(coproId: string) {
   const supabase = createUntypedClient();
+  // Comptes bancaires = comptes d'actif de trésorerie (512x banque, 502x livret travaux).
+  // L'enum account_type N'A PAS de valeur 'bank' -> on filtre par account_type='asset' + code.
   const { data, error } = await supabase
     .from('accounts')
     .select('id, name, code, banque, iban, bic, initial_balance')
     .eq('copro_id', coproId)
-    .eq('account_type', 'bank')
+    .eq('account_type', 'asset')
+    .or('code.like.512%,code.like.502%')
     .order('code', { ascending: true });
   if (error) return { data: null, error: new Error(error.message) };
   return { data: data as Array<{ id: string; name: string; code: string; banque: string | null; iban: string | null; bic: string | null; initial_balance: number }>, error: null };
