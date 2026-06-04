@@ -4,7 +4,7 @@
 -- 4 tables : accounting_periods, ledger_transactions, ledger_entries, period_cutoff_items
 -- Triggers d'immutabilite (trg_ledger_tx_immutable, trg_ledger_tx_no_delete_posted,
 --   enforce_is_postable, trg_enforce_lot_id_on_45x, etc.) DIFFERES en Task 24.
--- tiers_id sur period_cutoff_items : FK -> tiers ajoutee en 0014.
+-- tiers_id sur period_cutoff_items : FK -> tiers ajoutee en 0015.
 -- locked_at/locked_by SUPPRIMÉS (verrou WP5.2 abandonne).
 
 -- ============================================================
@@ -116,7 +116,7 @@ create table public.period_cutoff_items (
   counterpart_account_id uuid        not null references public.accounts(id) on delete restrict,
   amount                 numeric(14,2) not null,
   label                  text,
-  tiers_id               uuid,  -- FK -> tiers ajoutee en 0014
+  tiers_id               uuid,  -- FK -> tiers ajoutee en 0015
   auto_reverse           boolean     not null default true,
   posting_tx_id          uuid        references public.ledger_transactions(id) on delete restrict,
   reversal_tx_id         uuid        references public.ledger_transactions(id) on delete restrict,
