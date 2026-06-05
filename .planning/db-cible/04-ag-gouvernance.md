@@ -282,7 +282,7 @@ Cœur sain (majorité simple propre). Dette principale corrigée : **les liaison
 | is_active | boolean | NO | true | |
 | created_at / updated_at | timestamptz | NO | now() | |
 
-- **CHECK** `chk_council_member_identity` : `user_id IS NOT NULL OR coproprietaire_id IS NOT NULL` (identité souple). **UNIQUE** `(copro_id, coproprietaire_id, start_date)`. **Index partiel** `(copro_id) WHERE is_active` (lecture du conseil courant).
+- **CHECK** `ck_council_member_identity` : `user_id IS NOT NULL OR coproprietaire_id IS NOT NULL` (identité souple). **UNIQUE** `(copro_id, coproprietaire_id, start_date)`. **Index partiel** `(copro_id) WHERE is_active` (lecture du conseil courant).
 
 **`council_decisions`** :
 

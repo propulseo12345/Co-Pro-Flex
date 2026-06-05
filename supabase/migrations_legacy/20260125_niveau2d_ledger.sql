@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS ledger_transactions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- Contrainte: posted_at et posted_by doivent être cohérents
-  CONSTRAINT chk_posted_consistency CHECK (
+  CONSTRAINT ck_posted_consistency CHECK (
     (status = 'draft' AND posted_at IS NULL AND posted_by IS NULL) OR
     (status = 'posted' AND posted_at IS NOT NULL)
   )

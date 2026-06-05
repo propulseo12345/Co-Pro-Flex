@@ -127,7 +127,7 @@ CREATE TABLE call_for_funds_lines (
   CONSTRAINT uq_call_line_lot UNIQUE (call_id, lot_id),
 
   -- Cohérence montants
-  CONSTRAINT chk_call_line_amounts CHECK (amount_paid <= amount_due)
+  CONSTRAINT ck_call_line_amounts CHECK (amount_paid <= amount_due)
 );
 
 COMMENT ON TABLE call_for_funds_lines IS

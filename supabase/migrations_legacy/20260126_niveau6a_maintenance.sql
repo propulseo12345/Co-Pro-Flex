@@ -290,8 +290,8 @@ CREATE TABLE contracts (
   termination_reason TEXT NULL,
 
   -- Contraintes
-  CONSTRAINT chk_contract_dates CHECK (end_date >= start_date),
-  CONSTRAINT chk_contract_notice CHECK (notice_months IS NULL OR notice_months >= 0)
+  CONSTRAINT ck_contract_dates CHECK (end_date >= start_date),
+  CONSTRAINT ck_contract_notice CHECK (notice_months IS NULL OR notice_months >= 0)
 );
 
 COMMENT ON TABLE contracts IS
@@ -477,7 +477,7 @@ CREATE TABLE service_orders (
 
   -- Contraintes
   CONSTRAINT uq_service_order_number UNIQUE (copro_id, order_number),
-  CONSTRAINT chk_service_order_amounts CHECK (
+  CONSTRAINT ck_service_order_amounts CHECK (
     estimated_amount IS NULL OR estimated_amount >= 0 AND
     quoted_amount IS NULL OR quoted_amount >= 0 AND
     actual_amount IS NULL OR actual_amount >= 0

@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS council_members (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- Contraintes
-  CONSTRAINT chk_council_member_identity CHECK (
+  CONSTRAINT ck_council_member_identity CHECK (
     user_id IS NOT NULL OR coproprietaire_id IS NOT NULL
   ),
   CONSTRAINT uq_council_member_active UNIQUE (copro_id, coproprietaire_id, start_date)
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS events (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT chk_event_dates CHECK (ends_at IS NULL OR ends_at >= starts_at)
+  CONSTRAINT ck_event_dates CHECK (ends_at IS NULL OR ends_at >= starts_at)
 );
 
 COMMENT ON TABLE events IS 'Événements de la copropriété - AG, réunions CS, travaux, fêtes.';
