@@ -49,17 +49,56 @@
 
 
 -- ============================================================================================
+-- SECTION 0 — LISTE BLANCHE D'IMMUTABILITÉ (régénération autorisée, consultée par la SECTION 1)
+-- ============================================================================================
+-- is_ledger_regen_exempt(p_source_type, p_source_id, p_posting_period_id) -> bool  [G-INTERNAL]
+-- Autorise l'annule-et-repasse (UPDATE/DELETE/INSERT sur une tx pourtant 'posted') UNIQUEMENT pour
+-- les écritures « régénérables » par construction — soldes d'ouverture, clôture, reprise
+-- d'onboarding, affectation du résultat — ET tant que NI la période source (p_source_id = period_id
+-- de l'objet régénéré) NI la période d'accueil ne sont 'approved'. L'exemption se ferme dès qu'une
+-- des deux périodes est approuvée (gel comptable définitif). Pour une écriture NON régénérable
+-- (payment/appel/facture…) renvoie false → immutabilité TOTALE. CONSULTÉE par les 4 triggers
+-- d'immutabilité de la SECTION 1. (Posée ici, avant ses appelants — décision USER « 0024 self-cohérent ».)
+create or replace function public.is_ledger_regen_exempt(
+  p_source_type        text,
+  p_source_id          uuid,
+  p_posting_period_id  uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select p_source_type in ('opening_balance', 'closing', 'opening_onboarding', 'result_allocation')
+     and p_source_id is not null
+     and exists (
+       select 1 from public.accounting_periods ap
+       where ap.id = p_source_id and ap.status <> 'approved'
+     )
+     and exists (
+       select 1 from public.accounting_periods ap
+       where ap.id = p_posting_period_id and ap.status <> 'approved'
+     );
+$$;
+revoke execute on function public.is_ledger_regen_exempt(text, uuid, uuid) from public, anon;
+grant execute on function public.is_ledger_regen_exempt(text, uuid, uuid) to authenticated, service_role;
+
+
+-- ============================================================================================
 -- SECTION 1 — IMMUTABILITÉ DU GRAND LIVRE (en-têtes + lignes)
 -- ============================================================================================
 -- Une écriture `posted` est gravée dans le marbre (compta d'engagement, décret 2005-240) :
--- on ne la modifie ni ne la supprime ; on la contre-passe par une écriture inverse.
+-- on ne la modifie ni ne la supprime — SAUF écriture régénérable non approuvée (SECTION 0,
+-- is_ledger_regen_exempt) ; sinon on la contre-passe par une écriture inverse.
 
 -- 1.1 ledger_transactions : UPDATE interdit dès que la tx est postée
 --     (la bascule draft -> posted reste possible : old.status='draft' à ce moment-là).
 create or replace function public.tr_ledger_tx_immutable()
 returns trigger language plpgsql as $$
 begin
-  if old.status = 'posted' then
+  if old.status = 'posted'
+     and not public.is_ledger_regen_exempt(old.source_type::text, old.source_id, old.period_id) then
     raise exception 'ledger_transactions % : écriture postée, modification interdite (immutabilité GL)', old.id
       using errcode = '23514';
   end if;
@@ -75,7 +114,8 @@ revoke execute on function public.tr_ledger_tx_immutable() from public, anon, au
 create or replace function public.tr_ledger_tx_no_delete_posted()
 returns trigger language plpgsql as $$
 begin
-  if old.status = 'posted' then
+  if old.status = 'posted'
+     and not public.is_ledger_regen_exempt(old.source_type::text, old.source_id, old.period_id) then
     raise exception 'ledger_transactions % : écriture postée, suppression interdite (immutabilité GL)', old.id
       using errcode = '23514';
   end if;
@@ -103,10 +143,15 @@ language plpgsql
 security definer
 set search_path = public as $$
 declare
-  v_tx_status ledger_tx_status;
+  v_tx_status      ledger_tx_status;
+  v_tx_source_type ledger_source_type;
+  v_tx_source_id   uuid;
 begin
-  select status into v_tx_status from public.ledger_transactions where id = old.tx_id;
-  if v_tx_status = 'posted' then
+  select status, source_type, source_id
+    into v_tx_status, v_tx_source_type, v_tx_source_id
+  from public.ledger_transactions where id = old.tx_id;
+  if v_tx_status = 'posted'
+     and not public.is_ledger_regen_exempt(v_tx_source_type::text, v_tx_source_id, old.period_id) then
     raise exception 'ledger_entries % : ligne d''une écriture postée, modification/suppression interdite (immutabilité GL)', old.id
       using errcode = '23514';
   end if;
@@ -129,10 +174,15 @@ language plpgsql
 security definer
 set search_path = public as $$
 declare
-  v_tx_status ledger_tx_status;
+  v_tx_status      ledger_tx_status;
+  v_tx_source_type ledger_source_type;
+  v_tx_source_id   uuid;
 begin
-  select status into v_tx_status from public.ledger_transactions where id = new.tx_id;
-  if v_tx_status = 'posted' then
+  select status, source_type, source_id
+    into v_tx_status, v_tx_source_type, v_tx_source_id
+  from public.ledger_transactions where id = new.tx_id;
+  if v_tx_status = 'posted'
+     and not public.is_ledger_regen_exempt(v_tx_source_type::text, v_tx_source_id, new.period_id) then
     raise exception 'ledger_entries : insertion interdite dans l''écriture postée % (immutabilité GL)', new.tx_id
       using errcode = '23514';
   end if;
