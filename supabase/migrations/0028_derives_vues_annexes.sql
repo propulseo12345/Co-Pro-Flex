@@ -201,7 +201,8 @@ select
   cfl.lot_id,
   l.ref                                                                 as lot_ref,
   (
-    select cp.first_name || ' ' || cp.last_name
+    select case when cp.is_company then cp.company_name
+                else coalesce(cp.first_name || ' ' || cp.last_name, 'Inconnu') end
     from public.lot_owners lo
     join public.coproprietaires cp on cp.id = lo.coproprietaire_id
     where lo.lot_id = cfl.lot_id
@@ -259,7 +260,8 @@ select
   p.amount - coalesce(sum(pa.amount_allocated), 0)                     as unallocated,
   count(pa.id)                                                         as allocations_count,
   (
-    select cp.first_name || ' ' || cp.last_name
+    select case when cp.is_company then cp.company_name
+                else coalesce(cp.first_name || ' ' || cp.last_name, 'Inconnu') end
     from public.lot_owners lo
     join public.coproprietaires cp on cp.id = lo.coproprietaire_id
     where lo.lot_id = p.lot_id
