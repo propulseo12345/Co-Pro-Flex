@@ -14135,7 +14135,7 @@ export type Database = {
         Row: {
           copro_id: string | null
           difference: number | null
-          gl_balance: number | null
+          gl_call_payment_balance: number | null
           lot_id: string | null
           lot_ref: string | null
           owner_name: string | null

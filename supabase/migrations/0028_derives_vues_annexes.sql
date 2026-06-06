@@ -308,36 +308,66 @@ comment on view public.v_bank_movements_overview is
 -- ============================================================================================
 -- A.7  v_lot_vs_gl_mismatch — DÉTECTION écart RELEVÉ ↔ GRAND LIVRE (Gap G3, grain LOT)
 -- ============================================================================================
--- VÉRIFIÉ absent de 0001→0027 (référencé en commentaire de 0027 comme modèle, jamais créé). 0 ligne si
--- conforme. côté GL = v_owner_statement_by_lot.balance (créance 45x par lot, source de référence) ;
+-- RÉCONCILIATION PAR LOT, périmètre RESTREINT aux appels + paiements (les SEULS mouvements 45x que le
+-- relevé d'appel suit). Invariant : par lot, le solde 450 issu UNIQUEMENT de source_type IN
+-- ('call_for_funds','payment') doit égaler Σ(amount_due − amount_paid) des call_for_funds_lines. Les
+-- autres mouvements 45x LÉGITIMES hors appel (opening_balance à-nouveau, result_allocation affectation,
+-- opening_onboarding reprise de mandat, et au besoin mutation/manual/od/reclassification) ne sont PAS
+-- tracés par call_for_funds_lines → EXCLUS de CETTE réconciliation pour éviter un faux LOT_GL_MISMATCH en
+-- multi-période. gl_call_payment_balance ≠ v_owner_statement_by_lot.balance dès qu'il y a à-nouveau /
+-- affectation : le vrai solde dû (toutes sources) reste exposé par v_owner_statement_by_lot (NON modifié).
+-- côté GL = Σ(débit − crédit) sur 45x portant lot_id, tx posted, source_type IN (calls, payments) ;
 -- côté relevé = Σ(amount_due − amount_paid) des call_for_funds_lines non draft/cancelled, au grain LOT
 -- (jamais au grain personne : double-compterait une indivision). difference = gl − relevé.
 create or replace view public.v_lot_vs_gl_mismatch
 with (security_invoker = true) as
-with releve as (
-  select cfl.copro_id,
-         cfl.lot_id,
-         sum(cfl.amount_due - coalesce(cfl.amount_paid, 0)) as statement_balance
+with gl as (
+  select
+    e.copro_id,
+    e.lot_id,
+    round(sum(case when e.direction = 'debit' then e.amount else -e.amount end), 2) as gl_call_payment_balance
+  from public.ledger_entries e
+  join public.ledger_transactions t on t.id = e.tx_id and t.status = 'posted'
+  join public.accounts a            on a.id = e.account_id
+  where e.lot_id is not null
+    and a.code like '45%'
+    and t.source_type in ('call_for_funds', 'payment')
+  group by e.copro_id, e.lot_id
+),
+releve as (
+  select
+    cfl.copro_id,
+    cfl.lot_id,
+    sum(cfl.amount_due - coalesce(cfl.amount_paid, 0)) as statement_balance
   from public.call_for_funds_lines cfl
   join public.call_for_funds cf on cf.id = cfl.call_id
   where cf.status not in ('draft', 'cancelled')
   group by cfl.copro_id, cfl.lot_id
 )
 select
-  coalesce(sl.copro_id, r.copro_id)                                    as copro_id,
-  coalesce(sl.lot_id, r.lot_id)                                        as lot_id,
+  coalesce(g.copro_id, r.copro_id)                                     as copro_id,
+  coalesce(g.lot_id, r.lot_id)                                         as lot_id,
   l.ref                                                                 as lot_ref,
-  sl.owner_name,
-  coalesce(sl.balance, 0)                                              as gl_balance,
-  coalesce(r.statement_balance, 0)                                    as statement_balance,
-  coalesce(sl.balance, 0) - coalesce(r.statement_balance, 0)          as difference
-from public.v_owner_statement_by_lot sl
-full outer join releve r on r.lot_id = sl.lot_id and r.copro_id = sl.copro_id
-left join public.lots l on l.id = coalesce(sl.lot_id, r.lot_id)
-where abs(coalesce(sl.balance, 0) - coalesce(r.statement_balance, 0)) > 0.01;
+  (
+    select case when cp.is_company then cp.company_name
+                else coalesce(cp.first_name || ' ' || cp.last_name, 'Inconnu') end
+    from public.lot_owners lo
+    join public.coproprietaires cp on cp.id = lo.coproprietaire_id
+    where lo.lot_id = coalesce(g.lot_id, r.lot_id)
+      and lo.is_primary = true
+      and lo.end_date is null
+    limit 1
+  )                                                                     as owner_name,
+  coalesce(g.gl_call_payment_balance, 0)                               as gl_call_payment_balance,
+  coalesce(r.statement_balance, 0)                                     as statement_balance,
+  coalesce(g.gl_call_payment_balance, 0) - coalesce(r.statement_balance, 0) as difference
+from gl g
+full outer join releve r on r.lot_id = g.lot_id and r.copro_id = g.copro_id
+left join public.lots l on l.id = coalesce(g.lot_id, r.lot_id)
+where abs(coalesce(g.gl_call_payment_balance, 0) - coalesce(r.statement_balance, 0)) > 0.01;
 
 comment on view public.v_lot_vs_gl_mismatch is
-  'Lots dont le solde du releve (call_for_funds_lines du-paye) diverge du solde GL (v_owner_statement_by_lot, 45x). Detection lecture seule (Gap G3), grain lot.';
+  'Lots dont le solde 450 RESTREINT aux source_type call_for_funds + payment (le seul perimetre suivi par le releve d appel) diverge du releve (call_for_funds_lines du-paye). gl_call_payment_balance N EST PAS le solde 450 complet : les mouvements legitimes hors appel (opening_balance, opening_onboarding, result_allocation, mutation, manual, od, reclassification) sont VOLONTAIREMENT exclus de cette reconciliation et restent visibles dans v_owner_statement_by_lot. Detection lecture seule (Gap G3), grain lot, security_invoker.';
 
 
 -- ============================================================================================
@@ -619,7 +649,7 @@ grant execute on function public.calculate_budget_projection(uuid, uuid, budget_
 -- Détecte :
 --   - LEDGER_UNBALANCED : une transaction postée dont Σ débit ≠ Σ crédit (viole la partie double) ;
 --   - LOT_ID_MISSING_45X : une ligne 45x postée SANS lot_id (créance copro sans lot, viole lot-centric) ;
---   - LOT_GL_MISMATCH : écart entre le solde du relevé (appels) et le solde GL d'un lot (v_lot_vs_gl_mismatch) ;
+--   - LOT_GL_MISMATCH : écart entre le relevé d'appel et le solde GL d'un lot RESTREINT aux appels+paiements (v_lot_vs_gl_mismatch) ;
 --   - CALL_TOTAL_MISMATCH : un appel dont total_amount ≠ Σ amount_due des lignes.
 -- Filtre optionnel par copro (p_copro_id NULL = toutes les copros visibles). G-DEF-RO.
 create or replace function public.audit_finance_integrity(p_copro_id uuid default null)
@@ -687,14 +717,14 @@ begin
     and (p_copro_id is null or e.copro_id = p_copro_id)
 
   union all
-  -- 3) Écart relevé ↔ GL par lot (Gap G3).
+  -- 3) Écart relevé ↔ GL (appels+paiements only) par lot (Gap G3).
   select
     'lot'::text,
     g.lot_id,
     g.copro_id,
     'LOT_GL_MISMATCH'::text,
-    ('Ecart releve/GL - lot ' || coalesce(g.lot_ref, g.lot_id::text))::text,
-    g.gl_balance,
+    ('Ecart releve/GL appels+paiements - lot ' || coalesce(g.lot_ref, g.lot_id::text))::text,
+    g.gl_call_payment_balance,
     g.statement_balance,
     g.difference
   from public.v_lot_vs_gl_mismatch g
@@ -723,7 +753,7 @@ revoke execute on function public.audit_finance_integrity(uuid) from public, ano
 grant execute on function public.audit_finance_integrity(uuid) to authenticated, service_role;
 
 comment on function public.audit_finance_integrity(uuid) is
-  'Controle d integrite du GL (cle de validation boucle d or 0029) : detecte tx desequilibree, ligne 45x sans lot_id, ecart releve/GL, ecart total appel/lignes. 0 ligne si conforme.';
+  'Controle d integrite du GL (cle de validation boucle d or 0029) : detecte tx desequilibree, ligne 45x sans lot_id, ecart releve/GL (appels+paiements only), ecart total appel/lignes. 0 ligne si conforme.';
 
 
 -- ============================================================================================
