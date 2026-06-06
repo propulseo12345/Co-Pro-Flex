@@ -1359,19 +1359,44 @@ revoke execute on function public.tr_validate_call_total() from public, anon, au
 -- L5. tr_cff_ledger_required()  (CONSTRAINT TRIGGER DEFERRED, AFTER I/U sur call_for_funds)
 -- ============================================================================================
 -- NOUVEAU (blueprint §1.4/§4) : matérialise « chaque opération génère une écriture » —
---   un appel status<>'draft' EXIGE ledger_tx_id NOT NULL. CONSTRAINT DEFERRED : la chaîne
---   post_budget_call_for_funds insère l'appel ('issued') PUIS pose ledger_tx_id dans la même
---   transaction ; le contrôle au COMMIT voit donc l'état final cohérent. Un appel 'draft' (sans
---   écriture) reste permis. AFTER. errcode 23514.
+--   un appel POSTÉ (status non 'draft' ni 'cancelled') EXIGE ledger_tx_id NOT NULL. CONSTRAINT
+--   DEFERRED : la chaîne post_budget_call_for_funds insère l'appel ('issued') PUIS pose ledger_tx_id
+--   dans la même transaction ; le contrôle au COMMIT doit donc voir l'état FINAL cohérent.
+--
+-- CORRECTIF (bug d'image figée) : une CONSTRAINT TRIGGER DEFERRED rejoue chaque événement au COMMIT
+--   avec l'IMAGE FIGÉE de la ligne au moment de l'événement (pas de re-fetch). L'événement INSERT de
+--   post_budget_call_for_funds garde donc (status='issued', ledger_tx_id=NULL) même si un UPDATE
+--   ultérieur (même tx) pose ledger_tx_id -> lire new.status/new.ledger_tx_id RAISE TOUJOURS au commit
+--   réel. On RE-LIT l'état COURANT via la PK (new.id, immuable) : tous les événements différés de la
+--   même ligne convergent alors vers l'état final. 'if not found' couvre la suppression dans la même tx.
+--
+-- EXEMPTION 'cancelled' : aligne le trigger sur la convention du reste du schéma (vues v_*,
+--   update_call_status, recalculate_all_call_statuses : 'status not in (draft,cancelled)'). Un appel
+--   annulé n'a légitimement pas d'écriture. HYPOTHÈSE : aucun chemin actif (0001->0029) ne pose
+--   'cancelled', et le seul cas légitime est l'annulation d'un appel DRAFT jamais posté. DETTE FUTURE :
+--   le jour où l'on annule un appel DÉJÀ POSTÉ (issued/paid), il faut une CONTRE-PASSATION (l'écriture
+--   d'origine ne disparaît pas, ledger_tx_id ON DELETE RESTRICT) et resserrer cette garde (p.ex. exiger
+--   ledger_tx_id NOT NULL si issued_at IS NOT NULL), sinon un 'cancelled' posté perdrait son écriture.
+-- AFTER INSERT OR UPDATE. errcode 23514.
 create or replace function public.tr_cff_ledger_required()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_status public.call_for_funds_status;
+  v_tx     uuid;
 begin
-  if new.status <> 'draft' and new.ledger_tx_id is null then
-    raise exception 'tr_cff_ledger_required: l''appel % (statut %) doit porter une écriture (ledger_tx_id NOT NULL)', new.id, new.status
+  -- Re-lire l'ÉTAT COURANT au COMMIT (contrainte différée) ; new.* serait l'image figée de l'événement.
+  select status, ledger_tx_id into v_status, v_tx
+  from public.call_for_funds where id = new.id;
+  if not found then
+    return null;  -- appel supprimé dans la même tx : rien à contrôler.
+  end if;
+
+  if v_status not in ('draft', 'cancelled') and v_tx is null then
+    raise exception 'tr_cff_ledger_required: l''appel % (statut %) doit porter une écriture (ledger_tx_id NOT NULL)', new.id, v_status
       using errcode = '23514';
   end if;
   return null;
