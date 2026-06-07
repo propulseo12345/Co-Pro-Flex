@@ -699,6 +699,16 @@ create policy p_mgr_all on public.wall_posts
   using (public.user_is_copro_manager(copro_id))
   with check (public.user_is_copro_manager(copro_id));
 
+create policy p_own_insert on public.wall_posts
+  for insert to authenticated
+  with check (author_id = auth.uid() and public.user_has_copro_access(copro_id));
+create policy p_own_update on public.wall_posts
+  for update to authenticated
+  using (author_id = auth.uid()) with check (author_id = auth.uid());
+create policy p_own_delete on public.wall_posts
+  for delete to authenticated
+  using (author_id = auth.uid());
+
 -- wall_comments : classe E (confidentialité héritée du post parent)
 create policy p_sel_content on public.wall_comments
   for select to authenticated
@@ -715,6 +725,20 @@ create policy p_mgr_all on public.wall_comments
   using (public.user_is_copro_manager(copro_id))
   with check (public.user_is_copro_manager(copro_id));
 
+create policy p_own_insert on public.wall_comments
+  for insert to authenticated
+  with check (author_id = auth.uid() and exists (
+    select 1 from public.wall_posts p
+    where p.id = wall_comments.post_id
+      and public.can_view_content(p.copro_id, p.visibility, auth.uid())
+  ));
+create policy p_own_update on public.wall_comments
+  for update to authenticated
+  using (author_id = auth.uid()) with check (author_id = auth.uid());
+create policy p_own_delete on public.wall_comments
+  for delete to authenticated
+  using (author_id = auth.uid());
+
 -- wall_likes : classe E (confidentialité héritée du post parent)
 create policy p_sel_content on public.wall_likes
   for select to authenticated
@@ -725,7 +749,11 @@ create policy p_sel_content on public.wall_likes
   ));
 create policy p_own_insert on public.wall_likes
   for insert to authenticated
-  with check (user_id = auth.uid());
+  with check (user_id = auth.uid() and exists (
+    select 1 from public.wall_posts p
+    where p.id = wall_likes.post_id
+      and public.can_view_content(p.copro_id, p.visibility, auth.uid())
+  ));
 create policy p_own_delete on public.wall_likes
   for delete to authenticated
   using (user_id = auth.uid());

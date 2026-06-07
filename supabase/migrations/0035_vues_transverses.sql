@@ -52,14 +52,15 @@ select
     where lo.coproprietaire_id = c.id
   ), 0)                                                                as solde,
   case
-    when exists (
-      select 1 from public.lot_owners lo
-      where lo.coproprietaire_id = c.id and lo.end_date is null
-    ) then 'COPROPRIETAIRE'
-    when exists (
-      select 1 from public.lot_owners lo
-      where lo.coproprietaire_id = c.id and lo.end_date is not null
-    ) then 'ANCIEN'
+    when not exists (
+           select 1 from public.lot_owners lo
+           where lo.coproprietaire_id = c.id and lo.end_date is null
+         )
+         and exists (
+           select 1 from public.lot_owners lo
+           where lo.coproprietaire_id = c.id and lo.end_date is not null
+         )
+    then 'ANCIEN'
     else 'COPROPRIETAIRE'
   end                                                                  as owner_type,
   (
@@ -151,9 +152,9 @@ select
   coalesce(tr.total_transferred, 0)                                    as total_transferred,
   coalesce(lines.total_planned, 0) - coalesce(tr.total_transferred, 0) as solde_actuel,
   coalesce(
-    round((lines.total_planned / nullif(fonct.total_planned, 0) * 100)::numeric, 1),
-    5.0
-  )                                                                    as pourcentage_budget,
+    round((coalesce(lines.total_planned, 0) / nullif(fonct.total_planned, 0) * 100)::numeric, 1),
+    0
+  )                                                                    as pourcentage_budget,  -- 0 si pas de budget courant validé (NON le plancher légal 5%, qui se calcule ailleurs)
   coalesce(fonct.total_planned, 0)                                     as budget_fonctionnement
 from public.budgets b
 join public.accounting_periods ap on ap.id = b.period_id
