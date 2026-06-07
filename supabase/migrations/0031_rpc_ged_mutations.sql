@@ -544,6 +544,8 @@ declare
   v_total_w  numeric;
   v_items    jsonb;
   v_p1_total numeric;
+  v_p2_items jsonb;
+  v_p2_total numeric;
   v_by_nature jsonb;
   v_adv      numeric;
   v_prov     numeric;
@@ -558,12 +560,15 @@ begin
   v_eff := coalesce(v_mut.effective_date, v_mut.signature_date, current_date);
   select ref into v_lot_ref from public.lots where id = v_mut.lot_id;
 
-  -- P1 : sommes 45x du LOT figees a v_eff (par compte/nature). balance>0 = du par le lot.
+  -- 45x du LOT figes a v_eff (par compte/nature). P1 = debiteur (bal>0, du PAR le vendeur) ; P2 = crediteur (|bal<0|, du AU vendeur).
+  -- P2 EXCLUT le 450-5 (cotisation fonds travaux ALUR art.14-2) : attache au lot, acquis au fonds, NON remboursable au vendeur (decision USER 2026-06-07).
   select
-    coalesce(jsonb_agg(jsonb_build_object('code', x.code, 'nature', x.nature, 'amount', x.bal) order by x.code) filter (where x.bal <> 0), '[]'::jsonb),
-    coalesce(sum(x.bal), 0),
+    coalesce(jsonb_agg(jsonb_build_object('code', x.code, 'nature', x.nature, 'amount', x.bal) order by x.code) filter (where x.bal > 0), '[]'::jsonb),
+    coalesce(sum(x.bal) filter (where x.bal > 0), 0),
+    coalesce(jsonb_agg(jsonb_build_object('code', x.code, 'nature', x.nature, 'amount', -x.bal) order by x.code) filter (where x.bal < 0 and x.code <> '450-5'), '[]'::jsonb),
+    coalesce(-sum(x.bal) filter (where x.bal < 0 and x.code <> '450-5'), 0),
     coalesce(jsonb_object_agg(x.code, x.bal) filter (where x.bal <> 0), '{}'::jsonb)
-  into v_items, v_p1_total, v_by_nature
+  into v_items, v_p1_total, v_p2_items, v_p2_total, v_by_nature
   from (
     select a.code, coalesce(a.nature::text, 'autre') as nature,
            round(sum(case when e.direction = 'debit' then e.amount else -e.amount end), 2) as bal
@@ -607,14 +612,18 @@ begin
       'label', 'Sommes dues par le vendeur au syndicat',
       'items', v_items, 'total', v_p1_total),
     'partie_2_dues_par_syndicat', jsonb_build_object(
-      'label', 'Bases de calcul de la quote-part',
-      'tantiemes_lot', coalesce(v_w, 0), 'tantiemes_total', coalesce(v_total_w, 0),
-      'owner_share_pct', case when coalesce(v_total_w, 0) > 0 then round(coalesce(v_w, 0) * 100.0 / v_total_w, 4) else 0 end),
+      'label', 'Sommes dont le syndicat est debiteur envers le vendeur',
+      'items', v_p2_items, 'total', v_p2_total,
+      'note', 'Hors fonds de travaux art.14-2 (450-5) : attache au lot, non remboursable au vendeur'),
     'partie_3_charge_acquereur', jsonb_build_object(
       'label', 'A la charge de l''acquereur',
       'reconstitution_avances', v_adv,
       'provisions_appelees_non_echues', v_prov,
       'total', round(v_adv + v_prov, 2)),
+    'annexe_quote_part', jsonb_build_object(
+      'label', 'Bases de calcul de la quote-part (annexe art.5)',
+      'tantiemes_lot', coalesce(v_w, 0), 'tantiemes_total', coalesce(v_total_w, 0),
+      'owner_share_pct', case when coalesce(v_total_w, 0) > 0 then round(coalesce(v_w, 0) * 100.0 / v_total_w, 4) else 0 end),
     'lot', jsonb_build_object('id', v_mut.lot_id, 'ref', v_lot_ref),
     'copro', jsonb_build_object('id', p_copro_id),
     'seller', jsonb_build_object('id', v_mut.seller_owner_id),
