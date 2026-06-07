@@ -7,15 +7,6 @@ import { StepHeader } from '../shared/StepHeader';
 import { createCopropriete } from '@/lib/onboarding/api';
 import styles from './Step1Copropriete.module.css';
 
-const PERIODES_CONSTRUCTION = [
-  { value: 'avant-1965', label: 'Avant 1965' },
-  { value: '1965-1990', label: '1965 – 1990' },
-  { value: '1990-2012', label: '1990 – 2012' },
-  { value: 'apres-2012', label: 'Après 2012' },
-] as const;
-
-type PeriodeConstruction = typeof PERIODES_CONSTRUCTION[number]['value'];
-
 interface Step1Props {
   onComplete: (coproId: string, coproName: string) => void;
   existingCoproId: string | null;
@@ -27,7 +18,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
   const [codePostal, setCodePostal] = useState('');
   const [ville, setVille] = useState('');
   const [nombreBatiments, setNombreBatiments] = useState('1');
-  const [periodeConstruction, setPeriodeConstruction] = useState<PeriodeConstruction | ''>('');
+  const [anneeConstruction, setAnneeConstruction] = useState('');
   const [siretSyndic, setSiretSyndic] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -76,8 +67,8 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
       address: adresse.trim(),
       city: ville.trim(),
       postal_code: codePostal.trim(),
-      buildings_count: parseInt(nombreBatiments, 10) || 1,
-      annee_construction: periodeConstruction || undefined,
+      // buildings_count non transmis : copros n'a pas cette colonne (le nb de bâtiments relèvera de la table buildings).
+      annee_construction: anneeConstruction ? Number(anneeConstruction) : undefined,
       siret: siretSyndic || undefined,
     });
     setIsSaving(false);
@@ -89,7 +80,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
     if (data) {
       onComplete(data.id, data.name);
     }
-  }, [validate, existingCoproId, nom, adresse, ville, codePostal, nombreBatiments, periodeConstruction, siretSyndic, onComplete]);
+  }, [validate, existingCoproId, nom, adresse, ville, codePostal, nombreBatiments, anneeConstruction, siretSyndic, onComplete]);
 
   return (
     <div>
@@ -182,19 +173,16 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
             />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>Période de construction</label>
-            <div className={styles.pills}>
-              {PERIODES_CONSTRUCTION.map(p => (
-                <button
-                  key={p.value}
-                  type="button"
-                  className={`${styles.pill} ${periodeConstruction === p.value ? styles.pillActive : ''}`}
-                  onClick={() => setPeriodeConstruction(prev => prev === p.value ? '' : p.value)}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+            <label className={styles.label}>Année de construction</label>
+            <input
+              className={styles.input}
+              type="number"
+              min="1700"
+              max={new Date().getFullYear() + 5}
+              placeholder="ex. 1987"
+              value={anneeConstruction}
+              onChange={e => setAnneeConstruction(e.target.value)}
+            />
           </div>
         </div>
 

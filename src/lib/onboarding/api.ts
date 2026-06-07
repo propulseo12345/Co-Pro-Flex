@@ -10,25 +10,37 @@ export interface CoproCreate {
   address: string;
   city: string;
   postal_code: string;
-  buildings_count?: number;
-  annee_construction?: string;
+  annee_construction?: number; // millésime (ex 1987) ; int2 en base (contrôle 1700..année+5)
   siret?: string;
-  exercice_debut?: string;
+  exercice_debut?: number; // mois de début d'exercice (1..12), défaut 1 = janvier (exercice civil)
 }
 
 export async function createCopropriete(payload: CoproCreate) {
   const supabase = createUntypedClient();
+
+  // copros.cabinet_id est NOT NULL (schéma cible multi-cabinet) : on rattache la copro au
+  // cabinet du gestionnaire courant (profiles.cabinet_id). La création de cabinet (signup) est différée.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: new Error('Non authentifié : impossible de créer une copropriété.') };
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles').select('cabinet_id').eq('id', user.id).single();
+  if (profileErr) return { data: null, error: new Error(profileErr.message) };
+  const cabinetId = (profile as { cabinet_id: string | null } | null)?.cabinet_id ?? null;
+  if (!cabinetId) {
+    return { data: null, error: new Error("Votre compte n'est rattaché à aucun cabinet : impossible de créer une copropriété.") };
+  }
+
   const { data, error } = await supabase
     .from('copros')
     .insert({
+      cabinet_id: cabinetId,
       name: payload.name.trim(),
       address: payload.address.trim(),
       city: payload.city.trim(),
       postal_code: payload.postal_code.trim(),
-      buildings_count: payload.buildings_count || 1,
-      annee_construction: payload.annee_construction || null,
+      annee_construction: payload.annee_construction ?? null,
       siret: payload.siret?.trim() || null,
-      exercice_debut: payload.exercice_debut || '01-01',
+      exercice_debut: payload.exercice_debut ?? 1,
       onboarding_step: 2,
       onboarding_max_step: 2,
     })
@@ -36,13 +48,12 @@ export async function createCopropriete(payload: CoproCreate) {
     .single();
   if (error) return { data: null, error: new Error(error.message) };
 
-  // Créer le membership admin pour le gestionnaire qui crée la copro
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user && data) {
+  // Rattachement du gestionnaire qui crée la copro (memberships.role = 'gestionnaire').
+  if (data) {
     await supabase.from('memberships').insert({
       user_id: user.id,
       copro_id: (data as { id: string }).id,
-      role: 'admin',
+      role: 'gestionnaire',
     });
   }
 
@@ -222,7 +233,7 @@ export async function createCompteBancaire(payload: CompteCreate) {
       code,
       name: payload.label.trim(),
       account_type: 'asset',
-      banque: payload.banque?.trim() || null,
+      bank_name: payload.banque?.trim() || null,
       iban: payload.iban?.trim().replace(/\s/g, '') || null,
       bic: payload.bic?.trim() || null,
       initial_balance: payload.solde_initial || 0,
@@ -243,7 +254,7 @@ export async function listComptesBancaires(coproId: string) {
   // sinon BalanceEntreeForm affiche des lignes banque fantômes / risque de postage erroné.
   const { data, error } = await supabase
     .from('accounts')
-    .select('id, name, code, banque, iban, bic, initial_balance')
+    .select('id, name, code, banque:bank_name, iban, bic, initial_balance')
     .eq('copro_id', coproId)
     .eq('account_type', 'asset')
     .or('code.like.512%,code.like.502%')
@@ -256,34 +267,31 @@ export async function listComptesBancaires(coproId: string) {
 
 // ═══ ACCOUNTING PERIOD ═══
 
-/** Bornes d'un exercice : start dérivé de exercice_debut (MM-DD) + année, end = start + 1 an - 1 jour. */
-function deriveExercicePeriod(exerciceDebut: string | null, year: number): { start: string; end: string; name: string } {
-  // exerciceDebut au format 'MM-DD' (défaut '01-01'). On tolère un format vide/invalide -> civil.
-  const md = /^\d{2}-\d{2}$/.test(exerciceDebut ?? '') ? (exerciceDebut as string) : '01-01';
-  const [mm, dd] = md.split('-').map(Number);
-  const start = new Date(Date.UTC(year, mm - 1, dd));
-  const end = new Date(Date.UTC(year + 1, mm - 1, dd));
+/** Bornes d'un exercice : start = 1er jour du mois de début (exercice_debut 1..12) de `year`, end = +1 an - 1 jour. */
+export function deriveExercicePeriod(exerciceDebut: number | null, year: number): { start: string; end: string; name: string } {
+  // exerciceDebut = MOIS de début (int2 1..12, schéma cible) ; jour implicite = 1er. Défaut janvier = exercice civil.
+  const mm = exerciceDebut != null && exerciceDebut >= 1 && exerciceDebut <= 12 ? exerciceDebut : 1;
+  const start = new Date(Date.UTC(year, mm - 1, 1));
+  const end = new Date(Date.UTC(year + 1, mm - 1, 1));
   end.setUTCDate(end.getUTCDate() - 1); // start + 1 an - 1 jour
   const iso = (d: Date) => d.toISOString().slice(0, 10);
-  const label = mm === 1 && dd === 1 ? `Exercice ${year}` : `Exercice ${iso(start)} → ${iso(end)}`;
+  const label = mm === 1 ? `Exercice ${year}` : `Exercice ${iso(start)} → ${iso(end)}`;
   return { start: iso(start), end: iso(end), name: label };
 }
 
 /**
- * Année d'exercice CONTENANT la date `today`, dérivée de `exercice_debut` (MM-DD).
- * Pour un exercice civil (01-01) c'est l'année de `today`. Pour un exercice décalé
- * (ex. 07-01), si today est en janvier on vise l'exercice ouvert l'année PRÉCÉDENTE
+ * Année d'exercice CONTENANT la date `today`, dérivée de `exercice_debut` (mois 1..12).
+ * Pour un exercice civil (1 = janvier) c'est l'année de `today`. Pour un exercice décalé
+ * (ex. 7 = juillet), si today est en janvier on vise l'exercice ouvert l'année PRÉCÉDENTE
  * (juil. N-1 → juin N) — JAMAIS getFullYear() brut, qui ciblerait juil. N → juin N+1.
  */
-export function deriveExerciceYearForDate(exerciceDebut: string | null, today: Date): number {
-  const md = /^\d{2}-\d{2}$/.test(exerciceDebut ?? '') ? (exerciceDebut as string) : '01-01';
-  const [mm, dd] = md.split('-').map(Number);
+export function deriveExerciceYearForDate(exerciceDebut: number | null, today: Date): number {
+  const mm = exerciceDebut != null && exerciceDebut >= 1 && exerciceDebut <= 12 ? exerciceDebut : 1;
   const y = today.getUTCFullYear();
-  // Début d'exercice de l'année civile courante (UTC, comparé à today en UTC).
-  const startThisYear = Date.UTC(y, mm - 1, dd);
+  // Début d'exercice (1er du mois mm) de l'année civile courante, en UTC.
+  const startThisYear = Date.UTC(y, mm - 1, 1);
   const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  // Si today est AVANT le début d'exercice de l'année courante, on est dans l'exercice
-  // ouvert l'année précédente.
+  // Si today est AVANT le début d'exercice de l'année courante -> exercice ouvert l'année précédente.
   return todayUTC < startThisYear ? y - 1 : y;
 }
 
@@ -295,7 +303,7 @@ export async function ensureAccountingPeriod(coproId: string, year: number) {
     .from('copros').select('exercice_debut').eq('id', coproId).single();
   if (coproErr) return { data: null, error: new Error(coproErr.message) };
   const { start, end, name } = deriveExercicePeriod(
-    (copro as { exercice_debut: string | null }).exercice_debut, year
+    (copro as { exercice_debut: number | null }).exercice_debut, year
   );
 
   // Période déjà existante ?
@@ -423,7 +431,7 @@ export async function getOrCreateOnboardingPeriod(
   if (coproErr) return { data: null, error: new Error(coproErr.message) };
 
   const year = deriveExerciceYearForDate(
-    (copro as { exercice_debut: string | null }).exercice_debut, new Date()
+    (copro as { exercice_debut: number | null }).exercice_debut, new Date()
   );
   const { data: created, error: createErr } = await ensureAccountingPeriod(coproId, year);
   if (createErr || !created) {
