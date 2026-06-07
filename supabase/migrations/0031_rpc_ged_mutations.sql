@@ -11,7 +11,7 @@
 -- ============================================================
 -- generate_document_path (4 args) — chemin canonique ged/<copro>/<category>/<year>/<file>
 -- ============================================================
--- Lecture pure (aucune table touchée) → IMMUTABLE. G-INTERNAL (REVOKE anon).
+-- Lecture pure (aucune table touchée) mais le corps appelle now() (catégorie STABLE) → STABLE, pas IMMUTABLE. G-INTERNAL (REVOKE anon).
 create or replace function public.generate_document_path(
   p_copro_id  uuid,
   p_category  document_category,
@@ -20,7 +20,7 @@ create or replace function public.generate_document_path(
 )
 returns text
 language sql
-immutable
+stable
 as $$
   select 'ged/'
        || p_copro_id::text || '/'
@@ -485,13 +485,20 @@ begin
     if coalesce(p_buyer_company_name, p_buyer_last_name) is null then
       raise exception 'validate_mutation: acquereur requis (id ou nom)' using errcode = '23514';
     end if;
+    -- is_company DÉRIVÉ de la présence du nom de société (source de vérité unique = ck_copro_person_company en 0010),
+    -- pour ne jamais violer la contrainte is_company = (company_name is not null).
     insert into public.coproprietaires (copro_id, is_company, company_name, first_name, last_name, email)
-    values (v_mut.copro_id, coalesce(p_buyer_is_company, false), p_buyer_company_name, p_buyer_first_name, p_buyer_last_name, p_buyer_email)
+    values (v_mut.copro_id, (p_buyer_company_name is not null), p_buyer_company_name, p_buyer_first_name, p_buyer_last_name, p_buyer_email)
     returning id into v_buyer;
   else
     if not exists (select 1 from public.coproprietaires where id = v_buyer and copro_id = v_mut.copro_id) then
       raise exception 'validate_mutation: acquereur % hors copro %', v_buyer, v_mut.copro_id using errcode = '23503';
     end if;
+  end if;
+
+  -- acquereur != vendeur (message metier clair plutot qu'une violation brute de ck_mut_seller_buyer_distinct, 0019)
+  if v_buyer = v_mut.seller_owner_id then
+    raise exception 'validate_mutation: acquereur et vendeur identiques (mutation %)', p_mutation_id using errcode = '23514';
   end if;
 
   -- LOT-CENTRIC : clore TOUS les proprietaires actifs du lot, ouvrir l'acquereur. AUCUN GL (le 450 suit le lot).
@@ -571,6 +578,10 @@ begin
   -- P2 : quote-part (cle generale active)
   select id into v_key from public.repartition_keys
     where copro_id = p_copro_id and category = 'general' and is_active = true limit 1;
+  -- aligne sur 0027/0030 : sans cle generale active, l'etat date serait silencieusement a 0% de quote-part (piece legale)
+  if v_key is null then
+    raise exception 'generate_etat_date_payload: cle de repartition generale active introuvable (copro %)', p_copro_id using errcode = '23503';
+  end if;
   select rkl.weight into v_w from public.repartition_key_lines rkl where rkl.key_id = v_key and rkl.lot_id = v_mut.lot_id;
   select sum(weight) into v_total_w from public.repartition_key_lines where key_id = v_key;
 
@@ -587,7 +598,9 @@ begin
   from public.call_for_funds_lines cfl
   join public.call_for_funds cf on cf.id = cfl.call_id
   where cfl.copro_id = p_copro_id and cfl.lot_id = v_mut.lot_id
-    and cf.status not in ('draft', 'cancelled') and cf.due_date > v_eff;
+    and cf.status not in ('draft', 'cancelled')
+    and cf.issue_date <= v_eff   -- gel symetrique de l'emission a la date d'effet (aligne sur P1/avances : tx_date <= v_eff)
+    and cf.due_date > v_eff;
 
   return jsonb_build_object(
     'partie_1_sommes_dues_vendeur', jsonb_build_object(
