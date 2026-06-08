@@ -122,20 +122,22 @@ export async function getDashboardKpis(coproId: string): Promise<ApiResult<Dashb
     .limit(1)
     .maybeSingle();
 
-  // La fn ne sépare pas le compte travaux (5121) → tresorerie = trésorerie courante.
-  // tresorerie_travaux et critical_unpaid_count restent non fournis (0) tant qu'on
-  // n'enrichit pas la fn (éviterait une migration pour ce palier léger).
+  // La fn ne sépare pas le compte bancaire travaux (5121) → tresorerie = trésorerie courante.
+  // La tuile "Fonds travaux" du dashboard montre le FONDS ALUR / réserve travaux (comptes 103+105,
+  // = provisions_travaux, dérivé du grand livre) — décision USER 2026-06-08.
+  // critical_unpaid_count reste non fourni par la fn (0) : indicateur d'impayés critiques différé.
   const tresorerie = Number(fin?.tresorerie) || 0;
+  const provisionsTravaux = Number(fin?.provisions_travaux) || 0;
 
   const kpis: DashboardKpis = {
     copro_id: coproId,
     current_balance: tresorerie,
     tresorerie,
     tresorerie_courante: tresorerie,
-    tresorerie_travaux: 0,
+    tresorerie_travaux: provisionsTravaux,
     unpaid_total: Number(fin?.total_impayes) || 0,
     critical_unpaid_count: 0,
-    provisions_travaux: Number(fin?.provisions_travaux) || 0,
+    provisions_travaux: provisionsTravaux,
     budget_vote: Number(fin?.budget_vote) || 0,
     budget_realise: Number(fin?.budget_realise) || 0,
     budget_pct: Number(fin?.budget_pct) || 0,
