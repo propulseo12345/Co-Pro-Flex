@@ -14,6 +14,7 @@ export interface Copro {
   address: string | null;
   city: string | null;
   postal_code: string | null;
+  annee_construction: number | null;
 }
 
 export interface CoproContextValue {
@@ -87,7 +88,7 @@ export function CoproProvider({ children }: CoproProviderProps) {
 
       const { data, error: fetchError } = await supabase
         .from('copros')
-        .select('id, name, address, city, postal_code')
+        .select('id, name, address, city, postal_code, annee_construction')
         .eq('id', coproId)
         .single();
 

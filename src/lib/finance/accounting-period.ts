@@ -14,7 +14,7 @@ export interface AccountingPeriodInfo {
   end_date: string;
   label: string;
   year: number;
-  status: 'open' | 'locked' | 'closed';
+  status: 'open' | 'closed' | 'approved';
 }
 
 export interface GetAccountingPeriodResult {
@@ -276,7 +276,7 @@ export async function listAccountingPeriods(
       id: string;
       start_date: string;
       end_date: string;
-      status: 'open' | 'locked' | 'closed';
+      status: 'open' | 'closed' | 'approved';
     }) => ({
       id: period.id,
       start_date: period.start_date,

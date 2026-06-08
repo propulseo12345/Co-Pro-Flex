@@ -291,9 +291,10 @@ export function useLogbook() {
             adresse: currentCopro.address || '',
             codePostal: currentCopro.postal_code || '',
             ville: currentCopro.city || '',
-            anneeConstruction: (currentCopro as unknown as Record<string, unknown>).construction_year as number || 0,
-            nombreBatiments: (currentCopro as unknown as Record<string, unknown>).buildings_count as number || 1,
-            nombreLots: (currentCopro as unknown as Record<string, unknown>).lots_count as number || 0,
+            anneeConstruction: currentCopro.annee_construction || 0,
+            // nb de bâtiments / lots : tables buildings/lots (non rebranchées ici) -> valeurs par défaut.
+            nombreBatiments: 1,
+            nombreLots: 0,
             syndicNom: syndicInfo.nom || '',
             syndicTelephone: syndicInfo.telephone || '',
             syndicEmail: syndicInfo.email || '',
@@ -477,20 +478,24 @@ export function useLogbook() {
         if (!currentCoproId) return;
         const supabase = createClient();
 
-        // Sauvegarder les infos copropriété dans Supabase
-        await supabase
+        // Sauvegarder les infos copropriété dans Supabase (colonnes réelles uniquement :
+        // buildings_count / lots_count n'existent pas sur copros -> tables buildings/lots, hors scope).
+        // Client non typé : les types générés (périmés) déclarent annee_construction en string
+        // alors que la colonne est smallint -> régénération différée avec le rebranchement maintenance.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
             .from('copros')
             .update({
                 name: formData.nom,
                 address: formData.adresse,
                 postal_code: formData.codePostal,
                 city: formData.ville,
-                construction_year: formData.anneeConstruction || null,
-                buildings_count: formData.nombreBatiments || null,
-                lots_count: formData.nombreLots || null,
+                annee_construction: formData.anneeConstruction || null,
             })
             .eq('id', currentCoproId);
 
+        // En cas d'échec, on garde le mode édition ouvert pour ne pas masquer l'erreur silencieusement.
+        if (error) return;
         setIsEditing(false);
     }, [formData, currentCoproId]);
 
