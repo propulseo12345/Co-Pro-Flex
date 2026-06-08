@@ -167,7 +167,8 @@ appelle `post_call_for_funds` — **RPC inexistante** dans la base 0001→0036 (
 - [x] **2026-06-08** — Trou #1 cadré (décisions métier) + audit cascade 🟢 + spec écrite.
 - [x] **2026-06-08** — Trou #4 cadré (affichage seul) + découverte du maillon ALUR↔AG manquant (→ item #6).
 - [x] **2026-06-08** — Plan #1 écrit, puis **2 revues ultra** (SQL 0037 + re-vérif solo) ; coquilles corrigées dans plan/spec/tracker ; dette createCall confirmée ; décision source-105.
-- [ ] **Trou #1** — implémentation (migration 0037 + harnais + branchement front).
+- [x] **2026-06-08** — **Trou #1 BACKEND livré** : migration `0037` (`742b773`) + gate vert (`bac3e55`). Gate prouve : affectation D105/C705, refus (montant/type/sécurité 42501), règlement cash D512/C502, **neutralisation 705→110 à la clôture (net 110=0)**. `db:test` 4/4. (Gotcha corrigé : psql n'interpole pas `:var` dans `$$…$$` → copros créées dans le bloc.)
+- [ ] **Trou #1 — FRONT (Phase B)** : wrappers `lib/budget/api.ts`, `handleTransferALUR` réel, réécriture `TransferModal` (EN_COURS, sans compte courant, borné sur solde 105), bandeau rappel + `historiqueTransferts`. tsc + vitest + vérif écran.
 - [ ] **Trou #4** — affichage du lien AG (front-only, lecture `source_ag_id`).
 - [ ] **Trou #2** — transformer budget → appels de fonds (câblage).
 - [ ] **Trou #3** — générer le prochain appel (câblage échéancier).
