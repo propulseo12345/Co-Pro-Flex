@@ -50,11 +50,19 @@ export async function createCopropriete(payload: CoproCreate) {
 
   // Rattachement du gestionnaire qui crée la copro (memberships.role = 'gestionnaire').
   if (data) {
-    await supabase.from('memberships').insert({
+    const { error: memErr } = await supabase.from('memberships').insert({
       user_id: user.id,
       copro_id: (data as { id: string }).id,
       role: 'gestionnaire',
     });
+    if (memErr) {
+      // Sans rattachement, la copro serait orpheline (invisible et non supprimable une fois la RLS
+      // active, car les policies exigent une membership). On la supprime en best-effort avant de
+      // remonter l'erreur. À ce stade, seule la ligne copros existe (plan comptable pas encore
+      // provisionné). La création atomique (copro + membership + plan via RPC) reste différée.
+      await supabase.from('copros').delete().eq('id', (data as { id: string }).id);
+      return { data: null, error: new Error(`Création de la copropriété échouée (rattachement du gestionnaire) : ${memErr.message}`) };
+    }
   }
 
   // Provisionner le plan comptable canonique (82 comptes, 450-1..5, chapeau non-postable).

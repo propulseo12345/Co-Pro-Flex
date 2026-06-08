@@ -7,6 +7,11 @@ import { StepHeader } from '../shared/StepHeader';
 import { createCopropriete } from '@/lib/onboarding/api';
 import styles from './Step1Copropriete.module.css';
 
+const MOIS_EXERCICE = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
+
 interface Step1Props {
   onComplete: (coproId: string, coproName: string) => void;
   existingCoproId: string | null;
@@ -17,7 +22,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
   const [adresse, setAdresse] = useState('');
   const [codePostal, setCodePostal] = useState('');
   const [ville, setVille] = useState('');
-  const [nombreBatiments, setNombreBatiments] = useState('1');
+  const [moisDebutExercice, setMoisDebutExercice] = useState(1);
   const [anneeConstruction, setAnneeConstruction] = useState('');
   const [siretSyndic, setSiretSyndic] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -67,9 +72,9 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
       address: adresse.trim(),
       city: ville.trim(),
       postal_code: codePostal.trim(),
-      // buildings_count non transmis : copros n'a pas cette colonne (le nb de bâtiments relèvera de la table buildings).
       annee_construction: anneeConstruction ? Number(anneeConstruction) : undefined,
       siret: siretSyndic || undefined,
+      exercice_debut: moisDebutExercice,
     });
     setIsSaving(false);
 
@@ -80,7 +85,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
     if (data) {
       onComplete(data.id, data.name);
     }
-  }, [validate, existingCoproId, nom, adresse, ville, codePostal, nombreBatiments, anneeConstruction, siretSyndic, onComplete]);
+  }, [validate, existingCoproId, nom, adresse, ville, codePostal, moisDebutExercice, anneeConstruction, siretSyndic, onComplete]);
 
   return (
     <div>
@@ -163,14 +168,16 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
 
         <div className={styles.row}>
           <div className={styles.field}>
-            <label className={styles.label}>Nombre de bâtiments</label>
-            <input
+            <label className={styles.label}>Mois de début d&apos;exercice</label>
+            <select
               className={styles.input}
-              type="number"
-              min="1"
-              value={nombreBatiments}
-              onChange={e => setNombreBatiments(e.target.value)}
-            />
+              value={moisDebutExercice}
+              onChange={e => setMoisDebutExercice(Number(e.target.value))}
+            >
+              {MOIS_EXERCICE.map((label, i) => (
+                <option key={label} value={i + 1}>{label}</option>
+              ))}
+            </select>
           </div>
           <div className={styles.field}>
             <label className={styles.label}>Année de construction</label>
