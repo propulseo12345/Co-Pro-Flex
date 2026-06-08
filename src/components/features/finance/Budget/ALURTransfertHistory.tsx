@@ -19,17 +19,20 @@ export function ALURTransfertHistory({ fondsALUR, onOpenTransferModal }: ALURTra
         </button>
       </div>
       <p className={styles.info}>
-        Les fonds ALUR peuvent être transférés vers le compte courant pour financer des travaux votés en AG.
+        Le fonds ALUR est affecté à un budget travaux voté (écriture 105 → 705). Le virement de trésorerie
+        (Livret A → compte courant) est régularisé séparément une fois l&apos;affectation décidée.
       </p>
 
       <div className={styles.historySection}>
-        <h4 className={styles.historyTitle}>Historique des transferts</h4>
+        <h4 className={styles.historyTitle}>Historique des affectations</h4>
         {fondsALUR.historiqueTransferts.length > 0 ? (
           <div className={styles.list}>
             {fondsALUR.historiqueTransferts.map((transfert) => (
               <div key={transfert.id} className={styles.row}>
-                <span className={styles.rowDate}>{new Date(transfert.date).toLocaleDateString('fr-FR')}</span>
-                <span className={styles.rowDesc}>{transfert.description}</span>
+                <span className={styles.rowDate}>
+                  {transfert.date ? new Date(transfert.date).toLocaleDateString('fr-FR') : '—'}
+                </span>
+                <span className={styles.rowDesc}>{transfert.description || 'Affectation au budget travaux'}</span>
                 <span className={styles.rowAmount}>-{transfert.montant.toLocaleString('fr-FR')} €</span>
               </div>
             ))}

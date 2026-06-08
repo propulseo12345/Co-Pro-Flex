@@ -47,11 +47,13 @@ export default function BudgetsPage() {
     budgetsTravaux,
     fondsALUR,
     coproprietairesALUR,
+    pendingAlurCash,
     resolutionsAG,
     totals,
     postesEnAlerte,
     handleOpenTravauxDetail,
     handleTransferALUR,
+    handleSettleAlurCash,
     handleTransformToAppele,
     handleCreateBudget,
     getBudgetN1,
@@ -188,6 +190,8 @@ export default function BudgetsPage() {
             fondsALUR={fondsALUR}
             coproprietairesALUR={coproprietairesALUR}
             budgetAnnuelVote={budgetAnnuelVote}
+            pendingAlurCash={pendingAlurCash}
+            onSettleAlurCash={handleSettleAlurCash}
             onOpenTransferModal={() => setShowTransferModal(true)}
             onSelectCoproprietaire={setSelectedCoproprietaireALUR}
           />
