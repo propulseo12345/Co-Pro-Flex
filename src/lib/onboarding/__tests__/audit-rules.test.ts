@@ -11,9 +11,9 @@ function issue(issue_type: string): OnboardingAuditIssue {
 }
 
 describe('audit-rules', () => {
-  it('la liste blanche contient exactement les 5 fautes bloquantes du spec §6', () => {
+  it('la liste blanche = les 2 fautes structurelles bloquantes (décision 2026-06-08)', () => {
     expect([...BLOCKING_ISSUE_TYPES].sort()).toEqual(
-      ['CHAPEAU_450_POSTED', 'OVER_ALLOCATED', 'OVER_PAID', 'SOURCE_ID_MISSING', 'TOTAL_MISMATCH'],
+      ['LEDGER_UNBALANCED', 'LOT_ID_MISSING_45X'],
     );
   });
 
@@ -22,20 +22,20 @@ describe('audit-rules', () => {
     expect(hasBlockingIssue([])).toBe(false);
   });
 
-  it('LOT_GL_MISMATCH d\'origine reprise = NON bloquant (avertissement)', () => {
+  it('LOT_GL_MISMATCH (écart de réconciliation) = NON bloquant (avertissement)', () => {
     expect(hasBlockingIssue([issue('LOT_GL_MISMATCH')])).toBe(false);
   });
 
-  it('CALL_VS_BUDGET_MISMATCH = NON bloquant', () => {
-    expect(hasBlockingIssue([issue('CALL_VS_BUDGET_MISMATCH')])).toBe(false);
+  it('CALL_TOTAL_MISMATCH (total d\'appel) = NON bloquant (avertissement)', () => {
+    expect(hasBlockingIssue([issue('CALL_TOTAL_MISMATCH')])).toBe(false);
   });
 
-  it('TOTAL_MISMATCH = bloquant', () => {
-    expect(hasBlockingIssue([issue('TOTAL_MISMATCH')])).toBe(true);
+  it('LEDGER_UNBALANCED (déséquilibre comptable) = bloquant', () => {
+    expect(hasBlockingIssue([issue('LEDGER_UNBALANCED')])).toBe(true);
   });
 
   it('split sépare bloquants / avertissements', () => {
-    const mixed = [issue('TOTAL_MISMATCH'), issue('LOT_GL_MISMATCH'), issue('SOURCE_ID_MISSING')];
+    const mixed = [issue('LEDGER_UNBALANCED'), issue('LOT_GL_MISMATCH'), issue('LOT_ID_MISSING_45X')];
     const split = splitAuditIssues(mixed);
     expect(split.blocking.length).toBe(2);
     expect(split.warnings.length).toBe(1);
