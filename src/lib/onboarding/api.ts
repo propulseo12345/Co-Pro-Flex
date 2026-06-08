@@ -48,39 +48,42 @@ export async function createCopropriete(payload: CoproCreate) {
     .single();
   if (error) return { data: null, error: new Error(error.message) };
 
-  // Rattachement du gestionnaire qui crée la copro (memberships.role = 'gestionnaire').
+  // Rattachement du gestionnaire + provisionnement du plan comptable. En cas d'échec APRÈS
+  // l'insert copro, on nettoie (best-effort) pour ne pas laisser une copro orpheline ou sans
+  // plan comptable — qui pourrait devenir la copro active (getActiveCopro prend la plus ancienne).
+  // NB : création non atomique → RPC create_copro transactionnelle = amélioration différée.
   if (data) {
+    const newCoproId = (data as { id: string }).id;
+    // Nettoyage : on retire les comptes (FK accounts→copros = RESTRICT) PUIS la copro
+    // (cascade → membership). Sur un échec précoce les comptes n'existent pas encore (no-op).
+    const cleanupOrphan = async () => {
+      await supabase.from('accounts').delete().eq('copro_id', newCoproId);
+      await supabase.from('copros').delete().eq('id', newCoproId);
+    };
+
     const { error: memErr } = await supabase.from('memberships').insert({
       user_id: user.id,
-      copro_id: (data as { id: string }).id,
+      copro_id: newCoproId,
       role: 'gestionnaire',
     });
     if (memErr) {
-      // Sans rattachement, la copro serait orpheline (invisible et non supprimable une fois la RLS
-      // active, car les policies exigent une membership). On la supprime en best-effort avant de
-      // remonter l'erreur. À ce stade, seule la ligne copros existe (plan comptable pas encore
-      // provisionné). La création atomique (copro + membership + plan via RPC) reste différée.
-      await supabase.from('copros').delete().eq('id', (data as { id: string }).id);
+      await cleanupOrphan();
       return { data: null, error: new Error(`Création de la copropriété échouée (rattachement du gestionnaire) : ${memErr.message}`) };
     }
-  }
 
-  // Provisionner le plan comptable canonique (82 comptes, 450-1..5, chapeau non-postable).
-  // Idempotent côté SQL (ON CONFLICT DO NOTHING).
-  if (data) {
-    const { error: chartErr } = await supabase.rpc('provision_copro_chart', {
-      p_copro_id: (data as { id: string }).id,
-    });
+    // Provisionner le plan comptable canonique (82 comptes, 450-1..5, chapeau non-postable).
+    const { error: chartErr } = await supabase.rpc('provision_copro_chart', { p_copro_id: newCoproId });
     if (chartErr) {
+      await cleanupOrphan();
       return { data: null, error: new Error(`Plan comptable non provisionné : ${chartErr.message}`) };
     }
 
-    // provision_copro_chart est idempotent (son entier de retour vaut 0 au re-run) :
-    // vérifier un compte sentinelle (450-1) confirme que le plan est réellement présent.
+    // provision_copro_chart est idempotent : vérifier le compte sentinelle 450-1 confirme le plan.
     const { count: sentinel, error: chkErr } = await supabase
       .from('accounts').select('id', { count: 'exact', head: true })
-      .eq('copro_id', (data as { id: string }).id).eq('code', '450-1');
+      .eq('copro_id', newCoproId).eq('code', '450-1');
     if (chkErr || !sentinel) {
+      await cleanupOrphan();
       return { data: null, error: new Error('Plan comptable incomplet après provisionnement (450-1 absent).') };
     }
   }
