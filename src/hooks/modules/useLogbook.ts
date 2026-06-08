@@ -259,6 +259,7 @@ export function useLogbook() {
     // États UI
     const [showExportMenu, setShowExportMenu] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [isSimplifiedView, setIsSimplifiedView] = useState(false);
 
     // États modals
@@ -476,6 +477,7 @@ export function useLogbook() {
     // Handlers
     const handleSaveInfo = useCallback(async () => {
         if (!currentCoproId) return;
+        setSaveError(null);
         const supabase = createClient();
 
         // Sauvegarder les infos copropriété dans Supabase (colonnes réelles uniquement :
@@ -494,8 +496,11 @@ export function useLogbook() {
             })
             .eq('id', currentCoproId);
 
-        // En cas d'échec, on garde le mode édition ouvert pour ne pas masquer l'erreur silencieusement.
-        if (error) return;
+        // Échec : on garde le mode édition ouvert ET on expose un message (sinon perte silencieuse).
+        if (error) {
+            setSaveError('La sauvegarde a échoué. Vérifiez votre connexion et réessayez.');
+            return;
+        }
         setIsEditing(false);
     }, [formData, currentCoproId]);
 
@@ -878,6 +883,7 @@ export function useLogbook() {
         expandedCategories,
         showExportMenu,
         isEditing,
+        saveError,
         isSimplifiedView,
         selectedEquipement,
         showNewInterventionModal,
