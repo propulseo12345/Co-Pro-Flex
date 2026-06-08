@@ -45,7 +45,6 @@ const initialResult: UseConvocationAgResult = {
 export function useConvocationAg(): UseConvocationAgReturn {
   const [state, setState] = useState<UseConvocationAgResult>(initialResult);
   const mountedRef = useRef(true);
-  const membershipEnsuredRef = useRef(false);
 
   // Créer le client une seule fois
   const supabaseRef = useRef(createUntypedClient());
@@ -59,18 +58,6 @@ export function useConvocationAg(): UseConvocationAgReturn {
 
     try {
       const supabase = supabaseRef.current;
-
-      // S'assurer que l'utilisateur a un membership admin pour accéder aux drafts
-      // (RLS: seuls les managers voient les AG en draft)
-      // Ne le faire qu'une seule fois par session
-      if (!membershipEnsuredRef.current) {
-        try {
-          await supabase.rpc('ensure_dev_membership', { p_copro_id: null });
-          membershipEnsuredRef.current = true;
-        } catch {
-          // Ignorer les erreurs (ex: utilisateur non authentifié)
-        }
-      }
 
       const { data: meeting, error: meetingError } = await supabase
         .from('ag_meetings')
