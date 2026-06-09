@@ -6,7 +6,6 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import {
-  RESOLUTIONS_BANK,
   CATEGORIES_RESOLUTIONS,
   type ResolutionTemplate,
   type TypeAG,
@@ -14,6 +13,7 @@ import {
   type TemplateScope,
   type TemplateStatus,
 } from '@/lib/constants/resolutions';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 
 // Types pour les filtres
 export interface ResolutionFilters {
@@ -172,6 +172,9 @@ export function useResolutionLibrary(
 ): UseResolutionLibraryReturn {
   const { initialFilters = {}, pageSize: defaultPageSize = 20 } = options;
 
+  // Source unique : snapshot de la banque chargé en base via le provider
+  const { templates } = useResolutionTemplates();
+
   // États
   const [filters, setFiltersState] = useState<ResolutionFilters>({
     ...DEFAULT_FILTERS,
@@ -185,11 +188,11 @@ export function useResolutionLibrary(
   const categories = useMemo(() => [...CATEGORIES_RESOLUTIONS], []);
 
   // Tous les tags disponibles
-  const allTags = useMemo(() => extractAllTags(RESOLUTIONS_BANK), []);
+  const allTags = useMemo(() => extractAllTags(templates), [templates]);
 
   // Filtrage des résolutions
   const filteredResolutions = useMemo(() => {
-    let results: ScoredResolution[] = RESOLUTIONS_BANK.map(r => ({
+    let results: ScoredResolution[] = templates.map(r => ({
       resolution: r,
       score: calculateRelevanceScore(r, filters.query),
     }));
@@ -253,7 +256,7 @@ export function useResolutionLibrary(
     }
 
     return results;
-  }, [filters]);
+  }, [templates, filters]);
 
   // Tri des résolutions
   const sortedResolutions = useMemo(() => {
@@ -345,17 +348,17 @@ export function useResolutionLibrary(
   // Récupérer une résolution par ID
   const getResolutionById = useCallback(
     (id: string): ResolutionTemplate | undefined => {
-      return RESOLUTIONS_BANK.find(r => r.id === id);
+      return templates.find(r => r.id === id);
     },
-    []
+    [templates]
   );
 
   // Récupérer les résolutions par catégorie
   const getResolutionsByCategory = useCallback(
     (category: string): ResolutionTemplate[] => {
-      return RESOLUTIONS_BANK.filter(r => r.categorie === category);
+      return templates.filter(r => r.categorie === category);
     },
-    []
+    [templates]
   );
 
   // États dérivés
@@ -374,7 +377,7 @@ export function useResolutionLibrary(
   return {
     // Données
     resolutions: paginatedResolutions,
-    totalCount: RESOLUTIONS_BANK.length,
+    totalCount: templates.length,
     filteredCount: sortedResolutions.length,
     categories,
     allTags,
