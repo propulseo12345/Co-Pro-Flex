@@ -302,15 +302,8 @@ export async function markActionActivated(
 
 export async function markAgFinalized(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
-  const { error } = await supabase
-    .from('ag_meetings')
-    .update({
-      status: 'finalized',
-      current_step: 9,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', agId);
-
+  const { data, error } = await supabase.rpc('finalize_ag', { p_ag_id: agId });
   if (error) return { success: false, error: error.message };
-  return { success: true };
+  const result = data as { success: boolean; error?: string };
+  return result;
 }
