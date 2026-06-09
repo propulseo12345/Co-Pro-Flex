@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { writeFileSync } from 'node:fs';
 import { RESOLUTIONS_BANK } from '@/lib/constants/resolutions';
-import { buildSystemSeed } from '@/lib/ag/resolutionTemplates/seed';
+import { buildSystemSeed, toSeedSql } from '@/lib/ag/resolutionTemplates/seed';
 
 describe('buildSystemSeed', () => {
   const seed = buildSystemSeed(RESOLUTIONS_BANK);
@@ -49,5 +50,11 @@ describe('buildSystemSeed', () => {
       expect(row.action_type ?? null).toBe(src!.action_type ?? null);
       expect(row.obligatoire_pour ?? []).toEqual(src!.obligatoire_pour ?? []);
     }
+  });
+
+  it('émet 0043 (idempotent, source-contrôlé)', () => {
+    const sqlText = toSeedSql(buildSystemSeed(RESOLUTIONS_BANK));
+    writeFileSync('supabase/migrations/0043_seed_resolution_templates.sql', sqlText, 'utf8');
+    expect(sqlText).toContain("insert into public.resolution_templates");
   });
 });
