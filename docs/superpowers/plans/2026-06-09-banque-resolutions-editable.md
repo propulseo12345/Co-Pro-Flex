@@ -223,6 +223,9 @@ create trigger trg_resolution_templates_copro_cabinet
   for each row execute function public.enforce_template_copro_cabinet();
 
 -- Helper RLS cabinet (calqué sur user_is_copro_manager, 0023). Le gestionnaire pilote SON cabinet.
+-- SÉCURITÉ : le RÔLE ne vit PAS dans profiles. On exige À LA FOIS le rattachement au cabinet
+--   (profiles.cabinet_id) ET un membership 'gestionnaire' (public.memberships, source unique du rôle).
+--   Sans le 2e exists, un coproprietaire du même cabinet obtiendrait lecture/écriture des modèles cabinet.
 create or replace function public.user_is_cabinet_manager(p_cabinet_id uuid)
 returns boolean language plpgsql stable security definer set search_path = public as $$
 begin
@@ -231,6 +234,13 @@ begin
   return exists (
     select 1 from public.profiles p
     where p.id = auth.uid() and p.cabinet_id = p_cabinet_id
+  ) and exists (
+    select 1
+    from public.memberships m
+    join public.copros c on c.id = m.copro_id
+    where m.user_id = auth.uid()
+      and m.role = 'gestionnaire'
+      and c.cabinet_id = p_cabinet_id
   );
 end $$;
 revoke execute on function public.user_is_cabinet_manager(uuid) from public, anon;

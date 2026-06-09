@@ -61,7 +61,8 @@ begin
     if not exists (
       select 1 from public.copros c where c.id = NEW.copro_id and c.cabinet_id = NEW.cabinet_id
     ) then
-      raise exception 'resolution_templates: copro_id % n''appartient pas au cabinet %', NEW.copro_id, NEW.cabinet_id;
+      raise exception 'resolution_templates: copro_id % n''appartient pas au cabinet %', NEW.copro_id, NEW.cabinet_id
+        using errcode = 'check_violation';
     end if;
   end if;
   return NEW;
@@ -71,6 +72,11 @@ create trigger trg_resolution_templates_copro_cabinet
   for each row execute function public.enforce_template_copro_cabinet();
 
 -- Helper RLS cabinet (calqué sur user_is_copro_manager, 0023). Le gestionnaire pilote SON cabinet.
+-- SÉCURITÉ — le RÔLE ne vit PAS dans profiles (un copropriétaire peut avoir profiles.cabinet_id renseigné).
+--   On EXIGE donc À LA FOIS : (a) le rattachement au cabinet (profiles.cabinet_id = p_cabinet_id) ET
+--   (b) un membership 'gestionnaire' sur une copro de ce cabinet (public.memberships, source unique du rôle,
+--   cf. user_is_copro_manager 0023). Sans le 2e exists, tout membre du cabinet (y compris coproprietaire)
+--   obtiendrait lecture/écriture/suppression des modèles cabinet — fuite RLS corrigée ici.
 create or replace function public.user_is_cabinet_manager(p_cabinet_id uuid)
 returns boolean language plpgsql stable security definer set search_path = public as $$
 begin
@@ -79,6 +85,13 @@ begin
   return exists (
     select 1 from public.profiles p
     where p.id = auth.uid() and p.cabinet_id = p_cabinet_id
+  ) and exists (
+    select 1
+    from public.memberships m
+    join public.copros c on c.id = m.copro_id
+    where m.user_id = auth.uid()
+      and m.role = 'gestionnaire'
+      and c.cabinet_id = p_cabinet_id
   );
 end $$;
 revoke execute on function public.user_is_cabinet_manager(uuid) from public, anon;
@@ -101,6 +114,12 @@ create policy p_del_restpl on public.resolution_templates
   using (cabinet_id is not null and public.user_is_cabinet_manager(cabinet_id));
 
 -- Bascule env (OFF en dev, comme 0034). RLS active uniquement en production.
+-- REGISTRE RLS CENTRAL (0034) — bascule locale VOLONTAIRE, NE PAS migrer dans 0034 :
+--   le sweep RLS centralisé vit en 0034 (revoke_rls_seed), mais cette table est créée en 0042, soit APRÈS
+--   0034 dans l'ordre de rejeu des migrations. L'ajouter à la liste de 0034 casserait `supabase db reset`
+--   avec « relation "public.resolution_templates" does not exist » (la table n'existe pas encore au moment
+--   où 0034 s'exécute). Cette table gère donc sa PROPRE bascule env-gated ici, alignée sur la convention 0034
+--   (OFF hors production). C'est un choix d'ordering assumé, pas un oubli du registre central.
 do $$
 begin
   if current_setting('app.environment', true) = 'production' then
