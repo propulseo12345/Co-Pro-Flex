@@ -141,14 +141,14 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
   const nextMeeting = useMemo(() => {
     const now = new Date();
     const upcoming = meetings
-      .filter((m) => new Date(m.meeting_date) >= now && !['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'].includes(m.status))
+      .filter((m) => new Date(m.meeting_date) >= now && !['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'archived'].includes(m.status))
       .sort((a, b) => new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime());
     return upcoming[0] || null;
   }, [meetings]);
 
   // AG actives (convoquées, en cours, session active — hors draft et terminées)
   const activeMeetings = useMemo(() => {
-    const terminalStatuses = ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'];
+    const terminalStatuses = ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'archived'];
     return meetings
       .filter((m) => m.status !== 'draft' && !terminalStatuses.includes(m.status))
       .sort((a, b) => new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime());
@@ -158,7 +158,7 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
   const pastMeetings = useMemo(() => {
     const now = new Date();
     return meetings
-      .filter((m) => ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'].includes(m.status) || (new Date(m.meeting_date) < now && m.status !== 'draft'))
+      .filter((m) => ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'archived'].includes(m.status) || (new Date(m.meeting_date) < now && m.status !== 'draft'))
       .sort((a, b) => new Date(b.meeting_date).getTime() - new Date(a.meeting_date).getTime());
   }, [meetings]);
 
