@@ -1,0 +1,91 @@
+import { createClient } from '@/lib/supabase/client';
+import type { ResolutionTemplateRow, CreateTemplatePayload, ApiResult } from './types';
+
+const TABLE = 'resolution_templates';
+const SELECT = '*';
+
+/** Système (cabinet_id NULL) + cabinet + copro active. Ne JAMAIS comparer cabinet_id = NULL. */
+export async function fetchTemplatesForCabinet(
+  cabinetId: string | null,
+  coproId: string | null,
+): Promise<ApiResult<ResolutionTemplateRow[]>> {
+  const supabase = createClient();
+  let query = supabase.from(TABLE).select(SELECT);
+  if (cabinetId) {
+    const coproClause = coproId ? `,and(cabinet_id.eq.${cabinetId},copro_id.eq.${coproId})` : '';
+    query = query.or(`cabinet_id.is.null,and(cabinet_id.eq.${cabinetId},copro_id.is.null)${coproClause}`);
+  } else {
+    query = query.is('cabinet_id', null);
+  }
+  const { data, error } = await query;
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: (data ?? []) as ResolutionTemplateRow[] };
+}
+
+/** Obligatoires SYSTÈME pour un type d'AG (utilisé par la création d'AG, sans cabinet). */
+export async function fetchSystemObligatoires(typeAG: string): Promise<ApiResult<ResolutionTemplateRow[]>> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from(TABLE).select(SELECT).is('cabinet_id', null).contains('obligatoire_pour', [typeAG]);
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: (data ?? []) as ResolutionTemplateRow[] };
+}
+
+async function isSystem(supabase: ReturnType<typeof createClient>, id: string): Promise<boolean | null> {
+  const { data, error } = await supabase.from(TABLE).select('cabinet_id').eq('id', id).single();
+  if (error || !data) return null;
+  return (data as { cabinet_id: string | null }).cabinet_id === null;
+}
+
+export async function createTemplate(
+  cabinetId: string, payload: CreateTemplatePayload, coproId: string | null = null,
+): Promise<ApiResult<ResolutionTemplateRow>> {
+  if (!cabinetId) return { success: false, error: 'Aucun cabinet courant.' };
+  const supabase = createClient();
+  const { data, error } = await supabase.from(TABLE)
+    .insert({ ...payload, cabinet_id: cabinetId, copro_id: coproId, code: null, scope: 'org' })
+    .select(SELECT).single();
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data as ResolutionTemplateRow };
+}
+
+export async function updateTemplate(
+  id: string, patch: Partial<CreateTemplatePayload>,
+): Promise<ApiResult<ResolutionTemplateRow>> {
+  const supabase = createClient();
+  const sys = await isSystem(supabase, id);
+  if (sys === null) return { success: false, error: 'Modèle introuvable.' };
+  if (sys) return { success: false, error: 'Un modèle système est en lecture seule.' };
+  const { data, error } = await supabase.from(TABLE).update(patch).eq('id', id).select(SELECT).single();
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data as ResolutionTemplateRow };
+}
+
+export async function duplicateTemplate(
+  fromId: string, cabinetId: string, coproId: string | null = null,
+): Promise<ApiResult<ResolutionTemplateRow>> {
+  if (!cabinetId) return { success: false, error: 'Aucun cabinet courant.' };
+  const supabase = createClient();
+  const { data: src, error: e1 } = await supabase.from(TABLE).select(SELECT).eq('id', fromId).single();
+  if (e1 || !src) return { success: false, error: 'Modèle source introuvable.' };
+  const s = src as ResolutionTemplateRow;
+  const { data, error } = await supabase.from(TABLE).insert({
+    cabinet_id: cabinetId, copro_id: coproId, code: null, scope: 'org',
+    titre: `${s.titre} (copie)`, categorie: s.categorie, texte: s.texte, majorite: s.majorite,
+    is_information: s.isInformation, applicable_ag: s.applicable_ag, obligatoire_pour: s.obligatoire_pour,
+    ordre_suggere: s.ordre_suggere, tags: s.tags, variables: s.variables, variables_typees: s.variablesTypees,
+    action_type: s.action_type,
+  }).select(SELECT).single();
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data as ResolutionTemplateRow };
+}
+
+export async function deleteTemplate(id: string): Promise<ApiResult<null>> {
+  const supabase = createClient();
+  const sys = await isSystem(supabase, id);
+  if (sys === null) return { success: false, error: 'Modèle introuvable.' };
+  if (sys) return { success: false, error: 'Un modèle système ne peut pas être supprimé.' };
+  const { error } = await supabase.from(TABLE).delete().eq('id', id);
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: null };
+}
