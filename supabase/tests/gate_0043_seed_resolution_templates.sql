@@ -15,6 +15,11 @@ BEGIN
    WHERE code IN ('cs-02','cs-04','cs-05') AND majorite <> 'ART_25';
   IF v_maj IS NOT NULL THEN RAISE EXCEPTION 'ASSERT FAIL : majorités non corrigées : %', v_maj; END IF;
 
+  -- fin-10 : texte sans quitus (requalifiée en prise d'acte)
+  SELECT count(*) INTO v_bad FROM public.resolution_templates
+   WHERE code = 'fin-10' AND cabinet_id IS NULL AND texte ILIKE '%quitus%';
+  IF v_bad <> 0 THEN RAISE EXCEPTION 'ASSERT FAIL : fin-10 texte contient encore quitus'; END IF;
+
   RAISE EXCEPTION 'ROLLBACK_TEST_OK';
 EXCEPTION WHEN OTHERS THEN
   IF SQLERRM = 'ROLLBACK_TEST_OK' THEN RAISE NOTICE 'OK'; ELSE RAISE; END IF;

@@ -31,10 +31,17 @@ const CLEANUPS: Record<string, Partial<SeedRow>> = {
   'reglement-05': { categorie: 'Modification du règlement' },
   // (2) Dédoublonnage quitus : fin-10 requalifiée en prise d'acte (le quitus reste porté par ag-05).
   'fin-10': {
-    titre: 'Prise d’acte de la situation de trésorerie',
+    titre: "Prise d'acte de la situation de trésorerie",
+    texte: 'L\'assemblée générale prend acte de la situation de trésorerie au {date}, présentant un solde de {solde} euros.',
     majorite: 'INFORMATION',
     is_information: true,
     ordre_suggere: null, // lève la collision ordre_suggere=6 avec ag-05
+    variables: ['date', 'solde'],
+    variables_typees: [
+      { name: 'date', type: 'date', label: 'Date de la situation', required: true },
+      { name: 'solde', type: 'montant', label: 'Solde de trésorerie', required: true },
+    ],
+    tags: ['trésorerie', 'situation financière'],
   },
   // (3) Majorités légales (loi 10/07/1965 art. 25 ; passerelle 25-1 gérée au vote).
   'cs-02': { majorite: 'ART_25', legal_ref: 'Loi du 10 juillet 1965, art. 25 (passerelle 25-1)' },
@@ -90,6 +97,7 @@ export function toSeedSql(rows: SeedRow[]): string {
     `insert into public.resolution_templates\n` +
     `  (code, titre, categorie, texte, majorite, is_information, applicable_ag, obligatoire_pour,\n` +
     `   ordre_suggere, tags, variables, variables_typees, legal_ref, action_type)\n` +
-    `values\n${values};\n`
+    `values\n${values}\n` +
+    `on conflict (code) where cabinet_id is null do nothing;\n`
   );
 }

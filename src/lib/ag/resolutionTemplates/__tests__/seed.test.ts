@@ -31,6 +31,7 @@ describe('buildSystemSeed', () => {
     const r = seed.find((x) => x.code === 'fin-10');
     expect(r?.majorite).toBe('INFORMATION');
     expect(r?.titre.toLowerCase()).not.toContain('quitus');
+    expect(r?.texte.toLowerCase()).not.toContain('quitus');
   });
 
   it('cardinalité figée (100 modèles, 0 dédoublonnage de code)', () => {
