@@ -2,6 +2,7 @@
 
 import { FileText } from 'lucide-react';
 import { getNombreResolutionsAGOrdinaire } from '@/lib/utils/ag-resolutions';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 import type { AGFormData } from '../domain/types';
 import styles from '../../../../app/(dashboard)/ag/new/new-ag.module.css';
 
@@ -10,6 +11,7 @@ interface InfoBoxProps {
 }
 
 export function InfoBox({ type }: InfoBoxProps) {
+  const { templates } = useResolutionTemplates();
   return (
     <div className={type === 'URGENTE' ? styles.infoBoxUrgent : styles.infoBox}>
       <FileText size={20} aria-hidden="true" />
@@ -22,7 +24,7 @@ export function InfoBox({ type }: InfoBoxProps) {
         </p>
         {type === 'ORDINAIRE' && (
           <p style={{ marginTop: '8px', color: 'var(--primary)', fontWeight: 500 }}>
-            ✓ {getNombreResolutionsAGOrdinaire()} résolutions standards seront ajoutées automatiquement pour une AG
+            ✓ {getNombreResolutionsAGOrdinaire(templates)} résolutions standards seront ajoutées automatiquement pour une AG
             Ordinaire
           </p>
         )}
