@@ -932,17 +932,17 @@ export default function DocumentViewerModal({
                 <div className={styles.linkedEntitiesList}>
                   <h3>Entités liées à ce document</h3>
                   {linkedEntities.map((link) => {
-                    const module = getLinkableModule(link.entityType);
-                    return module ? (
+                    const mod = getLinkableModule(link.entityType);
+                    return mod ? (
                       <div key={link.id} className={styles.linkedEntityCard}>
                         <div
                           className={styles.linkedEntityIcon}
-                          style={{ backgroundColor: `${module.color}15`, color: module.color }}
+                          style={{ backgroundColor: `${mod.color}15`, color: mod.color }}
                         >
                           {getLinkedEntityIcon(link.entityType, 20)}
                         </div>
                         <div className={styles.linkedEntityInfo}>
-                          <span className={styles.linkedEntityType}>{module.label}</span>
+                          <span className={styles.linkedEntityType}>{mod.label}</span>
                           <span className={styles.linkedEntityId}>ID: {link.entityId}</span>
                           {link.extractedData?.objet && (
                             <span className={styles.linkedEntityDesc}>
@@ -951,7 +951,7 @@ export default function DocumentViewerModal({
                           )}
                         </div>
                         <Link
-                          href={`${module.routeBase}/${link.entityId}`}
+                          href={`${mod.routeBase}/${link.entityId}`}
                           className={styles.linkedEntityLink}
                         >
                           Voir <ExternalLink size={14} />

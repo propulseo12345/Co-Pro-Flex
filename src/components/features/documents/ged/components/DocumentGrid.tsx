@@ -90,18 +90,18 @@ export function DocumentGrid({ documents, canManageAccess, onPreview, onLink, on
               {docLinks.length > 0 && (
                 <div className={styles.docLinks}>
                   {docLinks.map((link) => {
-                    const module = getLinkableModule(link.entityType);
-                    return module ? (
+                    const mod = getLinkableModule(link.entityType);
+                    return mod ? (
                       <Link
                         key={link.id}
-                        href={`${module.routeBase}/${link.entityId}`}
+                        href={`${mod.routeBase}/${link.entityId}`}
                         className={styles.docLinkTag}
-                        style={{ backgroundColor: `${module.color}15`, color: module.color }}
-                        title={`Voir ${module.label}`}
+                        style={{ backgroundColor: `${mod.color}15`, color: mod.color }}
+                        title={`Voir ${mod.label}`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {getLinkedEntityIcon(link.entityType, 12)}
-                        <span>{module.label}</span>
+                        <span>{mod.label}</span>
                         <ExternalLink size={10} />
                       </Link>
                     ) : null;

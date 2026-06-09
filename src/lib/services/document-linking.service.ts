@@ -256,10 +256,10 @@ export function detectDocumentEntityType(
   }
 
   // Ensuite essayer par pattern de nom (confiance moyenne)
-  for (const module of LINKABLE_MODULES) {
-    for (const pattern of module.filePatterns) {
+  for (const mod of LINKABLE_MODULES) {
+    for (const pattern of mod.filePatterns) {
       if (pattern.test(normalizedName)) {
-        return { type: module.type, confidence: 70 };
+        return { type: mod.type, confidence: 70 };
       }
     }
   }
@@ -340,8 +340,8 @@ export function getLinkableModule(entityType: LinkedEntityType): LinkableModule 
  * Génère un label descriptif pour une entité liée
  */
 export function formatEntityLabel(entityType: LinkedEntityType, entityData: Record<string, unknown>): string {
-  const module = getLinkableModule(entityType);
-  if (!module) return 'Entité inconnue';
+  const mod = getLinkableModule(entityType);
+  if (!mod) return 'Entité inconnue';
 
   switch (entityType) {
     case 'FACTURE':
@@ -363,7 +363,7 @@ export function formatEntityLabel(entityType: LinkedEntityType, entityData: Reco
     case 'COPROPRIETAIRE':
       return `${entityData.nom || 'Copropriétaire'} - Lot ${entityData.lot || ''}`;
     default:
-      return module.label;
+      return mod.label;
   }
 }
 

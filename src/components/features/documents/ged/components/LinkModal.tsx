@@ -99,17 +99,17 @@ export function LinkModal({
           <div className={styles.linkManualSection}>
             <h4>Ou lier manuellement à :</h4>
             <div className={styles.linkModulesGrid}>
-              {LINKABLE_MODULES.map((module) => (
+              {LINKABLE_MODULES.map((mod) => (
                 <button
-                  key={module.type}
+                  key={mod.type}
                   className={styles.linkModuleBtn}
-                  onClick={() => onCreateLink(module.type)}
-                  style={{ '--module-color': module.color } as React.CSSProperties}
+                  onClick={() => onCreateLink(mod.type)}
+                  style={{ '--module-color': mod.color } as React.CSSProperties}
                 >
-                  {getLinkedEntityIcon(module.type, 20)}
-                  <span className={styles.linkModuleName}>{module.label}</span>
+                  {getLinkedEntityIcon(mod.type, 20)}
+                  <span className={styles.linkModuleName}>{mod.label}</span>
                   <span className={styles.linkModuleAction}>
-                    {detectedEntityType?.type === module.type ? 'Suggéré' : 'Lier'}
+                    {detectedEntityType?.type === mod.type ? 'Suggéré' : 'Lier'}
                   </span>
                 </button>
               ))}
@@ -121,13 +121,13 @@ export function LinkModal({
               <h4>Liaisons existantes</h4>
               <div className={styles.linkExistingList}>
                 {existingLinks.map((link) => {
-                  const module = getLinkableModule(link.entityType);
-                  return module ? (
+                  const mod = getLinkableModule(link.entityType);
+                  return mod ? (
                     <div key={link.id} className={styles.linkExistingItem}>
-                      <span style={{ color: module.color }}>{getLinkedEntityIcon(link.entityType, 16)}</span>
-                      <span>{module.label}</span>
+                      <span style={{ color: mod.color }}>{getLinkedEntityIcon(link.entityType, 16)}</span>
+                      <span>{mod.label}</span>
                       <Link
-                        href={`${module.routeBase}/${link.entityId}`}
+                        href={`${mod.routeBase}/${link.entityId}`}
                         className={styles.linkExistingAction}
                       >
                         Voir <ExternalLink size={12} />

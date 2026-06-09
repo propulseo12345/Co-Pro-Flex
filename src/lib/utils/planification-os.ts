@@ -52,7 +52,7 @@ export function calculerDatesInterventions(
   // Prendre la date la plus proche entre dateFin et dateMax
   const limiteDate = dateFin < dateMax ? dateFin : dateMax;
 
-  let currentDate = new Date(dateDebut);
+  const currentDate = new Date(dateDebut);
 
   while (currentDate <= limiteDate) {
     dates.push(currentDate.toISOString().split('T')[0]);
