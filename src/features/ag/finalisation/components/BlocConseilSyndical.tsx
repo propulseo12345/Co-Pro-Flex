@@ -1,61 +1,74 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users } from 'lucide-react';
+import { Crown, Users } from 'lucide-react';
+import { useCopro } from '@/providers/CoproContext';
 import { BlocCard } from './BlocCard';
 import type { PendingAction } from '@/lib/ag/api/finalisation.api';
-import { createClient } from '@/lib/supabase/client';
+import { listCoproprietaires } from '@/lib/owners/api';
 import styles from './BlocConseilSyndical.module.css';
 
+type CSRole = 'president' | 'member';
+
+interface CouncilMember {
+  coproprietaire_id: string;
+  role: CSRole;
+  nom: string;
+}
+
+const ROLE_LABELS: Record<CSRole, string> = {
+  president: 'Président du CS',
+  member: 'Membre du CS',
+};
+
 interface BlocConseilSyndicalProps {
-  agId: string;
   action: PendingAction;
 }
 
-/** Noms des membres élus, lus depuis les résolutions ELECT_COUNCIL approuvées (variable `noms`). */
-async function loadElectedNames(agId: string): Promise<string[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
-  const { data } = await supabase
-    .from('ag_resolutions')
-    .select('variables')
-    .eq('ag_id', agId)
-    .eq('action_type', 'ELECT_COUNCIL')
-    .eq('is_approved', true);
-
-  const names: string[] = [];
-  if (data?.length) {
-    for (const res of data as Array<{ variables: Record<string, string> | null }>) {
-      const nom = res.variables?.noms;
-      if (nom && nom.trim()) names.push(nom.trim());
-    }
-  }
-  return names;
-}
-
 /** Revue lecture seule du conseil syndical élu (renouvelé à l'étape PV). */
-export function BlocConseilSyndical({ agId, action }: BlocConseilSyndicalProps) {
-  const [names, setNames] = useState<string[]>([]);
+export function BlocConseilSyndical({ action }: BlocConseilSyndicalProps) {
+  const { currentCoproId } = useCopro();
+  const [members, setMembers] = useState<CouncilMember[]>([]);
 
-  // Chargement indépendant du statut (l'élection est déjà activée à l'étape PV).
+  // Source canonique : variables.council_members de la résolution (id + rôle réels),
+  // noms résolus depuis l'annuaire des copropriétaires. Indépendant du statut.
   useEffect(() => {
+    const raw = (action.resolution?.variables as unknown as {
+      council_members?: Array<{ coproprietaire_id: string; role: CSRole }>;
+    } | null)?.council_members;
+
+    if (!raw?.length || !currentCoproId) {
+      setMembers([]);
+      return;
+    }
+
     let cancelled = false;
-    loadElectedNames(agId).then(n => { if (!cancelled) setNames(n); });
+    listCoproprietaires(currentCoproId, { type: 'COPROPRIETAIRE' }).then(({ data }) => {
+      if (cancelled) return;
+      const nameById = new Map((data || []).map(c => [c.id, c.display_name || '']));
+      setMembers(
+        raw.map(m => ({
+          coproprietaire_id: m.coproprietaire_id,
+          role: m.role,
+          nom: nameById.get(m.coproprietaire_id) || 'Copropriétaire',
+        }))
+      );
+    });
     return () => { cancelled = true; };
-  }, [agId]);
+  }, [action.resolution, currentCoproId]);
 
   return (
     <BlocCard title="Conseil syndical" actionType={action.action_type} status={action.status}>
       {action.resolution?.title && (
         <p className={styles.resolutionTitle}>Résolution : {action.resolution.title}</p>
       )}
-      {names.length > 0 ? (
+      {members.length > 0 ? (
         <div className={styles.activatedList}>
-          {names.map((nom, i) => (
-            <div key={i} className={styles.activatedItem}>
-              <Users size={14} />
-              <span>{nom}</span>
-              <span className={styles.roleBadge}>Membre du CS</span>
+          {members.map(m => (
+            <div key={m.coproprietaire_id} className={styles.activatedItem}>
+              {m.role === 'president' ? <Crown size={14} /> : <Users size={14} />}
+              <span>{m.nom}</span>
+              <span className={styles.roleBadge}>{ROLE_LABELS[m.role]}</span>
             </div>
           ))}
         </div>
