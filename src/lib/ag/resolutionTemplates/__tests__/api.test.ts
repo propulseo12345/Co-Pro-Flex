@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockFrom = vi.fn();
-vi.mock('@/lib/supabase/client', () => ({
-  createClient: () => ({ from: mockFrom }),
+vi.mock('@/lib/ag/api/utils', () => ({
+  createUntypedClient: () => ({ from: mockFrom }),
 }));
 
 import { updateTemplate, deleteTemplate } from '@/lib/ag/resolutionTemplates/api';
