@@ -143,13 +143,20 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
                 return;
             }
 
-            // Close the AG
-            const { error: closeError } = await supabase
-                .from('ag_meetings')
-                .update({ status: 'closed', session_ended_at: new Date().toISOString() })
-                .eq('id', agId);
+            // Close the AG via RPC canonique close_ag (fige les votes + statut closed).
+            // close_ag derive copro_id et applique la garde gestionnaire en interne.
+            const { data: closeResult, error: closeError } = await (supabase.rpc as CallableFunction)(
+                'close_ag', { p_ag_id: agId, p_closing_notes: null }
+            );
 
             if (closeError) throw closeError;
+
+            const closeData = closeResult as Record<string, unknown> | null;
+            if (closeData && closeData.success === false) {
+                setError((closeData.message as string) || 'Erreur lors de la cloture');
+                setIsClosing(false);
+                return;
+            }
 
             onClose();
         } catch (err) {

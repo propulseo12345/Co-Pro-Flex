@@ -149,16 +149,17 @@ export async function startAg(input: StartAgInput): Promise<{ success: boolean; 
 }
 
 /**
- * Terminer une AG session → pv_generated (génère pending_actions)
+ * Terminer une AG (lever la séance) → statut 'closed'.
+ * Canonique : prepare_ag_decisions (matérialise les décisions votées) PUIS close_ag (fige + clôt).
  */
 export async function finishAgSession(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
 
-  const { data, error } = await supabase.rpc('finish_ag_session', { p_ag_id: agId });
+  const { error: prepError } = await supabase.rpc('prepare_ag_decisions', { p_ag_id: agId });
+  if (prepError) return { success: false, error: prepError.message };
 
-  if (error) {
-    return { success: false, error: error.message };
-  }
+  const { data, error } = await supabase.rpc('close_ag', { p_ag_id: agId, p_closing_notes: null });
+  if (error) return { success: false, error: error.message };
 
   const result = data as { success: boolean; error?: string };
   return result;
