@@ -3,8 +3,6 @@
 import { useState, useMemo } from 'react';
 import { Search, X, Star, Tag, ChevronDown, ChevronUp } from 'lucide-react';
 import {
-    RESOLUTIONS_BANK,
-    getCategories,
     MAJORITES,
     type ResolutionTemplate,
     type TypeAG,
@@ -13,6 +11,7 @@ import {
     getResolutionsByCategorieForAGType,
     searchResolutions
 } from '@/lib/constants/resolutions';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 import styles from './BibliothequeResolutions.module.css';
 
 interface BibliothequeResolutionsProps {
@@ -32,6 +31,7 @@ export function BibliothequeResolutions({
     resolutionsDejaAjoutees = [],
     existingTitles = []
 }: BibliothequeResolutionsProps) {
+    const { templates } = useResolutionTemplates();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [showObligatoiresOnly, setShowObligatoiresOnly] = useState(false);
@@ -39,25 +39,25 @@ export function BibliothequeResolutions({
 
     // Résolutions filtrées par type d'AG
     const resolutionsForAGType = useMemo(() => {
-        return getResolutionsForAGType(typeAG);
-    }, [typeAG]);
+        return getResolutionsForAGType(templates, typeAG);
+    }, [templates, typeAG]);
 
     // Résolutions obligatoires pour ce type d'AG
     const resolutionsObligatoires = useMemo(() => {
-        return getResolutionsObligatoires(typeAG);
-    }, [typeAG]);
+        return getResolutionsObligatoires(templates, typeAG);
+    }, [templates, typeAG]);
 
     // Résolutions par catégorie pour ce type d'AG
     const resolutionsByCategorie = useMemo(() => {
-        return getResolutionsByCategorieForAGType(typeAG);
-    }, [typeAG]);
+        return getResolutionsByCategorieForAGType(templates, typeAG);
+    }, [templates, typeAG]);
 
     // Résolutions filtrées (recherche + catégorie + obligatoires)
     const filteredResolutions = useMemo(() => {
         let results: ResolutionTemplate[];
 
         if (searchQuery.trim()) {
-            results = searchResolutions(searchQuery, typeAG);
+            results = searchResolutions(templates, searchQuery, typeAG);
         } else if (showObligatoiresOnly) {
             results = resolutionsObligatoires;
         } else if (selectedCategory !== 'all') {
@@ -67,7 +67,7 @@ export function BibliothequeResolutions({
         }
 
         return results;
-    }, [searchQuery, selectedCategory, showObligatoiresOnly, typeAG, resolutionsForAGType, resolutionsObligatoires, resolutionsByCategorie]);
+    }, [templates, searchQuery, selectedCategory, showObligatoiresOnly, typeAG, resolutionsForAGType, resolutionsObligatoires, resolutionsByCategorie]);
 
     // Catégories disponibles pour ce type d'AG
     const categoriesDisponibles = useMemo(() => {
