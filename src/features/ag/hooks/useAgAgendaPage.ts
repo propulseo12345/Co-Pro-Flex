@@ -17,6 +17,7 @@ import { getResolutionById, getResolutionByTitle, generateEcheancesDates, getRes
 import { extractVariableNames, formatDateFR, formatMontant } from '@/lib/utils/resolution-variables';
 import type { Resolution, ResolutionEditData } from '@/components/features/ag';
 import { useCopro } from '@/providers/CoproContext';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 import {
   useAgDetail,
   useAddResolution,
@@ -76,7 +77,7 @@ function fromDbMajorityType(type: DbMajorityType): MajorityType {
 // DB TO FRONTEND CONVERTERS
 // ============================================================================
 
-function dbToFrontendResolution(dbRes: AgResolutionResult): Resolution {
+function dbToFrontendResolution(templates: ResolutionTemplate[], dbRes: AgResolutionResult): Resolution {
   const variables: Record<string, string> | undefined = dbRes.variables
     ? Object.fromEntries(
         Object.entries(dbRes.variables as Record<string, unknown>).map(([k, v]) => [k, String(v ?? '')])
@@ -84,7 +85,7 @@ function dbToFrontendResolution(dbRes: AgResolutionResult): Resolution {
     : undefined;
 
   // Retrouver le templateId par correspondance de titre
-  const matchedTemplate = getResolutionByTitle(dbRes.title);
+  const matchedTemplate = getResolutionByTitle(templates, dbRes.title);
 
   return {
     id: dbRes.id,
@@ -122,6 +123,13 @@ function meetingToFormData(meeting: AgMeeting) {
 export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const router = useRouter();
   const { currentCoproId, isManager } = useCopro();
+  const { templates } = useResolutionTemplates();
+
+  // Helper lié au snapshot (la banque vit en base, lue via le provider)
+  const getResolutionByIdBound = useCallback(
+    (id: string): ResolutionTemplate | undefined => getResolutionById(templates, id),
+    [templates],
+  );
 
   // -------------------------------------------------------------------------
   // SUPABASE DATA HOOKS (source de vérité unique)
@@ -171,8 +179,8 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   // DERIVED DATA (calculé depuis DB, pas d'état local)
   // -------------------------------------------------------------------------
   const resolutions = useMemo(() => {
-    return dbResolutions.map(dbToFrontendResolution);
-  }, [dbResolutions]);
+    return dbResolutions.map((dbRes) => dbToFrontendResolution(templates, dbRes));
+  }, [dbResolutions, templates]);
 
   // Titres des résolutions existantes (pour éviter les doublons dans la bibliothèque)
   const existingResolutionTitles = useMemo(() => {
@@ -478,7 +486,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
 
     const typeAG: TypeAG = meeting.meeting_type === 'ordinary' ? 'ORDINAIRE' : 'EXTRAORDINAIRE';
 
-    const templatesObligatoires = getResolutionsObligatoires(typeAG);
+    const templatesObligatoires = getResolutionsObligatoires(templates, typeAG);
 
     if (templatesObligatoires.length === 0) {
       const errorMsg = `Aucun template obligatoire trouvé pour le type d'AG "${typeAG}"`;
@@ -561,7 +569,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
       console.error('[handlePrefillObligatoires] Exception:', err);
       setSaveState({ isSaving: false, lastSaved: null, error: `Exception: ${message}` });
     }
-  }, [currentCoproId, isManager, meeting, dbResolutions, agId, addResolutionMutation, refreshResolutions, getGlobalSuggestions, getTemplateSuggestions]);
+  }, [currentCoproId, isManager, meeting, dbResolutions, agId, addResolutionMutation, refreshResolutions, getGlobalSuggestions, getTemplateSuggestions, templates]);
 
   // -------------------------------------------------------------------------
   // MUTATIONS: RÉORDONNER
@@ -859,7 +867,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
     goBack,
 
     // Utilities
-    getResolutionById,
+    getResolutionById: getResolutionByIdBound,
     isManager,
 
     // Refresh from DB
