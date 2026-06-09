@@ -30,6 +30,7 @@ const GATES = [
   'supabase/tests/20260603100000_positive_proof_test.sql',
   'supabase/tests/20260603104000_moteur_acceptance_test.sql',
   'supabase/tests/20260603103000_period_from_exercice_debut_test.sql',
+  'supabase/tests/gate_0042_resolution_templates.sql',
 ];
 
 function runGate(relPath) {
