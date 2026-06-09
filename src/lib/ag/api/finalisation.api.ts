@@ -9,12 +9,6 @@ export interface BlocPoste {
   repartition_key_id?: string;
 }
 
-export interface MembreConseil {
-  copro_id: string;
-  nom: string;
-  role: string;
-}
-
 export interface PendingAction {
   id: string;
   action_type: string;

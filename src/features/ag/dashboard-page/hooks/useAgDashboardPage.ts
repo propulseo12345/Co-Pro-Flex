@@ -37,6 +37,7 @@ export function getStatusBadge(status: AgStatus): { label: string; className: st
     case 'pv_signed': return { label: 'PV signé', className: 'pvSigned' };
     case 'pv_sent': return { label: 'PV diffusé', className: 'pvSent' };
     case 'finalized': return { label: 'Finalisée', className: 'finalized' };
+    case 'archived': return { label: 'Archivée', className: 'finalized' };
     default: return { label: status, className: '' };
   }
 }

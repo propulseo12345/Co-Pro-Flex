@@ -98,7 +98,6 @@ export default function FinalisationPage() {
 
         {alurAction && (
           <BlocALUR
-            agId={agId}
             action={alurAction}
             scheduleAction={scheduleAlurAction}
           />
@@ -108,13 +107,11 @@ export default function FinalisationPage() {
           <BlocAppelsFonds
             agId={agId}
             action={appelsAction}
-            alurAction={alurAction}
           />
         )}
 
         {councilAction && (
           <BlocConseilSyndical
-            agId={agId}
             action={councilAction}
           />
         )}
@@ -122,7 +119,6 @@ export default function FinalisationPage() {
         {simpleActions.map(action => (
           <BlocSimple
             key={action.id}
-            agId={agId}
             action={action}
           />
         ))}

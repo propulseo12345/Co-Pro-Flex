@@ -26,7 +26,6 @@ function mapModalites(val: string | undefined): string {
 }
 
 interface BlocALURProps {
-  agId: string;
   action: PendingAction;
   scheduleAction?: PendingAction;
 }

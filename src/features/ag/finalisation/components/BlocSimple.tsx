@@ -18,7 +18,6 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 interface BlocSimpleProps {
-  agId: string;
   action: PendingAction;
 }
 

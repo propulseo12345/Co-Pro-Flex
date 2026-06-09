@@ -28,7 +28,6 @@ function fmt(n: number): string {
 interface BlocAppelsFondsProps {
   agId: string;
   action: PendingAction;
-  alurAction?: PendingAction;
 }
 
 /** Revue lecture seule des appels de fonds générés à l'étape PV (aperçu de la répartition). */
@@ -101,7 +100,7 @@ export function BlocAppelsFonds({ agId, action }: BlocAppelsFondsProps) {
           </div>
 
           <div className={styles.preview}>
-            <p className={styles.previewTitle}>Aperçu des appels</p>
+            <p className={styles.previewTitle}>Aperçu indicatif des appels (découpage estimatif)</p>
             <table className={styles.previewTable}>
               <thead>
                 <tr>

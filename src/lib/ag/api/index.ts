@@ -62,4 +62,4 @@ export {
   loadPendingActions,
   markAgFinalized,
 } from './finalisation.api';
-export type { BlocPoste, MembreConseil, PendingAction } from './finalisation.api';
+export type { BlocPoste, PendingAction } from './finalisation.api';
