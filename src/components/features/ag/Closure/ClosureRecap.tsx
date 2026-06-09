@@ -129,22 +129,8 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
     const handleClose = useCallback(async () => {
         setIsClosing(true);
         try {
-            // Prepare decisions (RPC added by migration, not yet in generated types)
-            const { data: prepResult, error: prepError } = await (supabase.rpc as CallableFunction)(
-                'prepare_ag_decisions', { p_ag_id: agId }
-            );
-
-            if (prepError) throw prepError;
-
-            const prepData = prepResult as Record<string, unknown> | null;
-            if (prepData && !prepData.success) {
-                setError((prepData.error as string) || 'Erreur lors de la preparation des decisions');
-                setIsClosing(false);
-                return;
-            }
-
-            // Close the AG via RPC canonique close_ag (fige les votes + statut closed).
-            // close_ag derive copro_id et applique la garde gestionnaire en interne.
+            // 1) close_ag : fige + APPROUVE les votes (calculate_resolution_result) et passe l'AG en 'closed'.
+            //    close_ag derive copro_id et applique la garde gestionnaire en interne.
             const { data: closeResult, error: closeError } = await (supabase.rpc as CallableFunction)(
                 'close_ag', { p_ag_id: agId, p_closing_notes: null }
             );
@@ -154,6 +140,21 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
             const closeData = closeResult as Record<string, unknown> | null;
             if (closeData && closeData.success === false) {
                 setError((closeData.message as string) || 'Erreur lors de la cloture');
+                setIsClosing(false);
+                return;
+            }
+
+            // 2) prepare_ag_decisions APRES close_ag : ne materialise que les resolutions desormais 'approved'.
+            //    Ordre imperatif (inverser => 0 decision materialisee, echec silencieux).
+            const { data: prepResult, error: prepError } = await (supabase.rpc as CallableFunction)(
+                'prepare_ag_decisions', { p_ag_id: agId }
+            );
+
+            if (prepError) throw prepError;
+
+            const prepData = prepResult as Record<string, unknown> | null;
+            if (prepData && prepData.success === false) {
+                setError((prepData.error as string) || 'Erreur lors de la preparation des decisions');
                 setIsClosing(false);
                 return;
             }

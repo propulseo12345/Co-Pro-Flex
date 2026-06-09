@@ -150,16 +150,19 @@ export async function startAg(input: StartAgInput): Promise<{ success: boolean; 
 
 /**
  * Terminer une AG (lever la séance) → statut 'closed'.
- * Canonique : prepare_ag_decisions (matérialise les décisions votées) PUIS close_ag (fige + clôt).
+ * Canonique : close_ag (fige + APPROUVE les votes via calculate_resolution_result) PUIS
+ * prepare_ag_decisions (matérialise dans ag_pending_actions les résolutions désormais 'approved').
+ * L'ordre est impératif : prepare ne matérialise QUE les résolutions 'approved', et c'est close_ag
+ * qui les passe en 'approved'. Inverser l'ordre matérialise 0 décision (échec silencieux).
  */
 export async function finishAgSession(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
 
-  const { error: prepError } = await supabase.rpc('prepare_ag_decisions', { p_ag_id: agId });
-  if (prepError) return { success: false, error: prepError.message };
-
   const { data, error } = await supabase.rpc('close_ag', { p_ag_id: agId, p_closing_notes: null });
   if (error) return { success: false, error: error.message };
+
+  const { error: prepError } = await supabase.rpc('prepare_ag_decisions', { p_ag_id: agId });
+  if (prepError) return { success: false, error: prepError.message };
 
   const result = data as { success: boolean; error?: string };
   return result;
