@@ -47,18 +47,21 @@ BROUILLON → ENVOYE → EN_ATTENTE_PRESTATAIRE → INTERVENTION_PROGRAMMEE → 
 Chaîne canonique de statuts (`ag_status`) et fonctions SQL qui les pilotent :
 
 ```
-draft → convoked → session_active → closed → pv_generated → pv_signed → finalized → archived
-        (start_ag)  (close_ag)                                (finalize_ag)  (archive_ag)
+draft → convoked → session_active → closed → pv_generated → pv_signed → pv_sent → finalized → archived
+        (start_ag)  (close_ag)                                                    (finalize_ag) (archive_ag)
 ```
 
 | Transition | Fonction SQL | Rôle |
 |------------|-------------|------|
 | → session_active | `start_ag` | Ouvre la séance |
-| → closed | `close_ag` | Fige les votes + clôt la séance (appelée après `prepare_ag_decisions`) |
-| activation des décisions | `activate_ag_decisions` | **À l'étape PV** : crée budget/ALUR/appels/conseil… dans `ag_pending_actions` |
+| → closed | `close_ag` | Fige les votes + les **APPROUVE** (`calculate_resolution_result`), passe en `closed` |
+| (post-close) | `prepare_ag_decisions` | Appelée **APRÈS** `close_ag` : matérialise les résolutions désormais `approved` dans `ag_pending_actions` |
+| activation des décisions | `activate_ag_decisions` | **À l'étape PV** : exécute les `ag_pending_actions` (crée budget/ALUR/appels/conseil…) |
 | → finalized | `finalize_ag` | Classe l'AG (préconditions : `pv_signed`/`pv_sent` + toutes décisions `activated`) |
-| → archived | `archive_ag` | Archive une AG close/finalisée (garde gestionnaire) |
+| → archived | `archive_ag` | Archive une AG dès `closed` (statuts acceptés : `closed`, `pv_generated`, `pv_signed`, `pv_sent`, `finalized` ; garde gestionnaire) |
 
+- **Ordre impératif à la clôture : `close_ag` PUIS `prepare_ag_decisions`.** `close_ag` est ce qui passe les résolutions en `approved` ; `prepare_ag_decisions` ne matérialise QUE les `approved`. Inverser l'ordre matérialise 0 décision (échec silencieux).
 - **L'activation se fait une seule fois, à l'étape PV** (`activate_ag_decisions`). La page « Finalisation » est une **revue lecture seule** des décisions déjà activées (pas d'activation manuelle par bloc).
+- `finalize_ag` est ouvert dès `pv_signed` (la signature du PV est le fait juridique déterminant ; `pv_sent` = diffusion administrative).
 - `in_progress` = repli en cas d'annulation de séance. `pv_*` sont posés par UPDATE front (transitions de gestion). Aucune valeur d'enum n'est retirée (retrait jugé risqué/inutile).
 - `finalize_ag` ne relance **jamais** `activate_ag_decisions` (immuabilité du grand livre).

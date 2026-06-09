@@ -45,4 +45,5 @@ begin
 end;
 $$;
 
+revoke execute on function public.get_ag_pending_actions(uuid) from public, anon;
 grant execute on function public.get_ag_pending_actions(uuid) to authenticated, service_role;

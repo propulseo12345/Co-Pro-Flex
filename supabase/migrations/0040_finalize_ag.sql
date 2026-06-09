@@ -47,4 +47,5 @@ begin
 end;
 $$;
 
+revoke execute on function public.finalize_ag(uuid) from public, anon;
 grant execute on function public.finalize_ag(uuid) to authenticated, service_role;
