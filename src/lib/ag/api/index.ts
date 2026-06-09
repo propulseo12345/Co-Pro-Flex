@@ -11,6 +11,7 @@ export {
   startAg,
   cancelAgSession,
   finishAgSession,
+  archiveAg,
   updateAg,
   updateAgCurrentStep,
 } from './meetings.api';

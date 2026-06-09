@@ -166,6 +166,16 @@ export async function finishAgSession(agId: string): Promise<{ success: boolean;
 }
 
 /**
+ * Archiver une AG finalisée → statut 'archived' (RPC archive_ag, garde gestionnaire).
+ */
+export async function archiveAg(agId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase.rpc('archive_ag', { p_ag_id: agId });
+  if (error) return { success: false, error: error.message };
+  return data as { success: boolean; error?: string };
+}
+
+/**
  * Met à jour le statut d'une AG
  */
 export async function updateAgStatus(agId: string, status: AgStatus): Promise<{ success: boolean; error?: string }> {

@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2, Play, CheckCircle } from 'lucide-react';
+import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2, Play, CheckCircle, Archive } from 'lucide-react';
 import { AGArchivesList, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
 import type { AgListItemAction } from '@/components/features/ag/Dashboard';
+import { archiveAg } from '@/lib/ag/api';
 import archiveStyles from '@/components/features/ag/Dashboard/AGArchivesList.module.css';
 import { AgDocumentQuickActions } from '@/components/features/ag';
 import { AgStatusBadge } from '@/components/features/ag/Dashboard/components/AgStatusBadge';
@@ -61,12 +62,20 @@ export default function AGDashboardPage() {
     { icon: <Trash2 size={16} />, onClick: () => handleDeleteLocalDraft(draft.id), title: 'Supprimer le brouillon', variant: 'danger' as const },
   ];
 
+  const handleArchive = async (agId: string) => {
+    const res = await archiveAg(agId);
+    if (res.success) refresh();
+  };
+
   const buildHistoryActions = (ag: AgOverview): AgListItemAction[] => {
     const hasPV = ['pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'closed'].includes(ag.status);
     return [
       ...(hasPV ? [{ icon: <AgDocumentQuickActions agId={ag.id} agStatus={ag.status} compact />, title: '', href: undefined }] : []),
       { icon: <Eye size={16} />, label: 'PV', href: `/ag/${ag.id}/pv`, title: 'Voir le procès-verbal' },
       { icon: <Copy size={16} />, label: 'Dupliquer', href: `/ag/new?duplicate=${ag.id}`, title: 'Dupliquer pour nouvelle AG' },
+      ...(isManager && ag.status === 'finalized'
+        ? [{ icon: <Archive size={16} />, label: 'Archiver', onClick: () => handleArchive(ag.id), title: 'Archiver cette AG' }]
+        : []),
     ].filter(a => a.title !== '');
   };
 

@@ -89,7 +89,7 @@ export function useAgDashboardPage() {
             ag_pending_actions(status)
           `)
           .eq('copro_id', currentCoproId)
-          .in('status', ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized'])
+          .in('status', ['closed', 'pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'archived'])
           .order('meeting_date', { ascending: false });
 
         if (closedMeetings) {
