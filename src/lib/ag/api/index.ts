@@ -60,10 +60,6 @@ export {
 // Finalisation
 export {
   loadPendingActions,
-  createBudgetFromAg,
-  createAlurFundFromAg,
-  electCouncilFromAg,
-  markActionActivated,
   markAgFinalized,
 } from './finalisation.api';
 export type { BlocPoste, MembreConseil, PendingAction } from './finalisation.api';
