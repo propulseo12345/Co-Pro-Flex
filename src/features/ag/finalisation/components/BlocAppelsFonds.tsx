@@ -37,8 +37,8 @@ export function BlocAppelsFonds({ agId, action }: BlocAppelsFondsProps) {
   const [previewLoading, setPreviewLoading] = useState(true);
 
   useEffect(() => {
+    // previewLoading démarre à true (useState) ; setState uniquement dans le callback async.
     let cancelled = false;
-    setPreviewLoading(true);
     loadCallPreviewData(agId).then(data => {
       if (!cancelled) {
         setPreview(data);

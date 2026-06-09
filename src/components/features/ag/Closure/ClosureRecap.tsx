@@ -83,7 +83,7 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
                 .from('ag_resolutions')
                 .select('id, title, action_type, variables, resolution_number' as '*')
                 .eq('ag_id', agId)
-                .eq('is_approved', true)
+                .eq('status', 'approved')
                 .not('action_type' as 'id', 'is', null)
                 .order('resolution_number');
 

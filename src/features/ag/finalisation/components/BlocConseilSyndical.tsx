@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Crown, Users } from 'lucide-react';
 import { useCopro } from '@/providers/CoproContext';
 import { BlocCard } from './BlocCard';
@@ -9,12 +9,6 @@ import { listCoproprietaires } from '@/lib/owners/api';
 import styles from './BlocConseilSyndical.module.css';
 
 type CSRole = 'president' | 'member';
-
-interface CouncilMember {
-  coproprietaire_id: string;
-  role: CSRole;
-  nom: string;
-}
 
 const ROLE_LABELS: Record<CSRole, string> = {
   president: 'Président du CS',
@@ -28,46 +22,41 @@ interface BlocConseilSyndicalProps {
 /** Revue lecture seule du conseil syndical élu (renouvelé à l'étape PV). */
 export function BlocConseilSyndical({ action }: BlocConseilSyndicalProps) {
   const { currentCoproId } = useCopro();
-  const [members, setMembers] = useState<CouncilMember[]>([]);
 
-  // Source canonique : variables.council_members de la résolution (id + rôle réels),
-  // noms résolus depuis l'annuaire des copropriétaires. Indépendant du statut.
-  useEffect(() => {
+  // Membres élus (id + rôle réels) dérivés de la résolution — valeur calculée, sans état.
+  const elected = useMemo<Array<{ coproprietaire_id: string; role: CSRole }>>(() => {
     const raw = (action.resolution?.variables as unknown as {
       council_members?: Array<{ coproprietaire_id: string; role: CSRole }>;
     } | null)?.council_members;
+    return raw ?? [];
+  }, [action.resolution]);
 
-    if (!raw?.length || !currentCoproId) {
-      setMembers([]);
-      return;
-    }
+  // Noms résolus depuis l'annuaire — setState UNIQUEMENT dans le callback async (jamais synchrone).
+  const [namesById, setNamesById] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (!elected.length || !currentCoproId) return;
     let cancelled = false;
     listCoproprietaires(currentCoproId, { type: 'COPROPRIETAIRE' }).then(({ data }) => {
       if (cancelled) return;
-      const nameById = new Map((data || []).map(c => [c.id, c.display_name || '']));
-      setMembers(
-        raw.map(m => ({
-          coproprietaire_id: m.coproprietaire_id,
-          role: m.role,
-          nom: nameById.get(m.coproprietaire_id) || 'Copropriétaire',
-        }))
-      );
+      const map: Record<string, string> = {};
+      for (const c of data || []) map[c.id] = c.display_name || '';
+      setNamesById(map);
     });
     return () => { cancelled = true; };
-  }, [action.resolution, currentCoproId]);
+  }, [elected, currentCoproId]);
 
   return (
     <BlocCard title="Conseil syndical" actionType={action.action_type} status={action.status}>
       {action.resolution?.title && (
         <p className={styles.resolutionTitle}>Résolution : {action.resolution.title}</p>
       )}
-      {members.length > 0 ? (
+      {elected.length > 0 ? (
         <div className={styles.activatedList}>
-          {members.map(m => (
+          {elected.map(m => (
             <div key={m.coproprietaire_id} className={styles.activatedItem}>
               {m.role === 'president' ? <Crown size={14} /> : <Users size={14} />}
-              <span>{m.nom}</span>
+              <span>{namesById[m.coproprietaire_id] || 'Copropriétaire'}</span>
               <span className={styles.roleBadge}>{ROLE_LABELS[m.role]}</span>
             </div>
           ))}
