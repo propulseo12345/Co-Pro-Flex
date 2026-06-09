@@ -25,11 +25,35 @@ export interface PendingAction {
   resolution: { title: string; variables: Record<string, string> | null } | null;
 }
 
+/** Forme plate renvoyée par la RPC get_ag_pending_actions (colonnes resolution_*). */
+interface RawPendingAction {
+  id: string;
+  action_type: string;
+  status: 'pending' | 'activated' | 'failed';
+  error_message: string | null;
+  result_data: Record<string, unknown> | null;
+  resolution_id: string | null;
+  resolution_title: string | null;
+  resolution_variables: Record<string, string> | null;
+}
+
 export async function loadPendingActions(agId: string): Promise<PendingAction[]> {
   const supabase = createUntypedClient();
   const { data, error } = await supabase.rpc('get_ag_pending_actions', { p_ag_id: agId });
   if (error) throw error;
-  return (data as unknown as PendingAction[]) || [];
+  const rows = (data as unknown as RawPendingAction[]) || [];
+  // La RPC renvoie des colonnes plates ; l'UI consomme la forme imbriquee resolution: { title, variables }.
+  return rows.map((r) => ({
+    id: r.id,
+    action_type: r.action_type,
+    status: r.status,
+    error_message: r.error_message,
+    result_data: r.result_data,
+    resolution_id: r.resolution_id,
+    resolution: r.resolution_id
+      ? { title: r.resolution_title ?? '', variables: r.resolution_variables }
+      : null,
+  }));
 }
 
 export async function createBudgetFromAg(
