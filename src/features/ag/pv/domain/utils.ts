@@ -33,8 +33,8 @@ export function getResolutionResult(resolution: Resolution, votes: VoteData[]): 
 
   const total = pour + contre + abstention;
 
-  // Use is_approved from DB when available (set during session),
-  // otherwise calculate from votes
+  // Use resolution.resultat (dérivé du status DB, posé en séance) quand dispo,
+  // sinon calcule depuis les votes
   let adopte: boolean;
   if (resolution.resultat === 'ADOPTEE' || resolution.resultat === 'REJETEE') {
     adopte = resolution.resultat === 'ADOPTEE';

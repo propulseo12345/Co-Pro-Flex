@@ -54,7 +54,6 @@ interface PVBundleResponse {
     majorite: string;
     resolution_number: number;
     status: string;
-    is_approved: boolean | null;
     variables: Record<string, unknown>;
   }>;
   presences: Array<{
@@ -219,7 +218,7 @@ export function usePVPage({ agId }: UsePVPageProps) {
           texte: r.texte || '',
           majorite: r.majorite,
           variables: r.variables as Record<string, string> || {},
-          resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
+          resultat: r.status === 'approved' ? 'ADOPTEE' : r.status === 'rejected' ? 'REJETEE' : undefined,
         })));
       }
 

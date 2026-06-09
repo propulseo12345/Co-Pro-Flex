@@ -76,7 +76,6 @@ async function addResolutionDirect(input: AddResolutionInput): Promise<AddResolu
       voters_for: 0,
       voters_against: 0,
       voters_abstention: 0,
-      is_approved: null,
       is_bridgeable: false,
       vote_details: {},
     };
@@ -122,7 +121,6 @@ export async function updateResolution(
     status?: string;
     variables?: Record<string, unknown>;
     is_customized?: boolean;
-    is_approved?: boolean | null;
   }
 ): Promise<void> {
   const supabase = createUntypedClient();
@@ -136,7 +134,6 @@ export async function updateResolution(
   if (updates.status !== undefined) payload.status = updates.status;
   if (updates.variables !== undefined) payload.variables = updates.variables;
   if (updates.is_customized !== undefined) payload.is_customized = updates.is_customized;
-  if (updates.is_approved !== undefined) payload.is_approved = updates.is_approved;
 
   // Always set updated_at
   payload.updated_at = new Date().toISOString();

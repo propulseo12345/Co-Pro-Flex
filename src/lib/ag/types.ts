@@ -106,7 +106,6 @@ export interface AgResolution {
   voters_abstention: number;
   threshold_tantiemes: number | null;
   threshold_voters: number | null;
-  is_approved: boolean | null;
   is_bridgeable: boolean;
   bridge_vote_id: string | null;
   voted_at: string | null;
@@ -206,7 +205,6 @@ export interface AgResolutionResult {
   voters_abstention: number;
   threshold_tantiemes: number | null;
   threshold_voters: number | null;
-  is_approved: boolean | null;
   is_bridgeable: boolean;
   percent_for: number;
   bridge_vote_id: string | null;
