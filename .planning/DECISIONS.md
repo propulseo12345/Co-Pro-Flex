@@ -2,7 +2,7 @@
 
 > **Pièce maîtresse de l'organisation.** Tout ce qu'on tranche vit ICI (pas dans un chat).
 > L'ouvrier (Claude Code) lit ce fichier AVANT de juger un comportement « bug » vs « volontaire ».
-> Dernière mise à jour : 2026-06-08.
+> Dernière mise à jour : 2026-06-10.
 
 ## Légende des statuts
 - 🟢 **FAIT LOI** — sourcé (Légifrance/décret), **non négociable**.
@@ -92,6 +92,9 @@ Invariants. Toute violation = bug.
   - ⚠️ **AVANT le 1er `db push` cloud + 1er cabinet** : corriger **B1 (RLS démarre OFF en prod : `app.environment` jamais positionné)** + **M2 (assertion REVOKE anon fragile)** — **relèvent de la session Phase 1 sécurité/RLS** (différée). Audit complet + checklist : `.planning/RE-BASELINE_READINESS.md`. Faux positif écarté : 0043 a déjà son `on conflict`.
 - **G3** 🟢 **TRANCHÉ + FAIT (code)** — **Wizard d'appel manuel (`createCall`) MASQUÉ pour la bêta** (appelle `post_call_for_funds`, non livrée). Les appels passent par la validation budget en AG (`post_budget_call_for_funds`). Réactiver quand `post_exceptional_call_for_funds` sera implémentée (cf. F4). *Commit `970c4d3`.*
 - **G4** 🟢 **TRANCHÉ + FAIT (code)** — **Statut facture fournisseur « validée » = `posted`** (pas de statut `'approved'` distinct ; enum `supplier_invoice_status` = `draft/posted/paid/cancelled`). *Commit `7b1db68`.*
+- **G6** 🟢 **TRANCHÉ (2026-06-10)** — **Horizon du plan = FEATURE-COMPLETE.** Le plan maître va jusqu'au feature-complete (rangs 7-8 inclus : mutations/ventes, paiement en ligne, conformité 2026, RGPD), avec deux paliers intermédiaires : **BÊTA pilotes** puis **1ER CLIENT PROD** (F7). Suivi unique : `.planning/PLAN_MAITRE_FIN_PROJET.md`.
+- **G7** 🟢 **TRANCHÉ (2026-06-10)** — **Recâblage hors-finance COMPLET avant bêta.** Les ~80 objets driftés (AG pouvoirs/jalons/envois/brouillons, communication, GED, maintenance, CS, budget front) sont recréés et rebranchés AVANT d'inviter un pilote (pas de masquage « à venir »). Méthode = celle de la finance : vues d'agrégat + rebranchement + gate par module. *Remplace la reco « stratégie 1 » de `AUDIT_DRIFT_HORS_FINANCE_2026-06-10.md`.*
+- **G8** 🟢 **TRANCHÉ (2026-06-10)** — **Arbitrages comptables en session dédiée amont.** Les 7 🔴 + 7 🟡 (+ D2/D3/D5/D6 état daté + 2 arbitrages seed E2E AG) se tranchent en UNE session d'arbitrage au début du plan (Jalon 0.2), sur dossier préparé par Claude (1 page par point : enjeu, options, reco sourcée). Évite le rework sur annexes/clôture/cloisonnement.
 - **G5** 🟢 **TRANCHÉ + FAIT (migration 0044)** — **Avoirs fournisseurs = TYPE DÉDIÉ** : `doc_kind` sur `supplier_invoices`, montant POSITIF, écriture INVERSE **C6xx/D401**, lien `original_invoice_id` nullable, RPC `post_supplier_credit_note` (copie ventilation ou lignes explicites). Q1/Q2/Q3 validés (Lyes). Vue `remaining_to_pay` nette des avoirs ; paiement avoir-aware (un avoir ne se paie pas ; 'paid' = paiement du NET). Prouvé : `gate_avoir_fournisseur_e2e.sql` (9 invariants, db:test 9/9). Spec : `SPEC_AVOIRS_FOURNISSEURS.md`. **Dette notée** : `post_supplier_payment` (0026) renvoie `invoice_status` sur le brut (statut réel correct via trigger) ; relances à filtrer sur doc_kind ; UI « Créer un avoir » à câbler (front).
 
 ---

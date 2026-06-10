@@ -1,5 +1,9 @@
 # PROGRESS — Refonte CoProFlex (tracker maître)
 
+> ⚠️ **SUPERSEDÉ (2026-06-10)** — ce tracker est périmé (dernier état vérifié : 2026-06-03,
+> avant le pivot re-baseline et les migrations 0023→0044). Le suivi de fin de projet vit dans
+> **`PLAN_MAITRE_FIN_PROJET.md`**. Conservé comme référence métier/historique.
+
 > **Document de suivi unique de la refonte.** Point d'entrée des sessions.
 > Dernière mise à jour : **2026-06-03** · Branche `v2` @ `14cb14d` (= `origin/main` = `origin/v2`).
 > État **vérifié dans le code** (pas seulement les docs) le 2026-06-03 via un audit multi-agents.

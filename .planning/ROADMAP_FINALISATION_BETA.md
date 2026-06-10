@@ -1,5 +1,9 @@
 # Roadmap — De l'état actuel à la bêta testable
 
+> ⚠️ **SUPERSEDÉ (2026-06-10 après-midi)** — le suivi vit désormais dans
+> **`PLAN_MAITRE_FIN_PROJET.md`** (périmètre élargi par G6/G7 : recâblage hors-finance
+> complet avant bêta + horizon feature-complete). Ce document reste une référence historique.
+
 > Écrit le 2026-06-10 (session autonome). Objectif : un chemin clair, ordonné par dépendances, de « boucle finance prouvée » jusqu'à « des syndics pilotes utilisent l'outil ». Honnête sur le « prouvé vs déclaré ».
 
 ## Où on en est (vérifié, pas déclaré)
