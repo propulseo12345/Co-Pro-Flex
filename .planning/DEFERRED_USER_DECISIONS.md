@@ -1,5 +1,9 @@
 # Décisions différées — à traiter avec l'utilisateur à la fin des migrations
 
+> ✅ **RÉSOLU le 2026-06-10 (session d'arbitrage J0.2b)** — les points ouverts D3-D6 sont
+> **tranchés** et journalisés dans **`DECISIONS.md` §H** (H1-H4). Ce fichier reste une
+> archive de contexte ; ne plus y ajouter de décisions (tout passe par DECISIONS.md).
+
 > Collectées en mode autonome (lot fonctions 0030→0035). Chaque item = un point qui demande
 > un **vrai retour métier** de l'utilisateur (expert copro), pas un bug technique simple.
 > Les bugs techniques simples sont corrigés au fil de l'eau.

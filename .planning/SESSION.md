@@ -1,23 +1,22 @@
-# Session State — 2026-06-10 soir (plan maître + J0 exécuté)
+# Session State — 2026-06-10 fin de soirée (J0 CLOS À 100 %)
 
 ## Branch / Commit
-`j0-finitions` @ voir `git log` (clean) · PR #3 vers `main` · **PR #2 MERGÉE** (`origin/main` = `d9a6911`, main local synchronisé).
+`j02b-arbitrage` (PR #4 vers `main`, auto-merge sur CI verte) · base `main` @ `b19cf03` (PR #2+#3 mergées).
 
 ## Completed This Session
-- **PLAN_MAITRE_FIN_PROJET.md créé** = suivi unique fin de projet (J0→J9). Cadrage tranché : **G6** feature-complete, **G7** recâblage complet avant bêta, **G8** arbitrages en session dédiée.
-- **J0.1** ✅ : `.gitattributes` (EOL), ~92 commits poussés, CI verte (db:test bloquant), PR #2 mergée, main rebasé propre (commit sauvegarde 3h01 absorbé — déjà dans la branche).
-- **J0.2a** ✅ : `DOSSIER_ARBITRAGE_J0.md` — 20 fiches sourcées (7🔴+7🟡+4 état daté+2 seed), état code vérifié.
-- **J0.3** ✅ : greffe types 0044 (regen complète → J2.9, sinon +430 erreurs modules driftés) · **UI avoir** (fiche : modal total/partiel prorata ; liste : RPC au lieu du montant négatif cassé) · **/finance/factures/new réel** (mono-poste 6xx, post immédiat, fin du setTimeout fantôme) · mapper `doc_kind` (avoirs hors KPIs « à payer »/retards).
-- tsc=0 · vitest 97/97 · eslint 0 erreur sur les fichiers touchés.
+- **PLAN_MAITRE_FIN_PROJET.md** créé = suivi unique J0→J9 (G6 feature-complete · G7 recâblage complet avant bêta · G8 arbitrages).
+- **J0 INTÉGRALEMENT CLOS** : hygiène git + CI bloquante effective · dossier d'arbitrage · finitions finance (types 0044, UI avoirs fiche+liste, /factures/new réel, fournisseur à la volée, kanban avoirs, effets avoirs visibles) · **session d'arbitrage J0.2b : 20/20 tranchés** + 4 durcissements expert → `DECISIONS.md` (B/C/E 🟢 + §H), compteur = 0 en attente.
+- Edge runtime Docker relancé (gotcha mémorisé) · testé runtime par Lyes (factures, avoirs total/partiel).
 
-## Next Task
-- **J0.2b — Session d'arbitrage (LYES)** : trancher les 20 fiches de `DOSSIER_ARBITRAGE_J0.md` (~45-60 min) → je reporte dans DECISIONS.md. Effort : `Max` (dialogue).
-- Puis : merge PR #3 (sur CI verte) → **J1 sécurité/RLS** en session neuve. Effort : `ultracode`.
+## Next Task (SESSION NEUVE)
+- **J1 — Sécurité/RLS** : B1 (RLS démarre OFF en prod, fail-safe à inverser dans 0034/0042) + M2 (assertion anon) → checklist `RE-BASELINE_READINESS.md` ; RLS ON + test d'étanchéité multi-cabinet ; `owner_id` → `auth.uid()` (6 fichiers) ; seed comptes démo.
+- 👉 Effort conseillé : **`ultracode`** (revue adversariale — enjeu fuite de données). Démarrer par `/token-saver start`.
 
 ## Blockers
-- None. (B1 RLS = précisément le sujet de J1.)
+- None.
 
 ## Key Context
-- **Dette notée J2.8** : « valider »/« payer » une facture = bascule de statut SANS écriture GL (vraie validation + pay_supplier_invoice à câbler).
-- **Test runtime Lyes (F10)** : saisir une facture via `/finance/factures/new` (fournisseur+compte 6xx) → fiche → « Créer un avoir » (total puis partiel) → vérifier net à payer et absence de l'avoir dans les retards. Serveur : `npm run dev`.
-- Régénération types : référence fraîche dans `.planning/supabase_types_regenerated.ts` (post-0044).
+- Branche+PR obligatoires (push direct main bloqué) ; planning docs montent avec la branche courante.
+- L'exécution des 20 verdicts d'arbitrage = **J5** (détail par fiche : `DOSSIER_ARBITRAGE_J0.md` ; verdicts : `DECISIONS.md`).
+- Dettes au plan : J2.8 (validation/paiement factures sans GL), J2.9 (regen types, réf `.planning/supabase_types_regenerated.ts`), J2.3 (justificatif facture GED).
+- Si « Edge Function non-2xx » : `docker start supabase_edge_runtime_Co-Pro-Flex` (cf. mémoire local-tooling). App dev = port 3001 (3000 = autre projet).
