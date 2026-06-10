@@ -1,0 +1,85 @@
+# Intégration continue — garde-fou anti-régression sur chaque PR.
+#
+# Conception (volontairement honnête vis-à-vis de l'état réel du repo) :
+#   • Gate BLOQUANT = `tsc --noEmit` (0 erreur aujourd'hui) + `vitest` (97/97).
+#     Ce sont les deux signaux 100 % reproductibles : s'ils cassent, c'est une vraie régression.
+#   • Lint = exécuté mais NON bloquant (continue-on-error) tant que la dette pré-existante
+#     n'est pas résorbée (13 erreurs + ~825 warnings : `any`, console.*, unused). Il reste
+#     visible dans les logs pour suivre la dette, sans rendre la CI rouge à tort.
+#   • db:test = job séparé NON bloquant : il lève une stack Supabase locale et applique
+#     0001→0043. Tant que la base n'est pas re-baselinée (migrations non garanties
+#     reproductibles), on ne veut pas qu'un échec d'infra bloque les PR. À passer en
+#     `required` une fois la re-baseline faite (retirer `continue-on-error`).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Annule les runs obsolètes quand on pousse plusieurs fois sur la même PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Type check · Lint · Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Type check (bloquant)
+        run: npx tsc --noEmit
+
+      - name: Lint (informatif — non bloquant tant que la dette n'est pas résorbée)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Tests unitaires / logique pure (bloquant)
+        run: npm test
+
+  db-tests:
+    name: Gates SQL (db:test) — non bloquant avant re-baseline
+    runs-on: ubuntu-latest
+    needs: quality
+    # Tant que les migrations 0001→0043 ne sont pas garanties reproductibles,
+    # un échec ici ne doit pas bloquer la PR. À retirer après re-baseline.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Installer la CLI Supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Démarrer Supabase (applique migrations + seed)
+        run: supabase start
+
+      - name: Lancer les gates SQL d'intégrité financière
+        env:
+          # Nom du conteneur Postgres créé par `supabase start` (project_id = Co-Pro-Flex).
+          SUPABASE_DB_CONTAINER: supabase_db_Co-Pro-Flex
+        run: npm run db:test
+
+      - name: Arrêter Supabase
+        if: always()
+        run: supabase stop --no-backup
