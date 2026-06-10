@@ -103,7 +103,7 @@ export interface SupplierInvoiceOverview {
   due_date: string | null;
   label: string;
   total_amount: number;
-  status: 'draft' | 'approved' | 'posted' | 'paid' | 'cancelled';
+  status: 'draft' | 'posted' | 'paid' | 'cancelled';
   ledger_tx_id: string | null;
   document_id: string | null;
   created_at: string;
@@ -594,7 +594,7 @@ export interface UpdateSupplierInvoicePayload {
   due_date?: string;
   label?: string;
   total_amount?: number;
-  status?: 'draft' | 'approved' | 'posted' | 'paid' | 'cancelled';
+  status?: 'draft' | 'posted' | 'paid' | 'cancelled';
 }
 
 export async function updateSupplierInvoice(payload: UpdateSupplierInvoicePayload): Promise<ApiResult<{ success: boolean }>> {
