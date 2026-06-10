@@ -34,6 +34,7 @@ const GATES = [
   'supabase/tests/gate_0043_seed_resolution_templates.sql',
   'supabase/tests/gate_finance_loop_e2e.sql',
   'supabase/tests/gate_cloture_affectation_e2e.sql',
+  'supabase/tests/gate_avoir_fournisseur_e2e.sql',
 ];
 
 function runGate(relPath) {

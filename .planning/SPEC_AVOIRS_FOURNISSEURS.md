@@ -20,7 +20,13 @@ de `supplier_invoices`. Forcer un négatif casserait aussi les invariants compta
 **Option B — table séparée `supplier_credit_notes` :** plus « pure » mais duplique lignes/règlement/vues.
 → **Reco : Option A** (discriminant), sauf si tu veux un cycle de vie vraiment distinct.
 
-## Écriture comptable (à CONFIRMER avec toi)
+## ✅ Décisions métier validées (2026-06-10, Lyes expert copro)
+- **Q1** — L'avoir crédite **le(s) même(s) 6xx + la même clé** que la facture d'origine (ventilation copiée). Lien `original_invoice_id` **nullable** : si présent → copie la ventilation ; si absent (ristourne globale) → ventilation saisie à la main.
+- **Q2** — L'avoir **peut dépasser** le solde dû → le **401 passe débiteur** (le fournisseur nous doit, = créance). Défaut = **imputation** sur facture future ; **remboursement** (D512/C401) en option. L'avoir **frappe toujours la période OUVERTE courante** (droits constatés à sa date ; pas de rattachement à un exercice clos en bêta).
+- **Q3** — Avoirs **partiels ET multiples** autorisés (1 facture → N avoirs). **Corollaire :** `remaining_to_pay` doit déduire les avoirs postés (`Σ factures − Σ paiements − Σ avoirs`).
+- **Bonus** — TVA non récupérable → montants **TTC** des deux côtés (cohérent `post_supplier_invoice`).
+
+## Écriture comptable
 Facture normale (rappel) : **D 6xx (charge) / C 401 (dette fournisseur)**.
 Avoir = **inverse**, montant positif :
 
