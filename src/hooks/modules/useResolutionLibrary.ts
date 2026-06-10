@@ -13,6 +13,7 @@ import {
   type TemplateScope,
   type TemplateStatus,
 } from '@/lib/constants/resolutions';
+import type { ResolutionTemplateRow } from '@/lib/ag/resolutionTemplates/types';
 import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 
 // Types pour les filtres
@@ -32,7 +33,7 @@ export type SortOption = 'relevance' | 'popular' | 'recent' | 'alphabetical' | '
 
 // Type pour les résultats avec score de pertinence
 interface ScoredResolution {
-  resolution: ResolutionTemplate;
+  resolution: ResolutionTemplateRow;
   score: number;
 }
 
@@ -45,7 +46,7 @@ export interface UseResolutionLibraryOptions {
 // Retour du hook
 export interface UseResolutionLibraryReturn {
   // Données
-  resolutions: ResolutionTemplate[];
+  resolutions: ResolutionTemplateRow[];
   totalCount: number;
   filteredCount: number;
   categories: string[];
@@ -72,8 +73,8 @@ export interface UseResolutionLibraryReturn {
   prevPage: () => void;
 
   // Actions
-  getResolutionById: (id: string) => ResolutionTemplate | undefined;
-  getResolutionsByCategory: (category: string) => ResolutionTemplate[];
+  getResolutionById: (id: string) => ResolutionTemplateRow | undefined;
+  getResolutionsByCategory: (category: string) => ResolutionTemplateRow[];
 
   // État
   isFiltered: boolean;
@@ -347,7 +348,7 @@ export function useResolutionLibrary(
 
   // Récupérer une résolution par ID
   const getResolutionById = useCallback(
-    (id: string): ResolutionTemplate | undefined => {
+    (id: string): ResolutionTemplateRow | undefined => {
       return templates.find(r => r.id === id);
     },
     [templates]
@@ -355,7 +356,7 @@ export function useResolutionLibrary(
 
   // Récupérer les résolutions par catégorie
   const getResolutionsByCategory = useCallback(
-    (category: string): ResolutionTemplate[] => {
+    (category: string): ResolutionTemplateRow[] => {
       return templates.filter(r => r.categorie === category);
     },
     [templates]
