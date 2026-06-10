@@ -84,5 +84,14 @@ Invariants. Toute violation = bug.
 
 ---
 
+## G — Cadrage bêta (🟢 TRANCHÉ 2026-06-10)
+- **G1** 🟢 **TRANCHÉ** — **Périmètre bêta = AVEC portail copropriétaire** (pas « gestionnaire-only »). Conséquence : le **portail copro** (UI + RLS + `coproprietaires.user_id` + invitations, plan `PLAN_MAITRE_VUE_COPROPRIETAIRE.md`) **remonte sur le chemin critique bêta** — il n'est plus « bêta 2 ». ⚠️ Nuance vs **F6** (qui le différait *hors palier 1 finance*) : il reste hors du palier finance, mais devient **requis avant la bêta**.
+- **G2** 🟢 **TRANCHÉ** — **Cible cloud bêta = projet Supabase NEUF** dédié, schéma propre `0001→0043` redéployé. **Prérequis : re-baseline reproductible** (débloque aussi le job CI `db:test`). Cloud actuel laissé **intact**. **Toute migration cloud = sur GO explicite.**
+- **G3** 🟢 **TRANCHÉ + FAIT (code)** — **Wizard d'appel manuel (`createCall`) MASQUÉ pour la bêta** (appelle `post_call_for_funds`, non livrée). Les appels passent par la validation budget en AG (`post_budget_call_for_funds`). Réactiver quand `post_exceptional_call_for_funds` sera implémentée (cf. F4). *Commit `970c4d3`.*
+- **G4** 🟢 **TRANCHÉ + FAIT (code)** — **Statut facture fournisseur « validée » = `posted`** (pas de statut `'approved'` distinct ; enum `supplier_invoice_status` = `draft/posted/paid/cancelled`). *Commit `7b1db68`.*
+- **G5** 🟢 **TRANCHÉ (à implémenter)** — **Avoirs fournisseurs (notes de crédit) = TYPE DÉDIÉ** : entité distincte, **montant positif + sens inverse** au grand livre (jamais de `total_amount` négatif, le `CHECK > 0` reste). Design + migration à faire (spec : `SPEC_AVOIRS_FOURNISSEURS.md`). Cible = nouvelle base (G2).
+
+---
+
 ### Sources (pour les 🟢 FAIT LOI)
 Décret n°2005-240 du 14 mars 2005 (art. 8) · Arrêté du 14 mars 2005 (art. 7-11, nomenclature + 5 annexes) · Loi n°65-557 du 10 juillet 1965 (art. 14-2 / 14-2-1) · Code civil art. 1342-10 / 1343-1. Détail de la recherche : conversation du 2026-06-08 (5 sous-agents, sources Légifrance).

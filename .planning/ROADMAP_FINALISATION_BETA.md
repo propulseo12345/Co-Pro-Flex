@@ -8,14 +8,15 @@
 - **Produit : ~60 % en démo gestionnaire mono-utilisateur ; ~35 % en SaaS multi-clients prod.** L'écart = sécurité/isolation, pas fonctionnel.
 - **3 blocages structurels connus pour la prod** : RLS désactivée (~71 tables), `owner_id` codé en dur (isolation users absente), pas de seed de comptes démo après reset.
 
-## La décision qui cadre tout : quel périmètre de bêta ?
+## ✅ Décisions actées (2026-06-10, cf. DECISIONS.md §G)
 
-👉 **Recommandation : viser d'abord une « bêta gestionnaire-only »** — un syndic gère ses copros dans l'outil, sans portail copropriétaire ni paiement en ligne. C'est atteignable bien plus vite et ça valide le cœur métier auprès de vrais utilisateurs. Le portail copropriétaire et le paiement en ligne deviennent une **bêta 2**.
+- **G1 — Bêta AVEC portail copropriétaire** (pas gestionnaire-only). → le **portail copro** (UI + RLS + `coproprietaires.user_id` + invitations) **entre dans le périmètre bêta** (n'est plus « bêta 2 »). Allonge le chemin mais c'est le choix produit.
+- **G2 — Cible cloud = projet Supabase NEUF** + **re-baseline reproductible** (débloque aussi le job CI `db:test`). Cloud actuel intact ; migration sur GO.
+- **G3 — Wizard d'appel manuel masqué** (FAIT). Appels via AG. Appel exceptionnel = plus tard (F4).
+- **G4 — Statut facture « validée » = `posted`** (FAIT).
+- **G5 — Avoirs = type dédié** (spec `SPEC_AVOIRS_FOURNISSEURS.md`, à coder sur la nouvelle base).
 
-Trois décisions à acter (au réveil) :
-1. **Bêta gestionnaire-only d'abord ?** (reco : oui) ou attendre le portail copropriétaire ?
-2. **Appel exceptionnel** (`createCall`) : on l'implémente maintenant (avec toi pour les écritures) ou on **masque le wizard** tant que c'est différé (F4) ?
-3. **Cible cloud de la bêta** : on redéploie le schéma propre (0001→0043) sur un **projet Supabase neuf** pour la bêta ? (l'actuel cloud est l'ancien schéma ; toute migration cloud attend ton GO.)
+> Impact roadmap : le **portail copropriétaire monte dans le chemin critique** (entre Phase 1 sécurité/RLS et la bêta), au lieu d'être renvoyé en « bêta 2 » plus bas.
 
 ---
 
