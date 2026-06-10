@@ -1,0 +1,3156 @@
+Savoir lire et exploiter les documents comptables de sa copropriété
+
+Les syndics : un double jeu
+
+Syndic mandataire
+
+Syndic prestataire
+
+LES DIFFÉRENTS INTERVENANTS EN COPROPRIÉTÉ
+
+ASSURANCE
+CONTRATS D’ENTRETIEN
+
+LE SYNDICAT DE COPROPRIÉTAIRES LES COPROPRIÉTAIRES
+LE SYNDIC
+GARDIEN
+
+EAU ÉLECTRICITÉ CHAUFFAGE
+
+LES DIFFÉRENTES COMPTABILITÉS DES INTERVENANTS
+
+LE SYNDIC
+
+LES COPROPRIETAIRES
+
+LA COPROPRIETE
+
+NE PAS CONFONDRE !
+
+Charges et dépenses
+ Les charges sont les factures enregistrées dans la comptabilité, indépendamment de leur paiement
+
+Produits et recettes
+ Les produits sont des ressources financières définitivement acquises à la copropriété indépendamment du versement de la somme
+
+• Les dépenses sont les règlements débités  Les recettes sont les sommes encaissées
+
+sur le compte bancaire de la copropriété
+
+dans le compte bancaire de la copropriété
+
+Le relevé des dépenses présenté par le syndic est donc un « abus de langage » puisqu’il s’agit en réalité du relevé des charges présentant les factures, indépendamment du fait qu’elles soient payées ou non
+
+QU’EST-CE QUE LA COMPTABILITÉ ?
+
+ LA COMPTABILITÉ PERMET D’ENREGISTRER LES OPÉRATIONS COMPTABLES ET FINANCIÈRES DE LA COPROPRIÉTÉ
+
+ L’ENSEMBLE DE CES OPÉRATIONS SONT INSCRITES DANS DES DOCUMENTS COMPTABLES DÉFINIS PAR L’ARTICLE 2 DE L’ARRÊTÉ DU 14 MARS 2005
+
+ON RETROUVE : - le grand livre des comptes ; - le livre journal ; - la balance ; - les cinq annexes comptables.
+
+Chaque document a son utilité !
+
+LES POUVOIRS DU CONSEIL SYNDICAL EN MATIERE DE CONSULTATION DES PIECES
+L’ENSEMBLE DES DOCUMENTS DE LA COPROPRIÉTÉ SONT À LA DISPOSITION DU CONSEIL SYNDICAL QUI A UNE MISSION DE CONTRÔLE ET D’ASSISTANCE (article 21 de la loi du 10 juillet 1965)
+Il peut prendre connaissance et copie, à sa demande, et après en avoir donné avis au syndic, de toutes pièces ou documents, correspondances ou registres se rapportant à la gestion du syndic et, d'une manière générale, à l'administration de la copropriété. » (article 21 de la loi du 10 juillet 1965)
+
+LES POUVOIRS DU CONSEIL SYNDICAL POUR FAIRE RESPECTER SES DROITS
+En cas d'absence de transmission de ces pièces, au-delà d'un délai d'un mois à compter de la demande du conseil syndical, des pénalités par jour de retard, dont le montant est fixé par décret, sont imputées sur la rémunération forfaitaire annuelle du syndic. Ces pénalités sont déduites de la rémunération du syndic lors de l'établissement des comptes définitifs à clôturer et à soumettre à l'assemblée générale pour approbation. (article 21 de la loi du 10 juillet 1965)
+A défaut, le président du conseil syndical peut demander au président du tribunal judiciaire, statuant selon la procédure accélérée au fond, la condamnation du syndic au paiement de ces pénalités au profit du syndicat des copropriétaires. (article 21 de la loi du 10 juillet 1965)
+
+LES FONDAMENTAUX DE LA COMPTABILITE
+1) Le respect d’une nomenclature comptable 2) La tenue d’une comptabilité en partie double 3) La tenue d’une comptabilité d’engagement 4) Des procédures de clôture d’exercice 5) L’édition de documents comptables imposés :
+Le grand livre La balance des comptes Les journaux des écritures Les 5 annexes
+
+LA NOMENCLATURE COMPTABLE
+• La nomenclature comptable s’énumère dans un plan comptable constitué d’une liste de comptes classés, numérotés et définis par une terminologie et des règles de fonctionnement rationnelles.
+
+LA PRESENTATION SOMMAIRE DE LA NOMENCLATURE COMPTABLE • Classe 1 = Capitaux • Classe 4 = Tiers • Classe 5 = Trésorerie • Classe 6 = Charges • Classe 7 = Produits
+
+COMMENT CHERCHER UN COMPTE COMPTABLE ?
+Regardons comment se lit ce compte
+4 50 01
+
+LA CLASSE DE TIERS
+
+LE DÉTAIL DANS LA CLASSE COMPTABLE
+
+LE SOUS – COMPTE DU DÉTAIL DANS LA
+CLASSE COMPTABLE
+
+Possibilité de création des sous-comptes comptables
+L’article 8 de l’arrêté du 14 mars 2005 donne une possibilité de créer des sous-comptes « Lorsque les comptes prévus par la présente nomenclature ne
+suffisent pas au syndicat pour enregistrer distinctement toutes ses opérations, il peut ouvrir toute subdivision nécessaire. » Cela peut être nécessaire pour :
+- le fonds travaux ; - le suivi de plusieurs campagnes travaux ; - la distinction de comptes d’attentes ; - ...
+
+CLASSE 1 : Capitaux
+
+• 102 Provisions pour travaux décidés
+
+• 1031 Avances de trésorerie
+
+• 1032 Avances travaux au titre de l'article 18
+
+• 105 Fonds de travaux
+
+• 106 Provisions pour travaux au titre de la délégation de pouvoirs accordée au conseil syndical en application de l’article 21-1 de loi du 10 juillet 1965
+
+• 12 Solde en attente sur travaux ou opérations exc.
+
+• 131
+
+Subventions accordées en instance de versement
+A partir du moment où les sommes sont exigibles, elles sont enregistrées indépendamment du règlement effectif
+
+102 : Provisions pour travaux décidés
+
+A- Appel de fonds auprès des copropriétaires
+
+102 Libellé
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+Appel de fonds
+
+150 000 €
+
+102 : Provisions pour travaux décidés
+
+B- Affectation travaux
+
+102 Libellé Appel de fonds Affectation travaux
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+150 000 €
+
+130 000 €
+
+Solde
+
+20 000 €
+
+Au fur et à mesure de la réception des factures concernant les travaux, ce compte est débité de leur montant
+
+102 : la situation des provisions travaux terminés en fin d’année
+
+Lorsque les travaux sont terminés et qu’ils présentent un solde débiteur ou créditeur, ce dernier est réparti auprès des copropriétaires dans le cadre de la régularisation des charges
+
+102 Libellé Appel de fonds Affectation travaux Solde
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+150 000 €
+
+130 000 €
+
+20 000 €
+
+4501 Libellé Régularisation
+
+Copropriétaire A
+
+Débit
+
+Crédit
+
+5000 €
+
+4502 Libellé Régularisation
+
+Copropriétaire B
+
+Débit
+
+Crédit
+
+12 000€
+
+4503 Libellé Régularisation
+
+Copropriétaire C
+
+Débit
+
+Crédit 3 000 €
+
+102 : la situation des travaux non terminés en fin d’exercice
+
+L’ensemble des sommes indiquées au débit et au crédit du compte « 102 » basculent dans le compte « 120 - solde en attente » travaux non terminés
+
+102
+Libellé Appel de fonds Affectation travaux
+Solde
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+150 000 €
+
+150 000 €
+
+130 000 €
+
+130 000 €
+
+0€
+
+120
+
+Solde en attente sur travaux
+
+Libellé Appel de fonds Affectation travaux
+
+Débit 130 000 €
+
+Crédit 150 000 €
+
+Solde
+
+20 000 €
+
+La stratégie des syndics en matière de gestion des travaux
+
+102 Libellé Appel de fonds Affectation travaux Solde
+
+A- AVEC REPARTITION
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+150 000 €
+
+130 000 €
+
+20 000 €
+
+4501 Libellé Situation Régularisation
+Solde
+
+Copropriétaire A Débit Crédit 500 €
+5000 €
+4500 €
+
+4502 Libellé Situation Régularisation Solde
+
+Copropriétaire B
+
+Débit
+
+Crédit
+
+1000 €
+
+12 000 €
+
+11000 €
+
+4503 Libellé Situation Régularisation Solde
+
+Copropriétaire C
+
+Débit
+
+Crédit
+
+1000 €
+
+3000 €
+
+4000 €
+
+La stratégie des syndics en matière de gestion des travaux
+
+B- SANS REPARTITION
+
+102 Libellé Appel de fonds Affectation travaux Solde
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+150 000 €
+
+130 000 €
+
+20 000 €
+
+Compte d’attente
+
+4501 Libellé Situation Régularisation
+Solde
+
+Copropriétaire A
+
+Débit 500 €
+
+Crédit 5000 €
+
+500 €
+
+4502 Libellé Situation Régularisation
+Solde
+
+Copropriétaire B
+
+Débit 1000 €
+1000 €
+
+Crédit
+1200 0€
+
+4503 Libellé Situation Régularisation Solde
+
+Copropriétaire C
+
+Débit
+
+Crédit 1000 €
+
+3O00€
+
+1000€
+
+L’intérêt de ce type de procédé pour le syndic en matière financière
+
+A- Avec répartition
+
+4501 Libellé Situation Régularisation
+Solde
+
+Copropriétaire A Débit Crédit 500 €
+5000 €
+4500€
+
+4502 Libellé Situation Régularisation
+Solde
+
+Copropriétaire B Débit Crédit 1000 €
+12000 €
+11000 €
+
+4503 Libellé Situation Régularisation
+Solde
+
+Copropriétaire C Débit Crédit
+1000 € 3000 €
+4000€
+
+Libellé Situation Règlement
+Solde
+
+COMPTE BANCAIRE Débit
+
+Crédit 23000 €
+23000 €
+
+L’intérêt de ce type de procédé pour le syndic en matière financière
+B- Sans répartition
+
+4501 Libellé Situation Régularisation
+
+Copropriétaire A Débit Crédit 500 €
+5000 €
+
+Solde
+
+500 €
+
+4502 Libellé Situation Régularisation
+Solde
+
+Copropriétaire B Débit Crédit 1000 €
+12000 €
+1000 €
+
+4503 Libellé Situation Régularisation
+Solde
+
+Copropriétaire C Débit Crédit
+1000 € 3000€
+1000 €
+
+Libellé Situation Règlement
+Solde
+
+COMPTE BANCAIRE Débit
+
+Crédit 23000 € 1500 €
+24 500 €
+
+La notion « d’avance »
+- Il s’agit de sommes « prêtées » par les copropriétaires au syndicat de copropriétaires
+- À partir du moment où l’assemblée générale vote le principe, l’ensemble des copropriétaires est tenu de verser cette avance
+ Conformément à l’article 45-1 du décret du 17 mars 1967, « les avances sont remboursables »
+
+1031 : Avances de trésorerie
+
+- L’article 45-1 du décret du 17 mars 1967 : les avances sont remboursables - L’article 35 du décret du 17 mars 1967 : l’avance de trésorerie ne peut excéder 1/6ème du budget
+prévisionnel (et non ne doit atteindre) - A défaut de stipulation dans le règlement de copropriété, la mise en place de l’avance de trésorerie se vote
+à l’article 26
+
+Appel de fonds
+
+1031 Libellé
+
+Débit
+
+Avance de trésorerie Crédit 1500 €
+
+4501 Libellé Appel de fonds
+
+Copropriétaire A Débit Crédit 500 €
+
+4502 Libellé Appel de fonds
+
+Copropriétaire B
+
+Débit 800 €
+
+Crédit
+
+4503 Libellé Appel de fonds
+
+Copropriétaire C
+
+Débit 200 €
+
+Crédit
+
+105 Fonds de travaux
+
+- La loi impose une cotisation minimale de 5% du budget prévisionnel (art. 14-2 de la loi du 10 juillet 1965) - Les fonds doivent être déposés sur un compte bancaire séparé et rémunéré (art. 18 de la loi du 10 juillet 1965) - Les appels de fonds devront respecter les mêmes modalités que celles pour le budget prévisionnel (art. de la loi du 10-1 juillet 1965) - Les sommes sont acquises au lot et donc non remboursables (art. 18 de la loi du 10 juillet 1965) - L’affectation doit tenir de l’existence de parties communes spéciales ou de clé de répartition des charges (art. 14-2 de la loi du 10 juillet 1965
+modifié par la loi ELAN)
+
+105 Libellé Fonds travaux Solde
+
+Fonds de travaux
+
+Débit
+
+Crédit
+
+1500 €
+
+1500 €
+
+4501 Libellé Fonds de travaux
+
+Copropriétaire A
+
+Débit
+
+Crédit
+
+500 €
+
+4502 Libellé Fonds de travaux
+
+Copropriétaire B
+
+Débit 800 €
+
+Crédit
+
+4503 Libellé Fonds de travaux
+
+Copropriétaire C
+
+Débit
+
+Crédit
+
+200 €
+
+Eclatement du fonds de travaux en sous comptes
+
+Afin d’éviter que les copropriétaires ne soient lésés ou, au contraire, bénéficient d’un enrichissement sans cause, il faudra impérativement prévoir des « sous comptes » du compte « 105 » par lot (et non par copropriétaire)
+
+Fonds travaux
+
+105 Libellé
+
+Débit
+
+Fonds travaux
+
+Crédit 1500 €
+
+Solde
+
+1500 €
+
+105-1 Libellé Fonds travaux
+
+Copropriétaire A
+
+Lot 1
+
+Débit
+
+Crédit 500 €
+
+105-2 Libellé Fonds travaux
+
+Lot 2
+
+Débit
+
+Crédit 800 €
+
+Copropriétaire B
+
+105-3 Libellé Fonds travaux
+
+Lot 3
+
+Débit
+
+Crédit 200 €
+
+LE VOTE D’UN PLAN PLURIANNUEL DE TRAVAUX
+
+14ème SALON INDÉPENDANT DE LA COPROPRIÉTÉ
+
+Loi n° 2021-1104 du 22 août 2021 portant lutte contre le dérèglement climatique et renforcement de la résilience face à ses effets
+
+La copropriété doit réaliser soit:
+- un diagnostic technique global
+- une analyse du bâti et des équipements de l’immeuble + un diagnostic de performance énergétique.
+1
+Le rapport devra déterminer les travaux à réaliser dans les 10 ans
+
+Plan pluriannuel de travaux avec estimation des
+coûts
+2
+Il est probable que les gros travaux soient a réaliser au cours des premières
+années
+
+Présentation à l’assemblée générale pour validation partielle ou totale
+
+Elaboration du fonds travaux
+
+3
+Si l ’assemblée générale ne
+valide de PPT, il devra être
+présenté à la prochaine AG
+
+4
+2 niveaux: - 2,5% du montant
+des travaux du PPT - Qui ne pas être
+inferieur à 5% du budget prévisionnel
+
+Vote en assemblée générale de l’exécution des travaux
+5
+Le syndic devra présenter chaque opération travaux pour les faire voter
+distinctement
+
+Les nouvelles mesures issues de la loi « climat et résilience »
+
+• Dispositifs qui entreront en vigueur de manière progressive à partir du 1er janvier 2023 en fonction du nombre de lots qui composent la copropriété.
+
++ de 200 lots
+
+1er janvier 2023
+
+entre 51 et 200 lots 1er janvier 2024
+
+au plus 50 lots
+
+1er janvier 2025
+
+• Les copropriétés dont la date de réception de travaux de construction est supérieure à 15 ans ont l’obligation de réaliser un projet de plan pluriannuel de travaux (PPT) qui doit être actualisé tous les 10 ans.
+
+• Ce projet de plan pluriannuel doit être établi à partir d’une analyse du bâti et des équipements de l’immeuble ainsi que du diagnostic de performance énergétique (DPE).
+
+Ce plan pluriannuel de travaux devra mettre en exergue :
+1° La liste des travaux nécessaires à :
+• la sauvegarde de l'immeuble, • la préservation de la santé et de la sécurité des occupants, • à la réalisation d'économies d'énergie et à la réduction des émissions de gaz à effet de serre ;
+2° Une estimation du niveau de performance au sens de l'article L. 173-1-1 dudit code que les travaux mentionnés au 1° du présent permettent d'atteindre ;
+3° Une estimation sommaire du coût de ces travaux et leur hiérarchisation ;
+4° Une proposition d'échéancier pour les travaux dont la réalisation apparaît nécessaire dans les dix prochaines années.
+
+Ce projet de plan pluriannuel devra :
+•Etre soumis à l’assemblée générale afin d’être validé, de manière totale ou partielle, à la majorité de l’article 24.
+•S’il n’est pas adopté, il devra être représenté à chaque assemblée générale.
+
+La cotisation annuelle minimum du fonds de travaux est de :
+• 2,5 % du montant des travaux prévus dans le plan adopté ET A
+• 5 % du budget prévisionnel
+si 2,5 % du montant du PPT à 5 % du budget prévisionnel :
+2,5 % du plan pluriannuel de travaux
+si 2,5 % du montant du PPT à 5 % du budget prévisionnel :
+5 % du budget prévisionnel
+
+Budget prévisionnel :
+
+500 000 €
+
+Plan pluriannuel de travaux : 850 000 €
+
+• Cotisation annuelle minimum du fonds de travaux à prendre en considération:
+
+ 5 % du budget prévisionnel (500 000 €) égal 25 000 €
+
+ 2,5 % du plan pluriannuel de travaux (850 000 €) égal 21 250 €
+
+ 5 % du budget prévisionnel reste la référence
+
+Budget prévisionnel :
+
+300 000 €
+
+Plan pluriannuel de travaux : 850 000 €
+
+• Cotisation annuelle minimum du fonds de travaux à prendre en considération:
+
+ 5 % du budget prévisionnel (300 000 €) égal 15 000 €
+
+ 2,5 % du plan pluriannuel de travaux (850 000 €) égal 21 250 €
+
+2,5 % du plan pluriannuel de travaux
+
+106 Provisions pour travaux au titre de la délégation de pouvoirs accordée au conseil syndical en application de l’article 21-1 de loi du 10 juillet 1965
+ Lorsque le conseil syndical est composé d'au moins trois membres, l'assemblée générale peut, par décision prise à la majorité des voix de tous les copropriétaires, lui déléguer le pouvoir de prendre tout ou partie des décisions relevant de la majorité des voix exprimées des copropriétaires présents, représentés, ou votant par correspondance.
+La délégation de pouvoirs ne peut toutefois porter sur : - l'approbation des comptes, - sur la détermination du budget prévisionnel, - sur les adaptations du règlement de copropriété rendues nécessaires par les modifications législatives et règlementaires intervenues depuis son établissement.
+• L'assemblée générale fixe le montant maximum des sommes allouées au conseil syndical pour mettre en œuvre sa délégation de pouvoirs.
+• La délégation de pouvoirs est accordée au conseil syndical pour une durée maximale de deux ans. Elle est renouvelable par une décision expresse de l'assemblée générale.
+• Le syndicat des copropriétaires souscrit, pour chacun des membres du conseil syndical, une assurance de responsabilité civile. • Les décisions du conseil syndical pour l'exercice de la délégation de pouvoirs sont prises à la majorité de ses membres. En cas de partage des
+voix, le président du conseil syndical a voix prépondérante.
+• Le conseil syndical rend compte de l'exercice de sa délégation de pouvoirs devant l'assemblée générale votant l'approbation des comptes. • Il établit un rapport en vue de l'information des copropriétaires.
+• Lorsque la délégation de pouvoirs porte sur des dépenses pour travaux non compris dans le budget prévisionnel, l'assemblée générale précise le montant maximum alloué pour chacune d'elles. Les sommes afférentes à ces dépenses sont appelées selon les mêmes modalités que celles prévues au second alinéa du I de l'article 14-2 de la loi du 10 juillet 1965.
+
+106 Provisions pour travaux au titre de la délégation de pouvoirs accordée au conseil syndical en application de l’article 21-1 de loi du 10 juillet 1965
+
+A- Appel de fonds auprès des copropriétaires
+
+106 Libellé Appel de fonds
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+25 000 €
+
+106- affectation des provisions pour opérations courantes au titre de la délégation de pouvoirs accordée au conseil syndical en application de
+l’article 21-1 de loi du 10 juillet 1965
+
+B- ENGAGEMENT D’UNE DEPENSE
+
+106 Libellé
+
+provisions pour travaux au titre de la délégation de pouvoirs accordée au conseil syndical
+
+Débit
+
+Crédit
+
+Appel de fonds
+Affectation provisions Solde
+
+10 000 €
+
+25 000 € 15 000€
+
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+- Sur ce compte, figurent les travaux ou opérations exceptionnelles non commencés ou terminés en fin d’exercice
+- L’ensemble des sommes appelées concernant les travaux et les factures correspondantes à ces travaux sont placées sur le compte 12
+
+102-1 102-1 Libellé Libellé ProvisionPsrotvrisaiovnasutrxavaux
+Ann. Fin d’exercice Solde
+
+ProvisPiroonvissiotnrsatvraavuauxxAASSCC
+
+DébiDtébit
+
+CrCérdéditit 2520500000€€
+
+25 000 € 0
+
+67617-11-1
+LibLeiblléellé FFaaccttuureres sASACSC Ann. Fin d’exercice Solde
+
+ChargeCsheaxrcgepetsioenxnceellpetsiAoSnCnelles ASC
+
+Débit Débit 18 0001€8 000 €
+
+Crédit
+
+Crédit
+
+18 000 € 0
+
+12 Libellé Extourne factures
+Extourne provisions
+Solde
+
+Solde en attente
+
+Débit
+
+Crédit
+
+18 000 €
+
+25 000 €
+
+7000 €
+
+Les contrôles à réaliser en matière de travaux non terminés en fin d’exercice
+- Vérifier s’il était prévu que les travaux se réalisent sur deux ou plusieurs exercices - Dans le cas contraire, obtenir des explications du syndic afin d’identifier d’éventuels blocages - Contrôler que le syndic n’impute pas des travaux terminés sur ce compte pour ne pas les répartir,
+notamment en ne passant pas ses honoraires - Analyser les travaux qui présentent un solde négatif
+
+CLASSE 4 : Tiers
+• 40 Fournisseurs • 401 Factures parvenues • 408 Factures non parvenues • 42 à 44 Autres dettes et créances • 45 Copropriétaires (créances ou dettes) • 46 Débiteurs et créditeurs divers • 47 Comptes d'attente • 48 Comptes de régularisation • 49 Dépréciation des comptes de tiers
+
+40 : Fournisseurs 42-44 : Autres dettes et créances
+
+Il faudra impérativement créer des sous comptes par fournisseur ou par type d’organismes sociaux et fiscaux
+
+Réception de facture d’un montant de 300 euros
+
+401-1 Libellé Rec. facture Solde
+
+ABC
+
+Débit
+
+Crédit 300 €
+
+300 €
+
+Paiement de la facture de 300 euros
+
+401-1 Libellé Rec. facture Règlement Solde
+
+ABC
+
+Débit
+
+Crédit 300 €
+
+300 €
+
+0€
+
+Exemple de compte de fournisseur
+
+408 : Factures non parvenues
+Il s’agit de factures non parvenues en fin d’année mais dont la charge est imputée sur l’exercice
+• Il faudra vérifier la réalité des montants figurant sur ce compte lors du contrôle de comptes qui se passe généralement deux à quatre mois après la fin de l’exercice
+• Ce compte est également utilisé pour les factures d’énergie ou de fluides qui sont à cheval sur deux exercices. Il faudra donc analyser la bonne répartition des factures
+
+45 : Copropriétaires
+
+Le décret comptable : - impose un compte comptable par copropriétaire - donne une possibilité à l’assemblée générale de voter la création de 4 sous comptes pour chacun des copropriétaires pour distinguer
+la situation liée aux budget prévisionnel, travaux, avances et emprunts (art.10 arrêté du 14 mars 2005)
+
+450 : COPROPRIETAIRES
+ 450001……………………..Martine A  450002………………...……Karima B  450003………………………...Simon C
+
+SOUS COMPTES DU COMPTE 450 001 : Martine A
+ 450001-1…………………… charges courantes  450001-2…………………… travaux  450001-3…………………… avances  450001-4……………………emprunts
+
+45 : les appels de fonds et règlements des copropriétaires
+
+Appel de fonds charges courantes de 500 €
+
+450-1 Libellé Appel de fonds
+
+Paiement de l’appel de fonds de 400 €
+
+450-1 Libellé appels de fonds Règlement Solde
+
+Copropriétaire A
+
+Débit 500 €
+
+Crédit
+
+Copropriétaire A
+
+Débit 500 €
+
+Crédit
+
+400 €
+
+100 €
+
+Exemple de compte de copropriétaire
+
+461: Débiteurs divers 462 : Créditeurs divers
+ Sur ces comptes : - le créancier ou le débiteur n’est pas forcément identifié - peuvent être regroupés plusieurs tiers différents  Il faudra contrôler l’identité du tiers, le montant enregistré ainsi que sa justification  On retrouve généralement le syndic, les copropriétaires-vendeurs ou l’assureur
+
+Le syndic :
+Ce compte est utilisé généralement pour la facturation des prestations privatives (mise en demeure, état daté, lettre de relance, etc).
+
+Le copropriétaire-vendeur :
+Il peut s’agir de copropriétaire-vendeur présentant soit un débit soit un crédit à l’égard du syndicat de copropriétaires. Il faudra traiter la situation de façon distincte et ne pas compenser les débiteurs par les copropriétaires.
+
+L’assureur :
+Il s’agit des sommes que l’assurance s’est engagée à rembourser dans le cadre de l’indemnité d’un sinistre.
+
+47: Comptes d’attente
+
+Les comptes d’attente présentent les sommes qui sont en attente d’affectation
+ La nomenclature comptable prévoit deux comptes d’attente : - 471 : compte d’attente débiteur - 472 : compte d’attente créditeur
+ L’article 10 de l’arrêté comptable précise que le compte d’attente « doit être soldé à la fin de l’exercice ou, à défaut, justifié ligne à ligne »
+ Il s’agit de comptes « fourre-tout » qu’il faudra analyser très attentivement  Ces sommes peuvent remonter à plusieurs exercices
+• L’origine de ces sommes peut être variée, impliquant d’identifier la cause et le tiers
+
+Les produits exceptionnels :
+ Les produits financiers  Les indemnités d’assurance  Les loyers  Etc.
+
+Les soldes des exercices comptables :
+ Solde d’exercice(s) excédentaire(s)
+ Solde d’exercice(s) déficitaire(s)
+
+Les stocks :
+ Badges  Etc.
+
+L’intérêt pour les syndics de maintenir des sommes sur le compte d’attente
+Prenons l’exemple d’un remboursement d’indemnités d’assurance d’un montant de 25 000 €
+
+Indemnités d’assurance : 25 000 €
+
+1ère hypothèse
+
+671
+
+Travaux de réfection
+
+Libellé
+Travaux suite à sinistre
+Affectation de l’indemnité assurance
+Solde
+
+Débit 32 000 €
+
+Crédit
+
+25 000 €
+
+7000 €
+
+470-2 Libellé Indemnité d’assurance
+671
+
+2ème hypothèse
+
+Compte d’attente créditeur
+
+Débit
+
+Crédit 25 000 €
+
+Travaux de réfection
+
+Libellé Travaux suite à sinistre
+Affectation de l’indemnité assurance Solde
+
+Débit 32 000 €
+32 000 €
+
+Crédit
+
+CLASSE 5 : Trésorerie
+• 50 Fonds Placés • 501 compte à terme • 502 autre compte
+• 51 Banque ou fonds disponibles en banque • 512 banques • 514 chèques postaux
+• 53 Caisse
+
+Les comptes banques : 5
+- Il s’agit de la tenue comptable des comptes bancaires, saisie par le syndic - Depuis l’obligation du fonds travaux, la copropriété est obligée de disposer
+d’un compte bancaire séparé et rémunéré pour placer les sommes affectées à ce fonds - Le syndic a l’obligation d’ouvrir un compte bancaire séparé, sans dérogation possible, pour toutes les copropriétés qu’il gère - Chaque copropriété doit disposer d’au moins deux de relevés de compte bancaire:
+ pour le compte bancaire courant  pour le compte de placement
+
+50 : Fonds placés
+ Sur ces comptes figurent les sommes placées soit sur un livret A, compte à terme, CECOP, etc.
+ À partir du moment où la copropriété a constitué un fonds de travaux, doit figurer dans la comptabilité ce type de comptes
+Conformément à l’article 35-1 de la loi du 10 juillet 1965 « l’assemblée générale décide s’il y a lieu du placement des fonds recueillis »
+Le conseil syndical devra vérifier la concordance entre la tenue comptable du compte à terme et le relevé bancaire à une date précise.
+En cas d’incohérence, une explication du syndic devra être donnée à travers un rapprochement bancaire (voir diaporama qui s’intitule « rapprochement bancaire »)
+
+51 : banque ou fonds disponibles en banque
+ Il s’agit de la tenue comptable du compte bancaire de la copropriété  L’immeuble peut disposer de plusieurs comptes bancaires et, à ce titre,
+présenter plusieurs comptes banques (courant, travaux...)  En cas de présence dans la comptabilité de plusieurs comptes banques alors
+que la copropriété ne dispose que d’un compte bancaire, il faudra demander des explications au syndic
+Le conseil syndical devra vérifier la concordance entre la tenue comptable du compte banque avec le relevé bancaire à une date précise.
+Cette opération devra se faire plusieurs fois au cours de l’année à travers le rapprochement bancaire (voir diaporama qui s’intitule « rapprochement bancaire »)
+
+Le rapprochement bancaire
+La technique consiste à justifier l’écart entre les soldes du compte banque par rapport au compte bancaire à une date déterminée
+
+Compte banque comptable
+
+Au 31.03.2023
+
+Compte bancaire
+
+512
+Libellé Reprise solde du mois précédent Règlement appel de fonds Mme. A Règlement appel de fonds M. B Paiement de la société de maintenance d’ascenseur Achat de fourniture d’ampoules Solde au 31.03
+
+Compte banque
+
+Débit 5828 €
+
+Crédit
+
+324 €
+
+846 € ?
+
+428 €
+
+639 €
+5931 €
+
+Relevé bancaire
+
+Libellé
+Reprise solde du mois précédent
+Règlement appel de fonds Mme A
+
+Débit 5828 €
+
+Crédit
+OK
+324 € OK
+
+Règlement société de nettoyage
+
+214 € ?
+
+Paiement de la société de maintenance d’ascenseur
+
+428 € OK
+
+Solde au 31.03
+?
+
+5290 €
+
+Différence : 641€
+
+Les contrôles à réaliser en matière de compte bancaire
+1)Il faudra s’assurer que le compte bancaire est bien séparé au nom du syndicat de copropriétaires (et non SDC), en vérifiant la convention de compte ainsi que les conditions générales et particulières
+2)Demander au syndic une attestation de la banque affirmant d’une part que le compte est bien séparé de tout tiers et que le seul titulaire est le syndicat de copropriétaires (en toutes lettres) et d’autre part qu’il puisse être transféré en cas de changement de syndic
+3)Les autorisations de prélèvement SEPA doivent indiquer comme seul compte créditeur le syndicat de copropriétaires (en toutes lettres)
+4)Vérifier que l’intégralité des règlements des appels de fonds sont crédités immédiatement sur le compte bancaire de la copropriété sans transiter par un compte de tiers
+5)Vérifier sur le relevé bancaire s’il n y a pas de mouvements importants de sommes qui transitent du compte du syndic vers celui du syndicat de copropriétaires
+6)Contrôler dans l’appel de fonds que l’ordre de règlement par chèque soit bien celui du syndicat de copropriétaires et non du syndic
+7)Contrôler dans l’extranet du syndic que l’identification du compte bénéficiaire du prélèvement unique ou automatique du règlement des appels de fonds est bien le syndicat de copropriétaires.
+
+CLASSE 6 (1ère série)
+• 60 Achat de matières et de fournitures • 601 Eau • 602 Électricité • 603 Chauffage, énergie et combustible • 604 Achats de produits d’entretien et petit équipement • 605 Matériel • 606 Fournitures
+
+CLASSE 6 (2ème série)
+
+• 61 • 611 • 612 • 613 • 614 • 615 • 616
+
+Services Extérieurs Nettoyage des locaux Locations immobilières Location mobilière Contrats de maintenance Entretien et petites réparations Primes d’assurance
+
+CLASSE 6 (3ème série)
+ 62 Frais d’Administration
+ 621 Rémunérations du syndic sur gestion de copropriété
+ 6212 Débours  6213 Frais postaux  622 Autres honoraires du syndic  623 Rémunérations de tiers intervenants  624 Frais de conseil syndical
+ 63 Impôts, taxes et versements assimilés  632 Taxe de balayage  633 Taxe foncière  634 Autres impôts et taxes
+
+CLASSE 6 (3ème série suite)
+ 64 Frais de personnel  641 Salaires  642 Charges sociales et organismes sociaux  643 Taxe sur les salaires  644 Autres médecine du travail, mutuelle…
+ 66 Charges sur emprunts  661 Remboursement d'annuités d 'emprunt  662 Autres charges financières et agios
+
+CLASSE 6 (4ème série)
+
+ 671  672  673  677  678  68
+
+Travaux décidés par l'assemblée générale Travaux urgents Études techniques, diagnostics, consultations Pertes sur créances irrécouvrables Charges exceptionnelles Dotations aux dépréciations sur créances douteuses
+
+L’ENSEMBLE DE CES CHARGES SONT CONSIDÉRÉES COMME DES TRAVAUX OU OPÉRATIONS EXCEPTIONNELLES QUI DOIVENT OBLIGATOIREMENT FAIRE L’OBJET D’UN VOTE DISTINCT EN ASSEMBLÉE GÉNÉRALE
+
+EXEMPLE DE COMPTES DE CHARGES
+
+CLASSE 7 (1ère série)
+• 701 Provisions copropriétaires (article 14-1) • 705 Affectation du fonds travaux • 711 Subventions sur frais de fonctionnement • 713 Indemnités d’assurances • 714 Produits divers • 716 Produits financiers
+
+CLASSE 7 (2ème série)
+ 702 Provisions pour travaux
+ 703 Avances versées par les copropriétaires  704 Remboursements d 'annuités d 'emprunts  705 Affectation du fonds travaux  706 Provisions au titre de la délégation de pouvoirs accordée au conseil
+syndical en application de l’article 21-1 de loi du 10 juillet 1965
+706-1 Provisions sur opérations courantes 706-2 Provisions sur travaux et opérations exceptionnelles
+
+CLASSE 7 (3ème série)
+ 711 Subventions  712 Emprunts  713 Indemnités d 'assurance  714 Produits divers  716 Produits financiers  718 Produits exceptionnels  78 Reprises de dépréciations sur créances douteuses
+
+EXEMPLE DE COMPTE DE PRODUITS
+
+LA RÉPARTITION DES COMPTES AU SEIN DU GRAND LIVRE
+
+Les comptes de bilan
+
+• Classe 1 = Capitaux • Classe 4 = Tiers
+
+• Classe 5 = Trésorerie
+
+LES DETTES ET LES CRÉANCES DE LA COPROPRIÉTÉ VIS-À-VIS DES TIERS
+
+Les comptes d’exploitation
+
+• Classe 6 = Charges • Classe 7 = Produits
+
+LES CAUSES DE VARIATIONS DES CLASSES 1 A 4
+
+Comment lire les comptes comptables : qui se cache derrière les comptes ?
+
+ Les comptes 1 : capitaux
+ 102 Provisions pour travaux décidés  1031 Avances de trésorerie  1032 Avances travaux au titre de l'article 18  105 Fonds travaux  12 Solde en attente sur travaux ou opérations exc.  131 Subventions accordées en instance de versement
+ Les comptes 4 : tiers
+ Les comptes 5 : banque
+
+LES COPROPRIÉTAIRES
+• FOURNISSEURS • ORGANISMES • COPROPRIÉTAIRES
+ÉTABLISSEMENT BANCAIRE
+
+LA NOTION DE DÉBIT ET CRÉDIT
+
+• A ÀA DDIISSTTININGUGEUREDRIS:TINGUER
+
+Les classes 1 À 5
+
+Les classes 6 ET 7
+
+o DÉBIT
+
+CRÉANCES AU BÉNÉFICE
+
+DE LA COPROPRIÉTÉ
+
+o CRÉDIT
+
+DETTES QUE DOIT
+
+SUPPORTER LA COPROPRIÉTÉ
+
+o DÉBIT COPROPRIÉTÉ
+
+CHARGES POUR LA
+
+o CRÉDIT
+
+PRODUITS EN FAVEUR
+
+DE LA COPROPRIÉTÉ
+
+La technique de lecture d’un compte comptable
+
+Pour l’ensemble des comptes se situant entre la classe 1 et la classe 5, il faut se situer de la position du tiers (les copropriétaires, fournisseurs, établissement bancaire) par rapport au syndicat de copropriétaires.
+Trois étapes à identifier :
+- Qui ? - Situation : créditeur ou débiteur ? - Combien ?
+
+4501
+Libellé Appel de fonds 1er trimestre Virement n°123456 Solde
+
+Copropriétaire A
+
+Débit
+500 €
+
+Crédit
+324 €
+
+176 €
+
+Syndicat de copropriétaires
+
+La technique de lecture d’un compte de tiers
+
+DUPONT
+
+DEBIT CREDIT
+
+Créditeur : 76,98 €
+
+DEBIT
+
+CREDIT
+
+Créditeur : 121,58 €
+
+Syndicat de copropriétaires
+
+La technique de lecture d’un compte de banque
+LE COMPTE BANQUE DOIT SE LIRE ABSOLUMENT DE LA MÊME FAÇON QU’UN COMPTE DE TIERS : - SOLDE DÉBITEUR : LA BANQUE DOIT DES SOMMES À LA COPROPRIÉTÉ - SOLDE CRÉDITEUR : LA BANQUE EST CRÉANCIÈRE VIS-À-VIS DE LA COPROPRIÉTÉ
+IL FAUT LIRE LE COMPTE BANQUE DE MANIÈRE INVERSE AU RELEVÉ BANCAIRE
+
+DEBIT
+
+CREDIT
+
+Syndicat de copropriétaires
+
+La technique d’enregistrement des opérations figurant sur le compte de banque
+LE COMPTE BANQUE DOIT SE MOUVEMENTER DE LA MÊME FAÇON QU’UN COMPTE DE TIERS : - LES SOMMES PORTÉES AU DÉBIT SONT LES DETTES QU’ A LA BANQUE VIS-À-VIS DE LA COPROPRIÉTÉ - LES SOMMES PORTÉES AU CRÉDIT SONT LES CRÉANCES QU’ A LA BANQUE A L’EGARD DE LA COPROPRIÉTÉ
+SOLDE DÉBITEUR = LA BANQUE A UNE DETTE VIS-À-VIS DE LA COPROPRIÉTÉ SOLDE CRÉDITEUR = LA BANQUE EST CRÉANCIÈRE À L’ÉGARD DE LA COPROPRIÉTÉ
+IL FAUT DONC LIRE LE COMPTE BANQUE DE MANIÈRE INVERSE AU RELEVÉ BANCAIRE
+
+Règlement du copropriétaire A
+
+512
+Libellé Règlement du copropriétaire A
+
+BANQUE
+
+Débit 500 €
+
+Crédit
+
+La technique d’enregistrement des opérations figurant sur le compte de banque
+LE COMPTE BANQUE DOIT SE MOUVEMENTER DE LA MÊME FAÇON QU’UN COMPTE DE TIERS : - LES SOMMES PORTÉES AU DÉBIT SONT LES DETTES QU’ A LA BANQUE VIS-À-VIS DE LA COPROPRIÉTÉ - LES SOMMES PORTÉES AU CRÉDIT SONT LES CRÉANCES QU’ A LA BANQUE A L’EGARD DE LA COPROPRIÉTÉ
+SOLDE DÉBITEUR = LA BANQUE A UNE DETTE VIS-À-VIS DE LA COPROPRIÉTÉ SOLDE CRÉDITEUR = LA BANQUE EST CRÉANCIÈRE À L’ÉGARD DE LA COPROPRIÉTÉ
+IL FAUT DONC LIRE LE COMPTE BANQUE DE MANIÈRE INVERSE AU RELEVÉ BANCAIRE
+
+Règlement du copropriétaire A Paiement d’une facture
+
+512
+Libellé Règlement du copropriétaire A
+Virement n°123456
+Solde
+
+BANQUE
+
+Débit 500 €
+
+Crédit
+
+176 €
+
+324 €
+
+La technique de lecture des comptes de capitaux
+
+LES COMPTES DE CAPITAUX DOIVENT SE LIRE ABSOLUMENT DE LA MÊME FAÇON QU’UN COMPTE DE TIERS : - LES TIERS SONT LES COPROPRIÉTAIRES - LORSQUE LE COMPTE EST :  DÉBITEUR : LES COPROPRIÉTAIRES ONT UNE DETTE VIS-À-VIS DU SYNDICAT DES COPROPRIÉTAIRES  CRÉDITEUR : LES COPROPRIÉTAIRES ONT UNE CRÉANCE VIS-À-VIS DU SYNDICAT DES COPROPRIÉTAIRES
+
+Les copropriétaires
+
+DEBIT
+
+CREDIT
+
+Syndicat de copropriétaires
+
+LA NOTION DE DOUBLE PARTIE
+• Lorsqu’une écriture est indiquée au débit, une écriture doit être passée au crédit : on dira alors que l’écriture est équilibrée
+
+PASSONS À PRESENT QUELQUES ÉCRITURES COMPTABLES
+
+PASSONS UNE RECEPTION DE FACTURE DE VEOLIA DE 2000 € AVEC LE REGLEMENT
+
+QUI ?
+
+ENGAGEMENT DE LA FACTURE
+
+QUOI ?
+
+401 Libellé Facture n°2024
+
+Veolia
+
+Débit
+
+Crédit
+
+2000 €
+
+2000€
+
+601
+Libellé Facture n°2024
+
+COMBIEN?
+
+Eau
+
+Débit 2000€
+
+Crédit
+
+PASSONS UNE RECEPTION DE FACTURE DE VEOLIA DE 2000 € AVEC LE REGLEMENT
+
+QUI ?
+
+ENGAGEMENT DE LA FACTURE
+
+QUOI ?
+
+401 Libellé Facture n°2024
+
+Veolia
+
+Débit
+
+Crédit
+
+2000 €
+
+2000€
+
+601
+Libellé Facture n°2024
+
+COMBIEN?
+
+Eau
+
+Débit 2000€
+
+Crédit
+
+QUI ?
+
+REGLEMENT DE LA FACTURE
+
+OÙ ?
+
+401
+Libellé Facture n°2024
+Règlement par virement n°1234
+
+Veolia
+
+Débit
+
+Crédit 2000€
+
+2000€
+
+512
+
+Banque
+
+Libellé
+Règlement par virement n°1234
+
+Débit
+2000 €
+
+Crédit 2000€
+
+COMBIEN?
+
+PASSONS UN APPEL DE FONDS SUR CHARGES COURANTES DE 1200€ AVEC SON REGLEMENT
+
+QUI ?
+
+ENGAGEMENT
+
+450 Libellé
+Appel de fond 1er trimestre
+
+Copropriétaires
+
+Débit
+
+Crédit
+
+2000 € 1200 €
+
+701
+Libellé Appel de fond 1er trimestre COMBIEN?
+
+POUR QUOI?
+
+Produits sur charges courantes
+
+Débit
+
+Crédit 1200 €
+
+PASSONS UN APPEL DE FONDS SUR CHARGES COURANTES DE 1200€ AVEC SON REGLEMENT
+
+QUI ?
+
+ENGAGEMENT
+
+450 Libellé
+Appel de fond 1er trimestre
+
+Copropriétaires
+
+Débit
+
+Crédit
+
+2000 € 1200 €
+
+701
+Libellé Appel de fond 1er trimestre COMBIEN?
+
+QUI ?
+
+TRESORERIE
+
+POUR QUOI?
+
+Produits sur charges courantes
+
+Débit
+
+Crédit 1200 €
+
+OÙ ?
+
+450
+Libellé Appel de fond 1er trimestre
+Règlement par chèque n°1234 SOLDE
+
+Copropriétaires
+
+Débit 1200 €
+
+Crédit
+
+1200 € 0€
+
+512
+Libellé Règlement par chèque n°1234
+COMBIEN?
+
+Banque
+
+2000D€ébit 1200 €
+
+Crédit
+
+PASSONS UN APPEL DE FONDS D’AVANCE DE TRESORERIE POUR UN MONTANT DE 450 € AVEC SON REGLEMENT
+
+QUI ?
+
+ENGAGEMENT
+
+POUR QUOI ?
+
+450 Libellé Appel de fond 1/4
+
+Copropriétaires
+
+Débit
+
+Crédit
+
+2000 € 450€
+
+1031
+Libellé Appel de fond 1/4 COMBIEN?
+
+Avance de trésorerie
+
+Débit
+
+Crédit 450€
+
+PASSONS UN APPEL DE FONDS D’AVANCE DE TRESORERIE POUR UN MONTANT DE 450 € AVEC SON REGLEMENT
+
+QUI ?
+
+ENGAGEMENT
+
+POUR QUOI ?
+
+450 Libellé Appel de fond 1/4
+
+Copropriétaires
+
+Débit
+
+Crédit
+
+2000 € 450€
+
+1031
+Libellé Appel de fond 1/4 COMBIEN?
+
+Avance de trésorerie
+
+Débit
+
+Crédit 450€
+
+QUI ?
+450
+Libellé Appel de fond 1/4
+Règlement par chèque n°678 SOLDE
+
+TRESORERIE Copropriétaires
+
+OÙ ?
+
+Débit 450€
+
+Crédit 400€
+
+512
+
+Banque
+
+Libellé
+Règlement par chèque n°678
+
+2000 € Débit 400€
+
+Crédit
+
+50 €
+
+PASSONS UN APPEL DE FONDS DE PROVISIONS TRAVAUX POUR UN MONTANT DE 1400 € AVEC SON REGLEMENT
+
+QUI ?
+
+ENGAGEMENT étape 1
+
+POUR QUOI ?
+
+450 Libellé
+Appel de fond travaux ascenseur 1/6
+
+Copropriétaires
+
+Débit
+
+Crédit
+
+20001400€ €
+
+102
+Libellé Appel de fond travaux ascenseur 1/6
+COMBIEN?
+
+Provisions travaux
+
+Débit
+
+Crédit 1400€
+
+PASSONS UN APPEL DE FONDS DE PROVISIONS TRAVAUX POUR UN MONTANT DE 1400 € AVEC SON REGLEMENT
+
+QUI ?
+
+ENGAGEMENT étape 1
+
+POUR QUOI ?
+
+450 Libellé
+Appel de fond travaux ascenseur 1/6
+
+Copropriétaires
+
+Débit
+
+Crédit
+
+20001400€ €
+
+102
+Libellé Appel de fond travaux ascenseur 1/6
+COMBIEN?
+
+Provisions travaux
+
+Débit
+
+Crédit 1400€
+
+TRANSFERT
+
+ENGAGEMENT étape 2
+
+102 Libellé Appel de fond travaux ascenseur 1/6
+Affectation travaux ascenseur solde
+
+Provisions travaux
+
+Débit
+
+Crédit
+
+1000€
+
+1400€
+
+400 €
+
+TRANSFERT
+
+702
+Libellé Affectation travaux ascenseur
+
+Produits travaux
+
+2000 Débit €
+
+Crédit 1000€
+
+LES DIFFERENTS DOCUMENTS COMPTABLES
+
+Le grand - livre
+
+Les journaux
+
+Les 5 annexes comptables
+
+Le grand-livre répertorie l’ensemble des écritures par classe comptable de façon chronologique
+
+Le journal est un livre comptable dans lequel les éléments affectant le patrimoine de la copropriété sont enregistrés par catégorie d’opérations sur plusieurs journaux
+- Achat - Produit - Banque - Salaire
+
+Les annexes reprennent les soldes du grand livre en distinguant les différentes informations dans cinq annexes distinctes
+
+ANALYSONS MAINTENANT LE GRAND LIVRE
+
+LECTURE D’UNE BALANCE
+
+LECTURE DE JOURNAUX
+
+JOURNAUX 01/01/2023 au 31/12/2022
+
+LECTURE DES 5 ANNEXES COMPTABLES
+
+LA COHERENCE TECHNIQUE DES CINQ ANNEXES
+
+Etat financier après répartition au ……………………… (date de clôture de l'exercice comptable)
+
+I - SITUATION FINANCIERE ET TRESORERIE
+
+T résorerie
+50 Fonds placés
+
+Exercice précédent approuvé
+
+Exercice clos
+Provisions et avances 102 Provisions pour travaux
+
+Exercice précédent approuvé
+
+Exercice clos
+
+51 Banques 53 Caisse
+
+103 Avances
+PARTIE HAUTE 1031 Avance de trésorerie 1032 Avance travaux 1033 Autres avances 105 Fonds travaux 131 Subventions en instance d'affectation
+
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Trésorerie disponible Total 1
+
+Total 1
+
+Annexe 5 Etat des travaux de l'article 14-2 et opérations exceptionnelles votés non encore clôturés à la fin de l'exercice du ……. Au………
+
+Travaux votés
+
+A
+
+Date
+
+Montant
+
+Travaux payés
+
+B
+
+Date
+
+Montant
+
+Travaux réalisés
+
+C
+
+Date
+
+Montant
+
+Provisions appelées, emprunts et subventions reçus, affectation du fonds
+de travaux
+
+Solde en attente sur travaux
+E=D-C
+
+Subventions et
+Emprunts à recevoir
+F
+
+Date
+
+Montant
+
+Montant
+
+Date
+
+Montant
+
+TRAVAUX DE RAVALEMENT TRAVAUX DE TOITURE
+
+ANNEXE 5
+
+TOTAL
+
+ANNEXE 2 PARTIE HAUTE
+
+ANNEXE 3
+113
+
+ANNEXE 2 PARTIE BASSE
+
+ANNEXE 4
+114
+
+LA LECTURE DES CINQ COMPTES
+
+Syndicat des copropriétaires:
+
+État financier après répartition au …
+
+Annexe 1
+
+I- situation financière et trésorerie
+
+Trésorerie
+
+Exercice précédent approuvé
+
+Exercice clos
+
+Provision et avances
+
+Exercice précédent approuvé
+
+Exercice clos
+
+50 Fonds Placés
+
+102 Provisions pour travaux
+
+51 Banque ou fonds disponible en banque (1)
+
+103 Avances 1031 Avances de trésorerie
+
+53 Caisse
+
+1032 Avance travaux 1033 Autres avances
+
+105 fonds travaux
+
+131Subventions et instance d’affectation
+
+Trésorerie disponible Total II- Créances
+
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Dettes
+
+Total I
+
+45 Copropriétaires-sommes exigibles restant à recevoir(2)
+459 Copropriétaires-créances(2) douteuses
+
+Exercice précédent approuvé
+
+Exercice clos
+
+45 Copropriété-excédents versés(2)
+
+Exercice précédent Exercice
+
+approuvé
+
+clos
+
+Compte de tiers
+
+40 Fournisseurs
+
+Comptes de tiers
+
+42 à 44 Autres dettes
+
+42 à 44 Autres créances
+
+46 Créditeurs divers
+
+46 Débiteurs divers
+
+47 Compte d’attente
+
+47 Comptes d’attente
+
+48 Compte de régularisation
+
+48 Comptes de régularisation
+
+49 Dépréciation des comptes de tiers(2)
+
+Total II
+Total général (1)+(2)
+(1) Une somme affectée du signe <-> indique un découvert correspondant à une dette du syndicat.
+(2) Liste individualisée (nom et montant) ci – jointe.
+
+Total II Total général (1)+(2)
+
+Syndicat des copropriétaires:
+
+État financier après répartition au …
+
+Annexe 1
+
+I- situation financière et trésorerie
+
+Trésorerie
+
+Exercice précédent approuvé
+
+Exercice clos
+
+Provision et avances
+
+Exercice précédent approuvé
+
+Exercice clos
+
+50 Fonds Placés
+
+102 Provisions pour travaux
+
+51 Banque ou fonds disponible en banque (1)
+
+103 Avances 1031 Avances de trésorerie
+
+53 Caisse
+
+1032 Avance travaux
+PARTIE HAUTE 1033 Autres avances
+105 fonds travaux
+
+131Subventions et instance d’affectation
+
+Trésorerie disponible Total II- Créances
+
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Dettes
+
+Total I
+
+45 Copropriétaires-sommes exigibles restant à recevoir(2)
+459 Copropriétaires-créances(2) douteuses
+
+Exercice précédent approuvé
+
+Exercice clos
+
+45 Copropriété-excédents versés(2)
+
+Exercice précédent Exercice
+
+approuvé
+
+clos
+
+Compte de tiers
+
+40 Fournisseurs
+
+Comptes de tiers 42 à 44 Autres créances
+
+PARTIE BASSE 42 à 44 Autres dettes 46 Créditeurs divers
+
+46 Débiteurs divers
+
+47 Compte d’attente
+
+47 Comptes d’attente
+
+48 Compte de régularisation
+
+48 Comptes de régularisation
+
+49 Dépréciation des comptes de tiers(2)
+
+Total II
+Total général (1)+(2)
+(1) Une somme affectée du signe <-> indique un découvert correspondant à une dette du syndicat.
+(2) Liste individualisée (nom et montant) ci – jointe.
+
+Total II Total général (1)+(2)
+
+I- situation financière et trésorerie
+
+Trésorerie 50 Fonds Placés 51 Banque ou fonds disponible en banque (1) 53 Caisse
+
+Exercice précédent approuvé
+
+Exercice clos
+Provision et avances
+102 Provisions pour travaux
+103 Avances
+1031 Avances de trésorerie
+1032 Avance travaux
+1033 Autres avances
+1031Subventions et instance d’affectation
+105 fonds travaux
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Exercice précédent approuvé
+
+Trésorerie disponible Total I
+
+Total I
+
+Exercice clos
+
+I- situation financière et trésorerie
+
+Trésorerie 50 Fonds Placés 51 Banque ou fonds disponible en banque (1) 53 Caisse
+
+Exercice précédent approuvé
+
+Exercice clos
+Provision et avances
+102 Provisions pour travaux
+103 Avances
+1031 Avances de trésorerie
+1032 Avance travaux
+1033 Autres avances
+1031Subventions et instance d’affectation
+105 fonds travaux
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Exercice précédent approuvé
+
+Trésorerie disponible Total I
+
+Total I
+
+Exercice clos
+
+I- situation financière et trésorerie
+
+Trésorerie 50 Fonds Placés 51 Banque ou fonds disponible en banque (1) 53 Caisse
+
+Exercice précédent approuvé
+
+Exercice clos
+Provision et avances
+102 Provisions pour travaux
+103 Avances
+1031 Avances de trésorerie
+1032 Avance travaux
+1033 Autres avances
+1031Subventions et instance d’affectation
+105 fonds travaux
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Exercice précédent approuvé
+
+Trésorerie disponible Total I
+
+Total I
+
+Exercice clos
+
+I- situation financière et trésorerie
+
+Trésorerie 50 Fonds Placés 51 Banque ou fonds disponible en banque (1) 53 Caisse
+
+Exercice précédent approuvé
+
+Exercice clos
+Provision et avances
+102 Provisions pour travaux
+103 Avances
+1031 Avances de trésorerie
+1032 Avance travaux
+1033 Autres avances
+1031Subventions et instance d’affectation
+105 fonds travaux
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Exercice précédent approuvé
+
+Trésorerie disponible Total I
+
+Total I
+
+Exercice clos
+
+I- situation financière et trésorerie
+
+Trésorerie 50 Fonds Placés 51 Banque ou fonds disponible en banque (1) 53 Caisse
+
+Exercice précédent approuvé
+
+Exercice clos
+Provision et avances
+102 Provisions pour travaux
+103 Avances
+1031 Avances de trésorerie
+1032 Avance travaux
+1033 Autres avances
+1031Subventions et instance d’affectation
+105 fonds travaux
+12 Solde en attente sur travaux ou opérations exceptionnelles
+
+Exercice précédent approuvé
+
+Trésorerie disponible Total I
+
+Total I
+
+Exercice clos
+
+II- Créances
+45 Copropriétairessommes exigibles restant à recevoir(2) 459 Copropriétairescréances(2) douteuses Comptes de tiers 42 à 44 Autres créances 46 Débiteurs divers 47 Comptes d’attente 48 Comptes de régularisation
+
+Dettes
+
+Exercice précédent approuvé
+
+Exercice clos
+
+45 Copropriété-excédents versés(2)
+Compte de tiers
+40 Fournisseurs
+42 à 44 Autres dettes
+46 Créditeurs divers 47 Compte d’attente
+48 Compte de régularisation
+49 Dépréciation des comptes de tiers(2)
+
+Exercice précédent approuvé
+
+Exercice clos
+
+Total II Total général (1)+(2)
+
+Total II Total général (1)+(2)
+
+124
+
+Syndicat des copropriétaires:
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au …
+
+Et budget prévisionnel de l’exercice
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice
+
+clos budget Exercice clos
+
+vote
+
+réalisé à
+
+approuver
+
+Budget prévisionnel en cours voté
+
+Budget prévisionnel à voter
+
+Pour approbation des comptes
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs
+
+N-1 N
+
+N
+
+N+1 N+2
+
+N-1
+
+N
+
+N
+
+701 Provisions copropriétaire
+
+711 Subventions sur frais
+
+de fonctionnement
+
+713 Indemnités d’assurances
+
+714 Produit divers
+
+716 Produit financiers
+
+611 Nettoyage des locaux
+
+612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance
+
+PARTIE HAUTE
+
+615 Entretien et petite réparations
+
+61X Autres
+
+62 Frais d’administration
+
+621 Rémunérations du syndic sur gestion copropriété
+
+622 Autres honoraire du syndic
+
+63 Impôt et taxe
+
+64 Frais de personnel
+Sous-total
+
+Sous-total
+
+Solde (excèdent/opération courantes affecté aux copropriétaires)
+
+Solde (excèdent /opération courantes affecté aux copropriétaires)
+
+Annexe 2
+
+Le vote du budget prévisionnel
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N+1
+
+N+1
+
+CHARGES POUR TRAVAUX ET AUTRES OPÉRATIONS EXEPTIONNELLES
+661 Remboursement d’annuités d’empreint 671à 673 Travaux 677 Pertes sur créances irrécouvrables
+Solde (excédent) Total II
+
+POUR TRAVAUX ET AUTRES OPÉRATIONS EXCEPTIONNELLES 702 Provision pour travaux 703 Avances versées par les copropriétaires 704 Remboursement d’annuités d’emprunts Autres produits 711 Subventions sur travaux 712 Emprunt à utiliser sur travaux
+PARTIE BASSE 713 Indemnités d’assurances 714 Produits divers 716 Produits financiers 718 Produits exceptionnels 78 Reprise de dépréciation sur créances douteuses Solde (insuffisance) Total II
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+Compte de gestion générale de l’exercice clos réalisé (N1) du … au … Et budget prévisionnel de l’exercice
+
+Annexe 2
+
+CHARGES POUR OPÉRATION COURANTES (ventilation en annexe 3)
+
+PRODUIT POUR OPÉRATIONS COURANTES
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice Exercice Exercice clos Budget
+
+Budget
+
+précédent clos budget réalisé à
+
+prévisionnel en prévisionnel
+
+approuvé vote
+
+approuver cours voté
+
+à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+2
+
+60 Achats de matière et fournitures 601 Eau (compteur général) 602 Électricité 603 Chauffage, énergie et combustible 60X Autres
+61 Services extérieurs 611 Nettoyage des locaux 612 Locations mobilières 613 Locations mobilières 614 Locations de maintenance 615 Entretien et petite réparations 61X Autres
+62 Frais d’administration 621 Rémunérations du syndic sur gestion copropriété 622 Autres honoraire du syndic
+63 Impôt et taxe 64 Frais de personnel
+
+701 Provisions copropriétaire
+711 Subventions sur frais de fonctionnement
+713 Indemnités d’assurances
+714 Produit divers
+716 Produit financiers
+
+Pour approbation des comptes
+
+Le vote du budget prévisionnel
+
+Exercice précédent approuvé
+
+Exercice Exercice clos
+
+clos budget réalisé à
+
+vote
+
+approuver
+
+Budget prévisionnel en cour s voté
+
+Budget prévisionnel à voter
+
+N-1
+
+N
+
+N
+
+N+1
+
+N+1
+
+Sous-total
+Solde (excèdent s/opération courantes affecté aux
+copropriétaires)
+Total 1
+
+Sous-total
+Solde (déficitaire s/opération courantes affecté aux copropriétaires)
+Total 1
+
+CHARGES POUR TRAVAUX ET AUTRES OPÉRATIONS EXEPTIONNELLES
+
+PRODUITS POURTRAVAUX ET AUTRES OPÉRATIONS EXCEPTIONNELLES
+
+661 Remboursement d’annuités d’empreint 671à 673 Travaux 677 Pertes sur créances irrécouvrables
+678 Charges exceptionnelles 68 Dépréciation sur créances douteuses
+
+702 ProvisionS pour travaux
+703 Avances versées par les copropriétaires
+704 Remboursement d’annuités d’emprunts
+Autres produits
+711 Subventions sur travaux
+712 Emprunt à utiliser sur travaux
+713 Indemnités d’assurances
+714 Produits divers
+716 Produits financiers
+718 Produits exceptionnels
+78 Reprise de dépréciation sur créances douteuses
+
+Solde (excédent) Total II
+
+Solde (insuffisance) Total II
+
+CHARGES POUR TRAVAUX ET AUTRES OPÉRATIONS EXEPTIONNELLES
+
+PRODUITS POURTRAVAUX ET AUTRES OPÉRATIONS EXCEPTIONNELLES
+
+661 Remboursement d’annuités d’empreint 671à 673 Travaux 677 Pertes sur créances irrécouvrables
+678 Charges exceptionnelles 68 Dépréciation sur créances douteuses
+
+702 ProvisionS pour travaux
+703 Avances versées par les copropriétaires
+704 Remboursement d’annuités d’emprunts
+Autres produits
+711 Subventions sur travaux
+712 Emprunt à utiliser sur travaux
+713 Indemnités d’assurances
+714 Produits divers
+716 Produits financiers
+718 Produits exceptionnels
+78 Reprise de dépréciation sur créances douteuses
+
+Solde (excédent) Total II
+
+Solde (insuffisance) Total II
+
+CHARGES POUR TRAVAUX ET AUTRES OPÉRATIONS EXEPTIONNELLES
+
+PRODUITS POURTRAVAUX ET AUTRES OPÉRATIONS EXCEPTIONNELLES
+
+661 Remboursement d’annuités d’empreint 671à 673 Travaux 677 Pertes sur créances irrécouvrables
+678 Charges exceptionnelles 68 Dépréciation sur créances douteuses
+
+702 ProvisionS pour travaux
+703 Avances versées par les copropriétaires
+704 Remboursement d’annuités d’emprunts
+Autres produits
+711 Subventions sur travaux
+712 Emprunt à utiliser sur travaux
+713 Indemnités d’assurances
+714 Produits divers
+716 Produits financiers
+718 Produits exceptionnels
+78 Reprise de dépréciation sur créances douteuses
+
+Solde (excédent) Total II
+
+Solde (insuffisance) Total II
+
+CHARGES POUR TRAVAUX ET AUTRES OPÉRATIONS EXEPTIONNELLES
+
+PRODUITS POURTRAVAUX ET AUTRES OPÉRATIONS EXCEPTIONNELLES
+
+661 Remboursement d’annuités d’empreint 671à 673 Travaux 677 Pertes sur créances irrécouvrables
+678 Charges exceptionnelles 68 Dépréciation sur créances douteuses
+
+702 ProvisionS pour travaux
+703 Avances versées par les copropriétaires
+704 Remboursement d’annuités d’emprunts
+Autres produits
+711 Subventions sur travaux
+712 Emprunt à utiliser sur travaux
+713 Indemnités d’assurances
+714 Produits divers
+716 Produits financiers
+718 Produits exceptionnels
+78 Reprise de dépréciation sur créances douteuses
+
+Solde (excédent) Total II
+
+Solde (insuffisance) Total II
+
+ANNEXE 3 : Compte de gestion pour opération courantes de l'exercice clos et réalisé ( N ) du ……… au ……... Et budget prévisionnel de l'exercice ( N+2 ) du ……... au ………..
+CHARGES POUR OPERATIONS COURANTES
+
+Ex. précédent approuvé
+
+Pour approbation des comptes
+
+N-1
+
+N
+
+1 GENERALES
+601000 EAU 602000 ELECTRICITE 603000 CHAUFFAGE, ENERGIE ET COMBUSTIBLES 604000 ACHATS PRODUITS D'ENTRETIEN ET PETITS EQUIPEMENTS 605000 MATERIEL 606000 FOURNITURES 611000 NETTOYAGE DES LOCAUX 614000 CONTRATS DE MAINTENANCE 614003 LIGNE ASCENSEUR 615000 ENTRETIEN ET PETITES REPARATIONS 616000 PRIMES D'ASSURANCES 621100 REMUNERATION DU SYNDIC 621200 DEBOURS 621300 FRAIS POSTAUX 623000 REMUNERATIONS DE TIERS INTERVENANTS
+PRODUITS AFFECTES
+
+Total net pour la clé : 1 GENERALES 2 ASCENSEURS
+602000 ELECTRICITE 614002 CONTRAT DE MAINTENANCE ASCENSUR 614003 LIGNE ASCENSEUR 615000 ENTRETIEN ET PETITES REPARATIONS
+PRODUITS AFFECTES
+
+Total net pour la clé : 2 ASCENSEURS TOTAL CHARGES NETTES
+PROVISIONS COPROPRIETAIRES
+
+SOLDE excédent ou insuffisance sur opérations courantes affecté aux copropriétaires
+
+Ex. clos réalisé à approuver
+N
+
+Buget en cours voté
+
+Pour le vote du budget
+
+N+1
+
+N+2
+
+Compte de gestion pour travaux de l'article 14-2 et opérations exceptionnelles hors budget prévisionnel de l'exercice clos réalisé
+
+TRAVAUX DE L'ARTICLE 14-2
+CHARGES COMMUNES GENERALES 671002 --- REFECTION CAGE D'ESCALIERS Total net pour la clé : GENERALE 713000 -INDEMNITE ASSURANCE
+NCEHTACRHGAESRSGPEESCIACLOEMBMATUINMEESNTGAENERALES
+
+Exercice clos réalisé à approuver ( N )
+
+Ex. clos dépenses
+votées N
+
+Dépenses N
+
+ANNEXE 4
+
+Provisions appelées, emprunts et
+subventions reçus, affectation du fonds
+de travaux
+
+Solde
+
+Total travaux article 14-2
+OPERATIONS EXCEPTIONNELLES CHARGES COMMUNES GENERALES 673001- HONORAIRES AVOCATS
+
+Ex. clos dépenses
+votées N
+
+Dépenses
+
+Provisions appelées, emprunts et
+subventions reçus, affectation du fonds
+de travaux N
+
+Solde
+
+Total opérations exceptionnelles TOTAL
+
+Annexe 5
+Etat des travaux de l’article 14-2 et opérations exceptionnelles votes non encore clôtures a la fin de l’exercice du … au …
+
+TRAVAUX RAVALEMENT
+
+TRAVAUX VOTES (montant et date)
+A
+
+TRAVAUX PAYES (montant et date)
+B
+
+TRAVAUX REALISES (montant et date)
+
+APPELS TRAVAUX, EMPRUNTS ET SUBVENTIONS RECUS
+(montant et date)
+
+C
+
+D
+
+SOLDE EN ATTENTE SUR TRAVAUX
+E=D-C
+
+SUBVENTIONS ET EMPRUNTS A RECEVOIR (montant et date)
+F
+
+TRAVAUX TOITURE
+(1)
+
+TOTAL
+(1) A détailler par marché de travaux ou opérations exceptionnelles et par clé de répartition
+(2) Ce solde correspond au solde du compte 12 dans l’annexe n°1
+
+(2)
+Date et référence du syndic
+
+Annexe 5
+Etat des travaux de l’article 14-2 et opérations exceptionnelles votes non encore clôtures a la fin de l’exercice du … au …
+
+TRAVAUX RAVALEMENT
+
+TRAVAUX VOTES (montant et date)
+A
+
+TRAVAUX PAYES (montant et date)
+B
+
+TRAVAUX REALISES (montant et date)
+
+APPELS TRAVAUX, EMPRUNTS ET SUBVENTIONS RECUS
+(montant et date)
+
+C
+
+D
+
+SOLDE EN ATTENTE SUR TRAVAUX
+E=D-C
+
+SUBVENTIONS ET EMPRUNTS A RECEVOIR (montant et date)
+F
+
+TRAVAUX TOITURE
+(1)
+
+TOTAL
+(1) A détailler par marché de travaux ou opérations exceptionnelles et par clé de répartition
+(2) Ce solde correspond au solde du compte 12 dans l’annexe n°1
+
+(2) Date et référence du syndic
+
+144
+
+MERCI !
+
+

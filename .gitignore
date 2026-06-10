@@ -58,3 +58,5 @@ supabase/.temp/
 /Retour DB/
 /Retour Pastel/
 /Pr*sentation*/
+playwright-report/
+test-results/

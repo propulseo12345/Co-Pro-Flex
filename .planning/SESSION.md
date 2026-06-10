@@ -1,23 +1,23 @@
-# Session State — 2026-05-31 (CLÔTURE) · WP1+WP2+WP3+WP4(cœur)+sécu faits
+# Session State — 2026-06-10 (Chantier #3 banque de résolutions LIVRÉ)
 
 ## Branch / Commit
-`v2` @ `c1c4177` — **14 commits propres cette session** (depuis `51c2ea7`). Non poussés.
+`finance-drift-rebranchement` @ `21686c5` ; `main` LOCAL FF'd = `21686c5` (origin/main = `27123d5`, **push EN ATTENTE**). origin/branche = `a7e0839` → **19 commits feature non poussés** + 43 antérieurs.
 
 ## Completed This Session
-- **WP1** socle grand livre (4 RPC `post_*` + edge wrappers, 2 bugs corrigés) — e2e OK, GL équilibré.
-- **WP3** clés (catégorie, complétude+blocage, snapshot, ALUR) — prouvé.
-- **WP4 (cœur)** dashboard (6 clés JSON), vues `status='posted'`, impayé canonique, **+ valider une dépense l'écrit au grand livre (6xx/401)** — prouvé.
-- **WP2** orchestrateur `finalize_and_activate_ag` (atomique+idempotent), art.24 exprimés, appels d'AG routés au grand livre — prouvé (vote→budget actif, rejeu=0 doublon).
-- **Sécurité** : JWT exigé sur generate_call_for_funds.
+- **Chantier #3 banque de résolutions LIVRÉ** : cadrage (spec + revue adversariale 5 angles) → plan 9 tâches (`writing-plans`) → exécution **subagent-driven** (implémenteur + revues par tâche). Table `resolution_templates` (système/cabinet/copro), migrations 0042/0043, provider cache, helpers purs, api CRUD, UI 3 niveaux.
+- 3 vrais bugs attrapés en revue : B1 helper RLS sans contrôle de rôle (faille privilège, prouvée+corrigée+gate), fin-10 « quitus » résiduel, couture camelCase/snake_case.
+- Mergé dans `main` LOCAL (FF). Push branche débloqué via compte gh `lyestriki-29`.
+- **Vérifié : tsc 0 · vitest 97/97 · gates SQL 6/6.**
 
-## Next Task (session NEUVE)
-- **Finir TOUT puis tester à la fin.** Ordre : **WP6 (seed propre) → WP5 (clôture 408/486) → finitions → tests**.
-- 👉 **Tout le détail (avancés, reste, IDs, gotchas, plan) est dans `.planning/PROMPT_REPRISE.md`** — le lire en premier.
+## Next Task
+- **Pousser** sur origin (19 commits feature + 43 antérieurs) via `lyestriki-29`, puis **PR** vers main (push main direct bloqué par garde-fou).
+- **Vérif runtime UI par USER** : `/ag/resolutions` (badges Système/Cabinet/Cette copro, Dupliquer, Modifier/Supprimer sur ses modèles, Créer « pour cette copro »).
+- Effort conseillé : `Max`.
 
 ## Blockers
-- None. (Suppressions d'artefacts de test = demander OK user, classifier bloque.)
+- Push origin/main bloqué (garde-fou PR + droits) ; `supabase db reset` CLI cassé (conteneur `supabase_vector`) → appliquer migrations en direct via `docker exec … psql`.
 
 ## Key Context
-- Copro test `11111111-aaaa-bbbb-cccc-111111111111` ; **seule période ouverte = 2027** `0a808340-3ba6-4d3c-86cb-aa06a6c1f304` (on ne poste que là).
-- Route canonique = `create_ledger_transaction`. Serveur dev : `npm run dev` → localhost:3000.
-- 14 commits sur `v2`, non poussés ; `.planning/` partiellement versionné.
+- Mapper `mapRowFromDb` snake→camel OBLIGATOIRE (client non typé) ; regen `supabase.ts` = dette Phase 3.
+- ✅ Commits feature VÉRIFIÉS propres (aucun `.planning/`/parasite committé) ; fichiers parasites du dépôt restés non suivis.
+- Faits durables → mémoire [[ag-resolutions-bank]] (à jour) + [[gh-write-access-coproflex]].
