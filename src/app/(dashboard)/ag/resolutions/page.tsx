@@ -244,7 +244,7 @@ export default function ResolutionsCatalogPage() {
           <div className={styles.editorModalContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             {/* Erreur éditeur (refus silencieux corrigé) */}
             {page.editorError && (
-              <div className={styles.stats}>
+              <div className={styles.errorBanner}>
                 <AlertCircle size={16} aria-hidden="true" />
                 <span>{page.editorError}</span>
               </div>

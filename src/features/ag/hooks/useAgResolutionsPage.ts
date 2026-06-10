@@ -171,6 +171,7 @@ export function useAgResolutionsPage() {
       setEditorError('Aucun cabinet associé à votre compte.');
       return;
     }
+    // Dupliquer crée un modèle CABINET réutilisable ; la portée "cette copro" se choisit via la modale Créer.
     const result = await duplicateTemplate(id, cabinetId, null);
     if (result.success) {
       await refresh();
