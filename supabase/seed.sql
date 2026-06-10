@@ -19,6 +19,19 @@
 --   (Scan error … converting NULL to string is unsupported).
 -- ============================================================================
 
+-- ── Bascule DEV (B1 fail-safe) ──────────────────────────────────────────────
+-- La chaîne de migrations vient de rejouer avec la RLS ON (défaut fail-safe :
+-- GUC `app.environment` absent sur base fraîche). En LOCAL uniquement, on
+-- re-applique la bascule en mode dev → RLS OFF ([[dev_phase_rls]] : phase dev
+-- volontaire). Le set_config est de session, mais la bascule elle-même est de
+-- la DDL durable. seed.sql n'est JAMAIS rejoué par `db push` cloud → le cloud
+-- reste fail-safe, RLS ON + FORCE GL.
+-- NB : un `ALTER DATABASE … SET app.environment` persistant est refusé au rôle
+-- `postgres` (GUC custom, PG15+). Si une future migration appliquée SEULE via
+-- `migration up` re-bascule la RLS ON en local → refaire `db reset`.
+select set_config('app.environment', 'development', false);
+select public.apply_rls_environment();
+
 -- Contexte service_role : nécessaire pour franchir les gardes is_service_call()
 -- des fonctions de seed (create_test_copro_seeded, seed_golden_loop…).
 select set_config('request.jwt.claims', '{"role":"service_role"}', false);

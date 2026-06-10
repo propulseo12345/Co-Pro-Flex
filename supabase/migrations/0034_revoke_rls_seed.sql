@@ -817,14 +817,21 @@ grant select on public.tiers_directory to authenticated;
 -- ============================================================
 -- 0034 — revoke-rls-seed : blocs INFRA (REVOKE / BASCULE / FORCE / SEED)
 -- Policies RLS = bloc séparé (Bloc 2). Ordre : (1) REVOKE filet,
--- (2) bascule ENABLE/DISABLE env-conditionnelle, (3) FORCE GL prod,
--- (4) seed global. Bascule OFF en dev ([[dev_phase_rls]]).
+-- (2)+(3) bascule env FAIL-SAFE (B1 : RLS ON + FORCE GL par défaut,
+-- OFF uniquement si app.environment='development' — posé par seed.sql
+-- local, [[dev_phase_rls]]), (4) seed global.
 -- ============================================================
 
 -- ------------------------------------------------------------
--- (1) ASSERTION REVOKE — filet idempotent (aucun REVOKE de masse)
+-- (1) REVOKE DÉFENSIF + ASSERTION — filet idempotent (M2)
 --     anon doit être à 0 fonction EXECUTE (fait au fil de l'eau 0023→0033).
+--     Sur un cloud neuf, des grants par défaut (extensions, plateforme)
+--     peuvent exister : REVOKE de masse défensif d'abord, puis assertion
+--     restreinte aux fonctions NON issues d'extensions (pg_depend
+--     deptype 'e') pour ne pas casser le push sur un faux positif.
 -- ------------------------------------------------------------
+revoke execute on all functions in schema public from anon;
+
 do $$
 declare
   v_leaked text;
@@ -834,7 +841,11 @@ begin
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public'
-    and has_function_privilege('anon', p.oid, 'EXECUTE');
+    and has_function_privilege('anon', p.oid, 'EXECUTE')
+    and not exists (
+      select 1 from pg_depend d
+      where d.objid = p.oid and d.deptype = 'e'
+    );
 
   if v_leaked is not null then
     raise exception
@@ -844,13 +855,27 @@ end;
 $$;
 
 -- ------------------------------------------------------------
--- (2) BASCULE ENV — ENABLE en production, DISABLE sinon (dev)
---     Idempotent : ENABLE/DISABLE ROW LEVEL SECURITY est rejouable.
---     79 tables.
+-- (2)+(3) BASCULE ENV — FAIL-SAFE (B1) : RLS ON sauf dev EXPLICITE
+--     `app.environment = 'development'` (posé par seed.sql en local)
+--       → DISABLE + NO FORCE (phase dev, [[dev_phase_rls]]).
+--     GUC absent ou toute autre valeur (cloud neuf, production)
+--       → ENABLE sur toutes les tables du registre + FORCE sur les
+--         5 tables du grand livre (RLS appliquée même au propriétaire,
+--         jamais bypassée hors superuser/bypassrls).
+--     Factorisée en fonction rejouable : appelée ici, par 0042
+--     (resolution_templates créée APRÈS 0034 — ignorée ici via
+--     to_regclass), par seed.sql (retour dev après reset local) et
+--     par les tests d'étanchéité (simulation production).
 -- ------------------------------------------------------------
-do $$
+create or replace function public.apply_rls_environment()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
 declare
-  v_prod boolean := current_setting('app.environment', true) = 'production';
+  -- Fail-safe B1 : seul 'development' EXPLICITE désactive la RLS.
+  v_dev boolean := current_setting('app.environment', true) = 'development';
   t text;
 begin
   foreach t in array array[
@@ -875,41 +900,41 @@ begin
     'planned_works', 'service_orders', 'service_order_events', 'logbook_entries',
     'contracts', 'conversations', 'conversation_members', 'messages',
     'wall_posts', 'wall_comments', 'wall_likes', 'events', 'mails',
-    'email_templates'
+    'email_templates',
+    'resolution_templates'
   ]
   loop
-    if v_prod then
-      execute format('alter table public.%I enable row level security', t);
-    else
+    if to_regclass('public.' || t) is null then
+      continue; -- table pas encore créée à ce point de la chaîne (ex. resolution_templates avant 0042)
+    end if;
+    if v_dev then
       execute format('alter table public.%I disable row level security', t);
+    else
+      execute format('alter table public.%I enable row level security', t);
     end if;
   end loop;
-end;
-$$;
 
--- ------------------------------------------------------------
--- (3) FORCE ROW LEVEL SECURITY — production uniquement
---     5 tables du grand livre : la RLS s'applique même au propriétaire
---     de la table (jamais bypassée hors service_role). DISABLE en dev.
--- ------------------------------------------------------------
-do $$
-declare
-  v_prod boolean := current_setting('app.environment', true) = 'production';
-  t text;
-begin
   foreach t in array array[
     'ledger_transactions', 'ledger_entries', 'accounting_periods',
     'accounts', 'payment_allocations'
   ]
   loop
-    if v_prod then
-      execute format('alter table public.%I force row level security', t);
-    else
+    if to_regclass('public.' || t) is null then
+      continue;
+    end if;
+    if v_dev then
       execute format('alter table public.%I no force row level security', t);
+    else
+      execute format('alter table public.%I force row level security', t);
     end if;
   end loop;
 end;
 $$;
+
+-- Exécutable uniquement par le propriétaire (postgres : migrations, seed.sql, tests).
+revoke execute on function public.apply_rls_environment() from public, anon, authenticated;
+
+select public.apply_rls_environment();
 
 -- ------------------------------------------------------------
 -- (4) SEED global (service_role à l'exécution, idempotent)

@@ -113,18 +113,9 @@ create policy p_del_restpl on public.resolution_templates
   for delete to authenticated
   using (cabinet_id is not null and public.user_is_cabinet_manager(cabinet_id));
 
--- Bascule env (OFF en dev, comme 0034). RLS active uniquement en production.
--- REGISTRE RLS CENTRAL (0034) — bascule locale VOLONTAIRE, NE PAS migrer dans 0034 :
---   le sweep RLS centralisé vit en 0034 (revoke_rls_seed), mais cette table est créée en 0042, soit APRÈS
---   0034 dans l'ordre de rejeu des migrations. L'ajouter à la liste de 0034 casserait `supabase db reset`
---   avec « relation "public.resolution_templates" does not exist » (la table n'existe pas encore au moment
---   où 0034 s'exécute). Cette table gère donc sa PROPRE bascule env-gated ici, alignée sur la convention 0034
---   (OFF hors production). C'est un choix d'ordering assumé, pas un oubli du registre central.
-do $$
-begin
-  if current_setting('app.environment', true) = 'production' then
-    execute 'alter table public.resolution_templates enable row level security';
-  else
-    execute 'alter table public.resolution_templates disable row level security';
-  end if;
-end $$;
+-- Bascule env FAIL-SAFE (B1, registre central 0034) : resolution_templates est
+-- désormais DANS la liste de apply_rls_environment() (0034), protégée par
+-- to_regclass au rejeu de 0034 (table pas encore créée à ce moment-là).
+-- Ici, la table existe : on re-applique la bascule → RLS ON sauf
+-- app.environment='development' explicite.
+select public.apply_rls_environment();
