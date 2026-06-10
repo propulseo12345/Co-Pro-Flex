@@ -92,7 +92,7 @@ export function BibliothequeResolutions({
         'Contrats',
         'Action en justice',
         'Impayés',
-        'Modification du règlement de copropriété et des lots',
+        'Modification du règlement',
         'Compteurs',
         'Règles de bonne conduite'
     ];

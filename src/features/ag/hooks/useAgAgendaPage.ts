@@ -330,7 +330,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
   const RESOLUTIONS_N_MINUS_1 = useMemo(() => new Set([
     'fin-05',  // Approbation des comptes
     'ag-05',   // Quitus au syndic
-    'fin-10',  // Situation de trésorerie et quitus
+    'fin-10',  // Situation de trésorerie (requalifiée sans quitus)
   ]), []);
 
   // Résolutions N+1 (prochain exercice) : budget prévisionnel
