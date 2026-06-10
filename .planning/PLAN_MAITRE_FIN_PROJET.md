@@ -128,6 +128,19 @@ Exécution des arbitrages **tranchés le 2026-06-10** (verdicts : `DECISIONS.md`
 - [ ] **RGPD** · extranet ALUR avancé · mandat syndic modélisé (différé 0030).
 - [ ] **Dette transverse** : `any` résiduels, `console.*`, hooks monolithiques (`useAgData` 1091L, `useBudget`, `useAppelsFonds`), fichiers `.legacy`, doublons constantes, suppression des derniers fichiers EN morts.
 
+## J10 — Gros pass POLISH UI/UX *(ajouté 2026-06-11 · effort `Max` + skills design)*
+
+> Passe finale de qualité visuelle/ergonomie sur TOUTE l'app, une fois fonctionnellement complète (après J9). Objectif : qualité « agence haut de gamme », anti-générique, cohérence totale.
+
+- [ ] **Audit UX d'ensemble** : parcours par module (dashboard, finance, AG, maintenance, GED, communication, copropriétaires, ventes, portail copro), repérer les écrans pauvres / incohérents / « faux boutons » résiduels.
+- [ ] **Design system durci** : faire de `docs/claude/design-system.md` la source unique appliquée partout (tokens, espacements, typo, états hover/focus/loading/empty/error), supprimer tout style en dur / pastel / `rem` en finance.
+- [ ] **Polish par module** : hiérarchie visuelle, densité, micro-interactions, transitions, skeletons de chargement, états vides soignés, responsive. Respecter la stack RÉELLE (Next.js + CSS Modules) — **ne PAS importer Tailwind** (skills design = goût, pas la stack).
+- [ ] **Accessibilité** : labels, focus visibles, contrastes, navigation clavier (sweep a11y final).
+- [ ] **Cohérence finale** : composants partagés unifiés (boutons, modales, tables, badges, KPI strips), 0 divergence entre pages ; PDF (convocation/PV/appels) alignés sur la DA.
+- Outils : skills `frontend-design` / goût visuel (adaptés CSS Modules), MCP navigateur pour vérif réelle (Lyes), screenshots avant/après par écran.
+
+**Test Lyes** : revue visuelle écran par écran ; « ça fait premium, c'est cohérent, rien ne sonne faux ».
+
 ---
 
 ## Règles de garde (rappel)
