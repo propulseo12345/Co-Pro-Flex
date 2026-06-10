@@ -507,6 +507,34 @@ export function usePaySupplierInvoice() {
   return { ...state, mutate };
 }
 
+// Avoir fournisseur (0044) : poste l'écriture INVERSE (D 401 / C 6xx) → refresh des annexes.
+export function useCreateSupplierCreditNote() {
+  const { currentCoproId } = useCopro();
+  const { refresh: refreshAnnexes } = useAnnexeContext();
+  const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
+
+  const mutate = useCallback(async (payload: Omit<financeApi.CreateSupplierCreditNotePayload, 'copro_id'>) => {
+    if (!currentCoproId) {
+      return { data: null, error: 'Aucune copropriété sélectionnée' };
+    }
+
+    setState({ isLoading: true, error: null });
+
+    const result = await financeApi.createSupplierCreditNote({
+      ...payload,
+      copro_id: currentCoproId,
+    });
+
+    setState({ isLoading: false, error: result.error });
+
+    if (!result.error) refreshAnnexes();
+
+    return result;
+  }, [currentCoproId, refreshAnnexes]);
+
+  return { ...state, mutate };
+}
+
 export function useUpdateSupplierInvoice() {
   const { currentCoproId } = useCopro();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });

@@ -1,8 +1,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { ArrowLeft, FileText, Building2, Clock, CheckCircle, AlertTriangle, Download, Printer, Send, CreditCard, Paperclip, History, PieChart, Key, ExternalLink, FileEdit, ClipboardCheck, CheckCircle2, ArrowRight, Plus, Edit, Eye } from 'lucide-react';
-import { useFactureDetailPage } from '@/features/finance';
+import { ArrowLeft, FileText, Building2, Clock, CheckCircle, AlertTriangle, Download, Printer, Send, CreditCard, Paperclip, History, PieChart, Key, ExternalLink, FileEdit, ClipboardCheck, CheckCircle2, ArrowRight, Plus, Edit, Eye, FileMinus2 } from 'lucide-react';
+import { useFactureDetailPage, CreateAvoirModal } from '@/features/finance';
 import type { StatutFacture, EvenementFacture } from '@/components/features/finance/Factures/types';
 import styles from './facture-detail.module.css';
 
@@ -37,6 +37,9 @@ export default function FactureDetailPage() {
         <div className={styles.headerActions}>
           <button className={`${styles.actionButton} ${styles.actionButtonSecondary}`}><Printer size={16} />Imprimer</button>
           <button className={`${styles.actionButton} ${styles.actionButtonSecondary}`}><Download size={16} />Exporter</button>
+          {page.canCreateAvoir && (
+            <button className={`${styles.actionButton} ${styles.actionButtonSecondary}`} onClick={page.openAvoirModal}><FileMinus2 size={16} />Créer un avoir</button>
+          )}
           {page.nextStatut && (
             <button className={`${styles.actionButton} ${styles.actionButtonPrimary}`} onClick={() => page.handleChangeStatut(page.nextStatut!)}><Send size={16} />{page.getActionLabel(page.facture.statut)}</button>
           )}
@@ -143,6 +146,21 @@ export default function FactureDetailPage() {
           </section>
         </aside>
       </div>
+
+      {page.avoirContext && (
+        <CreateAvoirModal
+          isOpen={page.isAvoirModalOpen}
+          reference={page.facture.reference}
+          fournisseur={page.facture.fournisseur}
+          montantTotal={page.avoirContext.montantTotal}
+          resteAPayer={page.avoirContext.resteAPayer}
+          isSubmitting={page.isCreatingAvoir}
+          error={page.avoirError}
+          formatCurrency={page.formatCurrency}
+          onClose={page.closeAvoirModal}
+          onSubmit={page.handleCreateAvoir}
+        />
+      )}
     </div>
   );
 }
