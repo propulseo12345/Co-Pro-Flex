@@ -1465,6 +1465,9 @@ export type Database = {
         Row: {
           amount: number
           budget_id: string | null
+          cash_ledger_tx_id: string | null
+          cash_settled: boolean
+          cash_settled_at: string | null
           copro_id: string
           created_at: string
           destination: Database["public"]["Enums"]["transfer_destination"]
@@ -1477,6 +1480,9 @@ export type Database = {
         Insert: {
           amount: number
           budget_id?: string | null
+          cash_ledger_tx_id?: string | null
+          cash_settled?: boolean
+          cash_settled_at?: string | null
           copro_id: string
           created_at?: string
           destination: Database["public"]["Enums"]["transfer_destination"]
@@ -1489,6 +1495,9 @@ export type Database = {
         Update: {
           amount?: number
           budget_id?: string | null
+          cash_ledger_tx_id?: string | null
+          cash_settled?: boolean
+          cash_settled_at?: string | null
           copro_id?: string
           created_at?: string
           destination?: Database["public"]["Enums"]["transfer_destination"]
@@ -1519,6 +1528,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_budgets_overview"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_cash_ledger_tx_id_fkey"
+            columns: ["cash_ledger_tx_id"]
+            isOneToOne: false
+            referencedRelation: "ledger_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_cash_ledger_tx_id_fkey"
+            columns: ["cash_ledger_tx_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_statement_by_lot_detail"
+            referencedColumns: ["tx_id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_cash_ledger_tx_id_fkey"
+            columns: ["cash_ledger_tx_id"]
+            isOneToOne: false
+            referencedRelation: "v_result_allocation_split"
+            referencedColumns: ["tx_id"]
           },
           {
             foreignKeyName: "alur_transfers_copro_id_fkey"
@@ -6155,6 +6185,119 @@ export type Database = {
           },
         ]
       }
+      resolution_templates: {
+        Row: {
+          action_type: string | null
+          applicable_ag: string[] | null
+          cabinet_id: string | null
+          categorie: string
+          code: string | null
+          copro_id: string | null
+          created_at: string
+          created_by: string | null
+          deprecated_by: string | null
+          id: string
+          is_information: boolean
+          legal_ref: string | null
+          majorite: string
+          obligatoire_pour: string[]
+          ordre_suggere: number | null
+          scope: string
+          status: string
+          tags: string[]
+          texte: string
+          titre: string
+          updated_at: string
+          usage_count: number
+          variables: string[]
+          variables_typees: Json
+          version: string
+        }
+        Insert: {
+          action_type?: string | null
+          applicable_ag?: string[] | null
+          cabinet_id?: string | null
+          categorie: string
+          code?: string | null
+          copro_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deprecated_by?: string | null
+          id?: string
+          is_information?: boolean
+          legal_ref?: string | null
+          majorite: string
+          obligatoire_pour?: string[]
+          ordre_suggere?: number | null
+          scope?: string
+          status?: string
+          tags?: string[]
+          texte: string
+          titre: string
+          updated_at?: string
+          usage_count?: number
+          variables?: string[]
+          variables_typees?: Json
+          version?: string
+        }
+        Update: {
+          action_type?: string | null
+          applicable_ag?: string[] | null
+          cabinet_id?: string | null
+          categorie?: string
+          code?: string | null
+          copro_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deprecated_by?: string | null
+          id?: string
+          is_information?: boolean
+          legal_ref?: string | null
+          majorite?: string
+          obligatoire_pour?: string[]
+          ordre_suggere?: number | null
+          scope?: string
+          status?: string
+          tags?: string[]
+          texte?: string
+          titre?: string
+          updated_at?: string
+          usage_count?: number
+          variables?: string[]
+          variables_typees?: Json
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resolution_templates_cabinet_id_fkey"
+            columns: ["cabinet_id"]
+            isOneToOne: false
+            referencedRelation: "cabinets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resolution_templates_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resolution_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resolution_templates_deprecated_by_fkey"
+            columns: ["deprecated_by"]
+            isOneToOne: false
+            referencedRelation: "resolution_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_order_events: {
         Row: {
           comment: string | null
@@ -6522,6 +6665,7 @@ export type Database = {
           copro_id: string
           created_at: string
           created_by: string | null
+          doc_kind: Database["public"]["Enums"]["supplier_doc_kind"]
           document_id: string | null
           due_date: string | null
           id: string
@@ -6531,6 +6675,7 @@ export type Database = {
           ledger_tx_id: string | null
           montant_ht: number | null
           montant_tva: number | null
+          original_invoice_id: string | null
           period_id: string
           service_order_id: string | null
           status: Database["public"]["Enums"]["supplier_invoice_status"]
@@ -6543,6 +6688,7 @@ export type Database = {
           copro_id: string
           created_at?: string
           created_by?: string | null
+          doc_kind?: Database["public"]["Enums"]["supplier_doc_kind"]
           document_id?: string | null
           due_date?: string | null
           id?: string
@@ -6552,6 +6698,7 @@ export type Database = {
           ledger_tx_id?: string | null
           montant_ht?: number | null
           montant_tva?: number | null
+          original_invoice_id?: string | null
           period_id: string
           service_order_id?: string | null
           status?: Database["public"]["Enums"]["supplier_invoice_status"]
@@ -6564,6 +6711,7 @@ export type Database = {
           copro_id?: string
           created_at?: string
           created_by?: string | null
+          doc_kind?: Database["public"]["Enums"]["supplier_doc_kind"]
           document_id?: string | null
           due_date?: string | null
           id?: string
@@ -6573,6 +6721,7 @@ export type Database = {
           ledger_tx_id?: string | null
           montant_ht?: number | null
           montant_tva?: number | null
+          original_invoice_id?: string | null
           period_id?: string
           service_order_id?: string | null
           status?: Database["public"]["Enums"]["supplier_invoice_status"]
@@ -6623,6 +6772,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_result_allocation_split"
             referencedColumns: ["tx_id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_original_invoice_id_fkey"
+            columns: ["original_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_original_invoice_id_fkey"
+            columns: ["original_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_supplier_invoices_overview"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "supplier_invoices_period_id_fkey"
@@ -7440,6 +7603,21 @@ export type Database = {
           },
         ]
       }
+      v_alur_fund_balance: {
+        Row: {
+          balance: number | null
+          copro_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_alur_fund_summary: {
         Row: {
           budget_fonctionnement: number | null
@@ -7589,6 +7767,47 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_result_allocation_split"
             referencedColumns: ["tx_id"]
+          },
+        ]
+      }
+      v_alur_transfers_pending_cash: {
+        Row: {
+          amount: number | null
+          budget_id: string | null
+          budget_name: string | null
+          copro_id: string | null
+          notes: string | null
+          transfer_date: string | null
+          transfer_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alur_transfers_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_alur_fund_summary"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budgets_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alur_transfers_copro_id_fkey"
+            columns: ["copro_id"]
+            isOneToOne: false
+            referencedRelation: "copros"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -8946,6 +9165,8 @@ export type Database = {
         Row: {
           copro_id: string | null
           created_at: string | null
+          credited_amount: number | null
+          doc_kind: Database["public"]["Enums"]["supplier_doc_kind"] | null
           document_id: string | null
           due_date: string | null
           id: string | null
@@ -8953,6 +9174,7 @@ export type Database = {
           invoice_number: string | null
           label: string | null
           ledger_tx_id: string | null
+          original_invoice_id: string | null
           payments_count: number | null
           period_id: string | null
           remaining_to_pay: number | null
@@ -8997,6 +9219,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_result_allocation_split"
             referencedColumns: ["tx_id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_original_invoice_id_fkey"
+            columns: ["original_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_original_invoice_id_fkey"
+            columns: ["original_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_supplier_invoices_overview"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "supplier_invoices_period_id_fkey"
@@ -9443,6 +9679,7 @@ export type Database = {
         Returns: Json
       }
       delete_service_order: { Args: { p_order_id: string }; Returns: Json }
+      finalize_ag: { Args: { p_ag_id: string }; Returns: Json }
       finalize_and_activate_ag: {
         Args: { p_activate?: boolean; p_ag_id: string }
         Returns: Json
@@ -9508,6 +9745,25 @@ export type Database = {
       get_ag_all_session_drafts: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_envoi_tracking: { Args: { p_ag_id: string }; Returns: Json }
       get_ag_live_results: { Args: { p_ag_id: string }; Returns: Json }
+      get_ag_pending_actions: {
+        Args: { p_ag_id: string }
+        Returns: {
+          action_type: Database["public"]["Enums"]["ag_action_type"]
+          activated_at: string
+          ag_id: string
+          created_at: string
+          error_message: string
+          id: string
+          payload: Json
+          resolution_id: string
+          resolution_title: string
+          resolution_variables: Json
+          result_data: Json
+          status: string
+          target_id: string
+          target_table: string
+        }[]
+      }
       get_ag_recipients: {
         Args: {
           p_ag_id: string
@@ -9653,6 +9909,16 @@ export type Database = {
         }
         Returns: Json
       }
+      post_alur_transfer: {
+        Args: {
+          p_amount: number
+          p_budget_id: string
+          p_copro_id: string
+          p_notes?: string
+          p_transfer_date: string
+        }
+        Returns: Json
+      }
       post_budget_call_for_funds: {
         Args: {
           p_budget_id: string
@@ -9686,6 +9952,23 @@ export type Database = {
       }
       post_period_cutoff: {
         Args: { p_copro_id: string; p_items: Json; p_period_id: string }
+        Returns: Json
+      }
+      post_supplier_credit_note: {
+        Args: {
+          p_copro_id: string
+          p_document_id?: string
+          p_invoice_date: string
+          p_invoice_number: string
+          p_label: string
+          p_lines?: Json
+          p_montant_ht?: number
+          p_montant_tva?: number
+          p_original_invoice_id?: string
+          p_period_id: string
+          p_taux_tva?: number
+          p_tiers_id: string
+        }
         Returns: Json
       }
       post_supplier_invoice: {
@@ -9761,10 +10044,6 @@ export type Database = {
         Args: { p_copro_id: string; p_period_id: string }
         Returns: Json
       }
-      rpc_finalize_ag_session: {
-        Args: { p_ag_id: string; p_closing_notes?: string }
-        Returns: Json
-      }
       rpc_get_ag_convocation_bundle: {
         Args: { p_ag_id: string }
         Returns: Json
@@ -9825,11 +10104,19 @@ export type Database = {
         }
         Returns: Json
       }
+      settle_alur_transfer_cash: {
+        Args: { p_settled_date: string; p_transfer_id: string }
+        Returns: Json
+      }
       start_ag: {
         Args: { p_ag_id: string; p_opening_notes?: string }
         Returns: Json
       }
       submit_budget: { Args: { p_budget_id: string }; Returns: Json }
+      supplier_invoice_net_payable: {
+        Args: { p_invoice_id: string }
+        Returns: number
+      }
       update_call_status: { Args: { p_call_id: string }; Returns: undefined }
       update_service_order_status: {
         Args: {
@@ -9871,6 +10158,10 @@ export type Database = {
         Returns: boolean
       }
       user_has_copro_access: { Args: { p_copro_id: string }; Returns: boolean }
+      user_is_cabinet_manager: {
+        Args: { p_cabinet_id: string }
+        Returns: boolean
+      }
       user_is_copro_manager: { Args: { p_copro_id: string }; Returns: boolean }
       user_is_lot_owner: { Args: { p_lot_id: string }; Returns: boolean }
       user_is_lot_owner_in_copro: {
@@ -10091,6 +10382,7 @@ export type Database = {
         | "budget_expense"
         | "mutation"
         | "collective_loan"
+        | "supplier_credit_note"
       ledger_tx_status: "draft" | "posted"
       legal_proceeding_nature: "litigation" | "recovery" | "other"
       legal_proceeding_status:
@@ -10215,6 +10507,7 @@ export type Database = {
         | "cancelled"
         | "refused"
       service_order_type: "classique" | "urgent" | "contrat" | "art18"
+      supplier_doc_kind: "invoice" | "credit_note"
       supplier_invoice_status: "draft" | "posted" | "paid" | "cancelled"
       technical_doc_type:
         | "dta"
@@ -10574,6 +10867,7 @@ export const Constants = {
         "budget_expense",
         "mutation",
         "collective_loan",
+        "supplier_credit_note",
       ],
       ledger_tx_status: ["draft", "posted"],
       legal_proceeding_nature: ["litigation", "recovery", "other"],
@@ -10714,6 +11008,7 @@ export const Constants = {
         "refused",
       ],
       service_order_type: ["classique", "urgent", "contrat", "art18"],
+      supplier_doc_kind: ["invoice", "credit_note"],
       supplier_invoice_status: ["draft", "posted", "paid", "cancelled"],
       technical_doc_type: [
         "dta",

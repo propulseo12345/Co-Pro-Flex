@@ -9076,6 +9076,7 @@ export type Database = {
           copro_id: string
           created_at: string
           created_by: string | null
+          doc_kind: Database["public"]["Enums"]["supplier_doc_kind"]
           document_id: string | null
           due_date: string | null
           id: string
@@ -9085,6 +9086,7 @@ export type Database = {
           ledger_tx_id: string | null
           montant_ht: number | null
           montant_tva: number | null
+          original_invoice_id: string | null
           period_id: string
           related_service_order_id: string | null
           status: Database["public"]["Enums"]["supplier_invoice_status"]
@@ -9097,6 +9099,7 @@ export type Database = {
           copro_id: string
           created_at?: string
           created_by?: string | null
+          doc_kind?: Database["public"]["Enums"]["supplier_doc_kind"]
           document_id?: string | null
           due_date?: string | null
           id?: string
@@ -9106,6 +9109,7 @@ export type Database = {
           ledger_tx_id?: string | null
           montant_ht?: number | null
           montant_tva?: number | null
+          original_invoice_id?: string | null
           period_id: string
           related_service_order_id?: string | null
           status?: Database["public"]["Enums"]["supplier_invoice_status"]
@@ -9118,6 +9122,7 @@ export type Database = {
           copro_id?: string
           created_at?: string
           created_by?: string | null
+          doc_kind?: Database["public"]["Enums"]["supplier_doc_kind"]
           document_id?: string | null
           due_date?: string | null
           id?: string
@@ -9127,6 +9132,7 @@ export type Database = {
           ledger_tx_id?: string | null
           montant_ht?: number | null
           montant_tva?: number | null
+          original_invoice_id?: string | null
           period_id?: string
           related_service_order_id?: string | null
           status?: Database["public"]["Enums"]["supplier_invoice_status"]
@@ -9225,6 +9231,20 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_original_invoice_id_fkey"
+            columns: ["original_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_original_invoice_id_fkey"
+            columns: ["original_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_supplier_invoices_overview"
             referencedColumns: ["id"]
           },
         ]
@@ -15527,6 +15547,8 @@ export type Database = {
         Row: {
           copro_id: string | null
           created_at: string | null
+          credited_amount: number | null
+          doc_kind: Database["public"]["Enums"]["supplier_doc_kind"] | null
           document_id: string | null
           due_date: string | null
           id: string | null
@@ -15534,12 +15556,14 @@ export type Database = {
           invoice_number: string | null
           label: string | null
           ledger_tx_id: string | null
+          original_invoice_id: string | null
           payments_count: number | null
           period_id: string | null
           remaining_to_pay: number | null
           status: Database["public"]["Enums"]["supplier_invoice_status"] | null
           supplier_id: string | null
           supplier_name: string | null
+          tiers_id: string | null
           total_amount: number | null
           total_paid: number | null
         }
@@ -16653,6 +16677,23 @@ export type Database = {
         Args: { p_copro_id: string; p_items: Json; p_period_id: string }
         Returns: Json
       }
+      post_supplier_credit_note: {
+        Args: {
+          p_copro_id: string
+          p_document_id?: string
+          p_invoice_date: string
+          p_invoice_number: string
+          p_label: string
+          p_lines?: Json
+          p_montant_ht?: number
+          p_montant_tva?: number
+          p_original_invoice_id?: string
+          p_period_id: string
+          p_taux_tva?: number
+          p_tiers_id: string
+        }
+        Returns: Json
+      }
       post_supplier_invoice: {
         Args: {
           p_copro_id: string
@@ -17259,6 +17300,7 @@ export type Database = {
         | "closed"
         | "cancelled"
       service_order_type: "classique" | "contractuel"
+      supplier_doc_kind: "invoice" | "credit_note"
       supplier_invoice_status:
         | "draft"
         | "approved"
@@ -17761,6 +17803,7 @@ export const Constants = {
         "cancelled",
       ],
       service_order_type: ["classique", "contractuel"],
+      supplier_doc_kind: ["invoice", "credit_note"],
       supplier_invoice_status: [
         "draft",
         "approved",
