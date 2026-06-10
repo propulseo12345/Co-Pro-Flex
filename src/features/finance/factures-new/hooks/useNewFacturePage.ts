@@ -1,35 +1,64 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-
-export type StatutFacture = 'A_PAYER' | 'EN_ATTENTE' | 'PAYEE';
+import { useSuppliers, useOpenPeriod, useAccounts, useCreateSupplierInvoice } from '@/hooks/modules/useFinanceData';
 
 export interface FactureForm {
   date: string;
-  fournisseur: string;
+  dateEcheance: string;
+  supplierId: string;
+  accountId: string;
   reference: string;
+  libelle: string;
   montant: string;
-  statut: StatutFacture;
-  fichier?: File | null;
 }
 
 export type FactureFormErrors = Partial<Record<keyof FactureForm, string>>;
 
 export function useNewFacturePage() {
   const router = useRouter();
+  const suppliers = useSuppliers();
+  const accounts = useAccounts();
+  const openPeriod = useOpenPeriod();
+  const createInvoice = useCreateSupplierInvoice();
+
   const [formData, setFormData] = useState<FactureForm>({
     date: new Date().toISOString().split('T')[0],
-    fournisseur: '',
+    dateEcheance: '',
+    supplierId: '',
+    accountId: '',
     reference: '',
+    libelle: '',
     montant: '',
-    statut: 'A_PAYER',
-    fichier: null
   });
   const [errors, setErrors] = useState<FactureFormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleChange = useCallback((field: keyof FactureForm, value: string | StatutFacture | File | null) => {
+  // Mono-poste : la charge s'impute sur UN compte 6xx (modèle facture fournisseur validé).
+  const chargeAccounts = useMemo(
+    () => (accounts.data ?? []).filter(account => account.code.startsWith('6')),
+    [accounts.data]
+  );
+
+  const isLoadingRefs = suppliers.isLoading || accounts.isLoading || openPeriod.isLoading;
+
+  // Préconditions réelles de saisie — affichées en clair plutôt qu'un formulaire qui plantera.
+  const blockingError = useMemo(() => {
+    if (isLoadingRefs) return null;
+    if (!openPeriod.data) {
+      return 'Aucune période comptable ouverte : ouvrez un exercice avant de saisir une facture.';
+    }
+    if (!suppliers.data || suppliers.data.length === 0) {
+      return "Aucun fournisseur actif sur cette copropriété : créez d'abord le fournisseur dans l'annuaire des tiers.";
+    }
+    if (chargeAccounts.length === 0) {
+      return 'Aucun compte de charge (6xx) actif : le plan comptable de la copropriété est incomplet.';
+    }
+    return null;
+  }, [isLoadingRefs, openPeriod.data, suppliers.data, chargeAccounts.length]);
+
+  const handleChange = useCallback((field: keyof FactureForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setErrors(prev => {
       if (prev[field]) {
@@ -39,19 +68,18 @@ export function useNewFacturePage() {
     });
   }, []);
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    handleChange('fichier', file);
-  }, [handleChange]);
-
   const validateForm = useCallback((): boolean => {
     const newErrors: FactureFormErrors = {};
 
     if (!formData.date) newErrors.date = 'La date est requise';
-    if (!formData.fournisseur.trim()) newErrors.fournisseur = 'Le fournisseur est requis';
-    if (!formData.reference.trim()) newErrors.reference = 'La référence est requise';
+    if (!formData.supplierId) newErrors.supplierId = 'Le fournisseur est requis';
+    if (!formData.accountId) newErrors.accountId = 'Le compte de charge est requis';
+    if (!formData.libelle.trim()) newErrors.libelle = 'Le libellé est requis';
     if (!formData.montant || parseFloat(formData.montant) <= 0) {
       newErrors.montant = 'Le montant doit être supérieur à 0';
+    }
+    if (formData.dateEcheance && formData.date && formData.dateEcheance < formData.date) {
+      newErrors.dateEcheance = "L'échéance ne peut pas précéder la date de facture";
     }
 
     setErrors(newErrors);
@@ -62,15 +90,34 @@ export function useNewFacturePage() {
     e.preventDefault();
 
     if (!validateForm()) return;
+    if (!openPeriod.data) {
+      setSubmitError('Aucune période comptable ouverte.');
+      return;
+    }
+    setSubmitError(null);
 
-    setIsSubmitting(true);
+    const montant = parseFloat(formData.montant);
+    const result = await createInvoice.mutate({
+      period_id: openPeriod.data.id,
+      supplier_id: formData.supplierId,
+      invoice_number: formData.reference.trim() || undefined,
+      invoice_date: formData.date,
+      due_date: formData.dateEcheance || undefined,
+      label: formData.libelle.trim(),
+      // Mono-poste : une ligne TTC sur le compte choisi (TVA non récupérable en copro).
+      lines: [{ account_id: formData.accountId, label: formData.libelle.trim(), amount: montant }],
+      // Saisie + comptabilisation en un geste (décision « validée = posted ») : la RPC écrit
+      // D 6xx / C 401. Le 2-temps brouillon → validation arrive avec la RPC de validation (LOT 1.2).
+      post_immediately: true,
+    });
 
-    // Simuler l'envoi au serveur
-    setTimeout(() => {
-      setIsSubmitting(false);
-      router.push('/finance/factures');
-    }, 1000);
-  }, [validateForm, router]);
+    if (result.error || !result.data) {
+      setSubmitError(result.error ?? 'La création de la facture a échoué.');
+      return;
+    }
+
+    router.push(`/finance/factures/${result.data.invoice_id}`);
+  }, [validateForm, openPeriod.data, formData, createInvoice, router]);
 
   const handleBack = useCallback(() => {
     router.back();
@@ -79,9 +126,13 @@ export function useNewFacturePage() {
   return {
     formData,
     errors,
-    isSubmitting,
+    suppliers: suppliers.data ?? [],
+    chargeAccounts,
+    isLoadingRefs,
+    blockingError,
+    submitError,
+    isSubmitting: createInvoice.isLoading,
     handleChange,
-    handleFileChange,
     handleSubmit,
     handleBack,
   };

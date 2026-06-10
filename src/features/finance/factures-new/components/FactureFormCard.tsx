@@ -6,20 +6,34 @@ import {
   Building2,
   Hash,
   Euro,
-  Upload,
+  BookOpen,
+  Tag,
+  Info,
   AlertCircle
 } from 'lucide-react';
-import type { FactureForm, StatutFacture, FactureFormErrors } from '../hooks';
+import type { FactureForm, FactureFormErrors } from '../hooks';
 import styles from '@/app/(dashboard)/finance/factures/new/new-facture.module.css';
+
+interface SupplierOption {
+  id: string;
+  name: string;
+}
+
+interface ChargeAccountOption {
+  id: string;
+  code: string;
+  name: string;
+}
 
 interface FactureFormCardProps {
   formData: FactureForm;
   errors: FactureFormErrors;
-  onFieldChange: (field: keyof FactureForm, value: string | StatutFacture | File | null) => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  suppliers: SupplierOption[];
+  chargeAccounts: ChargeAccountOption[];
+  onFieldChange: (field: keyof FactureForm, value: string) => void;
 }
 
-export function FactureFormCard({ formData, errors, onFieldChange, onFileChange }: FactureFormCardProps) {
+export function FactureFormCard({ formData, errors, suppliers, chargeAccounts, onFieldChange }: FactureFormCardProps) {
   return (
     <div className={styles.formCard}>
       <div className={styles.cardHeader}>
@@ -28,7 +42,57 @@ export function FactureFormCard({ formData, errors, onFieldChange, onFileChange 
       </div>
 
       <div className={styles.formGrid}>
-        {/* Date */}
+        {/* Fournisseur */}
+        <div className={styles.formGroup}>
+          <label htmlFor="fournisseur">
+            <Building2 size={16} aria-hidden="true" />
+            Fournisseur
+          </label>
+          <select
+            id="fournisseur"
+            value={formData.supplierId}
+            onChange={(e) => onFieldChange('supplierId', e.target.value)}
+            className={errors.supplierId ? styles.inputError : ''}
+          >
+            <option value="">— Sélectionner un fournisseur —</option>
+            {suppliers.map((supplier) => (
+              <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+            ))}
+          </select>
+          {errors.supplierId && (
+            <span className={styles.errorMessage}>
+              <AlertCircle size={14} aria-hidden="true" />
+              {errors.supplierId}
+            </span>
+          )}
+        </div>
+
+        {/* Compte de charge (mono-poste) */}
+        <div className={styles.formGroup}>
+          <label htmlFor="compte">
+            <BookOpen size={16} aria-hidden="true" />
+            Compte de charge
+          </label>
+          <select
+            id="compte"
+            value={formData.accountId}
+            onChange={(e) => onFieldChange('accountId', e.target.value)}
+            className={errors.accountId ? styles.inputError : ''}
+          >
+            <option value="">— Sélectionner un compte (6xx) —</option>
+            {chargeAccounts.map((account) => (
+              <option key={account.id} value={account.id}>{account.code} — {account.name}</option>
+            ))}
+          </select>
+          {errors.accountId && (
+            <span className={styles.errorMessage}>
+              <AlertCircle size={14} aria-hidden="true" />
+              {errors.accountId}
+            </span>
+          )}
+        </div>
+
+        {/* Date facture */}
         <div className={styles.formGroup}>
           <label htmlFor="date">
             <Calendar size={16} aria-hidden="true" />
@@ -49,55 +113,48 @@ export function FactureFormCard({ formData, errors, onFieldChange, onFileChange 
           )}
         </div>
 
-        {/* Fournisseur */}
+        {/* Échéance */}
         <div className={styles.formGroup}>
-          <label htmlFor="fournisseur">
-            <Building2 size={16} aria-hidden="true" />
-            Fournisseur
+          <label htmlFor="dateEcheance">
+            <Calendar size={16} aria-hidden="true" />
+            Date d&apos;échéance (optionnel)
           </label>
           <input
-            id="fournisseur"
-            type="text"
-            placeholder="Nom du fournisseur"
-            value={formData.fournisseur}
-            onChange={(e) => onFieldChange('fournisseur', e.target.value)}
-            className={errors.fournisseur ? styles.inputError : ''}
+            id="dateEcheance"
+            type="date"
+            value={formData.dateEcheance}
+            onChange={(e) => onFieldChange('dateEcheance', e.target.value)}
+            className={errors.dateEcheance ? styles.inputError : ''}
           />
-          {errors.fournisseur && (
+          {errors.dateEcheance && (
             <span className={styles.errorMessage}>
               <AlertCircle size={14} aria-hidden="true" />
-              {errors.fournisseur}
+              {errors.dateEcheance}
             </span>
           )}
         </div>
 
-        {/* Reference */}
+        {/* Référence */}
         <div className={styles.formGroup}>
           <label htmlFor="reference">
             <Hash size={16} aria-hidden="true" />
-            Reference
+            Référence (optionnel)
           </label>
           <input
             id="reference"
             type="text"
-            placeholder="Numero de facture"
+            placeholder="Numéro de facture du fournisseur"
             value={formData.reference}
             onChange={(e) => onFieldChange('reference', e.target.value)}
             className={errors.reference ? styles.inputError : ''}
           />
-          {errors.reference && (
-            <span className={styles.errorMessage}>
-              <AlertCircle size={14} aria-hidden="true" />
-              {errors.reference}
-            </span>
-          )}
         </div>
 
         {/* Montant */}
         <div className={styles.formGroup}>
           <label htmlFor="montant">
             <Euro size={16} aria-hidden="true" />
-            Montant (EUR)
+            Montant TTC (EUR)
           </label>
           <input
             id="montant"
@@ -117,47 +174,35 @@ export function FactureFormCard({ formData, errors, onFieldChange, onFileChange 
           )}
         </div>
 
-        {/* Statut */}
+        {/* Libellé */}
         <div className={styles.formGroup}>
-          <label htmlFor="statut">Statut</label>
-          <select
-            id="statut"
-            value={formData.statut}
-            onChange={(e) => onFieldChange('statut', e.target.value as StatutFacture)}
-          >
-            <option value="A_PAYER">A payer</option>
-            <option value="EN_ATTENTE">En attente</option>
-            <option value="PAYEE">Payee</option>
-          </select>
-        </div>
-
-        {/* Upload fichier */}
-        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-          <label htmlFor="fichier">
-            <Upload size={16} aria-hidden="true" />
-            Piece justificative
+          <label htmlFor="libelle">
+            <Tag size={16} aria-hidden="true" />
+            Libellé
           </label>
-          <div className={styles.fileUpload}>
-            <input
-              id="fichier"
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={onFileChange}
-              className={styles.fileInput}
-            />
-            <label htmlFor="fichier" className={styles.fileLabel}>
-              <Upload size={20} aria-hidden="true" />
-              {formData.fichier ? formData.fichier.name : 'Choisir un fichier (PDF, image...)'}
-            </label>
-          </div>
-          {!formData.fichier && (
-            <span className={styles.warningMessage}>
+          <input
+            id="libelle"
+            type="text"
+            placeholder="Ex. Entretien ascenseur T2"
+            value={formData.libelle}
+            onChange={(e) => onFieldChange('libelle', e.target.value)}
+            className={errors.libelle ? styles.inputError : ''}
+          />
+          {errors.libelle && (
+            <span className={styles.errorMessage}>
               <AlertCircle size={14} aria-hidden="true" />
-              Recommande : joindre un justificatif (PDF, image...) pour cette facture
+              {errors.libelle}
             </span>
           )}
         </div>
       </div>
+
+      <span className={styles.warningMessage}>
+        <Info size={14} aria-hidden="true" />
+        En enregistrant, la facture est comptabilisée immédiatement au grand livre
+        (débit {formData.accountId ? 'du compte de charge choisi' : '6xx'} / crédit 401) sur la période ouverte.
+        Montants TTC (TVA non récupérable en copropriété).
+      </span>
     </div>
   );
 }
