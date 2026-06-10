@@ -32,6 +32,8 @@ const GATES = [
   'supabase/tests/20260603103000_period_from_exercice_debut_test.sql',
   'supabase/tests/gate_0042_resolution_templates.sql',
   'supabase/tests/gate_0043_seed_resolution_templates.sql',
+  'supabase/tests/gate_rls_multitenant_isolation.sql',
+  'supabase/tests/gate_rls_definer_guards.sql',
   'supabase/tests/gate_finance_loop_e2e.sql',
   'supabase/tests/gate_cloture_affectation_e2e.sql',
   'supabase/tests/gate_avoir_fournisseur_e2e.sql',
