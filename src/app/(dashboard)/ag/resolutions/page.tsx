@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {
   Search, ArrowLeft, Plus, X, Filter, ChevronDown, ChevronUp,
   SlidersHorizontal, ChevronLeft, ChevronRight, RotateCcw, FileText,
+  AlertCircle,
 } from 'lucide-react';
 import type { SortOption } from '@/hooks/modules/useResolutionLibrary';
 import { CustomResolutionEditor } from '@/components/features/ag/CustomResolutionEditor';
@@ -155,6 +156,14 @@ export default function ResolutionsCatalogPage() {
         </div>
       )}
 
+      {/* Garde cabinet absent */}
+      {!page.cabinetId && (
+        <div className={styles.stats}>
+          <AlertCircle size={16} aria-hidden="true" />
+          <span>Aucun cabinet associé à votre compte — la création de modèles est désactivée.</span>
+        </div>
+      )}
+
       {page.sortBy === 'category' ? (
         Object.entries(page.groupedResolutions).map(([category, categoryResolutions]) => (
           <div key={category} className={styles.categorySection}>
@@ -175,6 +184,9 @@ export default function ResolutionsCatalogPage() {
                     onCopy={page.handleCopy}
                     onAddToAG={page.handleOpenAddToAG}
                     hasAvailableAGs={page.availableAGs.length > 0}
+                    onDuplicate={page.cabinetId ? (id) => { void page.handleDuplicateResolution(id); } : undefined}
+                    onEdit={page.handleEditResolution}
+                    onDelete={page.cabinetId ? (id) => { void page.handleDeleteResolution(id); } : undefined}
                   />
                 ))}
               </div>
@@ -192,6 +204,9 @@ export default function ResolutionsCatalogPage() {
                 onCopy={page.handleCopy}
                 onAddToAG={page.handleOpenAddToAG}
                 hasAvailableAGs={page.availableAGs.length > 0}
+                onDuplicate={page.cabinetId ? (id) => { void page.handleDuplicateResolution(id); } : undefined}
+                onEdit={page.handleEditResolution}
+                onDelete={page.cabinetId ? (id) => { void page.handleDeleteResolution(id); } : undefined}
               />
             ))}
           </div>
@@ -227,7 +242,18 @@ export default function ResolutionsCatalogPage() {
       {page.showEditorModal && (
         <div className={styles.modalOverlay} onClick={page.closeEditorModal}>
           <div className={styles.editorModalContent} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-            <CustomResolutionEditor resolution={page.editingResolution} onSave={page.handleSaveResolution} onCancel={page.closeEditorModal} organizationId="default-org" userId="current-user" />
+            {/* Erreur éditeur (refus silencieux corrigé) */}
+            {page.editorError && (
+              <div className={styles.stats}>
+                <AlertCircle size={16} aria-hidden="true" />
+                <span>{page.editorError}</span>
+              </div>
+            )}
+            <CustomResolutionEditor
+              resolution={page.editingResolution}
+              onSave={page.handleSaveResolution}
+              onCancel={page.closeEditorModal}
+            />
           </div>
         </div>
       )}

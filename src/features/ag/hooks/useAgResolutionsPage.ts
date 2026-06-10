@@ -3,12 +3,11 @@
 import { useState, useCallback, useMemo } from 'react';
 import {
   useResolutionLibrary,
-  type SortOption,
 } from '@/hooks/modules/useResolutionLibrary';
 import type { MajorityType, TypeAG, ResolutionTemplate } from '@/lib/constants/resolutions';
 import type { ICustomResolution } from '@/types/models/custom-resolution';
 import type { ResolutionTemplateRow } from '@/lib/ag/resolutionTemplates/types';
-import { createTemplate, updateTemplate, deleteTemplate } from '@/lib/ag/resolutionTemplates/api';
+import { createTemplate, updateTemplate, deleteTemplate, duplicateTemplate } from '@/lib/ag/resolutionTemplates/api';
 import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 import { loadDraft, saveDraft } from '@/lib/ag/draft-persistence';
 import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
@@ -103,7 +102,10 @@ export function useAgResolutionsPage() {
       });
   }, [agDrafts, isLoadingDrafts]);
 
+  const [editorError, setEditorError] = useState<string | null>(null);
+
   const handleSaveResolution = useCallback(async (resolution: ICustomResolution) => {
+    setEditorError(null);
     const payload = {
       titre: resolution.titre,
       categorie: resolution.categorie,
@@ -116,9 +118,21 @@ export function useAgResolutionsPage() {
     // Un modèle déjà présent dans le snapshot = mise à jour ; sinon création.
     const exists = templates.some((t) => t.id === resolution.id);
     if (exists) {
-      await updateTemplate(resolution.id, payload);
+      const result = await updateTemplate(resolution.id, payload);
+      if (!result.success) {
+        setEditorError(result.error);
+        return;
+      }
     } else if (cabinetId) {
-      await createTemplate(cabinetId, payload, coproId);
+      const result = await createTemplate(cabinetId, payload, coproId);
+      if (!result.success) {
+        setEditorError(result.error);
+        return;
+      }
+    } else {
+      // Correction du refus silencieux : cabinetId est null, on ne peut pas créer.
+      setEditorError('Aucun cabinet associé à votre compte. Impossible de créer un modèle.');
+      return;
     }
     await refresh();
     setShowEditorModal(false);
@@ -130,17 +144,40 @@ export function useAgResolutionsPage() {
     setShowEditorModal(true);
   }, []);
 
-  const handleEditResolution = useCallback((resolution: ICustomResolution) => {
-    setEditingResolution(resolution);
+  const handleEditResolution = useCallback((resolution: ICustomResolution | ResolutionTemplateRow) => {
+    // Accepte les deux formes : ICustomResolution (depuis les cartes custom) ou ResolutionTemplateRow (depuis ResolutionCard)
+    if ('cabinet_id' in resolution) {
+      setEditingResolution(rowToCustomResolution(resolution as ResolutionTemplateRow));
+    } else {
+      setEditingResolution(resolution as ICustomResolution);
+    }
     setShowEditorModal(true);
   }, []);
 
   const handleDeleteResolution = useCallback(async (id: string) => {
-    if (confirm('Supprimer cette résolution de la bibliothèque ?')) {
-      await deleteTemplate(id);
+    setEditorError(null);
+    if (!confirm('Supprimer cette résolution de la bibliothèque ?')) return;
+    const result = await deleteTemplate(id);
+    if (result.success) {
       await refresh();
+    } else {
+      setEditorError(result.error);
     }
   }, [refresh]);
+
+  const handleDuplicateResolution = useCallback(async (id: string) => {
+    setEditorError(null);
+    if (!cabinetId) {
+      setEditorError('Aucun cabinet associé à votre compte.');
+      return;
+    }
+    const result = await duplicateTemplate(id, cabinetId, null);
+    if (result.success) {
+      await refresh();
+    } else {
+      setEditorError(result.error);
+    }
+  }, [cabinetId, refresh]);
 
   const handleCopy = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -243,7 +280,7 @@ export function useAgResolutionsPage() {
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(res);
     return acc;
-  }, {} as Record<string, ResolutionTemplate[]>);
+  }, {} as Record<string, ResolutionTemplateRow[]>);
 
   const activeFiltersCount =
     library.filters.categories.length +
@@ -267,12 +304,15 @@ export function useAgResolutionsPage() {
     customResolutions,
     showEditorModal,
     editingResolution,
+    editorError,
+    cabinetId,
     groupedResolutions,
     activeFiltersCount,
     handleSaveResolution,
     handleOpenEditor,
     handleEditResolution,
     handleDeleteResolution,
+    handleDuplicateResolution,
     handleCopy,
     handleOpenAddToAG,
     handleAddToAG,
