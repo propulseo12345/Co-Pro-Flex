@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { KPIFilterType } from '@/components/features/finance/Factures/FacturesKPI';
 import type { SortColumn, SortDirection } from '@/components/features/finance/Factures/FacturesTable';
 import { detectTypeDepense, TYPE_DEPENSE_TO_POSTE } from '@/components/features/finance/Factures/utils';
@@ -12,19 +12,22 @@ import {
   calculerDateEcheanceDefaut,
   MotifAvoir,
   calculerKPIFactures,
-  isFactureEnRetard,
-  PJFacture
+  isFactureEnRetard
 } from '@/components/features/finance/Factures/types';
 import { facturePJService } from '@/lib/services/facture-pj.service';
 import { useCopro } from '@/providers/CoproContext';
 import {
   useSupplierInvoices,
   useCreateSupplierInvoiceDirect,
+  useCreateSupplierCreditNote,
   useOpenPeriod,
   useUpdateSupplierInvoice,
   useDeleteSupplierInvoice,
   useSuppliers
 } from '@/hooks/modules/useFinanceData';
+import { listSupplierInvoiceLines } from '@/lib/finance/api';
+import type { CreditNoteLinePayload } from '@/lib/finance/api';
+import { prorateLines } from '@/lib/finance/credit-notes';
 
 // Store original Supabase invoice IDs for mutations
 const invoiceIdMap = new Map<string, string>(); // local ID -> supabase ID
@@ -48,6 +51,7 @@ export function useFacturesPage() {
   const { data: supabaseInvoices, isLoading, error, refresh } = useSupplierInvoices();
   const { data: openPeriod } = useOpenPeriod();
   const createInvoiceMutation = useCreateSupplierInvoiceDirect();
+  const creditNoteMutation = useCreateSupplierCreditNote();
   const updateInvoiceMutation = useUpdateSupplierInvoice();
   const deleteInvoiceMutation = useDeleteSupplierInvoice();
   const { data: suppliers } = useSuppliers();
@@ -70,7 +74,9 @@ export function useFacturesPage() {
       invoiceIdMap.set(inv.id, inv.id);
       return {
         id: inv.id,
-        typeDocument: 'FACTURE' as const,
+        // doc_kind (0044) : un avoir n'est PAS une facture (exclu des KPIs « à payer »/retards).
+        typeDocument: inv.doc_kind === 'credit_note' ? ('AVOIR' as const) : ('FACTURE' as const),
+        factureOrigineId: inv.original_invoice_id ?? undefined,
         date: inv.invoice_date,
         dateEcheance: inv.due_date || inv.invoice_date,
         fournisseur: inv.supplier_name,
@@ -484,63 +490,67 @@ export function useFacturesPage() {
     setShowAvoirModal(true);
   }, []);
 
+  // Avoir via la RPC dédiée post_supplier_credit_note (0044) : montant POSITIF, écriture
+  // INVERSE D401/C6xx. Avoir total = ventilation copiée par la RPC ; partiel = lignes au
+  // prorata de la facture d'origine. Plus AUCUN fallback local (pas de données fantômes).
   const handleConfirmAvoir = useCallback(async (montant: number, motif: MotifAvoir, reference: string) => {
     if (!selectedFacture) return;
 
     setIsMutating(true);
+    setCreateError(null);
 
     try {
-      // Try to create avoir in Supabase
-      if (currentCoproId && openPeriod && suppliers) {
-        // Find supplier by name (same as original invoice)
-        const supplier = suppliers.find(
-          s => s.name.toLowerCase() === selectedFacture.fournisseur.toLowerCase()
-        );
+      const rawInvoice = supabaseInvoices?.find(inv => inv.id === selectedFacture.id);
+      if (!rawInvoice) {
+        setCreateError('Facture d’origine introuvable : rafraîchissez la page.');
+        return;
+      }
+      if (rawInvoice.doc_kind !== 'invoice') {
+        setCreateError('Un avoir ne peut pas être créé sur un autre avoir.');
+        return;
+      }
+      if (!openPeriod) {
+        setCreateError('Aucune période comptable ouverte : impossible de comptabiliser l’avoir.');
+        return;
+      }
 
-        if (supplier) {
-          // Create as a credit note (negative amount) using direct insertion
-          const result = await createInvoiceMutation.mutate({
-            period_id: openPeriod.id,
-            supplier_id: supplier.id,
-            invoice_number: reference,
-            invoice_date: new Date().toISOString().split('T')[0],
-            due_date: new Date().toISOString().split('T')[0],
-            label: `Avoir: ${motif} - ${reference}`,
-            total_amount: -montant, // Negative for credit note
-          });
-
-          if (!result.error) {
-            await refreshWithTimestamp();
-            setShowAvoirModal(false);
-            setSelectedFacture(null);
-            return;
-          } else {
-            console.error('Create avoir error:', result.error);
-          }
+      const isTotal = Math.abs(montant - Number(rawInvoice.total_amount)) < 0.005;
+      let lines: CreditNoteLinePayload[] | undefined;
+      if (!isTotal) {
+        const linesResult = await listSupplierInvoiceLines(rawInvoice.id);
+        if (linesResult.error || !linesResult.data || linesResult.data.length === 0) {
+          setCreateError('Ventilation de la facture d’origine introuvable : avoir partiel impossible.');
+          return;
+        }
+        lines = prorateLines(linesResult.data, montant);
+        if (lines.length === 0) {
+          setCreateError('Le montant demandé ne produit aucune ligne de ventilation valide.');
+          return;
         }
       }
 
-      // Fallback: Create locally (shouldn't happen if supplier exists)
-      const nouvelAvoir: Facture = {
-        id: String(Date.now()),
-        typeDocument: 'AVOIR',
-        date: new Date().toISOString().split('T')[0],
-        dateEcheance: new Date().toISOString().split('T')[0],
-        fournisseur: selectedFacture.fournisseur,
-        reference,
-        montant,
-        statut: 'A_PAYER',
-        posteBudgetaire: selectedFacture.posteBudgetaire,
-        factureOrigineId: selectedFacture.id,
-        motifAvoir: motif
-      };
-      setFactures(prev => [nouvelAvoir, ...prev]);
+      const result = await creditNoteMutation.mutate({
+        period_id: openPeriod.id,
+        supplier_id: rawInvoice.tiers_id,
+        invoice_number: reference,
+        invoice_date: new Date().toISOString().split('T')[0],
+        label: `Avoir : ${motif} — ${reference}`,
+        original_invoice_id: rawInvoice.id,
+        ...(lines ? { lines } : {}),
+      });
+
+      if (result.error) {
+        setCreateError(`Erreur lors de la création de l’avoir : ${result.error}`);
+        return;
+      }
+
+      await refreshWithTimestamp();
       setShowAvoirModal(false);
       setSelectedFacture(null);
     } finally {
       setIsMutating(false);
     }
-  }, [selectedFacture, currentCoproId, openPeriod, suppliers, createInvoiceMutation, refreshWithTimestamp]);
+  }, [selectedFacture, supabaseInvoices, openPeriod, creditNoteMutation, refreshWithTimestamp]);
 
   const closePaymentModal = useCallback(() => setShowPaymentModal(false), []);
   const closeAccountingModal = useCallback(() => { setShowAccountingModal(false); setSelectedFacture(null); }, []);

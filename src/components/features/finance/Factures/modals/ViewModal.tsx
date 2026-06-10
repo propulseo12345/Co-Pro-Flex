@@ -11,6 +11,8 @@ import styles from '../Factures.module.css';
 interface ViewModalProps {
   facture: Facture;
   onClose: () => void;
+  /** Ouvre la fiche complète /finance/factures/[id] (reste à payer, avoirs liés, workflow…). */
+  onOpenFull?: () => void;
 }
 
 function getStatutIcon(statut: StatutFacture) {
@@ -28,7 +30,7 @@ function getStatutIcon(statut: StatutFacture) {
   }
 }
 
-export function ViewModal({ facture, onClose }: ViewModalProps) {
+export function ViewModal({ facture, onClose, onOpenFull }: ViewModalProps) {
   const badgeClassName = getStatutBadgeClass(facture.statut);
 
   // Récupérer les documents GED liés à cette facture
@@ -165,6 +167,12 @@ export function ViewModal({ facture, onClose }: ViewModalProps) {
           <button className={styles.cancelButton} onClick={onClose}>
             Fermer
           </button>
+          {onOpenFull && (
+            <button className={styles.sendButton} onClick={onOpenFull}>
+              <ExternalLink size={16} aria-hidden="true" />
+              Ouvrir la fiche complète
+            </button>
+          )}
         </div>
       </div>
     </div>

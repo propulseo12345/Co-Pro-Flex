@@ -32,7 +32,7 @@ export function FormActions({ isSubmitting, onCancel }: FormActionsProps) {
         ) : (
           <>
             <Save size={20} aria-hidden="true" />
-            Enregistrer la facture
+            Enregistrer et comptabiliser
           </>
         )}
       </button>

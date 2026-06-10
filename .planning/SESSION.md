@@ -1,25 +1,23 @@
-# Session State — 2026-06-10 (avoirs G5 + re-baseline G2 + design portail copro)
+# Session State — 2026-06-10 soir (plan maître + J0 exécuté)
 
 ## Branch / Commit
-`finance-drift-rebranchement` @ `b0ee3c0` (clean hors bruit EOL ; PR #2 ouverte, non touchée).
+`j0-finitions` @ voir `git log` (clean) · PR #3 vers `main` · **PR #2 MERGÉE** (`origin/main` = `d9a6911`, main local synchronisé).
 
 ## Completed This Session
-- **Nuit (autonome)** : 2 gates E2E (boucle finance + clôture/à-nouveau/affectation), rebranch fournisseurs `suppliers→tiers`, infra CI + headers sécu, 4 docs planning. Tout revu adversarialement.
-- **Matin** : 4 drifts finance (edge `p_tiers_id`, statuts facture `validée=posted` + code mort, wizard appel manuel masqué) ; décisions **G1-G5** actées (DECISIONS.md §G).
-- **Avoirs fournisseurs G5 LIVRÉS** (migration `0044`) : type dédié, écriture inverse C6xx/D401, vue nette, paiement avoir-aware (B1/B2/B3 de la revue corrigés). Gate `gate_avoir_fournisseur_e2e.sql`. **db:test 9/9**, tsc=0, vitest=97/97.
-- **Re-baseline G2 PROUVÉE** : 0001→0044 rejoue à 0 erreur (même en transaction/fichier) + smoke audit=0 ; `scripts/rebaseline-check.sh` ; **CI db:test passée BLOQUANTE** ; rapport `RE-BASELINE_READINESS.md`.
-- **Design portail copropriétaire VALIDÉ** (brainstorm) : contrats des 8 pages vérifiés vs schéma réel (fan-out 5 agents), 6 écarts vs plan corrigés ; filtre `listPendingInvoices`→`['posted']` (ecaab1f). Spec committée → voir Next Task.
+- **PLAN_MAITRE_FIN_PROJET.md créé** = suivi unique fin de projet (J0→J9). Cadrage tranché : **G6** feature-complete, **G7** recâblage complet avant bêta, **G8** arbitrages en session dédiée.
+- **J0.1** ✅ : `.gitattributes` (EOL), ~92 commits poussés, CI verte (db:test bloquant), PR #2 mergée, main rebasé propre (commit sauvegarde 3h01 absorbé — déjà dans la branche).
+- **J0.2a** ✅ : `DOSSIER_ARBITRAGE_J0.md` — 20 fiches sourcées (7🔴+7🟡+4 état daté+2 seed), état code vérifié.
+- **J0.3** ✅ : greffe types 0044 (regen complète → J2.9, sinon +430 erreurs modules driftés) · **UI avoir** (fiche : modal total/partiel prorata ; liste : RPC au lieu du montant négatif cassé) · **/finance/factures/new réel** (mono-poste 6xx, post immédiat, fin du setTimeout fantôme) · mapper `doc_kind` (avoirs hors KPIs « à payer »/retards).
+- tsc=0 · vitest 97/97 · eslint 0 erreur sur les fichiers touchés.
 
-## Next Task (sessions séparées, choix USER)
-- **Phase 1 sécurité/RLS** (session neuve) : corriger **B1** (RLS off en prod, `app.environment` jamais posé) + M2 (assertion anon) dans 0034/0042. Effort conseillé : **`ultracode`** (enjeu fuite de données, revue adversariale).
-- **Portail copropriétaire** (session séparée) : **spec prête** → `/writing-plans` puis implémentation. V1 zéro-migration, 100% parallèle. Effort : **`Max`** (cadrage/plan) + **`ultracode`** ponctuel (revues SQL/RLS au moment du gate de lancement).
-- **Déploiement cloud neuf** : sur GO user, après RLS.
+## Next Task
+- **J0.2b — Session d'arbitrage (LYES)** : trancher les 20 fiches de `DOSSIER_ARBITRAGE_J0.md` (~45-60 min) → je reporte dans DECISIONS.md. Effort : `Max` (dialogue).
+- Puis : merge PR #3 (sur CI verte) → **J1 sécurité/RLS** en session neuve. Effort : `ultracode`.
 
 ## Blockers
-- B1 (RLS OFF en prod) = différé session RLS — non négociable avant 1er cabinet. Détail : `RE-BASELINE_READINESS.md`.
+- None. (B1 RLS = précisément le sujet de J1.)
 
 ## Key Context
-- db:test 9 gates ; `bash scripts/rebaseline-check.sh` re-prouve la repro (non destructif).
-- Décisions canoniques = `DECISIONS.md §G`. Avoirs : 3 Q métier validées (Q1/Q2/Q3).
-- Sessions parallèles USER actives dans `src/` (lane B/C committées) — zone Claude = supabase/tests, scripts, .planning.
-- **Spec portail** = `docs/superpowers/specs/2026-06-10-portail-coproprietaire-design.md` (contrats vérifiés, server-first RSC, V1 zéro-migration, RLS=gate de lancement). NB : re-baseline SQL = DÉJÀ FAITE (reste = cutover cloud + drift de contrat hors-finance).
+- **Dette notée J2.8** : « valider »/« payer » une facture = bascule de statut SANS écriture GL (vraie validation + pay_supplier_invoice à câbler).
+- **Test runtime Lyes (F10)** : saisir une facture via `/finance/factures/new` (fournisseur+compte 6xx) → fiche → « Créer un avoir » (total puis partiel) → vérifier net à payer et absence de l'avoir dans les retards. Serveur : `npm run dev`.
+- Régénération types : référence fraîche dans `.planning/supabase_types_regenerated.ts` (post-0044).

@@ -42,9 +42,10 @@ J0 hygiène + arbitrages (immédiat)
 
 ## J0 — Hygiène & arbitrages *(démarrage immédiat · 2-3 sessions · effort `Max`)*
 
-- [ ] **0.1 Hygiène git** : committer `SESSION.md` en attente ; neutraliser le bruit EOL (`.gitattributes` pour `*.sql`) ; **merger la PR #2** (`finance-drift-rebranchement` → `main`, 24 commits) ; **pousser `main`** (65 commits locaux, compte `lyestriki-29`) ; **vérifier la CI verte sur GitHub** (elle est inopérante tant que rien n'est poussé).
-- [ ] **0.2 Session d'arbitrage comptable (G8)** : Claude prépare le dossier (1 page par point : enjeu, options, reco sourcée) pour les **7 🔴 + 7 🟡** (B3/B4/B5 · C2/C3/C6 · E2-E9) **+ D2/D3/D5/D6** (état daté) **+ 2 arbitrages seed E2E AG**. Lyes tranche tout en une session → `DECISIONS.md` à jour. *Conditionne : annexes, clôture, cloisonnement, `operation_id` (schéma).*
-- [ ] **0.3 Finitions finance** : régénérer `src/types/supabase.ts` (post-0044, purge `post_call_for_funds`) ; **UI « créer un avoir »** (RPC `post_supplier_credit_note` déjà livrée/prouvée) ; remplacer le **piège mock `/finance/factures/new`** par le vrai flux (edge `create_supplier_invoice`) ; relances filtrées `doc_kind` (dette G5).
+- [x] **0.1 Hygiène git** ✅ 2026-06-10 : `.gitattributes` (EOL sql/sh), ~92 commits poussés, **CI verte** (run 27286218272, db:test bloquant inclus), **PR #2 mergée** (`d9a6911`), `main` local = `origin/main` (rebase ; le commit de sauvegarde 3h01 était déjà intégralement dans la branche → absorbé).
+- [x] **0.2a Dossier d'arbitrage (G8)** ✅ 2026-06-10 : `DOSSIER_ARBITRAGE_J0.md` — **20 fiches** (7 🔴 + 7 🟡 + D3/D4/D5/D6 état daté + S1/S2 seed E2E), état du code vérifié dans les migrations, recos sourcées Légifrance.
+- [ ] **0.2b Session de décision (Lyes)** : trancher les 20 fiches (~45-60 min) → reporter chaque décision dans `DECISIONS.md` (statut 🟢 TRANCHÉ). *Conditionne : annexes, clôture, cloisonnement, `operation_id` (schéma) — consommé par J5.*
+- [x] **0.3 Finitions finance** ✅ 2026-06-10 : types = **greffe chirurgicale 0044** (enum/colonnes/vue/RPC ; la regen complète exposait ~430 erreurs des modules driftés → **déplacée en 2.9**, référence fraîche : `.planning/supabase_types_regenerated.ts`) ; **UI « créer un avoir »** livrée (fiche facture : modal total/partiel au prorata ; liste : `handleConfirmAvoir` re-routé RPC, fin du montant négatif rejeté) ; **piège mock `/finance/factures/new` remplacé** (saisie réelle mono-poste, `post_immediately=true`) ; mapper liste `doc_kind` → les avoirs sortent des KPIs « à payer »/retards (filtres existants redevenus effectifs).
 
 **Test Lyes** : créer un avoir sur une facture test → net à payer correct ; saisir une vraie facture depuis l'UI → elle persiste.
 
@@ -63,11 +64,13 @@ Méthode identique à la finance pour CHAQUE module : spec courte → migration 
 
 - [ ] **2.1 Budget front** : `BUDGET_USE_SUPABASE` → true, écrans branchés sur le GL (vérité unique). *(Hook `useBudget` ~1000L : découpage léger si nécessaire.)*
 - [ ] **2.2 AG compléments** : pouvoirs (procurations — légalement nécessaires), jalons, choix d'envoi, brouillons, stats (7 vues + ~10 RPC + `increment_template_usage`).
-- [ ] **2.3 GED / documents** : `dossiers`, `ged`, `document_access/links`, `pv_templates` + 6 vues.
+- [ ] **2.3 GED / documents** : `dossiers`, `ged`, `document_access/links`, `pv_templates` + 6 vues. *Inclut le rattachement du justificatif à la saisie de facture (`document_id` — attente terrain Lyes 2026-06-10 ; l'ancien upload était factice).*
 - [ ] **2.4 Maintenance / prestataires** : `providers` → `tiers` (`is_provider=true`, même méthode que fournisseurs) + 8 vues (contrats, carnet, OS).
 - [ ] **2.5 Communication / mail** : 5 tables `mail_*` + 6 vues + `generate_campaign_recipients` (cloisonnement utilisateur déjà réglé en J1).
 - [ ] **2.6 Conseil syndical** : 3 tables rapports + 3 vues.
 - [ ] **2.7 Restes** : dashboard (`v_dashboard_recent_activity`/`todos` dégradés), `v_finance_integrity_issues` → adapter sur `audit_finance_integrity`.
+- [ ] **2.8 Factures fournisseurs : validation & paiement RÉELS** *(dette découverte J0.3)* : la « validation » (détail + liste) et le « paiement » (`handlePaymentComplete`) basculent le statut **sans écriture GL** (ni posting D6xx/C401 du brouillon, ni mouvement 512). Câbler : RPC de validation d'un brouillon (le 2-temps de `post_supplier_invoice` n'existe qu'à la création) + `pay_supplier_invoice` (edge existante) ; la création de brouillons du modal liste (header sans lignes) à unifier au passage.
+- [ ] **2.9 Régénération COMPLÈTE `src/types/supabase.ts`** (après 2.1→2.7) : référence prête `.planning/supabase_types_regenerated.ts` ; purge les objets fantômes des anciens types (providers, mail_*, statut `approved`…).
 
 **Test Lyes** : un parcours type par module, à chaque fin de tranche.
 

@@ -2,7 +2,16 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupplierInvoices, useRepartitionKeys, useUpdateSupplierInvoice } from '@/hooks/modules/useFinanceData';
+import {
+  useSupplierInvoices,
+  useRepartitionKeys,
+  useUpdateSupplierInvoice,
+  useCreateSupplierCreditNote,
+  useOpenPeriod
+} from '@/hooks/modules/useFinanceData';
+import { listSupplierInvoiceLines } from '@/lib/finance/api';
+import type { SupplierInvoiceOverview, CreditNoteLinePayload } from '@/lib/finance/api';
+import { prorateLines } from '@/lib/finance/credit-notes';
 import {
   formatCurrency,
   formatDate,
@@ -28,8 +37,8 @@ function mapStatusToSupabase(statut: StatutFacture): 'draft' | 'posted' | 'paid'
   }
 }
 
-// Map Supabase invoice to Facture type
-function mapSupabaseToFacture(invoice: any): Facture {
+// Map Supabase invoice (vue v_supplier_invoices_overview) to Facture type
+function mapSupabaseToFacture(invoice: SupplierInvoiceOverview): Facture {
   return {
     id: invoice.id,
     reference: invoice.invoice_number || `FAC-${invoice.id.slice(0, 8)}`,
@@ -38,7 +47,8 @@ function mapSupabaseToFacture(invoice: any): Facture {
     dateEcheance: invoice.due_date || invoice.invoice_date,
     montant: Number(invoice.total_amount),
     statut: mapStatus(invoice.status),
-    typeDocument: 'FACTURE',
+    typeDocument: invoice.doc_kind === 'credit_note' ? 'AVOIR' : 'FACTURE',
+    factureOrigineId: invoice.original_invoice_id ?? undefined,
     ventilation: [],
     historique: [],
   };
@@ -54,19 +64,34 @@ function mapStatus(status: string): StatutFacture {
   }
 }
 
+export interface CreateAvoirParams {
+  montant: number;
+  date: string;
+  numero: string;
+  libelle: string;
+}
+
 export function useFactureDetailPage(factureId: string) {
   const router = useRouter();
   const { data: invoices, isLoading, refresh } = useSupplierInvoices();
   const { data: repartitionKeys } = useRepartitionKeys();
   const updateInvoiceMutation = useUpdateSupplierInvoice();
+  const creditNoteMutation = useCreateSupplierCreditNote();
+  const openPeriod = useOpenPeriod();
   const [isMutating, setIsMutating] = useState(false);
+  const [isAvoirModalOpen, setIsAvoirModalOpen] = useState(false);
+  const [avoirError, setAvoirError] = useState<string | null>(null);
 
-  // Find and map the invoice from Supabase data
-  const initialFacture = useMemo(() => {
-    if (!invoices) return null;
-    const invoice = invoices.find(f => f.id === factureId);
-    return invoice ? mapSupabaseToFacture(invoice) : null;
-  }, [invoices, factureId]);
+  // Ligne brute de la vue (porte tiers_id, doc_kind, remaining_to_pay… que Facture ne connaît pas)
+  const rawInvoice = useMemo(
+    () => invoices?.find(f => f.id === factureId) ?? null,
+    [invoices, factureId]
+  );
+
+  const initialFacture = useMemo(
+    () => (rawInvoice ? mapSupabaseToFacture(rawInvoice) : null),
+    [rawInvoice]
+  );
 
   const [facture, setFacture] = useState<Facture | null>(null);
 
@@ -89,6 +114,96 @@ export function useFactureDetailPage(factureId: string) {
 
   const nextStatut = facture ? getNextStatut(facture.statut) : null;
   const isAvoir = facture?.typeDocument === 'AVOIR';
+
+  // Un avoir se crée sur une facture COMPTABILISÉE (posted/paid), jamais sur un avoir.
+  const canCreateAvoir = !!rawInvoice
+    && rawInvoice.doc_kind === 'invoice'
+    && (rawInvoice.status === 'posted' || rawInvoice.status === 'paid');
+
+  const avoirContext = useMemo(() => {
+    if (!rawInvoice) return null;
+    return {
+      montantTotal: Number(rawInvoice.total_amount),
+      resteAPayer: Number(rawInvoice.remaining_to_pay),
+      totalPaye: Number(rawInvoice.total_paid),
+      avoirsDeduits: Number(rawInvoice.credited_amount),
+    };
+  }, [rawInvoice]);
+
+  // Avoirs rattachés à CETTE facture (pièces inverses séparées — la facture, elle, est immuable).
+  const linkedAvoirs = useMemo(() => (invoices ?? [])
+    .filter(inv => inv.doc_kind === 'credit_note' && inv.original_invoice_id === factureId)
+    .map(inv => ({
+      id: inv.id,
+      reference: inv.invoice_number || inv.label,
+      date: inv.invoice_date,
+      montant: Number(inv.total_amount),
+    })), [invoices, factureId]);
+
+  // Pour la fiche d'un AVOIR : la facture d'origine (lien retour).
+  const factureOrigine = useMemo(() => {
+    if (!rawInvoice?.original_invoice_id) return null;
+    const origin = invoices?.find(inv => inv.id === rawInvoice.original_invoice_id);
+    return origin ? { id: origin.id, reference: origin.invoice_number || origin.label } : null;
+  }, [invoices, rawInvoice]);
+
+  const openFacture = useCallback((id: string) => {
+    router.push(`/finance/factures/${id}`);
+  }, [router]);
+
+  const openAvoirModal = useCallback(() => {
+    setAvoirError(null);
+    setIsAvoirModalOpen(true);
+  }, []);
+
+  const closeAvoirModal = useCallback(() => setIsAvoirModalOpen(false), []);
+
+  const handleCreateAvoir = useCallback(async (params: CreateAvoirParams): Promise<boolean> => {
+    if (!rawInvoice) {
+      setAvoirError('Facture introuvable.');
+      return false;
+    }
+    if (!openPeriod.data) {
+      setAvoirError("Aucune période comptable ouverte : impossible de comptabiliser l'avoir.");
+      return false;
+    }
+    setAvoirError(null);
+
+    // Avoir total → la RPC copie la ventilation d'origine ; partiel → lignes au prorata.
+    const isTotal = Math.abs(params.montant - Number(rawInvoice.total_amount)) < 0.005;
+    let lines: CreditNoteLinePayload[] | undefined;
+    if (!isTotal) {
+      const linesResult = await listSupplierInvoiceLines(rawInvoice.id);
+      if (linesResult.error || !linesResult.data || linesResult.data.length === 0) {
+        setAvoirError("Ventilation de la facture d'origine introuvable : avoir partiel impossible (un avoir total reste possible).");
+        return false;
+      }
+      lines = prorateLines(linesResult.data, params.montant);
+      if (lines.length === 0) {
+        setAvoirError("Le montant demandé ne produit aucune ligne de ventilation valide.");
+        return false;
+      }
+    }
+
+    const result = await creditNoteMutation.mutate({
+      period_id: openPeriod.data.id,
+      supplier_id: rawInvoice.tiers_id,
+      invoice_number: params.numero,
+      invoice_date: params.date,
+      label: params.libelle,
+      original_invoice_id: rawInvoice.id,
+      ...(lines ? { lines } : {}),
+    });
+
+    if (result.error) {
+      setAvoirError(result.error);
+      return false;
+    }
+
+    setIsAvoirModalOpen(false);
+    await refresh();
+    return true;
+  }, [rawInvoice, openPeriod.data, creditNoteMutation, refresh]);
 
   const handleBack = useCallback(() => {
     router.push('/finance/factures');
@@ -155,6 +270,17 @@ export function useFactureDetailPage(factureId: string) {
     isAvoir,
     isLoading,
     isMutating,
+    canCreateAvoir,
+    avoirContext,
+    linkedAvoirs,
+    factureOrigine,
+    openFacture,
+    isAvoirModalOpen,
+    isCreatingAvoir: creditNoteMutation.isLoading,
+    avoirError,
+    openAvoirModal,
+    closeAvoirModal,
+    handleCreateAvoir,
     handleBack,
     handleChangeStatut,
     getActionLabel,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Download, Plus } from 'lucide-react';
 import { useFacturesPageV2 } from '@/features/finance/factures';
 import {
@@ -15,7 +16,6 @@ import { AccountingModal } from '@/components/features/finance/Factures/modals/A
 import { ViewModal } from '@/components/features/finance/Factures/modals/ViewModal';
 import { EditModal } from '@/components/features/finance/Factures/modals/EditModal';
 import { DeleteModal } from '@/components/features/finance/Factures/modals/DeleteModal';
-import { NewFactureModal } from '@/components/features/finance/Factures/modals/NewFactureModal';
 import { AvoirModal } from '@/components/features/finance/Factures/modals/AvoirModal';
 import { useBudget } from '@/hooks/modules/useBudget';
 import styles from './factures.module.css';
@@ -25,6 +25,7 @@ function formatCurrency(amount: number): string {
 }
 
 export default function FacturesPage() {
+  const router = useRouter();
   const page = useFacturesPageV2();
   const { postesBudget } = useBudget();
 
@@ -47,7 +48,10 @@ export default function FacturesPage() {
             <button className={topBarStyles.btnGhost} onClick={() => {/* TODO */}}>
               <Download size={14} /> Export
             </button>
-            <button className={topBarStyles.btnPrimary} onClick={page.handleNewFacture}>
+            {/* Route de saisie UNIQUE : /finance/factures/new (vraie comptabilisation,
+                création de fournisseur à la volée). L'ancien modal créait des brouillons
+                sans lignes ni écriture — retiré. */}
+            <button className={topBarStyles.btnPrimary} onClick={() => router.push('/finance/factures/new')}>
               <Plus size={14} /> Nouvelle facture
             </button>
           </>
@@ -78,25 +82,21 @@ export default function FacturesPage() {
         <AccountingModal facture={page.selectedFacture} selectedTypeDepense={page.selectedTypeDepense} onTypeDepenseChange={page.setSelectedTypeDepense} onClose={page.closeAccountingModal} onSend={page.handleSendToAccounting} />
       )}
       {page.showViewModal && page.selectedFacture && (
-        <ViewModal facture={page.selectedFacture} onClose={page.closeViewModal} />
+        <ViewModal
+          facture={page.selectedFacture}
+          onClose={page.closeViewModal}
+          onOpenFull={() => {
+            const id = page.selectedFacture!.id;
+            page.closeViewModal();
+            router.push(`/finance/factures/${id}`);
+          }}
+        />
       )}
       {page.showEditModal && page.selectedFacture && (
         <EditModal facture={page.selectedFacture} editForm={page.editForm} postesBudget={postesBudget} onEditFormChange={page.setEditForm} onClose={page.closeEditModal} onSave={page.handleSaveEdit} />
       )}
       {page.showDeleteModal && page.selectedFacture && (
         <DeleteModal facture={page.selectedFacture} onClose={page.closeDeleteModal} onConfirm={page.handleConfirmDelete} />
-      )}
-      {page.showNewModal && (
-        <NewFactureModal
-          form={page.newFactureForm}
-          postesBudget={postesBudget}
-          suppliers={page.suppliers}
-          createError={page.createError}
-          isCreating={page.isMutating}
-          onFormChange={page.setNewFactureForm}
-          onClose={() => { page.clearCreateError(); page.closeNewModal(); }}
-          onCreate={page.handleCreateFacture}
-        />
       )}
       {page.showAvoirModal && page.selectedFacture && (
         <AvoirModal facture={page.selectedFacture} onClose={page.closeAvoirModal} onConfirm={page.handleConfirmAvoir} />

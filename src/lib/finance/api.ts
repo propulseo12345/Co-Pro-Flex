@@ -108,8 +108,12 @@ export interface SupplierInvoiceOverview {
   document_id: string | null;
   created_at: string;
   total_paid: number;
+  // remaining_to_pay est NET des avoirs postés (Σ facture − Σ paiements − Σ avoirs, cf. 0044).
   remaining_to_pay: number;
   payments_count: number;
+  doc_kind: 'invoice' | 'credit_note';
+  credited_amount: number;
+  original_invoice_id: string | null;
 }
 
 export interface BankMovementOverview {
@@ -506,6 +510,39 @@ export async function listSuppliers(coproId: string): Promise<ApiResult<Supplier
   return { data: data as Supplier[], error: null };
 }
 
+// Création de fournisseur à la volée (modèle facture LOT 1.2) : un fournisseur = un tiers
+// is_supplier=true ; seuls copro_id + name sont requis (le reste a des défauts en base).
+export interface CreateSupplierPayload {
+  copro_id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  siret?: string;
+}
+
+export async function createSupplier(payload: CreateSupplierPayload): Promise<ApiResult<Supplier>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('tiers')
+    .insert({
+      copro_id: payload.copro_id,
+      name: payload.name,
+      is_supplier: true,
+      email: payload.email || null,
+      phone: payload.phone || null,
+      siret: payload.siret || null,
+    })
+    .select('*')
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as Supplier, error: null };
+}
+
 export interface CreateSupplierInvoicePayload {
   copro_id: string;
   period_id: string;
@@ -580,6 +617,82 @@ export interface PaySupplierInvoicePayload {
   reference?: string;
   /** Clé d'idempotence (UUID généré une fois par tentative de paiement) : évite le double règlement. */
   idempotency_key?: string;
+}
+
+export interface SupplierInvoiceLine {
+  id: string;
+  invoice_id: string;
+  account_id: string;
+  label: string;
+  amount: number;
+  repartition_key_id: string | null;
+  budget_line_id: string | null;
+  amount_ht: number | null;
+  amount_tva: number | null;
+  taux_pct: number | null;
+}
+
+export async function listSupplierInvoiceLines(invoiceId: string): Promise<ApiResult<SupplierInvoiceLine[]>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('supplier_invoice_lines')
+    .select('id, invoice_id, account_id, label, amount, repartition_key_id, budget_line_id, amount_ht, amount_tva, taux_pct')
+    .eq('invoice_id', invoiceId);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as SupplierInvoiceLine[], error: null };
+}
+
+// Ligne de ventilation d'un avoir (payload jsonb de post_supplier_credit_note).
+// Type alias (pas interface) : assignable à Json pour l'appel RPC.
+export type CreditNoteLinePayload = {
+  account_id: string;
+  label: string;
+  amount: number;
+  repartition_key_id: string | null;
+  budget_line_id: string | null;
+  amount_ht: number | null;
+  amount_tva: number | null;
+  taux_pct: number | null;
+};
+
+export interface CreateSupplierCreditNotePayload {
+  copro_id: string;
+  period_id: string;
+  // Alias sémantique : colonne réelle = tiers_id (un fournisseur EST un tiers is_supplier=true).
+  supplier_id: string;
+  invoice_number: string;
+  invoice_date: string;
+  label: string;
+  // Avoir TOTAL : original_invoice_id seul → la RPC copie la ventilation de la facture d'origine.
+  // Avoir PARTIEL : lines explicites (Σ = montant de l'avoir) ; original_invoice_id garde le lien.
+  original_invoice_id?: string;
+  lines?: CreditNoteLinePayload[];
+}
+
+export async function createSupplierCreditNote(payload: CreateSupplierCreditNotePayload): Promise<ApiResult<{ credit_note_id: string }>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc('post_supplier_credit_note', {
+    p_copro_id: payload.copro_id,
+    p_period_id: payload.period_id,
+    p_tiers_id: payload.supplier_id,
+    p_invoice_number: payload.invoice_number,
+    p_invoice_date: payload.invoice_date,
+    p_label: payload.label,
+    ...(payload.original_invoice_id ? { p_original_invoice_id: payload.original_invoice_id } : {}),
+    ...(payload.lines && payload.lines.length > 0 ? { p_lines: payload.lines } : {}),
+  });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as unknown as { credit_note_id: string }, error: null };
 }
 
 export async function paySupplierInvoice(payload: PaySupplierInvoicePayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; invoice_status: string }>> {
