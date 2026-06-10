@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSuppliers, useOpenPeriod, useAccounts, useCreateSupplierInvoice } from '@/hooks/modules/useFinanceData';
+import { useSuppliers, useOpenPeriod, useAccounts, useCreateSupplierInvoice, useCreateSupplier } from '@/hooks/modules/useFinanceData';
 
 export interface FactureForm {
   date: string;
@@ -34,6 +34,12 @@ export function useNewFacturePage() {
   });
   const [errors, setErrors] = useState<FactureFormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Création de fournisseur à la volée (inline, sans quitter la saisie).
+  const createSupplier = useCreateSupplier();
+  const [isNewSupplierOpen, setIsNewSupplierOpen] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState('');
+  const [newSupplierError, setNewSupplierError] = useState<string | null>(null);
 
   // Mono-poste : la charge s'impute sur UN compte 6xx (modèle facture fournisseur validé).
   const chargeAccounts = useMemo(
@@ -67,6 +73,41 @@ export function useNewFacturePage() {
       return prev;
     });
   }, []);
+
+  const toggleNewSupplier = useCallback(() => {
+    setIsNewSupplierOpen(prev => !prev);
+    setNewSupplierError(null);
+  }, []);
+
+  const handleCreateSupplier = useCallback(async () => {
+    const name = newSupplierName.trim();
+    if (!name) {
+      setNewSupplierError('Le nom du fournisseur est requis.');
+      return;
+    }
+
+    // Anti-doublon : si le nom existe déjà, on le sélectionne au lieu de recréer.
+    const existing = (suppliers.data ?? []).find(s => s.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      handleChange('supplierId', existing.id);
+      setIsNewSupplierOpen(false);
+      setNewSupplierName('');
+      setNewSupplierError(null);
+      return;
+    }
+
+    setNewSupplierError(null);
+    const result = await createSupplier.mutate({ name });
+    if (result.error || !result.data) {
+      setNewSupplierError(result.error ?? 'La création du fournisseur a échoué.');
+      return;
+    }
+
+    await suppliers.refresh();
+    handleChange('supplierId', result.data.id);
+    setIsNewSupplierOpen(false);
+    setNewSupplierName('');
+  }, [newSupplierName, suppliers, createSupplier, handleChange]);
 
   const validateForm = useCallback((): boolean => {
     const newErrors: FactureFormErrors = {};
@@ -132,6 +173,13 @@ export function useNewFacturePage() {
     blockingError,
     submitError,
     isSubmitting: createInvoice.isLoading,
+    isNewSupplierOpen,
+    newSupplierName,
+    setNewSupplierName,
+    newSupplierError,
+    isCreatingSupplier: createSupplier.isLoading,
+    toggleNewSupplier,
+    handleCreateSupplier,
     handleChange,
     handleSubmit,
     handleBack,

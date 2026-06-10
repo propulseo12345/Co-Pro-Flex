@@ -9,7 +9,9 @@ import {
   BookOpen,
   Tag,
   Info,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  X
 } from 'lucide-react';
 import type { FactureForm, FactureFormErrors } from '../hooks';
 import styles from '@/app/(dashboard)/finance/factures/new/new-facture.module.css';
@@ -30,10 +32,30 @@ interface FactureFormCardProps {
   errors: FactureFormErrors;
   suppliers: SupplierOption[];
   chargeAccounts: ChargeAccountOption[];
+  isNewSupplierOpen: boolean;
+  newSupplierName: string;
+  newSupplierError: string | null;
+  isCreatingSupplier: boolean;
+  onNewSupplierNameChange: (value: string) => void;
+  onToggleNewSupplier: () => void;
+  onCreateSupplier: () => void;
   onFieldChange: (field: keyof FactureForm, value: string) => void;
 }
 
-export function FactureFormCard({ formData, errors, suppliers, chargeAccounts, onFieldChange }: FactureFormCardProps) {
+export function FactureFormCard({
+  formData,
+  errors,
+  suppliers,
+  chargeAccounts,
+  isNewSupplierOpen,
+  newSupplierName,
+  newSupplierError,
+  isCreatingSupplier,
+  onNewSupplierNameChange,
+  onToggleNewSupplier,
+  onCreateSupplier,
+  onFieldChange
+}: FactureFormCardProps) {
   return (
     <div className={styles.formCard}>
       <div className={styles.cardHeader}>
@@ -63,6 +85,41 @@ export function FactureFormCard({ formData, errors, suppliers, chargeAccounts, o
             <span className={styles.errorMessage}>
               <AlertCircle size={14} aria-hidden="true" />
               {errors.supplierId}
+            </span>
+          )}
+          <button type="button" className={styles.inlineLink} onClick={onToggleNewSupplier}>
+            {isNewSupplierOpen ? <X size={13} aria-hidden="true" /> : <Plus size={13} aria-hidden="true" />}
+            {isNewSupplierOpen ? 'Annuler la création' : 'Créer un nouveau fournisseur'}
+          </button>
+          {isNewSupplierOpen && (
+            <div className={styles.inlineCreateRow}>
+              <input
+                type="text"
+                placeholder="Nom du fournisseur (ex. Veolia)"
+                value={newSupplierName}
+                onChange={(e) => onNewSupplierNameChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onCreateSupplier();
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className={styles.inlineCreateButton}
+                onClick={onCreateSupplier}
+                disabled={isCreatingSupplier}
+              >
+                {isCreatingSupplier ? 'Création…' : 'Créer'}
+              </button>
+            </div>
+          )}
+          {newSupplierError && (
+            <span className={styles.errorMessage}>
+              <AlertCircle size={14} aria-hidden="true" />
+              {newSupplierError}
             </span>
           )}
         </div>

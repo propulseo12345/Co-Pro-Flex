@@ -14,6 +14,13 @@ export default function NewFacturePage() {
     blockingError,
     submitError,
     isSubmitting,
+    isNewSupplierOpen,
+    newSupplierName,
+    setNewSupplierName,
+    newSupplierError,
+    isCreatingSupplier,
+    toggleNewSupplier,
+    handleCreateSupplier,
     handleChange,
     handleSubmit,
     handleBack,
@@ -37,6 +44,13 @@ export default function NewFacturePage() {
             errors={errors}
             suppliers={suppliers}
             chargeAccounts={chargeAccounts}
+            isNewSupplierOpen={isNewSupplierOpen}
+            newSupplierName={newSupplierName}
+            newSupplierError={newSupplierError}
+            isCreatingSupplier={isCreatingSupplier}
+            onNewSupplierNameChange={setNewSupplierName}
+            onToggleNewSupplier={toggleNewSupplier}
+            onCreateSupplier={handleCreateSupplier}
             onFieldChange={handleChange}
           />
 

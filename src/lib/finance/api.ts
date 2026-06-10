@@ -510,6 +510,39 @@ export async function listSuppliers(coproId: string): Promise<ApiResult<Supplier
   return { data: data as Supplier[], error: null };
 }
 
+// Création de fournisseur à la volée (modèle facture LOT 1.2) : un fournisseur = un tiers
+// is_supplier=true ; seuls copro_id + name sont requis (le reste a des défauts en base).
+export interface CreateSupplierPayload {
+  copro_id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  siret?: string;
+}
+
+export async function createSupplier(payload: CreateSupplierPayload): Promise<ApiResult<Supplier>> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('tiers')
+    .insert({
+      copro_id: payload.copro_id,
+      name: payload.name,
+      is_supplier: true,
+      email: payload.email || null,
+      phone: payload.phone || null,
+      siret: payload.siret || null,
+    })
+    .select('*')
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as Supplier, error: null };
+}
+
 export interface CreateSupplierInvoicePayload {
   copro_id: string;
   period_id: string;
