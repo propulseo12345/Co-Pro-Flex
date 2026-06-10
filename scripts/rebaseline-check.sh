@@ -47,9 +47,12 @@ create table if not exists auth.users (
 ENVSQL
 
 # 3. Rejeu des migrations dans l'ordre, attribution d'erreur par fichier.
+#    -1 / --single-transaction : CHAQUE fichier est appliqué dans UNE transaction (comme `supabase
+#    db push`/`db reset`). Ferme l'angle mort « DDL non-transactionnelle » (ex. ALTER TYPE ADD VALUE
+#    utilisé dans la même transaction, CREATE INDEX CONCURRENTLY) que l'autocommit masquerait.
 fail=0
 for f in $(ls "$MIGDIR"/*.sql | sort); do
-  out=$(cat "$f" | docker exec -i "$CONTAINER" psql -U postgres -d "$DBNAME" -v ON_ERROR_STOP=1 2>&1)
+  out=$(cat "$f" | docker exec -i "$CONTAINER" psql -U postgres -d "$DBNAME" -1 -v ON_ERROR_STOP=1 2>&1)
   if echo "$out" | grep -qiE "^ERROR|FATAL"; then
     fail=$((fail+1))
     echo "  ✗ $(basename "$f")"

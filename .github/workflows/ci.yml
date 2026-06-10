@@ -6,10 +6,10 @@
 #   • Lint = exécuté mais NON bloquant (continue-on-error) tant que la dette pré-existante
 #     n'est pas résorbée (13 erreurs + ~825 warnings : `any`, console.*, unused). Il reste
 #     visible dans les logs pour suivre la dette, sans rendre la CI rouge à tort.
-#   • db:test = job séparé NON bloquant : il lève une stack Supabase locale et applique
-#     0001→0043. Tant que la base n'est pas re-baselinée (migrations non garanties
-#     reproductibles), on ne veut pas qu'un échec d'infra bloque les PR. À passer en
-#     `required` une fois la re-baseline faite (retirer `continue-on-error`).
+#   • db:test = job séparé BLOQUANT depuis la re-baseline (2026-06-10) : il lève une stack
+#     Supabase locale (fresh runner), applique 0001→0044 + seed, et lance les gates SQL.
+#     La reproductibilité est PROUVÉE (0001→0044 rejoue à 0 erreur + smoke audit=0,
+#     cf. `scripts/rebaseline-check.sh`), donc un échec ici = vraie régression, pas un aléa d'infra.
 
 name: CI
 
@@ -49,12 +49,11 @@ jobs:
         run: npm test
 
   db-tests:
-    name: Gates SQL (db:test) — non bloquant avant re-baseline
+    name: Gates SQL (db:test) — bloquant
     runs-on: ubuntu-latest
     needs: quality
-    # Tant que les migrations 0001→0043 ne sont pas garanties reproductibles,
-    # un échec ici ne doit pas bloquer la PR. À retirer après re-baseline.
-    continue-on-error: true
+    # BLOQUANT depuis la re-baseline (2026-06-10) : la chaîne 0001→0044 est prouvée reproductible.
+    # `supabase start` applique migrations + seed sur un runner neuf ; un échec = vraie régression.
     steps:
       - uses: actions/checkout@v4
 
