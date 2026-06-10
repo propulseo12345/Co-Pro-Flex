@@ -17,4 +17,5 @@
 
 > Format : [bloc] question — défaut pris en attendant — impact si on change.
 
-*(vide pour l'instant — se remplit au fil du run)*
+- **[J2.8] Paiement partiel depuis l'UI Factures** — défaut pris : le bouton « Payer » règle le **total** de la facture (`amount = montant`, clé d'idempotence `pay-<id>-<date>`). La RPC `post_supplier_payment` gère pourtant le partiel. Impact si on veut le partiel : ajouter un champ montant dans le modal de paiement + clé d'idempotence par montant/séquence. Non bloquant (le cas courant = paiement total).
+- **[J2.8] Sous-compte banque (512-x) au paiement** — défaut pris : le `compteId` choisi dans le modal est conservé en affichage mais la RPC poste sur le 512 générique (lookup `code='512'`). Impact si multi-comptes bancaires : étendre `post_supplier_payment` pour accepter un `account_id` 512 cible. Non bloquant tant qu'une copro a un seul 512.
