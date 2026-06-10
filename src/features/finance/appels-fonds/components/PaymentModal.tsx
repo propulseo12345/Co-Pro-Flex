@@ -7,10 +7,10 @@ import type { CallLotRow } from '../hooks/useAppelsFondsDetail';
 import { formatEuros } from '../utils';
 import styles from '../styles/PaymentModal.module.css';
 
-type PaymentMethod = 'bank_transfer' | 'direct_debit' | 'card' | 'check' | 'cash' | 'other';
+type PaymentMethod = 'transfer' | 'direct_debit' | 'card' | 'check' | 'cash' | 'other';
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
-  bank_transfer: 'Virement',
+  transfer: 'Virement',
   direct_debit: 'Prélèvement SEPA',
   check: 'Chèque',
   card: 'Carte',
@@ -54,7 +54,7 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
   const [lotId, setLotId] = useState<string>(defaultLot?.lot_id ?? '');
   const [amount, setAmount] = useState<string>(defaultLot ? String(defaultLot.remaining) : '');
   const [paymentDate, setPaymentDate] = useState<string>(todayISO());
-  const [method, setMethod] = useState<PaymentMethod>('bank_transfer');
+  const [method, setMethod] = useState<PaymentMethod>('transfer');
   const [natureFilter, setNatureFilter] = useState<'' | PaymentNatureFilter>('');
   const [reference, setReference] = useState<string>('');
   const [error, setError] = useState<string | null>(null);

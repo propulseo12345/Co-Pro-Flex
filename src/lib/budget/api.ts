@@ -630,3 +630,105 @@ export async function deleteExpense(expenseId: string): Promise<void> {
     throw new Error(`Failed to delete expense: ${error.message}`);
   }
 }
+
+// ============================================================================
+// MUTATIONS - Affectation du fonds de travaux ALUR (migration 0037)
+// ============================================================================
+
+/** Ligne de la vue v_alur_transfers_pending_cash (affectations dont le cash n'a pas bougé). */
+export interface PendingAlurCash {
+  transfer_id: string;
+  copro_id: string;
+  budget_id: string | null;
+  budget_name: string | null;
+  amount: number;
+  transfer_date: string | null;
+  notes: string | null;
+}
+
+/** Ligne de la vue v_alur_transfers_history. */
+export interface AlurTransferHistoryRow {
+  id: string;
+  copro_id: string;
+  budget_id: string | null;
+  amount: number;
+  transfer_date: string | null;
+  destination: 'works' | 'reserve' | 'operating' | 'other';
+  notes: string | null;
+  period_year: number;
+}
+
+/**
+ * Affecte une partie du fonds ALUR à un budget travaux voté (écriture D105/C705).
+ * Le serveur borne le montant sur le solde cumulé du compte 105.
+ */
+export async function postAlurTransfer(
+  coproId: string,
+  budgetId: string,
+  amount: number,
+  transferDate: string,
+  notes?: string
+): Promise<{ transfer_id: string; ledger_tx_id: string }> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase.rpc('post_alur_transfer', {
+    p_copro_id: coproId,
+    p_budget_id: budgetId,
+    p_amount: amount,
+    p_transfer_date: transferDate,
+    p_notes: notes ?? null,
+  });
+  if (error) throw new Error(error.message);
+  if (!data?.success) throw new Error(data?.error ?? "Échec de l'affectation du fonds ALUR");
+  return { transfer_id: data.transfer_id, ledger_tx_id: data.ledger_tx_id };
+}
+
+/** Marque le virement de trésorerie réel (Livret A → courant) comme effectué (écriture D512/C502). */
+export async function settleAlurTransferCash(
+  transferId: string,
+  settledDate: string
+): Promise<{ cash_ledger_tx_id: string }> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase.rpc('settle_alur_transfer_cash', {
+    p_transfer_id: transferId,
+    p_settled_date: settledDate,
+  });
+  if (error) throw new Error(error.message);
+  if (!data?.success) throw new Error(data?.error ?? 'Échec du règlement du virement');
+  return { cash_ledger_tx_id: data.cash_ledger_tx_id };
+}
+
+/** Affectations en attente de virement de trésorerie (rappels UI). */
+export async function listPendingAlurCash(coproId: string): Promise<PendingAlurCash[]> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('v_alur_transfers_pending_cash')
+    .select('*')
+    .eq('copro_id', coproId)
+    .order('transfer_date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PendingAlurCash[];
+}
+
+/** Solde cumulé du fonds ALUR (compte 105) — SOURCE UNIQUE du disponible (= la borne de la RPC). */
+export async function getAlurFundBalance(coproId: string): Promise<number> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('v_alur_fund_balance')
+    .select('balance')
+    .eq('copro_id', coproId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return Number(data?.balance ?? 0);
+}
+
+/** Historique des affectations du fonds ALUR. */
+export async function listAlurTransfersHistory(coproId: string): Promise<AlurTransferHistoryRow[]> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('v_alur_transfers_history')
+    .select('*')
+    .eq('copro_id', coproId)
+    .order('transfer_date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as AlurTransferHistoryRow[];
+}

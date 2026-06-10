@@ -33,6 +33,14 @@ interface CallPreview {
   amount: number;
 }
 
+/** Formate une Date en 'YYYY-MM-DD' à partir des composantes LOCALES (évite le décalage UTC). */
+function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack }: Step6Props) {
   const [phase, setPhase] = useState<Phase>('config');
   const [schedule, setSchedule] = useState<Schedule>('trimestriel');
@@ -41,6 +49,9 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
   const [error, setError] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const [budgetTotal, setBudgetTotal] = useState<number>(0);
+  // Début de l'exercice (period.start_date) : sert d'ancre aux dates d'appels, pour des
+  // échéances relatives au mois de début d'exercice (ex. exercice juillet -> juil/oct/janv/avr).
+  const [periodStart, setPeriodStart] = useState<string | null>(null);
 
   // Preview des appels éditables
   const [callPreviews, setCallPreviews] = useState<CallPreview[]>([]);
@@ -63,6 +74,23 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
     loadBudgetTotal();
   }, [budgetId]);
 
+  // Charger la date de début d'exercice (ancre des échéances)
+  useEffect(() => {
+    if (!periodId) return;
+    let cancelled = false;
+    async function loadPeriodStart() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('accounting_periods')
+        .select('start_date')
+        .eq('id', periodId)
+        .single();
+      if (!cancelled && data) setPeriodStart((data as { start_date: string }).start_date);
+    }
+    loadPeriodStart();
+    return () => { cancelled = true; };
+  }, [periodId]);
+
   const totalAppels = SCHEDULE_OPTIONS.find(s => s.value === schedule)?.total || 4;
   const remaining = Math.max(0, totalAppels - alreadyDone);
   const amountPerCall = totalAppels > 0 ? Math.round((budgetTotal / totalAppels) * 100) / 100 : 0;
@@ -83,29 +111,42 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
     return 'Annuel';
   }, [schedule]);
 
-  // Générer les previews avec dates auto-calculées
+  // Générer les previews avec dates auto-calculées, ancrées sur le début de l'exercice.
+  // Ces dates sont des valeurs par défaut : le gestionnaire peut les modifier ligne par ligne
+  // dans la preview (inputs date ci-dessous).
   const goToPreview = useCallback(() => {
-    const year = agDate ? new Date(agDate).getFullYear() : new Date().getFullYear();
+    // Ancre = 1er jour de l'exercice (period.start_date). Repli sur l'année de l'AG / janvier
+    // si la période n'est pas encore chargée.
+    let baseYear: number;
+    let baseMonth: number;
+    if (periodStart) {
+      const [y, m] = periodStart.split('-').map(Number);
+      baseYear = y;
+      baseMonth = m - 1;
+    } else {
+      baseYear = agDate ? new Date(agDate).getFullYear() : new Date().getFullYear();
+      baseMonth = 0;
+    }
     const monthsPerPeriod = schedule === 'annuel' ? 12 : schedule === 'semestriel' ? 6 : 3;
 
     const previews: CallPreview[] = [];
     for (let i = alreadyDone; i < totalAppels; i++) {
-      const startMonth = i * monthsPerPeriod;
-      const issueDate = new Date(year, startMonth, 1);
-      const dueDate = new Date(year, startMonth + monthsPerPeriod, 0); // Dernier jour de la période
+      // JS Date normalise le débordement de mois -> gère le passage d'année automatiquement.
+      const issueDate = new Date(baseYear, baseMonth + i * monthsPerPeriod, 1);
+      const dueDate = new Date(baseYear, baseMonth + (i + 1) * monthsPerPeriod, 0); // dernier jour de la sous-période
 
       previews.push({
         trimester: i + 1,
         label: `Appel ${periodLabel(i)}`,
-        issueDate: issueDate.toISOString().split('T')[0],
-        dueDate: dueDate.toISOString().split('T')[0],
+        issueDate: toISODate(issueDate),
+        dueDate: toISODate(dueDate),
         amount: amountPerCall,
       });
     }
     setCallPreviews(previews);
     setError(null);
     setPhase('preview');
-  }, [agDate, schedule, alreadyDone, totalAppels, amountPerCall, periodLabel]);
+  }, [periodStart, agDate, schedule, alreadyDone, totalAppels, amountPerCall, periodLabel]);
 
   const updatePreviewDate = useCallback((idx: number, field: 'issueDate' | 'dueDate', value: string) => {
     setCallPreviews(prev => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p));

@@ -140,7 +140,7 @@ export function useFacturesPage() {
           facture.fournisseur.toLowerCase().includes(searchTerm.toLowerCase()) ||
           facture.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
           facture.montant.toString().includes(searchTerm);
-        let matchesStatut = statutFilter === 'TOUS' || facture.statut === statutFilter;
+        const matchesStatut = statutFilter === 'TOUS' || facture.statut === statutFilter;
         const matchesFournisseur = !fournisseurFilter || facture.fournisseur === fournisseurFilter;
         let matchesPeriode = true;
         if (periodeFilter) {

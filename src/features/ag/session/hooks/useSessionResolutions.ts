@@ -59,7 +59,7 @@ export function useSessionResolutions({
       texte: r.description || '',
       majorite: fromDbMajorityType(r.majority_type),
       custom: true,
-      resultat: r.is_approved === true ? 'ADOPTEE' : r.is_approved === false ? 'REJETEE' : undefined,
+      resultat: r.status === 'approved' ? 'ADOPTEE' : r.status === 'rejected' ? 'REJETEE' : undefined,
       variables: r.variables as Record<string, string> | undefined,
       action_type: r.action_type ?? undefined,
     }));

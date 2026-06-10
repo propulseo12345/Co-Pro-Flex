@@ -1455,22 +1455,22 @@ export const RESOLUTIONS_BANK: ResolutionTemplate[] = [
     },
 ];
 
-export function getResolutionsByCategory(category?: string): ResolutionTemplate[] {
-    if (!category || category === 'all') return RESOLUTIONS_BANK;
-    return RESOLUTIONS_BANK.filter(r => r.categorie === category);
+export function getResolutionsByCategory(templates: ResolutionTemplate[], category?: string): ResolutionTemplate[] {
+    if (!category || category === 'all') return templates;
+    return templates.filter(r => r.categorie === category);
 }
 
 export function getCategories(): string[] {
     return Array.from(new Set(RESOLUTIONS_BANK.map(r => r.categorie)));
 }
 
-export function getResolutionById(id: string): ResolutionTemplate | undefined {
-    return RESOLUTIONS_BANK.find(r => r.id === id);
+export function getResolutionById(templates: ResolutionTemplate[], id: string): ResolutionTemplate | undefined {
+    return templates.find(r => r.id === id);
 }
 
-export function getResolutionByTitle(title: string): ResolutionTemplate | undefined {
+export function getResolutionByTitle(templates: ResolutionTemplate[], title: string): ResolutionTemplate | undefined {
     const normalized = title.toLowerCase().trim();
-    return RESOLUTIONS_BANK.find(r => r.titre.toLowerCase().trim() === normalized);
+    return templates.find(r => r.titre.toLowerCase().trim() === normalized);
 }
 
 export function replaceVariables(texte: string, variables: Record<string, string>): string {
@@ -1632,8 +1632,8 @@ export function generateEcheancesDates(modalite: string, exercice: string | numb
  * @param typeAG - Le type d'AG ('ORDINAIRE' ou 'EXTRAORDINAIRE')
  * @returns Liste des résolutions applicables, triées par ordre suggéré
  */
-export function getResolutionsForAGType(typeAG: TypeAG): ResolutionTemplate[] {
-    return RESOLUTIONS_BANK
+export function getResolutionsForAGType(templates: ResolutionTemplate[], typeAG: TypeAG): ResolutionTemplate[] {
+    return templates
         .filter(r => !r.applicable_ag || r.applicable_ag.includes(typeAG))
         .sort((a, b) => (a.ordre_suggere || 999) - (b.ordre_suggere || 999));
 }
@@ -1643,8 +1643,8 @@ export function getResolutionsForAGType(typeAG: TypeAG): ResolutionTemplate[] {
  * @param typeAG - Le type d'AG
  * @returns Liste des résolutions obligatoires, triées par ordre suggéré
  */
-export function getResolutionsObligatoires(typeAG: TypeAG): ResolutionTemplate[] {
-    return RESOLUTIONS_BANK
+export function getResolutionsObligatoires(templates: ResolutionTemplate[], typeAG: TypeAG): ResolutionTemplate[] {
+    return templates
         .filter(r => r.obligatoire_pour?.includes(typeAG))
         .sort((a, b) => (a.ordre_suggere || 999) - (b.ordre_suggere || 999));
 }
@@ -1654,8 +1654,8 @@ export function getResolutionsObligatoires(typeAG: TypeAG): ResolutionTemplate[]
  * @param typeAG - Le type d'AG
  * @returns Liste des résolutions suggérées
  */
-export function getResolutionsSuggerees(typeAG: TypeAG): ResolutionTemplate[] {
-    return getResolutionsForAGType(typeAG)
+export function getResolutionsSuggerees(templates: ResolutionTemplate[], typeAG: TypeAG): ResolutionTemplate[] {
+    return getResolutionsForAGType(templates, typeAG)
         .filter(r => !r.obligatoire_pour?.includes(typeAG));
 }
 
@@ -1664,8 +1664,8 @@ export function getResolutionsSuggerees(typeAG: TypeAG): ResolutionTemplate[] {
  * @param typeAG - Le type d'AG
  * @returns Objet avec les catégories comme clés et les résolutions comme valeurs
  */
-export function getResolutionsByCategorieForAGType(typeAG: TypeAG): Record<string, ResolutionTemplate[]> {
-    const resolutions = getResolutionsForAGType(typeAG);
+export function getResolutionsByCategorieForAGType(templates: ResolutionTemplate[], typeAG: TypeAG): Record<string, ResolutionTemplate[]> {
+    const resolutions = getResolutionsForAGType(templates, typeAG);
 
     return resolutions.reduce((acc, r) => {
         if (!acc[r.categorie]) acc[r.categorie] = [];
@@ -1680,10 +1680,10 @@ export function getResolutionsByCategorieForAGType(typeAG: TypeAG): Record<strin
  * @param typeAG - Le type d'AG (optionnel)
  * @returns Liste des résolutions correspondantes
  */
-export function searchResolutions(query: string, typeAG?: TypeAG): ResolutionTemplate[] {
+export function searchResolutions(templates: ResolutionTemplate[], query: string, typeAG?: TypeAG): ResolutionTemplate[] {
     const allResolutions = typeAG
-        ? getResolutionsForAGType(typeAG)
-        : RESOLUTIONS_BANK;
+        ? getResolutionsForAGType(templates, typeAG)
+        : templates;
 
     const lowerQuery = query.toLowerCase().trim();
     if (!lowerQuery) return allResolutions;
@@ -1701,17 +1701,6 @@ export function searchResolutions(query: string, typeAG?: TypeAG): ResolutionTem
  * @param typeAG - Le type d'AG
  * @returns Nombre de résolutions obligatoires
  */
-export function getNombreResolutionsObligatoires(typeAG: TypeAG): number {
-    return getResolutionsObligatoires(typeAG).length;
+export function getNombreResolutionsObligatoires(templates: ResolutionTemplate[], typeAG: TypeAG): number {
+    return getResolutionsObligatoires(templates, typeAG).length;
 }
-
-/**
- * Statistiques sur les résolutions par type d'AG
- */
-export const RESOLUTIONS_STATS = {
-    total: RESOLUTIONS_BANK.length,
-    total_ordinaire: RESOLUTIONS_BANK.filter(r => !r.applicable_ag || r.applicable_ag.includes('ORDINAIRE')).length,
-    total_extraordinaire: RESOLUTIONS_BANK.filter(r => !r.applicable_ag || r.applicable_ag.includes('EXTRAORDINAIRE')).length,
-    obligatoires_ordinaire: RESOLUTIONS_BANK.filter(r => r.obligatoire_pour?.includes('ORDINAIRE')).length,
-    obligatoires_extraordinaire: RESOLUTIONS_BANK.filter(r => r.obligatoire_pour?.includes('EXTRAORDINAIRE')).length,
-};

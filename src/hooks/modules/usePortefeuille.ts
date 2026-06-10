@@ -119,14 +119,6 @@ export function usePortefeuille(): UsePortefeuilleReturn {
       try {
         const supabase = createClient();
 
-        // Assurer le membership dev (même mécanisme que activeCopro)
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await (supabase as any).rpc('ensure_dev_membership', { p_copro_id: null });
-        } catch {
-          // Silently ignore
-        }
-
         // Récupérer copros + KPIs en parallèle
         const [coprosResult, kpisResult] = await Promise.all([
           supabase

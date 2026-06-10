@@ -1,0 +1,739 @@
+Formation Jeudi Technique le 4 avril 2024
+Plan Pluriannuel de Travaux:
+Qu’est-ce que c’est et quelles sont les obligations pour les copropriétés ?
+1
+Stanko TRIFUNOVIC – architecte DPLG – Directeur Technique ARC Services 1
+
+Sommaire
+ INTRODUCTION: 1. Un monde qui chauffe, des charges qui explosent
+2. Une réglementation : savoir en tirer partie 3. Maître d’œuvre, maître d’ouvrage
+ RENOVATION : QUAND LA THERMIQUE S’EN MÊLE 1. Déperditions thermiques et émissions de GES 2. La loi Climat (2021)
+ LE PLAN PLURIANNUEL DE TRAVAUX 1. Ce que c’est
+2. Comment le faire 3. Exemple de Plan Pluriannuel de Travaux
+4. Quelle méthode choisir? 5. Exemple de choix à faire par copropriétés
+ LE DIAGNOSTIC DE PERFORMANCE ENERGETIQUE 1. Présentation 2. L’obligation 3. Le contenu 4. Faire le DPE 5. Nouveautés 2
+
+Suite du Sommaire
+ LE DTG 1. Définition 2. Quels professionnels ? 3. Le référentiel DTG 4. Le Conseil Syndical et le DTG 5. Exemple de rapport  ASPECTS PRATIQUES 1. Visite, liste de documents à fournir, enquête 2. Réunion intermédiaire 3. Rendu rapport final en AG 4. Quels professionnels ?
+5. Une vie après le PPT ? 6. Anti-sèche
+7. Le BIB+ pour les petites copros
+3
+
+INTRODUCTION
+
+ UN MONDE QUI CHAUFFE, DES CHARGES QUI EXPLOSENT
+
+Accord de Paris 2015
+Préambule de la Loi Climat :
+« En cohérence avec l'accord de Paris adopté le 12 décembre 2015 et ratifié le 5 octobre 2016, et dans le cadre du Pacte
+vert pour l'Europe, l'Etat rappelle son engagement à respecter les objectifs de réduction des émissions de gaz à effet de
+serre… »
+• Objectif: pas plus de 1,5° C d’augmentation mondiale de température
+• 195 états participants
+
+• Le règlement européen 2018/842 sur les réductions contraignantes des émissions de gaz à effet de serre (GES) de 2021 à 2030
+
+•
+
+Quota français de réduction des
+
+émissions de GES: -55% en 2030 par
+
+rapport à 1990
+
+•
+
+A ce jour, nous sommes à -26% et il ne
+
+reste que 7 ans.
+
+•
+
+Le bâtiment, qui représente 18% des
+
+émissions actuelles (résidentiel et
+
+tertiaire inclus) devra voir ses
+
+émissions réduites de moitié, de 64 à
+
+30 Mt en 7 années seulement.
+
+•
+
+Il y a pour 2023: 11% de maisons
+
+"passoires" et 7% d'immeubles
+
+« passoires» qui nécessitent une
+
+rénovation énergétique performante.
+
+4
+
+INTRODUCTION, suite
+5
+
+INTRODUCTION, suite
+ UNE RÉGLEMENTATION : SAVOIR EN TIRER PARTIE - Des audits obligatoires (DPE, PPT) : des pistes de rénovation concrètes - Des aides : MaPrimRénov’, Chèque Audit MGP, C2E, TVA 5,5%, Prêts à taux 0, dispositifs divers pour équipement des bornes de recharge :
+pour aider à passer à l’acte - Des accompagnements : France Rénov’ (opérateur local Soliha)
+6
+
+INTRODUCTION, suite
+ MAÎTRE D’OUVRAGE, MAÎTRE D’OEUVRE
+Petite précision de vocabulaire :
+ Un Maître d’Œuvre est le professionnel qui conçoit et dirige les travaux. En tant que tel, il en est responsable. Les architectes sont des Maîtres d’Œuvre.
+ Un Maître d’Ouvrage est le commanditaire des travaux. Dans le cadre de la copropriété, c’est le Syndicat des Copropriétaires. Ce n’est pas le syndic. Celui-ci est le Maître d’Ouvrage Délégué.
+7
+
+RENOVATION : QUAND LA THERMIQUE S’EN MÊLE
+DÉPERDITIONS THERMIQUES : petit rappel
+Émissions de Gaz à Effet de Serre : principalement le chauffage et la production d‘eau chaude 8
+
+RENOVATION : QUAND LA THERMIQUE S’EN
+MÊLE, suite
+La loi Climat et Résilience du 22 août 2021
+La loi n°2021-1104 du 22/08/2021 porte sur la lutte contre le dérèglement climatique et le renforcement de la résilience face à ses effets.
+Voici quelques points affectant directement les copropriétés :
+• Classification des bâtiments (définition des doubles étiquettes DPE) • Définition de ce qu’est une rénovation énergétique performante • Obligation de réaliser un Diagnostic de Performance Énergétique collectif • Mise en place d’un Plan Pluriannuel de Travaux (PPT) • L’adaptation du fonds travaux au PPT (minimum 2,5% du montant du PPT) • L’étendue du prêt avance mutation sur conditions de ressource • Création d’un droit de surplomb
+9
+
+RENOVATION : QUAND LA THERMIQUE S’EN
+MÊLE, suite
+Suite des nouveautés introduites par la loi Climat et Résilience :
+• Obligation de raccordement au chauffage urbain (si + de 50% énergies renouvelables dans réseau disponible)
+• Organisation des modalités de pose des IRVE collectives (véhicules électriques) – convention de raccordement
+• Publicité dans boîtes aux lettres fortement diminuée (Stop Pub)
+• Nouvelles obligations à l’égard des bailleurs (classement DPE, loyer gelé, travaux de rénovation aux frais du locataire facilités)
+• Nouvelles informations devant être communiquées lors d’une vente d’un lot
+(Classement DPE, PPT)
+• Pour les communes dont les rejets pourraient avoir une incidence sur la qualit des eaux de la Seine (JO 2024), contrôle obligatoire et mise à disposition du rapport.
+• Création d’un carnet d’information du logement (neuf ou rénovation lourde) 10
+
+Plan Pluriannuel de Travaux
+Le texte: loi du 10 juillet 1965, article 14-2
+Ce projet de Plan Pluriannuel de Travaux comprend…
+1. La liste des travaux nécessaires à la sauvegarde de l'immeuble, à la préservation de la santé et de la sécurité des occupants, à la réalisation d'économies d'énergie et à la réduction des émissions de gaz à effet de serre ;
+2. Une estimation du niveau de performance énergétique ;
+3. Une estimation sommaire du coût de ces travaux ;
+4. La hiérarchisation de ces travaux, par ordre de priorité ; 5. Une proposition d'échéancier pour les travaux dont la réalisation
+apparaît nécessaire dans les dix prochaines années.
+11
+
+Plan Pluriannuel de Travaux, suite
+→ Le PPT s’impose pour toutes les copropriétés ayant réceptionné les travaux de construction depuis plus de quinze ans. Il devra ensuite être actualisé tous les dix ans.
+→ Le PPT doit être présenté en AG et mis au vote :  Le PPT est présenté à la première assemblée générale des copropriétaires qui suit son élaboration ;  Il doit intégrer le carnet d’entretien prévu à l’article 18 de la loi du 10 juillet 1965.
+→ Si un diagnostic technique global (DTG) ne fait apparaître aucun besoin de travaux au cours des dix années qui suivent son élaboration, la copropriété est dispensée de réaliser un PPT.
+→ L’obligation pour les copropriétés de réaliser un PPT suit un calendrier selon le nombre de lots principaux :
+Au 1er janvier 2023 pour les copropriétés de plus de 200 lots
+Au 1er janvier 2024 pour les copropriétés de 51 à 200 lots
+Au 1er janvier 2025 pour les copropriétés de 50 lots et moins
+12
+
+Plan Pluriannuel de Travaux, suite
+
+Exemple de projet de PPT pour les travaux dont la réalisation apparaît nécessaire dans les dix prochaines années – classé par ordre d’urgence
+
+Court terme (1 à 3 ans)
+
+Moyen terme (2 à 6 ans)
+
+Long terme (5 à 10 ans)
+
+Poste
+
+Travaux à envisager
+
+Coût estimatif (€ TDC)
+
+Cour
+
+Réfection du sol et des
+
+réseaux enterrés
+
+façades
+
+Ravalement de la façade coté rue
+
+Toiture
+
+Réfection et isolation de la toiture
+
+Évacuation Réfection des colonnes EU/EV eaux usées
+
+Alimentation eau
+
+Réfection des colonnes d’alimentation d’eau
+
+TOTAL
+
+35 000 € 42 000 € 25 000 € 12 000 € 37 000 € 151 000 €
+
+Niveau de performance thermique de la recommandations
+(R, U)
+Sans objet
+
+Gain
+
+Gain
+
+énergétique énergétique
+
+kWh EP
+
+%
+
+Sans objet Sans objet
+
+R = 4,4 m2.k/W
+
+250 kWhep
+
+25
+
+R = 6 m2.k/W
+
+160 kWhep
+
+16
+
+Sans objet
+
+Sans objet Sans objet
+
+Sans objet
+
+Sans objet Sans objet
+
+Calcul de la cotisation minimum annuelle du fond travaux*
+
+3 775 €
+
+*ne peut être inférieur à 2,5 % du montant total du PPT. A défaut d'adoption d'un plan, le montant de la cotisation
+
+annuelle ne peut être inférieur à 5 % du budget prévisionnel.
+
+13
+
+Plan Pluriannuel de Travaux, suite
+
+Comment établir un projet de PPT ? Deux solutions sont possibles :
+
+Analyse du bâti et des équipements
+
+Diagnostic de Performance Énergétique Coll.
+
+Diagnostic Technique Global
+(DTG)
+
+Etat des lieux technique général
+Structure et enveloppe du bâti, équipements collectifs
+Liste des travaux à envisager à court, moyen et long termes avec un coût prévisionnel
+Obligation de réalisation : liée à l’obligation de réaliser
+un projet de PPT
+Définition réglementaire du contenu : aucune
+
+Diagnostic thermique
+Enveloppe du bâti, équipements thermiques collectifs…
+Niveau de consommation énergétique théorique
+Bouquets de travaux énergétiques sommaires sans coût prévisionnel
+Obligation de réalisation : article L126-31 du CCH modifié par la loi
+Climat
+Définition réglementaire du contenu : arrêtés du 31 mars 2021
+et du 8 octobre 2021
+
+ou
+
+Etat des lieux technique et thermique général
+Structure et enveloppe du bâti, tous les équipements collectifs
+Niveau de consommation énergétique théorique ou
+générale
+Planification des travaux à envisager à court, moyen et long
+termes et bouquet de travaux énergétiques avec coût prévisionnel
+Obligation de réalisation : aucune
+Définition réglementaire du contenu : Article L731-1 du CCH
+et décret 2016-1965 du 28 décembre 2016
+
+14
+
+Plan Pluriannuel de Travaux, suite
+Quelle méthode choisir pour sa copropriété ?
+15
+
+Exemple de bâtiments et choix possibles pour réalisation PPPT
+La présence du chèque audit pour les DTG dans certaines communes pousse trop automatiquement à écarter la solution
+de l’analyse architecturale et technique. Voyons trois exemples pour vérifier la pertinence de ce choix.
+16
+
+Petite copropriété de 8 lots, situé en Métropole Grand Paris Construction de la deuxième moitié du XIXème siècle, R+3 + combles aménagés, sur rez de jardin. Chauffage individuel électrique Pas d’isolation, 60% de fenêtres double vitrage, pas de ventilation. Beaucoup de problèmes de fissuration et d’humidité
+OFFRES
+DTG : 8500€ TTC, éligible au chèque audit de 5000€ Analyse architecturale et technique : Architecte 2800€ TTC, Diagnostiqueur 950€ TTC
+CONCLUSIONS
+• Le DTG revient à peine moins cher grâce au chèque audit (3500€ contre 3750€)
+• Pas de possibilité d’atteindre 35% de gains énergétiques et d’être éligible à MaPrimRénov’.
+• Il faut avancer la somme totale du DTG avant la subvention : effort important.
+• Réunions et dispositif du DTG lourds par rapport aux conclusions qu’il apporte.
+• Le niveau d’information apporté ne diffère pas entre DTG et Analyse Architecturale+DPE Coll.
+• La formule DTG peut être choisie mais demandera plus d’engagement du CS et des copropriétaires (occupants ou bailleurs).
+17
+
+Petite copropriété de 9 lots, Paris XXème Construction de 1927, R+2 sur cave, Chauffage collectif gaz, proximité de réseau de chaleur urbaine Pas d’isolation sauf couche 4cm terrasse, 40% de fenêtres double vitrage, Pas de VMC. Problèmes de performance de chauffage, plafond de la cave dégradé.
+OFFRES
+DTG : 8500€ TTC, éligible au chèque audit de 5000€ Analyse architecturale et technique : Architecte 3000€ TTC, Diagnostiqueur 950€ TTC
+CONCLUSIONS
+• Le DTG revient moins cher grâce au chèque audit (3500€ contre 3950€)
+• Les informations données par le DTG, plus précises au niveau du volet énergétique, donnent davantage de certitudes sur une possibilité d’atteindre 35% de gains énergétiques et d’être éligible à MaPrimRénov’.
+18
+
+Copropriété de 45 lots, dans les Yvelines (hors Métropole Grand Paris) Construction de 1950, R+2 et R+3 sur cave, 6 cages d’escalier Chauffage collectif gaz, Pignons un peu isolés 60% de fenêtres double vitrage, Pas de VMC, ventilation naturelle dans pièces humides, Problèmes de condensation, de parois froides et de balcons béton qui se dégradent.
+OFFRES
+DTG : 15000€ TTC, non éligible au chèque audit Analyse architecturale et technique : Architecte 5000€ TTC, Diagnostiqueur 3000€ TTC
+CONCLUSIONS
+• Le DTG est presque deux fois plus cher. • Mixité de sujets techniques et énergétiques. • Les informations données par le DTG, plus précises au
+niveau du volet énergétique, donnent davantage de certitude sur une possibilité d’atteindre 35% de gains énergétiques et éligibilité à MaPrimRénov’. • Ici c’est le DTG qui est le plus intéressant, même en absence de subvention, même s’il est plus cher.
+19
+
+LE DIAGNOSTIC de PERFORMANCE ENERGETIQUE
+Le Diagnostic de Performance Energétique (DPE)
+→ Le DPE est un diagnostic réalisé selon un calcul réglementaire 3CL basé sur des critères prédéfinis ce qui permet de comparer les logements entre eux.
+→ Il a été instauré en 2006 afin de sensibiliser les habitants à la performance énergétique de leur logement en évaluant leur consommation énergétique et leurs émissions de gaz à effet de serre. Ils sont ensuite classés selon des étiquettes allant de A pour les logements les plus performants à G pour les logements les moins performants.
+→ On distingue deux types de DPE :  le DPE individuel ou DPE logement, obligatoire en cas de location ou de vente d’un logement.  Le DPE collectif ou DPE immeuble.
+→ Un DPE est valable 10 ans mais ceux réalisés avant le 31 décembre 2017 ne sont plus valables au 1er janvier 2023 et ceux réalisés entre le 1er janvier 2018 et le 30 juin 2021 ne le seront plus au 1er janvier 2025.
+20
+
+DIAGNOSTIC de PERFORMANCE
+ENERGETIQUE, suite
+L’obligation de réaliser un DPE collectif
+→ La loi « Climat et Résilience » a modifié l’article L126-31 du Code de la Construction et de l’Habitation :
+ Disparition de l’obligation de réaliser un audit énergétique pour les copropriétés en chauffage collectif de plus de 50 lots ;
+ Dorénavant, toutes les copropriétés dont le permis de construire a été déposé avant le 1er janvier 2013 doivent réaliser un DPE collectif selon le calendrier suivant : Au 1er janvier 2024 de plus de 200 lots
+Au 1er janvier 2025 de 51 à 200 lots
+Au 1er janvier 2026 de 50 lots et moins
+ Ce diagnostic est renouvelé ou mis à jour tous les dix ans, sauf lorsqu'un diagnostic réalisé après le 1er juillet 2021 permet d'établir que le bâtiment appartient à la classe A, B ou C.
+Un audit énergétique est obligatoire en cas de vente d’une passoire thermique (étiquette F ou G), mais cela ne concerne que les maisons individuelles, pas les appartements.
+21
+
+DIAGNOSTIC de PERFORMANCE
+ENERGETIQUE, suite
+Le contenu du DPE
+ Description du bâtiment (surface, orientation, qualité de l’isolation, menuiseries extérieures…) et des équipements de chauffage, de production d’eau chaude sanitaire, de refroidissement et de ventilation :
+
+ Consommation d’énergie primaire (EP) estimée pour une utilisation standardisée du bâtiment ou du logement ainsi que le niveau des émissions de gaz à effet de serre et estimation des coûts annuels d’énergie.
+
+ Indicateur du confort d’été.
+
+ Schéma de déperdition thermique de l’enveloppe.
+
+ Recommandations sur les mesures les plus efficaces pour économiser de l’énergie : conseils de bon usage et de bonne gestion du bâtiment et de ses équipements .
+
+ Recommandations de travaux à engager pour améliorer l’étiquette
+
+énergétique du logement. Ces travaux sont ensuite regroupés en deux
+
+scénarios avec l’indication de la consommation énergétique atteinte.
+
+22
+
+DIAGNOSTIC de PERFORMANCE
+ENERGETIQUE, suite
+Les nouveautés introduites en 2021
+→ Afin de rendre les DPE plus fiables et plus efficaces, plusieurs décrets et arrêtés ont été publiés par le gouvernement en 2020 et 2021 pour une entrée en vigueur du nouveau DPE au 1er juillet 2021.
+→ Nouvelle étiquette à 2 entrées :
+→ Opposabilité du DPE : en cas d’informations erronées, il est possible de se retourner contre le diagnostiqueur ou le bailleur/vendeur.
+23
+
+DIAGNOSTIC de PERFORMANCE
+ENERGETIQUE, suite
+24
+
+DIAGNOSTIC de PERFORMANCE
+ENERGETIQUE, suite
+→ Contraintes pour les bailleurs :
+ Gel des loyers depuis le 25 août 2022 pour les logements classés F ou G ;  Interdiction de location :
+ Logements consommant plus de 450 kWh d’énergie finale (EF) par m²/an à partir du 1er janvier 2023
+ Logements classés G en 2025  Logements classés F en 2028  Logements classés E en 2034
+→ Certaines aides financières dépendent du DPE :  Sortie de passoire thermique  Atteinte des étiquettes A ou B
+→ Le DPE collectif ne vaut plus systématiquement DPE individuel. La disposition a été remplacée par la possibilité de générer des DPE individuels lors de la réalisation d’un DPE collectif uniquement lorsqu’il existe une homogénéité thermique des lots d’habitation et ceci dans un délai de 6 mois.
+→ A savoir : le décret n°2020-1609 impose également de fournir au propriétaire le DPE au format xml. Ceci permet notamment au propriétaire de l’envoyer directement aux entreprises qui interviendraient dans le cadre de travaux énergétiques.
+25
+
+DIAGNOSTIC de PERFORMANCE
+ENERGETIQUE, suite et fin
+Nouveautés à venir
+Pour les appartements de moins de 40m², les seuils de classement des DPE individuels vont changer. Ceci pour sortir 140 000 logements des étiquettes F et G, car la consommation d’eau chaude sanitaire représente une part disproportionnée de la consommation d’énergie pour les petites surfaces. Le décret n’est pas encore sorti mais ceux qui ont fait un DPE individuel pour une surface inférieure à 40m² peuvent déjà aller voir la nouvelle note sur le site :
+https://observatoire-dpe-audit.ademe.fr/accueil
+La pénalisation actuelle de la consommation électrique sera sans doute aussi révisée. En effet, on calcule le DPE en énergie primaire et l’on estime que 1kWh d’électricité équivaut à 2,3kWh d’énergie primaire (à cause des déperditions dans le réseau) alors que pour le gaz ou le fioul 1kWh = à 1kWh.
+26
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+Le DTG a été mis en place le 1er janvier 2017, suite à l’article 58 de la loi ALUR du 24 mars
+2014. → Son contenu est défini par l’article L731-1 du Code de la Construction et de l’Habitat :
+ « Une analyse de l'état apparent des parties communes et des équipements communs de l'immeuble ;
+ Un état technique de l'immeuble au regard des obligations légales et réglementaires au titre de la construction ;
+ Une analyse des améliorations possibles de la gestion technique et patrimoniale de l'immeuble ;
+ Un diagnostic de performance énergétique (DPE) de l'immeuble ».
+→ Le DTG « fait apparaître une évaluation sommaire du coût et une liste des travaux nécessaires à la conservation de l'immeuble, à la préservation de la santé et de la sécurité des occupants et à la réalisation d'économies d'énergie, en précisant notamment ceux qui devraient être menés dans les dix prochaines années ».  Cette liste peut être considérée comme un projet de PPT de la copropriété.
+→ Définition « générale » = pas de modèle type.
+→ Le DTG est un diagnostic technique général qui doit permettre d’orienter les copropriétaires pour la réalisation de travaux ou d’études complémentaires mais ce n’est pas une étude-conception de maitrise d’œuvre.
+→ Le DTG n’est pas obligatoire mais il est mis au vote de l’assemblée générale.
+27
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+Le référentiel DTG
+→ En 2020, l’ARC et l’Agence Parisienne du Climat (APC) ont créé avec l’aide d’un groupe de travail composé d’architectes, de bureaux d’études et d’ALEC un référentiel DTG pour déterminer un contenu et une méthodologie de réalisation qui s’adaptent à toutes les tailles de copropriétés, tant en chauffage collectif qu’individuel, tant pour des bâtiments en maçonnerie traditionnelle que pour ceux en matériaux industriels.
+→ Il a été mis à jour début 2023 pour tenir compte des nouveautés apportées par la loi « Climat et Résilience ».
+→ Tout en respectant la réglementation, ce référentiel apporte :
+ Les différentes étapes de réalisation du DTG ;  Les moyens techniques pour la réalisation du DTG ;  Les qualifications des auditeurs ;  Une analyse énergétique plus poussée qui dépend de la configuration de la
+copropriété ;  Des bouquets travaux permettant à la copropriété de se lancer dans un projet
+de rénovation énergétique;  Un volet financier pour le financement des travaux ;  Plus de 20 fiches pratiques par poste de diagnostic.
+→ Le respect de ce référentiel permet entre autre l’obtention d’une aide de la part de certaines collectivités dont la Métropole du Grand Paris.
+28
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+Une méthodologie qui requiert l’implication active du Conseil Syndical
+1. La préparation de l’audit
+ Validation des priorités et attentes du CS, validation des documents à transmettre ;  Mise en place d’un planning : enquête résident, visites parties communes et privatives, rendu du
+rapport provisoire...
+2. La visite des parties communes et privatives :
+ Les éléments bâtis de structure, les façades, les toitures…  Toutes les parties communes et tous les équipements collectifs dont la production de chauffage et
+d’eau chaude sanitaire et les systèmes de ventilation.
+3. L’analyse des données par les auditeurs et l’élaboration du rapport provisoire :
+ Transmission au CS et au syndic pour relecture ;  Programmation de la réunion intermédiaire avec le CS et le syndic.
+4. La réunion intermédiaire
+ Validation de l’état des lieux et de l’enquête résidents ;  Présentation des améliorations possibles poste par poste ;  Élaboration d’une liste de travaux à réaliser à court, moyen et long terme (projet de PPT) ;  Construction de plans de travaux (scénarios) et émergence de solutions de financement.
+5. Le rapport final
+ Scénarios de travaux consolidés avec les économies énergétiques correspondantes ;  Estimation du coût des travaux et panorama des aides financières possibles (MPR, CEE, Anah...);  Transmission au CS et au syndic.
+6. La présentation aux copropriétaires
+ Elaboration d’une synthèse ;  Présentation en AG ou lors d’une réunion d’information spécifique.
+29
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+
+Page de garde
+
+Présentation générale
+
+Tableau de bord gestion technique
+
+30
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+
+Fiches par poste
+
+Analyse énergétique
+
+Focus amélioration thermique
+
+31
+
+D.T.G., suite
+
+Les fiches de diagnostic du référentiel DTG
+
+Classification par chapitre :
+
+• Enveloppe et structure: structure/toiture/façades/fenêtres et occultations/locaux non chauffes (entrée, hall..)
+
+• Sous-sols: caves, stationnement
+• Ventilation
+• Réseaux d’eau: évacuations EU-EV/eau froide
+
+• Réseaux d'énergie: électricité/gaz
+
+• Equipement de production de chauffage et/ou d'eau chaude sanitaire:
+
+• Equipements autres: sécurisation/sécurité incendie
+
+• Circulations intérieures: verticales/horizontales
+
+• Locaux communs: local OM/Local Vélos
+
+• Espaces extérieurs: espaces verts/cour
+
+• Cadre de vie: accessibilité/végétalisation
+
+et biodiversités/écomobilité
+
+32
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+
+Articulation au sein d’un DTG entre :
+
+Projet PPT
+
+Scénario travaux énergétique
+
+Ingénierie financière
+
+33
+
+Une fois le choix de formule arrêté et l’équipe missionnée pour faire l’audit menant au PPPT…
+Aspects Pratiques du Plan Pluriannuel de Travaux
+34
+
+• Visites, Enquête, liste de documents à fournir
+Une visite de la copropriété sera faite par l’équipe. Dans le cas de l’Analyse Architecturale+DPE Coll. les deux intervenants peuvent venir séparément et deux visites doivent être organisées. En cas de DTG, si la copropriété a du chauffage collectif, la visite se fera pendant la période de chauffe, afin de faire des relevés de température et prendre des clichés thermographiques. Lors de cette visite, il sera demandé au Conseil Syndical de fournir un certain nombre de documents et d’informations. Dans le cas d’un DTG, une enquête des occupants, sous forme d’un questionnaire, doit être rendue.
+35
+
+• Liste de documents à fournir
+
+Au moins une visite de la copropriété sera faite par l’équipe. Lors de cette visite, il sera demandé au Conseil Syndical de fournir un certains nombre de documents et d’informations.
+
+Documents demandés (si disponibles)
+
+Adresse complète
+
+⃝
+
+Numéros des appartements
+
+⃝
+
+Coordonnées des propriétaires/locataires
+
+⃝
+
+Coordonnées du syndic (ou du propriétaire des
+
+⃝
+
+installations communes)
+
+Plans de l’immeuble
+
+⃝
+
+Année de construction
+
+⃝
+
+Ancien DPE et documents associés (informatif)
+
+⃝
+
+Etude thermique initiale
+
+⃝
+
+Diagnostic thermique du bien
+
+⃝
+
+Factures des travaux réalisés les 20 dernières années
+
+⃝
+
+Justificatif crédit d’impôt
+
+⃝
+
+Surface habitable de l’immeuble et de tous les
+
+⃝
+
+appartements
+
+Descriptif des installations collectives
+
+⃝
+
+Descriptif des installations collectives et/ou individuelles et
+
+⃝
+
+leur mode de gestion (carnet d’entretien)
+
+Justificatifs d’entretien des installations
+
+⃝
+
+Factures pouvant justifier des travaux entrepris
+
+⃝
+
+Documents techniques des matériaux installés s’ils sont
+
+⃝
+
+apparents sur les factures.
+
+Installation collective de refroidissement
+
+Type de générateur
+
+⃝
+
+Année d’installation
+
+⃝
+
+Energie utilisée
+
+⃝
+
+Installation collective de chauffage
+
+Type d’installation (avec, sans
+
+⃝
+
+solaire, base+appoint,…)
+
+Nombre de générateurs
+
+⃝
+
+Pour chaque générateur :
+
+Type de générateur (Gaz,
+
+⃝
+
+fioul,…)
+
+Année d’installation du
+
+⃝
+
+générateur
+
+Énergie utilisée
+
+⃝
+
+Présence d’une veilleuse
+
+⃝
+
+Equipements d’intermittence
+
+⃝
+
+(central, par pièce, avec ou
+
+sans minimum de
+
+température,…)
+
+Présence d’un comptage
+
+⃝
+
+Installation collective de production d’eau chaude sanitaire
+
+Type d’installation
+
+⃝
+
+Nombre de générateurs
+
+⃝
+
+Nombres de ballons de
+
+⃝
+
+stockage
+
+Etat d’isolation du réseau de
+
+⃝
+
+distribution
+
+Bouclage / Traçage du réseau
+
+⃝
+
+de distribution
+
+Pour chaque générateur :
+
+Type de générateur
+
+⃝
+
+Année d’installation
+
+⃝
+
+Energie utilisée
+
+⃝
+
+Pour chaque ballon de stockage :
+
+Type de ballon de stockage
+
+⃝
+
+Catégorie du ballon de
+
+⃝
+
+stockage
+
+Volume de stockage
+
+⃝
+
+36
+
+• Enquête
+En cas de DTG, une enquête des occupants (copropriétaires résidents ainsi que locataires) doit être rendue. Il faut un minimum de 50% de retours pour qu’elle soit considérée comme représentative. Cette enquête comporte des questions sur : • le mode d’occupation des logements, • les caractéristiques des appartements, surfaces, menuiseries… • sur les équipements de production de chaleur, d’eau chaude, cuisson… • les attentes et avis sur ce que devrait être un programme de rénovation (pour les propriétaires)
+37
+
+• Réunion intermédiaire (formule DTG)
+En cas de DTG, une réunion est prévue entre les auditeurs et le CS pour présenter les conclusions leur étude et, ensemble, dresser les scénarios ou phasages de travaux. Il s’agit d’une plus value importante du DTG par rapport à l’analyse architecturale+DPE collectif, car les programmes de travaux sont envisagés ensemble entre l’équipe d’auditeurs et le CS. Les travaux sont moins « parachutés » car il y a une plus grande communication et concertation.
+• Rendu en Assemblée Générale (DTG et formule Analyse Architecturale+DPE coll.)
+Suite à cette réunion, l’équipe d’auditeurs finalise et fige le rapport final. Celui-ci est envoyé à la copropriété sous format numérique et accompagné du fichier spécial du DPE collectif (format xml). Le rapport peut donc être joint à la convocation d’AG. Il fera l’objet d’une présentation en AG. La copropriété aura alors la possibilité de voter et le PPPT deviendra un Plan Pluriannuel de Travaux, avec notamment le fonds de travaux qui y sera indexé.
+38
+
+Pour établir le projet de PPT de sa copropriété
+Quels professionnels choisir ?
+• Lorsque vous contactez des professionnels, ou lorsque votre syndic vous propose un devis, il est important de vérifier leurs compétences et certifications :
+ https://observatoire-dpe-audit.ademe.fr/accueil pour les diagnostiqueurs ;  https://france-renov.gouv.fr/annuaire-rge pour les architectes et les bureaux d’études.
+• Si le conseil syndical veut réaliser lui-même la recherche de devis, il existe plusieurs annuaires recensant les professionnels qualifiés :
+ L’observatoire de l’Ademe et l’annuaire France Rénov’ cités plus haut ;  L’annuaire Coachcopro pour l’Ile-de-France : https://grandparis.annuaire-coachcopro.com  Pour les adhérents à l’ARC :
+ Copro-Devis pour les entreprises référencées par Arc Services : www.leportaildeladherent.fr
+ Directement auprès du service technique de l’ARC : technique@arc-copro.fr
+39
+
+Établir le projet de PPT de sa copropriété
+Copro-Devis
+40
+
+Il y a-t-il une vie après le PPT ?
+La question de l’après audit… • Les travaux décrits et sommairement chiffrés, le fonds de
+travaux mis à jour, la balle est dans le camp des copropriétaires. • Pour certains travaux, surtout les plus lourds et les rénovations globales (objectif de la réglementation), il faudra trouver une équipe de maîtrise d’œuvre. • Si la structure qui a fait l’étude menant au PPT est intéressée par les travaux, il est naturel que le CS lui demande un devis. Attention, certaines structures, surtout celles qui sont essentiellement des bureaux d’études thermiques, ne sont pas les plus adéquates pour ce genre de projet. • Nous vous conseillons de mettre en concurrence avec d’autres cabinets d’architectes et/ou de maître d’œuvre.
+41
+
+Anti-sèche
+
+42
+
+DIAGNOSTIC TECHNIQUE GLOBAL, suite
+Face aux difficultés des petites copropriétés pour trouver des prestataires
+BIB + , une solution pour les petites copropriétés
+Une solution d’ARC-Services pour les copropriété de moins de 11 lots
+• Historique : le Bilan Initial du Bâti – BIB • Transition pour répondre aux demandes règlementaires, le
+BIB devient BIB+
+43
+
+44
+
+45
+
+MERCI POUR VOTRE ATTENTION !
+Permanences tous les mardis et mercredis ! Rendez-vous sur réservation téléphonique au
+01.40.30.12.82
+Contact mail : contact@arc-copro.fr 7 rue de Thionville – 75019 Paris
+www.arc-copro.fr
+Retrouvez-nous à Paris, le 9 avril, au salon : Habiter Durable qui se tiendra à l’Hôtel de Ville de Paris, entrée libre mais inscription
+nécessaire sur forumhabiterdurable.fr
+46
+
+

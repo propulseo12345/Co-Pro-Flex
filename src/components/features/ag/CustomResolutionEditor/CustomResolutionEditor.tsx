@@ -36,8 +36,10 @@ interface CustomResolutionEditorProps {
   resolution?: ICustomResolution;
   onSave: (resolution: ICustomResolution) => void;
   onCancel: () => void;
-  organizationId: string;
-  userId: string;
+  /** @deprecated Inutilisé — le cabinet est géré par le provider ResolutionTemplates. */
+  organizationId?: string;
+  /** @deprecated Inutilisé — l'utilisateur est géré côté serveur (RLS). */
+  userId?: string;
 }
 
 const VARIABLE_TYPES: { value: CustomVariable['type']; label: string }[] = [
@@ -58,8 +60,8 @@ export function CustomResolutionEditor({
   resolution,
   onSave,
   onCancel,
-  organizationId,
-  userId,
+  organizationId = '',
+  userId = '',
 }: CustomResolutionEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showTemplates, setShowTemplates] = useState(!resolution);

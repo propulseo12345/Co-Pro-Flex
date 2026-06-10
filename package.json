@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "db:test": "node scripts/db-test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "audit:pages": "node scripts/audit-pages-loc.mjs",

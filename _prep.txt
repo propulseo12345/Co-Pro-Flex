@@ -1,0 +1,99 @@
+                                              pg_get_functiondef                                               
+---------------------------------------------------------------------------------------------------------------
+ CREATE OR REPLACE FUNCTION public.prepare_ag_decisions(p_ag_id uuid)                                         +
+  RETURNS jsonb                                                                                               +
+  LANGUAGE plpgsql                                                                                            +
+  SECURITY DEFINER                                                                                            +
+  SET search_path TO 'public'                                                                                 +
+ AS $function$\r                                                                                              +
+ declare\r                                                                                                    +
+   v_copro_id  uuid;\r                                                                                        +
+   v_res       record;\r                                                                                      +
+   v_target    text;\r                                                                                        +
+   v_target_id uuid;\r                                                                                        +
+   v_payload   jsonb;\r                                                                                       +
+   v_prepared  integer := 0;\r                                                                                +
+ begin\r                                                                                                      +
+   select m.copro_id into v_copro_id\r                                                                        +
+   from public.ag_meetings m\r                                                                                +
+   where m.id = p_ag_id;\r                                                                                    +
+ \r                                                                                                           +
+   if v_copro_id is null then\r                                                                               +
+     raise exception 'prepare_ag_decisions: AG % introuvable', p_ag_id using errcode = '23503';\r             +
+   end if;\r                                                                                                  +
+ \r                                                                                                           +
+   if not public.is_service_call() and not public.user_is_copro_manager(v_copro_id) then\r                    +
+     raise exception 'forbidden: gestionnaire requis pour préparer les décisions de l''AG %', p_ag_id\r       +
+       using errcode = '42501';\r                                                                             +
+   end if;\r                                                                                                  +
+ \r                                                                                                           +
+   for v_res in\r                                                                                             +
+     select r.id, r.resolution_number, r.action_type,\r                                                       +
+            coalesce(r.variables, '{}'::jsonb) as variables\r                                                 +
+     from public.ag_resolutions r\r                                                                           +
+     where r.ag_id = p_ag_id\r                                                                                +
+       and r.status = 'approved'\r                                                                            +
+       and r.action_type is not null\r                                                                        +
+       and r.action_type <> 'DESIGNATE_BUREAU'\r                                                              +
+     order by r.resolution_number\r                                                                           +
+   loop\r                                                                                                     +
+     v_target_id := null;\r                                                                                   +
+     v_payload   := v_res.variables;\r                                                                        +
+ \r                                                                                                           +
+     v_target := case v_res.action_type\r                                                                     +
+       when 'CREATE_BUDGET'            then 'budgets'\r                                                       +
+       when 'CREATE_WORK_BUDGET'       then 'budgets'\r                                                       +
+       when 'CREATE_ALUR_FUND'         then 'budgets'\r                                                       +
+       when 'GRANT_QUITUS'             then 'budgets'\r                                                       +
+       when 'APPROVE_ACCOUNTS'         then 'accounting_periods'\r                                            +
+       when 'SCHEDULE_BUDGET_PAYMENTS' then 'call_for_funds'\r                                                +
+       when 'CREATE_EXCEPTIONAL_CALL'  then 'call_for_funds'\r                                                +
+       when 'SCHEDULE_ALUR_PAYMENTS'   then 'call_for_funds'\r                                                +
+       when 'ELECT_COUNCIL'            then 'council_members'\r                                               +
+       when 'APPOINT_SYNDIC'           then 'copros'\r                                                        +
+       when 'MANAGE_CONTRACT'          then 'contracts'\r                                                     +
+       else null\r                                                                                            +
+     end;\r                                                                                                   +
+ \r                                                                                                           +
+     if v_target is null then\r                                                                               +
+       raise exception 'prepare_ag_decisions: action_type % non cartographié (résolution %)',\r               +
+         v_res.action_type, v_res.resolution_number using errcode = '23514';\r                                +
+     end if;\r                                                                                                +
+ \r                                                                                                           +
+     -- APPROVE_ACCOUNTS : résoudre la période N couvrant date_debut..date_fin (pas d'approve_period(NULL)).\r+
+     if v_res.action_type = 'APPROVE_ACCOUNTS' then\r                                                         +
+       if not (v_payload ? 'date_debut') or not (v_payload ? 'date_fin') then\r                               +
+         raise exception 'prepare_ag_decisions: APPROVE_ACCOUNTS sans date_debut/date_fin (résolution %)',\r  +
+           v_res.resolution_number using errcode = '23514';\r                                                 +
+       end if;\r                                                                                              +
+       select p.id into v_target_id\r                                                                         +
+       from public.accounting_periods p\r                                                                     +
+       where p.copro_id = v_copro_id\r                                                                        +
+         and p.start_date <= (v_payload ->> 'date_debut')::date\r                                             +
+         and p.end_date   >= (v_payload ->> 'date_fin')::date\r                                               +
+       order by p.start_date desc\r                                                                           +
+       limit 1;\r                                                                                             +
+       if v_target_id is null then\r                                                                          +
+         raise exception 'prepare_ag_decisions: aucune période ne couvre % .. % (copro %)',\r                 +
+           (v_payload ->> 'date_debut'), (v_payload ->> 'date_fin'), v_copro_id\r                             +
+           using errcode = '23503';\r                                                                         +
+       end if;\r                                                                                              +
+     end if;\r                                                                                                +
+ \r                                                                                                           +
+     insert into public.ag_pending_actions\r                                                                  +
+       (ag_id, resolution_id, action_type, target_table, target_id, payload, status)\r                        +
+     values\r                                                                                                 +
+       (p_ag_id, v_res.id, v_res.action_type, v_target, v_target_id, v_payload, 'pending')\r                  +
+     on conflict (ag_id, resolution_id) do nothing;\r                                                         +
+ \r                                                                                                           +
+     if found then\r                                                                                          +
+       v_prepared := v_prepared + 1;\r                                                                        +
+     end if;\r                                                                                                +
+   end loop;\r                                                                                                +
+ \r                                                                                                           +
+   return jsonb_build_object('success', true, 'ag_id', p_ag_id, 'prepared', v_prepared);\r                    +
+ end;\r                                                                                                       +
+ $function$                                                                                                   +
+ 
+(1 row)
+

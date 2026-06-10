@@ -2,12 +2,13 @@
 -- une reprise complétée le solde à 0, et aucune anomalie d'intégrité bloquante n'apparaît.
 DO $$
 DECLARE
-  v jsonb; v_copro uuid; v_period uuid; v_lot uuid;
+  v_copro uuid; v_period uuid; v_lot uuid;
   v_res jsonb; v_wait numeric; v_blocking int;
 BEGIN
-  v := create_clean_test_copro_seeded('moteur-acc', 15000, 0);
-  v_copro := (v->>'copro_id')::uuid;
-  v_period := (v->>'period_id')::uuid;
+  PERFORM set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
+  v_copro := create_clean_test_copro_seeded('moteur-acc');
+  SELECT id INTO v_period FROM accounting_periods WHERE copro_id=v_copro AND status='open' ORDER BY start_date DESC LIMIT 1;
   SELECT id INTO v_lot FROM lots WHERE copro_id=v_copro ORDER BY ref LIMIT 1;
 
   -- 1) Reprise INCOMPLÈTE : seulement une créance 450/lot -> résidu sur 472
@@ -24,7 +25,7 @@ BEGIN
 
   -- aucune anomalie BLOQUANTE (TOTAL_MISMATCH / CHAPEAU_450_POSTED / SOURCE_ID_MISSING)
   SELECT count(*) INTO v_blocking FROM audit_finance_integrity(v_copro)
-   WHERE issue_type IN ('TOTAL_MISMATCH','CHAPEAU_450_POSTED','SOURCE_ID_MISSING');
+   WHERE issue_type IN ('LEDGER_UNBALANCED','LOT_GL_MISMATCH','CALL_TOTAL_MISMATCH','LOT_ID_MISSING_45X');
   IF v_blocking <> 0 THEN RAISE EXCEPTION 'ASSERT FAIL : % anomalie bloquante sur reprise incomplete', v_blocking; END IF;
 
   -- 2) COMPLÉTER : on saisit la contrepartie banque -> résidu 0

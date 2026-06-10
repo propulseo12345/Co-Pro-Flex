@@ -43,10 +43,12 @@ export enum OrdreServiceStatut {
   PAYE = 'PAYE',
   CLOTURE = 'CLOTURE',
   ANNULE = 'ANNULE',
-  // Legacy aliases pour compatibilité
+  // Legacy aliases pour compatibilité — valeurs volontairement dupliquées (rétro-compat).
+  /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
   EN_ATTENTE_PRESTATAIRE = 'ENVOYE',
   INTERVENTION_PROGRAMMEE = 'PLANIFIE',
   INTERVENTION_REALISEE = 'REALISE'
+  /* eslint-enable @typescript-eslint/no-duplicate-enum-values */
 }
 
 /**

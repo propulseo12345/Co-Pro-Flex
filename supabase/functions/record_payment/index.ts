@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
       p_lot_id: lot_id,
       p_amount: amount,
       p_payment_date: payment_date,
-      p_method: method ?? "bank_transfer",
+      p_method: method ?? "transfer",
       p_reference: reference ?? null,
       p_call_line_ids: call_line_ids ?? null,
       p_idempotency_key: idempotency_key ?? null,

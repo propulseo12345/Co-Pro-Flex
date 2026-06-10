@@ -39,10 +39,6 @@ export function useFinalisationPage(agId: string) {
     loadActions();
   }, [loadActions]);
 
-  const refreshAction = useCallback(async () => {
-    await loadActions();
-  }, [loadActions]);
-
   const allActivated = actions.length > 0 && actions.every(a => a.status === 'activated');
 
   const handleFinalize = useCallback(async () => {
@@ -69,7 +65,6 @@ export function useFinalisationPage(agId: string) {
     isFinalizing,
     finalizeError,
     isFinalized,
-    refreshAction,
     handleFinalize,
   };
 }

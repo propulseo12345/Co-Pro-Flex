@@ -16257,14 +16257,6 @@ export type Database = {
         }
         Returns: string
       }
-      create_alur_fund_from_ag: {
-        Args: { p_ag_id: string; p_modalites?: string; p_montant: number }
-        Returns: Json
-      }
-      create_budget_from_ag: {
-        Args: { p_ag_id: string; p_exercice: number; p_postes: Json }
-        Returns: Json
-      }
       create_document_system_folders: {
         Args: { p_copro_id: string; p_user_id?: string }
         Returns: undefined
@@ -16348,16 +16340,12 @@ export type Database = {
       delete_ag_draft: { Args: { p_ag_id: string }; Returns: Json }
       delete_ag_pouvoir: { Args: { p_pouvoir_id: string }; Returns: Json }
       delete_service_order: { Args: { p_order_id: string }; Returns: undefined }
-      elect_council_from_ag: {
-        Args: { p_ag_id: string; p_membres: Json }
-        Returns: Json
-      }
       ensure_dev_membership: { Args: { p_copro_id?: string }; Returns: string }
       finalize_and_activate_ag: {
         Args: { p_activate?: boolean; p_ag_id: string }
         Returns: Json
       }
-      finish_ag_session: { Args: { p_ag_id: string }; Returns: Json }
+      finalize_ag: { Args: { p_ag_id: string }; Returns: Json }
       fn_annexe_1: {
         Args: { p_copro_id: string; p_period_id: string }
         Returns: Json
@@ -16406,10 +16394,6 @@ export type Database = {
       generate_campaign_recipients: {
         Args: { p_campaign_id: string }
         Returns: number
-      }
-      generate_combined_calls_from_ag: {
-        Args: { p_ag_id: string; p_nb_appels?: number }
-        Returns: Json
       }
       generate_document_path:
         | {
@@ -16557,10 +16541,6 @@ export type Database = {
           p_to_status: Database["public"]["Enums"]["service_order_status"]
         }
         Returns: boolean
-      }
-      mark_ag_action_activated: {
-        Args: { p_action_type: string; p_ag_id: string; p_result_data?: Json }
-        Returns: Json
       }
       mark_conversation_read: {
         Args: { p_conversation_id: string }
@@ -16765,10 +16745,6 @@ export type Database = {
       }
       reverse_period_cutoff: {
         Args: { p_copro_id: string; p_period_id: string }
-        Returns: Json
-      }
-      rpc_finalize_ag_session: {
-        Args: { p_ag_id: string; p_closing_notes?: string }
         Returns: Json
       }
       rpc_get_ag_convocation_bundle: {

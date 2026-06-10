@@ -1,0 +1,4 @@
+# Normalisation des fins de ligne (Windows : core.autocrlf=true)
+# Les fichiers exécutés dans des conteneurs Linux (docker psql, bash) DOIVENT rester en LF.
+*.sql text eol=lf
+*.sh text eol=lf

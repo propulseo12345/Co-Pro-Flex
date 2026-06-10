@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
 import { BlocCard } from './BlocCard';
 import { createClient } from '@/lib/supabase/client';
-import { createBudgetFromAg, type BlocPoste, type PendingAction } from '@/lib/ag/api/finalisation.api';
+import { type BlocPoste, type PendingAction } from '@/lib/ag/api/finalisation.api';
 import { useAccountsAndKeys } from '@/features/ag/new/hooks/useAccountsAndKeys';
-import { POSTES_DEPENSES, POSTE_ACCOUNT_MAPPING } from '@/features/ag/new/domain/constants';
 import { inferPosteCode } from '@/components/features/finance/Budget/types';
 import styles from './BlocBudget.module.css';
 
@@ -24,20 +22,20 @@ function extractYear(dateDDMMYYYY: string | undefined): number {
 interface BlocBudgetProps {
   agId: string;
   action: PendingAction;
-  onActivated: () => void;
 }
 
-export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
+/** Revue lecture seule du budget prévisionnel voté (créé à l'étape PV). */
+export function BlocBudget({ agId, action }: BlocBudgetProps) {
   const vars = action.resolution?.variables || {};
   const exercice = extractYear(vars['date_debut']);
   const montantTotal = parseFrenchAmount(vars['montant']);
 
-  const { accounts, repartitionKeys, findAccountByCode, findKeyByName } = useAccountsAndKeys();
+  const { accounts, repartitionKeys } = useAccountsAndKeys();
 
   const [postes, setPostes] = useState<BlocPoste[]>([]);
   const [postesLoaded, setPostesLoaded] = useState(false);
 
-  // Charger les postes détaillés depuis variables.budget_postes (priorité) puis opening_notes (fallback)
+  // Charger les postes détaillés depuis variables.budget_postes (priorité) puis opening_notes (fallback).
   useEffect(() => {
     async function loadPostes() {
       // 1. Priorité: postes depuis ag_resolutions.variables.budget_postes
@@ -98,88 +96,13 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
       } catch (err) {
         console.error('[BlocBudget] Error loading opening_notes:', err);
       }
-      // Fallback: pas de postes détaillés, liste vide (le syndic les ajoutera ici)
       setPostesLoaded(true);
     }
     loadPostes();
   }, [agId, vars]);
 
-  const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(
-    action.status as 'pending' | 'activated' | 'failed'
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [selectedPoste, setSelectedPoste] = useState('');
-  const [customLabel, setCustomLabel] = useState('');
-  const [showCustom, setShowCustom] = useState(false);
-  const [newAmount, setNewAmount] = useState('');
-
   const total = postes.reduce((sum, p) => sum + p.amount, 0);
 
-  const resolveAccountData = useCallback((posteName: string) => {
-    const mapping = POSTE_ACCOUNT_MAPPING[posteName];
-    if (!mapping) return {};
-    const account = findAccountByCode(mapping.accountCode);
-    const key = findKeyByName(mapping.repartitionKeyName);
-    return {
-      account_id: account?.id,
-      repartition_key_id: key?.id,
-    };
-  }, [findAccountByCode, findKeyByName]);
-
-  const handlePosteSelect = useCallback((value: string) => {
-    if (value === 'Autre') {
-      setShowCustom(true);
-      setSelectedPoste('');
-      setCustomLabel('');
-    } else {
-      setShowCustom(false);
-      setSelectedPoste(value);
-    }
-  }, []);
-
-  const handleAddPoste = useCallback(() => {
-    const label = showCustom ? customLabel.trim() : selectedPoste;
-    if (!label || !newAmount) return;
-    const amount = parseFloat(newAmount);
-    if (isNaN(amount) || amount <= 0) return;
-
-    const accountData = resolveAccountData(label);
-
-    setPostes(prev => [...prev, {
-      label,
-      amount,
-      sort_order: prev.length,
-      code: inferPosteCode(label),
-      ...accountData,
-    }]);
-    setSelectedPoste('');
-    setCustomLabel('');
-    setShowCustom(false);
-    setNewAmount('');
-  }, [showCustom, customLabel, selectedPoste, newAmount, resolveAccountData]);
-
-  const handleRemove = useCallback((idx: number) => {
-    setPostes(prev => prev.filter((_, i) => i !== idx).map((p, i) => ({ ...p, sort_order: i })));
-  }, []);
-
-  const handleUpdateAmount = useCallback((idx: number, val: string) => {
-    setPostes(prev => prev.map((p, i) => i === idx ? { ...p, amount: parseFloat(val) || 0 } : p));
-  }, []);
-
-  const handleConfirm = useCallback(async () => {
-    setStatus('loading');
-    setError(null);
-    const result = await createBudgetFromAg(agId, exercice, postes);
-    if (result.success) {
-      setStatus('activated');
-      onActivated();
-    } else {
-      setStatus('failed');
-      setError(result.error || 'Erreur inconnue');
-    }
-  }, [agId, exercice, postes, onActivated]);
-
-  // Trouver le nom du compte par son ID
   const getAccountLabel = useCallback((accountId?: string) => {
     if (!accountId) return null;
     const acc = accounts.find(a => a.id === accountId);
@@ -201,15 +124,7 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
   }
 
   return (
-    <BlocCard
-      title={`Budget prévisionnel ${exercice}`}
-      actionType="CREATE_BUDGET"
-      status={status}
-      error={error}
-      onConfirm={handleConfirm}
-      confirmLabel="Créer le budget"
-      confirmDisabled={postes.length === 0}
-    >
+    <BlocCard title={`Budget prévisionnel ${exercice}`} actionType="CREATE_BUDGET" status={action.status}>
       {montantTotal > 0 && (
         <div className={styles.budgetRef}>
           Montant voté : {montantTotal.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
@@ -228,68 +143,15 @@ export function BlocBudget({ agId, action, onActivated }: BlocBudgetProps) {
                 </span>
               )}
             </span>
-            <input
-              type="number"
-              className={styles.posteAmount}
-              value={poste.amount}
-              onChange={e => handleUpdateAmount(idx, e.target.value)}
-              disabled={status === 'activated'}
-              min="0"
-              step="0.01"
-            />
-            <span className={styles.posteSuffix}>€</span>
-            {status !== 'activated' && (
-              <button type="button" className={styles.removeBtn} onClick={() => handleRemove(idx)}>
-                <Trash2 size={14} />
-              </button>
-            )}
+            <span className={styles.posteAmount}>
+              {poste.amount.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+            </span>
           </div>
         ))}
       </div>
 
-      {postes.length === 0 && status !== 'activated' && (
-        <div className={styles.emptyHint}>
-          Ajoutez les postes de dépenses pour détailler le budget.
-        </div>
-      )}
-
-      {status !== 'activated' && (
-        <div className={styles.addRow}>
-          {!showCustom ? (
-            <select
-              value={selectedPoste}
-              onChange={e => handlePosteSelect(e.target.value)}
-              className={styles.addSelect}
-            >
-              <option value="">Sélectionner un poste…</option>
-              {POSTES_DEPENSES.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              placeholder="Libellé personnalisé…"
-              value={customLabel}
-              onChange={e => setCustomLabel(e.target.value)}
-              className={styles.addLabel}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPoste(); } }}
-            />
-          )}
-          <input
-            type="number"
-            placeholder="Montant"
-            value={newAmount}
-            onChange={e => setNewAmount(e.target.value)}
-            className={styles.addAmount}
-            min="0"
-            step="0.01"
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPoste(); } }}
-          />
-          <button type="button" onClick={handleAddPoste} className={styles.addBtn}>
-            <Plus size={14} /> Ajouter
-          </button>
-        </div>
+      {postes.length === 0 && (
+        <div className={styles.emptyHint}>Aucun poste détaillé enregistré pour ce budget.</div>
       )}
 
       <div className={styles.total}>

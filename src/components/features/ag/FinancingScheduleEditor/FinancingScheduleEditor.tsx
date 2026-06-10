@@ -67,7 +67,7 @@ function generateDefaultEntries(
 
   const months = FREQUENCY_MONTHS[frequency];
   const amountPerEntry = Math.round((totalAmount / months.length) * 100) / 100;
-  let remainder = totalAmount - amountPerEntry * months.length;
+  const remainder = totalAmount - amountPerEntry * months.length;
 
   return months.map((month, index) => {
     // Add remainder to first entry
@@ -211,7 +211,7 @@ export function FinancingScheduleEditor({
   // Distribute equally
   const handleDistributeEqually = useCallback(() => {
     const amountPerEntry = Math.round((totalBudget / entries.length) * 100) / 100;
-    let remainder = totalBudget - amountPerEntry * entries.length;
+    const remainder = totalBudget - amountPerEntry * entries.length;
 
     const newEntries = entries.map((entry, index) => ({
       ...entry,

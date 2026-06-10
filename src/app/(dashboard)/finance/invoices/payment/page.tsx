@@ -9,10 +9,12 @@ import { useMemo } from 'react';
 export default function InvoicesPaymentPage() {
     const { data: invoices, isLoading, error } = useSupplierInvoices();
 
-    // Filter invoices that need payment (posted or approved status)
+    // Factures à payer = comptabilisées ('posted') avec un RESTE À PAYER > 0. Filtrer sur
+    // remaining_to_pay (et non le seul statut) exclut d'un coup : les avoirs (credit_note, 0044,
+    // reste=0), les factures déjà réglées et celles soldées par avoir.
     const invoicesToPay = useMemo(() => {
         if (!invoices) return [];
-        return invoices.filter(f => f.status === 'posted' || f.status === 'approved');
+        return invoices.filter(f => f.status === 'posted' && f.remaining_to_pay > 0);
     }, [invoices]);
 
     if (isLoading) {

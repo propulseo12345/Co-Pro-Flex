@@ -83,7 +83,7 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
                 .from('ag_resolutions')
                 .select('id, title, action_type, variables, resolution_number' as '*')
                 .eq('ag_id', agId)
-                .eq('is_approved', true)
+                .eq('status', 'approved')
                 .not('action_type' as 'id', 'is', null)
                 .order('resolution_number');
 
@@ -129,7 +129,23 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
     const handleClose = useCallback(async () => {
         setIsClosing(true);
         try {
-            // Prepare decisions (RPC added by migration, not yet in generated types)
+            // 1) close_ag : fige + APPROUVE les votes (calculate_resolution_result) et passe l'AG en 'closed'.
+            //    close_ag derive copro_id et applique la garde gestionnaire en interne.
+            const { data: closeResult, error: closeError } = await (supabase.rpc as CallableFunction)(
+                'close_ag', { p_ag_id: agId, p_closing_notes: null }
+            );
+
+            if (closeError) throw closeError;
+
+            const closeData = closeResult as Record<string, unknown> | null;
+            if (closeData && closeData.success === false) {
+                setError((closeData.message as string) || 'Erreur lors de la cloture');
+                setIsClosing(false);
+                return;
+            }
+
+            // 2) prepare_ag_decisions APRES close_ag : ne materialise que les resolutions desormais 'approved'.
+            //    Ordre imperatif (inverser => 0 decision materialisee, echec silencieux).
             const { data: prepResult, error: prepError } = await (supabase.rpc as CallableFunction)(
                 'prepare_ag_decisions', { p_ag_id: agId }
             );
@@ -137,19 +153,11 @@ export function ClosureRecap({ agId, onClose }: ClosureRecapProps) {
             if (prepError) throw prepError;
 
             const prepData = prepResult as Record<string, unknown> | null;
-            if (prepData && !prepData.success) {
+            if (prepData && prepData.success === false) {
                 setError((prepData.error as string) || 'Erreur lors de la preparation des decisions');
                 setIsClosing(false);
                 return;
             }
-
-            // Close the AG
-            const { error: closeError } = await supabase
-                .from('ag_meetings')
-                .update({ status: 'closed', session_ended_at: new Date().toISOString() })
-                .eq('id', agId);
-
-            if (closeError) throw closeError;
 
             onClose();
         } catch (err) {

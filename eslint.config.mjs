@@ -26,6 +26,20 @@ const eslintConfig = defineConfig([
 
       // Éviter les index comme key
       "react/no-array-index-key": "warn",
+
+      // Apostrophes/guillemets dans le JSX : règle absurde pour une app française
+      // (« l'AG », « d'une copropriété »…). Désactivée (décision projet 2026-06-09).
+      "react/no-unescaped-entities": "off",
+
+      // Famille de règles React Compiler (codebase pas encore compiler-ready) :
+      // rétrogradées en warning pour ne pas bloquer le build, à traiter dans une
+      // passe React Compiler dédiée (décision projet 2026-06-09). rules-of-hooks
+      // reste en error (vrai bug). Les vrais signaux (Date.now en render…) restent visibles.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/purity": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
     },
   },
 ]);

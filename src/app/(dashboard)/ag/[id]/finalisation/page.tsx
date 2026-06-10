@@ -33,7 +33,6 @@ export default function FinalisationPage() {
     isFinalizing,
     finalizeError,
     isFinalized,
-    refreshAction,
     handleFinalize,
   } = useFinalisationPage(agId);
 
@@ -94,16 +93,13 @@ export default function FinalisationPage() {
           <BlocBudget
             agId={agId}
             action={budgetAction}
-            onActivated={refreshAction}
           />
         )}
 
         {alurAction && (
           <BlocALUR
-            agId={agId}
             action={alurAction}
             scheduleAction={scheduleAlurAction}
-            onActivated={refreshAction}
           />
         )}
 
@@ -111,25 +107,19 @@ export default function FinalisationPage() {
           <BlocAppelsFonds
             agId={agId}
             action={appelsAction}
-            alurAction={alurAction}
-            onActivated={refreshAction}
           />
         )}
 
         {councilAction && (
           <BlocConseilSyndical
-            agId={agId}
             action={councilAction}
-            onActivated={refreshAction}
           />
         )}
 
         {simpleActions.map(action => (
           <BlocSimple
             key={action.id}
-            agId={agId}
             action={action}
-            onActivated={refreshAction}
           />
         ))}
       </div>

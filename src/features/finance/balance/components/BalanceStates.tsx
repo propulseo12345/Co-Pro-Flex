@@ -3,9 +3,7 @@
 import { RefreshCw, AlertCircle, FileText } from 'lucide-react';
 import styles from '@/app/(dashboard)/documents/balance/balance.module.css';
 
-interface BalanceLoadingStateProps {}
-
-export function BalanceLoadingState({}: BalanceLoadingStateProps) {
+export function BalanceLoadingState() {
   return (
     <div className="container">
       <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>

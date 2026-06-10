@@ -188,7 +188,7 @@ export function getLabelSimplifie(compte: string, labelOriginal: string): { labe
  */
 function simplifierLabel(label: string): string {
   // Retirer les préfixes techniques courants
-  let simplified = label
+  const simplified = label
     .replace(/^Compte\s+/i, '')
     .replace(/^Cpte\s+/i, '')
     .replace(/copropriétaires?/gi, 'copros')

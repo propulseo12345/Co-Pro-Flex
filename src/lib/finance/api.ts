@@ -95,14 +95,15 @@ export interface SupplierInvoiceOverview {
   id: string;
   copro_id: string;
   period_id: string;
-  supplier_id: string;
+  // La vue v_supplier_invoices_overview expose `tiers_id` (FK tiers) + `supplier_name` (= tiers.name).
+  tiers_id: string;
   supplier_name: string;
   invoice_number: string | null;
   invoice_date: string;
   due_date: string | null;
   label: string;
   total_amount: number;
-  status: 'draft' | 'approved' | 'posted' | 'paid' | 'cancelled';
+  status: 'draft' | 'posted' | 'paid' | 'cancelled';
   ledger_tx_id: string | null;
   document_id: string | null;
   created_at: string;
@@ -132,13 +133,23 @@ export interface BankMovementOverview {
   matches_count: number;
 }
 
+/**
+ * Fournisseur = ligne de la table `tiers` avec `is_supplier = true`.
+ * L'ancienne table `suppliers` a été fusionnée dans `tiers` lors du redesign du schéma :
+ * il n'y a plus de colonne `contact` (jsonb) — les coordonnées sont des colonnes à plat.
+ */
 export interface Supplier {
   id: string;
   copro_id: string;
   name: string;
-  siret: string | null;
-  contact: Record<string, unknown>;
+  is_supplier: boolean;
   is_active: boolean;
+  siret: string | null;
+  vat_number: string | null;
+  email: string | null;
+  phone: string | null;
+  iban: string | null;
+  category: string;
   created_at: string;
   updated_at: string;
 }
@@ -479,10 +490,12 @@ export async function listSupplierInvoices(coproId: string): Promise<ApiResult<S
 export async function listSuppliers(coproId: string): Promise<ApiResult<Supplier[]>> {
   const supabase = getSupabaseClient();
 
+  // Fournisseurs = tiers avec is_supplier=true (l'ancienne table `suppliers` a fusionné dans `tiers`).
   const { data, error } = await supabase
-    .from('suppliers')
+    .from('tiers')
     .select('*')
     .eq('copro_id', coproId)
+    .eq('is_supplier', true)
     .eq('is_active', true)
     .order('name');
 
@@ -535,7 +548,9 @@ export async function createSupplierInvoiceDirect(payload: CreateSupplierInvoice
     .insert({
       copro_id: payload.copro_id,
       period_id: payload.period_id,
-      supplier_id: payload.supplier_id,
+      // Colonne réelle = `tiers_id` (FK tiers). On garde `supplier_id` comme nom de champ
+      // côté payload (alias sémantique : un fournisseur EST un tiers is_supplier=true).
+      tiers_id: payload.supplier_id,
       invoice_number: payload.invoice_number || null,
       invoice_date: payload.invoice_date,
       due_date: payload.due_date || null,
@@ -579,7 +594,7 @@ export interface UpdateSupplierInvoicePayload {
   due_date?: string;
   label?: string;
   total_amount?: number;
-  status?: 'draft' | 'approved' | 'posted' | 'paid' | 'cancelled';
+  status?: 'draft' | 'posted' | 'paid' | 'cancelled';
 }
 
 export async function updateSupplierInvoice(payload: UpdateSupplierInvoicePayload): Promise<ApiResult<{ success: boolean }>> {
@@ -1501,19 +1516,35 @@ export interface PendingInvoice {
 
 export async function listPendingInvoices(coproId: string): Promise<ApiResult<PendingInvoice[]>> {
   const supabase = createUntypedClient();
+  // Colonne réelle = `tiers_id` (FK tiers), jointure imbriquée = `tiers(name)`.
+  // « En attente de paiement » = factures validées mais non réglées. Décision actée « validée =
+  // posted » (statut comptablement engagé, dette au 401) → on filtre sur le SEUL statut 'posted' :
+  // un 'draft' (brouillon) n'est pas encore une dette, il n'a rien à faire dans le rapprochement
+  // bancaire ; 'paid'/'cancelled' sont soldés. Enum réel = ('draft','posted','paid','cancelled').
+  // doc_kind='invoice' : on EXCLUT les avoirs (credit_note, migration 0044) — un avoir n'est pas
+  // une dette à régler (il réduit la dette), il n'a rien à faire dans le rapprochement bancaire.
   const { data, error } = await supabase
     .from('supplier_invoices')
-    .select('id, copro_id, supplier_id, invoice_number, invoice_date, due_date, label, total_amount, status, suppliers(name)')
+    .select('id, copro_id, tiers_id, invoice_number, invoice_date, due_date, label, total_amount, status, tiers(name)')
     .eq('copro_id', coproId)
-    .in('status', ['pending', 'validated', 'approved']);
+    .eq('doc_kind', 'invoice')
+    .in('status', ['posted']);
 
   if (error) return { data: null, error: error.message };
 
   return {
     data: (data || []).map((d: Record<string, unknown>) => ({
-      ...d,
+      id: d.id as string,
+      copro_id: d.copro_id as string,
+      // alias sémantique : on garde `supplier_id` côté type interne, alimenté par la colonne tiers_id.
+      supplier_id: (d.tiers_id as string | null) ?? null,
+      supplier_name: (d.tiers as Record<string, unknown> | null)?.name as string ?? null,
+      invoice_number: (d.invoice_number as string | null) ?? null,
+      invoice_date: d.invoice_date as string,
+      due_date: (d.due_date as string | null) ?? null,
+      label: (d.label as string | null) ?? null,
       total_amount: Number(d.total_amount) || 0,
-      supplier_name: (d.suppliers as Record<string, unknown>)?.name as string || null,
+      status: d.status as string,
     })) as PendingInvoice[],
     error: null,
   };

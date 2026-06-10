@@ -95,48 +95,55 @@ function getSupabaseClient() {
 export async function getDashboardKpis(coproId: string): Promise<ApiResult<DashboardKpis>> {
   const supabase = getSupabaseClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
-    .from('v_dashboard_kpis')
-    .select('*')
-    .eq('copro_id', coproId)
-    .single();
+  // 1. Période comptable active (nécessaire aux KPIs budgétaires ; null si aucune).
+  const periodResult = await getActiveAccountingPeriod(coproId);
+  const periodId = periodResult.data?.id ?? null;
 
-  if (error) {
-    // Si PGRST116 (no rows), retourner des KPIs vides
-    if (error.code === 'PGRST116') {
-      return {
-        data: {
-          copro_id: coproId,
-          current_balance: 0,
-          tresorerie_courante: 0,
-          tresorerie_travaux: 0,
-          unpaid_total: 0,
-          critical_unpaid_count: 0,
-          next_ag_date: null,
-          next_ag_id: null,
-          next_ag_title: null,
-          budget_vote: 0,
-          budget_realise: 0,
-          budget_pct: 0,
-        },
-        error: null,
-      };
-    }
-    return { data: null, error: error.message };
+  // 2. KPIs financiers dérivés du grand livre (source unique de vérité).
+  //    fn_dashboard_kpis renvoie : tresorerie, total_impayes, provisions_travaux,
+  //    dettes, budget_vote, budget_realise, budget_pct.
+  const { data: fin, error: finError } = await supabase.rpc('fn_dashboard_kpis', {
+    p_copro_id: coproId,
+    p_period_id: periodId,
+  });
+
+  if (finError) {
+    return { data: null, error: finError.message };
   }
 
-  // Supabase retourne les numeric en string — cast en number
+  // 3. Prochaine AG à venir : la plus proche dans le futur, encore en cours de vie.
+  const { data: nextAg } = await supabase
+    .from('ag_meetings')
+    .select('id, title, meeting_date')
+    .eq('copro_id', coproId)
+    .gte('meeting_date', new Date().toISOString())
+    .in('status', ['draft', 'convoked', 'in_progress', 'session_active'])
+    .order('meeting_date', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  // La fn ne sépare pas le compte bancaire travaux (5121) → tresorerie = trésorerie courante.
+  // La tuile "Fonds travaux" du dashboard montre le FONDS ALUR / réserve travaux (comptes 103+105,
+  // = provisions_travaux, dérivé du grand livre) — décision USER 2026-06-08.
+  // critical_unpaid_count reste non fourni par la fn (0) : indicateur d'impayés critiques différé.
+  const tresorerie = Number(fin?.tresorerie) || 0;
+  const provisionsTravaux = Number(fin?.provisions_travaux) || 0;
+
   const kpis: DashboardKpis = {
-    ...data,
-    current_balance: Number(data.current_balance) || 0,
-    tresorerie_courante: Number(data.tresorerie_courante) || 0,
-    tresorerie_travaux: Number(data.tresorerie_travaux) || 0,
-    unpaid_total: Number(data.unpaid_total) || 0,
-    critical_unpaid_count: Number(data.critical_unpaid_count) || 0,
-    budget_vote: Number(data.budget_vote) || 0,
-    budget_realise: Number(data.budget_realise) || 0,
-    budget_pct: Number(data.budget_pct) || 0,
+    copro_id: coproId,
+    current_balance: tresorerie,
+    tresorerie,
+    tresorerie_courante: tresorerie,
+    tresorerie_travaux: provisionsTravaux,
+    unpaid_total: Number(fin?.total_impayes) || 0,
+    critical_unpaid_count: 0,
+    provisions_travaux: provisionsTravaux,
+    budget_vote: Number(fin?.budget_vote) || 0,
+    budget_realise: Number(fin?.budget_realise) || 0,
+    budget_pct: Number(fin?.budget_pct) || 0,
+    next_ag_date: nextAg?.meeting_date ?? null,
+    next_ag_id: nextAg?.id ?? null,
+    next_ag_title: nextAg?.title ?? null,
   };
 
   return { data: kpis, error: null };
@@ -226,26 +233,6 @@ export async function getDashboardData(coproId: string): Promise<ApiResult<Dashb
   }
 
   const kpis = kpisResult.data!;
-
-  // Supplement with annexe KPIs (best-effort, non-blocking)
-  // La vue v_dashboard_kpis fournit déjà tresorerie, budget — la RPC complète les champs manquants
-  try {
-    const periodResult = await getActiveAccountingPeriod(coproId);
-    if (!periodResult.error && periodResult.data) {
-      const supabase = createUntypedClient();
-      const { data: annexeKpis } = await supabase.rpc(
-        'fn_dashboard_kpis',
-        { p_copro_id: coproId, p_period_id: periodResult.data.id }
-      );
-      if (annexeKpis) {
-        // Ne pas écraser les valeurs déjà fournies par la vue
-        kpis.travaux_en_cours = annexeKpis.travaux_en_cours ?? kpis.travaux_en_cours ?? 0;
-        kpis.nb_travaux_ouverts = annexeKpis.nb_travaux_ouverts ?? kpis.nb_travaux_ouverts ?? 0;
-      }
-    }
-  } catch {
-    // Annexe KPIs are supplementary - don't fail the dashboard
-  }
 
   // Pour activities et todos, on tolère les erreurs (retourne tableau vide)
   return {

@@ -10,6 +10,7 @@ import { ToastProvider } from '@/providers/ToastProvider';
 import { SidebarProvider } from '@/providers/SidebarContext';
 import { AppBody } from '@/components/layout/AppBody';
 import { OnboardingRedirect } from '@/components/layout/OnboardingRedirect';
+import { ResolutionTemplatesProvider } from '@/providers/ResolutionTemplatesProvider';
 
 function LoadingFallback() {
   return (
@@ -27,6 +28,7 @@ export default function DashboardLayout({
   return (
     <ThemeProvider>
       <CoproProvider>
+        <ResolutionTemplatesProvider>
         <OnboardingRedirect />
         <AnnexeProvider>
           <VentesProvider>
@@ -46,6 +48,7 @@ export default function DashboardLayout({
             </ToastProvider>
           </VentesProvider>
         </AnnexeProvider>
+        </ResolutionTemplatesProvider>
       </CoproProvider>
     </ThemeProvider>
   );

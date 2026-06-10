@@ -14,12 +14,14 @@ import {
 } from '@/components/features/finance/Factures/utils';
 import type { Facture, StatutFacture, EvenementFacture } from '@/components/features/finance/Factures/types';
 
-// Map local status to Supabase status
-function mapStatusToSupabase(statut: StatutFacture): 'draft' | 'approved' | 'posted' | 'paid' | 'cancelled' {
+// Map local status to Supabase status.
+// Enum cible supplier_invoice_status = 'draft' | 'posted' | 'paid' | 'cancelled'
+// (pas de 'approved' : décision « validée = posted » = comptabilisée, cf. dossier 2026-06-10).
+function mapStatusToSupabase(statut: StatutFacture): 'draft' | 'posted' | 'paid' | 'cancelled' {
   switch (statut) {
     case 'BROUILLON': return 'draft';
-    case 'A_VALIDER': return 'approved';
-    case 'VALIDEE': return 'approved';
+    case 'A_VALIDER': return 'draft';   // pas encore comptabilisée
+    case 'VALIDEE': return 'posted';    // validée = comptabilisée (D6xx/C401)
     case 'A_PAYER': return 'posted';
     case 'PAYEE': return 'paid';
     default: return 'draft';
@@ -45,8 +47,8 @@ function mapSupabaseToFacture(invoice: any): Facture {
 function mapStatus(status: string): StatutFacture {
   switch (status) {
     case 'paid': return 'PAYEE';
-    case 'posted':
-    case 'approved': return 'A_PAYER';
+    case 'posted': return 'A_PAYER';   // comptabilisée, en attente de règlement
+    case 'cancelled': return 'BROUILLON';
     case 'draft': return 'BROUILLON';
     default: return 'A_VALIDER';
   }

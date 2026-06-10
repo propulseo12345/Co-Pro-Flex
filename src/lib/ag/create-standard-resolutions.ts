@@ -6,7 +6,8 @@
  */
 
 import { addResolution } from './api';
-import { getResolutionsObligatoires, type TypeAG, type MajorityType } from '@/lib/constants/resolutions';
+import { type TypeAG, type MajorityType } from '@/lib/constants/resolutions';
+import { fetchSystemObligatoires } from '@/lib/ag/resolutionTemplates/api';
 import { extractVariableNames } from '@/lib/utils/resolution-variables';
 import type { MajorityType as DbMajorityType, AddResolutionResponse } from './types';
 
@@ -88,8 +89,17 @@ export async function createStandardResolutions(
 ): Promise<CreateStandardResolutionsResult> {
   const { agId, coproId, typeAG, exerciceYear = new Date().getFullYear() + 1, budgetPostes } = input;
 
-  // Récupérer les templates obligatoires pour ce type d'AG
-  const templatesObligatoires = getResolutionsObligatoires(typeAG);
+  // Récupérer les templates obligatoires SYSTÈME pour ce type d'AG (lus en base, pas de cabinet requis)
+  const obligatoiresResult = await fetchSystemObligatoires(typeAG);
+  if (!obligatoiresResult.success) {
+    return {
+      success: false,
+      resolutionsCreated: 0,
+      results: [],
+      error: obligatoiresResult.error,
+    };
+  }
+  const templatesObligatoires = obligatoiresResult.data;
 
   if (templatesObligatoires.length === 0) {
     return {

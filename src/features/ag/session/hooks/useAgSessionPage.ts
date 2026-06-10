@@ -342,12 +342,12 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
       // Guard: resolutions draft must be an object with activeIndex, not an array (legacy corruption)
       const resData = resolutionsDraft.data && !Array.isArray(resolutionsDraft.data) ? resolutionsDraft.data : null;
 
-      // Fallback: derive completedResolutions from DB is_approved if drafts don't have them
+      // Fallback: derive completedResolutions from DB status (approved/rejected) if drafts don't have them
       let completedFromDraft = resData?.completedResolutions ?? sessionData?.completedResolutions ?? [];
       if (completedFromDraft.length === 0 && dbResolutions.length > 0) {
-        // Resolutions with is_approved set (voted) — maintain DB order
+        // Resolutions décidées (status approved/rejected) — maintain DB order
         const votedIds = dbResolutions
-          .filter(r => r.is_approved !== null && r.is_approved !== undefined)
+          .filter(r => r.status === 'approved' || r.status === 'rejected')
           .map(r => r.id);
         completedFromDraft = votedIds;
       }
@@ -518,7 +518,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     const current = resolutionsHook.currentResolution;
     if (!current || !votingHook.stats) return;
 
-    // 1. Compute result and save is_approved
+    // 1. Compute result and persist status (approved/rejected)
     const result = checkMajority(current, votingHook.stats, votingHook.votes, {
       totalTantiemes,
       totalCoproprietaires: coproprietaires.length,
@@ -528,11 +528,10 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
     if (!current.id.includes('_dup_')) {
       try {
         await updateResolution(current.id, {
-          is_approved: result.adopted,
           status: result.adopted ? 'approved' : 'rejected',
         });
       } catch (err) {
-        console.error('[persistResolutionResult] is_approved update failed:', err);
+        console.error('[persistResolutionResult] status update failed:', err);
       }
 
       // 2. Batch-save DIRECT votes that might not have been individually persisted
@@ -558,7 +557,7 @@ export function useAgSessionPage({ agId }: UseAgSessionPageParams): UseAgSession
   }, [useSupabase, isManager, resolutionsHook.currentResolution, votingHook.stats, votingHook.votes, totalTantiemes, coproprietaires.length, currentCoproId]);
 
   const confirmNextFromModal = useCallback(() => {
-    // Persist votes + is_approved to Supabase (fire-and-forget)
+    // Persist votes + status to Supabase (fire-and-forget)
     persistResolutionResult();
 
     const current = resolutionsHook.currentResolution;

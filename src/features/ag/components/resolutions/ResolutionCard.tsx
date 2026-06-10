@@ -1,19 +1,44 @@
 'use client';
 
-import { Copy, Check, PlusCircle, Scale } from 'lucide-react';
+import { Copy, Check, PlusCircle, Scale, Files, Pencil, Trash2 } from 'lucide-react';
 import { MAJORITES, type ResolutionTemplate } from '@/lib/constants/resolutions';
+import type { ResolutionTemplateRow } from '@/lib/ag/resolutionTemplates/types';
 import styles from '../../../../app/(dashboard)/ag/resolutions/resolutions.module.css';
 
+/** Dérive le niveau d'un modèle depuis ses dimensions de tenance. */
+function getNiveau(row: ResolutionTemplateRow): 'Système' | 'Cabinet' | 'Cette copro' {
+  if (row.cabinet_id == null) return 'Système';
+  if (row.copro_id) return 'Cette copro';
+  return 'Cabinet';
+}
+
 interface ResolutionCardProps {
-  resolution: ResolutionTemplate;
+  resolution: ResolutionTemplateRow;
   copiedId: string | null;
   onCopy: (text: string, id: string) => void;
   onAddToAG?: (resolution: ResolutionTemplate) => void;
   hasAvailableAGs?: boolean;
+  /** Déclenche la duplication du modèle vers le cabinet ou la copro. */
+  onDuplicate?: (id: string) => void;
+  /** Ouvre l'éditeur pour modifier (uniquement cabinet/copro). */
+  onEdit?: (row: ResolutionTemplateRow) => void;
+  /** Supprime le modèle (uniquement cabinet/copro). */
+  onDelete?: (id: string) => void;
 }
 
-export function ResolutionCard({ resolution, copiedId, onCopy, onAddToAG, hasAvailableAGs }: ResolutionCardProps) {
+export function ResolutionCard({
+  resolution,
+  copiedId,
+  onCopy,
+  onAddToAG,
+  hasAvailableAGs,
+  onDuplicate,
+  onEdit,
+  onDelete,
+}: ResolutionCardProps) {
   const majorite = MAJORITES[resolution.majorite];
+  const niveau = getNiveau(resolution);
+  const isEditable = resolution.cabinet_id != null;
 
   return (
     <div className={styles.resolutionCard}>
@@ -23,15 +48,54 @@ export function ResolutionCard({ resolution, copiedId, onCopy, onAddToAG, hasAva
           {resolution.obligatoire_pour && resolution.obligatoire_pour.length > 0 && (
             <span className={styles.obligatoireBadge}>Obligatoire</span>
           )}
+          {/* Badge de niveau */}
+          <span
+            className={
+              niveau === 'Système'
+                ? styles.badgeNiveauSystem
+                : niveau === 'Cabinet'
+                  ? styles.badgeNiveauCabinet
+                  : styles.badgeNiveauCopro
+            }
+          >
+            {niveau}
+          </span>
         </div>
         <div className={styles.cardActions}>
           {onAddToAG && (
             <button
               className={styles.addToAGBtn}
-              title={hasAvailableAGs ? "Ajouter à une AG" : "Aucune AG disponible"}
+              title={hasAvailableAGs ? 'Ajouter à une AG' : 'Aucune AG disponible'}
               onClick={() => onAddToAG(resolution)}
             >
               <PlusCircle size={16} />
+            </button>
+          )}
+          {onDuplicate && (
+            <button
+              className={styles.copyBtn}
+              title="Dupliquer ce modèle"
+              onClick={() => onDuplicate(resolution.id)}
+            >
+              <Files size={16} />
+            </button>
+          )}
+          {isEditable && onEdit && (
+            <button
+              className={styles.editBtn}
+              title="Modifier ce modèle"
+              onClick={() => onEdit(resolution)}
+            >
+              <Pencil size={16} />
+            </button>
+          )}
+          {isEditable && onDelete && (
+            <button
+              className={styles.deleteBtn}
+              title="Supprimer ce modèle"
+              onClick={() => onDelete(resolution.id)}
+            >
+              <Trash2 size={16} />
             </button>
           )}
           <button

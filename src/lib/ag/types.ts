@@ -8,10 +8,10 @@
 
 export type AgMeetingType = 'ordinary' | 'extraordinary' | 'special';
 
-export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'session_active' | 'closed' | 'pv_generated' | 'pv_signed' | 'pv_sent' | 'finalized';
+export type AgStatus = 'draft' | 'convoked' | 'in_progress' | 'session_active' | 'closed' | 'pv_generated' | 'pv_signed' | 'pv_sent' | 'finalized' | 'archived';
 
 /** Statuts considérés comme "terminés" (AG passées) */
-export const AG_TERMINAL_STATUSES: AgStatus[] = ['pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'closed'];
+export const AG_TERMINAL_STATUSES: AgStatus[] = ['pv_generated', 'pv_signed', 'pv_sent', 'finalized', 'closed', 'archived'];
 
 /** Configuration complète des statuts AG */
 export const AG_STATUS_CONFIG: Record<AgStatus, { label: string; color: string; order: number }> = {
@@ -24,6 +24,7 @@ export const AG_STATUS_CONFIG: Record<AgStatus, { label: string; color: string; 
   pv_signed: { label: 'PV signé', color: '#14B8A6', order: 6 },
   pv_sent: { label: 'PV diffusé', color: '#10B981', order: 7 },
   finalized: { label: 'Finalisée', color: '#059669', order: 8 },
+  archived: { label: 'Archivée', color: '#64748B', order: 9 },
 };
 
 /** Transitions autorisées entre statuts AG */
@@ -35,7 +36,8 @@ export const AG_STATUS_TRANSITIONS: Partial<Record<AgStatus, AgStatus[]>> = {
   pv_generated: ['pv_signed'],
   pv_signed: ['pv_sent'],
   pv_sent: ['finalized'],
-  finalized: [],
+  finalized: ['archived'],
+  archived: [],
 };
 
 export type ResolutionType = 'budget' | 'accounts' | 'works' | 'appointment' | 'contract' | 'rules' | 'other';
@@ -104,7 +106,6 @@ export interface AgResolution {
   voters_abstention: number;
   threshold_tantiemes: number | null;
   threshold_voters: number | null;
-  is_approved: boolean | null;
   is_bridgeable: boolean;
   bridge_vote_id: string | null;
   voted_at: string | null;
@@ -204,7 +205,6 @@ export interface AgResolutionResult {
   voters_abstention: number;
   threshold_tantiemes: number | null;
   threshold_voters: number | null;
-  is_approved: boolean | null;
   is_bridgeable: boolean;
   percent_for: number;
   bridge_vote_id: string | null;

@@ -25,6 +25,8 @@ import {
   BudgetTravaux,
   NouveauBudgetForm,
   CoproprietaireALUR,
+  FondsALUR,
+  TransfertALUR,
   getProgressColor,
   getProgressPercentage,
   POSTE_LABELS,
@@ -141,6 +143,10 @@ export function useBudget() {
   const [coproprietairesALUR, setCoproprietairesALUR] = useState<CoproprietaireALUR[]>([]);
   const [travauxCalls, setTravauxCalls] = useState<financeApi.CallForFundsOverview[]>([]);
   const [allWorksRaw, setAllWorksRaw] = useState<import('@/lib/budget/api').BudgetOverview[]>([]);
+  // ALUR (migration 0037) : rappels de virement, solde 105 cumulé (source unique), historique
+  const [pendingAlurCash, setPendingAlurCash] = useState<import('@/lib/budget/api').PendingAlurCash[]>([]);
+  const [alurFundBalance, setAlurFundBalance] = useState(0);
+  const [alurHistory, setAlurHistory] = useState<import('@/lib/budget/api').AlurTransferHistoryRow[]>([]);
 
   const {
     budgets: rawBudgets,
@@ -250,6 +256,26 @@ export function useBudget() {
 
   useEffect(() => { loadTravauxCalls(); }, [loadTravauxCalls]);
 
+  // Charge les extras ALUR (rappels virement + solde 105 cumulé + historique des affectations)
+  const loadAlurExtras = useCallback(async () => {
+    if (!currentCoproId) { setPendingAlurCash([]); setAlurFundBalance(0); setAlurHistory([]); return; }
+    try {
+      const api = await import('@/lib/budget/api');
+      const [pending, balance, history] = await Promise.all([
+        api.listPendingAlurCash(currentCoproId),
+        api.getAlurFundBalance(currentCoproId),
+        api.listAlurTransfersHistory(currentCoproId),
+      ]);
+      setPendingAlurCash(pending);
+      setAlurFundBalance(balance);
+      setAlurHistory(history);
+    } catch (err) {
+      console.error('[useBudget] Error loading ALUR extras:', err);
+    }
+  }, [currentCoproId]);
+
+  useEffect(() => { loadAlurExtras(); }, [loadAlurExtras]);
+
   // ============================================================================
   // UI State
   // ============================================================================
@@ -343,21 +369,28 @@ export function useBudget() {
     }) as BudgetTravaux[];
   }, [allWorksRaw, travauxCalls]);
 
-  // ALUR funds (from raw budgets of type 'alur')
-  const fondsALUR = useMemo(() => {
+  // ALUR funds : soldeActuel = solde CUMULÉ du compte 105 (source unique, cf. v_alur_fund_balance) ;
+  // cotisationAnnuelle/% restent indicatifs depuis le budget ALUR de l'exercice ;
+  // historiqueTransferts dérivé des affectations réelles (v_alur_transfers_history).
+  const fondsALUR = useMemo((): FondsALUR => {
     const alurBudget = rawBudgets.find(b => b.budget_type === 'alur');
-    if (!alurBudget) {
-      return { soldeActuel: 0, cotisationAnnuelle: 0, pourcentageBudget: 0, historiqueTransferts: [] };
-    }
-    const cotisation = Number(alurBudget.total_planned);
-    const pourcentage = budgetAnnuelVote > 0 ? (cotisation / budgetAnnuelVote) * 100 : 5;
+    const cotisation = alurBudget ? Number(alurBudget.total_planned) : 0;
+    const pourcentage = alurBudget && budgetAnnuelVote > 0 ? (cotisation / budgetAnnuelVote) * 100 : 0;
+    const historiqueTransferts: TransfertALUR[] = alurHistory.map(h => ({
+      id: h.id,
+      montant: Number(h.amount),
+      date: h.transfer_date ?? '',
+      destination: h.destination === 'operating' ? 'COMPTE_COURANT' : 'BUDGET_TRAVAUX',
+      budgetTravauxId: h.budget_id ?? undefined,
+      description: h.notes ?? '',
+    }));
     return {
-      soldeActuel: cotisation - Number(alurBudget.validated_spent),
+      soldeActuel: alurFundBalance,
       cotisationAnnuelle: cotisation,
       pourcentageBudget: Math.round(pourcentage * 10) / 10,
-      historiqueTransferts: [],
+      historiqueTransferts,
     };
-  }, [rawBudgets, budgetAnnuelVote]);
+  }, [rawBudgets, budgetAnnuelVote, alurFundBalance, alurHistory]);
 
   // ============================================================================
   // Computed Values
@@ -444,11 +477,35 @@ export function useBudget() {
     setShowTravauxDetailModal(true);
   }, []);
 
-  const handleTransferALUR = useCallback((_montant: number, destination: 'COMPTE_COURANT' | 'BUDGET_TRAVAUX', _budgetId?: string) => {
-    // TODO: Implement with Supabase
-    alert(`Transfert ALUR vers ${destination === 'COMPTE_COURANT' ? 'Compte courant' : 'Budget travaux'}`);
-    setShowTransferModal(false);
-  }, []);
+  // Affectation du fonds ALUR à un budget travaux voté (D105/C705 via post_alur_transfer).
+  const handleTransferALUR = useCallback(async (
+    montant: number,
+    _destination: 'COMPTE_COURANT' | 'BUDGET_TRAVAUX',
+    budgetId?: string
+  ) => {
+    if (!currentCoproId) { alert('Aucune copropriété sélectionnée.'); return; }
+    if (!budgetId) { alert('Veuillez sélectionner un budget travaux voté comme destination.'); return; }
+    try {
+      const { postAlurTransfer } = await import('@/lib/budget/api');
+      await postAlurTransfer(currentCoproId, budgetId, montant, new Date().toISOString().split('T')[0]);
+      setShowTransferModal(false);
+      // Pas de refresh() : l'affectation D105/C705 ne touche ni lignes ni dépenses du budget courant.
+      await Promise.all([loadAllWorks(), loadAlurExtras()]);
+    } catch (err) {
+      alert(`Affectation impossible : ${err instanceof Error ? err.message : 'erreur inconnue'}`);
+    }
+  }, [currentCoproId, loadAllWorks, loadAlurExtras]);
+
+  // Marque le virement de trésorerie réel (Livret A → courant) comme effectué (D512/C502).
+  const handleSettleAlurCash = useCallback(async (transferId: string) => {
+    try {
+      const { settleAlurTransferCash } = await import('@/lib/budget/api');
+      await settleAlurTransferCash(transferId, new Date().toISOString().split('T')[0]);
+      await loadAlurExtras();
+    } catch (err) {
+      alert(`Règlement impossible : ${err instanceof Error ? err.message : 'erreur inconnue'}`);
+    }
+  }, [loadAlurExtras]);
 
   const checkBudgetExists = useCallback((annee: number, type: 'fonctionnement' | 'travaux', excludeId?: string): BudgetWithStatus | undefined => {
     return budgets.find(b =>
@@ -750,9 +807,10 @@ export function useBudget() {
   const handleSetActiveTab = useCallback(async (tab: BudgetTab) => {
     setActiveTab(tab);
 
-    // Load ALUR copropriétaires when switching to ALUR tab
+    // Rafraîchir les données ALUR (copropriétaires + solde 105 + rappels + historique) à l'ouverture
+    // de l'onglet, pour que la borne de saisie de la modale ne soit pas périmée.
     if (tab === 'alur') {
-      await loadCoproprietairesALUR();
+      await Promise.all([loadCoproprietairesALUR(), loadAlurExtras()]);
     }
 
     // Load lines for the appropriate budget
@@ -769,7 +827,7 @@ export function useBudget() {
         loadBudgetExpenses(budget.id),
       ]);
     }
-  }, [rawBudgets, loadBudgetLines, loadBudgetExpenses, loadCoproprietairesALUR]);
+  }, [rawBudgets, loadBudgetLines, loadBudgetExpenses, loadCoproprietairesALUR, loadAlurExtras]);
 
   // ============================================================================
   // Return
@@ -832,6 +890,8 @@ export function useBudget() {
     // Budget handlers
     handleOpenTravauxDetail,
     handleTransferALUR,
+    handleSettleAlurCash,
+    pendingAlurCash,
     handleCreateBudgetFromResolution,
     handleTransformToAppele,
     handleCreateBudget,

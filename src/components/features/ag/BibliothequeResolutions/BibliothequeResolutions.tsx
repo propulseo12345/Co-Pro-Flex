@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Search, X, Star, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import { Search, X, Star, Tag, ChevronDown, ChevronUp, Plus, AlertCircle } from 'lucide-react';
 import {
-    RESOLUTIONS_BANK,
-    getCategories,
     MAJORITES,
     type ResolutionTemplate,
     type TypeAG,
@@ -13,6 +11,10 @@ import {
     getResolutionsByCategorieForAGType,
     searchResolutions
 } from '@/lib/constants/resolutions';
+import type { ResolutionTemplateRow, CreateTemplatePayload } from '@/lib/ag/resolutionTemplates/types';
+import { duplicateTemplate, deleteTemplate, createTemplate, updateTemplate } from '@/lib/ag/resolutionTemplates/api';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
+import { TemplateEditorModal } from './TemplateEditorModal';
 import styles from './BibliothequeResolutions.module.css';
 
 interface BibliothequeResolutionsProps {
@@ -32,32 +34,39 @@ export function BibliothequeResolutions({
     resolutionsDejaAjoutees = [],
     existingTitles = []
 }: BibliothequeResolutionsProps) {
+    const { templates, refresh, cabinetId, coproId } = useResolutionTemplates();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [showObligatoiresOnly, setShowObligatoiresOnly] = useState(false);
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['all']));
 
+    // État UI CRUD
+    const [actionError, setActionError] = useState<string | null>(null);
+    const [showEditor, setShowEditor] = useState(false);
+    const [editingTemplate, setEditingTemplate] = useState<ResolutionTemplateRow | undefined>(undefined);
+    const [editorSaveError, setEditorSaveError] = useState<string | null>(null);
+
     // Résolutions filtrées par type d'AG
     const resolutionsForAGType = useMemo(() => {
-        return getResolutionsForAGType(typeAG);
-    }, [typeAG]);
+        return getResolutionsForAGType(templates, typeAG);
+    }, [templates, typeAG]);
 
     // Résolutions obligatoires pour ce type d'AG
     const resolutionsObligatoires = useMemo(() => {
-        return getResolutionsObligatoires(typeAG);
-    }, [typeAG]);
+        return getResolutionsObligatoires(templates, typeAG);
+    }, [templates, typeAG]);
 
     // Résolutions par catégorie pour ce type d'AG
     const resolutionsByCategorie = useMemo(() => {
-        return getResolutionsByCategorieForAGType(typeAG);
-    }, [typeAG]);
+        return getResolutionsByCategorieForAGType(templates, typeAG);
+    }, [templates, typeAG]);
 
     // Résolutions filtrées (recherche + catégorie + obligatoires)
     const filteredResolutions = useMemo(() => {
         let results: ResolutionTemplate[];
 
         if (searchQuery.trim()) {
-            results = searchResolutions(searchQuery, typeAG);
+            results = searchResolutions(templates, searchQuery, typeAG);
         } else if (showObligatoiresOnly) {
             results = resolutionsObligatoires;
         } else if (selectedCategory !== 'all') {
@@ -67,7 +76,7 @@ export function BibliothequeResolutions({
         }
 
         return results;
-    }, [searchQuery, selectedCategory, showObligatoiresOnly, typeAG, resolutionsForAGType, resolutionsObligatoires, resolutionsByCategorie]);
+    }, [templates, searchQuery, selectedCategory, showObligatoiresOnly, typeAG, resolutionsForAGType, resolutionsObligatoires, resolutionsByCategorie]);
 
     // Catégories disponibles pour ce type d'AG
     const categoriesDisponibles = useMemo(() => {
@@ -83,7 +92,7 @@ export function BibliothequeResolutions({
         'Contrats',
         'Action en justice',
         'Impayés',
-        'Modification du règlement de copropriété et des lots',
+        'Modification du règlement',
         'Compteurs',
         'Règles de bonne conduite'
     ];
@@ -115,9 +124,81 @@ export function BibliothequeResolutions({
         onSelectResolution(resolution);
     };
 
+    // ----------------------------------------------------------------
+    // Actions CRUD
+    // ----------------------------------------------------------------
+
+    const handleDuplicate = useCallback(async (id: string) => {
+        setActionError(null);
+        if (!cabinetId) {
+            setActionError('Aucun cabinet associé à votre compte.');
+            return;
+        }
+        // Dupliquer crée un modèle CABINET réutilisable ; la portée "cette copro" se choisit via la modale Créer.
+        const result = await duplicateTemplate(id, cabinetId, null);
+        if (result.success) {
+            await refresh();
+        } else {
+            setActionError(result.error);
+        }
+    }, [cabinetId, refresh]);
+
+    const handleDelete = useCallback(async (id: string) => {
+        setActionError(null);
+        if (!confirm('Supprimer ce modèle de résolution ? Cette action est irréversible.')) return;
+        const result = await deleteTemplate(id);
+        if (result.success) {
+            await refresh();
+        } else {
+            setActionError(result.error);
+        }
+    }, [refresh]);
+
+    const handleOpenCreate = useCallback(() => {
+        setEditorSaveError(null);
+        setEditingTemplate(undefined);
+        setShowEditor(true);
+    }, []);
+
+    const handleOpenEdit = useCallback((row: ResolutionTemplateRow) => {
+        setEditorSaveError(null);
+        setEditingTemplate(row);
+        setShowEditor(true);
+    }, []);
+
+    const handleEditorSave = useCallback(async (payload: CreateTemplatePayload, pourCopro: boolean) => {
+        setEditorSaveError(null);
+        if (!cabinetId) {
+            setEditorSaveError('Aucun cabinet associé à votre compte. Impossible de créer un modèle.');
+            return;
+        }
+
+        if (editingTemplate) {
+            const result = await updateTemplate(editingTemplate.id, payload);
+            if (!result.success) { setEditorSaveError(result.error); return; }
+        } else {
+            const result = await createTemplate(cabinetId, payload, pourCopro ? coproId : null);
+            if (!result.success) { setEditorSaveError(result.error); return; }
+        }
+
+        await refresh();
+        setShowEditor(false);
+        setEditingTemplate(undefined);
+    }, [cabinetId, coproId, editingTemplate, refresh]);
+
+    // ----------------------------------------------------------------
+    // Render d'une carte de résolution (bibliothèque inline)
+    // ----------------------------------------------------------------
+
     const renderResolutionCard = (resolution: ResolutionTemplate) => {
         const isObligatoire = isResolutionObligatoire(resolution.id);
         const isDejaAjoutee = isResolutionDejaAjoutee(resolution.id, resolution.titre);
+        // Récupérer les dimensions de tenance si dispo (le snapshot est des ResolutionTemplateRow)
+        const row = resolution as ResolutionTemplateRow;
+        const niveau = row.cabinet_id == null
+            ? 'Système'
+            : row.copro_id ? 'Cette copro' : 'Cabinet';
+        const isEditable = row.cabinet_id != null;
 
         return (
             <div
@@ -125,12 +206,54 @@ export function BibliothequeResolutions({
                 className={`${styles.resolutionCard} ${isObligatoire ? styles.obligatoire : ''} ${isDejaAjoutee ? styles.dejaAjoutee : ''}`}
             >
                 <div className={styles.cardHeader}>
-                    <h4 className={styles.cardTitle}>{resolution.titre}</h4>
-                    {isObligatoire && (
-                        <span className={styles.badgeObligatoire} title="Résolution obligatoire pour ce type d'AG">
-                            <Star size={12} /> Obligatoire
-                        </span>
-                    )}
+                    <div className={styles.cardHeaderLeft}>
+                        <h4 className={styles.cardTitle}>{resolution.titre}</h4>
+                        <div className={styles.cardBadges}>
+                            {isObligatoire && (
+                                <span className={styles.badgeObligatoire} title="Résolution obligatoire pour ce type d'AG">
+                                    <Star size={12} /> Obligatoire
+                                </span>
+                            )}
+                            <span className={
+                                niveau === 'Système'
+                                    ? styles.badgeSystem
+                                    : niveau === 'Cabinet'
+                                        ? styles.badgeCabinet
+                                        : styles.badgeCopro
+                            }>
+                                {niveau}
+                            </span>
+                        </div>
+                    </div>
+                    {/* Actions de gestion */}
+                    <div className={styles.cardCrudActions}>
+                        <button
+                            className={styles.crudBtn}
+                            title="Dupliquer ce modèle"
+                            onClick={() => void handleDuplicate(resolution.id)}
+                            disabled={!cabinetId}
+                        >
+                            Dupliquer
+                        </button>
+                        {isEditable && (
+                            <>
+                                <button
+                                    className={styles.crudBtn}
+                                    title="Modifier ce modèle"
+                                    onClick={() => handleOpenEdit(row)}
+                                >
+                                    Modifier
+                                </button>
+                                <button
+                                    className={`${styles.crudBtn} ${styles.crudBtnDanger}`}
+                                    title="Supprimer ce modèle"
+                                    onClick={() => void handleDelete(resolution.id)}
+                                >
+                                    Supprimer
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
                 <p className={styles.cardText}>{resolution.texte}</p>
                 <div className={styles.cardMeta}>
@@ -173,10 +296,37 @@ export function BibliothequeResolutions({
                             {typeAG === 'ORDINAIRE' ? 'AG Ordinaire' : 'AG Extraordinaire'}
                         </span>
                     </div>
-                    <button onClick={onClose} className={styles.closeButton} aria-label="Fermer">
-                        <X size={20} />
-                    </button>
+                    <div className={styles.headerActions}>
+                        {/* Bouton créer un modèle */}
+                        {cabinetId ? (
+                            <button
+                                className={styles.createBtn}
+                                onClick={handleOpenCreate}
+                                title="Créer un nouveau modèle"
+                            >
+                                <Plus size={14} /> Créer un modèle
+                            </button>
+                        ) : (
+                            <span className={styles.noCabinetWarning}>
+                                <AlertCircle size={14} /> Aucun cabinet associé
+                            </span>
+                        )}
+                        <button onClick={onClose} className={styles.closeButton} aria-label="Fermer">
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
+
+                {/* Message d'erreur action CRUD */}
+                {actionError && (
+                    <div className={styles.actionError}>
+                        <AlertCircle size={14} />
+                        <span>{actionError}</span>
+                        <button className={styles.errorDismiss} onClick={() => setActionError(null)}>
+                            <X size={12} />
+                        </button>
+                    </div>
+                )}
 
                 <div className={styles.filters}>
                     <div className={styles.searchContainer}>
@@ -303,6 +453,18 @@ export function BibliothequeResolutions({
                     )}
                 </div>
             </div>
+
+            {/* Modale éditeur */}
+            {showEditor && (
+                <TemplateEditorModal
+                    template={editingTemplate}
+                    cabinetId={cabinetId}
+                    coproId={coproId}
+                    onSave={handleEditorSave}
+                    onCancel={() => { setShowEditor(false); setEditingTemplate(undefined); }}
+                    errorMessage={editorSaveError}
+                />
+            )}
         </div>
     );
 }

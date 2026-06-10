@@ -102,7 +102,16 @@ export default function AppelsFondsPage() {
             <button className={topBarStyles.btnGhost} onClick={() => {/* TODO */}}>
               <Download size={14} /> Export
             </button>
-            <button className={topBarStyles.btnPrimary} onClick={() => setWizardOpen(true)} disabled={!selectedPeriod}>
+            {/* Bêta : création manuelle désactivée — le wizard appelle une RPC non livrée
+                (post_call_for_funds). Les appels sont générés à la validation du budget en AG
+                (post_budget_call_for_funds, opérationnel). Réactiver quand l'appel exceptionnel
+                (post_exceptional_call_for_funds) sera implémenté. */}
+            <button
+              className={topBarStyles.btnPrimary}
+              onClick={() => setWizardOpen(true)}
+              disabled
+              title="Création manuelle d'appels bientôt disponible — pour l'instant, les appels sont générés automatiquement à la validation du budget en AG."
+            >
               <Plus size={14} /> Générer les appels
             </button>
           </>

@@ -11,8 +11,6 @@
  *
  * Future: Pour revenir au multi-copro, remplacer ce service par une logique
  * basée sur les memberships de l'utilisateur.
- *
- * TODO: REMOVE DEV BOOTSTRAP - La fonction ensure_dev_membership est temporaire
  */
 
 'use client';
@@ -58,9 +56,6 @@ export interface ActiveCopro {
 /**
  * Récupère l'ID de la copro active.
  * Utilise un système de cache multi-niveau pour optimiser les performances.
- *
- * TODO: REMOVE DEV BOOTSTRAP - En mode dev, appelle ensure_dev_membership
- * pour auto-créer le membership si nécessaire.
  */
 export async function getActiveCopro(): Promise<ActiveCopro | null> {
   // 1. Check in-memory cache
@@ -78,68 +73,20 @@ export async function getActiveCopro(): Promise<ActiveCopro | null> {
     }
   }
 
-  // 3. Fetch from Supabase with DEV BOOTSTRAP
+  // 3. Fetch from Supabase: première copro (mode single-copro)
   try {
     const supabase = createClient();
 
-    // =================================================================
-    // TODO: REMOVE DEV BOOTSTRAP - Cette section est temporaire
-    // Appel à ensure_dev_membership pour auto-créer membership admin
-    // =================================================================
-    let coproIdFromBootstrap: string | null = null;
-    try {
-      // Cast to any to bypass TypeScript check for untyped RPC
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: bootstrapData, error: bootstrapError } = await (supabase as any)
-        .rpc('ensure_dev_membership', { p_copro_id: null });
+    const { data: copro, error: selectError } = await supabase
+      .from('copros')
+      .select('id, name')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
 
-      if (bootstrapError) {
-        // Si l'utilisateur n'est pas authentifié, ce n'est pas grave
-        // On continue avec la méthode standard
-        if (!bootstrapError.message.includes('Not authenticated')) {
-          // DEV bootstrap warning
-        }
-      } else if (bootstrapData) {
-        coproIdFromBootstrap = bootstrapData as string;
-        // DEV bootstrap: membership ensured
-      }
-    } catch (bootstrapErr) {
-      // Silently ignore bootstrap errors - fallback to standard method
-      // DEV bootstrap failed, using standard method
-    }
-    // =================================================================
-    // END DEV BOOTSTRAP
-    // =================================================================
-
-    // Récupérer la copro (préférer celle du bootstrap si disponible)
-    let copro: { id: string; name: string } | null = null;
-
-    if (coproIdFromBootstrap) {
-      const { data, error } = await supabase
-        .from('copros')
-        .select('id, name')
-        .eq('id', coproIdFromBootstrap)
-        .single();
-
-      if (!error && data) {
-        copro = data;
-      }
-    }
-
-    // Fallback: récupérer la première copro
-    if (!copro) {
-      const { data, error: selectError } = await supabase
-        .from('copros')
-        .select('id, name')
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .single();
-
-      if (selectError || !data) {
-        console.error('[ActiveCopro] Select error:', selectError);
-        return null;
-      }
-      copro = data;
+    if (selectError || !copro) {
+      console.error('[ActiveCopro] Select error:', selectError);
+      return null;
     }
 
     const result: ActiveCopro = { id: copro.id, name: copro.name };

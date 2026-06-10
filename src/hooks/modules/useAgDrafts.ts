@@ -181,14 +181,6 @@ export function useAgDrafts(): UseAgDraftsReturn {
     try {
       const supabase = createUntypedClient();
 
-      // S'assurer que l'utilisateur a un membership admin pour voir les brouillons
-      // (RLS: seuls les managers voient les drafts)
-      try {
-        await supabase.rpc('ensure_dev_membership', { p_copro_id: currentCoproId });
-      } catch {
-        // Ignorer les erreurs (ex: utilisateur non authentifié)
-      }
-
       // Essayer d'abord la vue agrégée optimisée
       let progressData: AgDraftProgress[] | null = null;
       let useViewFailed = false;

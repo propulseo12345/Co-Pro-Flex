@@ -481,9 +481,9 @@ export function useGedPageSupabase() {
 
   const handleCreateLink = useCallback(
     async (entityType: LinkedEntityType, entityId?: string) => {
-      const module = getLinkableModule(entityType);
+      const mod = getLinkableModule(entityType);
 
-      if (module && selectedDocForLink) {
+      if (mod && selectedDocForLink) {
         try {
           await documentsApi.linkDocumentToEntity(
             selectedDocForLink.id,

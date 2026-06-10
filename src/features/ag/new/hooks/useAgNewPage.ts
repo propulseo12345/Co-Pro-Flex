@@ -13,6 +13,7 @@ import { validateVisioUrl, sanitizeUrl } from '@/lib/utils/url-validation';
 import { detectVisioProvider, requiresVisioUrl, isVisioUrlMandatory } from '@/types';
 import { ensureRemoteMeeting } from '@/lib/services/remote-meeting.service';
 import { useCopro } from '@/providers/CoproContext';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 import { useGoogleMapsAutocomplete } from './useGoogleMapsAutocomplete';
 import { useBudgetPostes } from './useBudgetPostes';
 import { useBudgetImport } from './useBudgetImport';
@@ -22,6 +23,7 @@ import type { AdresseAG, BudgetPoste, AGFormData } from '../domain/types';
 export function useAgNewPage() {
   const router = useRouter();
   const { currentCoproId } = useCopro();
+  const { templates } = useResolutionTemplates();
 
   // Auto-creation/resume draft via Supabase
   const { draftId, isLoading: isDraftLoading, error: draftError } = useAgDraftAutoCreate();
@@ -216,7 +218,7 @@ export function useAgNewPage() {
 
       // Add standard resolutions for ordinary AG
       if (formData.type === 'ORDINAIRE') {
-        const resolutions = genererResolutionsAGOrdinaire();
+        const resolutions = genererResolutionsAGOrdinaire(templates);
         if (resolutions && resolutions.length > 0) {
           // Save resolutions in Supabase via saveDraft
           await saveDraft(draftId, 'resolutions', resolutions);
@@ -235,7 +237,7 @@ export function useAgNewPage() {
       console.error('[NewAGPage] Error:', err);
       setErrors({ form: "Une erreur est survenue lors de la création de l'AG. Veuillez réessayer." });
     }
-  }, [formData.type, formData.format, formData.visioUrl, formData.date, formData.heure, validate, router, draftId, currentCoproId, flush]);
+  }, [formData.type, formData.format, formData.visioUrl, formData.date, formData.heure, validate, router, draftId, currentCoproId, flush, templates]);
 
   // Navigate back
   const handleBack = useCallback(() => {

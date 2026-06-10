@@ -5,9 +5,11 @@ DECLARE
   v_copro uuid; v_period uuid;
   v_budget_orphelin uuid;
   v_calls_orphelin int;
-  v_seeded jsonb; v_copro2 uuid;
+  v_copro2 uuid;
   v_budget_ok uuid; v_calls_ok int;
 BEGIN
+  PERFORM set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
   -- CAS A : copro propre NON seedee -> on cree un budget validated SANS appel
   v_copro := create_clean_test_copro('proof-A');
   SELECT id INTO v_period FROM accounting_periods WHERE copro_id = v_copro AND status='open' ORDER BY start_date DESC LIMIT 1;
@@ -24,8 +26,7 @@ BEGIN
   END IF;
 
   -- CAS B : copro seedee (boucle d'or) -> budget validated AVEC appels emis
-  v_seeded := create_clean_test_copro_seeded('proof-B', 15000, 2);
-  v_copro2 := (v_seeded->>'copro_id')::uuid;
+  v_copro2 := create_clean_test_copro_seeded('proof-B');
   SELECT id INTO v_budget_ok FROM budgets WHERE copro_id = v_copro2 AND budget_type='current' ORDER BY created_at DESC LIMIT 1;
   SELECT count(*) INTO v_calls_ok
   FROM call_for_funds

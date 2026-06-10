@@ -1,0 +1,38 @@
+/* Bandeau de rappel : affectations ALUR en attente de virement de trésorerie (502 -> 512). */
+.pendingBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.pendingTitle {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pendingList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pendingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.pendingLabel {
+  font-variant-numeric: tabular-nums;
+}

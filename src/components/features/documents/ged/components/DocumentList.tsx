@@ -71,17 +71,17 @@ export function DocumentList({ documents, canManageAccess, onPreview, onLink, on
                   {docLinks.length > 0 ? (
                     <div className={styles.listLinksCell}>
                       {docLinks.map((link) => {
-                        const module = getLinkableModule(link.entityType);
-                        return module ? (
+                        const mod = getLinkableModule(link.entityType);
+                        return mod ? (
                           <Link
                             key={link.id}
-                            href={`${module.routeBase}/${link.entityId}`}
+                            href={`${mod.routeBase}/${link.entityId}`}
                             className={styles.listLinkTag}
-                            style={{ color: module.color }}
-                            title={`Voir ${module.label}`}
+                            style={{ color: mod.color }}
+                            title={`Voir ${mod.label}`}
                           >
                             {getLinkedEntityIcon(link.entityType, 12)}
-                            <span>{module.label}</span>
+                            <span>{mod.label}</span>
                           </Link>
                         ) : null;
                       })}

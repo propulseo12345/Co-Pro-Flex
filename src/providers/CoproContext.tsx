@@ -14,6 +14,7 @@ export interface Copro {
   address: string | null;
   city: string | null;
   postal_code: string | null;
+  annee_construction: number | null;
 }
 
 export interface CoproContextValue {
@@ -38,6 +39,9 @@ export interface CoproContextValue {
   // User role for current copro
   userRole: string | null;
   isManager: boolean;
+
+  // Cabinet du gestionnaire connecté (profiles.cabinet_id)
+  cabinetId: string | null;
 }
 
 const CoproContext = createContext<CoproContextValue | undefined>(undefined);
@@ -68,6 +72,7 @@ export function CoproProvider({ children }: CoproProviderProps) {
   const [currentCopro, setCurrentCopro] = useState<Copro | null>(null);
   const [overrideCoproId, setOverrideCoproId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [cabinetId, setCabinetId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,7 +92,7 @@ export function CoproProvider({ children }: CoproProviderProps) {
 
       const { data, error: fetchError } = await supabase
         .from('copros')
-        .select('id, name, address, city, postal_code')
+        .select('id, name, address, city, postal_code, annee_construction')
         .eq('id', coproId)
         .single();
 
@@ -110,9 +115,18 @@ export function CoproProvider({ children }: CoproProviderProps) {
           .maybeSingle();
 
         setUserRole(membership?.role || 'gestionnaire'); // Défaut: gestionnaire en mode single copro
+
+        // Récupérer le cabinet du gestionnaire connecté
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('cabinet_id')
+          .eq('id', user.id)
+          .maybeSingle();
+        setCabinetId((profile as { cabinet_id: string | null } | null)?.cabinet_id ?? null);
       } else {
         // Pas d'utilisateur authentifié, défaut à gestionnaire pour le dev
         setUserRole('gestionnaire');
+        setCabinetId(null);
       }
 
     } catch (err) {
@@ -173,6 +187,7 @@ export function CoproProvider({ children }: CoproProviderProps) {
     refreshCopros,
     userRole,
     isManager,
+    cabinetId,
   };
 
   return (

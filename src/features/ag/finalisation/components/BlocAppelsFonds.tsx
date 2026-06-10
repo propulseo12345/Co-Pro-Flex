@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BlocCard } from './BlocCard';
 import {
   loadCallPreviewData,
-  generateCombinedCallsFromAg,
   type PendingAction,
   type CallPreviewData,
 } from '@/lib/ag/api/finalisation.api';
@@ -29,23 +28,17 @@ function fmt(n: number): string {
 interface BlocAppelsFondsProps {
   agId: string;
   action: PendingAction;
-  alurAction?: PendingAction;
-  onActivated: () => void;
 }
 
-export function BlocAppelsFonds({ agId, action, onActivated }: BlocAppelsFondsProps) {
+/** Revue lecture seule des appels de fonds générés à l'étape PV (aperçu de la répartition). */
+export function BlocAppelsFonds({ agId, action }: BlocAppelsFondsProps) {
   const [nbAppels, setNbAppels] = useState(4);
   const [preview, setPreview] = useState<CallPreviewData | null>(null);
   const [previewLoading, setPreviewLoading] = useState(true);
-  const [status, setStatus] = useState<'pending' | 'activated' | 'failed' | 'loading'>(
-    action.status as 'pending' | 'activated' | 'failed'
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ calls_created?: number; lines_created?: number } | null>(null);
 
   useEffect(() => {
+    // previewLoading démarre à true (useState) ; setState uniquement dans le callback async.
     let cancelled = false;
-    setPreviewLoading(true);
     loadCallPreviewData(agId).then(data => {
       if (!cancelled) {
         setPreview(data);
@@ -55,42 +48,19 @@ export function BlocAppelsFonds({ agId, action, onActivated }: BlocAppelsFondsPr
     return () => { cancelled = true; };
   }, [agId]);
 
-  const handleConfirm = useCallback(async () => {
-    setStatus('loading');
-    setError(null);
-    const res = await generateCombinedCallsFromAg(agId, nbAppels);
-    if (res.success) {
-      setStatus('activated');
-      setResult({ calls_created: res.calls_created, lines_created: res.lines_created });
-      onActivated();
-    } else {
-      setStatus('failed');
-      setError(res.error || 'Erreur inconnue');
-    }
-  }, [agId, nbAppels, onActivated]);
-
   return (
-    <BlocCard
-      title="Appels de fonds"
-      actionType="SCHEDULE_BUDGET_PAYMENTS"
-      status={status}
-      error={error}
-      onConfirm={handleConfirm}
-      confirmLabel="Générer les appels"
-      confirmDisabled={previewLoading || !preview}
-    >
+    <BlocCard title="Appels de fonds" actionType="SCHEDULE_BUDGET_PAYMENTS" status={action.status}>
       {previewLoading && <p>Chargement des données…</p>}
 
       {preview && (
         <>
           <div className={styles.fields}>
             <div className={styles.field}>
-              <label className={styles.label}>Modalités de paiement</label>
+              <label className={styles.label}>Répartition de l&apos;aperçu</label>
               <select
                 className={styles.select}
                 value={nbAppels}
                 onChange={e => setNbAppels(parseInt(e.target.value))}
-                disabled={status === 'activated'}
               >
                 {Object.entries(NB_LABELS).map(([val, label]) => (
                   <option key={val} value={val}>{label}</option>
@@ -130,7 +100,7 @@ export function BlocAppelsFonds({ agId, action, onActivated }: BlocAppelsFondsPr
           </div>
 
           <div className={styles.preview}>
-            <p className={styles.previewTitle}>Aperçu des appels</p>
+            <p className={styles.previewTitle}>Aperçu indicatif des appels (découpage estimatif)</p>
             <table className={styles.previewTable}>
               <thead>
                 <tr>
@@ -155,12 +125,6 @@ export function BlocAppelsFonds({ agId, action, onActivated }: BlocAppelsFondsPr
             </table>
           </div>
         </>
-      )}
-
-      {result && (
-        <p className={styles.result}>
-          {result.calls_created} appels créés, {result.lines_created} lignes par lot
-        </p>
       )}
     </BlocCard>
   );

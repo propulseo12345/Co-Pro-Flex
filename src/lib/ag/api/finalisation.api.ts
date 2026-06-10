@@ -9,12 +9,6 @@ export interface BlocPoste {
   repartition_key_id?: string;
 }
 
-export interface MembreConseil {
-  copro_id: string;
-  nom: string;
-  role: string;
-}
-
 export interface PendingAction {
   id: string;
   action_type: string;
@@ -25,55 +19,35 @@ export interface PendingAction {
   resolution: { title: string; variables: Record<string, string> | null } | null;
 }
 
+/** Forme plate renvoyée par la RPC get_ag_pending_actions (colonnes resolution_*). */
+interface RawPendingAction {
+  id: string;
+  action_type: string;
+  status: 'pending' | 'activated' | 'failed';
+  error_message: string | null;
+  result_data: Record<string, unknown> | null;
+  resolution_id: string | null;
+  resolution_title: string | null;
+  resolution_variables: Record<string, string> | null;
+}
+
 export async function loadPendingActions(agId: string): Promise<PendingAction[]> {
   const supabase = createUntypedClient();
   const { data, error } = await supabase.rpc('get_ag_pending_actions', { p_ag_id: agId });
   if (error) throw error;
-  return (data as unknown as PendingAction[]) || [];
-}
-
-export async function createBudgetFromAg(
-  agId: string,
-  exercice: number,
-  postes: BlocPoste[]
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase.rpc('create_budget_from_ag', {
-    p_ag_id: agId,
-    p_exercice: exercice,
-    p_postes: postes,
-  });
-  if (error) return { success: false, error: error.message };
-  const result = data as { success: boolean; error?: string };
-  return result;
-}
-
-export async function createAlurFundFromAg(
-  agId: string,
-  montant: number,
-  modalites: string
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase.rpc('create_alur_fund_from_ag', {
-    p_ag_id: agId,
-    p_montant: montant,
-    p_modalites: modalites,
-  });
-  if (error) return { success: false, error: error.message };
-  return data as { success: boolean; error?: string };
-}
-
-export async function electCouncilFromAg(
-  agId: string,
-  membres: MembreConseil[]
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase.rpc('elect_council_from_ag', {
-    p_ag_id: agId,
-    p_membres: membres,
-  });
-  if (error) return { success: false, error: error.message };
-  return data as { success: boolean; error?: string };
+  const rows = (data as unknown as RawPendingAction[]) || [];
+  // La RPC renvoie des colonnes plates ; l'UI consomme la forme imbriquee resolution: { title, variables }.
+  return rows.map((r) => ({
+    id: r.id,
+    action_type: r.action_type,
+    status: r.status,
+    error_message: r.error_message,
+    result_data: r.result_data,
+    resolution_id: r.resolution_id,
+    resolution: r.resolution_id
+      ? { title: r.resolution_title ?? '', variables: r.resolution_variables }
+      : null,
+  }));
 }
 
 export interface CallPreviewKey {
@@ -161,132 +135,10 @@ export async function loadCallPreviewData(agId: string): Promise<CallPreviewData
   };
 }
 
-export async function generateCombinedCallsFromAg(
-  agId: string,
-  nbAppels: number
-): Promise<{ success: boolean; error?: string; calls_created?: number; lines_created?: number }> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase.rpc('generate_combined_calls_from_ag', {
-    p_ag_id: agId,
-    p_nb_appels: nbAppels,
-  });
-  if (error) return { success: false, error: error.message };
-  return data as { success: boolean; error?: string; calls_created?: number; lines_created?: number };
-}
-
-export async function appointSyndicFromAg(
-  coproId: string,
-  agId: string,
-  nomSyndic: string,
-  dureeMandatMois: number,
-  honorairesAnnuelsTtc: number,
-  agDate: string
-): Promise<{ success: boolean; error?: string; contract_id?: string }> {
-  const supabase = createUntypedClient();
-
-  // 1. Find or create provider by name
-  const { data: existingProviders } = await supabase
-    .from('providers')
-    .select('id')
-    .eq('copro_id', coproId)
-    .ilike('name', nomSyndic)
-    .limit(1);
-
-  let providerId: string;
-
-  if (existingProviders && existingProviders.length > 0) {
-    providerId = existingProviders[0].id;
-  } else {
-    const { data: newProvider, error: pErr } = await supabase
-      .from('providers')
-      .insert({
-        copro_id: coproId,
-        name: nomSyndic,
-        category: 'syndic',
-        is_active: true,
-      })
-      .select('id')
-      .single();
-
-    if (pErr || !newProvider) {
-      return { success: false, error: pErr?.message || 'Impossible de créer le prestataire' };
-    }
-    providerId = newProvider.id;
-  }
-
-  // 2. Terminate existing active syndic contracts
-  const now = new Date().toISOString();
-  await supabase
-    .from('contracts')
-    .update({
-      status: 'terminated',
-      terminated_at: now,
-      termination_reason: `Remplacement suite AG du ${agDate}`,
-      updated_at: now,
-    })
-    .eq('copro_id', coproId)
-    .eq('contract_type', 'syndic')
-    .eq('status', 'active');
-
-  // 3. Create new syndic contract
-  const startDate = new Date(agDate);
-  const endDate = new Date(startDate);
-  endDate.setMonth(endDate.getMonth() + dureeMandatMois);
-
-  const { data: newContract, error: cErr } = await supabase
-    .from('contracts')
-    .insert({
-      copro_id: coproId,
-      provider_id: providerId,
-      contract_type: 'syndic',
-      title: `Contrat de syndic - ${nomSyndic}`,
-      start_date: startDate.toISOString().split('T')[0],
-      end_date: endDate.toISOString().split('T')[0],
-      renewal_date: endDate.toISOString().split('T')[0],
-      annual_amount: honorairesAnnuelsTtc,
-      billing_frequency: 'quarterly',
-      tacit_renewal: false,
-      auto_generate_orders: false,
-      is_regulatory: true,
-      status: 'active',
-      notes: `Nommé en AG du ${agDate}. Durée : ${dureeMandatMois} mois. Honoraires : ${honorairesAnnuelsTtc}€ TTC/an.`,
-    })
-    .select('id')
-    .single();
-
-  if (cErr || !newContract) {
-    return { success: false, error: cErr?.message || 'Impossible de créer le contrat syndic' };
-  }
-
-  return { success: true, contract_id: newContract.id };
-}
-
-export async function markActionActivated(
-  agId: string,
-  actionType: string,
-  resultData?: Record<string, unknown>
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase.rpc('mark_ag_action_activated', {
-    p_ag_id: agId,
-    p_action_type: actionType,
-    p_result_data: resultData || null,
-  });
-  if (error) return { success: false, error: error.message };
-  return data as { success: boolean; error?: string };
-}
-
 export async function markAgFinalized(agId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createUntypedClient();
-  const { error } = await supabase
-    .from('ag_meetings')
-    .update({
-      status: 'finalized',
-      current_step: 9,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', agId);
-
+  const { data, error } = await supabase.rpc('finalize_ag', { p_ag_id: agId });
   if (error) return { success: false, error: error.message };
-  return { success: true };
+  const result = data as { success: boolean; error?: string };
+  return result;
 }

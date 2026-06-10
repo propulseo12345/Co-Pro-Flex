@@ -1,14 +1,42 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   useResolutionLibrary,
-  type SortOption,
 } from '@/hooks/modules/useResolutionLibrary';
 import type { MajorityType, TypeAG, ResolutionTemplate } from '@/lib/constants/resolutions';
 import type { ICustomResolution } from '@/types/models/custom-resolution';
+import type { ResolutionTemplateRow } from '@/lib/ag/resolutionTemplates/types';
+import { createTemplate, updateTemplate, deleteTemplate, duplicateTemplate } from '@/lib/ag/resolutionTemplates/api';
+import { useResolutionTemplates } from '@/providers/ResolutionTemplatesProvider';
 import { loadDraft, saveDraft } from '@/lib/ag/draft-persistence';
 import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
+
+/** Mappe un modèle « org » (banque en base) vers la forme d'affichage ICustomResolution. */
+function rowToCustomResolution(row: ResolutionTemplateRow): ICustomResolution {
+  return {
+    id: row.id,
+    createdAt: row.createdAt ?? '',
+    updatedAt: row.updatedAt ?? '',
+    createdBy: '',
+    organizationId: row.cabinet_id ?? '',
+    titre: row.titre,
+    texte: row.texte,
+    categorie: row.categorie,
+    majorite: row.majorite,
+    variables: (row.variables ?? []).map((key) => ({
+      key,
+      label: key,
+      type: 'text' as const,
+      required: false,
+    })),
+    scope: 'org',
+    isTemplate: true,
+    legalRef: row.legalRef,
+    usageCount: row.usageCount ?? 0,
+    tags: row.tags ?? [],
+  };
+}
 
 interface AvailableAG {
   id: string;
@@ -31,6 +59,7 @@ interface StoredResolution {
 export function useAgResolutionsPage() {
   const library = useResolutionLibrary({ pageSize: 24 });
   const { drafts: agDrafts, isLoading: isLoadingDrafts } = useAgDrafts();
+  const { templates, cabinetId, coproId, refresh } = useResolutionTemplates();
 
   const [showFilters, setShowFilters] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -38,31 +67,14 @@ export function useAgResolutionsPage() {
   const [showAddToAGModal, setShowAddToAGModal] = useState(false);
   const [selectedResolutionForAG, setSelectedResolutionForAG] = useState<ResolutionTemplate | null>(null);
   const [addedToAGId, setAddedToAGId] = useState<string | null>(null);
-  const [customResolutions, setCustomResolutions] = useState<ICustomResolution[]>([]);
   const [showEditorModal, setShowEditorModal] = useState(false);
   const [editingResolution, setEditingResolution] = useState<ICustomResolution | undefined>(undefined);
 
-  useEffect(() => {
-    async function loadCustomResolutions() {
-      // Essayer Supabase d'abord (via un draft global), puis fallback localStorage
-      try {
-        const { data } = await loadDraft<ICustomResolution[]>(
-          '00000000-0000-0000-0000-000000000000', // ID global pour la bibliothèque
-          'resolutions',
-          'custom-resolutions-library'
-        );
-        if (data) {
-          setCustomResolutions(data);
-          return;
-        }
-      } catch { /* fallback */ }
-      const saved = localStorage.getItem('custom-resolutions-library');
-      if (saved) {
-        setCustomResolutions(JSON.parse(saved));
-      }
-    }
-    loadCustomResolutions();
-  }, []);
+  // Modèles personnalisés = modèles « org » du snapshot (banque en base), plus de localStorage.
+  const customResolutions = useMemo<ICustomResolution[]>(
+    () => templates.filter((t) => t.scope === 'org').map(rowToCustomResolution),
+    [templates]
+  );
 
   // Mapper les brouillons d'AG Supabase vers le format AvailableAG
   const availableAGs = useMemo((): AvailableAG[] => {
@@ -90,45 +102,83 @@ export function useAgResolutionsPage() {
       });
   }, [agDrafts, isLoadingDrafts]);
 
-  const saveCustomResolutions = async (resolutions: ICustomResolution[]) => {
-    setCustomResolutions(resolutions);
-    // Sauvegarder via Supabase (fallback localStorage)
-    await saveDraft(
-      '00000000-0000-0000-0000-000000000000',
-      'resolutions',
-      resolutions,
-      'custom-resolutions-library'
-    );
-  };
+  const [editorError, setEditorError] = useState<string | null>(null);
 
-  const handleSaveResolution = useCallback((resolution: ICustomResolution) => {
-    const existingIndex = customResolutions.findIndex(r => r.id === resolution.id);
-    if (existingIndex >= 0) {
-      const updated = [...customResolutions];
-      updated[existingIndex] = resolution;
-      saveCustomResolutions(updated);
+  const handleSaveResolution = useCallback(async (resolution: ICustomResolution) => {
+    setEditorError(null);
+    const payload = {
+      titre: resolution.titre,
+      categorie: resolution.categorie,
+      texte: resolution.texte,
+      majorite: resolution.majorite,
+      tags: resolution.tags,
+      variables: resolution.variables.map((v) => v.key),
+    };
+
+    // Un modèle déjà présent dans le snapshot = mise à jour ; sinon création.
+    const exists = templates.some((t) => t.id === resolution.id);
+    if (exists) {
+      const result = await updateTemplate(resolution.id, payload);
+      if (!result.success) {
+        setEditorError(result.error);
+        return;
+      }
+    } else if (cabinetId) {
+      const result = await createTemplate(cabinetId, payload, coproId);
+      if (!result.success) {
+        setEditorError(result.error);
+        return;
+      }
     } else {
-      saveCustomResolutions([...customResolutions, resolution]);
+      // Correction du refus silencieux : cabinetId est null, on ne peut pas créer.
+      setEditorError('Aucun cabinet associé à votre compte. Impossible de créer un modèle.');
+      return;
     }
+    await refresh();
     setShowEditorModal(false);
     setEditingResolution(undefined);
-  }, [customResolutions]);
+  }, [templates, cabinetId, coproId, refresh]);
 
   const handleOpenEditor = useCallback(() => {
     setEditingResolution(undefined);
     setShowEditorModal(true);
   }, []);
 
-  const handleEditResolution = useCallback((resolution: ICustomResolution) => {
-    setEditingResolution(resolution);
+  const handleEditResolution = useCallback((resolution: ICustomResolution | ResolutionTemplateRow) => {
+    // Accepte les deux formes : ICustomResolution (depuis les cartes custom) ou ResolutionTemplateRow (depuis ResolutionCard)
+    if ('cabinet_id' in resolution) {
+      setEditingResolution(rowToCustomResolution(resolution as ResolutionTemplateRow));
+    } else {
+      setEditingResolution(resolution as ICustomResolution);
+    }
     setShowEditorModal(true);
   }, []);
 
-  const handleDeleteResolution = useCallback((id: string) => {
-    if (confirm('Supprimer cette résolution de la bibliothèque ?')) {
-      saveCustomResolutions(customResolutions.filter(r => r.id !== id));
+  const handleDeleteResolution = useCallback(async (id: string) => {
+    setEditorError(null);
+    if (!confirm('Supprimer cette résolution de la bibliothèque ?')) return;
+    const result = await deleteTemplate(id);
+    if (result.success) {
+      await refresh();
+    } else {
+      setEditorError(result.error);
     }
-  }, [customResolutions]);
+  }, [refresh]);
+
+  const handleDuplicateResolution = useCallback(async (id: string) => {
+    setEditorError(null);
+    if (!cabinetId) {
+      setEditorError('Aucun cabinet associé à votre compte.');
+      return;
+    }
+    // Dupliquer crée un modèle CABINET réutilisable ; la portée "cette copro" se choisit via la modale Créer.
+    const result = await duplicateTemplate(id, cabinetId, null);
+    if (result.success) {
+      await refresh();
+    } else {
+      setEditorError(result.error);
+    }
+  }, [cabinetId, refresh]);
 
   const handleCopy = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -231,7 +281,7 @@ export function useAgResolutionsPage() {
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(res);
     return acc;
-  }, {} as Record<string, ResolutionTemplate[]>);
+  }, {} as Record<string, ResolutionTemplateRow[]>);
 
   const activeFiltersCount =
     library.filters.categories.length +
@@ -255,12 +305,15 @@ export function useAgResolutionsPage() {
     customResolutions,
     showEditorModal,
     editingResolution,
+    editorError,
+    cabinetId,
     groupedResolutions,
     activeFiltersCount,
     handleSaveResolution,
     handleOpenEditor,
     handleEditResolution,
     handleDeleteResolution,
+    handleDuplicateResolution,
     handleCopy,
     handleOpenAddToAG,
     handleAddToAG,
