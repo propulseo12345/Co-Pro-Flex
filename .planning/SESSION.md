@@ -1,33 +1,22 @@
-# Session State — 2026-06-10 (matin : décisions actées + drifts corrigés)
+# Session State — 2026-06-10 (avoirs G5 + re-baseline G2)
 
 ## Branch / Commit
-`finance-drift-rebranchement` @ `39d7339` (PR #2 ouverte, non touchée). Nuit = 2 gates E2E + rebranch fournisseurs + infra CI ; matin = 4 fix + décisions G1-G5.
-
-## Décisions actées ce matin (DECISIONS.md §G)
-- **G1** bêta AVEC portail copro (→ portail dans le chemin critique) · **G2** cloud = projet NEUF + re-baseline · **G3** wizard appel masqué (fait) · **G4** facture « validée »=posted (fait) · **G5** avoirs = type dédié (spec écrite, 3 Q métier à confirmer).
-## Fait ce matin (vérifié)
-- Docker relancé · `tsc`=0 · `vitest`=97/97.
-- Drift A (edge `p_tiers_id`/`p_service_order_id`), Drift B (statuts facture + code mort), wizard masqué.
-- **G5 LIVRÉ — Avoirs fournisseurs (migration 0044)** : type dédié, écriture inverse C6xx/D401, vue nette, paiement avoir-aware. Revue adversariale (B1/B2/B3 corrigés). **db:test 9/9** (nouveau `gate_avoir_fournisseur_e2e.sql`). Dette : UI « Créer un avoir » à câbler (front).
+`finance-drift-rebranchement` @ `726e046` (clean hors bruit EOL ; PR #2 ouverte, non touchée).
 
 ## Completed This Session
-- ✅ **Gate E2E boucle finance** (`gate_finance_loop_e2e.sql`) : 8 invariants chiffrés date-indépendants (audit=0, GL équilibré, 701=appel, ventilation, 450-1 GL=relevé, 1 impayé, banque=encaissements−décaissements, facture réglée).
-- ✅ **Gate E2E clôture/affectation** (`gate_cloture_affectation_e2e.sql`) : prouve le HAUT de la boucle (close→open_next→regularize→approve) jusqu'ici non prouvé — 9 invariants (à-nouveau équilibré, banque reportée, 120=−résultat puis soldé, invariant 110/120 conforme non vacant, affectation 450-1 par quote-part). N'utilise PAS audit_finance_integrity (piège per-lot).
-- ✅ Les **deux gates durcis après revue adversariale** (sous-agents). **db:test 8/8** · `tsc`=0 · `vitest`=0.
-- 🔎 Diagnostic drift finance front : `createCall`→RPC morte (différé F4), `suppliers`→`tiers` (rebranch à faire), enum `bank_transfer`=faux problème (types périmés). Détail : `RESULTATS_FINANCE_2026-06-10.md`.
-- 📋 `ROADMAP_FINALISATION_BETA.md` (phases 0→4) + `PLAN_TRAVAUX_PARALLELES.md` (dispatch multi-sessions sans collision).
+- **Nuit (autonome)** : 2 gates E2E (boucle finance + clôture/à-nouveau/affectation), rebranch fournisseurs `suppliers→tiers`, infra CI + headers sécu, 4 docs planning. Tout revu adversarialement.
+- **Matin** : 4 drifts finance (edge `p_tiers_id`, statuts facture `validée=posted` + code mort, wizard appel manuel masqué) ; décisions **G1-G5** actées (DECISIONS.md §G).
+- **Avoirs fournisseurs G5 LIVRÉS** (migration `0044`) : type dédié, écriture inverse C6xx/D401, vue nette, paiement avoir-aware (B1/B2/B3 de la revue corrigés). Gate `gate_avoir_fournisseur_e2e.sql`. **db:test 9/9**, tsc=0, vitest=97/97.
+- **Re-baseline G2 PROUVÉE** : 0001→0044 rejoue à 0 erreur (même en transaction/fichier) + smoke audit=0 ; `scripts/rebaseline-check.sh` ; **CI db:test passée BLOQUANTE** ; rapport `RE-BASELINE_READINESS.md`.
 
-## Next Task (au choix USER)
-- **(a) Re-baseline reproductible** (prérequis G2 : projet cloud neuf + débloque CI db:test) — fondation.
-- **(b) Phase 1 sécurité** : RLS on (~71 tables, policies écrites) + `owner_id`→`auth.uid()` — mur pré-bêta, `ultracode` reco (revue adversariale RLS).
-- **(c) Portail copropriétaire** (désormais dans le périmètre bêta, G1) — `PLAN_MAITRE_VUE_COPROPRIETAIRE.md`.
-- **(d) Avoirs** (G5) : confirmer les 3 Q métier de `SPEC_AVOIRS_FOURNISSEURS.md` puis coder sur la nouvelle base.
+## Next Task (sessions séparées, choix USER)
+- **Phase 1 sécurité/RLS** (session neuve) : corriger **B1** (RLS off en prod, `app.environment` jamais posé) + M2 (assertion anon) dans 0034/0042. Effort conseillé : **`ultracode`** (enjeu fuite de données, revue adversariale).
+- **Portail copropriétaire** (session séparée). · **Déploiement cloud neuf** : sur GO user, après RLS.
 
 ## Blockers
-- Avoirs (G5) : 3 questions métier à confirmer avant de coder la migration (cf. spec).
-- Re-baseline non faite → CI `db:test` reste non-bloquant ; migration cloud sur GO explicite.
+- B1 (RLS OFF en prod) = différé session RLS — non négociable avant 1er cabinet. Détail : `RE-BASELINE_READINESS.md`.
 
 ## Key Context
-- `0043` & `SESSION.md` « modifiés » dans git = bruit EOL (LF↔CRLF), 0 contenu — ne pas committer.
-- Helpers test : `create_clean_test_copro_seeded('x')` déroule toute la boucle (audit=0). Pattern gate : asserts via `RAISE EXCEPTION 'ASSERT FAIL'` + `ROLLBACK_TEST_OK`.
-- Travail parallèle USER : worktree off `finance-drift-rebranchement` (pas `main`). Zone Claude = `supabase/tests/`, `scripts/`, `.planning/` ; `src/` libre.
+- db:test 9 gates ; `bash scripts/rebaseline-check.sh` re-prouve la repro (non destructif).
+- Décisions canoniques = `DECISIONS.md §G`. Avoirs : 3 Q métier validées (Q1/Q2/Q3).
+- Sessions parallèles USER actives dans `src/` (lane B/C committées) — zone Claude = supabase/tests, scripts, .planning.
