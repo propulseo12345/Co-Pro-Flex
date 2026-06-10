@@ -60,6 +60,15 @@ export default function FactureDetailPage() {
                 <div className={styles.infoItem}><span className={styles.infoLabel}>Fournisseur</span><span className={styles.infoValue}>{page.facture.fournisseur}</span></div>
                 <div className={styles.infoItem}><span className={styles.infoLabel}>Référence</span><span className={styles.infoValue} style={{ fontFamily: 'monospace' }}>{page.facture.reference}</span></div>
                 <div className={styles.infoItem}><span className={styles.infoLabel}>Montant TTC</span><span className={`${styles.infoValue} ${styles.infoValueHighlight}`}>{page.isAvoir ? '-' : ''}{page.formatCurrency(page.facture.montant)}</span></div>
+                {!page.isAvoir && page.avoirContext && page.avoirContext.avoirsDeduits > 0 && (
+                  <div className={styles.infoItem}><span className={styles.infoLabel}>Avoirs déduits</span><span className={`${styles.infoValue} ${styles.infoValueSuccess}`}>−{page.formatCurrency(page.avoirContext.avoirsDeduits)}</span></div>
+                )}
+                {!page.isAvoir && page.avoirContext && page.facture.statut !== 'PAYEE' && (
+                  <div className={styles.infoItem}><span className={styles.infoLabel}>Reste à payer</span><span className={`${styles.infoValue} ${styles.infoValueHighlight}`}>{page.formatCurrency(page.avoirContext.resteAPayer)}</span></div>
+                )}
+                {page.isAvoir && page.factureOrigine && (
+                  <div className={styles.infoItem}><span className={styles.infoLabel}>Facture d&apos;origine</span><span className={styles.infoValue}><button className={styles.cleBadge} onClick={() => page.openFacture(page.factureOrigine!.id)} title="Ouvrir la facture d'origine"><ExternalLink size={12} />{page.factureOrigine.reference}</button></span></div>
+                )}
                 {page.facture.datePaiement && (<div className={styles.infoItem}><span className={styles.infoLabel}>Date paiement</span><span className={`${styles.infoValue} ${styles.infoValueSuccess}`}>{page.formatDate(page.facture.datePaiement)}</span></div>)}
                 {page.cleRepartition && (<div className={styles.infoItem}><span className={styles.infoLabel}>Clé de répartition</span><span className={styles.cleBadge}><Key size={12} />{page.cleRepartition.name}</span></div>)}
               </div>
@@ -80,6 +89,28 @@ export default function FactureDetailPage() {
               </>
             ) : (<div className={styles.sectionBody}><div className={styles.emptyState}><PieChart size={32} /><p>Aucune ventilation définie</p></div></div>)}
           </section>
+
+          {!page.isAvoir && page.linkedAvoirs.length > 0 && (
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}><h2 className={styles.sectionTitle}><FileMinus2 size={18} />Avoirs liés ({page.linkedAvoirs.length})</h2></div>
+              <div className={styles.sectionBody}>
+                <div className={styles.pjList}>
+                  {page.linkedAvoirs.map((avoir) => (
+                    <div key={avoir.id} className={styles.pjItem}>
+                      <div className={styles.pjIcon}><FileMinus2 size={20} /></div>
+                      <div className={styles.pjInfo}>
+                        <div className={styles.pjName}>{avoir.reference}</div>
+                        <div className={styles.pjMeta}>{page.formatDate(avoir.date)} · −{page.formatCurrency(avoir.montant)}</div>
+                      </div>
+                      <div className={styles.pjActions}>
+                        <button className={styles.pjButton} title="Ouvrir l'avoir" onClick={() => page.openFacture(avoir.id)}><Eye size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
           <section className={styles.section}>
             <div className={styles.sectionHeader}><h2 className={styles.sectionTitle}><Paperclip size={18} />Pièces jointes</h2></div>

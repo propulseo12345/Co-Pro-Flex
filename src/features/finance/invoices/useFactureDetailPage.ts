@@ -125,8 +125,31 @@ export function useFactureDetailPage(factureId: string) {
     return {
       montantTotal: Number(rawInvoice.total_amount),
       resteAPayer: Number(rawInvoice.remaining_to_pay),
+      totalPaye: Number(rawInvoice.total_paid),
+      avoirsDeduits: Number(rawInvoice.credited_amount),
     };
   }, [rawInvoice]);
+
+  // Avoirs rattachés à CETTE facture (pièces inverses séparées — la facture, elle, est immuable).
+  const linkedAvoirs = useMemo(() => (invoices ?? [])
+    .filter(inv => inv.doc_kind === 'credit_note' && inv.original_invoice_id === factureId)
+    .map(inv => ({
+      id: inv.id,
+      reference: inv.invoice_number || inv.label,
+      date: inv.invoice_date,
+      montant: Number(inv.total_amount),
+    })), [invoices, factureId]);
+
+  // Pour la fiche d'un AVOIR : la facture d'origine (lien retour).
+  const factureOrigine = useMemo(() => {
+    if (!rawInvoice?.original_invoice_id) return null;
+    const origin = invoices?.find(inv => inv.id === rawInvoice.original_invoice_id);
+    return origin ? { id: origin.id, reference: origin.invoice_number || origin.label } : null;
+  }, [invoices, rawInvoice]);
+
+  const openFacture = useCallback((id: string) => {
+    router.push(`/finance/factures/${id}`);
+  }, [router]);
 
   const openAvoirModal = useCallback(() => {
     setAvoirError(null);
@@ -249,6 +272,9 @@ export function useFactureDetailPage(factureId: string) {
     isMutating,
     canCreateAvoir,
     avoirContext,
+    linkedAvoirs,
+    factureOrigine,
+    openFacture,
     isAvoirModalOpen,
     isCreatingAvoir: creditNoteMutation.isLoading,
     avoirError,
