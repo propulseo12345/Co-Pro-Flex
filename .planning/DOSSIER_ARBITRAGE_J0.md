@@ -1,5 +1,12 @@
 # DOSSIER D'ARBITRAGE — J0.2 (session dédiée, décision G8)
 
+> ✅ **TRANCHÉ le 2026-06-10 (session J0.2b)** — les 20 verdicts sont journalisés dans
+> **`DECISIONS.md`** (B3-B5, C2/C3/C6, E2-E9 passés 🟢 + nouvelle section **§H** pour
+> état daté/mutations/fixtures). Durcissements expert vs recos initiales : **B3** renommage
+> 110→12 requis J5 (pas optionnel) · **B4** + écran « opérations à apurer » · **B5** assertion
+> bloquante si multi-clés · **C3** mention de la reprise d'avance sur l'avis d'appel.
+> Ce dossier reste la référence des analyses détaillées (état du code, sources légales).
+
 > Préparé le 2026-06-10. **20 fiches**, une par décision en attente : 7 🔴 + 7 🟡 de
 > `DECISIONS.md`, 4 points état daté de `DEFERRED_USER_DECISIONS.md`, 2 arbitrages seed E2E.
 > Chaque fiche : enjeu vulgarisé → état réel du code (vérifié dans les migrations) → droit

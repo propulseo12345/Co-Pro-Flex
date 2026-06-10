@@ -44,7 +44,7 @@ J0 hygiène + arbitrages (immédiat)
 
 - [x] **0.1 Hygiène git** ✅ 2026-06-10 : `.gitattributes` (EOL sql/sh), ~92 commits poussés, **CI verte** (run 27286218272, db:test bloquant inclus), **PR #2 mergée** (`d9a6911`), `main` local = `origin/main` (rebase ; le commit de sauvegarde 3h01 était déjà intégralement dans la branche → absorbé).
 - [x] **0.2a Dossier d'arbitrage (G8)** ✅ 2026-06-10 : `DOSSIER_ARBITRAGE_J0.md` — **20 fiches** (7 🔴 + 7 🟡 + D3/D4/D5/D6 état daté + S1/S2 seed E2E), état du code vérifié dans les migrations, recos sourcées Légifrance.
-- [ ] **0.2b Session de décision (Lyes)** : trancher les 20 fiches (~45-60 min) → reporter chaque décision dans `DECISIONS.md` (statut 🟢 TRANCHÉ). *Conditionne : annexes, clôture, cloisonnement, `operation_id` (schéma) — consommé par J5.*
+- [x] **0.2b Session de décision** ✅ 2026-06-10 soir : **20/20 tranchés** (analyse expert, délégation Lyes) + 4 durcissements (B3 renommage requis J5 · B4 écran d'apurement · B5 assertion bloquante multi-clés · C3 mention sur l'avis). Journalisé : `DECISIONS.md` (B/C/E 🟢 + **§H** état daté/mutations/fixtures). **J0 CLOS À 100 %.**
 - [x] **0.3 Finitions finance** ✅ 2026-06-10 : types = **greffe chirurgicale 0044** (enum/colonnes/vue/RPC ; la regen complète exposait ~430 erreurs des modules driftés → **déplacée en 2.9**, référence fraîche : `.planning/supabase_types_regenerated.ts`) ; **UI « créer un avoir »** livrée (fiche facture : modal total/partiel au prorata ; liste : `handleConfirmAvoir` re-routé RPC, fin du montant négatif rejeté) ; **piège mock `/finance/factures/new` remplacé** (saisie réelle mono-poste, `post_immediately=true`) ; mapper liste `doc_kind` → les avoirs sortent des KPIs « à payer »/retards (filtres existants redevenus effectifs).
 
 **Test Lyes** : créer un avoir sur une facture test → net à payer correct ; saisir une vraie facture depuis l'UI → elle persiste.
@@ -91,12 +91,12 @@ Méthode identique à la finance pour CHAQUE module : spec courte → migration 
 
 ## J5 — Conformité légale & métier 1er client *(F7/F8/F9 · 5-7 sessions · effort `Max` + `ultracode` sur annexes)*
 
-Exécution des arbitrages tranchés en J0.2 :
-- [ ] **Annexes** : libellés exacts (E1, faux dans le code) + numérotation 3/4 vérifiée (E2) ; refonte annexe 1 (E7 : débiteurs/créditeurs par lot, isolation 450-5) ; annexe 2 en 2 blocs (E8).
-- [ ] **Schéma comptable** : dimension nature 6x/7x (E3) + `operation_id` travaux (E4 — condition légale annexe 5) ; natures 662/711-718 (E5/E6) ; réalisé sans budget (E9).
-- [ ] **Clôture/affectation** : sort du compte 120 (B3), affectation travaux à la clôture d'opération (B4), clé d'affectation (B5).
-- [ ] **Paiements** : cloisonnement par nature par défaut (C2), reprise auto du trop-perçu (C3) ; doc art. 24 (C6).
-- [ ] **État daté complet** (D2/D3/D5/D6 tranchés en J0.2).
+Exécution des arbitrages **tranchés le 2026-06-10** (verdicts : `DECISIONS.md` B/C/E + §H) :
+- [ ] **Annexes** : vérif fac-similé puis gel des libellés SQL+front+PDF (E2, clôt E1) ; refonte annexe 1 sans compensation, par lot et par sens, 450-5 isolé (E7) ; annexe 2 en 2 blocs officiels (E8).
+- [ ] **Schéma comptable** : colonne `charge_nature` + CHECK + seed sourcé arrêté (E3) ; `operation_id` niveau ligne FK budgets (E4) ; défauts 662 travaux / 711-718 courant (E5/E6) ; rattachement travaux obligatoire + filet « non rattachés » + blocage clôture d'opération (E9).
+- [ ] **Clôture/affectation** : renommage 110→12 + compte d'attente courant hors racine 12x (B3, REQUIS avant 1ᵉʳ client) ; gel du 110 + écran « opérations à apurer » (B4) ; assertion bloquante multi-clés dans `regularize_period` (B5).
+- [ ] **Paiements** : cloisonnement par nature PAR DÉFAUT (C2) ; reprise auto du trop-perçu + mention sur l'avis d'appel, 103 intouché (C3) ; correction doc/enums/seuil feuille de présence art. 24 (C6).
+- [ ] **État daté & mutations** : tableau d'acquéreurs Σ=100 (H1) ; tous les cédants nommés (H2) ; partie 3 complète — provisions restantes + ALUR (H3) ; index unique clé générale (H4).
 - [ ] **UX contre-passation guidée** (F9) — un syndic qui se trompe ne reste jamais bloqué.
 - [ ] **Reprise de mandat fiabilisée** (F8) : unifier les 2 chemins front (B6), traçabilité 471/472 ligne-par-ligne (art. 10), import balance Excel, acompte 409.
 
