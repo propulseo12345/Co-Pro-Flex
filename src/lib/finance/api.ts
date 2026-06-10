@@ -1521,10 +1521,13 @@ export async function listPendingInvoices(coproId: string): Promise<ApiResult<Pe
   // posted » (statut comptablement engagé, dette au 401) → on filtre sur le SEUL statut 'posted' :
   // un 'draft' (brouillon) n'est pas encore une dette, il n'a rien à faire dans le rapprochement
   // bancaire ; 'paid'/'cancelled' sont soldés. Enum réel = ('draft','posted','paid','cancelled').
+  // doc_kind='invoice' : on EXCLUT les avoirs (credit_note, migration 0044) — un avoir n'est pas
+  // une dette à régler (il réduit la dette), il n'a rien à faire dans le rapprochement bancaire.
   const { data, error } = await supabase
     .from('supplier_invoices')
     .select('id, copro_id, tiers_id, invoice_number, invoice_date, due_date, label, total_amount, status, tiers(name)')
     .eq('copro_id', coproId)
+    .eq('doc_kind', 'invoice')
     .in('status', ['posted']);
 
   if (error) return { data: null, error: error.message };
