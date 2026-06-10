@@ -82,7 +82,15 @@ export default function FacturesPage() {
         <AccountingModal facture={page.selectedFacture} selectedTypeDepense={page.selectedTypeDepense} onTypeDepenseChange={page.setSelectedTypeDepense} onClose={page.closeAccountingModal} onSend={page.handleSendToAccounting} />
       )}
       {page.showViewModal && page.selectedFacture && (
-        <ViewModal facture={page.selectedFacture} onClose={page.closeViewModal} />
+        <ViewModal
+          facture={page.selectedFacture}
+          onClose={page.closeViewModal}
+          onOpenFull={() => {
+            const id = page.selectedFacture!.id;
+            page.closeViewModal();
+            router.push(`/finance/factures/${id}`);
+          }}
+        />
       )}
       {page.showEditModal && page.selectedFacture && (
         <EditModal facture={page.selectedFacture} editForm={page.editForm} postesBudget={postesBudget} onEditFormChange={page.setEditForm} onClose={page.closeEditModal} onSave={page.handleSaveEdit} />

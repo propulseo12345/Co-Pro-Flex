@@ -64,7 +64,7 @@ Méthode identique à la finance pour CHAQUE module : spec courte → migration 
 
 - [ ] **2.1 Budget front** : `BUDGET_USE_SUPABASE` → true, écrans branchés sur le GL (vérité unique). *(Hook `useBudget` ~1000L : découpage léger si nécessaire.)*
 - [ ] **2.2 AG compléments** : pouvoirs (procurations — légalement nécessaires), jalons, choix d'envoi, brouillons, stats (7 vues + ~10 RPC + `increment_template_usage`).
-- [ ] **2.3 GED / documents** : `dossiers`, `ged`, `document_access/links`, `pv_templates` + 6 vues.
+- [ ] **2.3 GED / documents** : `dossiers`, `ged`, `document_access/links`, `pv_templates` + 6 vues. *Inclut le rattachement du justificatif à la saisie de facture (`document_id` — attente terrain Lyes 2026-06-10 ; l'ancien upload était factice).*
 - [ ] **2.4 Maintenance / prestataires** : `providers` → `tiers` (`is_provider=true`, même méthode que fournisseurs) + 8 vues (contrats, carnet, OS).
 - [ ] **2.5 Communication / mail** : 5 tables `mail_*` + 6 vues + `generate_campaign_recipients` (cloisonnement utilisateur déjà réglé en J1).
 - [ ] **2.6 Conseil syndical** : 3 tables rapports + 3 vues.

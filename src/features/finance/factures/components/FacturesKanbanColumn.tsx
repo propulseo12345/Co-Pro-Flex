@@ -17,6 +17,7 @@ const TOTAL_COLOR_MAP: Record<string, string> = {
   pending: styles.totalBlue,
   to_pay: styles.totalAmber,
   paid: styles.totalGreen,
+  avoirs: styles.totalViolet,
 };
 
 function formatCurrency(amount: number): string {
