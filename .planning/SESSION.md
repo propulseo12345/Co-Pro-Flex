@@ -6,8 +6,9 @@
 ## Décisions actées ce matin (DECISIONS.md §G)
 - **G1** bêta AVEC portail copro (→ portail dans le chemin critique) · **G2** cloud = projet NEUF + re-baseline · **G3** wizard appel masqué (fait) · **G4** facture « validée »=posted (fait) · **G5** avoirs = type dédié (spec écrite, 3 Q métier à confirmer).
 ## Fait ce matin (vérifié)
-- Docker relancé, **db:test 8/8** · `tsc`=0 · `vitest`=97/97.
-- Drift A (edge `p_tiers_id`/`p_service_order_id`), Drift B (statuts facture + code mort), wizard masqué. 3 commits fix + 1 doc.
+- Docker relancé · `tsc`=0 · `vitest`=97/97.
+- Drift A (edge `p_tiers_id`/`p_service_order_id`), Drift B (statuts facture + code mort), wizard masqué.
+- **G5 LIVRÉ — Avoirs fournisseurs (migration 0044)** : type dédié, écriture inverse C6xx/D401, vue nette, paiement avoir-aware. Revue adversariale (B1/B2/B3 corrigés). **db:test 9/9** (nouveau `gate_avoir_fournisseur_e2e.sql`). Dette : UI « Créer un avoir » à câbler (front).
 
 ## Completed This Session
 - ✅ **Gate E2E boucle finance** (`gate_finance_loop_e2e.sql`) : 8 invariants chiffrés date-indépendants (audit=0, GL équilibré, 701=appel, ventilation, 450-1 GL=relevé, 1 impayé, banque=encaissements−décaissements, facture réglée).
