@@ -1517,17 +1517,15 @@ export interface PendingInvoice {
 export async function listPendingInvoices(coproId: string): Promise<ApiResult<PendingInvoice[]>> {
   const supabase = createUntypedClient();
   // Colonne réelle = `tiers_id` (FK tiers), jointure imbriquée = `tiers(name)`.
-  // « En attente de paiement » = factures NON soldées : tout sauf 'paid' et 'cancelled'.
-  // L'enum cible supplier_invoice_status = ('draft','posted','paid','cancelled') → on filtre sur
-  // ('draft','posted'). NB : les anciennes valeurs ('pending','validated','approved') n'existaient
-  // plus dans l'enum et levaient une erreur Postgres (22P02). Le débat « faut-il un statut
-  // 'validé/approuvé' distinct ? » + le drift jumeau côté écriture (useFactureDetailPage écrit
-  // encore 'approved') restent une décision de workflow ouverte — voir dossier 2026-06-10.
+  // « En attente de paiement » = factures validées mais non réglées. Décision actée « validée =
+  // posted » (statut comptablement engagé, dette au 401) → on filtre sur le SEUL statut 'posted' :
+  // un 'draft' (brouillon) n'est pas encore une dette, il n'a rien à faire dans le rapprochement
+  // bancaire ; 'paid'/'cancelled' sont soldés. Enum réel = ('draft','posted','paid','cancelled').
   const { data, error } = await supabase
     .from('supplier_invoices')
     .select('id, copro_id, tiers_id, invoice_number, invoice_date, due_date, label, total_amount, status, tiers(name)')
     .eq('copro_id', coproId)
-    .in('status', ['draft', 'posted']);
+    .in('status', ['posted']);
 
   if (error) return { data: null, error: error.message };
 
