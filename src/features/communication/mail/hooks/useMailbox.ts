@@ -3,14 +3,15 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
+import { useSupabase } from '@/hooks/useSupabase';
 import type { IMail, IMailFolder, IMailLabel, IDraftData } from '@/features/communication/mail/domain/types';
 import { DEFAULT_FOLDERS, DEFAULT_LABELS } from '@/features/communication/mail/domain/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
 
-// ID propriétaire par défaut (syndic) — remplacé par auth.uid() quand l'auth sera active
-const DEFAULT_OWNER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
+// La boîte mail est PARTAGÉE par copro (la RLS `mails` gate sur user_is_copro_manager(copro_id),
+// pas sur owner_id) : on filtre par copro, et owner_id = utilisateur de session (provenance).
 const SYNDIC_EMAIL = 'copro.haussmann@coproflex.fr';
 const SYNDIC_NAME = 'Syndic — Résidence Haussmann';
 
@@ -89,6 +90,8 @@ function mapRow(row: any): IMail {
 
 export function useMailbox(): UseMailboxReturn {
   const { currentCoproId } = useCopro();
+  const { user } = useSupabase();
+  const currentUserId = user?.id ?? null;
   const supabase = useMemo(() => createUntypedClient(), []);
 
   const [allMails, setAllMails] = useState<IMail[]>([]);
@@ -114,7 +117,6 @@ export function useMailbox(): UseMailboxReturn {
         .from('mails')
         .select('*')
         .eq('copro_id', currentCoproId)
-        .eq('owner_id', DEFAULT_OWNER_ID)
         .order('created_at', { ascending: false });
 
       if (!error && data) {
@@ -144,7 +146,7 @@ export function useMailbox(): UseMailboxReturn {
           event: 'INSERT',
           schema: 'public',
           table: 'mails',
-          filter: `owner_id=eq.${DEFAULT_OWNER_ID}`,
+          filter: `copro_id=eq.${currentCoproId}`,
         },
         (payload: { new: unknown }) => {
           setAllMails((prev) => [mapRow(payload.new), ...prev]);
@@ -259,14 +261,14 @@ export function useMailbox(): UseMailboxReturn {
   }, [currentCoproId, supabase]);
 
   const saveDraft = useCallback(async (draft: IDraftData) => {
-    if (!currentCoproId) return;
+    if (!currentCoproId || !currentUserId) return;
 
     const now = new Date().toISOString();
     const { data } = await supabase
       .from('mails')
       .insert({
         copro_id: currentCoproId,
-        owner_id: DEFAULT_OWNER_ID,
+        owner_id: currentUserId,
         from_email: SYNDIC_EMAIL,
         from_name: SYNDIC_NAME,
         to_emails: draft.to,
@@ -296,7 +298,7 @@ export function useMailbox(): UseMailboxReturn {
     if (data) {
       setAllMails((prev) => [mapRow(data), ...prev]);
     }
-  }, [currentCoproId, supabase]);
+  }, [currentCoproId, currentUserId, supabase]);
 
   const deleteMail = useCallback(async (id: string) => {
     const now = new Date().toISOString();
@@ -366,7 +368,7 @@ export function useMailbox(): UseMailboxReturn {
     const newFolder: IMailFolder = {
       id: `f${Date.now()}`,
       coproprieteId: currentCoproId ?? '',
-      userId: DEFAULT_OWNER_ID,
+      userId: currentUserId ?? '',
       name,
       folderType: null,
       icon: 'Folder',
@@ -375,7 +377,7 @@ export function useMailbox(): UseMailboxReturn {
       unreadCount: 0,
     };
     setFolders((prev) => [...prev, newFolder]);
-  }, [currentCoproId, folders.length]);
+  }, [currentCoproId, currentUserId, folders.length]);
 
   const openCompose = useCallback(() => {
     setIsComposeOpen(true);

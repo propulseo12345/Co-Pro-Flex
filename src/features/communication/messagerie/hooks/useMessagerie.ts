@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
+import { useSupabase } from '@/hooks/useSupabase';
 import type {
   IConversation,
   IConversationPreview,
@@ -14,10 +15,6 @@ import type {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
-
-// ID utilisateur courant (syndic) — remplacé par auth.uid() quand l'auth sera active
-const CURRENT_USER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
-const CURRENT_USER_NAME = 'Admin CoProFlex';
 
 // ----------------------------------------------------------------------------
 // Types du hook
@@ -114,6 +111,10 @@ function mapMessage(row: any): IMessage {
 
 export function useMessagerie(): UseMessagerieReturn {
   const { currentCoproId } = useCopro();
+  const { user } = useSupabase();
+  const currentUserId = user?.id ?? null;
+  const currentUserName =
+    (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? 'Utilisateur';
   const supabase = useMemo(() => createUntypedClient(), []);
 
   const [previews, setPreviews] = useState<IConversationPreview[]>([]);
@@ -274,7 +275,7 @@ export function useMessagerie(): UseMessagerieReturn {
   const sendMessage = useCallback(
     async (content: string) => {
       const convId = activeIdRef.current;
-      if (!convId || !content.trim() || !currentCoproId) return;
+      if (!convId || !content.trim() || !currentCoproId || !currentUserId) return;
 
       const now = new Date().toISOString();
 
@@ -282,8 +283,8 @@ export function useMessagerie(): UseMessagerieReturn {
       const optimisticMsg: IMessage = {
         id: `optimistic-${Date.now()}`,
         conversationId: convId,
-        senderId: CURRENT_USER_ID,
-        senderName: CURRENT_USER_NAME,
+        senderId: currentUserId,
+        senderName: currentUserName,
         senderRole: 'syndic',
         type: 'text',
         content: content.trim(),
@@ -298,14 +299,14 @@ export function useMessagerie(): UseMessagerieReturn {
       const { data, error } = await supabase.from('messages').insert({
         copro_id: currentCoproId,
         conversation_id: convId,
-        author_id: CURRENT_USER_ID,
-        sender_name: CURRENT_USER_NAME,
+        author_id: currentUserId,
+        sender_name: currentUserName,
         content: content.trim(),
         message_type: 'text',
         attachments: null,
         reply_to_id: null,
         is_edited: false,
-        read_by: [CURRENT_USER_ID],
+        read_by: [currentUserId],
         attachment_id: null,
       }).select().single();
 
@@ -328,12 +329,12 @@ export function useMessagerie(): UseMessagerieReturn {
       setPreviews((prev) =>
         prev.map((p) =>
           p.id === convId
-            ? { ...p, lastMessage: content.trim(), lastMessageAt: now, lastSenderName: CURRENT_USER_NAME, lastSenderRole: 'syndic' as UserRole }
+            ? { ...p, lastMessage: content.trim(), lastMessageAt: now, lastSenderName: currentUserName, lastSenderRole: 'syndic' as UserRole }
             : p
         )
       );
     },
-    [currentCoproId, supabase]
+    [currentCoproId, currentUserId, currentUserName, supabase]
   );
 
   const markAsRead = useCallback((conversationId: string) => {
@@ -368,7 +369,7 @@ export function useMessagerie(): UseMessagerieReturn {
     filter,
     isLoading,
     totalUnread,
-    currentUserId: CURRENT_USER_ID,
+    currentUserId: currentUserId ?? '',
     selectConversation,
     setSearchTerm,
     setFilter,
