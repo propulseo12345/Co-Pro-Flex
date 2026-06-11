@@ -595,9 +595,9 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {interventions.map(inter => {
-              const statutColor = inter.statut === 'completed' || inter.statut === 'CLOTURE' ? C.success
-                : inter.statut === 'in_progress' || inter.statut === 'EN_COURS' ? 'var(--secondary)'
-                : inter.statut === 'scheduled' || inter.statut === 'PLANIFIEE' ? C.warning
+              const statutColor = inter.statut === 'terminee' ? C.success
+                : inter.statut === 'en_cours' ? 'var(--secondary)'
+                : inter.statut === 'planifiee' ? C.warning
                 : C.textSecondary;
               return (
                 <div key={inter.id} style={{

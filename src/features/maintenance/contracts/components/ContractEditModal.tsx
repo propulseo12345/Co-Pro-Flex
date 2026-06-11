@@ -7,11 +7,13 @@ import { X, Save, FileText } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { isValid, parseISO, format } from 'date-fns';
 
+// Les values sont des slugs du référentiel work_domain (un slug inconnu est
+// rejeté à l'écriture) — 'menage' est le slug canonique, pas 'nettoyage'.
 const CONTRACT_TYPE_OPTIONS: { value: ContractType; label: string }[] = [
     { value: 'maintenance', label: 'Maintenance' },
     { value: 'ascenseur', label: 'Ascenseur' },
     { value: 'chauffage', label: 'Chauffage' },
-    { value: 'nettoyage', label: 'Nettoyage' },
+    { value: 'menage', label: 'Nettoyage / ménage' },
     { value: 'espaces_verts', label: 'Espaces verts' },
     { value: 'securite', label: 'Sécurité' },
     { value: 'assurance', label: 'Assurance' },

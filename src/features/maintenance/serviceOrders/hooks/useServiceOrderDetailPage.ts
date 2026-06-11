@@ -16,33 +16,32 @@ import { createClient } from '@/lib/supabase/client';
 
 const SUPABASE_TO_LEGACY_STATUS: Record<ServiceOrderStatus, string> = {
     draft: 'BROUILLON',
-    to_send: 'A_ENVOYER',
     sent: 'ENVOYE',
-    accepted: 'EN_ATTENTE_PRESTATAIRE',
+    awaiting_provider: 'EN_ATTENTE_PRESTATAIRE',
     refused: 'REFUSE',
     scheduled: 'INTERVENTION_PROGRAMMEE',
     in_progress: 'EN_COURS',
     completed: 'INTERVENTION_REALISEE',
-    invoiced: 'FACTURE',
-    paid: 'PAYE',
     closed: 'CLOTURE',
     cancelled: 'ANNULE',
 };
 
+// Les statuts legacy FACTURE/PAYE n'existent plus dans le workflow cible
+// (la facturation vit sur supplier_invoices) : ils retombent sur 'completed'.
 const LEGACY_TO_SUPABASE_STATUS: Record<string, ServiceOrderStatus> = {
     BROUILLON: 'draft',
-    A_ENVOYER: 'to_send',
+    A_ENVOYER: 'draft',
     ENVOYE: 'sent',
-    ACCEPTE: 'accepted',
-    EN_ATTENTE_PRESTATAIRE: 'accepted',
+    ACCEPTE: 'awaiting_provider',
+    EN_ATTENTE_PRESTATAIRE: 'awaiting_provider',
     REFUSE: 'refused',
     PLANIFIE: 'scheduled',
     INTERVENTION_PROGRAMMEE: 'scheduled',
     EN_COURS: 'in_progress',
     REALISE: 'completed',
     INTERVENTION_REALISEE: 'completed',
-    FACTURE: 'invoiced',
-    PAYE: 'paid',
+    FACTURE: 'completed',
+    PAYE: 'completed',
     CLOTURE: 'closed',
     ANNULE: 'cancelled',
 };
@@ -56,10 +55,9 @@ function adaptOverviewToLegacy(
     events: ServiceOrderEvent[]
 ): OrdreService {
     const STATUS_LABELS: Record<string, string> = {
-        draft: 'Brouillon', to_send: 'À envoyer', sent: 'Envoyé',
-        accepted: 'Accepté', refused: 'Refusé', scheduled: 'Programmé',
-        in_progress: 'En cours', completed: 'Réalisé', invoiced: 'Facturé',
-        paid: 'Payé', closed: 'Clôturé', cancelled: 'Annulé',
+        draft: 'Brouillon', sent: 'Envoyé', awaiting_provider: 'En attente prestataire',
+        refused: 'Refusé', scheduled: 'Programmé', in_progress: 'En cours',
+        completed: 'Réalisé', closed: 'Clôturé', cancelled: 'Annulé',
     };
 
     const historique: ModificationHistoriqueOS[] = events.map(evt => {
@@ -87,7 +85,7 @@ function adaptOverviewToLegacy(
         dateModification: overview.created_at || '',
         titre: overview.subject || '',
         description: overview.description || '',
-        typeOrdre: overview.order_type === 'contractuel' ? 'CONTRACTUEL' : 'CLASSIQUE',
+        typeOrdre: overview.order_type === 'contrat' ? 'CONTRACTUEL' : 'CLASSIQUE',
         fournisseurId: overview.provider_id || undefined,
         fournisseurNom: overview.provider_name || '',
         fournisseurEmail: overview.provider_email || undefined,

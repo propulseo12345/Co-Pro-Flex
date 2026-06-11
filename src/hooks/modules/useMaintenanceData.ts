@@ -29,6 +29,73 @@ import type {
 const createUntypedClient = () => createClient() as any;
 
 // ============================================================================
+// ÉCRITURES — traduction du contrat legacy du front vers le schéma cible
+// (providers -> tiers, slugs work_domain -> domain_ids/domain_id,
+//  title/contract_number/provider_id/description -> label/reference/tiers_id/observations)
+// ============================================================================
+
+/** Écriture prestataire : colonnes `tiers` + domaines en slugs work_domain. */
+export type ProviderWriteInput = Omit<ProviderInsert, 'domain_ids' | 'category'> & {
+  category?: ProviderCategory | 'coproflex';
+  domains?: string[];
+};
+
+/** Écriture contrat : colonnes cibles OU alias legacy encore utilisés par le front. */
+export type ContractWriteInput = Partial<Contract> & {
+  title?: string;            // -> label
+  contract_number?: string;  // -> reference
+  contract_type?: string;    // slug work_domain -> domain_id
+  provider_id?: string;      // -> tiers_id
+  description?: string;      // -> observations
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveDomainIds(supabase: any, slugs: string[]): Promise<string[]> {
+  if (slugs.length === 0) return [];
+  const { data, error } = await supabase
+    .from('work_domain')
+    .select('id, slug')
+    .in('slug', slugs);
+  if (error) throw error;
+  const found = (data || []) as { id: string; slug: string }[];
+  const missing = slugs.filter((s) => !found.some((d) => d.slug === s));
+  if (missing.length > 0) {
+    // Pas de null silencieux : un slug UI non seedé doit échouer FORT.
+    throw new Error(`Domaine(s) d'intervention inconnu(s) : ${missing.join(', ')} (référentiel work_domain)`);
+  }
+  return found.map((d) => d.id);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function translateProviderWrite(supabase: any, input: Partial<ProviderWriteInput>) {
+  const { domains, category, ...rest } = input;
+  const out: Record<string, unknown> = { ...rest };
+  if (category !== undefined) out.category = category === 'coproflex' ? 'externe' : category;
+  // domains: [] est une désélection EXPLICITE -> domain_ids = [] ;
+  // domains absent (undefined) -> on ne touche pas à la colonne.
+  if (domains !== undefined) out.domain_ids = await resolveDomainIds(supabase, domains);
+  return out;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function translateContractWrite(supabase: any, input: ContractWriteInput) {
+  const { title, contract_number, contract_type, provider_id, description, ...rest } = input;
+  const out: Record<string, unknown> = { ...rest };
+  if (title !== undefined) out.label = title;
+  if (contract_number !== undefined) out.reference = contract_number;
+  if (provider_id !== undefined) out.tiers_id = provider_id;
+  if (description !== undefined) out.observations = description;
+  if (contract_type !== undefined) {
+    if (!contract_type) {
+      throw new Error('Type de contrat manquant (domain_id est obligatoire)');
+    }
+    const ids = await resolveDomainIds(supabase, [contract_type]);
+    out.domain_id = ids[0];
+  }
+  return out;
+}
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -37,7 +104,7 @@ interface UseMaintenanceDataOptions {
 }
 
 interface ProviderFilters {
-  category?: ProviderCategory | 'all';
+  category?: ProviderCategory | 'coproflex' | 'all';
   domain?: string | 'all';
   search?: string;
   isActive?: boolean;
@@ -123,12 +190,13 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
   const fetchProvidersRef = useRef(fetchProviders);
   fetchProvidersRef.current = fetchProviders;
 
-  const createProvider = useCallback(async (provider: ProviderInsert) => {
+  const createProvider = useCallback(async (provider: ProviderWriteInput) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
+    const translated = await translateProviderWrite(supabase, provider);
     const { data, error: insertError } = await supabase
-      .from('providers')
-      .insert({ ...provider, copro_id: currentCoproId })
+      .from('tiers')
+      .insert({ ...translated, copro_id: currentCoproId, is_provider: true })
       .select()
       .single();
 
@@ -138,10 +206,11 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
     return data as Provider;
   }, [currentCoproId, supabase]);
 
-  const updateProvider = useCallback(async (id: string, updates: Partial<Provider>) => {
+  const updateProvider = useCallback(async (id: string, updates: Partial<ProviderWriteInput>) => {
+    const translated = await translateProviderWrite(supabase, updates);
     const { data, error: updateError } = await supabase
-      .from('providers')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .from('tiers')
+      .update({ ...translated, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
@@ -154,7 +223,7 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
 
   const deleteProvider = useCallback(async (id: string) => {
     const { error: deleteError } = await supabase
-      .from('providers')
+      .from('tiers')
       .delete()
       .eq('id', id);
 
@@ -256,12 +325,13 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
   const fetchContractsRef = useRef(fetchContracts);
   fetchContractsRef.current = fetchContracts;
 
-  const createContract = useCallback(async (contract: ContractInsert) => {
+  const createContract = useCallback(async (contract: ContractWriteInput) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
+    const translated = await translateContractWrite(supabase, contract);
     const { data, error: insertError } = await supabase
       .from('contracts')
-      .insert({ ...contract, copro_id: currentCoproId })
+      .insert({ ...translated, copro_id: currentCoproId })
       .select()
       .single();
 
@@ -271,10 +341,11 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
     return data as Contract;
   }, [currentCoproId, supabase]);
 
-  const updateContract = useCallback(async (id: string, updates: Partial<Contract>) => {
+  const updateContract = useCallback(async (id: string, updates: ContractWriteInput) => {
+    const translated = await translateContractWrite(supabase, updates);
     const { data, error: updateError } = await supabase
       .from('contracts')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...translated, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
@@ -408,8 +479,8 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
       .insert({
         copro_id: currentCoproId,
         order_number: orderNumber as string,
-        provider_id: order.provider_id,
-        subject: order.subject,
+        tiers_id: order.tiers_id,
+        title: order.title,
         description: order.description,
         urgency: order.urgency || 'normal',
         order_type: order.order_type || 'classique',
@@ -420,7 +491,7 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
         lot_id: order.lot_id || null,
         estimated_amount: order.estimated_amount || null,
         is_art18_emergency: order.is_art18_emergency || false,
-        planned_intervention_date: order.planned_intervention_date || null,
+        scheduled_at: order.scheduled_at || null,
       })
       .select()
       .single();
@@ -456,13 +527,21 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
       const updates: Record<string, unknown> = {};
       if (options.quotedAmount) updates.quoted_amount = options.quotedAmount;
       if (options.actualAmount) updates.actual_amount = options.actualAmount;
-      if (options.invoiceId) updates.supplier_invoice_id = options.invoiceId;
       if (options.refusalReason) updates.refusal_reason = options.refusalReason;
 
       await supabase
         .from('service_orders')
         .update(updates)
         .eq('id', orderId);
+
+      // FK inversée depuis la re-baseline : le lien facture->OS vit sur
+      // supplier_invoices.service_order_id (plus de colonne côté OS).
+      if (options.invoiceId) {
+        await supabase
+          .from('supplier_invoices')
+          .update({ service_order_id: orderId })
+          .eq('id', options.invoiceId);
+      }
     }
 
     await fetchOrdersRef.current();
@@ -488,13 +567,20 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
     const { error: updateError } = await supabase
       .from('service_orders')
       .update({
-        supplier_invoice_id: invoiceId,
         actual_amount: actualAmount,
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId);
 
     if (updateError) throw new Error(updateError.message);
+
+    // FK inversée : on rattache la facture à l'OS côté supplier_invoices.
+    const { error: linkError } = await supabase
+      .from('supplier_invoices')
+      .update({ service_order_id: orderId })
+      .eq('id', invoiceId);
+
+    if (linkError) throw new Error(linkError.message);
 
     await fetchOrdersRef.current();
     return { success: true };
@@ -556,9 +642,9 @@ export function useServiceOrders(options: UseMaintenanceDataOptions = {}) {
   const stats = useMemo(() => ({
     total: orders.length,
     drafts: orders.filter(o => o.status === 'draft').length,
-    pending: orders.filter(o => o.status && ['to_send', 'sent', 'accepted', 'scheduled'].includes(o.status)).length,
+    pending: orders.filter(o => o.status && ['sent', 'awaiting_provider', 'scheduled'].includes(o.status)).length,
     inProgress: orders.filter(o => o.status === 'in_progress').length,
-    completed: orders.filter(o => o.status && ['completed', 'invoiced', 'paid', 'closed'].includes(o.status)).length,
+    completed: orders.filter(o => o.status && ['completed', 'closed'].includes(o.status)).length,
     cancelled: orders.filter(o => o.status === 'cancelled').length,
     urgent: orders.filter(o => o.urgency === 'critical' || o.urgency === 'high').length,
   }), [orders]);

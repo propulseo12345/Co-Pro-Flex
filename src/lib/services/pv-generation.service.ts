@@ -296,41 +296,49 @@ export async function getPVDocumentForAG(agId: string, coproId: string): Promise
         if (doc.agId === agId) return doc;
     }
 
-    // Sinon chercher dans Supabase via documents table
+    // Sinon via le lien canonique ag_meetings.pv_document_id (le schéma cible
+    // n'a plus de colonne documents.ag_id).
     try {
         const supabase = createClient() as ReturnType<typeof createClient>;
-        const { data, error } = await supabase
-            .from('documents')
-            .select('*')
-            .eq('copro_id', coproId)
-            .eq('ag_id', agId)
-            .eq('category', 'pv_ag')
-            .eq('is_current_version', true)
-            .order('created_at', { ascending: false })
-            .limit(1)
+        const { data: meeting, error: meetingError } = await supabase
+            .from('ag_meetings')
+            .select('pv_document_id')
+            .eq('id', agId)
             .single();
 
-        if (error && error.code !== 'PGRST116') {
-            console.error('[PVGeneration] Erreur recherche PV:', error);
+        if (meetingError && meetingError.code !== 'PGRST116') {
+            console.error('[PVGeneration] Erreur recherche AG:', meetingError);
         }
 
-        if (data) {
-            return {
-                id: data.id,
-                agId: data.ag_id || agId,
-                coproId: data.copro_id,
-                status: 'archived',
-                version: data.version ?? 1,
-                filePath: data.file_path,
-                generatedAt: new Date(data.created_at),
-                gedDocumentId: data.id,
-                metadata: {
-                    resolutionsCount: 0,
-                    participantsCount: 0,
-                    adoptedCount: 0,
-                    rejectedCount: 0,
-                },
-            };
+        if (meeting?.pv_document_id) {
+            const { data, error } = await supabase
+                .from('documents')
+                .select('*')
+                .eq('id', meeting.pv_document_id)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('[PVGeneration] Erreur recherche PV:', error);
+            }
+
+            if (data) {
+                return {
+                    id: data.id,
+                    agId,
+                    coproId: data.copro_id ?? coproId,
+                    status: 'archived',
+                    version: data.current_version_no ?? 1,
+                    filePath: data.file_path,
+                    generatedAt: new Date(data.created_at),
+                    gedDocumentId: data.id,
+                    metadata: {
+                        resolutionsCount: 0,
+                        participantsCount: 0,
+                        adoptedCount: 0,
+                        rejectedCount: 0,
+                    },
+                };
+            }
         }
     } catch (error) {
         console.error('[PVGeneration] Erreur getPVDocumentForAG:', error);

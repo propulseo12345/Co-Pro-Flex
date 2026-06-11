@@ -182,28 +182,30 @@ export function useContractsPage() {
   const handleGenerateOrder = useCallback(async (osData: Record<string, unknown>) => {
     try {
       await createOrder({
-        provider_id: (osData.fournisseurId as string) || '',
-        subject: (osData.titre as string) || 'Ordre de service',
+        copro_id: '', // Rempli par le hook createOrder
+        order_number: '', // Généré par le hook createOrder (RPC)
+        tiers_id: (osData.fournisseurId as string) || '',
+        title: (osData.titre as string) || 'Ordre de service',
         description: (osData.description as string) || null,
-        order_type: (osData.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique') as never,
-        origin: 'contrat' as never,
+        order_type: osData.typeOrdre === 'CONTRACTUEL' ? 'contrat' : 'classique',
+        origin: 'contrat',
         contract_id: (osData.contratId as string) || null,
-        urgency: 'normal' as never,
+        urgency: 'normal',
         estimated_amount: (osData.montantEstime as number) || null,
         is_art18_emergency: false,
-      } as never);
+      });
       showToast({
         type: 'success',
         message: `Ordre de service généré : ${(osData.titre as string) || 'Sans titre'}`
       });
-    } catch {
-      // Fallback localStorage
+    } catch (err) {
+      // Fallback localStorage — l'OS n'est PAS en base : ne pas le présenter comme un succès.
       const existingOS = JSON.parse(localStorage.getItem('custom_ordres_service') || '[]');
       const newOS = { ...osData, id: `os-gen-${Date.now()}` };
       localStorage.setItem('custom_ordres_service', JSON.stringify([...existingOS, newOS]));
       showToast({
-        type: 'success',
-        message: `Ordre de service sauvegardé localement`
+        type: 'error',
+        message: `Échec de création en base (${err instanceof Error ? err.message : 'erreur inconnue'}) — copie sauvegardée localement`
       });
     }
   }, [createOrder, showToast]);

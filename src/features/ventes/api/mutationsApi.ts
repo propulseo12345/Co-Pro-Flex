@@ -76,35 +76,51 @@ export async function fetchEtatDateSnapshots(
  * Récupère les lots disponibles pour une nouvelle mutation
  */
 export async function fetchAvailableLots(coproId: string) {
-  const { data, error } = await supabase
-    .from('lots')
-    .select(`
-      id,
-      ref,
-      type,
-      tantiemes_generaux,
-      floor,
-      surface,
-      lot_owners!inner (
-        coproprietaire_id,
-        is_primary,
-        end_date,
-        coproprietaires (
-          id,
-          first_name,
-          last_name,
-          company_name,
-          is_company,
-          email
+  // Les tantièmes ne sont plus une colonne de `lots` (ils vivent dans les clés
+  // de répartition) : on les lit depuis la vue canonique v_lots_with_owners.
+  const [lotsResult, tantiemesResult] = await Promise.all([
+    supabase
+      .from('lots')
+      .select(`
+        id,
+        ref,
+        type,
+        floor,
+        surface,
+        lot_owners!inner (
+          coproprietaire_id,
+          is_primary,
+          end_date,
+          coproprietaires (
+            id,
+            first_name,
+            last_name,
+            company_name,
+            is_company,
+            email
+          )
         )
-      )
-    `)
-    .eq('copro_id', coproId)
-    .is('lot_owners.end_date', null)
-    .eq('lot_owners.is_primary', true);
+      `)
+      .eq('copro_id', coproId)
+      .is('lot_owners.end_date', null)
+      .eq('lot_owners.is_primary', true),
+    supabase
+      .from('v_lots_with_owners')
+      .select('id, tantiemes_generaux')
+      .eq('copro_id', coproId),
+  ]);
 
-  if (error) throw new Error(error.message);
-  return data || [];
+  if (lotsResult.error) throw new Error(lotsResult.error.message);
+  if (tantiemesResult.error) throw new Error(tantiemesResult.error.message);
+
+  const tantiemesByLot = new Map(
+    (tantiemesResult.data || []).map((l) => [l.id, l.tantiemes_generaux ?? 0])
+  );
+
+  return (lotsResult.data || []).map((lot) => ({
+    ...lot,
+    tantiemes_generaux: tantiemesByLot.get(lot.id) ?? 0,
+  }));
 }
 
 // ============================================================================

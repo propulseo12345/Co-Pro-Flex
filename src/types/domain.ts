@@ -5,14 +5,15 @@
 import type { Tables, TablesInsert, Enums } from './supabase';
 
 // Table Row types
-export type Provider = Tables<'providers'>;
+// Les prestataires vivent dans `tiers` (is_provider = true) depuis la re-baseline.
+export type Provider = Tables<'tiers'>;
 export type Contract = Tables<'contracts'>;
 export type LogbookEntry = Tables<'logbook_entries'>;
 export type ServiceOrder = Tables<'service_orders'>;
 export type ServiceOrderEvent = Tables<'service_order_events'>;
 
 // Table Insert types
-export type ProviderInsert = TablesInsert<'providers'>;
+export type ProviderInsert = TablesInsert<'tiers'>;
 export type ContractInsert = TablesInsert<'contracts'>;
 export type LogbookEntryInsert = TablesInsert<'logbook_entries'>;
 export type ServiceOrderInsert = TablesInsert<'service_orders'>;
@@ -27,7 +28,9 @@ export type ServiceOrderOverview = Tables<'v_service_orders_overview'>;
 export type MaintenanceStats = Tables<'v_maintenance_stats'>;
 
 // Enum types
-export type ContractType = Enums<'contract_type'>;
-export type ProviderCategory = Enums<'provider_category'>;
-export type ProviderDomain = Enums<'provider_domain'>;
+// contract_type / provider_domain ne sont plus des enums SQL : ce sont des slugs
+// de la table de référence work_domain (ex. 'plomberie', 'ascenseur').
+export type ContractType = string;
+export type ProviderCategory = Enums<'tiers_category'>;
+export type ProviderDomain = string;
 export type ServiceOrderStatus = Enums<'service_order_status'>;

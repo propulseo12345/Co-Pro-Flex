@@ -10,7 +10,7 @@ import type { Database } from '@/types/supabase';
 // ============================================================================
 
 export type IntegrityIssue =
-  Database['public']['Views']['v_finance_integrity_issues']['Row'];
+  Database['public']['Functions']['audit_finance_integrity']['Returns'][number];
 
 interface UseFinanceDiagnosticResult {
   issues: IntegrityIssue[];
@@ -25,7 +25,7 @@ interface UseFinanceDiagnosticResult {
 
 /**
  * Charge en lecture seule les anomalies de cohérence financière de la copro
- * active depuis la vue `v_finance_integrity_issues` (source unique de vérité,
+ * active via la fonction `audit_finance_integrity` (source unique de vérité,
  * filets V0). Aucune mutation.
  */
 export function useFinanceDiagnostic(): UseFinanceDiagnosticResult {
@@ -61,9 +61,7 @@ export function useFinanceDiagnostic(): UseFinanceDiagnosticResult {
 
     const supabase = createClient();
     const { data, error: fetchError } = await supabase
-      .from('v_finance_integrity_issues')
-      .select('*')
-      .eq('copro_id', currentCoproId);
+      .rpc('audit_finance_integrity', { p_copro_id: currentCoproId });
 
     // Réponse obsolète (la copro active a changé entre-temps) → on l'ignore.
     if (reqId !== reqRef.current) return;

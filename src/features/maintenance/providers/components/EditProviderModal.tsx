@@ -125,8 +125,11 @@ export function EditProviderModal({ prestataire, onClose, onSave }: EditProvider
                                 <label key={d.value} className={styles.domaineCheckbox}>
                                     <input
                                         type="checkbox"
-                                        checked={(formData.domaines as string[]).includes(d.value)}
-                                        onChange={() => toggleDomaine(d.value)}
+                                        // dbValue (slug minuscule) : les domaines chargés depuis la
+                                        // vue sont des slugs — comparer sur value (MAJUSCULE) laissait
+                                        // tout décoché et rendait le retrait impossible.
+                                        checked={(formData.domaines as string[]).includes(d.dbValue)}
+                                        onChange={() => toggleDomaine(d.dbValue)}
                                     />
                                     <span>{d.label}</span>
                                 </label>

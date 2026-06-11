@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useProviders } from '@/hooks/modules/useMaintenanceData';
+import { useProviders, type ProviderWriteInput } from '@/hooks/modules/useMaintenanceData';
 import { useToast } from '@/providers/ToastProvider';
-import type { ProviderOverview, ProviderInsert, ProviderCategory, ProviderDomain } from '@/types/domain';
+import type { ProviderOverview, ProviderDomain } from '@/types/domain';
 
 // Domain labels for display - must match ProviderDomain enum
 const DOMAIN_LABELS: Record<ProviderDomain, string> = {
@@ -194,11 +194,11 @@ export function useProvidersHubPage() {
       const categorie = (prestataireData.categorie || prestataireData.category || 'COPROPRIETE').toLowerCase();
       const domaines = (prestataireData.domaines || prestataireData.domains || []).map((d: string) => d.toLowerCase());
 
-      const providerInsert: ProviderInsert = {
+      const providerInsert: ProviderWriteInput = {
         copro_id: '', // Will be set by hook
         name: nom,
-        category: categorie as ProviderCategory,
-        domains: domaines as ProviderDomain[],
+        category: categorie as ProviderWriteInput['category'],
+        domains: domaines,
         email: prestataireData.email || null,
         phone: prestataireData.telephone || prestataireData.phone || null,
         city: prestataireData.ville || prestataireData.city || null,

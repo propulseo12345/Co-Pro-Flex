@@ -133,9 +133,9 @@ export function useProviderDetailPage(id: string) {
                 description: data.description || '',
                 happened_at: data.date || new Date().toISOString(),
                 status: data.statut?.toLowerCase() || 'planifiee',
-                provider_id: data.prestataireId || id,
+                tiers_id: data.prestataireId || id,
                 provider_name_snapshot: prestataire?.nom || '',
-                entry_type: 'entretien',
+                entry_type: 'intervention',
                 copro_id: '',
             } as unknown as import('@/types/domain').LogbookEntryInsert);
             showToast({ type: 'success', message: 'Intervention ajoutée avec succès' });
@@ -160,7 +160,7 @@ export function useProviderDetailPage(id: string) {
                 siret: data.siren,
                 contact_name: data.contactReferent,
                 contact_role: data.fonctionContact,
-                domains: data.domaines?.map(d => d.toLowerCase()) as unknown as import('@/types/domain').ProviderDomain[],
+                domains: data.domaines?.map(d => d.toLowerCase()),
             });
         } catch (err) {
             console.error('[useProviderDetailPage] Supabase updateProvider error:', err);
