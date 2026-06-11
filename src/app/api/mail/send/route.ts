@@ -7,9 +7,6 @@ import { createClient } from '@/lib/supabase/server';
 const FROM_EMAIL = process.env.MAIL_FROM_ADDRESS ?? 'onboarding@resend.dev';
 const FROM_NAME = process.env.MAIL_FROM_NAME ?? 'CoProFlex Syndic';
 
-// ID propriétaire par défaut (profil syndic) — utilisé tant que l'auth n'est pas implémentée
-const DEFAULT_OWNER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
-
 interface MailParticipant {
   name: string;
   email: string;
@@ -35,6 +32,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Propriétaire = utilisateur de session (la route porte les cookies d'auth).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabaseAuth = (await createClient()) as any;
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+  }
+
   // Envoi via Resend
   const { data: resendData, error: resendError } = await resend.emails.send({
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
@@ -48,16 +53,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: resendError.message }, { status: 502 });
   }
 
-  // Sauvegarde dans Supabase
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
+  // Sauvegarde dans Supabase (même client porteur de session que ci-dessus).
+  const supabase = supabaseAuth;
   const now = new Date().toISOString();
 
   const { data: mail, error: dbError } = await supabase
     .from('mails')
     .insert({
       copro_id: coproId,
-      owner_id: DEFAULT_OWNER_ID,
+      owner_id: user.id,
       from_email: FROM_EMAIL,
       from_name: FROM_NAME,
       to_emails: to,

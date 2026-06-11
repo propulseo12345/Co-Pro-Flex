@@ -51,28 +51,32 @@ J0 hygiène + arbitrages (immédiat)
 
 ## J1 — Sécurité / isolation *(LE mur démo→prod · 2-3 sessions · effort `ultracode`)*
 
-- [ ] **B1** (BLOCKER) : RLS démarre OFF en prod — passer 0034/0042 en défaut **fail-safe** (`IS DISTINCT FROM 'development'`) ; **+ M2** (assertion REVOKE anon : exclure fonctions d'extensions + REVOKE défensif). Checklist : `RE-BASELINE_READINESS.md`.
-- [ ] **RLS ON + étanchéité prouvée** : test multi-tenant adversarial (cabinet A ne voit JAMAIS cabinet B), FORCE sur le GL, `resolution_templates` fermé.
-- [ ] **`owner_id` → `auth.uid()`** dans les 6 fichiers confirmés (`useMur`, `useMailbox`, `useMessagerie`, `communication/page`, 2 routes API mail).
-- [ ] **Seed comptes démo** après reset (admin/gestionnaire/jean.dupont — trou connu) + bascule `ensure_dev_membership` → `user_has_copro_access` (F0 phase 1, exige membership semé).
+> **PR #5** (`j1-rls-securite`, CI verte) — 2026-06-10. Cœur isolation livré et prouvé.
 
-**Test Lyes** : 2 comptes de 2 cabinets → aucune fuite de données dans aucun module.
+- [x] **B1** ✅ : bascule RLS **fail-safe** (`apply_rls_environment()` 0034 : RLS ON + FORCE GL par défaut, OFF si `app.environment='development'` explicite posé par seed.sql) ; **+ M2** ✅ (assertion REVOKE anon : exclut fonctions d'extensions `pg_depend` deptype `'e'` + REVOKE défensif). Prouvé : rejeu 0001→0045 sur base fraîche → 80/80 RLS ON, FORCE ×5.
+- [x] **RLS ON + étanchéité prouvée** ✅ : `gate_rls_multitenant_isolation` (cabinet A ⊀ cabinet B sur 9 tables + écriture refusée + modèle privé invisible + preuve positive), FORCE sur le GL, `resolution_templates` couvert par le registre.
+- [x] **7 fuites `SECURITY DEFINER` fermées** ✅ (audit adversarial ultracode → migration 0045) : RPC DEFINER `to authenticated` sans garde = IDOR cross-tenant. Garde `is_service_call() OR user_has_copro_access/manager`. Gate `gate_rls_definer_guards`. Inventaire propre : 0 table hors registre, 0 vue sans `security_invoker`, 0 grant anon.
+- [x] **`owner_id` → session** ✅ : les 6 fichiers comm (useMur/useMessagerie/useMailbox/page/2 routes) dérivent l'utilisateur de la session (`useSupabase()`) ; `mails` = boîte partagée par copro ; webhook inbound = client service_role + gestionnaire de la copro (`MAIL_INBOUND_COPRO_ID`). Nouveau `lib/supabase/admin.ts`.
+- [x] **Seed comptes démo** ✅ : déjà dans `seed.sql` (admin/gestionnaire/jean.dupont + memberships). `ensure_dev_membership` = mort (aucun appelant src/migrations) → bascule sans objet.
 
-## J2 — Recâblage hors-finance COMPLET *(G7 · ~80 objets · 8-12 sessions · effort `Max` + gates)*
+**Test Lyes** : 2 comptes de 2 cabinets → aucune fuite de données dans aucun module. *(Reste à brancher en cloud J6 : poser `SUPABASE_SERVICE_ROLE_KEY` + `MAIL_INBOUND_COPRO_ID` ; mapping fin adresse→copro du webhook = J2.5.)*
 
-Méthode identique à la finance pour CHAQUE module : spec courte → migration (vues d'agrégat + RPC) → rebranchement front → **gate SQL** → test Lyes. Ordre par valeur pilote :
+## J2 — Recâblage hors-finance *(G7 · ~~8-12 sessions~~ → **quasi soldé**, audit 2026-06-10)*
 
-- [ ] **2.1 Budget front** : `BUDGET_USE_SUPABASE` → true, écrans branchés sur le GL (vérité unique). *(Hook `useBudget` ~1000L : découpage léger si nécessaire.)*
-- [ ] **2.2 AG compléments** : pouvoirs (procurations — légalement nécessaires), jalons, choix d'envoi, brouillons, stats (7 vues + ~10 RPC + `increment_template_usage`).
-- [ ] **2.3 GED / documents** : `dossiers`, `ged`, `document_access/links`, `pv_templates` + 6 vues. *Inclut le rattachement du justificatif à la saisie de facture (`document_id` — attente terrain Lyes 2026-06-10 ; l'ancien upload était factice).*
-- [ ] **2.4 Maintenance / prestataires** : `providers` → `tiers` (`is_provider=true`, même méthode que fournisseurs) + 8 vues (contrats, carnet, OS).
-- [ ] **2.5 Communication / mail** : 5 tables `mail_*` + 6 vues + `generate_campaign_recipients` (cloisonnement utilisateur déjà réglé en J1).
-- [ ] **2.6 Conseil syndical** : 3 tables rapports + 3 vues.
-- [ ] **2.7 Restes** : dashboard (`v_dashboard_recent_activity`/`todos` dégradés), `v_finance_integrity_issues` → adapter sur `audit_finance_integrity`.
-- [ ] **2.8 Factures fournisseurs : validation & paiement RÉELS** *(dette découverte J0.3)* : la « validation » (détail + liste) et le « paiement » (`handlePaymentComplete`) basculent le statut **sans écriture GL** (ni posting D6xx/C401 du brouillon, ni mouvement 512). Câbler : RPC de validation d'un brouillon (le 2-temps de `post_supplier_invoice` n'existe qu'à la création) + `pay_supplier_invoice` (edge existante) ; la création de brouillons du modal liste (header sans lignes) à unifier au passage.
-- [ ] **2.9 Régénération COMPLÈTE `src/types/supabase.ts`** (après 2.1→2.7) : référence prête `.planning/supabase_types_regenerated.ts` ; purge les objets fantômes des anciens types (providers, mail_*, statut `approved`…).
+> **RÉVISION 2026-06-10 (audit mock vs Supabase, 2 agents)** : la prémisse « modules sur mock à recâbler » était PÉRIMÉE. **Tous les modules hors-finance sont déjà 100% Supabase** (vérifié par les tells `createClient()`/`.from()`/`.rpc()` dans les hooks/api). Le « gros recâblage » a été fait pendant la refonte finance. Il ne reste que **2.8** (vrai trou comptable) + un nettoyage de flags morts.
 
-**Test Lyes** : un parcours type par module, à chaque fin de tranche.
+- [x] **2.1 Budget** ✅ déjà Supabase (`useBudget` 955L → `useBudgetData` Supabase ; vues `v_budgets_overview`/`v_budget_lines_overview`/`v_budget_expenses_detail` créées en 0036 ; RPC `validate_budget_expense`/`post_alur_transfer`). **Flag `BUDGET_USE_SUPABASE` MORT** (jamais lu).
+- [x] **2.2 AG** ✅ déjà Supabase (`ag_meetings`/`v_ag_overview` + RPC cycle de vie). Compléments (pouvoirs/jalons/stats) = enrichissements, pas du recâblage.
+- [x] **2.3 GED / documents** ✅ déjà Supabase (`v_documents_with_folder`, storage `ged`). *Rattachement justificatif→facture (`document_id`) = attente terrain Lyes, à traiter avec 2.8.*
+- [x] **2.4 Maintenance / prestataires** ✅ déjà Supabase (`v_providers_overview`, `v_logbook_overview`, `v_service_orders_overview`, RPC OS).
+- [x] **2.5 Communication / mail** ✅ déjà Supabase ; cloisonnement utilisateur réglé en J1 (owner_id→session).
+- [x] **2.6 Conseil syndical** ✅ déjà Supabase (`v_council_members`, `v_council_decisions_overview`, edge functions).
+- [x] **2.7 Dashboard / restes** ✅ déjà Supabase (`v_dashboard_*`).
+- [ ] **2.8 Factures fournisseurs : validation & paiement RÉELS** *(SEUL trou réel — dette J0.3, confirmé audit 2026-06-10)* : la **validation** d'un brouillon (`draft → posted`) = `UPDATE` du statut **SANS écriture GL** (pas de posting D6xx/C401 ; il n'existe pas de RPC de validation de brouillon — le 2-temps de `post_supplier_invoice` n'existe qu'à la création). Le **paiement** passe par l'edge `pay_supplier_invoice` qui renvoie un `ledger_tx_id` (a priori OK, à confirmer côté serveur). Câbler une RPC `validate_supplier_invoice` (posting du brouillon) + confirmer/aligner le paiement ; unifier la création de brouillons du modal liste (header sans lignes). **→ chantier en cours de cadrage.**
+- [ ] **Nettoyage flags morts** : supprimer `BUDGET_USE_SUPABASE`, `VENTES_USE_SUPABASE`, `moduleUsesSupabase()` (définis, jamais lus).
+- [ ] **2.9 Régénération `src/types/supabase.ts`** : référence `.planning/supabase_types_regenerated.ts` (purge objets fantômes). *À refaire après 2.8 si la signature RPC change.*
+
+**Test Lyes** : un parcours type par module (la plupart déjà testables) ; focus = parcours facture (saisie brouillon → validation → vérifier l'écriture GL → paiement).
 
 ## J3 — Portail copropriétaire *(G1 · 4-6 sessions · effort `Max` + `ultracode` ponctuel)*
 

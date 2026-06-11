@@ -12,8 +12,6 @@ import styles from './communication-hub.module.css';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
 
-const DEFAULT_OWNER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
-
 // ── Types pour les KPI ────────────────────────────────────────────────────────
 
 interface HubKpis {
@@ -51,7 +49,6 @@ function useCommunicationKpis(coproId: string | null): HubKpis {
         .from('mails')
         .select('*', { count: 'exact', head: true })
         .eq('copro_id', coproId)
-        .eq('owner_id', DEFAULT_OWNER_ID)
         .eq('status', 'received')
         .eq('is_read', false)
         .eq('is_archived', false)
@@ -62,7 +59,6 @@ function useCommunicationKpis(coproId: string | null): HubKpis {
         .from('mails')
         .select('subject')
         .eq('copro_id', coproId)
-        .eq('owner_id', DEFAULT_OWNER_ID)
         .eq('status', 'received')
         .eq('is_read', false)
         .eq('is_deleted', false)

@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
+import { useSupabase } from '@/hooks/useSupabase';
 import type {
   IWallPost,
   IWallComment,
@@ -14,9 +15,7 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
 
-// ID utilisateur courant (syndic) — remplacé par auth.uid() quand l'auth sera active
-const CURRENT_USER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
-const CURRENT_USER_NAME = 'Admin CoProFlex';
+// Rôle d'auteur par défaut (le câblage rôle réel relève de J2.5 communication).
 const CURRENT_USER_ROLE: AuthorRole = 'syndic';
 
 // ----------------------------------------------------------------------------
@@ -96,6 +95,10 @@ function mapComment(row: any): IWallComment {
 
 export function useMur(): UseMurReturn {
   const { currentCoproId } = useCopro();
+  const { user } = useSupabase();
+  const currentUserId = user?.id ?? null;
+  const currentUserName =
+    (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? 'Utilisateur';
   const supabase = useMemo(() => createUntypedClient(), []);
 
   const [allPosts, setAllPosts] = useState<IWallPost[]>([]);
@@ -124,11 +127,13 @@ export function useMur(): UseMurReturn {
 
       if (!error && data) {
         // Charger les likes de l'utilisateur courant en une requête
-        const { data: likes } = await supabase
-          .from('wall_likes')
-          .select('post_id')
-          .eq('copro_id', currentCoproId)
-          .eq('user_id', CURRENT_USER_ID);
+        const { data: likes } = currentUserId
+          ? await supabase
+              .from('wall_likes')
+              .select('post_id')
+              .eq('copro_id', currentCoproId)
+              .eq('user_id', currentUserId)
+          : { data: [] as { post_id: string }[] };
 
         const likedIds = new Set((likes ?? []).map((l: { post_id: string }) => l.post_id));
 
@@ -142,7 +147,7 @@ export function useMur(): UseMurReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [currentCoproId, supabase]);
+  }, [currentCoproId, currentUserId, supabase]);
 
   fetchPostsRef.current = fetchPosts;
 
@@ -174,7 +179,7 @@ export function useMur(): UseMurReturn {
   const filteredPosts = useMemo(() => {
     return allPosts.filter((post) => {
       if (categoryFilter === 'pinned') return post.isPinned;
-      if (categoryFilter === 'mine') return post.authorId === CURRENT_USER_ID;
+      if (categoryFilter === 'mine') return post.authorId === currentUserId;
       if (categoryFilter !== 'all' && post.category !== categoryFilter) return false;
 
       if (searchTerm.trim()) {
@@ -186,7 +191,7 @@ export function useMur(): UseMurReturn {
       }
       return true;
     });
-  }, [allPosts, categoryFilter, searchTerm]);
+  }, [allPosts, categoryFilter, searchTerm, currentUserId]);
 
   const pinnedPosts = useMemo(() => filteredPosts.filter((p) => p.isPinned), [filteredPosts]);
   const posts = useMemo(() => filteredPosts.filter((p) => !p.isPinned), [filteredPosts]);
@@ -197,9 +202,9 @@ export function useMur(): UseMurReturn {
       counts[post.category] = (counts[post.category] || 0) + 1;
     }
     counts.pinned = allPosts.filter((p) => p.isPinned).length;
-    counts.mine = allPosts.filter((p) => p.authorId === CURRENT_USER_ID).length;
+    counts.mine = allPosts.filter((p) => p.authorId === currentUserId).length;
     return counts;
-  }, [allPosts]);
+  }, [allPosts, currentUserId]);
 
   const comments = useMemo(() => {
     if (!selectedPostId) return [];
@@ -216,15 +221,15 @@ export function useMur(): UseMurReturn {
   }, []);
 
   const createPost = useCallback(async (data: INewPostData) => {
-    if (!currentCoproId) return;
+    if (!currentCoproId || !currentUserId) return;
 
     const now = new Date().toISOString();
     const { data: inserted, error } = await supabase
       .from('wall_posts')
       .insert({
         copro_id: currentCoproId,
-        author_id: CURRENT_USER_ID,
-        author_name: CURRENT_USER_NAME,
+        author_id: currentUserId,
+        author_name: currentUserName,
         author_role: CURRENT_USER_ROLE,
         title: data.title,
         content: data.content,
@@ -244,7 +249,7 @@ export function useMur(): UseMurReturn {
       setAllPosts((prev) => [{ ...mapPost(inserted), isLikedByMe: false }, ...prev]);
     }
     setIsEditorOpen(false);
-  }, [currentCoproId, supabase]);
+  }, [currentCoproId, currentUserId, currentUserName, supabase]);
 
   const deletePost = useCallback(async (id: string) => {
     setAllPosts((prev) => prev.filter((p) => p.id !== id));
@@ -254,7 +259,7 @@ export function useMur(): UseMurReturn {
   }, [supabase]);
 
   const toggleLike = useCallback(async (id: string) => {
-    if (!currentCoproId) return;
+    if (!currentCoproId || !currentUserId) return;
 
     const post = allPosts.find((p) => p.id === id);
     if (!post) return;
@@ -274,7 +279,7 @@ export function useMur(): UseMurReturn {
       await supabase.from('wall_likes').insert({
         copro_id: currentCoproId,
         post_id: id,
-        user_id: CURRENT_USER_ID,
+        user_id: currentUserId,
       });
       await supabase
         .from('wall_posts')
@@ -285,13 +290,13 @@ export function useMur(): UseMurReturn {
         .from('wall_likes')
         .delete()
         .eq('post_id', id)
-        .eq('user_id', CURRENT_USER_ID);
+        .eq('user_id', currentUserId);
       await supabase
         .from('wall_posts')
         .update({ likes_count: Math.max(0, post.likesCount - 1) })
         .eq('id', id);
     }
-  }, [allPosts, currentCoproId, supabase]);
+  }, [allPosts, currentCoproId, currentUserId, supabase]);
 
   const togglePin = useCallback(async (id: string) => {
     const post = allPosts.find((p) => p.id === id);
@@ -305,7 +310,7 @@ export function useMur(): UseMurReturn {
   }, [allPosts, supabase]);
 
   const addComment = useCallback(async (postId: string, content: string) => {
-    if (!currentCoproId) return;
+    if (!currentCoproId || !currentUserId) return;
 
     const now = new Date().toISOString();
     const { data: inserted, error } = await supabase
@@ -313,8 +318,8 @@ export function useMur(): UseMurReturn {
       .insert({
         copro_id: currentCoproId,
         post_id: postId,
-        author_id: CURRENT_USER_ID,
-        author_name: CURRENT_USER_NAME,
+        author_id: currentUserId,
+        author_name: currentUserName,
         content,
         parent_comment_id: null,
         created_at: now,
@@ -337,7 +342,7 @@ export function useMur(): UseMurReturn {
           .eq('id', postId);
       }
     }
-  }, [allPosts, currentCoproId, supabase]);
+  }, [allPosts, currentCoproId, currentUserId, currentUserName, supabase]);
 
   const openEditor = useCallback(() => setIsEditorOpen(true), []);
   const closeEditor = useCallback(() => setIsEditorOpen(false), []);

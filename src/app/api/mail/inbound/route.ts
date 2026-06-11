@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-// ID propriétaire par défaut (profil syndic) — utilisé tant que l'auth n'est pas implémentée
-const DEFAULT_OWNER_ID = 'f76855bb-62c3-4040-8fc6-7586080be9fb';
-const DEFAULT_COPRO_ID = '11111111-aaaa-bbbb-cccc-111111111111';
+// Copropriété cible des e-mails entrants, via config (remplace l'ancien hardcode de la copro
+// gelée). Le mapping fin adresse destinataire → copro relève de J2.5 (règle métier à figer).
+const INBOUND_COPRO_ID = process.env.MAIL_INBOUND_COPRO_ID ?? '';
 
 // Webhook Resend pour les emails entrants
 // À configurer dans le dashboard Resend : Settings → Inbound → URL de ce endpoint
@@ -40,12 +40,36 @@ export async function POST(req: NextRequest) {
       )
     : [];
 
+  if (!INBOUND_COPRO_ID) {
+    return NextResponse.json(
+      { error: 'MAIL_INBOUND_COPRO_ID non configurée : impossible de router l\'e-mail entrant.' },
+      { status: 503 }
+    );
+  }
+
+  // Webhook = appel machine SANS session → client service_role (l'insert anon serait bloqué par
+  // la RLS de `mails`). Propriétaire = un gestionnaire de la copro cible.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
+  const supabase = createAdminClient() as any;
+
+  const { data: manager } = await supabase
+    .from('memberships')
+    .select('user_id')
+    .eq('copro_id', INBOUND_COPRO_ID)
+    .eq('role', 'gestionnaire')
+    .limit(1)
+    .maybeSingle();
+
+  if (!manager?.user_id) {
+    return NextResponse.json(
+      { error: 'Aucun gestionnaire rattaché à la copro cible de l\'e-mail entrant.' },
+      { status: 422 }
+    );
+  }
 
   const { error } = await supabase.from('mails').insert({
-    copro_id: DEFAULT_COPRO_ID,
-    owner_id: DEFAULT_OWNER_ID,
+    copro_id: INBOUND_COPRO_ID,
+    owner_id: manager.user_id,
     from_email: fromEmail,
     from_name: fromName,
     to_emails: toEmails,
