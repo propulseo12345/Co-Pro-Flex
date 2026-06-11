@@ -96,6 +96,7 @@ J0 hygiène + arbitrages ✅ ── J1 sécurité/RLS ✅ ── J2 ✅ (2.9/2.1
 - [ ] **Dashboard restes** : `v_dashboard_recent_activity`, `v_dashboard_todos`.
 - [ ] **Mutations** : `v_mutations_overview` (la base a `v_mutation_detail`).
 - [ ] **Divers** : `increment_template_usage` (compteur banque de résolutions) ; `post_call_for_funds` = différé F4 (J9).
+- [ ] **Retours revue 0047 tranchés 2026-06-11** : renommer `critical_unpaid_count` → `unpaid_lots_count` (vue + `usePortefeuille` + fin du `0` en dur de `lib/dashboard/api.ts` + statuts AG alignés) ; OS : retirer les boutons FACTURE/PAYE (no-op) + badge dérivé de la facture liée (`invoices_count`/`invoiced_total`).
 
 **Test Lyes** : un parcours type par module ; focus = parcours facture (saisie brouillon → validation → écriture GL → paiement) + **maintenance réparée** (prestataires, contrats, OS, carnet : listes non vides, création OK) — checklist détaillée `.planning/TESTS_F10_J0-J2.md`.
 
