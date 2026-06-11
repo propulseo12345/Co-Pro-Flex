@@ -699,6 +699,48 @@ export async function paySupplierInvoice(payload: PaySupplierInvoicePayload): Pr
   return invokeEdgeFunction('pay_supplier_invoice', payload);
 }
 
+// Validation d'un brouillon de facture (draft -> posted) : écrit D6xx/C401 au grand livre via la RPC
+// gardée validate_supplier_invoice (0046). Remplace l'ancien flip de statut nu (sans écriture).
+export async function validateSupplierInvoice(
+  invoiceId: string
+): Promise<ApiResult<{ invoice_id: string; ledger_tx_id: string; already_posted?: boolean }>> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.rpc('validate_supplier_invoice', { p_invoice_id: invoiceId });
+  if (error) return { data: null, error: error.message };
+  return { data: data as { invoice_id: string; ledger_tx_id: string; already_posted?: boolean }, error: null };
+}
+
+export interface PostSupplierPaymentPayload {
+  copro_id: string;
+  period_id: string;
+  invoice_id: string;
+  amount: number;
+  payment_date: string;
+  method?: string;
+  reference?: string;
+  idempotency_key: string;
+}
+
+// Règlement d'une facture comptabilisée : écrit D401/C512 via la RPC idempotente post_supplier_payment
+// (0026). Appelée en session (rpc) → contourne le souci d'auth de l'edge function pay_supplier_invoice.
+export async function postSupplierPayment(
+  p: PostSupplierPaymentPayload
+): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; invoice_status: string }>> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.rpc('post_supplier_payment', {
+    p_copro_id: p.copro_id,
+    p_period_id: p.period_id,
+    p_supplier_invoice_id: p.invoice_id,
+    p_amount: p.amount,
+    p_payment_date: p.payment_date,
+    p_method: p.method ?? 'transfer',
+    p_reference: p.reference ?? null,
+    p_idempotency_key: p.idempotency_key,
+  });
+  if (error) return { data: null, error: error.message };
+  return { data: data as { payment_id: string; ledger_tx_id: string; invoice_status: string }, error: null };
+}
+
 export interface UpdateSupplierInvoicePayload {
   copro_id: string;
   invoice_id: string;

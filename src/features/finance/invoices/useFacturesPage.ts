@@ -25,7 +25,7 @@ import {
   useDeleteSupplierInvoice,
   useSuppliers
 } from '@/hooks/modules/useFinanceData';
-import { listSupplierInvoiceLines } from '@/lib/finance/api';
+import { listSupplierInvoiceLines, validateSupplierInvoice, postSupplierPayment } from '@/lib/finance/api';
 import type { CreditNoteLinePayload } from '@/lib/finance/api';
 import { prorateLines } from '@/lib/finance/credit-notes';
 
@@ -231,27 +231,35 @@ export function useFacturesPage() {
 
   const handlePaymentComplete = useCallback(async (compteId: string) => {
     if (!selectedFacture) return;
+    if (!currentCoproId || !openPeriod?.id) {
+      console.error('Paiement impossible : copro ou période ouverte introuvable');
+      return;
+    }
 
     setIsMutating(true);
 
     try {
-      // Update status to 'paid' directly via Supabase update
-      // This bypasses the Edge Function that requires auth
-      const result = await updateInvoiceMutation.mutate({
+      // Règlement RÉEL : RPC post_supplier_payment -> écriture D401/C512 (et passage 'paid' quand soldé).
+      // Remplace l'ancien flip de statut nu (qui ne bougeait pas la banque dans les comptes).
+      const result = await postSupplierPayment({
+        copro_id: currentCoproId,
+        period_id: openPeriod.id,
         invoice_id: selectedFacture.id,
-        status: 'paid',
+        amount: selectedFacture.montant,
+        payment_date: todayStr,
+        idempotency_key: `pay-${selectedFacture.id}-${todayStr}`,
       });
 
       if (result.error) {
         console.error('Payment error:', result.error);
+      } else {
+        // État optimiste UNIQUEMENT si l'écriture a réussi (ne jamais afficher « payé » à tort).
+        setFactures(prev => prev.map(f =>
+          f.id === selectedFacture.id
+            ? { ...f, statut: 'PAYEE' as StatutFacture, datePaiement: todayStr, compteDebite: compteId }
+            : f
+        ));
       }
-
-      // Update local state optimistically
-      setFactures(prev => prev.map(f =>
-        f.id === selectedFacture.id
-          ? { ...f, statut: 'PAYEE' as StatutFacture, datePaiement: new Date().toISOString().split('T')[0], compteDebite: compteId }
-          : f
-      ));
 
       // Refresh from Supabase to ensure consistency
       await refreshWithTimestamp();
@@ -260,7 +268,7 @@ export function useFacturesPage() {
     }
 
     setShowPaymentModal(false);
-  }, [selectedFacture, updateInvoiceMutation, refreshWithTimestamp]);
+  }, [selectedFacture, currentCoproId, openPeriod?.id, todayStr, refreshWithTimestamp]);
 
   const handleSendToAccounting = useCallback(async () => {
     if (!selectedFacture) return;
@@ -268,23 +276,21 @@ export function useFacturesPage() {
     setIsMutating(true);
 
     try {
-      // Update status to 'posted' (A_PAYER) in Supabase
-      const result = await updateInvoiceMutation.mutate({
-        invoice_id: selectedFacture.id,
-        status: 'posted',
-      });
+      // Comptabilisation RÉELLE : RPC validate_supplier_invoice -> écriture D6xx/C401 au grand livre.
+      // Remplace l'ancien flip de statut nu (une facture « comptabilisée » sans aucune écriture).
+      const result = await validateSupplierInvoice(selectedFacture.id);
 
       if (result.error) {
         console.error('Send to accounting error:', result.error);
+      } else {
+        // État optimiste UNIQUEMENT si l'écriture a réussi.
+        const posteBudgetaire = TYPE_DEPENSE_TO_POSTE[selectedTypeDepense] || selectedFacture.posteBudgetaire;
+        setFactures(prev => prev.map(f =>
+          f.id === selectedFacture.id
+            ? { ...f, typeDepense: selectedTypeDepense, posteBudgetaire, statut: 'A_PAYER' as StatutFacture }
+            : f
+        ));
       }
-
-      // Update local state optimistically
-      const posteBudgetaire = TYPE_DEPENSE_TO_POSTE[selectedTypeDepense] || selectedFacture.posteBudgetaire;
-      setFactures(prev => prev.map(f =>
-        f.id === selectedFacture.id
-          ? { ...f, typeDepense: selectedTypeDepense, posteBudgetaire, statut: 'A_PAYER' as StatutFacture }
-          : f
-      ));
 
       // Refresh from Supabase to ensure consistency
       await refreshWithTimestamp();
@@ -294,7 +300,7 @@ export function useFacturesPage() {
 
     setShowAccountingModal(false);
     setSelectedFacture(null);
-  }, [selectedFacture, selectedTypeDepense, updateInvoiceMutation, refreshWithTimestamp]);
+  }, [selectedFacture, selectedTypeDepense, refreshWithTimestamp]);
 
   const handleView = useCallback((facture: Facture) => {
     setSelectedFacture(facture);

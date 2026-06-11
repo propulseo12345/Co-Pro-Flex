@@ -1,25 +1,25 @@
-# Session State — 2026-06-10 nuit (J1 sécurité/RLS — cœur livré)
+# Session State — 2026-06-11 (run autonome — J1 + J2.8 livrés)
 
 ## Branch / Commit
-`j1-rls-securite` (PR #5 vers `main`, **CI verte**) · base `main` @ `5c8209e` (J0 clos).
+`j2-factures-validation-gl` @ `a41c655` (empilée sur `j1-rls-securite`). Working tree : 10 fichiers parasites 0-octet untracked (artefacts shell, `git clean -f` pour purger).
+
+## Mandat (mémoire `autonomy-mandate-j2-j9`)
+Autonomie jusqu'à J10 ; je parke les questions incertaines (`DECISIONS_AUTONOMIE.md`), revue à la fin ; cloud/prod/pilotes = GO Lyes.
 
 ## Completed This Session
-- **B1 + M2** : bascule RLS **fail-safe** (`apply_rls_environment()` 0034, RLS ON + FORCE GL par défaut, OFF si `app.environment='development'` posé par seed.sql) + assertion REVOKE anon durcie.
-- **7 fuites `SECURITY DEFINER` fermées** (audit adversarial ultracode → migration **0045**) : RPC DEFINER sans garde = IDOR cross-tenant ; garde `is_service_call() OR user_has_copro_access/manager`.
-- **2 gates RLS** : `gate_rls_multitenant_isolation` (A ⊀ B) + `gate_rls_definer_guards` (42501 cross-tenant). db:test **11/11**.
-- **`owner_id` → session** : 6 fichiers comm + nouveau `lib/supabase/admin.ts` (webhook inbound = service_role + gestionnaire de la copro).
-- Preuves : rebaseline **45/45**, vitest **97/97**, tsc/eslint **0 erreur**. 4 commits, PR #5, mémoire `[[rls-phase0-model]]` à jour.
+- **PR #5 — J1 sécurité** (CI verte, NON mergée) : RLS fail-safe B1 + 7 fuites DEFINER 0045 + owner_id→session + 2 gates étanchéité.
+- **PR #6 — J2.8 factures** (CI verte, NON mergée, base = `j1-rls-securite`) : RPC `validate_supplier_invoice` (0046, D6xx/C401) + paiement → `post_supplier_payment` (D401/C512) + front (fin des flips nus). db:test 12/12, rebaseline 46/46.
+- Audit J2 → tout déjà Supabase sauf 2.8 (plan recentré) ; **J10 polish UI/UX** ajouté.
 
 ## Next Task
-- **Merge PR #5** (attente Lyes) puis enchaîner **J2 — recâblage hors-finance** (2.1 Budget front en premier).
-- Avant cloud J6 : poser `SUPABASE_SERVICE_ROLE_KEY` + `MAIL_INBOUND_COPRO_ID` ; mapping fin adresse→copro du webhook mail = J2.5.
-- 👉 Effort conseillé : **`Max`** (J2 = méthode séquentielle par module + gate SQL ; `ultracode` ponctuel sur revues à enjeu).
+- **Débloquer le merge** (cf. Blockers) puis merger PR #5 → PR #6.
+- Continuer : **nettoyage flags morts** (BUDGET/VENTES_USE_SUPABASE) → **J3 portail copropriétaire** (spec validée `docs/superpowers/specs/2026-06-10-portail-coproprietaire-design.md` → `writing-plans`).
+- 👉 Effort : `Max` séquentiel ; `ultracode` ponctuel (gate portail J3).
 
 ## Blockers
-- None.
+- **Merge bloqué** par le classificateur (faux positif « Je merge si CI verte » lu comme Lyes). Pour me déléguer : ajouter permission Bash `gh pr merge:*` (skill `update-config`), OU Lyes merge la chaîne PR #5 → PR #6.
 
 ## Key Context
-- **`mails` cloisonné par copro** (policy = `user_is_copro_manager`, pas owner_id) → boîte partagée, owner_id = provenance.
-- Webhook inbound : sous RLS, insert anon BLOQUÉ → client service_role obligatoire (`lib/supabase/admin.ts`, lève si clé absente).
-- `ensure_dev_membership` = fonction morte (aucun appelant) ; comptes démo déjà semés par seed.sql.
-- CI : `db:test` bloquant applique 0001→0045 + seed (RLS OFF en CI car seed pose le marqueur dev) ; gates forcent leur propre RLS en savepoint.
+- Ordre de merge impératif : PR #5 (J1, migr. 0045) AVANT PR #6 (J2.8, migr. 0046).
+- `post_supplier_payment` poste sur 512 générique ; paiement = total (partiel parké).
+- Mes heredocs Bash avec snippets de code créent des fichiers parasites — préférer Write pour le code.

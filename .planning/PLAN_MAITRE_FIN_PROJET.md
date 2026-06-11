@@ -72,7 +72,7 @@ J0 hygiène + arbitrages (immédiat)
 - [x] **2.5 Communication / mail** ✅ déjà Supabase ; cloisonnement utilisateur réglé en J1 (owner_id→session).
 - [x] **2.6 Conseil syndical** ✅ déjà Supabase (`v_council_members`, `v_council_decisions_overview`, edge functions).
 - [x] **2.7 Dashboard / restes** ✅ déjà Supabase (`v_dashboard_*`).
-- [ ] **2.8 Factures fournisseurs : validation & paiement RÉELS** *(SEUL trou réel — dette J0.3, confirmé audit 2026-06-10)* : la **validation** d'un brouillon (`draft → posted`) = `UPDATE` du statut **SANS écriture GL** (pas de posting D6xx/C401 ; il n'existe pas de RPC de validation de brouillon — le 2-temps de `post_supplier_invoice` n'existe qu'à la création). Le **paiement** passe par l'edge `pay_supplier_invoice` qui renvoie un `ledger_tx_id` (a priori OK, à confirmer côté serveur). Câbler une RPC `validate_supplier_invoice` (posting du brouillon) + confirmer/aligner le paiement ; unifier la création de brouillons du modal liste (header sans lignes). **→ chantier en cours de cadrage.**
+- [x] **2.8 Factures fournisseurs : validation & paiement RÉELS** ✅ *(livré 2026-06-11, branche `j2-factures-validation-gl`)* : RPC **`validate_supplier_invoice`** (0046) poste D6xx/C401 depuis le brouillon + ses lignes (gardée gestionnaire, idempotente, refuse brouillon sans ligne, recalcule le total depuis les lignes) ; **paiement** rebranché sur la RPC `post_supplier_payment` (D401/C512) au lieu du flip nu. Front : `handleSendToAccounting`/`handlePaymentComplete` → RPC, état optimiste conditionné au succès. Gate `gate_supplier_invoice_validation` (12/12) + rebaseline 46/46. Limitations parkées (paiement partiel, sous-compte 512) : `DECISIONS_AUTONOMIE.md`.
 - [ ] **Nettoyage flags morts** : supprimer `BUDGET_USE_SUPABASE`, `VENTES_USE_SUPABASE`, `moduleUsesSupabase()` (définis, jamais lus).
 - [ ] **2.9 Régénération `src/types/supabase.ts`** : référence `.planning/supabase_types_regenerated.ts` (purge objets fantômes). *À refaire après 2.8 si la signature RPC change.*
 
@@ -127,6 +127,19 @@ Exécution des arbitrages **tranchés le 2026-06-10** (verdicts : `DECISIONS.md`
 - [ ] **Conformité 2026** : DPE/PPT/Factur-X (aujourd'hui 100 % mock → brancher) ; contentieux/litiges.
 - [ ] **RGPD** · extranet ALUR avancé · mandat syndic modélisé (différé 0030).
 - [ ] **Dette transverse** : `any` résiduels, `console.*`, hooks monolithiques (`useAgData` 1091L, `useBudget`, `useAppelsFonds`), fichiers `.legacy`, doublons constantes, suppression des derniers fichiers EN morts.
+
+## J10 — Gros pass POLISH UI/UX *(ajouté 2026-06-11 · effort `Max` + skills design)*
+
+> Passe finale de qualité visuelle/ergonomie sur TOUTE l'app, une fois fonctionnellement complète (après J9). Objectif : qualité « agence haut de gamme », anti-générique, cohérence totale.
+
+- [ ] **Audit UX d'ensemble** : parcours par module (dashboard, finance, AG, maintenance, GED, communication, copropriétaires, ventes, portail copro), repérer les écrans pauvres / incohérents / « faux boutons » résiduels.
+- [ ] **Design system durci** : faire de `docs/claude/design-system.md` la source unique appliquée partout (tokens, espacements, typo, états hover/focus/loading/empty/error), supprimer tout style en dur / pastel / `rem` en finance.
+- [ ] **Polish par module** : hiérarchie visuelle, densité, micro-interactions, transitions, skeletons de chargement, états vides soignés, responsive. Respecter la stack RÉELLE (Next.js + CSS Modules) — **ne PAS importer Tailwind** (skills design = goût, pas la stack).
+- [ ] **Accessibilité** : labels, focus visibles, contrastes, navigation clavier (sweep a11y final).
+- [ ] **Cohérence finale** : composants partagés unifiés (boutons, modales, tables, badges, KPI strips), 0 divergence entre pages ; PDF (convocation/PV/appels) alignés sur la DA.
+- Outils : skills `frontend-design` / goût visuel (adaptés CSS Modules), MCP navigateur pour vérif réelle (Lyes), screenshots avant/après par écran.
+
+**Test Lyes** : revue visuelle écran par écran ; « ça fait premium, c'est cohérent, rien ne sonne faux ».
 
 ---
 
