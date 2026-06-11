@@ -50,31 +50,6 @@ export const WARN_OUT_OF_PERIOD_DATES = process.env.NODE_ENV === 'development';
 export const LOG_SUPABASE_QUERIES = false;
 
 // ============================================================================
-// MODULES EN DÉVELOPPEMENT
-// ============================================================================
-
-/**
- * Module Budget - Migration Supabase
- * Quand false: utilise les données mock
- * Quand true: utilise l'API Supabase
- */
-export const BUDGET_USE_SUPABASE = false;
-
-/**
- * Module Ventes - Migration Supabase
- * Quand false: utilise les données mock
- * Quand true: utilise l'API Supabase
- */
-export const VENTES_USE_SUPABASE = false;
-
-/**
- * Dashboard - Données dynamiques
- * @deprecated Le dashboard utilise maintenant toujours Supabase.
- * Ce flag est conservé pour compatibilité mais n'est plus utilisé.
- */
-export const DASHBOARD_USE_SUPABASE = true;
-
-// ============================================================================
 // UX FEATURES
 // ============================================================================
 
@@ -93,23 +68,3 @@ export const DASHBOARD_MAX_PRIORITIES = 5;
  * Nombre max d'items dans "Activité récente"
  */
 export const DASHBOARD_MAX_ACTIVITIES = 6;
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-/**
- * Vérifie si un module utilise Supabase
- */
-export function moduleUsesSupabase(module: 'budget' | 'ventes' | 'dashboard'): boolean {
-  switch (module) {
-    case 'budget':
-      return BUDGET_USE_SUPABASE;
-    case 'ventes':
-      return VENTES_USE_SUPABASE;
-    case 'dashboard':
-      return DASHBOARD_USE_SUPABASE;
-    default:
-      return false;
-  }
-}

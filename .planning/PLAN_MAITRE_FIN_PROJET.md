@@ -73,7 +73,7 @@ J0 hygiène + arbitrages (immédiat)
 - [x] **2.6 Conseil syndical** ✅ déjà Supabase (`v_council_members`, `v_council_decisions_overview`, edge functions).
 - [x] **2.7 Dashboard / restes** ✅ déjà Supabase (`v_dashboard_*`).
 - [x] **2.8 Factures fournisseurs : validation & paiement RÉELS** ✅ *(livré 2026-06-11, branche `j2-factures-validation-gl`)* : RPC **`validate_supplier_invoice`** (0046) poste D6xx/C401 depuis le brouillon + ses lignes (gardée gestionnaire, idempotente, refuse brouillon sans ligne, recalcule le total depuis les lignes) ; **paiement** rebranché sur la RPC `post_supplier_payment` (D401/C512) au lieu du flip nu. Front : `handleSendToAccounting`/`handlePaymentComplete` → RPC, état optimiste conditionné au succès. Gate `gate_supplier_invoice_validation` (12/12) + rebaseline 46/46. Limitations parkées (paiement partiel, sous-compte 512) : `DECISIONS_AUTONOMIE.md`.
-- [ ] **Nettoyage flags morts** : supprimer `BUDGET_USE_SUPABASE`, `VENTES_USE_SUPABASE`, `moduleUsesSupabase()` (définis, jamais lus).
+- [x] **Nettoyage flags morts** ✅ *(2026-06-11)* : supprimé `BUDGET_USE_SUPABASE`, `VENTES_USE_SUPABASE`, `DASHBOARD_USE_SUPABASE` (déprécié) et `moduleUsesSupabase()` de `src/lib/features/flags.ts` (aucun import dans le code, mentions docs = historique).
 - [ ] **2.9 Régénération `src/types/supabase.ts`** : référence `.planning/supabase_types_regenerated.ts` (purge objets fantômes). *À refaire après 2.8 si la signature RPC change.*
 
 **Test Lyes** : un parcours type par module (la plupart déjà testables) ; focus = parcours facture (saisie brouillon → validation → vérifier l'écriture GL → paiement).
