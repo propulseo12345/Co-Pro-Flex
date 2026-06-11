@@ -120,7 +120,7 @@ export function useContracts() {
             supabaseCreateContract({
                 title: newContrat.nom,
                 contract_type: newContrat.type.toLowerCase(),
-                contract_number: newContrat.numeroContrat || null,
+                contract_number: newContrat.numeroContrat || undefined,
                 provider_id: newContrat.prestataireId,
                 status: 'active',
                 start_date: newContrat.dateDebut,
@@ -128,9 +128,9 @@ export function useContracts() {
                 annual_amount: newContrat.coutAnnuel || null,
                 is_regulatory: newContrat.estReglementaire ?? false,
                 tacit_renewal: newContrat.taciteReconduction ?? false,
-                notice_months: newContrat.delaiResiliation ? Math.round(newContrat.delaiResiliation / 30) : null,
-                description: newContrat.description || null,
-            } as unknown as ContractInsert);
+                notice_months: newContrat.delaiResiliation ? Math.round(newContrat.delaiResiliation / 30) : undefined,
+                description: newContrat.description || undefined,
+            });
         } catch (err) {
             console.error('[Supabase] Failed to sync new contract:', err);
         }
@@ -146,15 +146,15 @@ export function useContracts() {
             supabaseUpdateContract(updatedContrat.id, {
                 title: updatedContrat.nom,
                 contract_type: updatedContrat.type.toLowerCase(),
-                contract_number: updatedContrat.numeroContrat || null,
+                contract_number: updatedContrat.numeroContrat || undefined,
                 start_date: updatedContrat.dateDebut,
                 end_date: updatedContrat.dateFin,
                 annual_amount: updatedContrat.coutAnnuel || null,
                 is_regulatory: updatedContrat.estReglementaire ?? false,
                 tacit_renewal: updatedContrat.taciteReconduction ?? false,
-                notice_months: updatedContrat.delaiResiliation ? Math.round(updatedContrat.delaiResiliation / 30) : null,
-                description: updatedContrat.description || null,
-            } as unknown as Partial<import('@/types/domain').Contract>);
+                notice_months: updatedContrat.delaiResiliation ? Math.round(updatedContrat.delaiResiliation / 30) : undefined,
+                description: updatedContrat.description || undefined,
+            });
         } catch (err) {
             console.error('[Supabase] Failed to sync contract update:', err);
         }

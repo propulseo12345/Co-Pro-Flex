@@ -8,8 +8,8 @@ import { createClient } from '@/lib/supabase/client';
 import type { Json } from '@/types/supabase';
 
 /**
- * Draft types supported by the database enum
- * Note: Types added via migrations - check 20260201_envoi_security.sql for latest
+ * Draft types supported by the database enum ag_draft_type
+ * (aligné avec la migration 0047 — extension de l'enum re-baseline)
  */
 export type AgDraftType =
   | 'attendance'
@@ -24,10 +24,6 @@ export type AgDraftType =
   | 'envoi'
   | 'resolutions_results'
   | 'resolutions_passerelles';
-
-// Type for RPC calls - base types that exist in Supabase generated types
-// New types ('envoi', 'milestones') should use dedicated RPCs or untyped client
-type RpcDraftType = 'attendance' | 'votes' | 'roles' | 'resolutions' | 'session';
 
 /**
  * Check if an ID is a valid UUID (Supabase-created AG)
@@ -63,10 +59,9 @@ export async function saveDraft(
   // Try Supabase first
   try {
     const supabase = createClient();
-    // Cast draftType - new enum values may not be in generated types yet
     const { error } = await supabase.rpc('save_ag_session_draft', {
       p_ag_id: agId,
-      p_draft_type: draftType as RpcDraftType,
+      p_draft_type: draftType,
       p_draft_data: data as Json,
     });
 
@@ -123,10 +118,9 @@ export async function loadDraft<T>(
   // Try Supabase first
   try {
     const supabase = createClient();
-    // Cast draftType - new enum values may not be in generated types yet
     const { data, error } = await supabase.rpc('get_ag_session_draft', {
       p_ag_id: agId,
-      p_draft_type: draftType as RpcDraftType,
+      p_draft_type: draftType,
     });
 
     if (!error && data) {
@@ -205,7 +199,7 @@ export async function clearDraft(
       .from('ag_session_drafts')
       .delete()
       .eq('ag_id', agId)
-      .eq('draft_type', draftType as RpcDraftType);
+      .eq('draft_type', draftType);
   } catch (err) {
     // clearDraft exception
   }

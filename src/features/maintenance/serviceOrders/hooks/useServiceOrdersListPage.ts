@@ -10,15 +10,12 @@ import type { ServiceOrderOverview, ServiceOrderStatus } from '@/types/domain';
 function mapStatusToLegacy(status: ServiceOrderStatus): string {
   const mapping: Record<ServiceOrderStatus, string> = {
     draft: 'BROUILLON',
-    to_send: 'A_ENVOYER',
     sent: 'ENVOYE',
-    accepted: 'EN_ATTENTE_PRESTATAIRE',
+    awaiting_provider: 'EN_ATTENTE_PRESTATAIRE',
     refused: 'REFUSE',
     scheduled: 'INTERVENTION_PROGRAMMEE',
     in_progress: 'EN_COURS',
     completed: 'INTERVENTION_REALISEE',
-    invoiced: 'FACTURE',
-    paid: 'PAYE',
     closed: 'CLOTURE',
     cancelled: 'ANNULE',
   };
@@ -35,7 +32,7 @@ function adaptToLegacyFormat(order: ServiceOrderOverview) {
     date: order.created_at,
     fournisseurId: order.provider_id,
     fournisseurNom: order.provider_name,
-    typeOrdre: order.order_type === 'contractuel' ? 'CONTRACTUEL' : 'CLASSIQUE',
+    typeOrdre: order.order_type === 'contrat' ? 'CONTRACTUEL' : 'CLASSIQUE',
     statut: order.status ? mapStatusToLegacy(order.status) : 'BROUILLON',
     urgence: order.urgency === 'critical' || order.urgency === 'high',
     montantEstime: order.estimated_amount,
@@ -90,7 +87,7 @@ export function useServiceOrdersListPage() {
         description: os.description || null,
         status: (os.statut === 'ENVOYE' ? 'sent' : 'draft') as ServiceOrderStatus,
         urgency: os.priorite === 'URGENT' ? 'high' : 'normal',
-        order_type: os.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
+        order_type: os.typeOrdre === 'CONTRACTUEL' ? 'contrat' : 'classique',
         origin: 'manual',
         provider_id: os.fournisseurId || null,
         provider_name: os.fournisseurNom || null,
@@ -123,7 +120,7 @@ export function useServiceOrdersListPage() {
   // Local filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [statutFilter, setStatutFilter] = useState<ServiceOrderStatus | 'TOUS'>('TOUS');
-  const [typeFilter, setTypeFilter] = useState<'classique' | 'contractuel' | 'TOUS'>('TOUS');
+  const [typeFilter, setTypeFilter] = useState<'classique' | 'contrat' | 'TOUS'>('TOUS');
   const [fournisseurFilter, setFournisseurFilter] = useState('TOUS');
   const [emailPreviewOS, setEmailPreviewOS] = useState<ServiceOrderOverview | null>(null);
 
@@ -236,7 +233,7 @@ export function useServiceOrdersListPage() {
     try {
       await sendOrderEmail(
         emailPreviewOS.id,
-        emailPreviewOS.order_type === 'contractuel' ? 'contractuel' : 'classique'
+        emailPreviewOS.order_type === 'contrat' ? 'contractuel' : 'classique'
       );
       alert('Email envoyé avec succès');
       setEmailPreviewOS(null);

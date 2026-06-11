@@ -6,13 +6,12 @@
  */
 
 import { ContratDetaille, ContratSyndic, StatutContratSyndic } from '@/types';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 
+// Client applicatif (session utilisateur) : indispensable depuis la RLS J1 —
+// un client anon nu ne voit aucune ligne.
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  return createClient();
 }
 
 // Seuils pour la mise à jour automatique des statuts
@@ -170,11 +169,13 @@ export function deleteContrat(id: string): void {
 export async function loadContracts(coproId: string): Promise<void> {
     const supabase = getSupabase();
 
+    // Vue de compat 0047 (title/contract_number/contract_type/provider_name).
+    // NB: neq exclut les NULL en SQL -> or() pour garder les contrats sans domaine.
     const { data, error } = await supabase
-        .from('contracts')
-        .select('id, contract_number, contract_type, title, description, start_date, end_date, annual_amount, status, tacit_renewal, notice_months, is_regulatory, provider_id, notes, providers(name)')
+        .from('v_contracts_overview')
+        .select('id, contract_number, contract_type, title, description, start_date, end_date, annual_amount, status, tacit_renewal, notice_months, is_regulatory, provider_id, provider_name')
         .eq('copro_id', coproId)
-        .neq('contract_type', 'syndic')
+        .or('contract_type.neq.syndic,contract_type.is.null')
         .order('created_at', { ascending: false });
 
     if (error || !data) {
@@ -199,19 +200,16 @@ export async function loadContracts(coproId: string): Promise<void> {
     };
 
     contratsState = data.map((row) => {
-        const rawProvider = row.providers as unknown;
-        const provider = Array.isArray(rawProvider) ? rawProvider[0] as { name: string } | undefined : rawProvider as { name: string } | null;
-
         return {
             id: row.id,
             nom: row.title,
             prestataireId: row.provider_id,
-            fournisseur: provider?.name || '',
-            type: (typeMap[row.contract_type] || 'AUTRE') as import('@/types').TypeContrat,
-            statut: (statusMap[row.status] || 'ACTIF') as ContratDetaille['statut'],
+            fournisseur: row.provider_name || '',
+            type: (typeMap[row.contract_type ?? 'autre'] || 'AUTRE') as import('@/types').TypeContrat,
+            statut: (statusMap[row.status ?? 'active'] || 'ACTIF') as ContratDetaille['statut'],
             dateDebut: row.start_date,
             dateFin: row.end_date,
-            coutAnnuel: parseFloat(row.annual_amount) || 0,
+            coutAnnuel: parseFloat(String(row.annual_amount)) || 0,
             description: row.description || '',
             numeroContrat: row.contract_number || undefined,
             taciteReconduction: row.tacit_renewal,
@@ -232,8 +230,8 @@ export async function loadSyndicContract(coproId: string): Promise<void> {
     const supabase = getSupabase();
 
     const { data, error } = await supabase
-        .from('contracts')
-        .select('id, contract_number, title, start_date, end_date, annual_amount, status, tacit_renewal, notice_months, notes, provider_id, providers(name, email, phone, address, city)')
+        .from('v_contracts_overview')
+        .select('id, contract_number, title, description, start_date, end_date, annual_amount, status, tacit_renewal, notice_months, provider_id')
         .eq('copro_id', coproId)
         .eq('contract_type', 'syndic')
         .in('status', ['active', 'terminated'])
@@ -247,28 +245,36 @@ export async function loadSyndicContract(coproId: string): Promise<void> {
         return;
     }
 
-    const rawProvider = data.providers as unknown;
-    const provider = Array.isArray(rawProvider) ? rawProvider[0] as { name: string; email: string | null; phone: string | null; address: string | null; city: string | null } | undefined : rawProvider as { name: string; email: string | null; phone: string | null; address: string | null; city: string | null } | null;
+    // Coordonnées du syndic : lecture directe du tiers lié.
+    let provider: { name: string; email: string | null; phone: string | null; address: string | null; city: string | null } | null = null;
+    if (data.provider_id) {
+        const { data: tiersData } = await supabase
+            .from('tiers')
+            .select('name, email, phone, address, city')
+            .eq('id', data.provider_id)
+            .maybeSingle();
+        provider = tiersData ?? null;
+    }
 
     // Map DB status to frontend status
     let statut: StatutContratSyndic = 'ACTIF';
     if (data.status === 'terminated') {
         statut = 'RESILIE';
-    } else {
+    } else if (data.end_date) {
         const joursRestants = getJoursAvantEcheance(data.end_date);
         if (joursRestants <= SEUIL_A_RENOUVELER) statut = 'A_RENOUVELER';
     }
 
     contratSyndicState = {
-        id: data.id,
+        id: data.id ?? '',
         nomSyndic: provider?.name || 'Syndic',
         numeroContrat: data.contract_number || '',
-        dateDebut: data.start_date,
-        dateFin: data.end_date,
-        montantAnnuel: parseFloat(data.annual_amount) || 0,
+        dateDebut: data.start_date ?? '',
+        dateFin: data.end_date ?? '',
+        montantAnnuel: parseFloat(String(data.annual_amount)) || 0,
         statut,
-        description: data.notes || undefined,
-        taciteReconduction: data.tacit_renewal,
+        description: data.description || undefined,
+        taciteReconduction: data.tacit_renewal ?? false,
         delaiResiliation: data.notice_months ? data.notice_months * 30 : undefined,
         telephone: provider?.phone || undefined,
         email: provider?.email || undefined,

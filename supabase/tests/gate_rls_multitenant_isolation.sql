@@ -23,6 +23,7 @@ DECLARE
   v_mgr_a   uuid := gen_random_uuid();
   v_n int; v_b_lots int; v_b_entries int; v_b_accounts int;
   v_tpl_b   uuid;
+  v_tiers_a uuid; v_tiers_b uuid; v_domain uuid;
   -- surface testée : table -> colonne copro
   r record;
 BEGIN
@@ -47,6 +48,26 @@ BEGIN
   UPDATE public.profiles SET cabinet_id = v_cab_a WHERE id = v_mgr_a;
   INSERT INTO public.memberships (user_id, copro_id, role) VALUES (v_mgr_a, v_copro_a, 'gestionnaire');
 
+  -- Surface MAINTENANCE (extension revue 2026-06-11) : données dans les DEUX cabinets,
+  -- pour prouver l'étanchéité (B invisible) ET la visibilité positive À TRAVERS les vues
+  -- security_invoker de 0047 (le bug d'origine = écrans vides silencieux côté gestionnaire).
+  SELECT id INTO v_domain FROM public.work_domain WHERE slug = 'plomberie';
+  IF v_domain IS NULL THEN
+    RAISE EXCEPTION 'SETUP FAIL : référentiel work_domain non seedé';
+  END IF;
+  INSERT INTO public.tiers (copro_id, name, category, is_provider, domain_ids)
+  VALUES (v_copro_a, 'Presta cabinet A', 'externe', true, ARRAY[v_domain]) RETURNING id INTO v_tiers_a;
+  INSERT INTO public.tiers (copro_id, name, category, is_provider, domain_ids, email)
+  VALUES (v_copro_b, 'Presta cabinet B', 'externe', true, ARRAY[v_domain], 'secret.b@x.fr') RETURNING id INTO v_tiers_b;
+  INSERT INTO public.contracts (copro_id, tiers_id, label, domain_id, start_date, end_date, status, notice_months)
+  VALUES (v_copro_a, v_tiers_a, 'Contrat A', v_domain, current_date - 10, current_date + 365, 'active', 2),
+         (v_copro_b, v_tiers_b, 'Contrat B', v_domain, current_date - 10, current_date + 365, 'active', 2);
+  INSERT INTO public.service_orders (copro_id, tiers_id, order_number, title, order_type, origin, status, urgency)
+  VALUES (v_copro_a, v_tiers_a, 'OS-RLS-A', 'OS cabinet A', 'classique', 'syndic', 'sent', 'normal'),
+         (v_copro_b, v_tiers_b, 'OS-RLS-B', 'OS cabinet B', 'classique', 'syndic', 'sent', 'normal');
+  INSERT INTO public.logbook_entries (copro_id, tiers_id, title, entry_type, category, status, happened_at)
+  VALUES (v_copro_b, v_tiers_b, 'Carnet cabinet B', 'intervention', 'courante', 'planifiee', current_date);
+
   -- PREUVE POSITIVE : le cabinet B contient bien des données (sinon « 0 vu » serait trivial).
   SELECT count(*) INTO v_b_lots     FROM public.lots           WHERE copro_id = v_copro_b;
   SELECT count(*) INTO v_b_entries  FROM public.ledger_entries WHERE copro_id = v_copro_b;
@@ -69,7 +90,10 @@ BEGIN
         'copros','lots','coproprietaires','lot_owners','accounts','accounting_periods',
         'ledger_transactions','ledger_entries','budgets','budget_lines',
         'call_for_funds','call_for_funds_lines','payments','payment_allocations',
-        'resolution_templates'
+        'resolution_templates',
+        -- surface maintenance (0047)
+        'tiers','contracts','service_orders','logbook_entries','supplier_invoices',
+        'service_order_events','buildings','work_domain'
       ]) AS t
     LOOP
       EXECUTE format('alter table public.%I enable row level security', r.t);
@@ -122,6 +146,26 @@ BEGIN
     IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
       RAISE EXCEPTION 'FUITE : modèle résolution privé cabinet B vu (% lignes)', v_n; END IF;
 
+    -- (1d) Surface MAINTENANCE : tables ET vues 0047 du cabinet B invisibles.
+    SELECT count(*) INTO v_n FROM public.tiers WHERE copro_id = v_copro_b;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'FUITE : tiers cabinet B vus (% lignes, PII prestataires)', v_n; END IF;
+    SELECT count(*) INTO v_n FROM public.contracts WHERE copro_id = v_copro_b;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'FUITE : contrats cabinet B vus (% lignes)', v_n; END IF;
+    SELECT count(*) INTO v_n FROM public.service_orders WHERE copro_id = v_copro_b;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'FUITE : ordres de service cabinet B vus (% lignes)', v_n; END IF;
+    SELECT count(*) INTO v_n FROM public.logbook_entries WHERE copro_id = v_copro_b;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'FUITE : carnet d''entretien cabinet B vu (% lignes)', v_n; END IF;
+    SELECT count(*) INTO v_n FROM public.v_providers_overview WHERE copro_id = v_copro_b;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'FUITE : v_providers_overview expose le cabinet B (% lignes)', v_n; END IF;
+    SELECT count(*) INTO v_n FROM public.v_dashboard_kpis WHERE copro_id = v_copro_b;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'FUITE : v_dashboard_kpis expose le cabinet B (% lignes)', v_n; END IF;
+
     -- (1c) ÉCRITURE : le gestionnaire A ne peut PAS modifier une copro du cabinet B.
     UPDATE public.copros SET name = 'hijack' WHERE id = v_copro_b;
     GET DIAGNOSTICS v_n = ROW_COUNT;
@@ -136,6 +180,24 @@ BEGIN
     SELECT count(*) INTO v_n FROM public.ledger_entries WHERE copro_id = v_copro_a;
     IF v_n = 0 THEN PERFORM set_config('role','service_role',true);
       RAISE EXCEPTION 'RÉGRESSION : gestionnaire A ne voit AUCUNE écriture de SA copro'; END IF;
+
+    -- (2b) PREUVE POSITIVE PAR LES VUES 0047 : le gestionnaire A voit SES données
+    -- maintenance À TRAVERS les vues security_invoker (anti « écran vide silencieux » :
+    -- une policy trop stricte sur tiers/contracts/work_domain rendrait ces vues vides
+    -- pour un gestionnaire légitime sans qu'aucune autre gate ne rougisse).
+    SELECT count(*) INTO v_n FROM public.v_providers_overview WHERE copro_id = v_copro_a;
+    IF v_n = 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'RÉGRESSION : gestionnaire A ne voit pas SES prestataires via v_providers_overview'; END IF;
+    SELECT count(*) INTO v_n FROM public.v_contracts_overview
+     WHERE copro_id = v_copro_a AND provider_name = 'Presta cabinet A' AND contract_type = 'plomberie';
+    IF v_n = 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'RÉGRESSION : v_contracts_overview vide (ou provider_name/slug non résolus) pour le gestionnaire A'; END IF;
+    SELECT count(*) INTO v_n FROM public.v_service_orders_overview WHERE copro_id = v_copro_a;
+    IF v_n = 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'RÉGRESSION : gestionnaire A ne voit pas SES ordres de service via la vue'; END IF;
+    SELECT count(*) INTO v_n FROM public.v_dashboard_kpis WHERE copro_id = v_copro_a;
+    IF v_n <> 1 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'RÉGRESSION : v_dashboard_kpis % ligne(s) pour la copro A (attendu 1)', v_n; END IF;
 
     -- Restaure service_role et provoque le ROLLBACK du savepoint (défait la RLS forcée).
     PERFORM set_config('role','service_role', true);

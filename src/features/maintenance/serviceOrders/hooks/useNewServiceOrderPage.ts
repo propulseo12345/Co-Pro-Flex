@@ -325,17 +325,18 @@ export function useNewServiceOrderPage() {
     const buildSupabaseInsert = useCallback((status: 'draft' | 'sent'): ServiceOrderInsert => {
         return {
             copro_id: '', // Rempli par le hook createOrder
-            provider_id: formData.fournisseurId || null,
+            order_number: '', // Généré par le hook createOrder (RPC)
+            tiers_id: formData.fournisseurId,
             contract_id: formData.typeOrdre === 'CONTRACTUEL' ? formData.contratId : null,
-            subject: formData.titre,
+            title: formData.titre,
             description: formData.description || null,
             urgency: formData.priorite === 'URGENT' ? 'high' : formData.priorite === 'HIGH' ? 'high' : formData.priorite === 'LOW' ? 'low' : 'normal',
-            order_type: formData.typeOrdre === 'CONTRACTUEL' ? 'contractuel' : 'classique',
+            order_type: formData.typeOrdre === 'CONTRACTUEL' ? 'contrat' : 'classique',
             origin: 'syndic',
             status,
             estimated_amount: formData.montantEstime ? parseFloat(formData.montantEstime) : null,
             is_art18_emergency: false,
-        } as unknown as ServiceOrderInsert;
+        };
     }, [formData]);
 
     const handleSaveDraft = useCallback(async () => {
