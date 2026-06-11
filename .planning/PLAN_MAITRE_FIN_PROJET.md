@@ -20,23 +20,29 @@
 ## Carte des dépendances
 
 ```
-J0 hygiène + arbitrages (immédiat)
+J0 hygiène + arbitrages ✅ ── J1 sécurité/RLS ✅ ── J2 ✅ (2.9/2.10 inclus · reste J2-bis ~50 objets)
  │
- ├─► J1 sécurité/RLS ─────────────┐
- ├─► J2 recâblage 6 modules ──────┤    (J2/J3 parallélisables par lanes :
- ├─► J3 portail copropriétaire ───┼──►  portail/front = src/ · vues/RPC = supabase/)
- ├─► J4 qualité Zod/CSP/lint ─────┤
+ ├─► J4 qualité Zod/CSP/lint ─────┐
+ ├─► J5 conformité légale ────────┤  (fondations comptables stabilisées
+ │                                ▼   AVANT le portail — décision 2026-06-11)
+ │                        J3 portail copropriétaire
  │                                ▼
  │                        J6 déploiement cloud neuf + E2E navigateur
- │                                │
- ├─► J5 conformité légale ────────┤  (requis AU PLUS TARD avant J8 ;
- │    (peut avancer en parallèle) ▼   idéalement avant la 1re clôture pilote)
+ │                                ▼
  │                        J7 BÊTA pilotes (1-2 syndics)
  │                                ▼
  │                        J8 1ER CLIENT PROD
  │                                ▼
- └──────────────────────► J9 FEATURE-COMPLETE
+ └──────────────────────► J9 FEATURE-COMPLETE ── J10 polish UI/UX
 ```
+
+> **Réordonnancement 2026-06-11 (décision Lyes)** : le portail copropriétaire (J3) passe
+> **APRÈS J4/J5** — la logique métier gestionnaire doit être complète et validée d'abord.
+> Raison : J5 modifie les fondations comptables (renommage 110→12, cloisonnement paiements,
+> ventilation clôture) que le portail affichera (soldes, appels, documents). Construire le
+> portail sur des fondations stabilisées évite le rework. Ordre d'exécution réel :
+> **2.9 → J4 → J5 → J3 → J6 → J7**. La gate RLS (J1) du portail est déjà livrée ; la spec
+> validée du 2026-06-10 reste la référence.
 
 ---
 
@@ -61,9 +67,11 @@ J0 hygiène + arbitrages (immédiat)
 
 **Test Lyes** : 2 comptes de 2 cabinets → aucune fuite de données dans aucun module. *(Reste à brancher en cloud J6 : poser `SUPABASE_SERVICE_ROLE_KEY` + `MAIL_INBOUND_COPRO_ID` ; mapping fin adresse→copro du webhook = J2.5.)*
 
-## J2 — Recâblage hors-finance *(G7 · ~~8-12 sessions~~ → **quasi soldé**, audit 2026-06-10)*
+## J2 — Recâblage hors-finance *(G7 · ~~8-12 sessions~~ → ~~quasi soldé~~ **RE-RÉVISÉ 2026-06-11**)*
 
-> **RÉVISION 2026-06-10 (audit mock vs Supabase, 2 agents)** : la prémisse « modules sur mock à recâbler » était PÉRIMÉE. **Tous les modules hors-finance sont déjà 100% Supabase** (vérifié par les tells `createClient()`/`.from()`/`.rpc()` dans les hooks/api). Le « gros recâblage » a été fait pendant la refonte finance. Il ne reste que **2.8** (vrai trou comptable) + un nettoyage de flags morts.
+> **RÉVISION 2026-06-10 (audit mock vs Supabase, 2 agents)** : la prémisse « modules sur mock à recâbler » était PÉRIMÉE. **Tous les modules hors-finance sont déjà 100% Supabase** (vérifié par les tells `createClient()`/`.from()`/`.rpc()` dans les hooks/api).
+>
+> ⚠️ **RE-RÉVISION 2026-06-11 (chantier 2.9/types)** : l'audit ci-dessus vérifiait que le code *appelle* Supabase, pas que les objets appelés *existent dans la base reconstruite*. Le sweep front↔base (méthode `AUDIT_DRIFT_HORS_FINANCE_2026-06-10.md`) montre **~60 objets manquants** : les modules étaient câblés mais une partie tournait à vide (requêtes en erreur → écrans vides), masquée par l'ancien `src/types/supabase.ts` (6 800 lignes de fantômes). Maintenance + dashboard KPIs + diagnostic réparés (2.10) ; le reste = **J2-bis** ci-dessous.
 
 - [x] **2.1 Budget** ✅ déjà Supabase (`useBudget` 955L → `useBudgetData` Supabase ; vues `v_budgets_overview`/`v_budget_lines_overview`/`v_budget_expenses_detail` créées en 0036 ; RPC `validate_budget_expense`/`post_alur_transfer`). **Flag `BUDGET_USE_SUPABASE` MORT** (jamais lu).
 - [x] **2.2 AG** ✅ déjà Supabase (`ag_meetings`/`v_ag_overview` + RPC cycle de vie). Compléments (pouvoirs/jalons/stats) = enrichissements, pas du recâblage.
@@ -74,11 +82,27 @@ J0 hygiène + arbitrages (immédiat)
 - [x] **2.7 Dashboard / restes** ✅ déjà Supabase (`v_dashboard_*`).
 - [x] **2.8 Factures fournisseurs : validation & paiement RÉELS** ✅ *(livré 2026-06-11, branche `j2-factures-validation-gl`)* : RPC **`validate_supplier_invoice`** (0046) poste D6xx/C401 depuis le brouillon + ses lignes (gardée gestionnaire, idempotente, refuse brouillon sans ligne, recalcule le total depuis les lignes) ; **paiement** rebranché sur la RPC `post_supplier_payment` (D401/C512) au lieu du flip nu. Front : `handleSendToAccounting`/`handlePaymentComplete` → RPC, état optimiste conditionné au succès. Gate `gate_supplier_invoice_validation` (12/12) + rebaseline 46/46. Limitations parkées (paiement partiel, sous-compte 512) : `DECISIONS_AUTONOMIE.md`.
 - [x] **Nettoyage flags morts** ✅ *(2026-06-11)* : supprimé `BUDGET_USE_SUPABASE`, `VENTES_USE_SUPABASE`, `DASHBOARD_USE_SUPABASE` (déprécié) et `moduleUsesSupabase()` de `src/lib/features/flags.ts` (aucun import dans le code, mentions docs = historique).
-- [ ] **2.9 Régénération `src/types/supabase.ts`** : référence `.planning/supabase_types_regenerated.ts` (purge objets fantômes). *À refaire après 2.8 si la signature RPC change.*
+- [x] **2.9 Régénération `src/types/supabase.ts`** ✅ *(2026-06-11)* : types générés depuis un **rejeu propre 0001→0047 en base jetable** (plus jamais depuis la base vivante — anti-drift) ; 17 840 → ~13 400 lignes, 6 800 lignes de fantômes purgées. A révélé le drift réel (cf. re-révision) → chantier 2.10.
+- [x] **2.10 Réparation maintenance + dashboard + diagnostic** ✅ *(2026-06-11, branche `j2-9-vues-maintenance`)* : migration **0047** (8 vues de compat `security_invoker` : providers/contracts/logbook/OS ×2 alerts + stats + `v_dashboard_kpis` ; + enum `ag_draft_type` étendu de 7 valeurs perdues) ; front rebranché (`providers`→`tiers` + traduction écritures slugs→`domain_ids`, FK facture↔OS **inversée** corrigée, statuts OS legacy purgés, `contracts.service` → vues + client session [le client anon nu ne voyait RIEN sous RLS], diagnostic → `audit_finance_integrity`, PV → `ag_meetings.pv_document_id`, tantièmes ventes → `v_lots_with_owners`). **Gate `gate_0047_maintenance_views` (13/13 db:test), tsc 0 erreur.**
 
-**Test Lyes** : un parcours type par module (la plupart déjà testables) ; focus = parcours facture (saisie brouillon → validation → vérifier l'écriture GL → paiement).
+### J2-bis — Drift restant front↔base (~50 objets, par module — sweep 2026-06-11)
+
+> Méthode et liste : `AUDIT_DRIFT_HORS_FINANCE_2026-06-10.md` (re-validée au 2026-06-11). Ces écrans sont câblés Supabase mais interrogent des objets ABSENTS de la base cible → à traiter **module par module, même méthode que 2.10** (vues de compat + gate + rebranch front). Non typés (client `as any`), donc invisibles à tsc.
+
+- [ ] **AG annexes** *(le plus gros)* : pouvoirs, jalons, brouillons UI, choix d'envoi, stats notifications, feuille de présence (7 vues `v_ag_*` + 11 RPC `*_ag_*`).
+- [ ] **Communication avancée** : campagnes mail, dossiers, boîte de réception, templates (5 tables `mail_*` + 6 vues + `generate_campaign_recipients`). *Le mur/messagerie/mails de base (J1) fonctionnent.*
+- [ ] **GED avancée** : `ged`, `dossiers`, `document_links`/`document_access`, `pv_templates` + 6 vues `v_documents_*`/`v_folders_*`/`v_recent_documents`.
+- [ ] **Conseil syndical** : rapports d'activité (3 tables `*_cs`) + 3 vues `v_council_*`.
+- [ ] **Dashboard restes** : `v_dashboard_recent_activity`, `v_dashboard_todos`.
+- [ ] **Mutations** : `v_mutations_overview` (la base a `v_mutation_detail`).
+- [ ] **Divers** : `increment_template_usage` (compteur banque de résolutions) ; `post_call_for_funds` = différé F4 (J9).
+
+**Test Lyes** : un parcours type par module ; focus = parcours facture (saisie brouillon → validation → écriture GL → paiement) + **maintenance réparée** (prestataires, contrats, OS, carnet : listes non vides, création OK) — checklist détaillée `.planning/TESTS_F10_J0-J2.md`.
 
 ## J3 — Portail copropriétaire *(G1 · 4-6 sessions · effort `Max` + `ultracode` ponctuel)*
+
+> ⚠️ **DÉCALÉ après J4/J5** (décision Lyes 2026-06-11, cf. note sous la carte des dépendances).
+> Ne pas démarrer tant que J5 n'est pas soldé. Le numéro J3 est conservé (références existantes).
 
 - [ ] `/writing-plans` depuis la spec validée (`docs/superpowers/specs/2026-06-10-portail-coproprietaire-design.md`) — session dédiée.
 - [ ] Implémentation : route group `(coproprietaire)`, 8 pages server-first RSC, V1 zéro-migration.
