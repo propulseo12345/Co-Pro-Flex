@@ -173,20 +173,55 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Init Supabase with service role for CRON execution
+    // SÉCURITÉ (audit 2026-06-12) : l'ancien code basculait en service_role dès
+    // que la clé existait dans l'env (= toujours), sans vérifier l'appelant —
+    // n'importe qui muni de l'anon key publique déclenchait des relances
+    // cross-tenant. Désormais :
+    //   - chemin CRON : secret partagé dédié dans l'en-tête x-cron-secret
+    //     → service_role assumé (appelant de confiance).
+    //   - chemin manuel : client au contexte de l'APPELANT (RLS s'applique)
+    //     + vérification explicite qu'il gère bien la copro ciblée.
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const authHeader = req.headers.get("Authorization");
+    const cronSecret = Deno.env.get("REMINDERS_CRON_SECRET");
+    const isCronCall =
+      !!cronSecret && req.headers.get("x-cron-secret") === cronSecret;
 
-    // Use service role for CRON, or user auth for manual calls
-    const supabase = supabaseServiceKey
-      ? createClient(supabaseUrl, supabaseServiceKey, {
-          auth: { persistSession: false },
-        })
-      : createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-          global: { headers: { Authorization: authHeader || "" } },
-          auth: { persistSession: false },
-        });
+    let supabase;
+    if (isCronCall && supabaseServiceKey) {
+      supabase = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: { persistSession: false },
+      });
+    } else {
+      supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: authHeader || "" } },
+        auth: { persistSession: false },
+      });
+
+      // Appel manuel : l'utilisateur doit gérer la copro ciblée.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Non authentifié" }),
+          { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      const { data: membership } = await supabase
+        .from("memberships")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("copro_id", copro_id)
+        .in("role", ["gestionnaire", "platform_admin"])
+        .limit(1)
+        .maybeSingle();
+      if (!membership) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Accès refusé : vous ne gérez pas cette copropriété" }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // 0. Check if reminders are paused for this copro
     const { data: pauseData } = await supabase

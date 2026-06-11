@@ -36,22 +36,30 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect dashboard routes
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
-  const isDashboardRoute =
-    request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/ag') ||
-    request.nextUrl.pathname.startsWith('/finance') ||
-    request.nextUrl.pathname.startsWith('/maintenance') ||
-    request.nextUrl.pathname.startsWith('/documents') ||
-    request.nextUrl.pathname.startsWith('/communication') ||
-    request.nextUrl.pathname.startsWith('/coproprietaires') ||
-    request.nextUrl.pathname.startsWith('/ventes-impayes') ||
-    request.nextUrl.pathname.startsWith('/settings') ||
-    request.nextUrl.pathname.startsWith('/portefeuille');
+  // SÉCURITÉ (audit 2026-06-12) : ALLOWLIST, plus de denylist.
+  // L'ancienne liste de préfixes « protégés » oubliait /conformite, /contentieux,
+  // /conseil-syndical, /dossiers, /legal, /sales, /agenda, /facturation, /modeles,
+  // /onboarding, /parametres-cabinet, /prestataires, /reporting — chargés par un
+  // anonyme. Désormais : tout est protégé SAUF ce qui est explicitement public.
+  const pathname = request.nextUrl.pathname;
+  const isAuthRoute = pathname.startsWith('/auth');
+
+  const PUBLIC_PREFIXES = [
+    '/auth',
+    // pages vitrines (groupe (marketing))
+    '/a-propos', '/blog', '/cgu', '/comment-ca-marche', '/comparaison',
+    '/confidentialite', '/contact', '/faq', '/mentions-legales', '/securite', '/tarifs',
+  ];
+  const isPublicRoute =
+    pathname === '/' ||
+    PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'));
+
+  // Les routes /api gèrent leur propre auth (webhooks signés, etc.) : pas de
+  // redirection HTML, elles répondent en JSON.
+  const isApiRoute = pathname.startsWith('/api');
 
   // Redirect unauthenticated users to login
-  if (!user && isDashboardRoute) {
+  if (!user && !isPublicRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/auth/login';
     return NextResponse.redirect(url);

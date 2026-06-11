@@ -103,17 +103,16 @@ Deno.serve(async (req: Request) => {
   try {
     const rawBody = await req.text();
 
-    // Verify webhook signature (optional mais recommandé en production)
+    // SÉCURITÉ (audit 2026-06-12) : signature OBLIGATOIRE — sans elle, n'importe
+    // qui pouvait forger des événements de livraison/ouverture/bounce.
     const WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET");
+    if (!WEBHOOK_SECRET) {
+      return new Response("RESEND_WEBHOOK_SECRET non configurée : webhook désactivé", { status: 503 });
+    }
     const signature = req.headers.get("svix-signature");
-
-    if (WEBHOOK_SECRET && signature) {
-      const isValid = await verifyWebhookSignature(rawBody, signature, WEBHOOK_SECRET);
-      if (!isValid) {
-        console.warn("Invalid webhook signature");
-        // En développement, on peut ignorer
-        // return new Response("Invalid signature", { status: 401 });
-      }
+    const isValid = await verifyWebhookSignature(rawBody, signature, WEBHOOK_SECRET);
+    if (!isValid) {
+      return new Response("Invalid signature", { status: 401 });
     }
 
     // Parse event

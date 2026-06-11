@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRequisition } from '@/lib/banking/gocardless';
+import { requireAnyManager } from '@/lib/security/authz';
 
 export async function POST(request: NextRequest) {
+  // SÉCURITÉ (audit 2026-06-12) : sans garde, un anonyme créait des réquisitions
+  // GoCardless (quota limité, redirectUrl libre). Gestionnaire requis.
+  const authz = await requireAnyManager();
+  if (authz.status !== 200) {
+    return NextResponse.json({ error: authz.error }, { status: authz.status });
+  }
+
   try {
     const body = await request.json();
     const { institutionId, redirectUrl } = body as {
