@@ -187,13 +187,17 @@ export function useCorrespondenceVotes({ agId }: UseCorrespondenceVotesParams): 
         votesArray.push({ resolution_id: resolutionId, vote });
       });
 
+      // La base attend 'hand_delivery' (enum), pas le libellé UI 'remise_main'.
+      const dbModeReception =
+        modeReception === 'remise_main' ? 'hand_delivery' : modeReception;
+
       // Appeler la fonction RPC
       const { data, error: rpcError } = await supabase
         .rpc('register_correspondence_form_votes', {
           p_ag_id: agId,
           p_coproprietaire_id: selectedOwner.id,
           p_votes: votesArray,
-          p_mode_reception: modeReception,
+          p_mode_reception: dbModeReception,
         });
 
       if (rpcError) throw rpcError;

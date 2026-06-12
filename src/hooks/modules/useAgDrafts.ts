@@ -65,7 +65,7 @@ export interface AgDraft {
   currentStep: number;
   // Étape maximale atteinte (pour l'affichage de la progression)
   maxStepReached: number;
-  // Ratio de complétion (0..1)
+  // Ratio de complétion en pourcentage (0..100), basé sur l'étape du wizard
   completionRatio: number;
   // Dernière activité
   lastActivityAt: string;
