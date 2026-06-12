@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import { UnifiedSidebar } from '@/components/layout/UnifiedSidebar';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { VentesProvider } from '@/providers/VentesProvider';
@@ -20,11 +22,19 @@ function LoadingFallback() {
   );
 }
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Défense en profondeur (audit 2026-06-12) : même si le middleware oublie un
+  // préfixe, aucune page de ce groupe ne se rend sans session.
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/auth/login');
+  }
+
   return (
     <ThemeProvider>
       <CoproProvider>

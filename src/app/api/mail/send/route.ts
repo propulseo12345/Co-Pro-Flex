@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import resend from '@/lib/mail/resend';
 import { createClient } from '@/lib/supabase/server';
+import { requireCoproManager } from '@/lib/security/authz';
 
 // Adresse expéditrice — à configurer avec un domaine vérifié dans Resend
 // En développement, Resend autorise l'envoi depuis onboarding@resend.dev vers le compte propriétaire
@@ -32,13 +33,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // SÉCURITÉ (audit 2026-06-12) : l'autorisation se vérifie AVANT l'envoi —
+  // l'email parti ne se rappelle pas. Sans ce contrôle, tout compte connecté
+  // (même d'un autre cabinet) pouvait envoyer des emails arbitraires depuis
+  // l'adresse vérifiée du domaine (relais spam/phishing).
+  const authz = await requireCoproManager(coproId);
+  if (authz.status !== 200 || !authz.user) {
+    return NextResponse.json({ error: authz.error }, { status: authz.status });
+  }
+  const user = authz.user;
+
   // Propriétaire = utilisateur de session (la route porte les cookies d'auth).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabaseAuth = (await createClient()) as any;
-  const { data: { user } } = await supabaseAuth.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
-  }
 
   // Envoi via Resend
   const { data: resendData, error: resendError } = await resend.emails.send({

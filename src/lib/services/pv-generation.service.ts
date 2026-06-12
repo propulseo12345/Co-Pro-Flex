@@ -475,7 +475,10 @@ async function runPVGeneration(jobId: string, options: GeneratePVOptions): Promi
         // Upload vers Supabase Storage
         const supabase = createClient();
         const year = new Date(agData.date).getFullYear();
-        const storagePath = `ged/${coproId}/pv_ag/${year}/${Date.now()}_${fileName}`;
+        // Chemin canonique : copro_id en PREMIER segment (les policies storage 0048
+        // isolent par copro sur ce segment) — pas de préfixe 'ged/' redondant
+        // à l'intérieur du bucket 'ged'.
+        const storagePath = `${coproId}/pv_ag/${year}/${Date.now()}_${fileName}`;
 
         const { error: uploadError } = await supabase.storage
             .from('ged')

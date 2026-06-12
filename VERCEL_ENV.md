@@ -5,9 +5,12 @@
 ### Supabase (obligatoires)
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://iyfesbjnkpynmwlsmxnp.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZmVzYmpua3B5bm13bHNteG5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwOTk0MDgsImV4cCI6MjA4NDY3NTQwOH0.mMGDDXRqdGcawx3j3G_f6mjeadzNteJ4LKV57ivYsBc
+NEXT_PUBLIC_SUPABASE_URL=https://<PROJECT_REF>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY>   # Settings → API → anon public
 ```
+
+> Doc de PLACEHOLDERS uniquement — ne jamais committer de valeur réelle ici,
+> et SURTOUT jamais `SUPABASE_SERVICE_ROLE_KEY` (serveur uniquement, Vercel env).
 
 ## Variables optionnelles
 
