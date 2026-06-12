@@ -68,7 +68,11 @@ jobs:
       - name: Installer la CLI Supabase
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Épinglée = même CLI que le rejeu de référence local (méthode drift).
+          # `latest` a cassé main le 2026-06-11 (changement des droits par défaut
+          # du rôle authenticated dans le stack local → permission denied dans les
+          # gates qui font SET ROLE authenticated, sur toutes les branches).
+          version: 2.105.0
 
       - name: Démarrer Supabase (applique migrations + seed)
         run: supabase start

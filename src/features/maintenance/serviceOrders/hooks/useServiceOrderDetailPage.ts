@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { Facture } from '@/components/features/finance/Factures/types';
 import { OrdreService, PieceJointeOS, ModificationHistoriqueOS, StatutOrdreService } from '@/types';
 import { useServiceOrders } from '@/hooks/modules/useMaintenanceData';
 import { useCopro } from '@/providers/CoproContext';
@@ -125,9 +124,17 @@ function getLocalOrdreService(id: string): OrdreService | null {
 // Exports utilitaires
 // ============================================================================
 
-export function getFactureLiee(_ordreServiceId: string): Facture | undefined {
-    // Factures will be fetched from Supabase in a future migration
-    return undefined;
+/**
+ * Facture liée dérivée de v_service_orders_overview (retour revue 0047) :
+ * un OS peut porter plusieurs factures (acompte/situations/solde), le badge
+ * raisonne sur le cumul posté/payé (invoices_count / invoiced_total) et la
+ * dernière facture (supplier_invoice_id / invoice_number).
+ */
+export interface FactureLieeInfo {
+    id: string;
+    reference: string | null;
+    montant: number;
+    count: number;
 }
 
 export function calculerEcart(montantEstime: number | undefined, montantFacture: number): { ecart: number; pourcentage: number; estAlerte: boolean } | null {
@@ -158,6 +165,7 @@ export function useServiceOrderDetailPage(id: string) {
     const { currentCoproId } = useCopro();
 
     const [ordreService, setOrdreService] = useState<OrdreService | null>(null);
+    const [factureLiee, setFactureLiee] = useState<FactureLieeInfo | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isMock, setIsMock] = useState(false);
 
@@ -177,9 +185,25 @@ export function useServiceOrderDetailPage(id: string) {
                 // Fallback mock
                 const mock = getLocalOrdreService(id);
                 setOrdreService(mock);
+                setFactureLiee(null);
                 setIsMock(true);
                 return;
             }
+
+            // Facture liée dérivée de la vue (badge + carte « Facture liée »)
+            const ov = overview as ServiceOrderOverview & {
+                invoices_count?: number | null;
+                invoiced_total?: number | null;
+                supplier_invoice_id?: string | null;
+                invoice_number?: string | null;
+            };
+            const invoicesCount = Number(ov.invoices_count) || 0;
+            setFactureLiee(invoicesCount > 0 ? {
+                id: String(ov.supplier_invoice_id ?? ''),
+                reference: ov.invoice_number ?? null,
+                montant: Number(ov.invoiced_total) || 0,
+                count: invoicesCount,
+            } : null);
 
             // Charger les events (historique) + documents liés
             let events: ServiceOrderEvent[] = [];
@@ -217,6 +241,7 @@ export function useServiceOrderDetailPage(id: string) {
             // Erreur réseau → fallback mock
             const mock = getLocalOrdreService(id);
             setOrdreService(mock);
+            setFactureLiee(null);
             setIsMock(true);
         } finally {
             setIsLoading(false);
@@ -331,8 +356,6 @@ export function useServiceOrderDetailPage(id: string) {
         if (!ordreService) return null;
         return editMode ? { ...ordreService, ...editedData } : ordreService;
     }, [ordreService, editedData, editMode]);
-
-    const factureLiee = ordreService ? getFactureLiee(ordreService.id) : undefined;
 
     return {
         ordreService,

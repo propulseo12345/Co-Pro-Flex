@@ -74,35 +74,34 @@ export async function getActiveCopro(): Promise<ActiveCopro | null> {
   }
 
   // 3. Fetch from Supabase: première copro (mode single-copro)
-  try {
-    const supabase = createClient();
+  const supabase = createClient();
 
-    const { data: copro, error: selectError } = await supabase
-      .from('copros')
-      .select('id, name')
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .single();
+  const { data: copro, error: selectError } = await supabase
+    .from('copros')
+    .select('id, name')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .single();
 
-    if (selectError || !copro) {
-      console.error('[ActiveCopro] Select error:', selectError);
-      return null;
-    }
-
-    const result: ActiveCopro = { id: copro.id, name: copro.name };
-
-    // Update caches
-    memoryCache = { id: result.id, name: result.name, timestamp: Date.now() };
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(STORAGE_KEY, result.id);
-      sessionStorage.setItem(COPRO_NAME_KEY, result.name);
-    }
-
-    return result;
-  } catch (err) {
-    console.error('[ActiveCopro] Fetch error:', err);
-    return null;
+  if (selectError) {
+    // PGRST116 = aucune ligne : vrai cas « pas de copro », pas une panne.
+    if (selectError.code === 'PGRST116') return null;
+    // Toute autre erreur (RLS, réseau, schéma) doit REMONTER à l'UI au lieu
+    // d'être réduite à un null silencieux (spinner infini sans diagnostic).
+    throw new Error(`Copropriété active inaccessible : ${selectError.message}`);
   }
+  if (!copro) return null;
+
+  const result: ActiveCopro = { id: copro.id, name: copro.name };
+
+  // Update caches
+  memoryCache = { id: result.id, name: result.name, timestamp: Date.now() };
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(STORAGE_KEY, result.id);
+    sessionStorage.setItem(COPRO_NAME_KEY, result.name);
+  }
+
+  return result;
 }
 
 /**

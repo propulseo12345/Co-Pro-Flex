@@ -177,10 +177,11 @@ BEGIN
   IF v_num IS DISTINCT FROM (v_fn->>'total_impayes')::numeric THEN
     RAISE EXCEPTION 'ASSERT FAIL : unpaid_total % <> fn.total_impayes %', v_num, v_fn->>'total_impayes';
   END IF;
-  SELECT critical_unpaid_count INTO v_n FROM public.v_dashboard_kpis WHERE copro_id = v_copro;
+  -- (renommée unpaid_lots_count en 0049 — retour de revue 0047)
+  SELECT unpaid_lots_count INTO v_n FROM public.v_dashboard_kpis WHERE copro_id = v_copro;
   IF v_n IS DISTINCT FROM (SELECT count(*)::int FROM public.v_unpaid_by_lot
                             WHERE copro_id = v_copro AND total_unpaid > 0) THEN
-    RAISE EXCEPTION 'ASSERT FAIL : critical_unpaid_count % <> nb lots en impayé', v_n;
+    RAISE EXCEPTION 'ASSERT FAIL : unpaid_lots_count % <> nb lots en impayé', v_n;
   END IF;
 
   INSERT INTO public.ag_meetings (copro_id, title, meeting_date, meeting_type, status)

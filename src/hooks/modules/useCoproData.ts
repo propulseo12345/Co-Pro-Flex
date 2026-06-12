@@ -90,7 +90,10 @@ export function useCoproprietaires(
       type: type === 'ALL' ? undefined : type,
     });
 
-    if (!isMounted.current) return;
+    if (!isMounted.current) {
+      setIsLoading(false);
+      return;
+    }
 
     if (fetchError) {
       setError(fetchError.message);
@@ -227,7 +230,10 @@ export function useLotsWithOwners(): UseLotsWithOwnersReturn {
 
     const { data, error: fetchError } = await listLotsWithOwners(currentCoproId);
 
-    if (!isMounted.current) return;
+    if (!isMounted.current) {
+      setIsLoading(false);
+      return;
+    }
 
     if (fetchError) {
       setError(fetchError.message);
@@ -289,7 +295,10 @@ export function useCoproprietaire(id: string | null): UseCoproprietaireReturn {
 
     const { data, error: fetchError } = await getCoproprietaire(currentCoproId, id);
 
-    if (!isMounted.current) return;
+    if (!isMounted.current) {
+      setIsLoading(false);
+      return;
+    }
 
     if (fetchError) {
       setError(fetchError.message);

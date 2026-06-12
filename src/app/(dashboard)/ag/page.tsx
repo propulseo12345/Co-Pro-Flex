@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
+import { DataState, LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
 import { useAgMeetings } from '@/hooks/modules/useAgData';
 import { useAgDrafts } from '@/hooks/modules/useAgDrafts';
@@ -17,7 +17,7 @@ import {
 import styles from './ag.module.css';
 
 export default function AGPage() {
-  const { currentCoproId, isManager } = useCopro();
+  const { currentCoproId, isManager, error: coproError, refreshCopros } = useCopro();
   const { nextMeeting, pastMeetings, isLoading, error, refresh, stats } = useAgMeetings();
   const {
     drafts,
@@ -40,9 +40,12 @@ export default function AGPage() {
     return nextMeeting;
   }, [nextMeeting]);
 
-  // Single Copro Mode: show loading if not yet loaded
+  // Single Copro Mode : l'erreur du contexte copro doit s'afficher,
+  // pas tourner en spinner muet.
   if (!currentCoproId) {
-    return <LoadingState message="Chargement de la copropriété..." />;
+    return coproError
+      ? <ErrorState message={coproError} onRetry={refreshCopros} />
+      : <LoadingState message="Chargement de la copropriété..." />;
   }
 
   const handleDeleteDraft = async (draftId: string): Promise<boolean> => {
