@@ -65,10 +65,10 @@ function useCommunicationKpis(coproId: string | null): HubKpis {
         .order('created_at', { ascending: false })
         .limit(2);
 
-      // 3. Conversations actives + non lues
+      // 3. Conversations actives + non lues (vue 0051 : my_unread_count par membre)
       const { data: conversations } = await supabase
-        .from('conversations')
-        .select('id, subject, is_archived, unread_count, last_message_at')
+        .from('v_conversations_overview')
+        .select('id, subject, is_archived, my_unread_count, last_message_at')
         .eq('copro_id', coproId)
         .eq('is_archived', false)
         .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -77,12 +77,12 @@ function useCommunicationKpis(coproId: string | null): HubKpis {
         id: string;
         subject: string | null;
         is_archived: boolean;
-        unread_count: number;
+        my_unread_count: number;
         last_message_at: string | null;
       }[];
 
       const activeCount = convList.length;
-      const totalUnread = convList.reduce((sum, c) => sum + (c.unread_count ?? 0), 0);
+      const totalUnread = convList.reduce((sum, c) => sum + (c.my_unread_count ?? 0), 0);
       const lastConv = convList[0]?.subject ?? null;
 
       // 4. Publications recentes (7 jours) + epingle

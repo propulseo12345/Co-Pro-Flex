@@ -52,8 +52,8 @@ function mapConversationPreview(row: any): IConversationPreview {
     lastMessageAt: row.last_message_at ?? row.created_at,
     lastSenderName: row.last_sender_name ?? 'Admin CoProFlex',
     lastSenderRole: (row.last_sender_role as UserRole) ?? undefined,
-    unreadCount: row.unread_count ?? 0,
-    memberCount: 2,
+    unreadCount: row.my_unread_count ?? 0,
+    memberCount: Array.isArray(row.other_members) ? row.other_members.length + 1 : 2,
     isArchived: row.is_archived ?? false,
     isMuted: false,
   };
@@ -135,7 +135,7 @@ export function useMessagerie(): UseMessagerieReturn {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('conversations')
+        .from('v_conversations_overview')
         .select('*')
         .eq('copro_id', currentCoproId)
         .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -226,7 +226,6 @@ export function useMessagerie(): UseMessagerieReturn {
     return () => {
       supabase.removeChannel(channel);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConversation?.id, supabase]);
 
   // ── Conversations filtrées ─────────────────────────────────────────────────
@@ -267,9 +266,11 @@ export function useMessagerie(): UseMessagerieReturn {
     (id: string) => {
       activeIdRef.current = id;
       setPreviews((prev) => prev.map((p) => (p.id === id ? { ...p, unreadCount: 0 } : p)));
+      // Reset durable côté base (conversation_members.unread_count + read_by)
+      void supabase.rpc('mark_conversation_read', { p_conversation_id: id });
       fetchMsgsRef.current?.(id);
     },
-    []
+    [supabase]
   );
 
   const sendMessage = useCallback(
@@ -317,15 +318,8 @@ export function useMessagerie(): UseMessagerieReturn {
         );
       }
 
-      // Mettre à jour le dernier message dans la conversation
-      await supabase
-        .from('conversations')
-        .update({
-          last_message_at: now,
-          last_message_preview: content.trim().slice(0, 100),
-        })
-        .eq('id', convId);
-
+      // last_message_at/preview + unread des autres membres : posés par le
+      // trigger trg_conversation_last_message (0032) à l'insert du message.
       setPreviews((prev) =>
         prev.map((p) =>
           p.id === convId
@@ -341,7 +335,8 @@ export function useMessagerie(): UseMessagerieReturn {
     setPreviews((prev) =>
       prev.map((p) => (p.id === conversationId ? { ...p, unreadCount: 0 } : p))
     );
-  }, []);
+    void supabase.rpc('mark_conversation_read', { p_conversation_id: conversationId });
+  }, [supabase]);
 
   const archiveConversation = useCallback(
     async (conversationId: string) => {
