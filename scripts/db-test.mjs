@@ -38,6 +38,7 @@ const GATES = [
   'supabase/tests/gate_0047_maintenance_views.sql',
   'supabase/tests/gate_0049_main_screen_views.sql',
   'supabase/tests/gate_0050_ag_annexes.sql',
+  'supabase/tests/gate_0051_communication.sql',
   'supabase/tests/gate_finance_loop_e2e.sql',
   'supabase/tests/gate_cloture_affectation_e2e.sql',
   'supabase/tests/gate_avoir_fournisseur_e2e.sql',
