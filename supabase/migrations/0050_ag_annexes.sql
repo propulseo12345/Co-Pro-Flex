@@ -32,15 +32,22 @@ create table public.ag_documents (
   version              integer      not null default 1,
   generated_at         timestamptz  not null default now(),
   generated_by         uuid         references public.profiles(id) on delete set null,
+  -- Nom du générateur FIGÉ à l'enregistrement : la vue ne peut pas le dériver via
+  -- profiles en prod (RLS profiles = lecture de son propre profil uniquement).
+  generated_by_name    text,
   generation_metadata  jsonb        not null default '{}'::jsonb,
   document_id          uuid         references public.documents(id) on delete set null,
   retention_until      timestamptz,
+  updated_at           timestamptz  not null default now(),
   constraint pk_ag_documents          primary key (id),
   constraint uq_ag_documents_version  unique (ag_id, doc_type, version),
   constraint ck_ag_documents_type     check (doc_type in ('convocation','attendance_sheet','pv'))
 );
 create index idx_ag_documents_ag    on public.ag_documents (ag_id);
 create index idx_ag_documents_copro on public.ag_documents (copro_id);
+create trigger trg_ag_documents_updated
+  before update on public.ag_documents
+  for each row execute function public.set_updated_at();
 
 -- RLS classe A (collectif lecture / back-office écriture) — modèle 0034.
 alter table public.ag_documents enable row level security;
@@ -62,6 +69,18 @@ alter table public.ag_notifications
 alter table public.ag_notifications
   add constraint ck_ag_notifications_type
   check (notification_type in ('convocation','relance','pv'));
+-- Index manquant : la vue stats et useAgNotifications filtrent sur ag_id.
+create index idx_ag_notifications_ag on public.ag_notifications (ag_id);
+
+-- ----------------------------------------------------------------------------
+-- 2bis. Verrou métier : une seule clé de répartition GÉNÉRALE active par copro
+-- ----------------------------------------------------------------------------
+-- Le moteur AG (compute_ag_quorum, trigger tantièmes) suppose UNE clé générale
+-- active (limit 1). On ferme la porte au cas « 2 clés actives » qui fausserait
+-- silencieusement tous les dénominateurs de tantièmes.
+create unique index uq_one_active_general_key
+  on public.repartition_keys (copro_id)
+  where category = 'general' and is_active = true;
 
 -- ----------------------------------------------------------------------------
 -- 3. Vue : feuille de présence enrichie
@@ -154,13 +173,19 @@ select
   (res.resolutions_count > 0) as has_resolutions,
   (res.votes_count > 0)       as has_votes,
   (att.attendance_count > 0)  as has_attendance,
-  -- Wizard à 7 étapes (création → finalisation) : approximation d'avancement
-  -- basée sur la dernière étape atteinte. À challenger côté métier si besoin.
-  round(least(coalesce(m.max_step_reached, 1), 7)::numeric / 7 * 100) as completion_ratio,
-  greatest(m.updated_at, coalesce(drafts.last_modified_at, m.updated_at)) as last_activity_at
+  -- Wizard à 9 étapes (cf. ck_ag_meetings_max_step 1..9) : avancement = dernière
+  -- étape atteinte, en pourcentage 0..100 (100 % à la dernière étape).
+  round(least(coalesce(m.max_step_reached, 1), 9)::numeric / 9 * 100) as completion_ratio,
+  greatest(
+    m.updated_at,
+    coalesce(drafts.last_modified_at, m.updated_at),
+    coalesce(res.last_resolution_at, m.updated_at),
+    coalesce(att.last_attendance_at, m.updated_at)
+  ) as last_activity_at
 from public.ag_meetings m
 left join lateral (
   select count(*)::int as resolutions_count,
+         max(r.created_at) as last_resolution_at,
          coalesce((select count(*)
                      from public.ag_votes v
                     where v.resolution_id in (select r2.id from public.ag_resolutions r2 where r2.ag_id = m.id)), 0)::int as votes_count
@@ -168,7 +193,8 @@ left join lateral (
   where r.ag_id = m.id
 ) res on true
 left join lateral (
-  select count(*)::int as attendance_count
+  select count(*)::int as attendance_count,
+         max(a.created_at) as last_attendance_at
   from public.ag_attendance a
   where a.ag_id = m.id
 ) att on true
@@ -176,10 +202,11 @@ left join lateral (
   select max(d.last_modified_at) as last_modified_at
   from public.ag_session_drafts d
   where d.ag_id = m.id
-) drafts on true;
+) drafts on true
+where m.status = 'draft';
 
 comment on view public.v_ag_drafts_progress is
-  'Progression des AG (notamment brouillons du wizard) : compteurs, drapeaux has_*, completion_ratio = max_step_reached/7, dernière activité (meeting OU session_drafts) — contrat compat 5c8209e.';
+  'Brouillons d''AG du wizard (status=draft uniquement) : compteurs, drapeaux has_*, completion_ratio = max_step_reached/9 en %, dernière activité (meeting, session_drafts, résolutions ou présences) — contrat compat 5c8209e.';
 
 -- ----------------------------------------------------------------------------
 -- 6. Vue : état du vote par correspondance par AG
@@ -221,15 +248,28 @@ left join lateral (
   where cv2.ag_id = m.id
 ) det on true
 left join lateral (
-  select coalesce(sum(a.tantiemes), 0) as correspondence_tantiemes
-  from public.ag_attendance a
-  where a.ag_id = m.id and a.presence_type = 'correspondence'
+  -- Tantièmes ayant voté par correspondance, dérivés des votes RÉELS
+  -- (vote_source='correspondence'), pas de la feuille de présence : la RPC
+  -- register_correspondence_form_votes n'écrit pas ag_attendance. max() par
+  -- copropriétaire pour ne pas multiplier le poids par le nombre de résolutions.
+  select coalesce(sum(t.w), 0) as correspondence_tantiemes
+  from (
+    select v.coproprietaire_id, max(v.tantiemes) as w
+    from public.ag_votes v
+    join public.ag_resolutions r on r.id = v.resolution_id
+    where r.ag_id = m.id and v.vote_source = 'correspondence'
+    group by v.coproprietaire_id
+  ) t
 ) corr on true
 left join lateral (
+  -- UNE seule clé générale active (aligné sur compute_ag_quorum / trigger).
   select coalesce(sum(rkl.weight), 0) as total_tantiemes
-  from public.repartition_keys rk
-  join public.repartition_key_lines rkl on rkl.key_id = rk.id
-  where rk.copro_id = m.copro_id and rk.category = 'general' and rk.is_active = true
+  from public.repartition_key_lines rkl
+  where rkl.key_id = (
+    select rk.id from public.repartition_keys rk
+    where rk.copro_id = m.copro_id and rk.category = 'general' and rk.is_active = true
+    limit 1
+  )
 ) tot on true;
 
 comment on view public.v_ag_correspondence_status is
@@ -254,14 +294,13 @@ select
   d.version,
   d.generated_at,
   d.generated_by,
-  p.full_name     as generated_by_name,
+  d.generated_by_name,
   d.generation_metadata,
   d.document_id,
   doc.file_name   as document_name,
   d.retention_until
 from public.ag_documents d
 join public.ag_meetings m      on m.id = d.ag_id
-left join public.profiles p    on p.id = d.generated_by
 left join public.documents doc on doc.id = d.document_id;
 
 comment on view public.v_ag_documents is
@@ -276,7 +315,9 @@ select
   n.copro_id,
   n.ag_id,
   n.notification_type,
-  count(*)::int                                                        as total_count,
+  -- total = somme des buckets ci-dessous (on exclut 'cancelled', qui n'a aucun
+  -- bucket dédié — sinon total_count > somme des compteurs).
+  (count(*) filter (where n.status <> 'cancelled'))::int               as total_count,
   (count(*) filter (where n.status in ('pending','queued')))::int      as pending_count,
   (count(*) filter (where n.status = 'sent'))::int                     as sent_count,
   (count(*) filter (where n.status = 'delivered'))::int                as delivered_count,
@@ -288,6 +329,62 @@ group by n.copro_id, n.ag_id, n.notification_type;
 
 comment on view public.v_ag_notification_stats is
   'Agrégats de livraison des notifications AG par (ag, type) — contrat = interface front AgNotificationStats (+ copro_id pour le contexte RLS).';
+
+-- ----------------------------------------------------------------------------
+-- 8bis. RPC create_ag_notification — RECRÉÉE pour matcher les edges réels
+-- ----------------------------------------------------------------------------
+-- La version 0033 (p_ag_id, p_coproprietaire_id, p_channel, p_provider_ref)
+-- NE correspond PAS à ce que les edges appellent (ag_send_convocations,
+-- ag_send_relance passent p_copro_id, p_notification_type, p_document_id) :
+-- l'appel échouait silencieusement → ag_notifications jamais alimentée,
+-- notification_type figé à 'convocation', vue stats morte. On recrée la
+-- signature attendue et on renseigne enfin notification_type.
+drop function if exists public.create_ag_notification(uuid, uuid, notification_channel, text);
+create or replace function public.create_ag_notification(
+  p_copro_id          uuid,
+  p_ag_id             uuid,
+  p_coproprietaire_id uuid    default null,
+  p_notification_type text    default 'convocation',
+  p_channel           notification_channel default null,
+  p_document_id       uuid    default null,
+  p_provider_ref      text    default null
+)
+returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  v_copro uuid;
+  v_id uuid;
+begin
+  select m.copro_id into v_copro from public.ag_meetings m where m.id = p_ag_id;
+  if v_copro is null then
+    raise exception 'create_ag_notification: AG % introuvable', p_ag_id using errcode = '23503';
+  end if;
+  if v_copro <> p_copro_id then
+    raise exception 'create_ag_notification: AG % n''appartient pas à la copro %', p_ag_id, p_copro_id
+      using errcode = '42501';
+  end if;
+  if not public.is_service_call() and not public.user_is_copro_manager(v_copro) then
+    raise exception 'forbidden: gestionnaire requis pour l''AG %', p_ag_id using errcode = '42501';
+  end if;
+
+  -- p_document_id reçu pour compat d'appel (lien convocation↔PDF) mais non
+  -- persisté : ag_notifications n'a pas de colonne dédiée (hors périmètre).
+  insert into public.ag_notifications
+    (ag_id, copro_id, coproprietaire_id, channel, status, provider_ref, notification_type)
+  values
+    (p_ag_id, v_copro, p_coproprietaire_id, p_channel, 'queued'::delivery_status,
+     p_provider_ref, coalesce(p_notification_type, 'convocation'))
+  returning id into v_id;
+
+  return v_id;
+end;
+$$;
+revoke execute on function public.create_ag_notification(uuid, uuid, uuid, text, notification_channel, uuid, text) from public, anon;
+grant  execute on function public.create_ag_notification(uuid, uuid, uuid, text, notification_channel, uuid, text) to authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
 -- 9. RPC register_ag_document — enregistre un document généré (versionné)
@@ -313,6 +410,7 @@ declare
   v_copro uuid;
   v_id uuid;
   v_version integer;
+  v_name text;
 begin
   select m.copro_id into v_copro from public.ag_meetings m where m.id = p_ag_id;
   if v_copro is null then
@@ -327,16 +425,23 @@ begin
       using errcode = '42501';
   end if;
 
+  -- Sérialise les générations concurrentes du même (AG, type) : sans ce verrou,
+  -- deux appels simultanés calculent le même max+1 → violation uq_ag_documents_version.
+  perform pg_advisory_xact_lock(hashtextextended(p_ag_id::text || ':' || p_doc_type, 0));
+
   select coalesce(max(d.version), 0) + 1 into v_version
   from public.ag_documents d
   where d.ag_id = p_ag_id and d.doc_type = p_doc_type;
 
+  -- Nom du générateur figé (la vue ne peut pas le dériver via profiles sous RLS).
+  select p.full_name into v_name from public.profiles p where p.id = auth.uid();
+
   insert into public.ag_documents
     (copro_id, ag_id, doc_type, storage_path, file_name, file_size, version,
-     generated_by, generation_metadata)
+     generated_by, generated_by_name, generation_metadata)
   values
     (p_copro_id, p_ag_id, p_doc_type, p_storage_path, p_file_name, p_file_size, v_version,
-     auth.uid(), coalesce(p_metadata, '{}'::jsonb))
+     auth.uid(), v_name, coalesce(p_metadata, '{}'::jsonb))
   returning id into v_id;
 
   return jsonb_build_object('ag_document_id', v_id, 'version', v_version);
@@ -361,6 +466,8 @@ as $$
 declare
   v_copro uuid;
   v_status ag_status;
+  v_paths text[];
+  v_deleted int;
 begin
   select m.copro_id, m.status into v_copro, v_status
   from public.ag_meetings m where m.id = p_ag_id;
@@ -377,8 +484,21 @@ begin
       'error', 'Seul un brouillon peut être supprimé (statut actuel : ' || v_status || ')');
   end if;
 
-  delete from public.ag_meetings where id = p_ag_id;
-  return jsonb_build_object('success', true);
+  -- Récupère les fichiers générés AVANT cascade pour que l'appelant nettoie le
+  -- bucket storage (la cascade SQL ne touche pas le stockage objet).
+  select array_agg(d.storage_path) into v_paths
+  from public.ag_documents d where d.ag_id = p_ag_id;
+
+  -- Re-vérifie status='draft' DANS le DELETE (anti-TOCTOU : le statut a pu
+  -- changer entre le SELECT et ici). row_count = filet supplémentaire.
+  delete from public.ag_meetings where id = p_ag_id and status = 'draft';
+  get diagnostics v_deleted = row_count;
+  if v_deleted = 0 then
+    return jsonb_build_object('success', false,
+      'error', 'Le brouillon n''a pas pu être supprimé (statut modifié entre-temps ?)');
+  end if;
+
+  return jsonb_build_object('success', true, 'deleted_storage_paths', coalesce(to_jsonb(v_paths), '[]'::jsonb));
 end;
 $$;
 revoke execute on function public.delete_ag_draft(uuid) from public, anon;
