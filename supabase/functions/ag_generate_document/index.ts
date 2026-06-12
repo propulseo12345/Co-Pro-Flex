@@ -948,16 +948,20 @@ Deno.serve(async (req: Request) => {
         break;
     }
 
-    // Storage path
-    const storagePath = `ged/${params.copro_id}/ag/${params.ag_id}/${params.doc_type}.pdf`;
+    // Storage path — suffixe horodaté UNIQUE par génération : sans lui, toutes
+    // les "versions" enregistrées par register_ag_document pointaient le même
+    // fichier (upsert) et chaque génération écrasait la précédente (faux
+    // versionnage). Un chemin distinct par génération rend l'historique réel.
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const storagePath = `ged/${params.copro_id}/ag/${params.ag_id}/${params.doc_type}_${stamp}.pdf`;
     const fileName = `${docTypeLabels[params.doc_type]}_${ag.title.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
 
-    // Upload to storage
+    // Upload to storage (chemin unique → pas d'écrasement entre versions)
     const { error: uploadError } = await supabaseAdmin.storage
       .from("ged")
       .upload(storagePath, pdfBytes, {
         contentType: "application/pdf",
-        upsert: true,
+        upsert: false,
       });
 
     if (uploadError) {

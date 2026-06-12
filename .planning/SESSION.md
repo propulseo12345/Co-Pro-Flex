@@ -1,21 +1,22 @@
-# Session State — 2026-06-12 ~09:30 (audit livré + retours Lyes tranchés, cap J2-bis lot 1)
+# Session State — 2026-06-12 ~15:30 (lot 1 livré + mergé, lot 2 découverte faite)
 
 ## Branch / Commit
-`decisions-retours-0612` (PR docs/seed en auto-merge) sur `main` post-PR #11 (audit sécu+deps mergé 00h06).
+`j2bis-lot2-ag-annexes` @ `a5f06fd` (= origin/main post-PR #13, clean hors parasites 0-octet)
 
 ## Completed This Session
-- **Audit ultra 5 dim. (50 agents) + parcours navigateur 8 modules** → 28 findings, rapport committé `.planning/AUDIT_2026-06-12_SECU_FONCTIONNEL.md`.
-- **PR #11 MERGÉE** : 8 trous sécu fermés (webhooks signés, authz mail/banking, allowlist+layouts, **0048 bucket ged isolé**, edges) + deps (next 16.2.9, audit fix). Preuves : tsc 0 · gates 13/13 · vitest 97/97 · build OK · rejeu 48/48.
-- **4 retours Lyes tranchés** (2026-06-12) : relances → AUTOMATIQUES avant J7 · purge fallback mock impayés · export CSV → J5 · nom copro démo nettoyé (seed + base locale).
+- **Lot 1 J2-bis LIVRÉ + MERGÉ (PR #13)** : 0049 (4 vues écrans principaux + rename unpaid_lots_count + statuts AG alignés) + gate 14/14 ; spinners silencieux réparés (cause racine) ; purge mock impayés ; VentesProvider descendu ; badge facture OS. Preuves : tsc 0, gates 14/14, vitest 97/97.
+- **CI réparée** : CLI Supabase épinglée 2.105.0 (`latest` cassait main depuis le 11/06 sur TOUTES les branches).
+- **Codex acté HS** : règle inversée dans CLAUDE.md global (Claude exécute par défaut, Codex = second avis CLI direct seulement).
+- Lot 2 : découverte COMPLÈTE → périmètre réel 6 vues + 2 RPC + 1 table + 1 ALTER (8 RPC mortes à ne pas créer).
 
 ## Next Task
-- **J2-bis lot 1** : `v_ag_overview` + `v_wall_feed` + `v_conversations_overview` (écrans PRINCIPAUX, méthode 0047 : contrat depuis l'ancien types committé `git show 5c8209e:src/types/supabase.ts`) + **debug spinner copropriétaires** (systematic-debugging : vue présente, erreur avalée) + purge mock impayés + `useSalesList` descendu + retours 0047 (rename `unpaid_lots_count`, badges OS).
-- Effort : `Max` (méthode rodée) + `ultracode` en revue du lot — **demander le GO**.
+- **Écrire migration 0050 + gate_0050_ag_annexes** selon `.planning/PROGRESS_j2bis-lot2-ag-annexes.md` (TOUT le design y est : contrats, sources, pièges). Puis db:test, tsc, vitest, commits, PR.
+- Effort : `Max` pour l'écriture ; **`ultracode` à proposer pour la revue adversariale de fin de lot, AVANT merge**.
 
 ## Blockers
-- None. Push : compte gh actif = `lyestriki-29` (seul avec droits ; si 403 → demander à Lyes avant tout switch).
+- None. (Push : `gh auth switch -u lyestriki-29` juste avant chaque push — le compte actif retombe seul sur Propulseo.)
 
 ## Key Context
-- Secrets à poser au déploiement : `RESEND_INBOUND_SECRET`, `RESEND_WEBHOOK_SECRET`, `REMINDERS_CRON_SECRET` (sinon 503 propre).
-- Dev server : port 3000 = TropPayé ! → `npm run dev -- -p 3010` (1er hit ~90 s). Pas de build ∥ rejeu docker (OOM).
-- `git clean -f` toujours à faire (parasites 0-octet) ; branche orpheline distante `secu-audit-fixes` à supprimer (snapshot raté post-merge).
+- vitest : lancer depuis `C:\Users\...` (C MAJUSCULE) sinon double chargement vitest → échec bidon (10 fichiers "reading 'config'").
+- Base docker locale déjà à jour 0049 ; `npm run dev -- -p 3010` (port 3000 = TropPayé).
+- Parasites 0-octet racine : `git clean -f` à faire par Lyes.
