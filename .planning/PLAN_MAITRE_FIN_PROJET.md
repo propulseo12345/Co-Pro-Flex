@@ -97,6 +97,7 @@ J0 hygiène + arbitrages ✅ ── J1 sécurité/RLS ✅ ── J2 ✅ (2.9/2.1
 - [ ] **Mutations** : `v_mutations_overview` (la base a `v_mutation_detail`).
 - [ ] **Divers** : `increment_template_usage` (compteur banque de résolutions) ; `post_call_for_funds` = différé F4 (J9).
 - [ ] **Retours revue 0047 tranchés 2026-06-11** : renommer `critical_unpaid_count` → `unpaid_lots_count` (vue + `usePortefeuille` + fin du `0` en dur de `lib/dashboard/api.ts` + statuts AG alignés) ; OS : retirer les boutons FACTURE/PAYE (no-op) + badge dérivé de la facture liée (`invoices_count`/`invoiced_total`).
+- [ ] **Retours audit tranchés 2026-06-12** *(rapport `.planning/AUDIT_2026-06-12_SECU_FONCTIONNEL.md`)* : **purger le fallback MOCK des pages impayés** (lot 1) ; **rapprochement bancaire : créer la voie d'écriture** (`import_bank_movement` + `reconcile_bank_movement`, en RPC gardées esprit 0046, + table `bank_requisitions` pour le lien copro) ; **relances impayés AUTOMATIQUES avant J7** (pg_cron + wrapper multi-copros ou Vercel Cron — décision Lyes : automatique) ; debug **spinners silencieux AG + copropriétaires** ; `useSalesList` descendu du layout ; TravauxDetailModal (`documents.budget_id` fantôme → `document_relations`) ; suppression `src/lib/maintenance/api.ts` + 2 steps orphelins.
 
 **Test Lyes** : un parcours type par module ; focus = parcours facture (saisie brouillon → validation → écriture GL → paiement) + **maintenance réparée** (prestataires, contrats, OS, carnet : listes non vides, création OK) — checklist détaillée `.planning/TESTS_F10_J0-J2.md`.
 
@@ -127,6 +128,7 @@ Exécution des arbitrages **tranchés le 2026-06-10** (verdicts : `DECISIONS.md`
 - [ ] **Paiements** : cloisonnement par nature PAR DÉFAUT (C2) ; reprise auto du trop-perçu + mention sur l'avis d'appel, 103 intouché (C3) ; correction doc/enums/seuil feuille de présence art. 24 (C6).
 - [ ] **État daté & mutations** : tableau d'acquéreurs Σ=100 (H1) ; tous les cédants nommés (H2) ; partie 3 complète — provisions restantes + ALUR (H3) ; index unique clé générale (H4).
 - [ ] **UX contre-passation guidée** (F9) — un syndic qui se trompe ne reste jamais bloqué.
+- [ ] **Export comptable CSV** *(décision Lyes 2026-06-12)* : grand livre + balance + journaux (généré côté client depuis les données chargées) — transmission CS/expert-comptable, art. 18-1. Les boutons PDF/Excel morts restent masqués d'ici là.
 - [ ] **Reprise de mandat fiabilisée** (F8) : unifier les 2 chemins front (B6), traçabilité 471/472 ligne-par-ligne (art. 10), import balance Excel, acompte 409.
 
 ## J6 — Déploiement + parcours bêta réel *(2-3 sessions · effort `Max` + `ultracode` pré-push)*

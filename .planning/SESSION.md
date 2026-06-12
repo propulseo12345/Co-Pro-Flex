@@ -1,21 +1,21 @@
-# Session State — 2026-06-11 14:00 (J1+J2 mergés, revue ultra 0047, cap J2-bis)
+# Session State — 2026-06-12 ~09:30 (audit livré + retours Lyes tranchés, cap J2-bis lot 1)
 
 ## Branch / Commit
-`main` @ `ab2f38a` + docs PR #10 en auto-merge (SESSION/DECISIONS/PLAN/vibe-contrib). Reste ~20 fichiers parasites 0-octet → `git clean -f` (Lyes).
+`decisions-retours-0612` (PR docs/seed en auto-merge) sur `main` post-PR #11 (audit sécu+deps mergé 00h06).
 
 ## Completed This Session
-- **4 PR mergées** : #5 J1 sécurité · #7 J2.8 factures · #8 flags morts · **#9 chantier 2.9/2.10** (migration 0047 : 8 vues compat + enum AG ; types propres 428→0 ; création OS réparée ; gates durcies).
-- Revue adversariale ultracode (46 agents) : 18 findings confirmés, tous corrigés ou tranchés avec Lyes.
-- Réordonnancement acté : portail (J3) APRÈS J4/J5 ; J2-bis documenté au plan (~50 objets).
+- **Audit ultra 5 dim. (50 agents) + parcours navigateur 8 modules** → 28 findings, rapport committé `.planning/AUDIT_2026-06-12_SECU_FONCTIONNEL.md`.
+- **PR #11 MERGÉE** : 8 trous sécu fermés (webhooks signés, authz mail/banking, allowlist+layouts, **0048 bucket ged isolé**, edges) + deps (next 16.2.9, audit fix). Preuves : tsc 0 · gates 13/13 · vitest 97/97 · build OK · rejeu 48/48.
+- **4 retours Lyes tranchés** (2026-06-12) : relances → AUTOMATIQUES avant J7 · purge fallback mock impayés · export CSV → J5 · nom copro démo nettoyé (seed + base locale).
 
 ## Next Task
-- **J2-bis module par module** (méthode 0047 éprouvée : contrat ancien types → vues compat → gate durcie → rebranch front). Premier lot suggéré : **retours revue tranchés** (rename `unpaid_lots_count` + badges OS) puis **GED** ou **annexes AG**.
-- Effort conseillé : `Max` par module + `ultracode` ponctuel en revue par lot — **DEMANDER LE GO explicite avant tout passage ultra** (leçon du jour).
+- **J2-bis lot 1** : `v_ag_overview` + `v_wall_feed` + `v_conversations_overview` (écrans PRINCIPAUX, méthode 0047 : contrat depuis l'ancien types committé `git show 5c8209e:src/types/supabase.ts`) + **debug spinner copropriétaires** (systematic-debugging : vue présente, erreur avalée) + purge mock impayés + `useSalesList` descendu + retours 0047 (rename `unpaid_lots_count`, badges OS).
+- Effort : `Max` (méthode rodée) + `ultracode` en revue du lot — **demander le GO**.
 
 ## Blockers
-- None. (Lyes n'a pas encore déroulé la checklist F10 — `.planning/TESTS_F10_J0-J2.md`.)
+- None. Push : compte gh actif = `lyestriki-29` (seul avec droits ; si 403 → demander à Lyes avant tout switch).
 
 ## Key Context
-- Types : TOUJOURS régénérer via rejeu scratch (script pattern en mémoire) + `npx supabase@2.105.0` épinglé (2.106.0 plante en SSL) ; si « SSL probe » → `docker restart supabase_db_Co-Pro-Flex`.
-- Ne PAS lancer build/vitest en parallèle du rejeu docker (OOM → stack crash).
-- Brouillon vibe-library : `.planning/vibe-contrib/2026-06-11-compat-views-drift-repair.md` (à pousser après validation Lyes).
+- Secrets à poser au déploiement : `RESEND_INBOUND_SECRET`, `RESEND_WEBHOOK_SECRET`, `REMINDERS_CRON_SECRET` (sinon 503 propre).
+- Dev server : port 3000 = TropPayé ! → `npm run dev -- -p 3010` (1er hit ~90 s). Pas de build ∥ rejeu docker (OOM).
+- `git clean -f` toujours à faire (parasites 0-octet) ; branche orpheline distante `secu-audit-fixes` à supprimer (snapshot raté post-merge).
