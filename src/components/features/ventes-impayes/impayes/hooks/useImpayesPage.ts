@@ -10,7 +10,7 @@ import {
   generateImpayesExportCSV,
 } from '@/lib/pdf/generateRelancePDF';
 import type { Impaye, HistoriqueItem, RelanceGroupeeStep } from '../domain/types';
-import { MOCK_IMPAYES, WORKFLOW_STEPS } from '../domain/constants';
+import { WORKFLOW_STEPS } from '../domain/constants';
 import {
   getNextStep,
   getWorkflowIndex,
@@ -116,11 +116,11 @@ export function useImpayesPage() {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Load data from Supabase
+  // Load data from Supabase — AUCUN fallback mock : des impayés fictifs
+  // affichés comme vrais sont un risque métier (audit 2026-06-12).
   useEffect(() => {
     if (!currentCoproId) {
-      // Fallback to mock data when no copro is selected (dev mode)
-      setImpayes(MOCK_IMPAYES);
+      setImpayes([]);
       setIsLoadingData(false);
       return;
     }
@@ -139,19 +139,11 @@ export function useImpayesPage() {
 
         if (cancelled) return;
 
-        if (unpaidData.length === 0) {
-          // Fall back to mock data if no real data
-          setImpayes(MOCK_IMPAYES);
-        } else {
-          const mapped = unpaidData.map((u, i) => mapUnpaidToImpaye(u, i, remindersData));
-          setImpayes(mapped);
-        }
+        setImpayes(unpaidData.map((u, i) => mapUnpaidToImpaye(u, i, remindersData)));
       } catch (err) {
         if (cancelled) return;
-        console.error('Error loading impayés from Supabase:', err);
         setLoadError(err instanceof Error ? err.message : 'Erreur de chargement');
-        // Fallback to mock data on error
-        setImpayes(MOCK_IMPAYES);
+        setImpayes([]);
       } finally {
         if (!cancelled) {
           setIsLoadingData(false);
@@ -575,6 +567,8 @@ export function useImpayesPage() {
     selectedImpaye,
     selectedStatut,
     stats,
+    isLoadingData,
+    loadError,
 
     // Selection
     selectedIds,

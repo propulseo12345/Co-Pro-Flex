@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { UnifiedSidebar } from '@/components/layout/UnifiedSidebar';
 import { ThemeProvider } from '@/providers/ThemeProvider';
-import { VentesProvider } from '@/providers/VentesProvider';
 import { CoproProvider } from '@/providers/CoproContext';
 import { AnnexeProvider } from '@/providers/AnnexeContext';
 import { ToastProvider } from '@/providers/ToastProvider';
@@ -41,22 +40,20 @@ export default async function DashboardLayout({
         <ResolutionTemplatesProvider>
         <OnboardingRedirect />
         <AnnexeProvider>
-          <VentesProvider>
-            <ToastProvider>
-              <SidebarProvider>
-                <div className="app-container">
-                  <UnifiedSidebar />
-                  <AppBody>
-                    <main className="main-content">
-                      <Suspense fallback={<LoadingFallback />}>
-                        {children}
-                      </Suspense>
-                    </main>
-                  </AppBody>
-                </div>
-              </SidebarProvider>
-            </ToastProvider>
-          </VentesProvider>
+          <ToastProvider>
+            <SidebarProvider>
+              <div className="app-container">
+                <UnifiedSidebar />
+                <AppBody>
+                  <main className="main-content">
+                    <Suspense fallback={<LoadingFallback />}>
+                      {children}
+                    </Suspense>
+                  </main>
+                </AppBody>
+              </div>
+            </SidebarProvider>
+          </ToastProvider>
         </AnnexeProvider>
         </ResolutionTemplatesProvider>
       </CoproProvider>
