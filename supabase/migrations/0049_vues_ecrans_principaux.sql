@@ -202,10 +202,52 @@ comment on view public.v_events_overview is
   'Événements + créateur résolu, drapeaux is_past/is_today (fuseau du serveur, UTC en local/prod Supabase) — contrat de compat front 5c8209e.';
 
 -- ----------------------------------------------------------------------------
--- Rename revue 0047 : critical_unpaid_count -> unpaid_lots_count
+-- Retours revue 0047 sur v_dashboard_kpis (DROP/CREATE, vue feuille sans
+-- dépendance SQL ; le front est rebranché dans le même lot) :
+--   1. critical_unpaid_count -> unpaid_lots_count : le compteur compte TOUS
+--      les lots en impayé (pas seulement « critiques ») — le nom mentait.
+--   2. Statuts « prochaine AG » ALIGNÉS sur le front (lib/dashboard/api.ts) :
+--      une AG in_progress / session_active reste la prochaine AG (elle se
+--      tient en ce moment) — la vue 0047 ne gardait que draft/convoked.
 -- ----------------------------------------------------------------------------
--- Retour de revue tranché 2026-06-11 : le compteur de v_dashboard_kpis compte
--- TOUS les lots en impayé (pas seulement « critiques ») — le nom mentait.
--- Aucune dépendance SQL (vue feuille) ; le front est rebranché dans le même
--- lot (usePortefeuille + lib/dashboard/api.ts).
-alter view public.v_dashboard_kpis rename column critical_unpaid_count to unpaid_lots_count;
+drop view public.v_dashboard_kpis;
+create view public.v_dashboard_kpis
+with (security_invoker = true) as
+select
+  co.id as copro_id,
+  -- Trésorerie courante : solde réel cumulé des 512 (hors 5121 travaux), GL posté.
+  coalesce((
+    select sum(case when e.direction = 'debit' then e.amount else -e.amount end)
+      from public.ledger_entries e
+      join public.ledger_transactions t on t.id = e.tx_id and t.status = 'posted'
+      join public.accounts a            on a.id = e.account_id
+     where e.copro_id = co.id and a.code like '512%' and a.code not like '5121%'
+  ), 0) as current_balance,
+  -- Impayé échu total (vue canonique lot-centric).
+  coalesce((
+    select sum(u.total_unpaid)
+      from public.v_unpaid_by_lot u
+     where u.copro_id = co.id
+  ), 0) as unpaid_total,
+  -- Nombre de lots en impayé.
+  coalesce((
+    select count(*)
+      from public.v_unpaid_by_lot u
+     where u.copro_id = co.id and u.total_unpaid > 0
+  ), 0) as unpaid_lots_count,
+  next_ag.id   as next_ag_id,
+  next_ag.title as next_ag_title,
+  next_ag.meeting_date as next_ag_date
+from public.copros co
+left join lateral (
+  select m.id, m.title, m.meeting_date
+    from public.ag_meetings m
+   where m.copro_id = co.id
+     and m.meeting_date >= current_date
+     and m.status in ('draft', 'convoked', 'in_progress', 'session_active')
+   order by m.meeting_date asc
+   limit 1
+) next_ag on true;
+
+comment on view public.v_dashboard_kpis is
+  'KPIs portefeuille par copro (trésorerie 512 hors travaux, impayés échus lot-centric, prochaine AG — statuts alignés front 0049) — mêmes règles que fn_dashboard_kpis (0028). ⚠️ Fiable UNIQUEMENT pour un gestionnaire : en security_invoker, un copropriétaire verrait des montants partiels (sa seule dette, trésorerie 0) présentés comme des totaux copro. Ne PAS réutiliser pour le portail copropriétaire sans trancher la politique RLS.';

@@ -21,7 +21,7 @@ export interface DashboardKpis {
   tresorerie_courante?: number;
   tresorerie_travaux?: number;
   unpaid_total: number;
-  critical_unpaid_count: number;
+  unpaid_lots_count: number;
   next_ag_date: string | null;
   next_ag_id: string | null;
   next_ag_title: string | null;
@@ -122,10 +122,17 @@ export async function getDashboardKpis(coproId: string): Promise<ApiResult<Dashb
     .limit(1)
     .maybeSingle();
 
+  // 4. Nombre de lots en impayé : la fn ne le fournit pas, la vue portefeuille si
+  //    (retour revue 0047 : fin du 0 en dur, même source que le portefeuille).
+  const { data: kpiRow } = await supabase
+    .from('v_dashboard_kpis')
+    .select('unpaid_lots_count')
+    .eq('copro_id', coproId)
+    .maybeSingle();
+
   // La fn ne sépare pas le compte bancaire travaux (5121) → tresorerie = trésorerie courante.
   // La tuile "Fonds travaux" du dashboard montre le FONDS ALUR / réserve travaux (comptes 103+105,
   // = provisions_travaux, dérivé du grand livre) — décision USER 2026-06-08.
-  // critical_unpaid_count reste non fourni par la fn (0) : indicateur d'impayés critiques différé.
   const tresorerie = Number(fin?.tresorerie) || 0;
   const provisionsTravaux = Number(fin?.provisions_travaux) || 0;
 
@@ -136,7 +143,7 @@ export async function getDashboardKpis(coproId: string): Promise<ApiResult<Dashb
     tresorerie_courante: tresorerie,
     tresorerie_travaux: provisionsTravaux,
     unpaid_total: Number(fin?.total_impayes) || 0,
-    critical_unpaid_count: 0,
+    unpaid_lots_count: Number(kpiRow?.unpaid_lots_count) || 0,
     provisions_travaux: provisionsTravaux,
     budget_vote: Number(fin?.budget_vote) || 0,
     budget_realise: Number(fin?.budget_realise) || 0,

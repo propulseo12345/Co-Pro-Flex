@@ -127,7 +127,7 @@ export function usePortefeuille(): UsePortefeuilleReturn {
             .order('created_at', { ascending: true }),
           supabase
             .from('v_dashboard_kpis')
-            .select('copro_id, current_balance, unpaid_total, critical_unpaid_count, next_ag_date'),
+            .select('copro_id, current_balance, unpaid_total, unpaid_lots_count, next_ag_date'),
         ]);
 
         if (coprosResult.error || !coprosResult.data) {
@@ -137,7 +137,7 @@ export function usePortefeuille(): UsePortefeuilleReturn {
           const kpiMap = new Map<string, {
             current_balance: number | null;
             unpaid_total: number | null;
-            critical_unpaid_count: number | null;
+            unpaid_lots_count: number | null;
             next_ag_date: string | null;
           }>();
           if (kpisResult.data) {
@@ -157,7 +157,7 @@ export function usePortefeuille(): UsePortefeuilleReturn {
               exerciceCourant: new Date().getFullYear(),
               soldeDisponible: kpi?.current_balance ?? 0,
               totalImpayes: kpi?.unpaid_total ?? 0,
-              nombreImpayes: kpi?.critical_unpaid_count ?? 0,
+              nombreImpayes: kpi?.unpaid_lots_count ?? 0,
               tauxRecouvrement: 100,
               facturesEnRetard: 0,
               montantFacturesRetard: 0,

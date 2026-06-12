@@ -10011,11 +10011,11 @@ export type Database = {
       v_dashboard_kpis: {
         Row: {
           copro_id: string | null
-          critical_unpaid_count: number | null
           current_balance: number | null
           next_ag_date: string | null
           next_ag_id: string | null
           next_ag_title: string | null
+          unpaid_lots_count: number | null
           unpaid_total: number | null
         }
         Relationships: []
