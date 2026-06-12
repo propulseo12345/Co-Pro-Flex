@@ -44,8 +44,11 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
     REFUSE: ['A_ENVOYER'], PLANIFIE: ['EN_COURS'],
     INTERVENTION_PROGRAMMEE: ['INTERVENTION_REALISEE', 'EN_COURS'],
     EN_COURS: ['REALISE', 'INTERVENTION_REALISEE'],
-    REALISE: ['FACTURE', 'CLOTURE'], INTERVENTION_REALISEE: ['CLOTURE', 'FACTURE'],
-    FACTURE: ['PAYE'], PAYE: ['CLOTURE'], CLOTURE: [], ANNULE: [],
+    // FACTURE/PAYE retirés (retour revue 0047) : statuts legacy absents du
+    // workflow cible — la facturation vit sur supplier_invoices, le badge
+    // « Facturé » est dérivé de la facture liée.
+    REALISE: ['CLOTURE'], INTERVENTION_REALISEE: ['CLOTURE'],
+    CLOTURE: [], ANNULE: [],
 };
 
 const CHECKLIST: Record<string, string[]> = {
@@ -56,14 +59,11 @@ const CHECKLIST: Record<string, string[]> = {
     EN_COURS: ['Prestataire présent sur site'],
     INTERVENTION_REALISEE: ['Travaux vérifiés', 'PV de réception signé'],
     REALISE: ['Travaux vérifiés', 'PV de réception signé'],
-    FACTURE: ['Facture reçue et vérifiée'], PAYE: ['Paiement effectué'],
     CLOTURE: ['Tous les documents archivés'],
 };
 
 function needsDate(s: string) { return ['INTERVENTION_PROGRAMMEE', 'PLANIFIE'].includes(s); }
 function needsRealisee(s: string) { return ['INTERVENTION_REALISEE', 'REALISE'].includes(s); }
-function needsFacture(s: string) { return s === 'FACTURE'; }
-function needsPaiement(s: string) { return s === 'PAYE'; }
 function needsRefus(s: string) { return s === 'REFUSE'; }
 
 export default function ServiceOrderDetailPage({ params }: PageProps) {
@@ -113,8 +113,6 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
     const [dateProgrammee, setDateProgrammee] = useState('');
     const [dateRealisee, setDateRealisee] = useState('');
     const [montantFinal, setMontantFinal] = useState('');
-    const [numeroFacture, setNumeroFacture] = useState('');
-    const [datePaiement, setDatePaiement] = useState('');
     const [raisonRefus, setRaisonRefus] = useState('');
     const [commentaire, setCommentaire] = useState('');
     const [noteCloture, setNoteCloture] = useState('');
@@ -146,8 +144,6 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
         setError('');
         if (needsDate(selectedStatus) && !dateProgrammee) { setError('Date d\'intervention obligatoire'); return; }
         if (needsRealisee(selectedStatus) && (!dateRealisee || !montantFinal)) { setError('Date et montant obligatoires'); return; }
-        if (needsFacture(selectedStatus) && !numeroFacture) { setError('Numéro de facture obligatoire'); return; }
-        if (needsPaiement(selectedStatus) && !datePaiement) { setError('Date de paiement obligatoire'); return; }
         if (needsRefus(selectedStatus) && !raisonRefus) { setError('Raison du refus obligatoire'); return; }
 
         setIsProcessing(true);
@@ -161,8 +157,6 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
 
             const entries = [];
             if (needsRefus(selectedStatus)) entries.push({ id: `h-${Date.now()}`, date: now, auteur: 'Prestataire', action: `Refusé: ${raisonRefus}` });
-            if (needsFacture(selectedStatus)) entries.push({ id: `h-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: `Facture: ${numeroFacture}` });
-            if (needsPaiement(selectedStatus)) entries.push({ id: `h-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: `Paiement le ${new Date(datePaiement).toLocaleDateString('fr-FR')}` });
             if (commentaire.trim()) entries.push({ id: `h-c-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: commentaire });
             if (noteCloture.trim()) entries.push({ id: `h-n-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: `Note: ${noteCloture}` });
             entries.push({ id: `h-s-${Date.now()}`, date: now, auteur: 'Syndic Admin', action: 'Changement de statut', champModifie: 'statut', ancienneValeur: getStatutLabel(currentStatus), nouvelleValeur: getStatutLabel(selectedStatus) });
@@ -174,8 +168,6 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
             setDateProgrammee('');
             setDateRealisee('');
             setMontantFinal('');
-            setNumeroFacture('');
-            setDatePaiement('');
             setRaisonRefus('');
             setNoteCloture('');
             setCheckedItems(new Set());
@@ -183,7 +175,7 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
             setPanelOpen(true);
         } catch { setError('Erreur lors de la mise à jour'); }
         setIsProcessing(false);
-    }, [selectedStatus, ordreService, dateProgrammee, dateRealisee, montantFinal, numeroFacture, datePaiement, raisonRefus, commentaire, noteCloture, currentStatus, handleStatusUpdate]);
+    }, [selectedStatus, ordreService, dateProgrammee, dateRealisee, montantFinal, raisonRefus, commentaire, noteCloture, currentStatus, handleStatusUpdate]);
 
     const handleCancelOS = useCallback(async () => {
         if (!ordreService || !confirm('Annuler cet ordre de service ?')) return;
@@ -224,6 +216,12 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
                     <div className={styles.topbarMeta}>
                         {currentData.fournisseurNom} · Créé le {formatDate(currentData.dateCreation)}
                         <span className={clsx(styles.badge, styles.badgeBlue)}>{getStatutLabel(currentData.statut)}</span>
+                        {/* Badge dérivé de la facture liée (retour revue 0047) */}
+                        {factureLiee && (
+                            <span className={clsx(styles.badge, styles.badgeGreen)}>
+                                Facturé{factureLiee.count > 1 ? ` ×${factureLiee.count}` : ''} · {formatMoney(factureLiee.montant)}
+                            </span>
+                        )}
                     </div>
                 </div>
                 <div className={styles.topbarActions}>
@@ -335,22 +333,6 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
                                 <div className={styles.fieldGroup}>
                                     <label className={styles.fieldLabel}>Montant final (€) *</label>
                                     <input type="number" step="0.01" className={styles.fieldInput} placeholder="0.00" value={montantFinal} onChange={e => setMontantFinal(e.target.value)} />
-                                </div>
-                            </div>
-                        )}
-                        {needsFacture(selectedStatus) && (
-                            <div className={styles.fieldsRow}>
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.fieldLabel}>Numéro de facture *</label>
-                                    <input type="text" className={styles.fieldInput} placeholder="FAC-2026-001" value={numeroFacture} onChange={e => setNumeroFacture(e.target.value)} />
-                                </div>
-                            </div>
-                        )}
-                        {needsPaiement(selectedStatus) && (
-                            <div className={styles.fieldsRow}>
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.fieldLabel}>Date de paiement *</label>
-                                    <input type="date" className={styles.fieldInput} value={datePaiement} max={new Date().toISOString().split('T')[0]} onChange={e => setDatePaiement(e.target.value)} onClick={e => (e.target as HTMLInputElement).showPicker?.()} />
                                 </div>
                             </div>
                         )}
