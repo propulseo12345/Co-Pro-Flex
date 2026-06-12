@@ -9,7 +9,7 @@ import type { RepartitionKeyWithTotals, RepartitionBasis } from '@/lib/lots/api'
 import styles from './lots.module.css';
 
 export default function LotsPage() {
-  const { currentCoproId } = useCopro();
+  const { currentCoproId, error: coproError, refreshCopros } = useCopro();
   const {
     keyColumns, gridRows, stats, isLoading, error, isMutating,
     searchQuery, setSearchQuery,
@@ -22,7 +22,10 @@ export default function LotsPage() {
   const ownerOptions = owners.map(o => ({ id: o.id, display_name: o.display_name }));
 
   if (!currentCoproId) {
-    return <LoadingState message="Chargement de la copropriété..." />;
+    // L'erreur du contexte copro doit s'afficher, pas tourner en spinner muet.
+    return coproError
+      ? <ErrorState message={coproError} onRetry={refreshCopros} />
+      : <LoadingState message="Chargement de la copropriété..." />;
   }
 
   // Map GridKeyColumn to RepartitionKeyWithTotals for EditKeyModal

@@ -8,7 +8,8 @@ import { archiveAg } from '@/lib/ag/api';
 import archiveStyles from '@/components/features/ag/Dashboard/AGArchivesList.module.css';
 import { AgDocumentQuickActions } from '@/components/features/ag';
 import { AgStatusBadge } from '@/components/features/ag/Dashboard/components/AgStatusBadge';
-import { DataState, LoadingState } from '@/components/ui/DataState/DataState';
+import { DataState, LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
+import { useCopro } from '@/providers/CoproContext';
 import { useAgDashboardPage, NextAgCard, getTypeLabel, getStatusBadge, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
 import styles from './dashboard.module.css';
 import clsx from 'clsx';
@@ -41,9 +42,13 @@ export default function AGDashboardPage() {
     handleRename,
     handleConfirmDelete,
   } = useAgDashboardPage();
+  const { error: coproError, refreshCopros } = useCopro();
 
+  // L'erreur du contexte copro doit s'afficher, pas tourner en spinner muet.
   if (!currentCoproId) {
-    return <LoadingState message="Chargement de la copropriété..." />;
+    return coproError
+      ? <ErrorState message={coproError} onRetry={refreshCopros} />
+      : <LoadingState message="Chargement de la copropriété..." />;
   }
 
   const buildDraftActions = (draft: AgDraft): AgListItemAction[] => {

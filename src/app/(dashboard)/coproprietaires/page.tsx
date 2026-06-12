@@ -8,7 +8,7 @@ import { useCopro } from '@/providers/CoproContext';
 import styles from './coproprietaires.module.css';
 
 export default function CoproprietairesPage() {
-  const { currentCoproId } = useCopro();
+  const { currentCoproId, error: coproError, refreshCopros } = useCopro();
   const {
     activeTab, handleTabChange, searchQuery, setSearchQuery, filteredData,
     openMenuId, setOpenMenuId, menuPosition, menuRef, buttonRefs,
@@ -18,7 +18,10 @@ export default function CoproprietairesPage() {
   } = useCoproprietairesPage();
 
   if (!currentCoproId) {
-    return <LoadingState message="Chargement de la copropriété..." />;
+    // L'erreur du contexte copro doit s'afficher, pas tourner en spinner muet.
+    return coproError
+      ? <ErrorState message={coproError} onRetry={refreshCopros} />
+      : <LoadingState message="Chargement de la copropriété..." />;
   }
 
   // KPI calculations
