@@ -20,6 +20,13 @@
 - **[J2.8] Paiement partiel depuis l'UI Factures** — défaut pris : le bouton « Payer » règle le **total** de la facture (`amount = montant`, clé d'idempotence `pay-<id>-<date>`). La RPC `post_supplier_payment` gère pourtant le partiel. Impact si on veut le partiel : ajouter un champ montant dans le modal de paiement + clé d'idempotence par montant/séquence. Non bloquant (le cas courant = paiement total).
 - **[J2.8] Sous-compte banque (512-x) au paiement** — défaut pris : le `compteId` choisi dans le modal est conservé en affichage mais la RPC poste sur le 512 générique (lookup `code='512'`). Impact si multi-comptes bancaires : étendre `post_supplier_payment` pour accepter un `account_id` 512 cible. Non bloquant tant qu'une copro a un seul 512.
 
+### Retours d'audit TRANCHÉS avec Lyes le 2026-06-12 (matin)
+
+- **Relances impayés → AUTOMATIQUES** ✅ : brancher un déclencheur quotidien réel (pg_cron + wrapper multi-copros, ou Vercel Cron) **avant la bêta J7**. Le moteur existe ; il manque le réveil. Ajouté au plan.
+- **Fallback MOCK des pages impayés (ventes/contentieux) → PURGER** ✅ : liste vide = état vide, erreur = message d'erreur. À faire au lot 1 J2-bis (3 lignes).
+- **Export comptable → J5 (conformité 1er client)** ✅ : export CSV grand livre / balance / journaux (généré côté client), inscrit au plan ; boutons morts masqués d'ici là.
+- **Nom de la copro démo** ✅ : « HARNESS bd992c5d (…) » → « Le Clos Saint-Michel (démo) » (seed corrigé + base locale renommée).
+
 ### Issues de l'audit sécurité 2026-06-12 — défauts pris, à revoir
 - **[banking] Lien requisition↔copro non modélisé** — défaut pris : les 4 routes `/api/banking/*` exigent désormais un rôle gestionnaire (fin de l'IDOR anonyme), mais un gestionnaire d'un AUTRE cabinet pourrait encore lire une réquisition dont il connaît l'UUID. Fix complet = table `bank_requisitions(copro_id, requisition_id, created_by)` + contrôle d'appartenance. À faire avec le chantier rapprochement bancaire (J2-bis).
 - **[mail/send] Destinataires libres pour le gestionnaire** — défaut pris : l'envoi exige le rôle gestionnaire SUR la copro (fin du relais inter-cabinets), mais les destinataires restent libres (légitime : fournisseurs, notaires). Pas de rate-limit. À durcir si abus constaté.

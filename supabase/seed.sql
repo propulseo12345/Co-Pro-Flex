@@ -52,6 +52,13 @@ begin
     select cabinet_id into v_cabinet from public.copros where id = v_copro;
   end if;
 
+  -- Le harnais préfixe le nom par « HARNESS <uuid> (...) » — très bien pour les
+  -- copros jetables de test, pas pour la copro de démo affichée dans l'UI
+  -- (décision Lyes 2026-06-12). On rétablit le nom lisible (idempotent).
+  update public.copros
+     set name = 'Le Clos Saint-Michel (démo)'
+   where id = v_copro and name like 'HARNESS %';
+
   -- 2) Comptes démo du login + accès à la copro.
   for acct in
     select * from (values
