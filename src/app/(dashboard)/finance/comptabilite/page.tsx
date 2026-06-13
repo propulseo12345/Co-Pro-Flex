@@ -1,7 +1,8 @@
 'use client';
 
-import { Download, FileSpreadsheet, Copy, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Copy, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useComptabilitePage } from '@/features/finance/comptabilite';
+import { ExportCsvMenu } from '@/components/features/finance/Comptabilite/ExportCsvMenu';
 import {
   ComptaNavBar,
   ComptaViewSwitcher,
@@ -63,12 +64,7 @@ export default function ComptabilitePage() {
           title={title}
           actions={
             <>
-              <button className={topBarStyles.btnIcon} onClick={page.exportToPDF} title="Export PDF">
-                <Download size={16} />
-              </button>
-              <button className={topBarStyles.btnIcon} onClick={page.exportToExcel} title="Export Excel">
-                <FileSpreadsheet size={16} />
-              </button>
+              <ExportCsvMenu onExport={page.exportCSV} disabled />
               <button className={topBarStyles.btnIcon} title="Copier">
                 <Copy size={16} />
               </button>
@@ -126,12 +122,10 @@ export default function ComptabilitePage() {
         }
         actions={
           <>
-            <button className={topBarStyles.btnIcon} onClick={page.exportToPDF} title="Export PDF">
-              <Download size={16} />
-            </button>
-            <button className={topBarStyles.btnIcon} onClick={page.exportToExcel} title="Export Excel">
-              <FileSpreadsheet size={16} />
-            </button>
+            <ExportCsvMenu
+              onExport={page.exportCSV}
+              disabled={page.operations.length === 0}
+            />
             <button className={topBarStyles.btnIcon} title="Copier">
               <Copy size={16} />
             </button>

@@ -5,6 +5,14 @@ import { useCopro } from '@/providers/CoproContext';
 import { useGeneralLedger, useTrialBalance, useActivePeriod, useAccountingPeriods, useAccounts } from '@/hooks/modules/useFinanceData';
 import * as financeApi from '@/lib/finance/api';
 import {
+  generateGrandLivreCSV,
+  generateBalanceCSV,
+  generateJournauxCSV,
+  downloadCSV,
+  csvFileName,
+  type ExportCsvKind,
+} from '@/lib/export/accounting-csv';
+import {
   TabCompta,
   GrandLivreViewMode,
   OperationComptable,
@@ -20,7 +28,7 @@ import {
 } from '@/components/features/finance/Comptabilite';
 
 export function useComptabilitePage() {
-  const { currentCoproId } = useCopro();
+  const { currentCoproId, currentCopro } = useCopro();
   const [isClosingPeriod, setIsClosingPeriod] = useState(false);
   const [lastClosedPeriodId, setLastClosedPeriodId] = useState<string | null>(null);
   const [lastClosedYear, setLastClosedYear] = useState<number | null>(null);
@@ -243,8 +251,28 @@ export function useComptabilitePage() {
     refreshBalance,
   ]);
 
-  const exportToPDF = useCallback(() => {}, []);
-  const exportToExcel = useCallback(() => {}, []);
+  // Export comptable CSV (grand livre / balance / journaux) généré côté client
+  // depuis les données déjà chargées — finalité légale art. 18-1 (transmission CS/expert).
+  const exportCSV = useCallback(
+    (kind: ExportCsvKind) => {
+      const year = openPeriod?.start_date
+        ? new Date(openPeriod.start_date).getFullYear()
+        : new Date().getFullYear();
+      const meta = {
+        coproName: currentCopro?.name ?? null,
+        periodName: openPeriod?.name ?? null,
+        year,
+      };
+      const csv =
+        kind === 'balance'
+          ? generateBalanceCSV(trialBalanceData ?? [], meta)
+          : kind === 'journaux'
+            ? generateJournauxCSV(ledgerEntries ?? [], meta)
+            : generateGrandLivreCSV(ledgerEntries ?? [], meta);
+      downloadCSV(csv, csvFileName(kind, meta));
+    },
+    [openPeriod, currentCopro, ledgerEntries, trialBalanceData]
+  );
 
   return {
     // Context
@@ -313,7 +341,6 @@ export function useComptabilitePage() {
     // Handlers
     handleViewOperationDetail,
     handleValiderCloture,
-    exportToPDF,
-    exportToExcel,
+    exportCSV,
   };
 }
