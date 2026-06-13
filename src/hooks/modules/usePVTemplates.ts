@@ -82,6 +82,13 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     // ───────────────────────────────────────────────────────────
 
     const loadTemplates = useCallback(async () => {
+        // Copro pas encore résolue (mount async) : ne pas requêter avec un uuid
+        // vide (22P02 garanti) — l'effet se re-déclenche quand l'id arrive.
+        if (!organizationId) {
+            setTemplates([]);
+            setIsLoading(false);
+            return;
+        }
         setIsLoading(true);
         setError(null);
 
@@ -125,6 +132,10 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
 
     const createTemplate = useCallback(
         async (name: string, description?: string): Promise<IPVTemplate | null> => {
+            if (!organizationId || !userId) {
+                setError('Aucune copropriété active ou session expirée — création impossible.');
+                return null;
+            }
             try {
                 const template = await pvTemplateService.createTemplate(
                     organizationId,
@@ -132,6 +143,10 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
                     description || '',
                     userId
                 );
+                if (!template) {
+                    setError('La création du template a échoué (voir console).');
+                    return null;
+                }
                 await loadTemplates();
                 setSelectedTemplate(template);
                 return template;
@@ -144,13 +159,29 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     );
 
     const duplicateTemplate = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string, newName?: string): Promise<IPVTemplate | null> => {
-            // TODO: Implement duplicateTemplate in PVTemplateService
-            // TODO: Implement duplicateTemplate in PVTemplateService
-            return null;
+            if (!organizationId || !userId) {
+                setError('Aucune copropriété active — duplication impossible.');
+                return null;
+            }
+            try {
+                const source = await pvTemplateService.getTemplate(templateId);
+                if (!source) return null;
+                const copy = await pvTemplateService.createTemplate(
+                    organizationId,
+                    newName || `${source.name} (copie)`,
+                    source.description || '',
+                    userId,
+                    source.spec
+                );
+                if (copy) await loadTemplates();
+                return copy;
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Erreur lors de la duplication');
+                return null;
+            }
         },
-        []
+        [organizationId, userId, loadTemplates]
     );
 
     const updateTemplate = useCallback(
@@ -190,85 +221,140 @@ export function usePVTemplates({ organizationId, userId }: UsePVTemplatesOptions
     );
 
     const setAsDefault = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (templateId: string): Promise<boolean> => {
-            // TODO: Implement setAsDefault in PVTemplateService
-            // TODO: Implement setAsDefault in PVTemplateService
-            return false;
+            try {
+                // RPC transactionnelle (0052) : dé-flague l'ancien défaut puis pose
+                // le nouveau — deux UPDATE client ne seraient pas atomiques (23505
+                // sur l'index unique partiel uq_pv_templates_default).
+                const ok = await pvTemplateService.setDefaultTemplate(templateId);
+                if (ok) await loadTemplates();
+                else setError('Impossible de définir ce template par défaut.');
+                return ok;
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Erreur lors du changement de défaut');
+                return false;
+            }
         },
-        []
+        [loadTemplates]
     );
 
     // ───────────────────────────────────────────────────────────
-    // SECTIONS
+    // SPEC (chemin de persistance commun : updateTemplate(spec))
+    // ───────────────────────────────────────────────────────────
+
+    const persistSpec = useCallback(
+        async (templateId: string, mutate: (spec: IPVTemplateSpec) => IPVTemplateSpec): Promise<boolean> => {
+            try {
+                const current = await pvTemplateService.getTemplate(templateId);
+                if (!current || current.isSystemTemplate) {
+                    setError('Le template système ne peut pas être modifié — dupliquez-le.');
+                    return false;
+                }
+                const nextSpec = mutate(current.spec);
+                const updated = await pvTemplateService.updateTemplate(templateId, { spec: nextSpec }, userId);
+                if (!updated) {
+                    setError('La sauvegarde du template a échoué.');
+                    return false;
+                }
+                setSelectedTemplate(updated);
+                setTemplates((prev) => prev.map((t) => (t.id === templateId ? updated : t)));
+                return true;
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+                return false;
+            }
+        },
+        [userId]
+    );
+
+    const updateTemplateSpec = useCallback(
+        (templateId: string, specUpdates: Partial<IPVTemplateSpec>): Promise<boolean> =>
+            persistSpec(templateId, (spec) => ({ ...spec, ...specUpdates })),
+        [persistSpec]
+    );
+
+    // ───────────────────────────────────────────────────────────
+    // SECTIONS (stockées dans spec.sections)
     // ───────────────────────────────────────────────────────────
 
     const updateSection = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async (templateId: string, sectionId: string, updates: Partial<IPVSection>): Promise<boolean> => {
-            // TODO: Implement updateSection in PVTemplateService
-            // TODO: Implement updateSection in PVTemplateService
-            return false;
-        },
-        []
+        (templateId: string, sectionId: string, updates: Partial<IPVSection>): Promise<boolean> =>
+            persistSpec(templateId, (spec) => ({
+                ...spec,
+                sections: spec.sections.map((s) => (s.id === sectionId ? { ...s, ...updates } : s)),
+            })),
+        [persistSpec]
     );
 
     const toggleSection = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async (templateId: string, sectionId: string, enabled: boolean): Promise<boolean> => {
-            // TODO: Implement toggleSection in PVTemplateService
-            // TODO: Implement toggleSection in PVTemplateService
-            return false;
-        },
-        []
+        (templateId: string, sectionId: string, enabled: boolean): Promise<boolean> =>
+            persistSpec(templateId, (spec) => ({
+                ...spec,
+                sections: spec.sections.map((s) =>
+                    s.id === sectionId && !s.required ? { ...s, enabled } : s
+                ),
+            })),
+        [persistSpec]
     );
 
     const reorderSections = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async (templateId: string, sectionIds: string[]): Promise<boolean> => {
-            // TODO: Implement reorderSections in PVTemplateService
-            // TODO: Implement reorderSections in PVTemplateService
-            return false;
-        },
-        []
+        (templateId: string, sectionIds: string[]): Promise<boolean> =>
+            persistSpec(templateId, (spec) => ({
+                ...spec,
+                sections: spec.sections
+                    .map((s) => {
+                        const idx = sectionIds.indexOf(s.id);
+                        return idx === -1 ? s : { ...s, order: idx };
+                    })
+                    .sort((a, b) => a.order - b.order),
+            })),
+        [persistSpec]
     );
 
     // ───────────────────────────────────────────────────────────
-    // SPEC
-    // ───────────────────────────────────────────────────────────
-
-    const updateTemplateSpec = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async (templateId: string, specUpdates: Partial<IPVTemplateSpec>): Promise<boolean> => {
-            // TODO: Implement updateTemplateSpec in PVTemplateService
-            // TODO: Implement updateTemplateSpec in PVTemplateService
-            return false;
-        },
-        []
-    );
-
-    // ───────────────────────────────────────────────────────────
-    // EXPORT/IMPORT
+    // EXPORT/IMPORT (JSON de la spec + métadonnées)
     // ───────────────────────────────────────────────────────────
 
     const exportTemplate = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (templateId: string): string | null => {
-            // TODO: Implement exportTemplate in PVTemplateService
-            // TODO: Implement exportTemplate in PVTemplateService
-            return null;
+            const template = templates.find((t) => t.id === templateId) ?? selectedTemplate;
+            if (!template || template.id !== templateId) return null;
+            return JSON.stringify(
+                { name: template.name, description: template.description, spec: template.spec },
+                null,
+                2
+            );
         },
-        []
+        [templates, selectedTemplate]
     );
 
     const importTemplate = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (jsonString: string): Promise<IPVTemplate | null> => {
-            // TODO: Implement importTemplate in PVTemplateService
-            // TODO: Implement importTemplate in PVTemplateService
-            return null;
+            if (!organizationId || !userId) {
+                setError('Aucune copropriété active — import impossible.');
+                return null;
+            }
+            try {
+                const parsed = JSON.parse(jsonString) as { name?: string; description?: string; spec?: IPVTemplateSpec };
+                if (!parsed.name || !parsed.spec || !Array.isArray(parsed.spec.sections)) {
+                    setError('JSON invalide : champs name et spec.sections requis.');
+                    return null;
+                }
+                const template = await pvTemplateService.createTemplate(
+                    organizationId,
+                    parsed.name,
+                    parsed.description || '',
+                    userId,
+                    parsed.spec
+                );
+                if (template) await loadTemplates();
+                return template;
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'JSON invalide');
+                return null;
+            }
         },
-        []
+        [organizationId, userId, loadTemplates]
     );
 
     // ───────────────────────────────────────────────────────────

@@ -84,7 +84,7 @@ function toCanonicalDocumentRow(doc: Partial<Document>): Record<string, unknown>
     'copro_id', 'lot_id', 'coproprietaire_id', 'file_name', 'file_path',
     'file_size', 'mime_type', 'category', 'title', 'description', 'tags',
     'document_date', 'year', 'folder_id', 'retention_years',
-    'is_archived', 'archived_at', 'created_by',
+    'is_archived', 'archived_at', 'is_starred', 'created_by',
   ] as const;
   for (const k of passthrough) {
     if (doc[k] !== undefined) row[k] = doc[k];
@@ -169,6 +169,8 @@ export interface Document {
   // Archive
   is_archived?: boolean;
   archived_at?: string;
+  // Favori (toggle étoile GED)
+  is_starred?: boolean;
   // Audit
   created_at: string;
   created_by?: string;
@@ -435,9 +437,9 @@ export async function archiveDocument(id: string): Promise<Document> {
 }
 
 export async function deleteDocument(id: string): Promise<void> {
-  // Soft delete canonique : status='deleted' (les vues de compat l'excluent,
-  // trg_prevent_document_deletion bloque de toute façon le DELETE des documents
-  // à conservation légale).
+  // Soft delete canonique : status='deleted' (les vues de compat l'excluent).
+  // trg_document_soft_delete_guard (0052) REFUSE ce passage pour un document à
+  // conservation légale (deletion_blocked) — l'erreur remonte à l'appelant.
   const supabase = createUntypedClient();
   const { error } = await supabase
     .from('documents')

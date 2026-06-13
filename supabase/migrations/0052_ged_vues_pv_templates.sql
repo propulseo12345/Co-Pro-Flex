@@ -78,7 +78,9 @@ select
   null::uuid                               as parent_document_id,
   d.created_by,
   d.created_at,
-  d.updated_at
+  d.updated_at,
+  -- en FIN de liste : contrainte CREATE OR REPLACE VIEW (colonne ajoutée post-revue)
+  d.is_starred
 from public.documents d
 left join public.document_folders f  on f.id = d.folder_id
 left join public.document_folders pf on pf.id = f.parent_id
@@ -144,10 +146,11 @@ select
 from public.documents d
 left join public.document_folders f on f.id = d.folder_id
 left join public.profiles p         on p.id = d.created_by
-where d.status = 'active';
+where d.status = 'active'
+order by d.created_at desc;
 
 comment on view public.v_recent_documents is
-  'Documents actifs pour le widget récents (le front trie/limite) — compat 5c8209e.';
+  'Documents actifs, plus récents en tête (le front limite) — compat 5c8209e.';
 
 -- ----------------------------------------------------------------------------
 -- 4. v_documents_stats — KPIs GED par copro
@@ -302,6 +305,63 @@ create policy p_mgr_all on public.pv_templates
 
 comment on table public.pv_templates is
   'Templates de mise en page des PV d''AG (spec jsonb) : système (copro_id NULL) ou par copro. Éditeur : settings/templates.';
+
+-- Défaut par copro, transactionnel : dé-flague l'ancien défaut PUIS pose le
+-- nouveau (deux UPDATE client ne seraient pas atomiques → 23505 sur l'index
+-- unique partiel). SECURITY INVOKER : la RLS s'applique — un non-gestionnaire
+-- voit son UPDATE filtré → NOT FOUND → refus explicite.
+create or replace function public.set_default_pv_template(p_template_id uuid)
+returns void
+language plpgsql
+set search_path = public
+as $$
+declare
+  v_copro uuid;
+begin
+  select copro_id into v_copro from public.pv_templates where id = p_template_id;
+  if v_copro is null then
+    raise exception 'template introuvable ou template système non personnalisable : %', p_template_id
+      using errcode = 'P0002';
+  end if;
+
+  update public.pv_templates
+     set is_default = false
+   where copro_id = v_copro and is_default and id <> p_template_id;
+
+  update public.pv_templates
+     set is_default = true, status = 'active'
+   where id = p_template_id;
+  if not found then
+    raise exception 'forbidden: gestionnaire de la copro requis' using errcode = '42501';
+  end if;
+end;
+$$;
+revoke execute on function public.set_default_pv_template(uuid) from public, anon;
+grant  execute on function public.set_default_pv_template(uuid) to authenticated, service_role;
+
+-- Garde de conservation légale sur le SOFT-delete : le passage à status='deleted'
+-- est la suppression fonctionnelle (les vues l'excluent, l'edge ne le sert plus) ;
+-- il doit être bloqué dans les mêmes conditions que le DELETE physique
+-- (trg_prevent_document_deletion, 0031) — sinon la rétention est contournable.
+create or replace function public.tr_document_soft_delete_guard()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.status = 'deleted' and old.status is distinct from 'deleted'
+     and old.deletion_blocked
+     and (old.expiration_date is null or old.expiration_date > current_date) then
+    raise exception 'document à conservation légale : suppression interdite (%)', old.id
+      using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+revoke execute on function public.tr_document_soft_delete_guard() from public, anon, authenticated;
+create trigger trg_document_soft_delete_guard
+  before update of status on public.documents
+  for each row execute function public.tr_document_soft_delete_guard();
 
 -- Compteur d'usage (appelé par pv-template.service à chaque génération).
 -- SECURITY INVOKER : la RLS s'applique (seul un gestionnaire de la copro peut

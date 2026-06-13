@@ -142,8 +142,11 @@ export function useConvocationDocuments(
     setError(null);
 
     try {
-      // Upload le document
-      const doc = await uploadDocument(file, coproId, 'convocation', {
+      // Upload le document — catégorie 'autre' : fichier de TRAVAIL supprimable
+      // pendant la rédaction. La catégorie 'convocation' déclenche la rétention
+      // légale (deletion_blocked) qui doit protéger la convocation FINALE
+      // (générée et archivée via ag_documents), pas ses brouillons d'annexes.
+      const doc = await uploadDocument(file, coproId, 'autre', {
         title: file.name,
         description: `Annexe convocation AG`,
       });
@@ -188,14 +191,16 @@ export function useConvocationDocuments(
         .eq('entity_id', agId);
       if (relError) throw new Error(relError.message);
 
-      // Retirer le fichier du storage puis soft-delete canonique (le DELETE dur
-      // est bloqué par trg_prevent_document_deletion pour les docs légaux).
+      // Soft-delete D'ABORD : trg_document_soft_delete_guard (0052) refuse la
+      // suppression d'un doc à conservation légale — dans ce cas on N'EFFACE PAS
+      // le binaire. Le storage n'est retiré qu'après acceptation du soft-delete.
       const doc = documents.find(d => d.id === docId);
       if (doc) {
-        await supabase.storage.from('ged').remove([doc.filePath]);
-        await supabase.from('documents')
+        const { error: delError } = await supabase.from('documents')
           .update({ status: 'deleted' })
           .eq('id', docId);
+        if (delError) throw new Error(delError.message);
+        await supabase.storage.from('ged').remove([doc.filePath]);
       }
 
       setDocuments(prev => prev.filter(d => d.id !== docId));

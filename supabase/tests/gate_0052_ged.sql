@@ -9,10 +9,10 @@
 DO $$
 DECLARE
   v_copro uuid; v_root uuid; v_sub uuid;
-  v_doc_a uuid; v_doc_b uuid; v_doc_c uuid; v_doc_d uuid;
+  v_doc_a uuid; v_doc_b uuid; v_doc_c uuid; v_doc_d uuid; v_doc_e uuid; v_doc_f uuid;
   v_mgr uuid := gen_random_uuid();   -- gestionnaire (créateur des docs)
   v_mem uuid := gen_random_uuid();   -- copropriétaire (lecture seule)
-  v_tpl_sys uuid; v_tpl_copro uuid;
+  v_tpl_sys uuid; v_tpl_copro uuid; v_tpl_two uuid;
   v_n int; v_big bigint; v_txt text; v_bool boolean; v_arr text[];
 BEGIN
   -- (1) Contrats STRICTS — compat front 5c8209e
@@ -22,7 +22,7 @@ BEGIN
     'copro_id','copro_name','coproprietaire_id','created_at','created_by','deletion_blocked',
     'description','document_date','dossier_id','expiration_date','file_hash','file_name',
     'file_path','file_size','folder_color','folder_icon','folder_id','folder_name','id',
-    'invoice_id','is_archived','is_current_version','lot_id','mime_type','mutation_id',
+    'invoice_id','is_archived','is_current_version','is_starred','lot_id','mime_type','mutation_id',
     'parent_document_id','parent_folder_name','resolution_id','retention_years','search_text',
     'service_order_id','source_module','status','tags','title','updated_at','version','year'] THEN
     RAISE EXCEPTION 'ASSERT FAIL : contrat v_documents_with_folder : %', v_arr;
@@ -134,6 +134,10 @@ BEGIN
   SELECT count(*) INTO v_n FROM public.v_documents_with_folder WHERE id = v_doc_d;
   IF v_n <> 0 THEN RAISE EXCEPTION 'ASSERT FAIL : doc soft-deleted visible dans with_folder'; END IF;
 
+  -- (is_starred et la garde soft-delete sont testés en (9bis), APRÈS les
+  -- assertions de valeurs : l'UPDATE et les documents E/F déclencheraient le
+  -- trigger rétention ré-activé et fausseraient stats/expiring.)
+
   -- (5) v_folders_with_counts : compteurs actifs seulement + hiérarchie
   SELECT count(*) INTO v_n FROM public.v_folders_with_counts
    WHERE id = v_root AND document_count = 1 AND subfolder_count = 1 AND parent_name IS NULL;
@@ -174,6 +178,37 @@ BEGIN
    WHERE id = v_doc_b AND days_until_expiration = 80;
   IF v_n <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL : expiring doc B (80 j)'; END IF;
 
+  -- (9bis) is_starred : écrit sur la table, exposé par la vue (toggle étoile GED)
+  UPDATE public.documents SET is_starred = true WHERE id = v_doc_a;
+  SELECT is_starred INTO v_bool FROM public.v_documents_with_folder WHERE id = v_doc_a;
+  IF v_bool IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'ASSERT FAIL : is_starred non exposé par la vue'; END IF;
+
+  -- Garde de conservation légale sur le SOFT-delete : un doc posé avec le
+  -- trigger rétention actif (catégorie légale → deletion_blocked) refuse
+  -- status='deleted' ; un doc non protégé l'accepte.
+  INSERT INTO public.documents (copro_id, file_name, file_path, title, category, status,
+                                visibility, created_by)
+  VALUES (v_copro, 'e.pdf', v_copro||'/e.pdf', 'PV légal E', 'pv_ag', 'active',
+          'tous_coproprietaires', v_mgr)
+  RETURNING id INTO v_doc_e;
+  SELECT deletion_blocked INTO v_bool FROM public.documents WHERE id = v_doc_e;
+  IF v_bool IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'SETUP FAIL : doc E attendu deletion_blocked (catégorie légale)'; END IF;
+  BEGIN
+    UPDATE public.documents SET status = 'deleted' WHERE id = v_doc_e;
+    RAISE EXCEPTION 'ASSERT FAIL : soft-delete d''un document à conservation légale accepté';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+  INSERT INTO public.documents (copro_id, file_name, file_path, title, category, status,
+                                visibility, created_by)
+  VALUES (v_copro, 'f.pdf', v_copro||'/f.pdf', 'Doc libre F', 'autre', 'active',
+          'gestionnaire_seul', v_mgr)
+  RETURNING id INTO v_doc_f;
+  UPDATE public.documents SET status = 'deleted' WHERE id = v_doc_f;  -- doit passer
+  SELECT count(*) INTO v_n FROM public.v_documents_with_folder WHERE id = v_doc_f;
+  IF v_n <> 0 THEN RAISE EXCEPTION 'ASSERT FAIL : doc F soft-deleted encore visible'; END IF;
+
   -- (10) pv_templates : scope système et défaut unique
   INSERT INTO public.pv_templates (copro_id, name, status, is_system_template, spec)
   VALUES (NULL, 'Systeme G52', 'active', true, '{"k":1}'::jsonb) RETURNING id INTO v_tpl_sys;
@@ -194,17 +229,24 @@ BEGIN
 
   -- (11) RLS pv_templates prouvée (mécanique gate_rls : ENABLE+FORCE en sous-bloc,
   --      SET ROLE authenticated, claims utilisateur) + registre 0034 (rattrapage
-  --      ag_documents) : apply_rls_environment() en simulation production doit
-  --      activer la RLS des DEUX tables.
+  --      ag_documents) prouvé par la bascule DEV : seules les tables DU registre
+  --      sont désactivées par apply_rls_environment() en development — le test
+  --      production seul serait tautologique (RLS déjà ON via le CREATE de 0052).
   BEGIN
+    PERFORM set_config('app.environment', 'development', true);
+    PERFORM public.apply_rls_environment();
+    SELECT relrowsecurity INTO v_bool FROM pg_class WHERE oid = 'public.pv_templates'::regclass;
+    IF v_bool IS DISTINCT FROM false THEN
+      RAISE EXCEPTION 'ASSERT FAIL : pv_templates hors registre (bascule dev sans effet)'; END IF;
+    SELECT relrowsecurity INTO v_bool FROM pg_class WHERE oid = 'public.ag_documents'::regclass;
+    IF v_bool IS DISTINCT FROM false THEN
+      RAISE EXCEPTION 'ASSERT FAIL : ag_documents hors registre (bascule dev sans effet)'; END IF;
+
     PERFORM set_config('app.environment', 'production', true);
     PERFORM public.apply_rls_environment();
     SELECT relrowsecurity INTO v_bool FROM pg_class WHERE oid = 'public.pv_templates'::regclass;
     IF v_bool IS DISTINCT FROM true THEN
-      RAISE EXCEPTION 'ASSERT FAIL : pv_templates hors registre apply_rls_environment'; END IF;
-    SELECT relrowsecurity INTO v_bool FROM pg_class WHERE oid = 'public.ag_documents'::regclass;
-    IF v_bool IS DISTINCT FROM true THEN
-      RAISE EXCEPTION 'ASSERT FAIL : ag_documents hors registre apply_rls_environment'; END IF;
+      RAISE EXCEPTION 'ASSERT FAIL : pv_templates non ré-activée en production'; END IF;
 
     EXECUTE 'alter table public.pv_templates force row level security';
 
@@ -222,16 +264,36 @@ BEGIN
     EXCEPTION WHEN insufficient_privilege THEN NULL;
     END;
 
-    -- gestionnaire : écrit + incrémente l'usage (RPC invoker sous RLS)
+    -- gestionnaire : écrit + incrémente l'usage + bascule le défaut (RPC invoker sous RLS)
     PERFORM set_config('request.jwt.claims',
       json_build_object('sub', v_mgr, 'role','authenticated')::text, true);
     INSERT INTO public.pv_templates (copro_id, name, spec, created_by)
-    VALUES (v_copro, 'Manager OK', '{}'::jsonb, v_mgr);
+    VALUES (v_copro, 'Manager OK', '{}'::jsonb, v_mgr)
+    RETURNING id INTO v_tpl_two;
     PERFORM public.increment_template_usage(v_tpl_copro);
+    -- v_tpl_copro est le défaut actif : la RPC doit le dé-flaguer atomiquement
+    PERFORM public.set_default_pv_template(v_tpl_two);
+
+    -- membre : bascule de défaut refusée (RLS → NOT FOUND → 42501)
+    PERFORM set_config('request.jwt.claims',
+      json_build_object('sub', v_mem, 'role','authenticated')::text, true);
+    BEGIN
+      PERFORM public.set_default_pv_template(v_tpl_copro);
+      PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'ASSERT FAIL : set_default_pv_template autorisée à un copropriétaire';
+    EXCEPTION WHEN insufficient_privilege THEN NULL;
+    END;
+
     PERFORM set_config('role', 'service_role', true);
     SELECT usage_count INTO v_n FROM public.pv_templates WHERE id = v_tpl_copro;
     IF v_n <> 1 THEN
       RAISE EXCEPTION 'ASSERT FAIL : increment_template_usage (% au lieu de 1)', v_n; END IF;
+    SELECT is_default INTO v_bool FROM public.pv_templates WHERE id = v_tpl_two;
+    IF v_bool IS DISTINCT FROM true THEN
+      RAISE EXCEPTION 'ASSERT FAIL : set_default_pv_template — nouveau défaut non posé'; END IF;
+    SELECT is_default INTO v_bool FROM public.pv_templates WHERE id = v_tpl_copro;
+    IF v_bool IS DISTINCT FROM false THEN
+      RAISE EXCEPTION 'ASSERT FAIL : set_default_pv_template — ancien défaut non dé-flagué'; END IF;
   END;
 
   RAISE EXCEPTION 'ROLLBACK_TEST_OK';

@@ -537,6 +537,27 @@ class PVTemplateService {
     }
 
     /**
+     * Définit le template par défaut de la copro (RPC transactionnelle 0052 :
+     * dé-flague l'ancien défaut puis pose le nouveau — atomique).
+     */
+    async setDefaultTemplate(templateId: string): Promise<boolean> {
+        if (templateId === 'system-default') {
+            return false; // le template système n'est pas une ligne en base
+        }
+        try {
+            const supabase = createUntypedClient();
+            const { error } = await supabase.rpc('set_default_pv_template', {
+                p_template_id: templateId,
+            });
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.error('[PVTemplateService] Erreur setDefaultTemplate:', error);
+            return false;
+        }
+    }
+
+    /**
      * Supprime un template
      */
     async deleteTemplate(templateId: string): Promise<boolean> {
