@@ -5,7 +5,7 @@
 -- présence multi-sources dans les vues dashboard. Auto-rollback (ROLLBACK_TEST_OK).
 DO $$
 DECLARE
-  v_copro uuid; v_lot uuid; v_seller uuid; v_buyer uuid; v_notary uuid;
+  v_copro uuid; v_lot uuid; v_lot2 uuid; v_seller uuid; v_buyer uuid; v_notary uuid;
   v_mut uuid; v_n int; v_bool boolean; v_arr text[];
   v_seller_name text; v_notary_name text; v_days int; v_has_pre boolean; v_has_final boolean;
   v_ag uuid;
@@ -50,7 +50,8 @@ BEGIN
 
   -- (3) Harnais : copro seedée (lots + coproprietaires + clé générale)
   v_copro := create_clean_test_copro_seeded('g54');
-  SELECT id INTO v_lot FROM public.lots WHERE copro_id = v_copro ORDER BY created_at LIMIT 1;
+  SELECT id INTO v_lot  FROM public.lots WHERE copro_id = v_copro ORDER BY created_at LIMIT 1;
+  SELECT id INTO v_lot2 FROM public.lots WHERE copro_id = v_copro ORDER BY created_at OFFSET 1 LIMIT 1;
   SELECT id INTO v_seller FROM public.coproprietaires WHERE copro_id = v_copro ORDER BY created_at LIMIT 1;
   SELECT id INTO v_buyer  FROM public.coproprietaires WHERE copro_id = v_copro ORDER BY created_at OFFSET 1 LIMIT 1;
   IF v_lot IS NULL OR v_seller IS NULL THEN
@@ -84,6 +85,14 @@ BEGIN
      AND buyer_name IS NOT NULL AND status = 'draft' AND mutation_type = 'sale';
   IF v_n <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL : enrichissement lot/acheteur v_mutations_overview'; END IF;
 
+  -- mutation_type exposé VERBATIM (l'enum DB est 'succession', le front doit s'y aligner)
+  -- (sur un 2e lot : uq_mutations_active_lot interdit 2 mutations actives/lot)
+  INSERT INTO public.mutations (copro_id, lot_id, seller_owner_id, mutation_type, status)
+  VALUES (v_copro, v_lot2, v_seller, 'succession', 'draft');
+  SELECT count(*) INTO v_n FROM public.v_mutations_overview
+   WHERE copro_id = v_copro AND mutation_type = 'succession';
+  IF v_n <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL : mutation_type succession non exposé'; END IF;
+
   -- (5) Snapshot pré-état → has_pre_etat bascule + v_etat_date_latest enrichie
   -- payload : la contrainte ck_etat_date_payload_parts exige les 3 parties art.5
   INSERT INTO public.etat_date_snapshots (copro_id, mutation_id, lot_id, snapshot_type,
@@ -103,6 +112,15 @@ BEGIN
   SELECT count(*) INTO v_n FROM public.v_dashboard_recent_activity
    WHERE copro_id = v_copro AND activity_type = 'FINANCE';
   IF v_n < 1 THEN RAISE EXCEPTION 'ASSERT FAIL : v_dashboard_recent_activity sans activité finance'; END IF;
+
+  -- branche DOC : un document SANS titre doit produire un label non NULL (fallback file_name)
+  INSERT INTO public.documents (copro_id, file_name, file_path, category, status, visibility)
+  VALUES (v_copro, 'sans-titre.pdf', v_copro||'/sans-titre.pdf', 'autre', 'active',
+          'gestionnaire_seul');
+  SELECT count(*) INTO v_n FROM public.v_dashboard_recent_activity
+   WHERE copro_id = v_copro AND activity_type = 'DOC'
+     AND label = 'Document ajouté: sans-titre.pdf';
+  IF v_n <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL : label DOC NULL sur document sans titre (coalesce manquant)'; END IF;
 
   -- (7) v_dashboard_todos : une AG draft → ligne todo_type='ag_draft'
   INSERT INTO public.ag_meetings (copro_id, title, meeting_type, meeting_date, status)

@@ -172,8 +172,8 @@ union all
     le.created_at, '/maintenance/logbook'
   from public.logbook_entries le
 union all
-  -- Documents
-  select d.copro_id, 'DOC', 'Document ajouté: ' || d.title,
+  -- Documents (title nullable, contrairement aux autres sources → fallback file_name)
+  select d.copro_id, 'DOC', 'Document ajouté: ' || coalesce(d.title, d.file_name),
     d.created_at, '/documents'
   from public.documents d
   where d.status = 'active';

@@ -18,8 +18,8 @@ const createUntypedClient = () => createClient() as any;
 // Types - Database rows
 // ============================================================================
 
-/** Mutation type enum (DB) */
-export type MutationType = 'sale' | 'donation' | 'inheritance' | 'other';
+/** Mutation type enum (DB) : aligné sur l'enum Postgres mutation_type */
+export type MutationType = 'sale' | 'donation' | 'succession' | 'other';
 
 /** Mutation status (DB values) */
 export type DbMutationStatus =
