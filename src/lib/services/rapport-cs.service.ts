@@ -1,10 +1,13 @@
 /**
- * Service de gestion des rapports d'activité du Conseil Syndical
+ * Service de gestion des rapports d'activité du Conseil Syndical.
  *
- * Note: Ce service utilise actuellement des données mockées.
- * Prêt pour l'intégration Supabase (voir les commentaires TODO).
+ * Persistance réelle (0053) : rapports_activite_cs + sections_rapport_cs +
+ * annexes_rapport_cs. Colonnes canoniques EN en base (period_start, title,
+ * status…) — l'API du service reste en camelCase métier FR (titre, statut…),
+ * la traduction vit dans les mappers privés.
  */
 
+import { createClient } from '@/lib/supabase/client';
 import {
   RapportActiviteCS,
   SectionRapportCS,
@@ -16,16 +19,9 @@ import {
   CreateAnnexeData,
 } from '@/types/models/conseil-syndical';
 
-// Données mockées pour le développement
-const MOCK_RAPPORTS: RapportActiviteCS[] = [];
-let mockIdCounter = 1;
-
-/**
- * Génère un ID unique pour le mock
- */
-function generateMockId(): string {
-  return `rapport-cs-${mockIdCounter++}-${Date.now()}`;
-}
+// Tables 0053 absentes des types générés (regen différée) → client untyped
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createUntypedClient = () => createClient() as any;
 
 /**
  * Utilitaire pour supprimer les balises HTML
@@ -34,89 +30,62 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+/** date → 'YYYY-MM-DD' (colonne date, pas timestamptz) */
+function toDateOnly(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+const RAPPORT_SELECT = `
+  *,
+  sections:sections_rapport_cs(*),
+  annexes:annexes_rapport_cs(*)
+`;
+
 /**
  * Service de gestion des rapports d'activité du Conseil Syndical
  */
 export class RapportCSService {
-  // TODO: Remplacer par createClient de Supabase
-  // private supabase = createClient();
-
   // ========================================
   // CRUD RAPPORT
   // ========================================
 
   /**
-   * Crée un nouveau rapport
+   * Crée un nouveau rapport.
+   * NB : conseilSyndicalId (legacy) est ignoré — le conseil n'est pas une
+   * entité persistée, le rapport est rattaché à la copro.
    */
   async creerRapport(data: CreateRapportCSData): Promise<RapportActiviteCS> {
-    // TODO: Intégration Supabase
-    /*
-    const { data: rapport, error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { data: rapport, error } = await supabase
       .from('rapports_activite_cs')
       .insert({
-        conseil_syndical_id: data.conseilSyndicalId,
-        copropriete_id: data.coproprieteId,
-        auteur_id: data.auteurId,
-        periode_debut: data.periodeDebut.toISOString(),
-        periode_fin: data.periodeFin.toISOString(),
-        titre: data.titre,
-        statut: 'brouillon',
+        copro_id: data.coproprieteId,
+        author_id: data.auteurId || null,
+        period_start: toDateOnly(data.periodeDebut),
+        period_end: toDateOnly(data.periodeFin),
+        title: data.titre,
+        status: 'brouillon',
       })
       .select()
       .single();
 
     if (error) throw new Error(`Erreur création rapport: ${error.message}`);
     return this.mapToRapport(rapport);
-    */
-
-    const newRapport: RapportActiviteCS = {
-      id: generateMockId(),
-      conseilSyndicalId: data.conseilSyndicalId,
-      coproprieteId: data.coproprieteId,
-      auteurId: data.auteurId,
-      periodeDebut: data.periodeDebut,
-      periodeFin: data.periodeFin,
-      titre: data.titre,
-      introduction: '',
-      contenu: '',
-      contenuBrut: '',
-      sections: [],
-      annexes: [],
-      statut: 'brouillon',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    MOCK_RAPPORTS.push(newRapport);
-    return newRapport;
   }
 
   /**
-   * Récupère un rapport par ID
+   * Récupère un rapport par ID (avec sections et annexes)
    */
   async getRapport(id: string): Promise<RapportActiviteCS | null> {
-    // TODO: Intégration Supabase
-    /*
-    const { data, error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { data, error } = await supabase
       .from('rapports_activite_cs')
-      .select(`
-        *,
-        sections:sections_rapport_cs(*),
-        annexes:annexes_rapport_cs(*)
-      `)
+      .select(RAPPORT_SELECT)
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw new Error(`Erreur récupération rapport: ${error.message}`);
-    }
-
-    return this.mapToRapport(data);
-    */
-
-    const rapport = MOCK_RAPPORTS.find(r => r.id === id);
-    return rapport || null;
+    if (error) throw new Error(`Erreur récupération rapport: ${error.message}`);
+    return data ? this.mapToRapport(data) : null;
   }
 
   /**
@@ -126,41 +95,23 @@ export class RapportCSService {
     coproprieteId: string,
     options: { statut?: StatutRapportCS; agId?: string } = {}
   ): Promise<RapportActiviteCS[]> {
-    // TODO: Intégration Supabase
-    /*
-    let query = this.supabase
+    const supabase = createUntypedClient();
+    let query = supabase
       .from('rapports_activite_cs')
-      .select('*')
-      .eq('copropriete_id', coproprieteId)
+      .select(RAPPORT_SELECT)
+      .eq('copro_id', coproprieteId)
       .order('created_at', { ascending: false });
 
     if (options.statut) {
-      query = query.eq('statut', options.statut);
+      query = query.eq('status', options.statut);
     }
-
     if (options.agId) {
       query = query.eq('ag_id', options.agId);
     }
 
     const { data, error } = await query;
-
     if (error) throw new Error(`Erreur liste rapports: ${error.message}`);
-    return data.map(this.mapToRapport);
-    */
-
-    let rapports = MOCK_RAPPORTS.filter(r => r.coproprieteId === coproprieteId);
-
-    if (options.statut) {
-      rapports = rapports.filter(r => r.statut === options.statut);
-    }
-
-    if (options.agId) {
-      rapports = rapports.filter(r => r.agId === options.agId);
-    }
-
-    return rapports.sort((a, b) =>
-      (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
-    );
+    return (data || []).map((r: Record<string, unknown>) => this.mapToRapport(r));
   }
 
   /**
@@ -170,46 +121,25 @@ export class RapportCSService {
     id: string,
     contenu: UpdateRapportCSContenu
   ): Promise<RapportActiviteCS> {
-    // TODO: Intégration Supabase
-    /*
-    const updates: Record<string, unknown> = {
-      updated_at: new Date().toISOString(),
-    };
+    const supabase = createUntypedClient();
+    const updates: Record<string, unknown> = {};
 
-    if (contenu.titre) updates.titre = contenu.titre;
-    if (contenu.introduction) updates.introduction = contenu.introduction;
-    if (contenu.contenu) {
-      updates.contenu = contenu.contenu;
-      updates.contenu_brut = stripHtml(contenu.contenu);
+    if (contenu.titre !== undefined) updates.title = contenu.titre;
+    if (contenu.introduction !== undefined) updates.introduction = contenu.introduction;
+    if (contenu.contenu !== undefined) {
+      updates.content = contenu.contenu;
+      updates.content_text = stripHtml(contenu.contenu);
     }
 
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('rapports_activite_cs')
       .update(updates)
       .eq('id', id)
-      .select()
+      .select(RAPPORT_SELECT)
       .single();
 
     if (error) throw new Error(`Erreur mise à jour rapport: ${error.message}`);
     return this.mapToRapport(data);
-    */
-
-    const index = MOCK_RAPPORTS.findIndex(r => r.id === id);
-    if (index === -1) {
-      throw new Error(`Rapport non trouvé: ${id}`);
-    }
-
-    const rapport = MOCK_RAPPORTS[index];
-    if (contenu.titre) rapport.titre = contenu.titre;
-    if (contenu.introduction) rapport.introduction = contenu.introduction;
-    if (contenu.contenu) {
-      rapport.contenu = contenu.contenu;
-      rapport.contenuBrut = stripHtml(contenu.contenu);
-    }
-    rapport.updatedAt = new Date();
-
-    MOCK_RAPPORTS[index] = rapport;
-    return rapport;
   }
 
   // ========================================
@@ -223,37 +153,30 @@ export class RapportCSService {
     rapportId: string,
     section: CreateSectionData
   ): Promise<SectionRapportCS> {
-    // TODO: Intégration Supabase
-    /*
-    const { data, error } = await this.supabase
+    const supabase = createUntypedClient();
+
+    // copro_id obligatoire (RLS) : dérivé du rapport
+    const { data: rapport, error: rapportError } = await supabase
+      .from('rapports_activite_cs')
+      .select('copro_id')
+      .eq('id', rapportId)
+      .single();
+    if (rapportError) throw new Error(`Rapport non trouvé: ${rapportId}`);
+
+    const { data, error } = await supabase
       .from('sections_rapport_cs')
       .insert({
+        copro_id: rapport.copro_id,
         rapport_id: rapportId,
-        titre: section.titre,
-        contenu: section.contenu,
-        ordre: section.ordre,
+        title: section.titre,
+        content: section.contenu,
+        sort_order: section.ordre,
       })
       .select()
       .single();
 
     if (error) throw new Error(`Erreur ajout section: ${error.message}`);
     return this.mapToSection(data);
-    */
-
-    const rapport = MOCK_RAPPORTS.find(r => r.id === rapportId);
-    if (!rapport) {
-      throw new Error(`Rapport non trouvé: ${rapportId}`);
-    }
-
-    const newSection: SectionRapportCS = {
-      id: `section-${Date.now()}`,
-      titre: section.titre,
-      contenu: section.contenu,
-      ordre: section.ordre,
-    };
-
-    rapport.sections.push(newSection);
-    return newSection;
   }
 
   /**
@@ -263,55 +186,34 @@ export class RapportCSService {
     sectionId: string,
     updates: Partial<CreateSectionData>
   ): Promise<SectionRapportCS> {
-    // TODO: Intégration Supabase
-    /*
-    const { data, error } = await this.supabase
+    const supabase = createUntypedClient();
+    const row: Record<string, unknown> = {};
+    if (updates.titre !== undefined) row.title = updates.titre;
+    if (updates.contenu !== undefined) row.content = updates.contenu;
+    if (updates.ordre !== undefined) row.sort_order = updates.ordre;
+
+    const { data, error } = await supabase
       .from('sections_rapport_cs')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(row)
       .eq('id', sectionId)
       .select()
       .single();
 
     if (error) throw new Error(`Erreur mise à jour section: ${error.message}`);
     return this.mapToSection(data);
-    */
-
-    for (const rapport of MOCK_RAPPORTS) {
-      const sectionIndex = rapport.sections.findIndex(s => s.id === sectionId);
-      if (sectionIndex !== -1) {
-        const section = rapport.sections[sectionIndex];
-        if (updates.titre !== undefined) section.titre = updates.titre;
-        if (updates.contenu !== undefined) section.contenu = updates.contenu;
-        if (updates.ordre !== undefined) section.ordre = updates.ordre;
-        rapport.sections[sectionIndex] = section;
-        return section;
-      }
-    }
-
-    throw new Error(`Section non trouvée: ${sectionId}`);
   }
 
   /**
    * Supprime une section
    */
   async supprimerSection(sectionId: string): Promise<void> {
-    // TODO: Intégration Supabase
-    /*
-    const { error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { error } = await supabase
       .from('sections_rapport_cs')
       .delete()
       .eq('id', sectionId);
 
     if (error) throw new Error(`Erreur suppression section: ${error.message}`);
-    */
-
-    for (const rapport of MOCK_RAPPORTS) {
-      const sectionIndex = rapport.sections.findIndex(s => s.id === sectionId);
-      if (sectionIndex !== -1) {
-        rapport.sections.splice(sectionIndex, 1);
-        return;
-      }
-    }
   }
 
   // ========================================
@@ -319,90 +221,61 @@ export class RapportCSService {
   // ========================================
 
   /**
-   * Ajoute une annexe au rapport
+   * Ajoute une annexe au rapport (ordre = max existant + 1)
    */
   async ajouterAnnexe(
     rapportId: string,
     annexe: CreateAnnexeData
   ): Promise<AnnexeRapportCS> {
-    // TODO: Intégration Supabase
-    /*
-    // Récupérer le prochain ordre
-    const { data: existantes } = await this.supabase
+    const supabase = createUntypedClient();
+
+    const { data: rapport, error: rapportError } = await supabase
+      .from('rapports_activite_cs')
+      .select('copro_id')
+      .eq('id', rapportId)
+      .single();
+    if (rapportError) throw new Error(`Rapport non trouvé: ${rapportId}`);
+
+    const { data: existantes } = await supabase
       .from('annexes_rapport_cs')
-      .select('ordre')
+      .select('sort_order')
       .eq('rapport_id', rapportId)
-      .order('ordre', { ascending: false })
+      .order('sort_order', { ascending: false })
       .limit(1);
+    const ordre = existantes && existantes.length > 0 ? existantes[0].sort_order + 1 : 1;
 
-    const ordre = existantes && existantes.length > 0 ? existantes[0].ordre + 1 : 1;
-
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('annexes_rapport_cs')
       .insert({
+        copro_id: rapport.copro_id,
         rapport_id: rapportId,
-        nom: annexe.nom,
-        description: annexe.description,
-        type: annexe.type,
-        fichier_url: annexe.fichierUrl,
-        fichier_nom: annexe.fichierNom,
-        fichier_taille: annexe.fichierTaille,
-        contenu_integre: annexe.contenuIntegre,
-        ordre,
+        name: annexe.nom,
+        description: annexe.description ?? null,
+        kind: annexe.type,
+        file_url: annexe.fichierUrl ?? null,
+        file_name: annexe.fichierNom ?? null,
+        file_size: annexe.fichierTaille ?? null,
+        embedded_content: annexe.contenuIntegre ?? null,
+        sort_order: ordre,
       })
       .select()
       .single();
 
     if (error) throw new Error(`Erreur ajout annexe: ${error.message}`);
     return this.mapToAnnexe(data);
-    */
-
-    const rapport = MOCK_RAPPORTS.find(r => r.id === rapportId);
-    if (!rapport) {
-      throw new Error(`Rapport non trouvé: ${rapportId}`);
-    }
-
-    const maxOrdre = rapport.annexes.reduce((max, a) => Math.max(max, a.ordre), 0);
-
-    const newAnnexe: AnnexeRapportCS = {
-      id: `annexe-${Date.now()}`,
-      rapportId,
-      nom: annexe.nom,
-      description: annexe.description,
-      type: annexe.type,
-      fichierUrl: annexe.fichierUrl,
-      fichierNom: annexe.fichierNom,
-      fichierTaille: annexe.fichierTaille,
-      contenuIntegre: annexe.contenuIntegre,
-      ordre: maxOrdre + 1,
-      createdAt: new Date().toISOString(),
-    };
-
-    rapport.annexes.push(newAnnexe);
-    return newAnnexe;
   }
 
   /**
    * Supprime une annexe
    */
   async supprimerAnnexe(annexeId: string): Promise<void> {
-    // TODO: Intégration Supabase
-    /*
-    const { error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { error } = await supabase
       .from('annexes_rapport_cs')
       .delete()
       .eq('id', annexeId);
 
     if (error) throw new Error(`Erreur suppression annexe: ${error.message}`);
-    */
-
-    for (const rapport of MOCK_RAPPORTS) {
-      const annexeIndex = rapport.annexes.findIndex(a => a.id === annexeId);
-      if (annexeIndex !== -1) {
-        rapport.annexes.splice(annexeIndex, 1);
-        return;
-      }
-    }
   }
 
   // ========================================
@@ -417,45 +290,23 @@ export class RapportCSService {
     nouveauStatut: StatutRapportCS,
     membreId?: string
   ): Promise<RapportActiviteCS> {
-    // TODO: Intégration Supabase
-    /*
-    const updates: Record<string, unknown> = {
-      statut: nouveauStatut,
-      updated_at: new Date().toISOString(),
-    };
+    const supabase = createUntypedClient();
+    const updates: Record<string, unknown> = { status: nouveauStatut };
 
     if (nouveauStatut === 'valide' && membreId) {
-      updates.valide_par = membreId;
-      updates.date_validation = new Date().toISOString();
+      updates.validated_by = membreId;
+      updates.validated_at = new Date().toISOString();
     }
 
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('rapports_activite_cs')
       .update(updates)
       .eq('id', id)
-      .select()
+      .select(RAPPORT_SELECT)
       .single();
 
     if (error) throw new Error(`Erreur changement statut: ${error.message}`);
     return this.mapToRapport(data);
-    */
-
-    const index = MOCK_RAPPORTS.findIndex(r => r.id === id);
-    if (index === -1) {
-      throw new Error(`Rapport non trouvé: ${id}`);
-    }
-
-    const rapport = MOCK_RAPPORTS[index];
-    rapport.statut = nouveauStatut;
-    rapport.updatedAt = new Date();
-
-    if (nouveauStatut === 'valide' && membreId) {
-      rapport.validePar = membreId;
-      rapport.dateValidation = new Date();
-    }
-
-    MOCK_RAPPORTS[index] = rapport;
-    return rapport;
   }
 
   /**
@@ -476,35 +327,16 @@ export class RapportCSService {
    * Publie le rapport (le lie à une AG)
    */
   async publierRapport(id: string, agId: string): Promise<RapportActiviteCS> {
-    // TODO: Intégration Supabase
-    /*
-    const { data, error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { data, error } = await supabase
       .from('rapports_activite_cs')
-      .update({
-        statut: 'publie',
-        ag_id: agId,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ status: 'publie', ag_id: agId })
       .eq('id', id)
-      .select()
+      .select(RAPPORT_SELECT)
       .single();
 
     if (error) throw new Error(`Erreur publication rapport: ${error.message}`);
     return this.mapToRapport(data);
-    */
-
-    const index = MOCK_RAPPORTS.findIndex(r => r.id === id);
-    if (index === -1) {
-      throw new Error(`Rapport non trouvé: ${id}`);
-    }
-
-    const rapport = MOCK_RAPPORTS[index];
-    rapport.statut = 'publie';
-    rapport.agId = agId;
-    rapport.updatedAt = new Date();
-
-    MOCK_RAPPORTS[index] = rapport;
-    return rapport;
   }
 
   // ========================================
@@ -512,34 +344,21 @@ export class RapportCSService {
   // ========================================
 
   /**
-   * Récupère le rapport lié à une AG
+   * Récupère le rapport publié lié à une AG
    */
   async getRapportPourAG(agId: string): Promise<RapportActiviteCS | null> {
-    // TODO: Intégration Supabase
-    /*
-    const { data, error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { data, error } = await supabase
       .from('rapports_activite_cs')
-      .select(`
-        *,
-        sections:sections_rapport_cs(*),
-        annexes:annexes_rapport_cs(*)
-      `)
+      .select(RAPPORT_SELECT)
       .eq('ag_id', agId)
-      .eq('statut', 'publie')
-      .single();
+      .eq('status', 'publie')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw new Error(`Erreur récupération rapport AG: ${error.message}`);
-    }
-
-    return this.mapToRapport(data);
-    */
-
-    const rapport = MOCK_RAPPORTS.find(
-      r => r.agId === agId && r.statut === 'publie'
-    );
-    return rapport || null;
+    if (error) throw new Error(`Erreur récupération rapport AG: ${error.message}`);
+    return data ? this.mapToRapport(data) : null;
   }
 
   /**
@@ -549,33 +368,16 @@ export class RapportCSService {
     rapportId: string,
     resolutionId: string
   ): Promise<RapportActiviteCS> {
-    // TODO: Intégration Supabase
-    /*
-    const { data, error } = await this.supabase
+    const supabase = createUntypedClient();
+    const { data, error } = await supabase
       .from('rapports_activite_cs')
-      .update({
-        resolution_id: resolutionId,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ resolution_id: resolutionId })
       .eq('id', rapportId)
-      .select()
+      .select(RAPPORT_SELECT)
       .single();
 
     if (error) throw new Error(`Erreur liaison résolution: ${error.message}`);
     return this.mapToRapport(data);
-    */
-
-    const index = MOCK_RAPPORTS.findIndex(r => r.id === rapportId);
-    if (index === -1) {
-      throw new Error(`Rapport non trouvé: ${rapportId}`);
-    }
-
-    const rapport = MOCK_RAPPORTS[index];
-    rapport.resolutionId = resolutionId;
-    rapport.updatedAt = new Date();
-
-    MOCK_RAPPORTS[index] = rapport;
-    return rapport;
   }
 
   /**
@@ -603,29 +405,35 @@ export class RapportCSService {
   }
 
   // ========================================
-  // UTILITAIRES PRIVÉS (pour Supabase)
+  // UTILITAIRES PRIVÉS (colonnes EN → API camelCase FR)
   // ========================================
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private mapToRapport(data: any): RapportActiviteCS {
+    const sections = ((data.sections as any[]) || [])
+      .map((s) => this.mapToSection(s))
+      .sort((a, b) => a.ordre - b.ordre);
+    const annexes = ((data.annexes as any[]) || [])
+      .map((a) => this.mapToAnnexe(a))
+      .sort((a, b) => a.ordre - b.ordre);
     return {
       id: data.id,
-      conseilSyndicalId: data.conseil_syndical_id,
-      coproprieteId: data.copropriete_id,
-      periodeDebut: new Date(data.periode_debut),
-      periodeFin: new Date(data.periode_fin),
-      titre: data.titre,
+      conseilSyndicalId: '', // legacy — le conseil n'est pas une entité persistée
+      coproprieteId: data.copro_id,
+      periodeDebut: new Date(data.period_start),
+      periodeFin: new Date(data.period_end),
+      titre: data.title,
       introduction: data.introduction || '',
-      contenu: data.contenu || '',
-      contenuBrut: data.contenu_brut || '',
-      sections: data.sections?.map(this.mapToSection.bind(this)) || [],
-      annexes: data.annexes?.map(this.mapToAnnexe.bind(this)) || [],
-      statut: data.statut,
-      agId: data.ag_id,
-      resolutionId: data.resolution_id,
-      validePar: data.valide_par,
-      dateValidation: data.date_validation ? new Date(data.date_validation) : undefined,
-      auteurId: data.auteur_id,
+      contenu: data.content || '',
+      contenuBrut: data.content_text || '',
+      sections,
+      annexes,
+      statut: data.status,
+      agId: data.ag_id ?? undefined,
+      resolutionId: data.resolution_id ?? undefined,
+      validePar: data.validated_by ?? undefined,
+      dateValidation: data.validated_at ? new Date(data.validated_at) : undefined,
+      auteurId: data.author_id ?? '',
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
     };
@@ -634,9 +442,9 @@ export class RapportCSService {
   private mapToSection(data: any): SectionRapportCS {
     return {
       id: data.id,
-      ordre: data.ordre,
-      titre: data.titre,
-      contenu: data.contenu || '',
+      ordre: data.sort_order,
+      titre: data.title,
+      contenu: data.content || '',
     };
   }
 
@@ -644,14 +452,14 @@ export class RapportCSService {
     return {
       id: data.id,
       rapportId: data.rapport_id,
-      nom: data.nom,
-      description: data.description,
-      type: data.type,
-      fichierUrl: data.fichier_url,
-      fichierNom: data.fichier_nom,
-      fichierTaille: data.fichier_taille,
-      contenuIntegre: data.contenu_integre,
-      ordre: data.ordre,
+      nom: data.name,
+      description: data.description ?? undefined,
+      type: data.kind,
+      fichierUrl: data.file_url ?? undefined,
+      fichierNom: data.file_name ?? undefined,
+      fichierTaille: data.file_size ?? undefined,
+      contenuIntegre: data.embedded_content ?? undefined,
+      ordre: data.sort_order,
       createdAt: data.created_at,
     };
   }
@@ -660,3 +468,4 @@ export class RapportCSService {
 
 // Export singleton
 export const rapportCSService = new RapportCSService();
+export default rapportCSService;

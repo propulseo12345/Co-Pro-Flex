@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
+import { useSupabase } from '@/hooks/useSupabase';
 import { rapportCSService } from '@/lib/services/rapport-cs.service';
 import type { RapportActiviteCS } from '@/types/models/conseil-syndical';
 
@@ -20,6 +21,7 @@ export interface MembreCSDisplay {
 
 export function useConseilSyndicalPage() {
   const { currentCoproId } = useCopro();
+  const { user } = useSupabase();
   const supabase = useMemo(() => createUntypedClient(), []);
 
   const [activeTab, setActiveTab] = useState<'membres' | 'rapports'>('rapports');
@@ -52,36 +54,13 @@ export function useConseilSyndicalPage() {
         );
       }
 
-      // Charger les rapports
-      const { data: rapportsData } = await supabase
-        .from('council_documents')
-        .select('*')
-        .eq('copro_id', currentCoproId)
-        .eq('document_type', 'rapport_activite')
-        .order('created_at', { ascending: false });
-
-      if (rapportsData) {
-        setRapports(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          rapportsData.map((r: any) => ({
-            id: r.id,
-            conseilSyndicalId: r.council_id ?? '',
-            coproprieteId: r.copro_id,
-            periodeDebut: new Date(r.period_start ?? r.created_at),
-            periodeFin: new Date(r.period_end ?? r.created_at),
-            titre: r.title ?? 'Rapport sans titre',
-            introduction: r.introduction ?? '',
-            contenu: r.content ?? '',
-            contenuBrut: r.content_text ?? '',
-            sections: r.sections ?? [],
-            annexes: r.annexes ?? [],
-            statut: r.status ?? 'brouillon',
-            agId: r.ag_id ?? undefined,
-            auteurId: r.author_id ?? '',
-            createdAt: new Date(r.created_at),
-            updatedAt: new Date(r.updated_at ?? r.created_at),
-          }))
-        );
+      // Charger les rapports (table dédiée 0053 — council_documents est une
+      // table de LIENS vers la GED, elle n'a jamais porté les rapports)
+      try {
+        const rapportsData = await rapportCSService.listerRapports(currentCoproId!);
+        setRapports(rapportsData);
+      } catch (error) {
+        console.error('Erreur chargement rapports CS:', error);
       }
     }
 
@@ -90,6 +69,10 @@ export function useConseilSyndicalPage() {
 
   const handleCreateRapport = useCallback(async () => {
     if (!currentCoproId) return;
+    if (!user?.id) {
+      alert('Session expirée — reconnectez-vous pour créer un rapport.');
+      return;
+    }
 
     const now = new Date();
     const periodeDebut = new Date(now.getFullYear() - 1, 5, 1);
@@ -97,9 +80,9 @@ export function useConseilSyndicalPage() {
 
     try {
       const rapport = await rapportCSService.creerRapport({
-        conseilSyndicalId: 'cs-1',
+        conseilSyndicalId: '', // legacy, ignoré par le service (0053)
         coproprieteId: currentCoproId,
-        auteurId: '1',
+        auteurId: user.id,
         periodeDebut,
         periodeFin,
         titre: `Rapport d'activité ${periodeDebut.getFullYear()}-${periodeFin.getFullYear()}`,
@@ -110,7 +93,7 @@ export function useConseilSyndicalPage() {
       console.error('Erreur création rapport:', error);
       alert('Erreur lors de la création du rapport');
     }
-  }, [currentCoproId]);
+  }, [currentCoproId, user?.id]);
 
   return {
     activeTab,
