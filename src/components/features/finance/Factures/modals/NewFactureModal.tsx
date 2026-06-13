@@ -1,13 +1,21 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { X, Plus, AlertCircle, Calendar } from 'lucide-react';
+import { useForm, useWatch, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
+import { X, Plus, AlertCircle } from 'lucide-react';
 import { NewFactureForm, PJFacture, calculerDateEcheanceDefaut, PosteBudget } from '../types';
 import type { PosteBudgetData } from '@/components/features/finance/Budget/types';
 import { detectPosteBudgetaire, getResteDisponible, formatCurrency, POSTE_BUDGET_LABELS } from '../utils';
 import { PosteBudgetSelector } from '../PosteBudgetSelector';
 import { FacturePJSection } from '../PJ';
+import { FormField } from '@/components/ui/FormField';
+import { factureSchema } from '@/lib/validation/finance/facture';
 import styles from '../Factures.module.css';
+
+type FactureInput = z.input<typeof factureSchema>;
+type FactureOutput = z.output<typeof factureSchema>;
 
 interface Supplier {
   id: string;
@@ -25,63 +33,112 @@ interface NewFactureModalProps {
   onCreate: () => void;
 }
 
-export function NewFactureModal({ form, postesBudget, suppliers = [], createError, isCreating, onFormChange, onClose, onCreate }: NewFactureModalProps) {
+/** Date du jour au format YYYY-MM-DD en fuseau local. */
+function todayISO(): string {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+export function NewFactureModal({
+  form,
+  postesBudget,
+  suppliers = [],
+  createError,
+  isCreating,
+  onFormChange,
+  onClose,
+  onCreate,
+}: NewFactureModalProps) {
   const [pjError, setPjError] = useState<string | null>(null);
   const [suggestedPoste, setSuggestedPoste] = useState<PosteBudget | null>(null);
 
-  // Détection automatique du poste budgétaire quand le fournisseur change
-  useEffect(() => {
-    if (form.fournisseur) {
-      const detected = detectPosteBudgetaire({ fournisseur: form.fournisseur });
-      setSuggestedPoste(detected);
-      // Auto-remplir si le poste n'est pas encore défini
-      if (!form.posteBudgetaire && detected) {
-        onFormChange({ ...form, posteBudgetaire: detected });
-      }
-    }
-  }, [form.fournisseur]);
+  const initialDate = form.date || todayISO();
+  const initialEcheance = form.dateEcheance || calculerDateEcheanceDefaut(initialDate);
 
-  // Ref pour éviter les closures stale
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<FactureInput, unknown, FactureOutput>({
+    resolver: zodResolver(factureSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      date: initialDate,
+      dateEcheance: initialEcheance,
+      fournisseur: form.fournisseur ?? '',
+      reference: form.reference ?? '',
+      montant: form.montant ?? '',
+      posteBudgetaire: (form.posteBudgetaire as FactureInput['posteBudgetaire']) ?? undefined,
+    },
+  });
+
+  // Observer le montant pour le passer à PosteBudgetSelector (warning dépassement).
+  // useWatch évite de réveiller la règle lint react-hooks/exhaustive-deps sur watch().
+  const watchedMontantStr = useWatch({ control, name: 'montant' });
+  const watchedFournisseur = useWatch({ control, name: 'fournisseur' });
+  const numericMontant = Number(watchedMontantStr) || 0;
+
+  // Ref pour éviter les closures stale dans handlePJChange
   const formRef = useRef(form);
   useEffect(() => {
     formRef.current = form;
   }, [form]);
 
-  const handlePJChange = useCallback((piecesJointes: PJFacture[]) => {
-    // Utilise la ref pour avoir la valeur courante du form
-    onFormChange({ ...formRef.current, piecesJointes });
+  // Détection automatique du poste budgétaire quand le fournisseur change.
+  // On synchronise aussi vers le parent via onFormChange.
+  useEffect(() => {
+    if (watchedFournisseur) {
+      const detected = detectPosteBudgetaire({ fournisseur: watchedFournisseur });
+      setSuggestedPoste(detected);
+      if (!formRef.current.posteBudgetaire && detected) {
+        onFormChange({ ...formRef.current, fournisseur: watchedFournisseur, posteBudgetaire: detected });
+        setValue('posteBudgetaire', detected as FactureInput['posteBudgetaire'], { shouldValidate: true });
+      } else {
+        onFormChange({ ...formRef.current, fournisseur: watchedFournisseur });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedFournisseur]);
+
+  const handlePJChange = useCallback(
+    (piecesJointes: PJFacture[]) => {
+      onFormChange({ ...formRef.current, piecesJointes });
+      setPjError(null);
+    },
+    [onFormChange]
+  );
+
+  // Appelé par RHF après validation Zod réussie.
+  // submissionLogicTouched: false — on construit le NewFactureForm validé,
+  // on l'envoie au parent via onFormChange, puis on appelle onCreate().
+  const onValid = (data: FactureOutput) => {
     setPjError(null);
-  }, [onFormChange]);
 
-  // Quand la date de facture change, recalculer l'échéance par défaut
-  const handleDateChange = useCallback((newDate: string) => {
-    const dateEcheance = newDate ? calculerDateEcheanceDefaut(newDate) : '';
-    onFormChange({ ...form, date: newDate, dateEcheance });
-  }, [form, onFormChange]);
-
-  const handleCreate = () => {
-    // Vérifier que la date d'échéance est renseignée
-    if (!form.dateEcheance) {
-      setPjError('La date d\'échéance est obligatoire');
-      return;
-    }
-    // Vérifier que le poste budgétaire est renseigné
-    if (!form.posteBudgetaire) {
-      setPjError('Le poste budgétaire est obligatoire');
-      return;
-    }
-    // Vérifier le dépassement budgétaire
-    const montant = parseFloat(form.montant) || 0;
-    const resteDisponible = getResteDisponible(form.posteBudgetaire, postesBudget);
-    if (resteDisponible !== null && montant > resteDisponible) {
+    // Vérification dépassement budgétaire : warning d'UI, jamais bloquant.
+    const resteDisponible = getResteDisponible(data.posteBudgetaire as PosteBudget, postesBudget);
+    if (resteDisponible !== null && data.montant > resteDisponible) {
       const confirmDepassement = window.confirm(
-        `Attention : Cette facture de ${formatCurrency(montant)} dépasse le budget restant ` +
-        `de ${formatCurrency(resteDisponible)} pour le poste "${POSTE_BUDGET_LABELS[form.posteBudgetaire]}".\n\n` +
-        `Cette action nécessite une validation du syndic. Continuer ?`
+        `Attention : Cette facture de ${formatCurrency(data.montant)} dépasse le budget restant ` +
+          `de ${formatCurrency(resteDisponible)} pour le poste "${POSTE_BUDGET_LABELS[data.posteBudgetaire as PosteBudget]}".\n\n` +
+          `Cette action nécessite une validation du syndic. Continuer ?`
       );
       if (!confirmDepassement) return;
     }
-    setPjError(null);
+
+    // Synchroniser le parent avec les données validées/coercées.
+    onFormChange({
+      ...formRef.current,
+      date: data.date,
+      dateEcheance: data.dateEcheance,
+      fournisseur: data.fournisseur,
+      reference: data.reference,
+      montant: String(data.montant),
+      posteBudgetaire: data.posteBudgetaire as PosteBudget,
+    });
+
+    // Appel de soumission identique à l'original — payload/RPC inchangés.
     onCreate();
   };
 
@@ -95,141 +152,157 @@ export function NewFactureModal({ form, postesBudget, suppliers = [], createErro
         aria-labelledby="new-facture-modal-title"
       >
         <div className={styles.modalHeader}>
-          <h2 id="new-facture-modal-title" className={styles.modalTitle}>Nouvelle facture</h2>
+          <h2 id="new-facture-modal-title" className={styles.modalTitle}>
+            Nouvelle facture
+          </h2>
           <button className={styles.modalClose} onClick={onClose} aria-label="Fermer">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
 
-        <div className={styles.modalBody}>
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="new-date">Date facture <span className={styles.required}>*</span></label>
-              <input
-                id="new-date"
+        <form onSubmit={handleSubmit(onValid)}>
+          <div className={styles.modalBody}>
+            <div className={styles.formRow}>
+              <FormField
+                label="Date facture"
+                required
                 type="date"
-                value={form.date}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className={styles.formInput}
+                error={errors.date?.message}
+                {...register('date', {
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                    const newDate = e.target.value;
+                    const echeance = newDate ? calculerDateEcheanceDefaut(newDate) : '';
+                    setValue('dateEcheance', echeance, { shouldValidate: true });
+                    onFormChange({ ...formRef.current, date: newDate, dateEcheance: echeance });
+                  },
+                })}
+              />
+
+              <FormField
+                label="Date d'échéance"
+                required
+                type="date"
+                hint="30 jours fin de mois par défaut"
+                error={errors.dateEcheance?.message}
+                {...register('dateEcheance', {
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                    onFormChange({ ...formRef.current, dateEcheance: e.target.value });
+                  },
+                })}
               />
             </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="new-echeance">
-                Date d&apos;échéance <span className={styles.required}>*</span>
-                <span className={styles.labelHint}>(30j fin de mois par défaut)</span>
-              </label>
-              <div className={styles.inputWithIcon}>
-                <Calendar size={16} className={styles.inputIcon} aria-hidden="true" />
-                <input
-                  id="new-echeance"
-                  type="date"
-                  value={form.dateEcheance}
-                  onChange={(e) => onFormChange({ ...form, dateEcheance: e.target.value })}
-                  className={styles.formInput}
-                  min={form.date}
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="new-fournisseur">Fournisseur <span className={styles.required}>*</span></label>
-            <input
-              id="new-fournisseur"
+            <FormField
+              label="Fournisseur"
+              required
               type="text"
               list="fournisseurs-list"
-              value={form.fournisseur}
-              onChange={(e) => onFormChange({ ...form, fournisseur: e.target.value })}
-              className={styles.formInput}
               placeholder="Saisir ou sélectionner un fournisseur..."
               autoComplete="off"
+              error={errors.fournisseur?.message}
+              {...register('fournisseur')}
             />
             <datalist id="fournisseurs-list">
               {suppliers.map((s) => (
                 <option key={s.id} value={s.name} />
               ))}
             </datalist>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="new-reference">Référence <span className={styles.required}>*</span></label>
-            <input
-              id="new-reference"
+            <FormField
+              label="Référence"
+              required
               type="text"
-              value={form.reference}
-              onChange={(e) => onFormChange({ ...form, reference: e.target.value })}
-              className={styles.formInput}
               placeholder="Ex: FAC-2025-001"
+              error={errors.reference?.message}
+              {...register('reference')}
             />
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="new-montant">Montant (EUR) <span className={styles.required}>*</span></label>
-            <input
-              id="new-montant"
+            <FormField
+              label="Montant (EUR)"
+              required
               type="number"
               step="0.01"
-              value={form.montant}
-              onChange={(e) => onFormChange({ ...form, montant: e.target.value })}
-              className={styles.formInput}
               placeholder="Ex: 1250.00"
+              error={errors.montant?.message}
+              {...register('montant')}
             />
-          </div>
 
-          <div className={styles.formGroup}>
-            <label>Poste budgétaire <span className={styles.required}>*</span></label>
-            <PosteBudgetSelector
-              value={form.posteBudgetaire}
-              onChange={(poste) => onFormChange({ ...form, posteBudgetaire: poste })}
-              montantFacture={parseFloat(form.montant) || 0}
-              postesBudget={postesBudget}
-              suggestedPoste={suggestedPoste}
-              required
-            />
-          </div>
+            {/* PosteBudgetSelector : composant custom non natif → Controller */}
+            <div className={styles.formGroup}>
+              <label>
+                Poste budgétaire <span className={styles.required}>*</span>
+              </label>
+              <Controller
+                control={control}
+                name="posteBudgetaire"
+                render={({ field }) => (
+                  <PosteBudgetSelector
+                    value={field.value as PosteBudget | undefined}
+                    onChange={(poste) => {
+                      field.onChange(poste);
+                      onFormChange({ ...formRef.current, posteBudgetaire: poste });
+                    }}
+                    montantFacture={numericMontant}
+                    postesBudget={postesBudget}
+                    suggestedPoste={suggestedPoste}
+                    required
+                  />
+                )}
+              />
+              {errors.posteBudgetaire?.message && (
+                <p className={styles.errorMessage} role="alert">
+                  {errors.posteBudgetaire.message}
+                </p>
+              )}
+            </div>
 
-          {/* Section Pièces Jointes */}
-          <div className={styles.formGroup}>
-            <FacturePJSection
-              initialPJ={form.piecesJointes || []}
-              onChange={handlePJChange}
-              required={false}
-            />
-            {/* Avertissement non-bloquant si pas de PJ */}
-            {(!form.piecesJointes || form.piecesJointes.length === 0) && (
-              <div className={styles.warningMessage} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', backgroundColor: 'var(--badge-warning-bg)', borderRadius: '0.375rem', color: 'var(--color-warning-text, #92400e)', fontSize: '0.875rem' }}>
-                <AlertCircle size={14} aria-hidden="true" style={{ flexShrink: 0 }} />
-                <span>Recommandé : joindre un justificatif (PDF, image…) pour cette facture</span>
+            {/* Section Pièces Jointes — hors périmètre RHF, géré par FacturePJSection */}
+            <div className={styles.formGroup}>
+              <FacturePJSection
+                initialPJ={form.piecesJointes || []}
+                onChange={handlePJChange}
+                required={false}
+              />
+              {(!form.piecesJointes || form.piecesJointes.length === 0) && (
+                <div className={styles.warningMessage}>
+                  <AlertCircle size={14} aria-hidden="true" />
+                  <span>Recommandé : joindre un justificatif (PDF, image…) pour cette facture</span>
+                </div>
+              )}
+              {pjError && (
+                <span className={styles.errorMessage}>
+                  <AlertCircle size={14} aria-hidden="true" />
+                  {pjError}
+                </span>
+              )}
+            </div>
+
+            {/* Erreur de création Supabase */}
+            {createError && (
+              <div className={styles.formGroup}>
+                <span className={styles.errorMessage}>
+                  <AlertCircle size={16} aria-hidden="true" />
+                  <span>{createError}</span>
+                </span>
               </div>
             )}
-            {pjError && (
-              <span className={styles.errorMessage}>
-                <AlertCircle size={14} aria-hidden="true" />
-                {pjError}
-              </span>
-            )}
           </div>
 
-          {/* Erreur de création Supabase */}
-          {createError && (
-            <div className={styles.formGroup}>
-              <span className={styles.errorMessage} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', padding: '0.75rem', backgroundColor: 'var(--color-error-bg, #fef2f2)', borderRadius: '0.375rem' }}>
-                <AlertCircle size={16} aria-hidden="true" style={{ flexShrink: 0, marginTop: '0.125rem' }} />
-                <span>{createError}</span>
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className={styles.modalFooter}>
-          <button className={styles.cancelButton} onClick={onClose} disabled={isCreating}>
-            Annuler
-          </button>
-          <button className={styles.payButton} onClick={handleCreate} disabled={isCreating}>
-            <Plus size={20} aria-hidden="true" />
-            {isCreating ? 'Création en cours...' : 'Créer la facture'}
-          </button>
-        </div>
+          <div className={styles.modalFooter}>
+            <button
+              type="button"
+              className={styles.cancelButton}
+              onClick={onClose}
+              disabled={isCreating}
+            >
+              Annuler
+            </button>
+            <button type="submit" className={styles.payButton} disabled={isCreating}>
+              <Plus size={20} aria-hidden="true" />
+              {isCreating ? 'Création en cours...' : 'Créer la facture'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
