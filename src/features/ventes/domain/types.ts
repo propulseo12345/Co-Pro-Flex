@@ -11,7 +11,7 @@ export type MutationStatus =
   | 'validated'          // Mutation validée (transfert effectué)
   | 'cancelled';         // Annulée
 
-export type MutationType = 'sale' | 'donation' | 'inheritance' | 'other';
+export type MutationType = 'sale' | 'donation' | 'succession' | 'other';
 
 export type SnapshotType = 'pre' | 'final';
 
@@ -28,7 +28,7 @@ export const MUTATION_STATUS_LABELS: Record<MutationStatus, string> = {
 export const MUTATION_TYPE_LABELS: Record<MutationType, string> = {
   sale: 'Vente',
   donation: 'Donation',
-  inheritance: 'Succession',
+  succession: 'Succession',
   other: 'Autre',
 };
 

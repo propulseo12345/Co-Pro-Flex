@@ -41,6 +41,7 @@ const GATES = [
   'supabase/tests/gate_0051_communication.sql',
   'supabase/tests/gate_0052_ged.sql',
   'supabase/tests/gate_0053_conseil_rapports.sql',
+  'supabase/tests/gate_0054_mutations_dashboard.sql',
   'supabase/tests/gate_finance_loop_e2e.sql',
   'supabase/tests/gate_cloture_affectation_e2e.sql',
   'supabase/tests/gate_avoir_fournisseur_e2e.sql',
