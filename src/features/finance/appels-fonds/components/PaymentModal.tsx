@@ -1,13 +1,18 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
 import { X, Loader2, CheckCircle2 } from 'lucide-react';
 import type { ApiResult, PaymentNatureFilter, RecordPaymentPayload } from '@/lib/finance/api';
+import { paymentSchema, PAYMENT_METHODS, PAYMENT_NATURES } from '@/lib/validation/finance/paiement';
+import { FormField, FormSelect } from '@/components/ui/FormField';
 import type { CallLotRow } from '../hooks/useAppelsFondsDetail';
 import { formatEuros } from '../utils';
 import styles from '../styles/PaymentModal.module.css';
 
-type PaymentMethod = 'transfer' | 'direct_debit' | 'card' | 'check' | 'cash' | 'other';
+type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   transfer: 'Virement',
@@ -30,6 +35,10 @@ type RecordPaymentResult = ApiResult<{
   allocations: Array<{ call_line_id: string; amount_allocated: number }>;
 }>;
 
+// Valeurs telles que saisies (entrée) vs validées/coercées (sortie du schéma).
+type PaymentInput = z.input<typeof paymentSchema>;
+type PaymentOutput = z.output<typeof paymentSchema>;
+
 interface PaymentModalProps {
   lots: CallLotRow[];
   periodId: string;
@@ -48,45 +57,52 @@ function todayISO(): string {
 export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onClose, onRecorded }: PaymentModalProps) {
   // Une clé d'idempotence par ouverture de modale : un double-clic / retry n'encaisse qu'une fois.
   const [idempotencyKey] = useState(() => crypto.randomUUID());
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
   const defaultLot = useMemo(() => lots.find((l) => l.remaining > 0.005) ?? lots[0], [lots]);
 
-  const [lotId, setLotId] = useState<string>(defaultLot?.lot_id ?? '');
-  const [amount, setAmount] = useState<string>(defaultLot ? String(defaultLot.remaining) : '');
-  const [paymentDate, setPaymentDate] = useState<string>(todayISO());
-  const [method, setMethod] = useState<PaymentMethod>('transfer');
-  const [natureFilter, setNatureFilter] = useState<'' | PaymentNatureFilter>('');
-  const [reference, setReference] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<boolean>(false);
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<PaymentInput, unknown, PaymentOutput>({
+    resolver: zodResolver(paymentSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      lotId: defaultLot?.lot_id ?? '',
+      amount: defaultLot ? defaultLot.remaining : '',
+      paymentDate: todayISO(),
+      method: 'transfer',
+      natureFilter: '',
+      reference: '',
+    },
+  });
 
-  const selectedLot = lots.find((l) => l.lot_id === lotId) ?? null;
-  const numericAmount = Number(amount);
-  const canSubmit = lotId !== '' && numericAmount > 0 && paymentDate !== '' && !isSubmitting;
+  // Avertissement « trop-perçu » : warning d'UI (le surplus est porté en avance 450-3),
+  // PAS une erreur de validation — il ne bloque pas la soumission.
+  const watchedLotId = useWatch({ control, name: 'lotId' });
+  const numericAmount = Number(useWatch({ control, name: 'amount' }));
+  const selectedLot = lots.find((l) => l.lot_id === watchedLotId) ?? null;
+  const showOverpayHint = !!selectedLot && numericAmount > selectedLot.remaining + 0.005;
 
-  const handleLotChange = (id: string) => {
-    setLotId(id);
-    const lot = lots.find((l) => l.lot_id === id);
-    if (lot) setAmount(String(lot.remaining));
-  };
-
-  const handleSubmit = async () => {
-    setError(null);
-    if (!canSubmit) return;
-
+  const onValid = async (data: PaymentOutput) => {
+    setSubmitError(null);
     const result = await recordPayment({
       period_id: periodId,
-      lot_id: lotId,
-      amount: numericAmount,
-      payment_date: paymentDate,
-      method,
-      reference: reference.trim() || undefined,
+      lot_id: data.lotId,
+      amount: data.amount,
+      payment_date: data.paymentDate,
+      method: data.method,
+      reference: data.reference || undefined,
       idempotency_key: idempotencyKey,
-      nature_filter: natureFilter || undefined,
+      nature_filter: data.natureFilter || undefined,
     });
 
     if (result.error) {
-      setError(result.error);
+      setSubmitError(result.error);
       return;
     }
     setDone(true);
@@ -103,124 +119,120 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
           </button>
         </div>
 
-        <div className={styles.body}>
-          {done ? (
-            <div className={styles.done}>
-              <CheckCircle2 size={32} />
-              <div className={styles.doneText}>Paiement enregistré et comptabilisé au grand livre.</div>
-            </div>
-          ) : (
-            <>
-              <label className={styles.field}>
-                <span className={styles.label}>Lot</span>
-                <select className={styles.input} value={lotId} onChange={(e) => handleLotChange(e.target.value)}>
+        <form onSubmit={handleSubmit(onValid)}>
+          <div className={styles.body}>
+            {done ? (
+              <div className={styles.done}>
+                <CheckCircle2 size={32} />
+                <div className={styles.doneText}>Paiement enregistré et comptabilisé au grand livre.</div>
+              </div>
+            ) : (
+              <>
+                <FormSelect
+                  label="Lot"
+                  required
+                  error={errors.lotId?.message}
+                  {...register('lotId', {
+                    onChange: (e) => {
+                      const lot = lots.find((l) => l.lot_id === e.target.value);
+                      if (lot) setValue('amount', lot.remaining, { shouldValidate: true });
+                    },
+                  })}
+                >
                   {lots.map((l) => (
                     <option key={l.lot_id} value={l.lot_id}>
                       Lot {l.lot_ref} — {l.owner_name ?? 'Copropriétaire'} (reste {formatEuros(l.remaining)})
                     </option>
                   ))}
-                </select>
-              </label>
+                </FormSelect>
 
-              <div className={styles.row}>
-                <label className={styles.field}>
-                  <span className={styles.label}>Montant (€)</span>
-                  <input
-                    className={styles.input}
+                <div className={styles.row}>
+                  <FormField
+                    label="Montant (€)"
+                    required
                     type="number"
                     min="0"
                     step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    error={errors.amount?.message}
+                    {...register('amount')}
                   />
-                </label>
-                <label className={styles.field}>
-                  <span className={styles.label}>Date</span>
-                  <input
-                    className={styles.input}
+                  <FormField
+                    label="Date"
+                    required
                     type="date"
-                    value={paymentDate}
-                    onChange={(e) => setPaymentDate(e.target.value)}
+                    error={errors.paymentDate?.message}
+                    {...register('paymentDate')}
                   />
-                </label>
-              </div>
+                </div>
 
-              <div className={styles.row}>
-                <label className={styles.field}>
-                  <span className={styles.label}>Mode</span>
-                  <select className={styles.input} value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                    {(Object.keys(METHOD_LABELS) as PaymentMethod[]).map((m) => (
+                <div className={styles.row}>
+                  <FormSelect label="Mode" error={errors.method?.message} {...register('method')}>
+                    {PAYMENT_METHODS.map((m) => (
                       <option key={m} value={m}>
                         {METHOD_LABELS[m]}
                       </option>
                     ))}
-                  </select>
-                </label>
-                <label className={styles.field}>
-                  <span className={styles.label}>Référence (optionnel)</span>
-                  <input
-                    className={styles.input}
+                  </FormSelect>
+                  <FormField
+                    label="Référence (optionnel)"
                     type="text"
-                    value={reference}
-                    onChange={(e) => setReference(e.target.value)}
                     placeholder="N° de chèque, virement…"
+                    error={errors.reference?.message}
+                    {...register('reference')}
                   />
-                </label>
-              </div>
+                </div>
 
-              <label className={styles.field}>
-                <span className={styles.label}>Imputer sur la nature (optionnel)</span>
-                <select
-                  className={styles.input}
-                  value={natureFilter}
-                  onChange={(e) => setNatureFilter(e.target.value as '' | PaymentNatureFilter)}
+                <FormSelect
+                  label="Imputer sur la nature (optionnel)"
+                  error={errors.natureFilter?.message}
+                  {...register('natureFilter')}
                 >
                   <option value="">Toutes natures (FIFO)</option>
-                  {(Object.keys(NATURE_LABELS) as PaymentNatureFilter[]).map((n) => (
+                  {PAYMENT_NATURES.map((n) => (
                     <option key={n} value={n}>
                       {NATURE_LABELS[n]}
                     </option>
                   ))}
-                </select>
-              </label>
+                </FormSelect>
 
-              {selectedLot && numericAmount > selectedLot.remaining + 0.005 && (
-                <div className={styles.hint}>
-                  Le montant dépasse le restant dû ({formatEuros(selectedLot.remaining)}) : le trop-perçu sera porté en avance (450-3).
-                </div>
-              )}
-
-              <div className={styles.allocNote}>
-                L&apos;encaissement est lettré automatiquement sur les échéances les plus anciennes du lot (FIFO).
-              </div>
-
-              {error && <div className={styles.error}>{error}</div>}
-            </>
-          )}
-        </div>
-
-        <div className={styles.footer}>
-          {done ? (
-            <button className={styles.btnPrimary} onClick={onClose}>
-              Fermer
-            </button>
-          ) : (
-            <>
-              <button className={styles.btnCancel} onClick={onClose} disabled={isSubmitting}>
-                Annuler
-              </button>
-              <button className={styles.btnPrimary} onClick={handleSubmit} disabled={!canSubmit}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={14} className={styles.spin} /> Enregistrement…
-                  </>
-                ) : (
-                  'Enregistrer le paiement'
+                {showOverpayHint && selectedLot && (
+                  <div className={styles.hint}>
+                    Le montant dépasse le restant dû ({formatEuros(selectedLot.remaining)}) : le trop-perçu sera porté en avance (450-3).
+                  </div>
                 )}
+
+                <div className={styles.allocNote}>
+                  L&apos;encaissement est lettré automatiquement sur les échéances les plus anciennes du lot (FIFO).
+                </div>
+
+                {submitError && <div className={styles.error}>{submitError}</div>}
+              </>
+            )}
+          </div>
+
+          <div className={styles.footer}>
+            {done ? (
+              <button type="button" className={styles.btnPrimary} onClick={onClose}>
+                Fermer
               </button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                <button type="button" className={styles.btnCancel} onClick={onClose} disabled={isSubmitting}>
+                  Annuler
+                </button>
+                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={14} className={styles.spin} /> Enregistrement…
+                    </>
+                  ) : (
+                    'Enregistrer le paiement'
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );
