@@ -16,13 +16,21 @@ import {
   AlertCircle,
   X
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import { RapportActiviteCS, TypeAnnexeRapport } from '@/types/models/conseil-syndical';
 import styles from './RapportCS.module.css';
+
+interface AgOption {
+  id: string;
+  title: string;
+  meeting_date: string;
+}
 
 interface RapportSidebarProps {
   rapport: RapportActiviteCS;
   onAddAnnexe: (annexe: { nom: string; type: TypeAnnexeRapport; fichier?: File }) => Promise<void>;
   onDeleteAnnexe: (annexeId: string) => Promise<void>;
+  onValider: () => Promise<void>;
   onPublier: (agId: string) => Promise<void>;
   texteResolution: string;
 }
@@ -31,12 +39,30 @@ export function RapportSidebar({
   rapport,
   onAddAnnexe,
   onDeleteAnnexe,
+  onValider,
   onPublier,
   texteResolution,
 }: RapportSidebarProps) {
   const [showAnnexeModal, setShowAnnexeModal] = useState(false);
   const [showResolutionPreview, setShowResolutionPreview] = useState(false);
   const [newAnnexe, setNewAnnexe] = useState({ nom: '', type: 'document' as TypeAnnexeRapport });
+  const [agOptions, setAgOptions] = useState<AgOption[] | null>(null);
+  const [selectedAgId, setSelectedAgId] = useState('');
+
+  // AG cibles de publication : à venir (draft/convoked) de la MÊME copro —
+  // remplace l'ancien prompt() à UUID libre
+  const openAgPicker = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = createClient() as any;
+    const { data } = await supabase
+      .from('ag_meetings')
+      .select('id, title, meeting_date')
+      .eq('copro_id', rapport.coproprieteId)
+      .in('status', ['draft', 'convoked'])
+      .order('meeting_date', { ascending: true });
+    setAgOptions(data ?? []);
+    setSelectedAgId(data?.[0]?.id ?? '');
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -206,21 +232,58 @@ export function RapportSidebar({
       <section className={styles.sidebarSection}>
         <h3 className={styles.sidebarSectionTitle}>Actions</h3>
         <div className={styles.actions}>
-          {rapport.statut === 'valide' && (
+          {rapport.statut === 'en_revision' && (
             <button
               type="button"
               className={styles.btnPrimary}
-              onClick={() => {
-                // TODO: Ouvrir un sélecteur d'AG
-                const agId = prompt('Entrez l\'ID de l\'AG à lier :');
-                if (agId) {
-                  onPublier(agId);
-                }
-              }}
+              onClick={() => onValider()}
+            >
+              <CheckCircle size={16} aria-hidden="true" />
+              Valider le rapport
+            </button>
+          )}
+
+          {rapport.statut === 'valide' && agOptions === null && (
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              onClick={openAgPicker}
             >
               <Share2 size={16} aria-hidden="true" />
               Lier à une AG
             </button>
+          )}
+
+          {rapport.statut === 'valide' && agOptions !== null && (
+            agOptions.length === 0 ? (
+              <p className={styles.resolutionHelp}>
+                Aucune AG à venir (brouillon ou convoquée) dans cette copropriété.
+              </p>
+            ) : (
+              <>
+                <select
+                  className={styles.input}
+                  value={selectedAgId}
+                  onChange={(e) => setSelectedAgId(e.target.value)}
+                  aria-label="AG cible de la publication"
+                >
+                  {agOptions.map((ag) => (
+                    <option key={ag.id} value={ag.id}>
+                      {ag.title} — {new Date(ag.meeting_date).toLocaleDateString('fr-FR')}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  disabled={!selectedAgId}
+                  onClick={() => selectedAgId && onPublier(selectedAgId)}
+                >
+                  <Share2 size={16} aria-hidden="true" />
+                  Publier vers cette AG
+                </button>
+              </>
+            )
           )}
 
           <button

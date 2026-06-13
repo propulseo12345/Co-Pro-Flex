@@ -2,12 +2,14 @@
 
 import { useParams } from 'next/navigation';
 import { useRapportCS } from '@/hooks/modules/useRapportCS';
+import { useSupabase } from '@/hooks/useSupabase';
 import { RapportHeader, RapportEditor, RapportSidebar } from '@/components/features/conseil-syndical';
 import styles from '@/components/features/conseil-syndical/RapportCS.module.css';
 
 export default function RapportCSDetailPage() {
   const params = useParams();
   const rapportId = params.id as string;
+  const { user } = useSupabase();
 
   const {
     rapport,
@@ -25,6 +27,7 @@ export default function RapportCSDetailPage() {
     addAnnexe,
     deleteAnnexe,
     soumettrePourRevision,
+    valider,
     publier,
     save,
     genererTexteResolution,
@@ -38,7 +41,9 @@ export default function RapportCSDetailPage() {
     );
   }
 
-  if (error) {
+  // Fatal UNIQUEMENT si le rapport n'a pas pu être chargé : un échec de
+  // sauvegarde ne doit pas remplacer l'éditeur (la saisie serait perdue)
+  if (error && !rapport) {
     return (
       <div className={styles.error}>
         <h2>Erreur</h2>
@@ -57,6 +62,11 @@ export default function RapportCSDetailPage() {
 
   return (
     <div className={styles.pageContainer}>
+      {error && (
+        <div className={styles.error} role="alert">
+          Erreur de sauvegarde : {error.message} — vos dernières modifications ne sont peut-être pas enregistrées.
+        </div>
+      )}
       <RapportHeader
         rapport={rapport}
         isSaving={isSaving}
@@ -84,6 +94,7 @@ export default function RapportCSDetailPage() {
             rapport={rapport}
             onAddAnnexe={addAnnexe}
             onDeleteAnnexe={deleteAnnexe}
+            onValider={() => valider(user?.id ?? '')}
             onPublier={publier}
             texteResolution={genererTexteResolution()}
           />
