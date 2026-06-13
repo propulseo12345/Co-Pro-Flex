@@ -1,9 +1,14 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import type { DepenseEtendue } from '@/types/models/finance';
-import { PosteBudgetData, PieceJointeDepense } from '../types';
+import { depenseSchema } from '@/lib/validation/finance/depense';
+import type { DepenseFormInput, DepenseFormOutput } from '@/lib/validation/finance/depense';
+import { FormField, FormSelect } from '@/components/ui/FormField';
+import type { PosteBudgetData, PieceJointeDepense } from '../types';
 import { InvoiceUploadSection } from '../InvoiceUploadSection';
 import { DepenseValidationPanel } from '../DepenseValidationPanel';
 import { DepenseStatusBadge } from '../DepenseStatusBadge';
@@ -19,6 +24,7 @@ interface DepenseEditorModalProps {
   onOpenInvoicePicker: () => void;
 }
 
+/** Comptes de charge pré-définis par poste (affichage dérivé, pas de saisie libre si poste sélectionné). */
 const COMPTES_CHARGE: Record<string, string> = {
   eau: '602001 - Eau',
   electricite: '602002 - Électricité',
@@ -29,6 +35,12 @@ const COMPTES_CHARGE: Record<string, string> = {
   divers: '606 - Divers',
 };
 
+/** Date du jour au format YYYY-MM-DD en fuseau local. */
+function todayISO(): string {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
 export function DepenseEditorModal({
   mode,
   depense,
@@ -38,107 +50,99 @@ export function DepenseEditorModal({
   onSubmitForValidation,
   onOpenInvoicePicker,
 }: DepenseEditorModalProps) {
-  const [formData, setFormData] = useState<Partial<DepenseEtendue>>({
-    date: new Date().toISOString().split('T')[0],
-    libelle: '',
-    fournisseur: '',
-    montant: 0,
-    poste: undefined,
-    compteId: '',
-    recuperable: 0,
-    deductible: 0,
-    statut: 'BROUILLON',
-    ...depense,
-  });
+  const isEditable = !depense?.statut || depense.statut === 'BROUILLON' || depense.statut === 'REJETEE';
 
   const [pieceJointe, setPieceJointe] = useState<PieceJointeDepense | undefined>(
     depense?.pieceJointeDetails
   );
 
-  const isEditable = !depense?.statut || depense.statut === 'BROUILLON' || depense.statut === 'REJETEE';
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<DepenseFormInput, unknown, DepenseFormOutput>({
+    resolver: zodResolver(depenseSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      date: depense?.date ?? todayISO(),
+      libelle: depense?.libelle ?? '',
+      fournisseur: depense?.fournisseur ?? '',
+      montant: depense?.montant ?? '',
+      poste: (depense?.poste as DepenseFormInput['poste']) ?? '',
+      compteId: depense?.compteId ?? '',
+      recuperable: depense?.recuperable ?? 0,
+      deductible: depense?.deductible ?? 0,
+    },
+  });
 
-  useEffect(() => {
-    if (depense) {
-      setFormData({
-        ...depense,
-      });
-      if (depense.pieceJointeDetails) {
-        setPieceJointe(depense.pieceJointeDetails);
+  // Poste courant surveillé pour savoir si le champ compteId doit être verrouillé.
+  // useWatch (pas watch()) pour respecter la règle react-hooks/* gelée.
+  const watchedPoste = useWatch({ control, name: 'poste' });
+
+  const handlePosteChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const poste = e.target.value as DepenseFormInput['poste'];
+      // RHF est la source unique pour compteId : on synchronise via setValue.
+      if (poste) {
+        const compte = COMPTES_CHARGE[poste];
+        setValue('compteId', compte ? compte.split(' - ')[0] : '', { shouldValidate: false });
+      } else {
+        // Retour à « -- Sélectionner -- » : vider compteId (identique à l'original ligne 83-87).
+        setValue('compteId', '', { shouldValidate: false });
       }
-    }
-  }, [depense]);
-
-  const handleInputChange = useCallback((
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : value,
-    }));
-  }, []);
-
-  const handlePosteChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const poste = e.target.value as DepenseEtendue['poste'];
-    setFormData(prev => ({
-      ...prev,
-      poste,
-      compteId: poste ? COMPTES_CHARGE[poste].split(' - ')[0] : '',
-    }));
-  }, []);
+    },
+    [setValue]
+  );
 
   const handlePieceJointeUpload = useCallback((pj: PieceJointeDepense) => {
     setPieceJointe(pj);
-    setFormData(prev => ({
-      ...prev,
-      pieceJointe: pj.fichierNom,
-      pieceJointeDetails: pj,
-    }));
   }, []);
 
   const handlePieceJointeRemove = useCallback(() => {
     setPieceJointe(undefined);
-    setFormData(prev => ({
-      ...prev,
-      pieceJointe: undefined,
-      pieceJointeDetails: undefined,
-    }));
   }, []);
 
-  const handleSave = useCallback(() => {
-    if (!formData.libelle || !formData.fournisseur || !formData.montant) {
-      alert('Veuillez remplir tous les champs obligatoires (libellé, fournisseur, montant)');
-      return;
-    }
+  // onValid est appelé par handleSubmit APRÈS validation Zod.
+  // La logique de construction du payload et l'appel onSave sont STRICTEMENT identiques
+  // à l'original — seule la source des données change (data validé vs formData state).
+  const onValid = useCallback(
+    (data: DepenseFormOutput) => {
+      const depenseToSave: DepenseEtendue = {
+        id: depense?.id ?? `dep-${Date.now()}`,
+        date: data.date,
+        libelle: data.libelle,
+        fournisseur: data.fournisseur,
+        montant: data.montant,
+        compteId: data.compteId ?? '',
+        recuperable: data.recuperable ?? 0,
+        deductible: data.deductible ?? 0,
+        poste: data.poste !== '' ? data.poste : undefined,
+        pieceJointe: pieceJointe?.fichierNom,
+        pieceJointeDetails: pieceJointe,
+        statut: depense?.statut ?? 'BROUILLON',
+        budgetId: depense?.budgetId,
+        dateCreation: depense?.dateCreation ?? new Date().toISOString(),
+        dateDerniereModification: new Date().toISOString(),
+      };
 
-    const depenseToSave: DepenseEtendue = {
-      id: depense?.id || `dep-${Date.now()}`,
-      date: formData.date || new Date().toISOString().split('T')[0],
-      libelle: formData.libelle || '',
-      fournisseur: formData.fournisseur || '',
-      montant: formData.montant || 0,
-      compteId: formData.compteId || '',
-      recuperable: formData.recuperable || 0,
-      deductible: formData.deductible || 0,
-      poste: formData.poste,
-      pieceJointe: pieceJointe?.fichierNom,
-      pieceJointeDetails: pieceJointe,
-      statut: formData.statut || 'BROUILLON',
-      budgetId: formData.budgetId,
-      dateCreation: depense?.dateCreation || new Date().toISOString(),
-      dateDerniereModification: new Date().toISOString(),
-    };
+      onSave(depenseToSave);
+    },
+    [depense, pieceJointe, onSave]
+  );
 
-    onSave(depenseToSave);
-  }, [formData, pieceJointe, depense, onSave]);
-
+  // Soumission pour validation : onSubmitForValidation n'est appelée QUE SI
+  // la validation Zod passe et que onValid s'est exécutée — la race condition
+  // du blueprint initial est corrigée en imbriquant l'appel dans le callback.
   const handleSubmitForValidation = useCallback(() => {
-    if (depense?.id) {
-      // Save first, then submit
-      handleSave();
-      onSubmitForValidation(depense.id);
-    }
-  }, [depense, handleSave, onSubmitForValidation]);
+    if (!depense?.id) return;
+    const depenseId = depense.id;
+    void handleSubmit((data) => {
+      onValid(data);
+      onSubmitForValidation(depenseId);
+    })();
+  }, [depense, handleSubmit, onValid, onSubmitForValidation]);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose} aria-hidden="true">
@@ -154,8 +158,8 @@ export function DepenseEditorModal({
             <h2 id="modal-title" className={styles.modalTitle}>
               {mode === 'create' ? 'Nouvelle dépense' : 'Modifier la dépense'}
             </h2>
-            {formData.statut && (
-              <DepenseStatusBadge statut={formData.statut} size="sm" />
+            {depense?.statut && (
+              <DepenseStatusBadge statut={depense.statut} size="sm" />
             )}
           </div>
           <button
@@ -167,171 +171,139 @@ export function DepenseEditorModal({
           </button>
         </div>
 
-        <div className={styles.modalBody}>
-          <div className={styles.formGrid}>
-            {/* Left column - Form fields */}
-            <div className={styles.formColumn}>
-              <div className={styles.formGroup}>
-                <label htmlFor="date" className={styles.label}>Date *</label>
-                <input
+        <form onSubmit={handleSubmit(onValid)}>
+          <div className={styles.modalBody}>
+            <div className={styles.formGrid}>
+              {/* Colonne gauche — champs du formulaire */}
+              <div className={styles.formColumn}>
+                <FormField
+                  label="Date"
+                  required
                   type="date"
-                  id="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  className={styles.input}
+                  error={errors.date?.message}
                   disabled={!isEditable}
+                  {...register('date')}
                 />
-              </div>
 
-              <div className={styles.formGroup}>
-                <label htmlFor="libelle" className={styles.label}>Libellé *</label>
-                <input
+                <FormField
+                  label="Libellé"
+                  required
                   type="text"
-                  id="libelle"
-                  name="libelle"
-                  value={formData.libelle}
-                  onChange={handleInputChange}
-                  className={styles.input}
                   placeholder="Ex: Facture eau T1"
+                  error={errors.libelle?.message}
                   disabled={!isEditable}
+                  {...register('libelle')}
                 />
-              </div>
 
-              <div className={styles.formGroup}>
-                <label htmlFor="fournisseur" className={styles.label}>Fournisseur *</label>
-                <input
+                <FormField
+                  label="Fournisseur"
+                  required
                   type="text"
-                  id="fournisseur"
-                  name="fournisseur"
-                  value={formData.fournisseur}
-                  onChange={handleInputChange}
-                  className={styles.input}
                   placeholder="Ex: Veolia Eau"
+                  error={errors.fournisseur?.message}
                   disabled={!isEditable}
+                  {...register('fournisseur')}
                 />
-              </div>
 
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="montant" className={styles.label}>Montant (€) *</label>
-                  <input
+                <div className={styles.formRow}>
+                  <FormField
+                    label="Montant (€)"
+                    required
                     type="number"
-                    id="montant"
-                    name="montant"
-                    value={formData.montant}
-                    onChange={handleInputChange}
-                    className={styles.input}
                     min="0"
                     step="0.01"
+                    error={errors.montant?.message}
                     disabled={!isEditable}
+                    {...register('montant')}
                   />
-                </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="poste" className={styles.label}>Poste budgétaire</label>
-                  <select
-                    id="poste"
-                    name="poste"
-                    value={formData.poste || ''}
-                    onChange={handlePosteChange}
-                    className={styles.select}
+                  <FormSelect
+                    label="Poste budgétaire"
+                    error={errors.poste?.message}
                     disabled={!isEditable}
+                    {...register('poste', { onChange: handlePosteChange })}
                   >
                     <option value="">-- Sélectionner --</option>
-                    {postesBudget.map(p => (
+                    {postesBudget.map((p) => (
                       <option key={p.poste} value={p.poste}>
                         {p.label}
                       </option>
                     ))}
-                  </select>
+                  </FormSelect>
                 </div>
-              </div>
 
-              <div className={styles.formGroup}>
-                <label htmlFor="compteId" className={styles.label}>Compte de charge</label>
-                <input
+                {/* compteId : RHF est la source unique (pas de prop value= externe).
+                    disabled quand un poste est actif (valeur dérivée via setValue). */}
+                <FormField
+                  label="Compte de charge"
                   type="text"
-                  id="compteId"
-                  name="compteId"
-                  value={formData.poste ? COMPTES_CHARGE[formData.poste] : formData.compteId}
-                  onChange={handleInputChange}
-                  className={styles.input}
                   placeholder="Ex: 602001"
-                  disabled={!isEditable || !!formData.poste}
+                  error={errors.compteId?.message}
+                  disabled={!isEditable || !!watchedPoste}
+                  {...register('compteId')}
                 />
-              </div>
 
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="recuperable" className={styles.label}>Récupérable (€)</label>
-                  <input
+                <div className={styles.formRow}>
+                  <FormField
+                    label="Récupérable (€)"
                     type="number"
-                    id="recuperable"
-                    name="recuperable"
-                    value={formData.recuperable}
-                    onChange={handleInputChange}
-                    className={styles.input}
                     min="0"
                     step="0.01"
+                    error={errors.recuperable?.message}
+                    disabled={!isEditable}
+                    {...register('recuperable')}
+                  />
+
+                  <FormField
+                    label="Déductible (€)"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    error={errors.deductible?.message}
+                    disabled={!isEditable}
+                    {...register('deductible')}
+                  />
+                </div>
+              </div>
+
+              {/* Colonne droite — pièce justificative & validation */}
+              <div className={styles.sideColumn}>
+                <div className={styles.section}>
+                  <h3 className={styles.sectionTitle}>Pièce justificative</h3>
+                  <InvoiceUploadSection
+                    pieceJointe={pieceJointe}
+                    onUpload={handlePieceJointeUpload}
+                    onRemove={handlePieceJointeRemove}
+                    onLinkExisting={onOpenInvoicePicker}
+                    required={true}
                     disabled={!isEditable}
                   />
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="deductible" className={styles.label}>Déductible (€)</label>
-                  <input
-                    type="number"
-                    id="deductible"
-                    name="deductible"
-                    value={formData.deductible}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="0"
-                    step="0.01"
+                {mode === 'edit' && (
+                  <DepenseValidationPanel
+                    depense={{ ...(depense ?? {}), pieceJointeDetails: pieceJointe }}
+                    onSubmitForValidation={handleSubmitForValidation}
                     disabled={!isEditable}
                   />
-                </div>
+                )}
               </div>
-            </div>
-
-            {/* Right column - Invoice & Validation */}
-            <div className={styles.sideColumn}>
-              <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Pièce justificative</h3>
-                <InvoiceUploadSection
-                  pieceJointe={pieceJointe}
-                  onUpload={handlePieceJointeUpload}
-                  onRemove={handlePieceJointeRemove}
-                  onLinkExisting={onOpenInvoicePicker}
-                  required={true}
-                  disabled={!isEditable}
-                />
-              </div>
-
-              {mode === 'edit' && (
-                <DepenseValidationPanel
-                  depense={{ ...formData, pieceJointeDetails: pieceJointe }}
-                  onSubmitForValidation={handleSubmitForValidation}
-                  disabled={!isEditable}
-                />
-              )}
             </div>
           </div>
-        </div>
 
-        <div className={styles.modalFooter}>
-          <button onClick={onClose} className="btn btn-secondary">
-            Annuler
-          </button>
-          <button
-            onClick={handleSave}
-            className="btn btn-primary"
-            disabled={!isEditable}
-          >
-            {mode === 'create' ? 'Créer la dépense' : 'Enregistrer'}
-          </button>
-        </div>
+          <div className={styles.modalFooter}>
+            <button type="button" onClick={onClose} className="btn btn-secondary">
+              Annuler
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!isEditable}
+            >
+              {mode === 'create' ? 'Créer la dépense' : 'Enregistrer'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

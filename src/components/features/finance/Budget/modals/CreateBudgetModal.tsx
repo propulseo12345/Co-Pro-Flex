@@ -2,6 +2,9 @@
 
 import { X, FileText, Hammer, Copy, AlertCircle, Plus, Upload, Trash2 } from 'lucide-react';
 import { useState, useId, useCallback, useRef } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
 import { BudgetEditorModal } from './BudgetEditorModal';
 import { POSTES_BUDGET_PREDEFINIS, TYPES_TRAVAUX } from '@/lib/constants/budget-postes';
 import type { PosteEditorData } from '../PosteEditor';
@@ -10,6 +13,8 @@ import { BudgetStatut } from '@/types/enums/statuts';
 import { PAYMENT_SCHEDULE_TEMPLATES } from '@/lib/constants/payment-schedule-templates';
 import type { PaymentScheduleTemplate } from '@/lib/constants/payment-schedule-templates';
 import { PaymentSchedulePreview } from '../PaymentSchedulePreview';
+import { budgetTravauxSchema } from '@/lib/validation/finance/budget';
+import { FormField, FormSelect } from '@/components/ui/FormField';
 import styles from './CreateBudgetModal.module.css';
 
 interface BudgetN1Data {
@@ -27,6 +32,10 @@ interface CreateBudgetModalProps {
 
 type Step = 'type' | 'creation-mode' | 'editor';
 
+// Valeurs telles que saisies (entrée HTML) vs validées/coercées (sortie du schéma).
+type BudgetTravauxInput = z.input<typeof budgetTravauxSchema>;
+type BudgetTravauxOutput = z.output<typeof budgetTravauxSchema>;
+
 export function CreateBudgetModal({
   selectedYear,
   budgetN1,
@@ -37,23 +46,52 @@ export function CreateBudgetModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>('type');
   const [budgetType, setBudgetType] = useState<'fonctionnement' | 'travaux' | null>(null);
-  const [budgetYear, setBudgetYear] = useState(selectedYear + 1);
-  const [budgetName, setBudgetName] = useState('');
   const [initialPostes, setInitialPostes] = useState<PosteEditorData[]>([]);
   const [showN1Warning, setShowN1Warning] = useState(false);
 
-  // États spécifiques aux budgets travaux
-  const [typeTravaux, setTypeTravaux] = useState<string>('');
-  const [montantTotal, setMontantTotal] = useState<number>(0);
-  const [description, setDescription] = useState<string>('');
+  // État externe au formulaire RHF (géré par PaymentSchedulePreview).
+  const [schedulePhases, setSchedulePhases] = useState<{ label: string; percentage: number; dueDate?: string }[]>([]);
+  // Devis : gestion liste dynamique hors champ de formulaire.
   const [devisDocuments, setDevisDocuments] = useState<DevisDocument[]>([]);
   const [currentDevisMontant, setCurrentDevisMontant] = useState<number>(0);
-  const [scheduleTemplate, setScheduleTemplate] = useState<PaymentScheduleTemplate>('classic');
-  const [withRetention, setWithRetention] = useState(false);
-  const [schedulePhases, setSchedulePhases] = useState<{ label: string; percentage: number; dueDate?: string }[]>([]);
+
+  // -------------------------------------------------------------------------
+  // React Hook Form — sous-formulaire budget travaux
+  // -------------------------------------------------------------------------
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<BudgetTravauxInput, unknown, BudgetTravauxOutput>({
+    resolver: zodResolver(budgetTravauxSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      annee: String(selectedYear + 1),
+      nom: '',
+      typeTravaux: '',
+      montantTotal: '',
+      description: '',
+      scheduleTemplate: 'classic' as PaymentScheduleTemplate,
+      withRetention: false,
+    },
+  });
+
+  // Valeurs observées pour les warnings et affichages conditionnels.
+  // Pattern identique à PaymentModal (numericAmount = Number(useWatch(...))),
+  // conforme à la règle useWatch — jamais watch().
+  const watchedMontantTotal = Number(useWatch({ control, name: 'montantTotal' }));
+  const watchedScheduleTemplate = useWatch({ control, name: 'scheduleTemplate' });
+  const watchedWithRetention = useWatch({ control, name: 'withRetention' });
+  // Avertissement "modèle custom sans phases" — warning d'UI, PAS une erreur Zod.
+  const showCustomPhasesHint =
+    watchedScheduleTemplate === 'custom' && schedulePhases.length === 0;
 
   const hasN1Budget = !!budgetN1 && budgetN1.postes.length > 0;
 
+  // -------------------------------------------------------------------------
+  // Handlers navigation wizard (inchangés)
+  // -------------------------------------------------------------------------
   const handleSelectType = useCallback((type: 'fonctionnement' | 'travaux') => {
     setBudgetType(type);
     if (type === 'fonctionnement') {
@@ -85,10 +123,11 @@ export function CreateBudgetModal({
 
   const handleSaveFromEditor = useCallback(
     (postes: PosteEditorData[], total: number) => {
+      // annee et nom ne sont pas des champs RHF dans l'étape fonctionnement
+      // (délégué à BudgetEditorModal) — on lit les valeurs par défaut.
       const form: NouveauBudgetForm = {
-        annee: budgetYear,
+        annee: selectedYear + 1,
         type: 'fonctionnement',
-        nom: budgetName || undefined,
         montantTotal: total,
         statut: BudgetStatut.BROUILLON,
         lignesBudget: postes.map((p) => ({
@@ -101,59 +140,40 @@ export function CreateBudgetModal({
       onCreateBudget(form);
       onClose();
     },
-    [budgetYear, budgetName, onCreateBudget, onClose]
+    [selectedYear, onCreateBudget, onClose]
   );
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  const handleFileUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
 
-    const file = files[0];
-    const newDevis: DevisDocument = {
-      id: `devis-${Date.now()}`,
-      nom: file.name,
-      url: URL.createObjectURL(file),
-      montant: currentDevisMontant,
-      dateAjout: new Date().toISOString().split('T')[0],
-      taille: `${(file.size / 1024).toFixed(0)} KB`,
-      file,
-    };
+      const file = files[0];
+      const newDevis: DevisDocument = {
+        id: `devis-${Date.now()}`,
+        nom: file.name,
+        url: URL.createObjectURL(file),
+        montant: currentDevisMontant,
+        dateAjout: new Date().toISOString().split('T')[0],
+        taille: `${(file.size / 1024).toFixed(0)} KB`,
+        file,
+      };
 
-    setDevisDocuments(prev => [...prev, newDevis]);
-    setCurrentDevisMontant(0);
+      setDevisDocuments((prev) => [...prev, newDevis]);
+      setCurrentDevisMontant(0);
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }, [currentDevisMontant]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    [currentDevisMontant]
+  );
 
   const handleRemoveDevis = useCallback((devisId: string) => {
-    setDevisDocuments(prev => prev.filter(d => d.id !== devisId));
+    setDevisDocuments((prev) => prev.filter((d) => d.id !== devisId));
   }, []);
 
   const totalDevis = devisDocuments.reduce((sum, d) => sum + d.montant, 0);
-
-  const handleSubmitTravaux = useCallback(() => {
-    const form: NouveauBudgetForm = {
-      annee: budgetYear,
-      type: 'travaux',
-      nom: budgetName || undefined,
-      typeTravaux: typeTravaux || undefined,
-      description: description || undefined,
-      montantTotal: montantTotal,
-      statut: BudgetStatut.BROUILLON,
-      lignesBudget: [],
-      devisDocuments: devisDocuments.length > 0 ? devisDocuments : undefined,
-      paymentScheduleConfig: {
-        templateId: scheduleTemplate,
-        withRetention,
-        phases: schedulePhases,
-      },
-    };
-    onCreateBudget(form);
-    onClose();
-  }, [budgetYear, budgetName, typeTravaux, description, montantTotal, devisDocuments, scheduleTemplate, withRetention, schedulePhases, onCreateBudget, onClose]);
 
   const handleBack = useCallback(() => {
     if (step === 'creation-mode') {
@@ -166,11 +186,40 @@ export function CreateBudgetModal({
     }
   }, [step]);
 
-  // Render BudgetEditorModal
+  // -------------------------------------------------------------------------
+  // Soumission budget travaux — logique STRICTEMENT inchangée
+  // -------------------------------------------------------------------------
+  const onValid = useCallback(
+    (data: BudgetTravauxOutput) => {
+      const form: NouveauBudgetForm = {
+        annee: data.annee,
+        type: 'travaux',
+        nom: data.nom || undefined,
+        typeTravaux: data.typeTravaux || undefined,
+        description: data.description || undefined,
+        montantTotal: data.montantTotal,
+        statut: BudgetStatut.BROUILLON,
+        lignesBudget: [],
+        devisDocuments: devisDocuments.length > 0 ? devisDocuments : undefined,
+        paymentScheduleConfig: {
+          templateId: data.scheduleTemplate,
+          withRetention: data.withRetention,
+          phases: schedulePhases,
+        },
+      };
+      onCreateBudget(form);
+      onClose();
+    },
+    [devisDocuments, schedulePhases, onCreateBudget, onClose]
+  );
+
+  // -------------------------------------------------------------------------
+  // Rendu — étape editor (délégation à BudgetEditorModal)
+  // -------------------------------------------------------------------------
   if (step === 'editor') {
     return (
       <BudgetEditorModal
-        year={budgetYear}
+        year={selectedYear + 1}
         initialPostes={initialPostes}
         onSave={handleSaveFromEditor}
         onClose={onClose}
@@ -178,7 +227,9 @@ export function CreateBudgetModal({
     );
   }
 
-  // Render creation mode choice for fonctionnement
+  // -------------------------------------------------------------------------
+  // Rendu — étape creation-mode (fonctionnement : choix vierge ou reprise N-1)
+  // -------------------------------------------------------------------------
   if (step === 'creation-mode') {
     return (
       <div className={styles.modalOverlay} onClick={onClose}>
@@ -191,36 +242,24 @@ export function CreateBudgetModal({
         >
           <div className={styles.modalHeader}>
             <h2 id={titleId} className={styles.modalTitle}>
-              Budget de fonctionnement {budgetYear}
+              Budget de fonctionnement {selectedYear + 1}
             </h2>
-            <button
-              onClick={onClose}
-              className={styles.closeButton}
-              aria-label="Fermer"
-            >
+            <button onClick={onClose} className={styles.closeButton} aria-label="Fermer">
               <X size={24} aria-hidden="true" />
             </button>
           </div>
 
           <div className={styles.modalBody}>
-            <p className={styles.subtitle}>
-              Comment souhaitez-vous créer ce budget ?
-            </p>
+            <p className={styles.subtitle}>Comment souhaitez-vous créer ce budget ?</p>
 
             <div className={styles.optionsGrid}>
-              <button
-                type="button"
-                className={styles.optionCard}
-                onClick={handleCreateEmpty}
-              >
+              <button type="button" className={styles.optionCard} onClick={handleCreateEmpty}>
                 <div className={styles.optionIcon}>
                   <FileText size={32} aria-hidden="true" />
                 </div>
                 <div className={styles.optionContent}>
                   <h3 className={styles.optionTitle}>Créer à partir de zéro</h3>
-                  <p className={styles.optionDescription}>
-                    Budget vierge à configurer selon vos besoins
-                  </p>
+                  <p className={styles.optionDescription}>Budget vierge à configurer selon vos besoins</p>
                 </div>
               </button>
 
@@ -233,9 +272,7 @@ export function CreateBudgetModal({
                   <Copy size={32} aria-hidden="true" />
                 </div>
                 <div className={styles.optionContent}>
-                  <h3 className={styles.optionTitle}>
-                    Reprendre le budget {selectedYear}
-                  </h3>
+                  <h3 className={styles.optionTitle}>Reprendre le budget {selectedYear}</h3>
                   <p className={styles.optionDescription}>
                     {hasN1Budget
                       ? `Tous les postes pré-remplis (${budgetN1!.postes.length} postes, ${budgetN1!.total.toLocaleString('fr-FR')} €)`
@@ -255,18 +292,12 @@ export function CreateBudgetModal({
               <div className={styles.warningBox}>
                 <AlertCircle size={18} aria-hidden="true" />
                 <div className={styles.warningContent}>
-                  <p className={styles.warningTitle}>
-                    Aucun budget {selectedYear} trouvé
-                  </p>
+                  <p className={styles.warningTitle}>Aucun budget {selectedYear} trouvé</p>
                   <p className={styles.warningText}>
-                    Il n&apos;existe pas de budget pour l&apos;année {selectedYear}.
-                    Vous pouvez créer un budget vierge à la place.
+                    Il n'existe pas de budget pour l'année {selectedYear}. Vous pouvez créer
+                    un budget vierge à la place.
                   </p>
-                  <button
-                    type="button"
-                    className={styles.warningButton}
-                    onClick={handleCreateEmpty}
-                  >
+                  <button type="button" className={styles.warningButton} onClick={handleCreateEmpty}>
                     Créer un budget vierge
                   </button>
                 </div>
@@ -284,7 +315,9 @@ export function CreateBudgetModal({
     );
   }
 
-  // Render type selection (initial step)
+  // -------------------------------------------------------------------------
+  // Rendu — étape type (sélection fonctionnement | travaux + formulaire travaux)
+  // -------------------------------------------------------------------------
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div
@@ -295,12 +328,10 @@ export function CreateBudgetModal({
         aria-labelledby={titleId}
       >
         <div className={styles.modalHeader}>
-          <h2 id={titleId} className={styles.modalTitle}>Créer un budget</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="Fermer"
-          >
+          <h2 id={titleId} className={styles.modalTitle}>
+            Créer un budget
+          </h2>
+          <button onClick={onClose} className={styles.closeButton} aria-label="Fermer">
             <X size={24} aria-hidden="true" />
           </button>
         </div>
@@ -341,115 +372,87 @@ export function CreateBudgetModal({
           </div>
 
           {budgetType === 'travaux' && (
-            <div className={styles.configSection}>
+            <form
+              id="budget-travaux-form"
+              onSubmit={handleSubmit(onValid)}
+              className={styles.configSection}
+            >
               <h4 className={styles.configTitle}>Configuration du budget travaux</h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
                 {/* Ligne 1 : Type de travaux et Année */}
                 <div className={styles.configGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="type-travaux">
-                      Type de travaux *
-                    </label>
-                    <select
-                      id="type-travaux"
-                      className={styles.input}
-                      value={typeTravaux}
-                      onChange={(e) => setTypeTravaux(e.target.value)}
-                    >
-                      <option value="">Sélectionner un type</option>
-                      {TYPES_TRAVAUX.map((type) => (
-                        <option key={type.id} value={type.id}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <FormSelect
+                    label="Type de travaux"
+                    required
+                    error={errors.typeTravaux?.message}
+                    {...register('typeTravaux')}
+                  >
+                    <option value="">Sélectionner un type</option>
+                    {TYPES_TRAVAUX.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </FormSelect>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="budget-year">
-                      Année budgétaire
-                    </label>
-                    <input
-                      id="budget-year"
-                      type="number"
-                      className={styles.input}
-                      value={budgetYear}
-                      onChange={(e) => setBudgetYear(Number(e.target.value))}
-                      min={selectedYear}
-                      max={selectedYear + 5}
-                    />
-                  </div>
+                  <FormField
+                    label="Année budgétaire"
+                    required
+                    type="number"
+                    min={selectedYear}
+                    max={selectedYear + 5}
+                    error={errors.annee?.message}
+                    {...register('annee')}
+                  />
                 </div>
 
                 {/* Ligne 2 : Nom et Montant */}
                 <div className={styles.configGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="budget-name">
-                      Nom du budget *
-                    </label>
-                    <input
-                      id="budget-name"
-                      type="text"
-                      className={styles.input}
-                      value={budgetName}
-                      onChange={(e) => setBudgetName(e.target.value)}
-                      placeholder={`Ex: Ravalement façade ${budgetYear}`}
-                    />
-                  </div>
+                  <FormField
+                    label="Nom du budget"
+                    required
+                    type="text"
+                    placeholder={`Ex: Ravalement façade ${selectedYear + 1}`}
+                    error={errors.nom?.message}
+                    {...register('nom')}
+                  />
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="montant-total">
-                      Montant total du budget *
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        id="montant-total"
-                        type="number"
-                        className={styles.input}
-                        value={montantTotal || ''}
-                        onChange={(e) => setMontantTotal(Number(e.target.value))}
-                        min={0}
-                        step={100}
-                        placeholder="0"
-                        style={{ paddingRight: '30px' }}
-                      />
-                      <span style={{
-                        position: 'absolute',
-                        right: 'var(--space-md)',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: 'var(--text-secondary)',
-                      }}>
-                        €
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="description">
-                    Description des travaux
-                  </label>
-                  <textarea
-                    id="description"
-                    className={styles.input}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Décrivez les travaux prévus..."
-                    rows={3}
-                    style={{ resize: 'vertical' }}
+                  <FormField
+                    label="Montant total du budget (€)"
+                    required
+                    type="number"
+                    min="0"
+                    step="100"
+                    placeholder="0"
+                    error={errors.montantTotal?.message}
+                    {...register('montantTotal')}
                   />
                 </div>
 
-                {/* Section Devis */}
+                {/* Description */}
+                {/* TextArea : pas de FormField natif textarea — on garde le pattern existant
+                    avec les classes CSS module. FormField wrappe un <input>, pas un <textarea>. */}
+                <div className={styles.formGroup}>
+                  <label className={styles.label} htmlFor="budget-description">
+                    Description des travaux
+                  </label>
+                  <textarea
+                    id="budget-description"
+                    className={styles.input}
+                    placeholder="Décrivez les travaux prévus..."
+                    rows={3}
+                    style={{ resize: 'vertical' }}
+                    {...register('description')}
+                  />
+                </div>
+
+                {/* Section Devis (gestion dynamique hors RHF — inchangée) */}
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-lg)' }}>
                   <h5 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, margin: '0 0 var(--space-md) 0' }}>
                     Devis (optionnel)
                   </h5>
 
-                  {/* Liste des devis ajoutés */}
                   {devisDocuments.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
                       {devisDocuments.map((devis) => (
@@ -499,7 +502,6 @@ export function CreateBudgetModal({
                     </div>
                   )}
 
-                  {/* Formulaire d'ajout de devis */}
                   <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'flex-end' }}>
                     <div className={styles.formGroup} style={{ flex: 1 }}>
                       <label className={styles.label} htmlFor="devis-montant">
@@ -549,42 +551,42 @@ export function CreateBudgetModal({
                   </h5>
 
                   <div className={styles.configGrid}>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label} htmlFor="schedule-template">
-                        Modèle d&apos;échéancier
-                      </label>
-                      <select
-                        id="schedule-template"
-                        className={styles.input}
-                        value={scheduleTemplate}
-                        onChange={(e) => setScheduleTemplate(e.target.value as PaymentScheduleTemplate)}
-                      >
-                        {PAYMENT_SCHEDULE_TEMPLATES.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.label} — {t.description}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <FormSelect
+                      label="Modèle d'échéancier"
+                      error={errors.scheduleTemplate?.message}
+                      {...register('scheduleTemplate')}
+                    >
+                      {PAYMENT_SCHEDULE_TEMPLATES.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.label} — {t.description}
+                        </option>
+                      ))}
+                    </FormSelect>
 
                     <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'flex-end' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
                         <input
                           type="checkbox"
-                          checked={withRetention}
-                          onChange={(e) => setWithRetention(e.target.checked)}
+                          {...register('withRetention')}
                         />
                         Retenue de garantie 5%
                       </label>
                     </div>
                   </div>
 
-                  {montantTotal > 0 && (
+                  {/* Warning "modèle custom sans phases configurées" — hors Zod */}
+                  {showCustomPhasesHint && (
+                    <p style={{ fontSize: 'var(--text-xs)', color: 'var(--warning)', margin: 'var(--space-xs) 0 0 0' }}>
+                      Configurez les phases de l'échéancier personnalisé ci-dessous.
+                    </p>
+                  )}
+
+                  {watchedMontantTotal > 0 && (
                     <div style={{ marginTop: 'var(--space-md)' }}>
                       <PaymentSchedulePreview
-                        totalAmount={montantTotal}
-                        templateId={scheduleTemplate}
-                        withRetention={withRetention}
+                        totalAmount={watchedMontantTotal}
+                        templateId={watchedScheduleTemplate}
+                        withRetention={watchedWithRetention}
                         onPhasesChange={setSchedulePhases}
                       />
                     </div>
@@ -594,10 +596,11 @@ export function CreateBudgetModal({
 
               <div className={styles.infoBox} style={{ marginTop: 'var(--space-lg)' }}>
                 <p className={styles.infoText}>
-                  Le budget sera créé en <strong>brouillon</strong>. Vous pourrez ensuite le lier à une Assemblée Générale pour approbation, puis générer des appels de fonds.
+                  Le budget sera créé en <strong>brouillon</strong>. Vous pourrez ensuite le lier
+                  à une Assemblée Générale pour approbation, puis générer des appels de fonds.
                 </p>
               </div>
-            </div>
+            </form>
           )}
         </div>
 
@@ -607,9 +610,9 @@ export function CreateBudgetModal({
           </button>
           {budgetType === 'travaux' && (
             <button
+              type="submit"
+              form="budget-travaux-form"
               className="btn btn-primary"
-              onClick={handleSubmitTravaux}
-              disabled={!typeTravaux || !budgetName || montantTotal <= 0}
             >
               <Plus size={16} aria-hidden="true" />
               Créer le budget travaux
