@@ -42,6 +42,17 @@ const eslintConfig = defineConfig([
       "react-hooks/preserve-manual-memoization": "warn",
     },
   },
+  {
+    // Scripts d'outillage Node (codemods, vérifs CSS…) : ce sont des fichiers
+    // CommonJS exécutés par Node, pas du code applicatif Next/TS. `require()` et
+    // `console.log` y sont légitimes — désactivés ici pour ne pas appliquer les
+    // règles de l'app à de l'outillage (décision projet 2026-06-13, J4 lint bloquant).
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "no-console": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

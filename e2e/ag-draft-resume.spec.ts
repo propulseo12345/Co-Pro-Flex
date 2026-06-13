@@ -219,7 +219,6 @@ test.describe('AG Step Transitions - DB current_step Updates', () => {
   test('Each step transition should update current_step in database', async ({ page }) => {
     const supabase = getAdminClient();
     const testTitle = `${TEST_PREFIX}STEPS_${Date.now()}`;
-    let agId: string;
 
     // Create new draft via API for cleaner test
     const { data: newAg, error } = await supabase
@@ -240,7 +239,7 @@ test.describe('AG Step Transitions - DB current_step Updates', () => {
       return;
     }
 
-    agId = newAg.id;
+    const agId: string = newAg.id;
 
     try {
       // Navigate to step 1 (edit)

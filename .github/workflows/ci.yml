@@ -1,11 +1,11 @@
 # Intégration continue — garde-fou anti-régression sur chaque PR.
 #
 # Conception (volontairement honnête vis-à-vis de l'état réel du repo) :
-#   • Gate BLOQUANT = `tsc --noEmit` (0 erreur aujourd'hui) + `vitest` (97/97).
-#     Ce sont les deux signaux 100 % reproductibles : s'ils cassent, c'est une vraie régression.
-#   • Lint = exécuté mais NON bloquant (continue-on-error) tant que la dette pré-existante
-#     n'est pas résorbée (13 erreurs + ~825 warnings : `any`, console.*, unused). Il reste
-#     visible dans les logs pour suivre la dette, sans rendre la CI rouge à tort.
+#   • Gate BLOQUANT = `tsc --noEmit` (0 erreur aujourd'hui) + `vitest` (97/97) + `eslint`.
+#     Ce sont les signaux 100 % reproductibles : s'ils cassent, c'est une vraie régression.
+#   • Lint = BLOQUANT depuis 2026-06-13 (J4) : les 13 erreurs pré-existantes ont été résorbées,
+#     le job échoue désormais sur toute NOUVELLE erreur. Les warnings (~800 : `any`, console.*,
+#     unused) ne cassent pas la CI et restent visibles dans les logs comme dette à résorber.
 #   • db:test = job séparé BLOQUANT depuis la re-baseline (2026-06-10) : il lève une stack
 #     Supabase locale (fresh runner), applique 0001→0044 + seed, et lance les gates SQL.
 #     La reproductibilité est PROUVÉE (0001→0044 rejoue à 0 erreur + smoke audit=0,
@@ -41,9 +41,8 @@ jobs:
       - name: Type check (bloquant)
         run: npx tsc --noEmit
 
-      - name: Lint (informatif — non bloquant tant que la dette n'est pas résorbée)
+      - name: Lint (bloquant — 0 erreur ESLint exigée)
         run: npm run lint
-        continue-on-error: true
 
       - name: Tests unitaires / logique pure (bloquant)
         run: npm test
