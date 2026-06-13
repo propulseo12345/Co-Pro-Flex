@@ -21,9 +21,17 @@ export interface AccountingCsvMeta {
 const SEP = ';';
 const EOL = '\r\n';
 
-/** Échappe une valeur pour un CSV à séparateur `;` (guillemets si `;`, `"` ou saut de ligne). */
+/**
+ * Échappe une valeur pour un CSV à séparateur `;` (guillemets si `;`, `"` ou saut de ligne).
+ * Neutralise aussi l'injection de formule (Excel/LibreOffice) : une cellule commençant par
+ * un caractère de formule (`= + - @` ou tab/CR) est préfixée d'une apostrophe — SAUF les
+ * nombres légitimes (ex. un montant négatif `-500,00`), qui ne doivent pas être altérés.
+ */
 export function csvEscape(value: string | number | null | undefined): string {
-  const s = value === null || value === undefined ? '' : String(value);
+  let s = value === null || value === undefined ? '' : String(value);
+  if (/^[=+\-@\t\r]/.test(s) && !/^-?\d+(,\d+)?$/.test(s)) {
+    s = `'${s}`;
+  }
   return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

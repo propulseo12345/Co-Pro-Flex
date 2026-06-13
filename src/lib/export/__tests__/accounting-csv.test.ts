@@ -41,6 +41,16 @@ describe('helpers CSV', () => {
     expect(csvEscape(12)).toBe('12');
   });
 
+  it("neutralise l'injection de formule (apostrophe), sauf les nombres légitimes", () => {
+    expect(csvEscape('=SUM(A1)')).toBe("'=SUM(A1)");
+    expect(csvEscape('+33612345')).toBe("'+33612345");
+    expect(csvEscape('@cmd')).toBe("'@cmd");
+    expect(csvEscape('-cmd')).toBe("'-cmd");
+    // Un montant négatif légitime ne doit PAS être altéré :
+    expect(csvEscape('-500,00')).toBe('-500,00');
+    expect(csvEscape('1200,00')).toBe('1200,00');
+  });
+
   it('formatCsvAmount : virgule décimale, 2 décimales', () => {
     expect(formatCsvAmount(1200)).toBe('1200,00');
     expect(formatCsvAmount(1234.5)).toBe('1234,50');
