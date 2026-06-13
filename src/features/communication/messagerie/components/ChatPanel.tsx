@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   MessageSquare,
   Send,
@@ -90,6 +91,7 @@ export function ChatPanel({
   currentUserId,
   onSendMessage,
 }: ChatPanelProps) {
+  const router = useRouter();
   const [draft, setDraft] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -177,13 +179,21 @@ export function ChatPanel({
         </div>
         <div className={styles.headerActions}>
           {conversation.type === 'prestataire' && (
-            <button className={styles.headerBtn} type="button">
+            <button
+              className={styles.headerBtn}
+              type="button"
+              onClick={() => router.push('/maintenance/service-orders/new')}
+            >
               <ClipboardList size={14} aria-hidden="true" />
               Créer OS
             </button>
           )}
           {conversation.type === 'direct' && (
-            <button className={styles.headerBtn} type="button">
+            <button
+              className={styles.headerBtn}
+              type="button"
+              onClick={() => router.push('/coproprietaires')}
+            >
               <User size={14} aria-hidden="true" />
               Fiche copro
             </button>
