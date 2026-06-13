@@ -30,10 +30,22 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
-/** date → 'YYYY-MM-DD' (colonne date, pas timestamptz) */
+/**
+ * date → 'YYYY-MM-DD' en composantes LOCALES. Surtout pas toISOString() : les
+ * dates métier sont construites à minuit local (France = UTC+1/+2) et la
+ * conversion UTC les ferait glisser d'un jour en arrière (période légale fausse).
+ */
 function toDateOnly(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+
+/** 'YYYY-MM-DD' → Date à minuit LOCAL (symétrique de toDateOnly — new Date(str) parserait en UTC) */
+function fromDateOnly(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const RAPPORT_SELECT = `
   *,
@@ -77,6 +89,9 @@ export class RapportCSService {
    * Récupère un rapport par ID (avec sections et annexes)
    */
   async getRapport(id: string): Promise<RapportActiviteCS | null> {
+    // id issu de l'URL libre : un non-UUID (ancien id mock, typo) = introuvable,
+    // pas une erreur Postgres brute (22P02) à l'écran
+    if (!UUID_RE.test(id)) return null;
     const supabase = createUntypedClient();
     const { data, error } = await supabase
       .from('rapports_activite_cs')
@@ -288,13 +303,13 @@ export class RapportCSService {
   async changerStatut(
     id: string,
     nouveauStatut: StatutRapportCS,
-    membreId?: string
+    userId?: string // = profiles.id (auth.uid) — PAS un council_members.id (FK validated_by → profiles)
   ): Promise<RapportActiviteCS> {
     const supabase = createUntypedClient();
     const updates: Record<string, unknown> = { status: nouveauStatut };
 
-    if (nouveauStatut === 'valide' && membreId) {
-      updates.validated_by = membreId;
+    if (nouveauStatut === 'valide' && userId) {
+      updates.validated_by = userId;
       updates.validated_at = new Date().toISOString();
     }
 
@@ -317,17 +332,54 @@ export class RapportCSService {
   }
 
   /**
-   * Valide le rapport
+   * Valide le rapport. userId = profiles.id (utilisateur de session).
    */
-  async validerRapport(id: string, membreId: string): Promise<RapportActiviteCS> {
-    return this.changerStatut(id, 'valide', membreId);
+  async validerRapport(id: string, userId: string): Promise<RapportActiviteCS> {
+    return this.changerStatut(id, 'valide', userId);
   }
 
   /**
-   * Publie le rapport (le lie à une AG)
+   * Publie le rapport (le lie à une AG). Gardes métier :
+   * - le rapport doit être 'valide' (le gate UI seul est contournable) ;
+   * - l'AG doit appartenir à la MÊME copro et être à venir (draft/convoked) —
+   *   le compte rendu art. 21 se présente à une AG future, pas archivée ;
+   * - un seul rapport publié par AG (index 0053) : l'ancien est archivé d'abord.
    */
   async publierRapport(id: string, agId: string): Promise<RapportActiviteCS> {
     const supabase = createUntypedClient();
+
+    const { data: rapport, error: rapportError } = await supabase
+      .from('rapports_activite_cs')
+      .select('copro_id, status')
+      .eq('id', id)
+      .single();
+    if (rapportError) throw new Error(`Rapport non trouvé: ${rapportError.message}`);
+    if (rapport.status !== 'valide') {
+      throw new Error('Seul un rapport validé peut être publié.');
+    }
+
+    const { data: ag, error: agError } = await supabase
+      .from('ag_meetings')
+      .select('copro_id, status')
+      .eq('id', agId)
+      .maybeSingle();
+    if (agError || !ag) throw new Error('AG introuvable.');
+    if (ag.copro_id !== rapport.copro_id) {
+      throw new Error('Cette AG appartient à une autre copropriété.');
+    }
+    if (!['draft', 'convoked'].includes(ag.status)) {
+      throw new Error('Le rapport se publie vers une AG à venir (brouillon ou convoquée).');
+    }
+
+    // un seul rapport publié par AG : archiver l'éventuel précédent
+    const { error: archiveError } = await supabase
+      .from('rapports_activite_cs')
+      .update({ status: 'archive' })
+      .eq('ag_id', agId)
+      .eq('status', 'publie')
+      .neq('id', id);
+    if (archiveError) throw new Error(`Erreur d'archivage du rapport précédent: ${archiveError.message}`);
+
     const { data, error } = await supabase
       .from('rapports_activite_cs')
       .update({ status: 'publie', ag_id: agId })
@@ -335,7 +387,12 @@ export class RapportCSService {
       .select(RAPPORT_SELECT)
       .single();
 
-    if (error) throw new Error(`Erreur publication rapport: ${error.message}`);
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error('Un rapport est déjà publié pour cette AG — archivez-le d\'abord.');
+      }
+      throw new Error(`Erreur publication rapport: ${error.message}`);
+    }
     return this.mapToRapport(data);
   }
 
@@ -420,8 +477,8 @@ export class RapportCSService {
       id: data.id,
       conseilSyndicalId: '', // legacy — le conseil n'est pas une entité persistée
       coproprieteId: data.copro_id,
-      periodeDebut: new Date(data.period_start),
-      periodeFin: new Date(data.period_end),
+      periodeDebut: fromDateOnly(data.period_start),
+      periodeFin: fromDateOnly(data.period_end),
       titre: data.title,
       introduction: data.introduction || '',
       contenu: data.content || '',

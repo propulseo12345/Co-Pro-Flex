@@ -33,10 +33,15 @@ create table public.rapports_activite_cs (
   updated_at    timestamptz  not null default now(),
   constraint pk_rapports_activite_cs primary key (id),
   constraint ck_rapports_cs_status  check (status in ('brouillon','en_revision','valide','publie','archive')),
-  constraint ck_rapports_cs_period  check (period_end >= period_start)
+  constraint ck_rapports_cs_period  check (period_end >= period_start),
+  -- cible des FK composites des enfants : garantit rapport.copro = enfant.copro
+  constraint uq_rapports_cs_id_copro unique (id, copro_id)
 );
 create index idx_rapports_cs_copro on public.rapports_activite_cs (copro_id);
 create index idx_rapports_cs_ag    on public.rapports_activite_cs (ag_id);
+-- un SEUL rapport publié par AG (le compte rendu annexé à la convocation/PV)
+create unique index uq_rapports_cs_ag_publie
+  on public.rapports_activite_cs (ag_id) where status = 'publie';
 create trigger trg_rapports_cs_updated
   before update on public.rapports_activite_cs
   for each row execute function public.set_updated_at();
@@ -44,13 +49,17 @@ create trigger trg_rapports_cs_updated
 create table public.sections_rapport_cs (
   id          uuid         not null default gen_random_uuid(),
   copro_id    uuid         not null references public.copros(id) on delete cascade,
-  rapport_id  uuid         not null references public.rapports_activite_cs(id) on delete cascade,
+  rapport_id  uuid         not null,
   sort_order  integer      not null default 0,
   title       text         not null,
   content     text         not null default '',
   created_at  timestamptz  not null default now(),
   updated_at  timestamptz  not null default now(),
-  constraint pk_sections_rapport_cs primary key (id)
+  constraint pk_sections_rapport_cs primary key (id),
+  -- FK COMPOSITE : impossible d'attacher une section d'une copro X à un rapport
+  -- d'une copro Y (la RLS WITH CHECK ne valide que le copro_id de l'enfant)
+  constraint fk_sections_cs_rapport foreign key (rapport_id, copro_id)
+    references public.rapports_activite_cs (id, copro_id) on delete cascade
 );
 create index idx_sections_cs_rapport on public.sections_rapport_cs (rapport_id);
 create trigger trg_sections_cs_updated
@@ -60,7 +69,7 @@ create trigger trg_sections_cs_updated
 create table public.annexes_rapport_cs (
   id                uuid         not null default gen_random_uuid(),
   copro_id          uuid         not null references public.copros(id) on delete cascade,
-  rapport_id        uuid         not null references public.rapports_activite_cs(id) on delete cascade,
+  rapport_id        uuid         not null,
   name              text         not null,
   description       text,
   kind              text         not null default 'document',
@@ -71,7 +80,9 @@ create table public.annexes_rapport_cs (
   sort_order        integer      not null default 0,
   created_at        timestamptz  not null default now(),
   constraint pk_annexes_rapport_cs primary key (id),
-  constraint ck_annexes_cs_kind check (kind in ('document','image','tableau'))
+  constraint ck_annexes_cs_kind check (kind in ('document','image','tableau')),
+  constraint fk_annexes_cs_rapport foreign key (rapport_id, copro_id)
+    references public.rapports_activite_cs (id, copro_id) on delete cascade
 );
 create index idx_annexes_cs_rapport on public.annexes_rapport_cs (rapport_id);
 

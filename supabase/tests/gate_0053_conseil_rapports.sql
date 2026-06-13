@@ -5,9 +5,11 @@
 -- bascule dev (copro NON seedée → pas de triggers différés GL). Auto-rollback.
 DO $$
 DECLARE
-  v_copro uuid; v_rapport uuid; v_sec uuid; v_annexe uuid;
+  v_copro uuid; v_copro2 uuid; v_rapport uuid; v_rapport2 uuid; v_sec uuid; v_annexe uuid;
+  v_ag uuid;
   v_mgr uuid := gen_random_uuid();
   v_mem uuid := gen_random_uuid();
+  v_mem2 uuid := gen_random_uuid();  -- membre d'une AUTRE copro (isolation)
   v_n int; v_bool boolean; v_arr text[]; v_status text; v_intro text;
 BEGIN
   -- (1) Contrats STRICTS
@@ -82,6 +84,40 @@ BEGIN
    WHERE id = v_rapport AND status = 'valide' AND validated_by = v_mgr AND validated_at IS NOT NULL;
   IF v_n <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL : validation rapport'; END IF;
 
+  -- (3bis) Intégrité cross-copro : une section/annexe étiquetée copro X ne peut
+  -- PAS être attachée à un rapport de copro Y (FK composite)
+  v_copro2 := create_clean_test_copro('g53b');
+  INSERT INTO auth.users (id, email) VALUES (v_mem2, 'mem53b.'||substr(v_mem2::text,1,8)||'@test.fr');
+  INSERT INTO public.memberships (user_id, copro_id, role) VALUES (v_mem2, v_copro2, 'coproprietaire');
+  BEGIN
+    INSERT INTO public.sections_rapport_cs (copro_id, rapport_id, title)
+    VALUES (v_copro2, v_rapport, 'Injection cross-copro');
+    RAISE EXCEPTION 'ASSERT FAIL : section cross-copro acceptée (FK composite absente)';
+  EXCEPTION WHEN foreign_key_violation THEN NULL;
+  END;
+  BEGIN
+    INSERT INTO public.annexes_rapport_cs (copro_id, rapport_id, name)
+    VALUES (v_copro2, v_rapport, 'Injection cross-copro');
+    RAISE EXCEPTION 'ASSERT FAIL : annexe cross-copro acceptée (FK composite absente)';
+  EXCEPTION WHEN foreign_key_violation THEN NULL;
+  END;
+
+  -- (3ter) Unicité du rapport PUBLIÉ par AG (compte rendu annexé convocation/PV)
+  INSERT INTO public.ag_meetings (copro_id, title, meeting_type, meeting_date, status)
+  VALUES (v_copro, 'AG G53', 'ordinary', current_date + 30, 'draft')
+  RETURNING id INTO v_ag;
+  UPDATE public.rapports_activite_cs SET status = 'publie', ag_id = v_ag WHERE id = v_rapport;
+  INSERT INTO public.rapports_activite_cs (copro_id, period_start, period_end, title)
+  VALUES (v_copro, current_date - 10, current_date, 'Rapport 2 G53')
+  RETURNING id INTO v_rapport2;
+  BEGIN
+    UPDATE public.rapports_activite_cs SET status = 'publie', ag_id = v_ag WHERE id = v_rapport2;
+    RAISE EXCEPTION 'ASSERT FAIL : deux rapports publiés sur la même AG acceptés';
+  EXCEPTION WHEN unique_violation THEN NULL;
+  END;
+  DELETE FROM public.rapports_activite_cs WHERE id = v_rapport2;
+  UPDATE public.rapports_activite_cs SET status = 'valide', ag_id = NULL WHERE id = v_rapport;
+
   -- (4) Cascade : la suppression du rapport emporte sections et annexes
   DELETE FROM public.rapports_activite_cs WHERE id = v_rapport;
   SELECT count(*) INTO v_n FROM public.sections_rapport_cs WHERE rapport_id = v_rapport;
@@ -108,14 +144,22 @@ BEGIN
   INSERT INTO public.rapports_activite_cs (copro_id, author_id, period_start, period_end, title)
   VALUES (v_copro, v_mgr, current_date - 30, current_date, 'Rapport RLS G53')
   RETURNING id INTO v_rapport;
+  INSERT INTO public.annexes_rapport_cs (copro_id, rapport_id, name, kind)
+  VALUES (v_copro, v_rapport, 'Annexe RLS G53', 'document')
+  RETURNING id INTO v_annexe;
   BEGIN
     EXECUTE 'alter table public.rapports_activite_cs force row level security';
+    EXECUTE 'alter table public.sections_rapport_cs force row level security';
+    EXECUTE 'alter table public.annexes_rapport_cs force row level security';
     PERFORM set_config('request.jwt.claims',
       json_build_object('sub', v_mem, 'role','authenticated')::text, true);
     PERFORM set_config('role', 'authenticated', true);
     SELECT count(*) INTO v_n FROM public.rapports_activite_cs WHERE id = v_rapport;
     IF v_n <> 1 THEN PERFORM set_config('role','service_role',true);
       RAISE EXCEPTION 'ASSERT FAIL : lecture membre rapports_activite_cs'; END IF;
+    SELECT count(*) INTO v_n FROM public.annexes_rapport_cs WHERE id = v_annexe;
+    IF v_n <> 1 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'ASSERT FAIL : lecture membre annexes_rapport_cs'; END IF;
     BEGIN
       INSERT INTO public.rapports_activite_cs (copro_id, period_start, period_end, title)
       VALUES (v_copro, current_date, current_date, 'Membre KO');
@@ -123,6 +167,31 @@ BEGIN
       RAISE EXCEPTION 'ASSERT FAIL : écriture rapport autorisée à un copropriétaire';
     EXCEPTION WHEN insufficient_privilege THEN NULL;
     END;
+    BEGIN
+      INSERT INTO public.sections_rapport_cs (copro_id, rapport_id, title)
+      VALUES (v_copro, v_rapport, 'Membre KO');
+      PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'ASSERT FAIL : écriture section autorisée à un copropriétaire';
+    EXCEPTION WHEN insufficient_privilege THEN NULL;
+    END;
+    BEGIN
+      INSERT INTO public.annexes_rapport_cs (copro_id, rapport_id, name)
+      VALUES (v_copro, v_rapport, 'Membre KO');
+      PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'ASSERT FAIL : écriture annexe autorisée à un copropriétaire';
+    EXCEPTION WHEN insufficient_privilege THEN NULL;
+    END;
+
+    -- isolation : un membre d'une AUTRE copro ne voit RIEN des 3 tables
+    PERFORM set_config('request.jwt.claims',
+      json_build_object('sub', v_mem2, 'role','authenticated')::text, true);
+    SELECT (SELECT count(*) FROM public.rapports_activite_cs WHERE copro_id = v_copro)
+         + (SELECT count(*) FROM public.sections_rapport_cs  WHERE copro_id = v_copro)
+         + (SELECT count(*) FROM public.annexes_rapport_cs   WHERE copro_id = v_copro)
+      INTO v_n;
+    IF v_n <> 0 THEN PERFORM set_config('role','service_role',true);
+      RAISE EXCEPTION 'ASSERT FAIL : fuite cross-copro rapports CS (% lignes)', v_n; END IF;
+
     PERFORM set_config('request.jwt.claims',
       json_build_object('sub', v_mgr, 'role','authenticated')::text, true);
     INSERT INTO public.sections_rapport_cs (copro_id, rapport_id, title)

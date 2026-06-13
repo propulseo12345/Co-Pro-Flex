@@ -43,7 +43,8 @@ interface UseRapportCSReturn {
 
   // Workflow
   soumettrePourRevision: () => Promise<void>;
-  valider: (membreId: string) => Promise<void>;
+  /** userId = profiles.id (utilisateur de session), PAS un council_members.id */
+  valider: (userId: string) => Promise<void>;
   publier: (agId: string) => Promise<void>;
 
   // Sauvegarde
@@ -68,6 +69,10 @@ export function useRapportCS({
   const [error, setError] = useState<Error | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Persistance débouncée des sections : updates accumulés par section (sinon
+  // 1 UPDATE HTTP par frappe + courses de réponses qui écrasent la saisie)
+  const sectionSaveTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const sectionPendingUpdates = useRef<Map<string, Partial<SectionRapportCS>>>(new Map());
 
   // Charger le rapport
   const loadRapport = useCallback(async () => {
@@ -102,7 +107,9 @@ export function useRapportCS({
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      save();
+      // l'erreur est déjà capturée via setError dans save() — sans ce catch,
+      // chaque échec d'autosave serait une unhandled promise rejection
+      save().catch(() => {});
     }, autoSaveDelay);
 
     return () => {
@@ -159,16 +166,30 @@ export function useRapportCS({
     sectionId: string,
     updates: Partial<SectionRapportCS>
   ) => {
-    try {
-      const updated = await rapportCSService.mettreAJourSection(sectionId, updates);
-      setRapport(prev => prev ? {
-        ...prev,
-        sections: prev.sections.map(s => s.id === sectionId ? updated : s),
-      } : null);
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    }
+    // 1. Optimiste : l'input contrôlé reflète la frappe immédiatement (le
+    //    round-trip par frappe faisait « sauter » le texte sur réponse périmée)
+    setRapport(prev => prev ? {
+      ...prev,
+      sections: prev.sections.map(s => s.id === sectionId ? { ...s, ...updates } : s),
+    } : null);
+
+    // 2. Persistance débouncée, updates ACCUMULÉS (titre puis contenu tapés
+    //    coup sur coup ne doivent pas s'écraser mutuellement)
+    const pending = sectionPendingUpdates.current;
+    pending.set(sectionId, { ...(pending.get(sectionId) ?? {}), ...updates });
+
+    const timers = sectionSaveTimers.current;
+    const existing = timers.get(sectionId);
+    if (existing) clearTimeout(existing);
+    timers.set(sectionId, setTimeout(() => {
+      timers.delete(sectionId);
+      const toPersist = pending.get(sectionId);
+      pending.delete(sectionId);
+      if (!toPersist) return;
+      rapportCSService.mettreAJourSection(sectionId, toPersist).catch((err) => {
+        setError(err as Error);
+      });
+    }, 800));
   }, []);
 
   const deleteSection = useCallback(async (sectionId: string) => {
@@ -293,12 +314,12 @@ export function useRapportCS({
     }
   }, [rapport, hasUnsavedChanges]);
 
-  const valider = useCallback(async (membreId: string) => {
+  const valider = useCallback(async (userId: string) => {
     if (!rapport) return;
 
     setIsSaving(true);
     try {
-      const updated = await rapportCSService.validerRapport(rapport.id, membreId);
+      const updated = await rapportCSService.validerRapport(rapport.id, userId);
       setRapport(updated);
     } catch (err) {
       setError(err as Error);
