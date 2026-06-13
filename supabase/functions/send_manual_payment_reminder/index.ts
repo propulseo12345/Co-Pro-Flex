@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -17,17 +18,6 @@ interface SendManualReminderRequest {
   delay_level?: number; // Optionnel, sinon déterminé automatiquement
   custom_message?: string; // Message personnalisé optionnel
   dry_run?: boolean; // Mode simulation - ne pas envoyer d'email
-}
-
-interface SendManualReminderResponse {
-  success: boolean;
-  error?: string;
-  reminder_id?: string;
-  recipient_email?: string;
-  delay_level?: number;
-  // Dry run specific
-  dry_run?: boolean;
-  would_send?: boolean;
 }
 
 // ============================================================================
@@ -405,7 +395,7 @@ Deno.serve(async (req: Request) => {
       );
     }
   } catch (e) {
-    console.error("Error in send_manual_payment_reminder:", e);
+    log.error("Error in send_manual_payment_reminder", { error: e });
     return new Response(
       JSON.stringify({ success: false, error: String(e) }),
       { status: 500, headers: { "Content-Type": "application/json" } }

@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -117,7 +118,7 @@ Deno.serve(async (req: Request) => {
 
     // Parse event
     const event: ResendWebhookEvent = JSON.parse(rawBody);
-    console.log("Received webhook event:", event.type, event.data.email_id);
+    log.info("Received webhook event", { type: event.type, emailId: event.data.email_id });
 
     // Init Supabase with service role (webhooks n'ont pas d'auth user)
     const supabase = createClient(
@@ -134,7 +135,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (notifError || !notification) {
-      console.log("Notification not found for email_id:", event.data.email_id);
+      log.info("Notification not found for email_id", { emailId: event.data.email_id });
       // Peut être un email non suivi, OK
       return new Response(JSON.stringify({ received: true }), {
         status: 200,
@@ -156,14 +157,14 @@ Deno.serve(async (req: Request) => {
     });
 
     if (insertError) {
-      console.error("Error inserting event:", insertError);
+      log.error("Error inserting event", { insertError });
       // Le trigger mettra à jour le statut de la notification
     }
 
     // Si bounce, marquer également l'email comme invalide sur le copropriétaire
     if (eventType === "bounced" && event.data.to && event.data.to.length > 0) {
       const bouncedEmail = event.data.to[0];
-      console.log("Email bounced:", bouncedEmail);
+      log.info("Email bounced", { bouncedEmail });
 
       // Optionnel: marquer l'email comme invalide
       // await supabase
@@ -177,7 +178,7 @@ Deno.serve(async (req: Request) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("Webhook error:", e);
+    log.error("Webhook error", { error: e });
     return new Response(JSON.stringify({ error: String(e) }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

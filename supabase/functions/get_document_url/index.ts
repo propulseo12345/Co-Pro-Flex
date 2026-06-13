@@ -7,6 +7,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -220,7 +221,7 @@ async function logDocumentAccess(
     });
   } catch {
     // Ignore logging errors - table may not exist
-    console.log("Access logging skipped");
+    log.info("Access logging skipped");
   }
 }
 
@@ -363,7 +364,7 @@ Deno.serve(async (req: Request) => {
       .createSignedUrl(storagePath, expiresIn);
 
     if (signedUrlError) {
-      console.error("Signed URL error:", signedUrlError);
+      log.error("Signed URL error", { error: signedUrlError });
       return new Response(
         JSON.stringify({
           success: false,
@@ -394,7 +395,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    log.error("Unexpected error", { error: err });
     return new Response(
       JSON.stringify({
         success: false,

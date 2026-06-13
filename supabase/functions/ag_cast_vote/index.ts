@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // Types pour les paramètres d'entrée
 interface CastVoteRequest {
@@ -213,7 +214,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (error) {
-      console.error("RPC error:", error);
+      log.error("RPC error", { error });
 
       // Vérifier si c'est une erreur métier connue
       if (error.message.includes("already voted")) {
@@ -329,7 +330,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    log.error("Unexpected error", { error: err });
     return new Response(
       JSON.stringify({
         success: false,

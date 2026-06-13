@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -283,7 +284,7 @@ Deno.serve(async (req: Request) => {
     );
 
     if (pendingError) {
-      console.error("Error fetching pending reminders:", pendingError);
+      log.error("Error fetching pending reminders", { error: pendingError });
       return new Response(
         JSON.stringify({ success: false, error: pendingError.message }),
         { status: 500, headers: { "Content-Type": "application/json" } }
@@ -458,7 +459,7 @@ Deno.serve(async (req: Request) => {
       },
     });
   } catch (e) {
-    console.error("Error in run_payment_reminders:", e);
+    log.error("Error in run_payment_reminders", { error: e });
     return new Response(
       JSON.stringify({ success: false, error: String(e) }),
       { status: 500, headers: { "Content-Type": "application/json" } }
