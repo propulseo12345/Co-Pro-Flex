@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { getExercicesList } from '@/lib/dates';
 import { BudgetTab } from './types';
 import styles from './Budget.module.css';
@@ -42,13 +42,8 @@ export function BudgetHeader({
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
-          <button
-            className="btn btn-secondary"
-            onClick={() => alert('Export PDF en cours...\n\nLe budget sera téléchargé au format PDF dans quelques instants.')}
-          >
-            <Download size={16} aria-hidden="true" />
-            Export PDF
-          </button>
+          {/* Export PDF retiré (audit 2026-06-12 : bouton non fonctionnel).
+              L'export comptable réel (CSV grand livre/balance, art. 18-1) arrive en J5. */}
           <button
             className="btn btn-primary"
             onClick={onCreateBudget}

@@ -123,7 +123,7 @@ export default function BudgetDetailPage() {
         <LinkToAGModal budget={page.budget} availableResolutions={page.resolutionsAG} onLink={(_, resolutionId) => page.handleLinkToAG(resolutionId)} onClose={page.closeLinkModal} />
       )}
       {page.showTransformModal && (
-        <TransformBudgetModal budget={page.budget} onTransform={() => { alert('Appels de fonds generes avec succes !'); page.closeTransformModal(); }} onClose={page.closeTransformModal} />
+        <TransformBudgetModal budget={page.budget} onTransform={() => { alert('La génération des appels de fonds depuis le budget sera disponible prochainement.'); page.closeTransformModal(); }} onClose={page.closeTransformModal} />
       )}
       {page.showSimulationModal && (
         <SimulationRepartitionModal postes={page.postes} onClose={page.closeSimulationModal} />

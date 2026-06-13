@@ -695,8 +695,11 @@ export function useBudget() {
   }, []);
 
   const handleTransformToAppele = useCallback(() => {
-    // TODO: Implement fund calls generation
-    alert('Budget transformé en appels de fonds !');
+    // La génération d'appels de fonds depuis le budget (RPC post_budget_call_for_funds
+    // + écritures D450/C701 + échéancier) est un chantier finance dédié (J9, wizard G3).
+    // On NE simule PAS un succès (audit 2026-06-12 : un faux succès est pire qu'un bouton
+    // mort) : message honnête tant que le câblage réel n'est pas livré.
+    alert('La génération des appels de fonds depuis le budget sera disponible prochainement.');
     setShowTransformBudgetModal(false);
   }, []);
 
