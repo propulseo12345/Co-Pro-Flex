@@ -291,7 +291,8 @@ export function getDefaultTemplateSpec(): IPVTemplateSpec {
 }
 
 function generateTemplateId(): string {
-    return `tpl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // PK uuid en base (pv_templates 0052) — un id maison `tpl-...` serait rejeté
+    return crypto.randomUUID();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -353,7 +354,7 @@ class PVTemplateService {
             const { data, error } = await supabase
                 .from('pv_templates')
                 .select('*')
-                .or(`organization_id.eq.${organizationId},is_system_template.eq.true`)
+                .or(`copro_id.eq.${organizationId},is_system_template.eq.true`)
                 .order('updated_at', { ascending: false });
 
             if (error) {
@@ -425,7 +426,7 @@ class PVTemplateService {
             const { data, error } = await supabase
                 .from('pv_templates')
                 .select('*')
-                .eq('organization_id', organizationId)
+                .eq('copro_id', organizationId)
                 .eq('is_default', true)
                 .single();
 
@@ -621,7 +622,8 @@ class PVTemplateService {
     private mapFromDb(data: Record<string, unknown>): IPVTemplate {
         return {
             id: data.id as string,
-            organizationId: data.organization_id as string,
+            // copro_id NULL = template système global
+            organizationId: (data.copro_id as string | null) ?? 'system',
             name: data.name as string,
             description: data.description as string || '',
             status: data.status as PVTemplateStatus,
@@ -639,7 +641,7 @@ class PVTemplateService {
     private mapToDb(template: IPVTemplate): Record<string, unknown> {
         return {
             id: template.id,
-            organization_id: template.organizationId,
+            copro_id: template.organizationId === 'system' ? null : template.organizationId,
             name: template.name,
             description: template.description,
             status: template.status,

@@ -3,13 +3,14 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePVTemplates } from '@/hooks/modules/usePVTemplates';
+import { useCopro } from '@/providers/CoproContext';
+import { useSupabase } from '@/hooks/useSupabase';
 import type { IPVTemplate } from '@/types/models/pv-template';
-
-const MOCK_ORG_ID = 'org-001';
-const MOCK_USER_ID = 'user-001';
 
 export function useTemplatesPage() {
   const router = useRouter();
+  const { currentCoproId } = useCopro();
+  const { user } = useSupabase();
 
   const {
     templates,
@@ -23,8 +24,8 @@ export function useTemplatesPage() {
     importTemplate,
     validateTemplate,
   } = usePVTemplates({
-    organizationId: MOCK_ORG_ID,
-    userId: MOCK_USER_ID,
+    organizationId: currentCoproId ?? '',
+    userId: user?.id ?? '',
   });
 
   const [showCreateModal, setShowCreateModal] = useState(false);
