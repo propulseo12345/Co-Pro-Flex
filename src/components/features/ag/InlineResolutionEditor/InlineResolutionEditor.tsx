@@ -1,8 +1,15 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, X, AlertCircle } from 'lucide-react';
 import { MAJORITES, type MajorityType } from '@/lib/constants/resolutions';
+import {
+  resolutionInlineSchema,
+  type ResolutionInlineInput,
+  type ResolutionInlineOutput,
+} from '@/lib/validation/ag/resolution-inline';
 import styles from './InlineResolutionEditor.module.css';
 
 export interface ResolutionEditData {
@@ -27,36 +34,43 @@ export function InlineResolutionEditor({
   isLoading = false,
   error = null,
 }: InlineResolutionEditorProps) {
-  const [titre, setTitre] = useState(resolution.titre);
-  const [texte, setTexte] = useState(resolution.texte);
-  const [majorite, setMajorite] = useState<MajorityType>(resolution.majorite);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ResolutionInlineInput, unknown, ResolutionInlineOutput>({
+    resolver: zodResolver(resolutionInlineSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      titre: resolution.titre,
+      texte: resolution.texte,
+      majorite: resolution.majorite,
+    },
+  });
 
-  // Reset form when resolution changes
+  // Réinitialise le formulaire quand la résolution éditée change.
   useEffect(() => {
-    setTitre(resolution.titre);
-    setTexte(resolution.texte);
-    setMajorite(resolution.majorite);
-    setValidationError(null);
-  }, [resolution]);
-
-  const handleSave = useCallback(() => {
-    if (!titre.trim()) {
-      setValidationError('Le titre est obligatoire');
-      return;
-    }
-    if (!texte.trim()) {
-      setValidationError('Le texte est obligatoire');
-      return;
-    }
-    setValidationError(null);
-    onSave({
-      id: resolution.id,
-      titre: titre.trim(),
-      texte: texte.trim(),
-      majorite,
+    reset({
+      titre: resolution.titre,
+      texte: resolution.texte,
+      majorite: resolution.majorite,
     });
-  }, [titre, texte, majorite, resolution.id, onSave]);
+  }, [resolution, reset]);
+
+  // Soumission inchangée : on reconstruit le ResolutionEditData (id préservé)
+  // et on appelle onSave. titre/texte sont déjà trim()és par le schéma Zod.
+  const onValid = useCallback(
+    (data: ResolutionInlineOutput) => {
+      onSave({
+        id: resolution.id,
+        titre: data.titre,
+        texte: data.texte,
+        majorite: data.majorite,
+      });
+    },
+    [onSave, resolution.id]
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -64,16 +78,19 @@ export function InlineResolutionEditor({
         e.preventDefault();
         onCancel();
       }
-      // Ctrl/Cmd + Enter to save
+      // Ctrl/Cmd + Enter pour enregistrer
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        handleSave();
+        void handleSubmit(onValid)();
       }
     },
-    [onCancel, handleSave]
+    [onCancel, handleSubmit, onValid]
   );
 
-  const displayError = validationError || error;
+  // Une seule ligne d'erreur (comme avant), désormais pilotée par Zod/RHF :
+  // priorité aux erreurs de champ, puis à l'erreur de soumission du parent.
+  const displayError =
+    errors.titre?.message || errors.texte?.message || errors.majorite?.message || error;
 
   return (
     <div className={styles.editor} onKeyDown={handleKeyDown}>
@@ -84,12 +101,11 @@ export function InlineResolutionEditor({
         <input
           id="edit-titre"
           type="text"
-          value={titre}
-          onChange={(e) => setTitre(e.target.value)}
-          className={`${styles.input} ${!titre.trim() && validationError ? styles.inputError : ''}`}
+          className={`${styles.input} ${errors.titre ? styles.inputError : ''}`}
           placeholder="Titre de la résolution"
           autoFocus
           disabled={isLoading}
+          {...register('titre')}
         />
       </div>
 
@@ -99,12 +115,11 @@ export function InlineResolutionEditor({
         </label>
         <textarea
           id="edit-texte"
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
-          className={`${styles.textarea} ${!texte.trim() && validationError ? styles.inputError : ''}`}
+          className={`${styles.textarea} ${errors.texte ? styles.inputError : ''}`}
           placeholder="Texte complet de la résolution..."
           rows={6}
           disabled={isLoading}
+          {...register('texte')}
         />
         <p className={styles.hint}>
           Utilisez {'{'}variable{'}'} pour les champs dynamiques (ex: {'{'}date_debut{'}'}, {'{'}montant{'}'})
@@ -117,10 +132,9 @@ export function InlineResolutionEditor({
         </label>
         <select
           id="edit-majorite"
-          value={majorite}
-          onChange={(e) => setMajorite(e.target.value as MajorityType)}
           className={styles.select}
           disabled={isLoading}
+          {...register('majorite')}
         >
           {Object.entries(MAJORITES).map(([key, maj]) => (
             <option key={key} value={key}>
@@ -149,7 +163,7 @@ export function InlineResolutionEditor({
         </button>
         <button
           type="button"
-          onClick={handleSave}
+          onClick={handleSubmit(onValid)}
           className={styles.saveBtn}
           disabled={isLoading}
         >
