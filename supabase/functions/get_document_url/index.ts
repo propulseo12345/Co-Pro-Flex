@@ -27,7 +27,7 @@ interface GetDocumentUrlResponse {
   expires_at?: string;
   file_name?: string;
   mime_type?: string;
-  confidentiality?: string;
+  visibility?: string;
 }
 
 interface DocumentInfo {
@@ -36,7 +36,7 @@ interface DocumentInfo {
   file_path: string;
   file_name: string;
   mime_type: string | null;
-  confidentiality: string;
+  visibility: string;
   status: string;
   deletion_blocked: boolean;
 }
@@ -63,7 +63,7 @@ async function checkDocumentAccess(
   // Fetch document
   const { data: doc, error: docError } = await supabase
     .from("documents")
-    .select("id, copro_id, file_path, file_name, mime_type, confidentiality, status, deletion_blocked")
+    .select("id, copro_id, file_path, file_name, mime_type, visibility, status, deletion_blocked")
     .eq("id", documentId)
     .single();
 
@@ -76,8 +76,13 @@ async function checkDocumentAccess(
     return { allowed: false, reason: "Document non accessible pour cette copropriété" };
   }
 
+  // Soft-deleted : jamais servi
+  if (doc.status === "deleted") {
+    return { allowed: false, reason: "Document non trouvé" };
+  }
+
   // Check document status
-  if (doc.status === "archived" || doc.status === "expired") {
+  if (doc.status === "archived") {
     // Only managers can access archived docs
     const { data: membership } = await supabase
       .from("memberships")
@@ -86,7 +91,7 @@ async function checkDocumentAccess(
       .eq("copro_id", coproId)
       .single();
 
-    if (!membership || !["gestionnaire", "admin"].includes(membership.role)) {
+    if (!membership || !MANAGER_ROLES.includes(membership.role)) {
       return { allowed: false, reason: "Document archivé - accès réservé aux gestionnaires" };
     }
   }
@@ -94,7 +99,7 @@ async function checkDocumentAccess(
   // Check membership
   const { data: membership, error: membershipError } = await supabase
     .from("memberships")
-    .select("role, coproprietaire_id")
+    .select("role")
     .eq("user_id", userId)
     .eq("copro_id", coproId)
     .single();
@@ -103,39 +108,55 @@ async function checkDocumentAccess(
     return { allowed: false, reason: "Non membre de cette copropriété" };
   }
 
-  // Check confidentiality level
-  const confidentiality = doc.confidentiality || "public";
+  // Niveau de visibilité canonique (enum document_visibility) :
+  // gestionnaire_seul / conseil / tous_coproprietaires.
+  // L'ancien modèle document_access (ACL fine) est abandonné — décision 0020 §A4.
+  // Sémantique alignée sur user_can_view_document (0023) : l'appartenance au
+  // conseil vit dans council_members (pas dans memberships.role).
+  const visibility = doc.visibility || "gestionnaire_seul"; // défaut prudent
   const role = membership.role;
+  const isManager = MANAGER_ROLES.includes(role);
 
-  if (confidentiality === "restricted") {
-    // Only admins and specific grants
-    if (role !== "admin" && role !== "gestionnaire") {
-      // Check document_access table
-      const { data: accessGrant } = await supabase
-        .from("document_access")
-        .select("can_view")
-        .eq("document_id", documentId)
-        .eq("user_id", userId)
-        .single();
-
-      if (!accessGrant?.can_view) {
-        return { allowed: false, reason: "Accès restreint - document confidentiel" };
-      }
-    }
-  } else if (confidentiality === "manager") {
-    // Only gestionnaires and admins
-    if (!["gestionnaire", "admin"].includes(role)) {
+  if (visibility === "gestionnaire_seul") {
+    if (!isManager) {
       return { allowed: false, reason: "Accès réservé aux gestionnaires" };
     }
-  } else if (confidentiality === "council") {
-    // Gestionnaires, admins, and conseil syndical members
-    if (!["gestionnaire", "admin", "conseil"].includes(role)) {
+  } else if (visibility === "conseil") {
+    if (!isManager && !(await isCouncilMember(supabase, userId, coproId))) {
       return { allowed: false, reason: "Accès réservé au conseil syndical et gestionnaires" };
     }
   }
-  // 'public' is accessible to all members
+  // tous_coproprietaires : tout membre de la copro (membership déjà vérifié)
 
   return { allowed: true, doc: doc as DocumentInfo };
+}
+
+// Rôles memberships réels (enum membership_role) : gestionnaire, coproprietaire,
+// platform_admin — 'admin'/'conseil' n'existent pas.
+const MANAGER_ROLES = ["gestionnaire", "platform_admin"];
+
+/**
+ * Membre actif du conseil syndical — sémantique IDENTIQUE au helper SQL
+ * is_council_member (0023) : siège direct (cm.user_id) OU via la fiche
+ * copropriétaire (co.user_id), actif et sans end_date.
+ */
+async function isCouncilMember(
+  supabase: SupabaseClient,
+  userId: string,
+  coproId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("council_members")
+    .select("user_id, coproprietaires:coproprietaire_id ( user_id )")
+    .eq("copro_id", coproId)
+    .eq("is_active", true)
+    .is("end_date", null);
+
+  if (error || !data) return false;
+  return data.some(
+    (row: { user_id: string | null; coproprietaires: { user_id: string | null } | null }) =>
+      row.user_id === userId || row.coproprietaires?.user_id === userId
+  );
 }
 
 async function checkPathAccess(
@@ -144,13 +165,16 @@ async function checkPathAccess(
   filePath: string,
   coproId: string
 ): Promise<{ allowed: boolean; reason?: string }> {
-  // Extract copro_id from path: ged/{copro_id}/...
-  const pathParts = filePath.split("/");
-  if (pathParts.length < 2 || pathParts[0] !== "ged") {
+  // Chemin canonique : {copro_id}/{category}/{year}/... (0048 : les policies
+  // storage isolent par copro sur le PREMIER segment). On tolère l'ancien
+  // préfixe 'ged/' en le retirant.
+  const normalized = filePath.startsWith("ged/") ? filePath.slice(4) : filePath;
+  const pathParts = normalized.split("/");
+  if (pathParts.length < 2) {
     return { allowed: false, reason: "Chemin de fichier invalide" };
   }
 
-  const pathCoproId = pathParts[1];
+  const pathCoproId = pathParts[0];
 
   // Verify copro match
   if (pathCoproId !== coproId) {
@@ -331,10 +355,12 @@ Deno.serve(async (req: Request) => {
     const maxExpiry = 86400; // 24 hours
     const expiresIn = Math.min(Math.max(params.expires_in || defaultExpiry, 60), maxExpiry);
 
-    // Generate signed URL
+    // Generate signed URL — bucket unique 'ged' (0048) ; chemins canoniques
+    // sans préfixe 'ged/' (toléré en entrée, retiré ici).
+    const storagePath = filePath.startsWith("ged/") ? filePath.slice(4) : filePath;
     const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
-      .from("documents")
-      .createSignedUrl(filePath, expiresIn);
+      .from("ged")
+      .createSignedUrl(storagePath, expiresIn);
 
     if (signedUrlError) {
       console.error("Signed URL error:", signedUrlError);
@@ -362,7 +388,7 @@ Deno.serve(async (req: Request) => {
         expires_at: expiresAt,
         file_name: docInfo?.file_name,
         mime_type: docInfo?.mime_type || undefined,
-        confidentiality: docInfo?.confidentiality,
+        visibility: docInfo?.visibility,
       } as GetDocumentUrlResponse),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -71,22 +71,24 @@ export function useConvocationDocuments(
       const supabase = createUntypedClient();
 
       // Chercher les documents liés à cette AG en tant qu'annexe
+      // (document_relations = table canonique des liens, kind 'annexe')
       const { data, error: queryError } = await supabase
-        .from('document_links')
+        .from('document_relations')
         .select(`
           document_id,
           documents:document_id (
-            id, file_name, file_path, file_size, mime_type, created_at
+            id, file_name, file_path, file_size, mime_type, created_at, status
           )
         `)
         .eq('entity_type', 'ag')
         .eq('entity_id', agId)
-        .eq('link_type', 'annexe');
+        .eq('relation_kind', 'annexe');
 
       if (queryError) throw new Error(queryError.message);
 
       const docs: UploadedAnnexeDoc[] = (data || [])
-        .filter((row: { documents: unknown }) => row.documents)
+        .filter((row: { documents: { status?: string } | null }) =>
+          row.documents && row.documents.status !== 'deleted')
         .map((row: { documents: { id: string; file_name: string; mime_type: string; file_size: number; file_path: string; created_at: string } }) => ({
           id: row.documents.id,
           name: row.documents.file_name,
@@ -140,8 +142,11 @@ export function useConvocationDocuments(
     setError(null);
 
     try {
-      // Upload le document
-      const doc = await uploadDocument(file, coproId, 'convocation', {
+      // Upload le document — catégorie 'autre' : fichier de TRAVAIL supprimable
+      // pendant la rédaction. La catégorie 'convocation' déclenche la rétention
+      // légale (deletion_blocked) qui doit protéger la convocation FINALE
+      // (générée et archivée via ag_documents), pas ses brouillons d'annexes.
+      const doc = await uploadDocument(file, coproId, 'autre', {
         title: file.name,
         description: `Annexe convocation AG`,
       });
@@ -178,18 +183,24 @@ export function useConvocationDocuments(
       const supabase = createUntypedClient();
 
       // Supprimer le lien
-      await supabase
-        .from('document_links')
+      const { error: relError } = await supabase
+        .from('document_relations')
         .delete()
         .eq('document_id', docId)
         .eq('entity_type', 'ag')
         .eq('entity_id', agId);
+      if (relError) throw new Error(relError.message);
 
-      // Supprimer le document (et le fichier storage via trigger ou manuellement)
+      // Soft-delete D'ABORD : trg_document_soft_delete_guard (0052) refuse la
+      // suppression d'un doc à conservation légale — dans ce cas on N'EFFACE PAS
+      // le binaire. Le storage n'est retiré qu'après acceptation du soft-delete.
       const doc = documents.find(d => d.id === docId);
       if (doc) {
+        const { error: delError } = await supabase.from('documents')
+          .update({ status: 'deleted' })
+          .eq('id', docId);
+        if (delError) throw new Error(delError.message);
         await supabase.storage.from('ged').remove([doc.filePath]);
-        await supabase.from('documents').delete().eq('id', docId);
       }
 
       setDocuments(prev => prev.filter(d => d.id !== docId));

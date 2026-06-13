@@ -226,9 +226,16 @@ BEGIN
    WHERE ag_id = v_ag AND notification_type = 'relance' AND total_count = 1 AND pending_count = 1;
   IF v_n <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL : create_ag_notification/relance non reflété dans la vue'; END IF;
 
-  -- (11) RLS ag_documents : flag + 2 policies + visibilité (étranger 0 / gestionnaire 3)
+  -- (11) RLS ag_documents : policies + visibilité (étranger 0 / gestionnaire 3)
+  -- ag_documents est au REGISTRE 0034 depuis 0052 : en dev la bascule la
+  -- désactive (l'inclusion au registre est prouvée par gate_0052, bascule
+  -- dev/prod sur copro non seedée). Ici : activation CIBLÉE, transaction-locale
+  -- (rollback en fin de gate) — pas d'apply_rls_environment() : la copro seedée
+  -- laisse des triggers différés en attente sur le GL, incompatibles avec ses
+  -- ALTER TABLE.
+  EXECUTE 'alter table public.ag_documents enable row level security';
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.ag_documents'::regclass) THEN
-    RAISE EXCEPTION 'ASSERT FAIL : RLS non activée sur ag_documents';
+    RAISE EXCEPTION 'ASSERT FAIL : RLS non activable sur ag_documents';
   END IF;
   SELECT count(*) INTO v_n FROM pg_policies WHERE schemaname='public' AND tablename='ag_documents';
   IF v_n <> 2 THEN RAISE EXCEPTION 'ASSERT FAIL : ag_documents % policies (attendu 2)', v_n; END IF;
