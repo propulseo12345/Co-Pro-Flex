@@ -903,7 +903,8 @@ begin
     'email_templates',
     'resolution_templates',
     'ag_documents',      -- 0050 (rattrapage registre en 0052)
-    'pv_templates'       -- 0052
+    'pv_templates',      -- 0052
+    'rapports_activite_cs', 'sections_rapport_cs', 'annexes_rapport_cs'  -- 0053
   ]
   loop
     if to_regclass('public.' || t) is null then
