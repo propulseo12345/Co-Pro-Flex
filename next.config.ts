@@ -5,10 +5,10 @@ import type { NextConfig } from "next";
 // ----------------------------------------------------------------------------
 // Source unique de vérité (appliqués en dev ET en prod, parité garantie).
 //
-// CSP : volontairement en **Report-Only** pour l'instant — le navigateur SIGNALE
-// les violations sans RIEN bloquer. Aucun risque de casser l'app. Une fois la
-// politique vérifiée sur les vrais écrans (console = 0 violation légitime), il
-// suffira de renommer l'en-tête en `Content-Security-Policy` pour l'activer.
+// CSP : **ACTIVE (bloquante)** depuis J4 (2026-06-13). Politique permissive
+// vérifiée sans risque de casse (polices auto-hébergées via next/font, Supabase
+// couvert, pas de CDN tiers). Étape suivante de durcissement : passer script-src
+// à un nonce et retirer 'unsafe-inline'/'unsafe-eval' (passe dédiée).
 // ============================================================================
 
 // Politique CSP de départ, calquée sur les sources réelles de l'app :
@@ -43,8 +43,8 @@ const securityHeaders = [
   // Coupe les API navigateur non utilisées par l'app.
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  // CSP en mode observation (ne bloque rien) — voir commentaire ci-dessus.
-  { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy },
+  // CSP ACTIVE (bloquante) — voir commentaire en tête de fichier.
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
 ];
 
 const nextConfig: NextConfig = {
