@@ -1,5 +1,5 @@
 import { OperationComptable, Depense, HistoriqueModification, TypeCompte, LigneBalance } from './types';
-import { MOCK_OPERATIONS, MOCK_DEPENSES } from './data';
+import { MOCK_OPERATIONS } from './data';
 
 /**
  * Plan Comptable Copropriété - Classification des comptes par type

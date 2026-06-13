@@ -7,7 +7,8 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
-import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from "https://cdn.skypack.dev/pdf-lib@1.17.1?dts";
+import { PDFDocument, StandardFonts, rgb, PDFFont } from "https://cdn.skypack.dev/pdf-lib@1.17.1?dts";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -284,7 +285,7 @@ async function generateConvocation(
   copro: CoproInfo,
   ag: AgMeetingInfo,
   resolutions: ResolutionInfo[],
-  owners: AttendanceInfo[]
+  _owners: AttendanceInfo[]
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -799,7 +800,10 @@ async function fetchAgData(supabase: SupabaseClient, coproId: string, agId: stri
 
     // Log warning if there are still unresolved placeholders
     if (renderedDescription && /\{[^}]+\}/.test(renderedDescription)) {
-      console.warn(`[ag_generate_document] Unresolved placeholders in resolution ${r.resolution_number}: ${renderedDescription.match(/\{[^}]+\}/g)?.join(", ")}`);
+      log.warn("Placeholders non résolus dans une résolution", {
+        resolution_number: r.resolution_number,
+        placeholders: renderedDescription.match(/\{[^}]+\}/g)?.join(", "),
+      });
     }
 
     return {
@@ -965,7 +969,7 @@ Deno.serve(async (req: Request) => {
       });
 
     if (uploadError) {
-      console.error("Upload error:", uploadError);
+      log.error("Erreur d'upload vers le storage", { error: uploadError });
       return new Response(
         JSON.stringify({ success: false, error: `Storage error: ${uploadError.message}` } as GenerateDocumentResponse),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -990,7 +994,7 @@ Deno.serve(async (req: Request) => {
       });
 
     if (regError) {
-      console.error("Register error:", regError);
+      log.error("Erreur lors de l'enregistrement du document", { error: regError });
       // Continue anyway - file is uploaded
     }
 
@@ -1000,7 +1004,7 @@ Deno.serve(async (req: Request) => {
       .createSignedUrl(storagePath, 900); // 15 minutes
 
     if (signedUrlError) {
-      console.error("Signed URL error:", signedUrlError);
+      log.error("Erreur lors de la création de l'URL signée", { error: signedUrlError });
       return new Response(
         JSON.stringify({
           success: true,
@@ -1028,7 +1032,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    log.error("Erreur inattendue", { error: err });
     return new Response(
       JSON.stringify({
         success: false,

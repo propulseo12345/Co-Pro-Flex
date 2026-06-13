@@ -9,7 +9,6 @@ import type {
   VenteStepValidationResult,
   VenteWorkflowValidation,
   ValidationRuleResult,
-  ValidationStatus,
   ClotureCompteVendeur,
 } from '@/types/models/vente-workflow';
 import type { VenteDocument } from '@/components/features/ventes/VenteDetail/types';
@@ -28,11 +27,6 @@ const DOCUMENT_TYPE_MAPPING: Record<string, string> = {
   'COMPROMIS': 'compromis',
   'AUTRE': 'autre',
 };
-
-// Mapping inverse
-const DOCUMENT_TYPE_MAPPING_REVERSE: Record<string, string> = Object.fromEntries(
-  Object.entries(DOCUMENT_TYPE_MAPPING).map(([k, v]) => [v, k])
-);
 
 /**
  * Accède à une valeur imbriquée dans un objet via un chemin (ex: 'notaire.email')

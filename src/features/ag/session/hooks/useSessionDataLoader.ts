@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { loadDraft } from '@/lib/ag/draft-persistence';
 import { presencesEnrichiesVersSimple } from '@/lib/utils/ag-session';
 import type { VoteData, VoteSource, SessionDraftData, Coproprietaire, PresenceData, Resolution, SessionState } from '../types';

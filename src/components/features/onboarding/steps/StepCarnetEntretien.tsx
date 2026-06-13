@@ -95,7 +95,7 @@ export function StepCarnetEntretien({ coproId, onClose }: StepCarnetEntretienPro
       ]);
 
       resetForm();
-    } catch (err) {
+    } catch (_err) {
       alert('Erreur inattendue');
     } finally {
       setIsSaving(false);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useCallback } from 'react';
-import { Upload, Paperclip, Loader2, AlertCircle, FileText } from 'lucide-react';
+import { Upload, Paperclip, Loader2, FileText } from 'lucide-react';
 import type { PieceJointeOS } from '@/types';
 import { PieceJointeOSItem } from './PieceJointeOSItem';
 import styles from './ListePiecesJointesOS.module.css';

@@ -1,4 +1,4 @@
-import { Facture, CompteBancaire, Fournisseur, TypeDepense, LigneVentilation, EvenementFacture } from './types';
+import { Facture, CompteBancaire, Fournisseur, TypeDepense } from './types';
 
 /** Clés de répartition disponibles */
 export interface CleRepartition {

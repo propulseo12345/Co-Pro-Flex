@@ -6,9 +6,6 @@ import { useCopro } from '@/providers/CoproContext';
 import {
   useRepartitionKeyDetail,
   useLots,
-  type RepartitionKeyWithTotals,
-  type RepartitionKeyLineDetailed,
-  type ValidationResult,
   type RepartitionBasis,
 } from '@/hooks/modules/useLotsData';
 import * as lotsApi from '@/lib/lots/api';

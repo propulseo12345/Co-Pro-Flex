@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,7 +138,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error("Maintenance workflow error:", error);
+    log.error("Maintenance workflow error", { error });
     return new Response(
       JSON.stringify({ error: error.message || "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -193,7 +194,7 @@ async function handleUpdateStatus(
       .eq("id", orderId);
 
     if (updateError) {
-      console.error("Additional update error:", updateError);
+      log.error("Additional update error", { updateError });
     }
   }
 
@@ -437,7 +438,7 @@ async function handleCompleteAndLog(
   );
 
   if (logbookError) {
-    console.error("Logbook creation error:", logbookError);
+    log.error("Logbook creation error", { logbookError });
     // Don't fail the whole operation, just log
   }
 

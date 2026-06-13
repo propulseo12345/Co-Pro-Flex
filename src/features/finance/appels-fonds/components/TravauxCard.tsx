@@ -13,7 +13,7 @@ interface TravauxCardProps {
   onEmit?: (callId: string) => void;
 }
 
-export function TravauxCard({ project, onEmit }: TravauxCardProps) {
+export function TravauxCard({ project }: TravauxCardProps) {
   const router = useRouter();
   const currentCall = project.calls.find(
     c => c.status === 'issued' || c.status === 'partially_paid'

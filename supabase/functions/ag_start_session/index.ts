@@ -10,6 +10,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // Types
 interface RequestBody {
@@ -159,7 +160,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     );
 
     if (managerError) {
-      console.error("Manager check error:", managerError);
+      log.error("Manager check error", { error: managerError });
       return new Response(
         JSON.stringify({
           success: false,
@@ -205,7 +206,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Update AG status to in_progress
     const startedAt = new Date().toISOString();
-    const { data: updatedAg, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from("ag_meetings")
       .update({
         status: "in_progress",
@@ -218,7 +219,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .single();
 
     if (updateError) {
-      console.error("Update error:", updateError);
+      log.error("Update error", { error: updateError });
       return new Response(
         JSON.stringify({
           success: false,
@@ -253,7 +254,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    log.error("Unexpected error", { error });
     return new Response(
       JSON.stringify({
         success: false,

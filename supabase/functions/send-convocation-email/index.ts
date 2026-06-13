@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { log } from '../_shared/log.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'convocations@coproflex.fr';
@@ -36,7 +37,7 @@ serve(async (req) => {
 
     if (!RESEND_API_KEY) {
       // Mode stub : pas de cle API configuree
-      console.log(`[STUB] Email convocation → ${to} (${fileName})`);
+      log.info("[STUB] Email convocation", { to, fileName });
       return new Response(
         JSON.stringify({
           success: true,

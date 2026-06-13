@@ -20,11 +20,9 @@ import {
   ClipboardList,
   Archive,
   Download,
-  Eye,
   Edit,
   Play,
   CheckCircle,
-  AlertTriangle,
   Vote,
 } from 'lucide-react';
 

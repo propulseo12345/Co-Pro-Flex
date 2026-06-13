@@ -204,7 +204,6 @@ interface DocumentsSectionProps {
 export function AssuranceDocumentsSection({
     documents,
     formData,
-    assurance,
     isEditing,
     showAddDocument,
     newDocument,

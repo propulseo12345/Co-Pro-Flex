@@ -78,8 +78,8 @@ export function ClotureModal({
                 <span>Points de vigilance avant clôture</span>
               </div>
               <ul className={styles.clotureAlertList}>
-                {etatCloture.alertes.map((alerte, index) => (
-                  <li key={index}>{alerte}</li>
+                {etatCloture.alertes.map((alerte) => (
+                  <li key={alerte}>{alerte}</li>
                 ))}
               </ul>
             </div>

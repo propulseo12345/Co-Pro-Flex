@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Prestataire, InterventionDetaille, ContratDetaille, DomaineActivite } from '@/types';
-import type { Provider, LogbookOverview, ContractOverview, LogbookEntryInsert } from '@/types/domain';
+import type { LogbookEntryInsert } from '@/types/domain';
 import { useToast } from '@/providers/ToastProvider';
 import { useProviders, useLogbook, useContracts as useContractsSupabase } from '@/hooks/modules/useMaintenanceData';
 
@@ -12,7 +12,7 @@ export function useProviderDetailPage(id: string) {
     const searchParams = useSearchParams();
     const { showToast } = useToast();
     const { providers: supabaseProviders, updateProvider, deleteProvider } = useProviders({ autoFetch: true });
-    const { entries: dbEntries, createEntry, fetchEntries } = useLogbook({ autoFetch: true });
+    const { entries: dbEntries, createEntry } = useLogbook({ autoFetch: true });
     const { contracts: dbContracts } = useContractsSupabase({ autoFetch: true });
 
     const [showAddIntervention, setShowAddIntervention] = useState(false);
@@ -120,7 +120,7 @@ export function useProviderDetailPage(id: string) {
                 await deleteProvider(id);
                 showToast({ type: 'success', message: `Prestataire "${prestataire.nom}" supprimé` });
                 setTimeout(() => router.push('/maintenance/providers'), 1500);
-            } catch (err) {
+            } catch (_err) {
                 showToast({ type: 'error', message: `Erreur lors de la suppression du prestataire` });
             }
         }

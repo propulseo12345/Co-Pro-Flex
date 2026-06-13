@@ -10,9 +10,7 @@ import {
   TypeIntervention,
   CategorieIntervention,
   TypeTravauxPrevisionnel,
-  TravauxPrevisionnelStatut,
-  SousTypeAssurance,
-  ContratSyndicStatut
+  TravauxPrevisionnelStatut
 } from '../enums';
 
 /**

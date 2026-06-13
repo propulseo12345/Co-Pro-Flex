@@ -142,6 +142,8 @@ export default function ClesRepartitionPage() {
               {cle.validation && !cle.validation.isValid && cle.validation.warnings && cle.validation.warnings.length > 0 && (
                 <div className={styles.cleWarnings}>
                   {cle.validation.warnings.map((warning, idx) => (
+                    // Messages d'avertissement dérivés, sans identifiant stable et potentiellement identiques
+                    // eslint-disable-next-line react/no-array-index-key
                     <div key={idx} className={styles.warningItem}>
                       <AlertTriangle size={12} />{warning}
                     </div>

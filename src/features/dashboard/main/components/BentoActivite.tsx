@@ -25,6 +25,8 @@ export function BentoActivite({ activities, hasActivities }: BentoActiviteProps)
       {hasActivities ? (
         <div className={styles.activityItems}>
           {activities.map((activity, index) => (
+            // Liste d'activités dérivée sans identifiant stable (agrégat) → index combiné au type
+            // eslint-disable-next-line react/no-array-index-key
             <div key={`${activity.activity_type}-${index}`} className={styles.activityItem}>
               <span className={`${styles.dot} ${getActivityDotClass(activity.activity_type)}`} />
               <span className={styles.activityText}>{activity.label}</span>

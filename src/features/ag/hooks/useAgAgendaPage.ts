@@ -785,7 +785,7 @@ export function useAgAgendaPage({ agId }: UseAgAgendaPageParams) {
         current_step: 3,
         updated_at: new Date().toISOString(),
       }).eq('id', agId);
-    } catch (err) {
+    } catch {
       // Failed to update current_step
     }
 

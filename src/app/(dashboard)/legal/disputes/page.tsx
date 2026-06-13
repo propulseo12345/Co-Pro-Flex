@@ -2,7 +2,6 @@
 
 import { AlertCircle, MessageSquare, FileText, Plus } from 'lucide-react';
 import styles from './disputes.module.css';
-import Link from 'next/link';
 
 // TODO: Replace with Supabase query when litiges table is created
 const MOCK_LITIGES: Array<{ id: string; titre: string; statut: string; priorite: string; type: string; dateOuverture: string; description: string; parties: string[] }> = [];
@@ -110,6 +109,8 @@ export default function DisputesPage() {
                             <span className={styles.partiesLabel}>Parties concernées:</span>
                             <div className={styles.partiesList}>
                                 {litige.parties.map((partie, idx) => (
+                                    // Liste d'affichage statique (noms de parties, sans état local) : index acceptable
+                                    // eslint-disable-next-line react/no-array-index-key
                                     <span key={idx} className={styles.partie}>{partie}</span>
                                 ))}
                             </div>

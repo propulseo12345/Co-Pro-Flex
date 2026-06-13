@@ -6,7 +6,7 @@ import {
   Plus,
   Trash2,
   FileText,
-  Image,
+  Image as ImageIcon,
   Table,
   Eye,
   Download,
@@ -67,7 +67,7 @@ export function RapportSidebar({
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'document': return <FileText size={16} />;
-      case 'image': return <Image size={16} />;
+      case 'image': return <ImageIcon size={16} />;
       case 'tableau': return <Table size={16} />;
       default: return <Paperclip size={16} />;
     }
@@ -348,7 +348,7 @@ export function RapportSidebar({
                   <input
                     type="file"
                     id="annexe-fichier"
-                    onChange={(e) => {
+                    onChange={() => {
                       // TODO: Gérer l'upload de fichier
                     }}
                   />

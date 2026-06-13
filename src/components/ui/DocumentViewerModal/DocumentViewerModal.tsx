@@ -5,12 +5,12 @@ import Link from 'next/link';
 import {
   X, Download, FileText, ZoomIn, ZoomOut, RotateCcw, RotateCw,
   ChevronLeft, ChevronRight, Maximize2, Minimize2, Printer,
-  Share2, Trash2, FolderInput, Edit3, Info, Link2, Clock,
+  Share2, Trash2, FolderInput, Edit3, Info, Link2,
   Eye, Calendar, HardDrive, Tag, User, ExternalLink,
-  Image, FileSpreadsheet, FolderOpen, Receipt, FileSignature,
+  Image as ImageIcon, FileSpreadsheet, FolderOpen, Receipt, FileSignature,
   Users, ClipboardList, Banknote, AlertTriangle, Wrench, Home,
   History, GitBranch, Plus, CheckCircle, Archive, FileEdit, XCircle,
-  Upload, BarChart3, Lock, Unlock, Globe, Shield, Type,
+  Upload, BarChart3, Lock, Globe, Shield, Type,
   ArrowRight, Loader2
 } from 'lucide-react';
 import * as documentsApi from '@/lib/documents/api';
@@ -29,7 +29,6 @@ import {
   getStatusLabel,
   getStatusColor,
   getModificationTypeLabel,
-  DocumentValidityStatus,
 } from '@/lib/services/document-versioning.service';
 import {
   getDocumentMetadata,
@@ -43,7 +42,6 @@ import {
   getConfidentialityColor,
   formatRelativeDate,
   formatDateTime,
-  DocumentActionType,
 } from '@/lib/services/document-metadata.service';
 import styles from './DocumentViewerModal.module.css';
 
@@ -99,13 +97,6 @@ function computeFolderPath(folderId: string | undefined, folders: GEDFolder[]): 
   return path;
 }
 
-// Historique de consultation simulé
-const MOCK_VIEW_HISTORY = [
-  { date: '2024-12-28T14:30:00', user: 'Jean Dupont', action: 'Consulté' },
-  { date: '2024-12-15T10:15:00', user: 'Marie Martin', action: 'Téléchargé' },
-  { date: '2024-11-20T16:45:00', user: 'Jean Dupont', action: 'Consulté' },
-];
-
 // Icône pour les types d'entités liées
 function getLinkedEntityIcon(entityType: LinkedEntityType, size = 14) {
   const icons: Record<LinkedEntityType, React.ReactNode> = {
@@ -125,7 +116,7 @@ function getLinkedEntityIcon(entityType: LinkedEntityType, size = 14) {
 // Icône selon le type de fichier
 function getFileIcon(type: string, nom: string, size = 64) {
   if (type === 'IMAGE' || nom.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-    return <Image size={size} />;
+    return <ImageIcon size={size} />;
   }
   if (nom.match(/\.(xlsx?|csv)$/i)) {
     return <FileSpreadsheet size={size} />;
@@ -599,7 +590,7 @@ export default function DocumentViewerModal({
                       }}
                     >
                       <div className={styles.imagePreview}>
-                        <Image size={64} className={styles.imageIcon} />
+                        <ImageIcon size={64} className={styles.imageIcon} />
                         <h3>Aperçu de l'image</h3>
                         <p className={styles.imageFilename}>{document.nom}</p>
                         <p className={styles.imageNote}>
@@ -1094,7 +1085,7 @@ export default function DocumentViewerModal({
                         Historique des versions
                       </h3>
                       <div className={styles.versionTimeline}>
-                        {versionHistory.versions.slice().reverse().map((version, idx) => (
+                        {versionHistory.versions.slice().reverse().map((version) => (
                           <div
                             key={version.documentId}
                             className={`${styles.versionTimelineItem} ${

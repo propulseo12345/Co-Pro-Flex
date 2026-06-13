@@ -340,8 +340,7 @@ Ce certificat est valable pour la vente en cours et ne peut être utilisé pour 
 }
 
 // Générateur DIAGNOSTICS TECHNIQUES
-function generateDiagnostics(doc: jsPDF, vente: Vente, document: VenteDocument): void {
-  const pageWidth = doc.internal.pageSize.getWidth();
+function generateDiagnostics(doc: jsPDF, vente: Vente, _document: VenteDocument): void {
   const today = formatDate(new Date().toISOString());
 
   let y = addHeader(doc, 'DIAGNOSTICS TECHNIQUES', `Lot ${vente.lotId}`, today);
@@ -395,7 +394,6 @@ function generateDiagnostics(doc: jsPDF, vente: Vente, document: VenteDocument):
 
 // Générateur générique pour autres documents
 function generateGenericDocument(doc: jsPDF, vente: Vente, document: VenteDocument): void {
-  const pageWidth = doc.internal.pageSize.getWidth();
   const today = formatDate(new Date().toISOString());
 
   let y = addHeader(doc, document.nom.toUpperCase(), `Lot ${vente.lotId}`, today);
@@ -423,7 +421,7 @@ function generateGenericDocument(doc: jsPDF, vente: Vente, document: VenteDocume
   }
   if (document.signePar && document.dateSignature) {
     y = addLine(doc, y, 'Signé par :', document.signePar);
-    y = addLine(doc, y, 'Date signature :', formatDate(document.dateSignature));
+    addLine(doc, y, 'Date signature :', formatDate(document.dateSignature));
   }
 }
 

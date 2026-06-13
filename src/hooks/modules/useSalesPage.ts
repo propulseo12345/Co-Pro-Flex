@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type { Sale, SaleDocument, DocumentType, DocumentStatut } from '@/types';
 import { useVentesContext } from '@/providers/VentesProvider';
 
@@ -58,7 +58,6 @@ export function useSalesPage() {
   // Try to load from VentesContext (Supabase)
   let contextVentes: Sale[] = [];
   try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const ventesCtx = useVentesContext();
     contextVentes = ventesCtx.ventes.map(v => ({
       id: v.id,

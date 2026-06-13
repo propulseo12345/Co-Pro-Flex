@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useActiveCopro, setActiveCopro, invalidateActiveCoproCache } from '@/lib/copro/activeCopro';
+import { useActiveCopro, setActiveCopro } from '@/lib/copro/activeCopro';
 import { createClient } from '@/lib/supabase/client';
 
 // ============================================================================
@@ -67,7 +67,7 @@ interface CoproProviderProps {
  */
 export function CoproProvider({ children }: CoproProviderProps) {
   // Mode Single Copro: utiliser le hook activeCopro
-  const { coproId: activeCoproId, coproName, isLoading: activeLoading, error: activeError, refresh: refreshActiveCopro } = useActiveCopro();
+  const { coproId: activeCoproId, isLoading: activeLoading, error: activeError, refresh: refreshActiveCopro } = useActiveCopro();
 
   const [currentCopro, setCurrentCopro] = useState<Copro | null>(null);
   const [overrideCoproId, setOverrideCoproId] = useState<string | null>(null);

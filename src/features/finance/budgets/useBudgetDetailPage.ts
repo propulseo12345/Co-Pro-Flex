@@ -71,7 +71,6 @@ export function useBudgetDetailPage({ budgetId }: UseBudgetDetailPageProps) {
     currentBudget: rawBudget,
     lines: rawLines,
     isLoading: dataLoading,
-    error: dataError,
     refresh,
   } = useBudgetData({ budgetId });
 
@@ -255,7 +254,7 @@ export function useBudgetDetailPage({ budgetId }: UseBudgetDetailPageProps) {
     setHasChanges(true);
   }, []);
 
-  const handleLinkToAG = useCallback(async (resolutionId: string) => {
+  const handleLinkToAG = useCallback(async (_resolutionId: string) => {
     if (!budget) return;
     try {
       // Update budget status to pending approval

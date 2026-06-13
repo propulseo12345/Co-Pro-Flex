@@ -601,7 +601,7 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
                 .update({ variables: updatedVars })
                 .eq('id', budgetResolutionIdRef.current);
             }
-          } catch (err) {
+          } catch {
             // Failed to sync budget_postes to resolution
           }
         }

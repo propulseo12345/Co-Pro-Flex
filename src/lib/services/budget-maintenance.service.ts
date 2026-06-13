@@ -7,7 +7,7 @@
  * Note: En production, ce sera remplacé par des appels Supabase
  */
 
-import { InterventionCarnet, PosteBudgetMaintenance } from '@/types';
+import { InterventionCarnet } from '@/types';
 import { PosteBudgetData, PosteBudget, POSTE_LABELS, POSTE_COLORS } from '@/components/features/finance/Budget/types';
 import { getAllInterventions } from './interventions.service';
 import { MOCK_POSTES_BUDGET } from '@/components/features/finance/Budget/mock-data';

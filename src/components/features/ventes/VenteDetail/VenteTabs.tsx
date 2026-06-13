@@ -2,7 +2,7 @@
 
 import { FileText, Clock } from 'lucide-react';
 import clsx from 'clsx';
-import type { ActiveTab, VenteDocument, HistoriqueItem } from './types';
+import type { ActiveTab } from './types';
 import styles from './VenteDetail.module.css';
 
 interface VenteTabsProps {

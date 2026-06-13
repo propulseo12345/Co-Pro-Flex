@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // Types pour les paramètres d'entrée
 interface CloseAGRequest {
@@ -152,13 +153,13 @@ Deno.serve(async (req: Request) => {
     });
 
     // Appeler la fonction SQL close_ag
-    const { data, error } = await supabase.rpc("close_ag", {
+    const { error } = await supabase.rpc("close_ag", {
       p_ag_id: params.ag_id,
       p_closing_notes: params.closing_notes || null,
     });
 
     if (error) {
-      console.error("RPC error:", error);
+      log.error("RPC error", { error });
 
       // Vérifier si c'est une erreur métier connue
       if (error.message.includes("not in_progress")) {
@@ -282,7 +283,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    log.error("Unexpected error", { error: err });
     return new Response(
       JSON.stringify({
         success: false,

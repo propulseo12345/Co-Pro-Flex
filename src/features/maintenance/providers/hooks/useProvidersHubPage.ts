@@ -74,7 +74,6 @@ export function useProvidersHubPage() {
   // Supabase data hook
   const {
     providers,
-    stats: supabaseStats,
     isLoading,
     error,
     fetchProviders,

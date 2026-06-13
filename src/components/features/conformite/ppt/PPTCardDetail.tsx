@@ -19,7 +19,7 @@ function EtapeIcon({ statut }: { statut: IEtapeTravaux['statut'] }) {
   return <Circle size={16} className={styles.iconAVenir} />;
 }
 
-export function PPTCardDetail({ travail, onClose, onEdit, onDelete }: PPTCardDetailProps) {
+export function PPTCardDetail({ travail, onClose, onEdit, onDelete: _onDelete }: PPTCardDetailProps) {
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="ppt-modal-title" onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>

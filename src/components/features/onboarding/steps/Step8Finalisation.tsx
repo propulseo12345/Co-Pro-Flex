@@ -83,7 +83,9 @@ export function Step8Finalisation({ coproId, onFinalized, onBack, onEditReprise 
         <div className={styles.errorMsg}>
           <strong>{blockingIssues.length} écart(s) bloquant(s) — corrigez avant de terminer :</strong>
           <ul>
+            {/* Issues d'audit dérivées sans id stable ; ordre figé par le tri serveur */}
             {blockingIssues.map((i, idx) => (
+              // eslint-disable-next-line react/no-array-index-key
               <li key={idx}>{i.issue_type} — {i.description}</li>
             ))}
           </ul>
@@ -101,7 +103,9 @@ export function Step8Finalisation({ coproId, onFinalized, onBack, onEditReprise 
         <div className={styles.warningMsg}>
           <strong>{warningIssues.length} point(s) d&apos;attention (non bloquant) :</strong>
           <ul>
+            {/* Issues d'audit dérivées sans id stable ; ordre figé par le tri serveur */}
             {warningIssues.map((i, idx) => (
+              // eslint-disable-next-line react/no-array-index-key
               <li key={idx}>{i.issue_type} — {i.description}</li>
             ))}
           </ul>

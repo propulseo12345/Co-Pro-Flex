@@ -61,7 +61,7 @@ export function getStepPath(step: number): string {
 export function useAgDashboardPage() {
   const { currentCoproId, isManager } = useCopro();
   const { meetings, nextMeeting, activeMeetings, pastMeetings, isLoading, error, refresh } = useAgMeetings();
-  const { drafts: supabaseDrafts, deleteDraft, isLoading: draftsLoading } = useAgDrafts();
+  const { drafts: supabaseDrafts, deleteDraft } = useAgDrafts();
 
   const [activeTab, setActiveTab] = useState<'current' | 'archives'>('current');
   const [closedAGs, setClosedAGs] = useState<ClosedAG[]>([]);

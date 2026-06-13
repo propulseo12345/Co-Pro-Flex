@@ -241,8 +241,8 @@ export function AjoutSignataireModal({
             <div className={styles.errors}>
               <AlertCircle size={16} aria-hidden="true" />
               <ul>
-                {errors.map((err, i) => (
-                  <li key={i}>{err}</li>
+                {errors.map((err) => (
+                  <li key={err}>{err}</li>
                 ))}
               </ul>
             </div>

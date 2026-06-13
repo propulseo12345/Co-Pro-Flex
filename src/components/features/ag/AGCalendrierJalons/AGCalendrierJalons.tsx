@@ -72,7 +72,6 @@ export default function AGCalendrierJalons({
     const renderJalon = (jalon: JalonAG, index: number) => {
         const StatusIcon = jalon.icon;
         const isExpanded = expandedJalon === jalon.type;
-        const statusConfig = JALON_STATUS_CONFIG[jalon.status];
 
         const href = jalon.action?.href?.replace('{id}', agId || '');
 

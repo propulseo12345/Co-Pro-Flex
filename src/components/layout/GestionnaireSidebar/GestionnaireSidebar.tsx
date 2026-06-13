@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { PanelLeftClose, PanelLeftOpen, Sun, Moon, Settings } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, Sun, Moon } from 'lucide-react';
 import { GESTIONNAIRE_MODULES } from '@/lib/config/navigationGestionnaire';
 import { useSidebar } from '@/providers/SidebarContext';
 import { useTheme } from '@/providers/ThemeProvider';

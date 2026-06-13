@@ -6,10 +6,8 @@ import {
     X,
     Save
 } from 'lucide-react';
-import clsx from 'clsx';
 import type { InterventionFormModalProps } from '../types';
 import { EquipementCombobox } from '../EquipementCombobox';
-import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
 export function InterventionFormModal({
     isOpen,

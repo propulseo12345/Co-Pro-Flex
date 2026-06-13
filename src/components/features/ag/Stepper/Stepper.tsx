@@ -133,7 +133,7 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
     // STICKY UPDATER: maxStepReached can only increase, never decrease
     // CRITICAL: This is the core of the fix - value can ONLY go UP
     // ========================================================================
-    const updateMaxStepReached = useCallback((newValue: number, source: string = 'unknown') => {
+    const updateMaxStepReached = useCallback((newValue: number, _source: string = 'unknown') => {
         setMaxStepReached(prev => {
             // STICKY: Always take the maximum of all known values
             const updated = Math.max(prev, newValue);
@@ -209,7 +209,7 @@ export default function Stepper({ currentStep, agId }: StepperProps) {
                         setFetchFailed(true);
                     }
                 }
-            } catch (err) {
+            } catch {
                 if (!isMountedRef.current) return;
 
                 // Exception: Retry or fallback

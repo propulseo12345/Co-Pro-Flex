@@ -74,7 +74,7 @@ export async function saveDraft(
     }
 
     // Supabase error, falling back to localStorage
-  } catch (err) {
+  } catch {
     // Supabase exception
   }
 
@@ -130,7 +130,7 @@ export async function loadDraft<T>(
         return { data: draftResult.draft_data as T, source: 'supabase' };
       }
     }
-  } catch (err) {
+  } catch {
     // Supabase exception
   }
 
@@ -172,7 +172,7 @@ export async function loadAllDrafts(
       }
       return result as Record<AgDraftType, unknown>;
     }
-  } catch (err) {
+  } catch {
     // loadAllDrafts exception
   }
 
@@ -200,7 +200,7 @@ export async function clearDraft(
       .delete()
       .eq('ag_id', agId)
       .eq('draft_type', draftType);
-  } catch (err) {
+  } catch {
     // clearDraft exception
   }
 }

@@ -45,21 +45,6 @@ function formatDate(dateStr: string | null): string | null {
   }
 }
 
-function formatUpdatedAt(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return "À l'instant";
-  if (diffMins < 60) return `Il y a ${diffMins} min`;
-  if (diffHours < 24) return `Il y a ${diffHours}h`;
-  if (diffDays < 7) return `Il y a ${diffDays}j`;
-  return date.toLocaleDateString('fr-FR');
-}
-
 // URLs pour reprendre à l'étape maximale atteinte
 function getResumeUrl(draft: AgDraft): string {
   // Utiliser maxStepReached pour la navigation (reprend là où l'utilisateur s'est arrêté)

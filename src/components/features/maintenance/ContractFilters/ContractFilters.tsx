@@ -3,7 +3,6 @@
 import { StatutContrat, TypeContrat } from '@/types';
 import { Search, Filter } from 'lucide-react';
 import styles from './ContractFilters.module.css';
-import clsx from 'clsx';
 
 interface ContractFiltersProps {
     searchTerm: string;

@@ -85,8 +85,8 @@ export function LogbookAssurances({ assurances, onSelectAssurance }: LogbookAssu
                             <div className={styles.assuranceGaranties}>
                                 <p>Garanties</p>
                                 <div className={styles.garantiesList}>
-                                    {assurance.garanties.map((garantie, idx) => (
-                                        <span key={idx} className={styles.garantieTag}>{garantie}</span>
+                                    {assurance.garanties.map((garantie) => (
+                                        <span key={garantie} className={styles.garantieTag}>{garantie}</span>
                                     ))}
                                 </div>
                             </div>

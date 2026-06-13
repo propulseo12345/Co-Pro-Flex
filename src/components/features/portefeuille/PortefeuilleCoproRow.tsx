@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, AlertTriangle, Wrench, CheckCircle, ChevronRight, Calendar } from 'lucide-react';
+import { Building2, AlertTriangle, Wrench, CheckCircle, ChevronRight } from 'lucide-react';
 import type { ICoproprietePortefeuille } from '@/types/models/portefeuille';
 import styles from '../../../app/(gestionnaire)/portefeuille/portefeuille.module.css';
 

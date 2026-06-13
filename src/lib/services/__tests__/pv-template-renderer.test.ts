@@ -3,7 +3,7 @@
  */
 
 import { PVTemplateRenderer } from '../pv-template-renderer';
-import type { IPVRenderContext, IPVTemplateSpec, IPVSection } from '@/types/models/pv-template';
+import type { IPVRenderContext, IPVSection } from '@/types/models/pv-template';
 import { extractVariablesFromText, validateTemplateVariables, isValidVariable } from '@/lib/constants/pv-variables';
 
 describe('PVTemplateRenderer', () => {

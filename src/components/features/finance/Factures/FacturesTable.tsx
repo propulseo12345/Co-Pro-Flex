@@ -1,11 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FileText, Building2, Eye, Edit, Trash2, Clock, CheckCircle, AlertTriangle, ReceiptText, Link2, Wallet, Paperclip, AlertOctagon, FileEdit, ClipboardCheck, CheckCircle2, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
+import { FileText, Eye, Edit, Trash2, Clock, CheckCircle, AlertTriangle, ReceiptText, Link2, Wallet, Paperclip, AlertOctagon, FileEdit, ClipboardCheck, CheckCircle2, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
 import { TruncatedText } from '@/components/ui';
 import { Facture, StatutFacture, isFactureEnRetard, getJoursAvantEcheance, calculerMontantNet, hasAvoirsLies, MOTIFS_AVOIR } from './types';
 import type { PosteBudgetData } from '@/components/features/finance/Budget/types';
-import { getStatutBadgeClass, getStatutLabel, isStatutClickable, formatCurrency, formatDate, POSTE_BUDGET_LABELS, getResteDisponible, getPourcentageConsommation, hasPieceJointe, countPiecesJointes, isPJManquanteAlerte, getJoursDepuisCreation, getJoursRetard } from './utils';
+import { getStatutBadgeClass, getStatutLabel, isStatutClickable, formatCurrency, formatDate, POSTE_BUDGET_LABELS, getResteDisponible, getPourcentageConsommation, hasPieceJointe, countPiecesJointes, isPJManquanteAlerte, getJoursDepuisCreation } from './utils';
 import styles from './Factures.module.css';
 
 export type SortColumn = 'date' | 'dateEcheance' | 'fournisseur' | 'montant' | 'statut';
@@ -76,7 +76,7 @@ export function FacturesTable({
   factures,
   postesBudget,
   onStatutClick,
-  onCategorize,
+  onCategorize: _onCategorize,
   onView,
   onEdit,
   onDelete,

@@ -185,8 +185,8 @@ export default function AProposPage() {
       <section className={styles.section}>
         <SectionHeader title="Notre histoire" />
         <div className={styles.timeline}>
-          {TIMELINE.map((item, i) => (
-            <div key={i} className={styles.timelineItem}>
+          {TIMELINE.map((item) => (
+            <div key={`${item.year}-${item.title}`} className={styles.timelineItem}>
               <div className={styles.timelineLine}>
                 <div className={styles.timelineDot} />
               </div>

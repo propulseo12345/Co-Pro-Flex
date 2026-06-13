@@ -1,7 +1,9 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { hasBlockingIssue, splitAuditIssues } from '@/lib/onboarding/audit-rules';
 
-const createUntypedClient = () => createClient() as any;
+// Client « non typé » : accès aux tables/vues pas encore dans les types générés.
+const createUntypedClient = () => createClient() as unknown as SupabaseClient;
 
 // ═══ COPROPRIETE ═══
 

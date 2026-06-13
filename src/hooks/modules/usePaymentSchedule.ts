@@ -37,7 +37,7 @@ export function usePaymentSchedule(budgetId: string | null) {
     try {
       const rows = await scheduleApi.listPaymentSchedules(budgetId);
       setPhases(rows.map(mapRowToPhase));
-    } catch (err) {
+    } catch {
       // Erreur chargement échéancier
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       await scheduleApi.createPaymentPhases(inputs);
       await loadPhases();
       return true;
-    } catch (err) {
+    } catch {
       // Erreur création échéancier
       return false;
     }
@@ -80,7 +80,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       await scheduleApi.markPhasePaid(phaseId, paidDate, invoiceRef, documentId);
       await loadPhases();
       return true;
-    } catch (err) {
+    } catch {
       // Erreur marquage payé
       return false;
     }
@@ -94,7 +94,7 @@ export function usePaymentSchedule(budgetId: string | null) {
       await scheduleApi.updatePaymentPhase(phaseId, updates);
       await loadPhases();
       return true;
-    } catch (err) {
+    } catch {
       // Erreur mise à jour phase
       return false;
     }

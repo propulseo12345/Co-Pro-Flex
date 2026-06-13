@@ -22,7 +22,6 @@ import { BaseEntity } from '../types';
 import { COPROPRIETE_IDS } from './coproprietes';
 import { LOT_IDS } from './lots';
 import { COPROPRIETAIRE_IDS } from './coproprietaires';
-import { USER_IDS } from './users';
 
 // ============================================
 // TYPES

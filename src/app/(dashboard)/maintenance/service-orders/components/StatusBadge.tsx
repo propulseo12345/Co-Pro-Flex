@@ -6,7 +6,6 @@ import {
   Clock,
   Calendar,
   CheckCircle2,
-  Check,
   XCircle,
   ThumbsUp,
   ThumbsDown,

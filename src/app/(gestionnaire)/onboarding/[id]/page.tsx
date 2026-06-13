@@ -38,7 +38,7 @@ export default function OnboardingWizardPage() {
   // Bornes de la période de reprise (clamp de la date de reprise, step 7). [P1]
   const [periodStart, setPeriodStart] = useState<string | null>(null);
   const [periodEnd, setPeriodEnd] = useState<string | null>(null);
-  const [callPlan, setCallPlan] = useState<OnboardingCallPlan | null>(null);
+  const [_callPlan, setCallPlan] = useState<OnboardingCallPlan | null>(null);
 
   // Mémoriser la copro active pour les steps qui en ont besoin
   useEffect(() => {
@@ -65,8 +65,8 @@ export default function OnboardingWizardPage() {
 
       // Budget — chercher le dernier budget créé pour cette copro
       if (!budgetId) {
-        const supabase = createClient() as ReturnType<typeof createClient>;
-        (supabase as any)
+        const supabase = createClient();
+        supabase
           .from('budgets')
           .select('id')
           .eq('copro_id', coproId)

@@ -136,7 +136,7 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
     }, [pipelineToTransition]);
 
     const toggleCheck = (i: number) => {
-        setCheckedItems(prev => { const n = new Set(prev); n.has(i) ? n.delete(i) : n.add(i); return n; });
+        setCheckedItems(prev => { const n = new Set(prev); if (n.has(i)) n.delete(i); else n.add(i); return n; });
     };
 
     const handleConfirm = useCallback(async () => {
@@ -304,6 +304,8 @@ export default function ServiceOrderDetailPage({ params }: PageProps) {
                                 <div className={styles.sectionLabel}>Checklist avant validation</div>
                                 <ul className={styles.checklist}>
                                     {checklistItems.map((item, i) => (
+                                        // Liste statique (CHECKLIST const) sans clé naturelle, l'état coché est indexé par position
+                                        // eslint-disable-next-line react/no-array-index-key
                                         <li key={i} className={styles.checklistItem}>
                                             <button type="button" className={clsx(styles.checkBox, checkedItems.has(i) && styles.checkBoxChecked)} onClick={() => toggleCheck(i)}>
                                                 {checkedItems.has(i) ? '✓' : ''}

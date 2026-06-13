@@ -11,8 +11,6 @@ import {
     updateJobProgress,
     getPVDocument,
     getPVDocumentForAG,
-    startPVGeneration,
-    type GeneratePVOptions,
 } from '../pv-generation.service';
 
 // Mock localStorage

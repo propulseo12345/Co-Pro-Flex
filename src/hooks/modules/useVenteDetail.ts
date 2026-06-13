@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type {
   Vente,
   VenteDocument,
   HistoriqueItem,
-  OrdreService,
   ToastState,
   ActiveTab
 } from '@/components/features/ventes/VenteDetail/types';
@@ -13,8 +12,7 @@ import {
   INITIAL_VENTE,
   MOCK_DOCUMENTS,
   INITIAL_HISTORIQUE,
-  MOCK_ORDRES_SERVICE,
-  WORKFLOW_STEPS
+  MOCK_ORDRES_SERVICE
 } from '@/components/features/ventes/VenteDetail/constants';
 import { getWorkflowStepLabel } from '@/components/features/ventes/VenteDetail/utils';
 import { generateVentePDF } from '@/lib/pdf/generateVentePDF';

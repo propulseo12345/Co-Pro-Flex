@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { ArrowRight, Check, Search, RefreshCw, Building2, AlertCircle, CreditCard, Database, Clock } from 'lucide-react';
+import { ArrowRight, Check, Search, RefreshCw, AlertCircle, CreditCard, Database, Clock } from 'lucide-react';
 import { useCopro } from '@/providers/CoproContext';
 import { useBankMovements, useAccounts, useReconcileBankMovement, useOpenPeriod } from '@/hooks/modules/useFinanceData';
 import styles from './bank-movements.module.css';
@@ -10,7 +10,8 @@ export default function BankMovementsPage() {
     const { currentCoproId } = useCopro();
     const { data: bankMovements, isLoading, error, refresh } = useBankMovements('unmatched');
     const { data: accounts } = useAccounts();
-    const { data: openPeriod } = useOpenPeriod();
+    // Abonnement à la période ouverte conservé (effet du hook) même si la valeur n'est pas lue ici
+    useOpenPeriod();
     const reconcileMutation = useReconcileBankMovement();
 
     const [selectedAccounts, setSelectedAccounts] = useState<Record<string, string>>({});

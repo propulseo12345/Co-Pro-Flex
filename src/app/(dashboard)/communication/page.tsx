@@ -180,6 +180,8 @@ export default function CommunicationHubPage() {
           </div>
           <div className={styles.modulePreview}>
             {lastSubjects.map((subject, i) => (
+              // Aperçu dérivé (derniers objets de mails) sans identifiant stable, sujets potentiellement identiques
+              // eslint-disable-next-line react/no-array-index-key
               <p key={i} className={styles.previewItem}>
                 <span className={styles.previewDot} />
                 {subject}

@@ -173,10 +173,6 @@ function generateJobId(): string {
     return `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function generateDocumentId(agId: string): string {
-    return `pv-${agId}-${Date.now()}`;
-}
-
 /**
  * Crée un nouveau job de génération PV
  */

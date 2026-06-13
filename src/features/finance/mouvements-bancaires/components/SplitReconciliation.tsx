@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { CheckCircle, ArrowLeftRight } from 'lucide-react';
 import type { SuggestionRapprochementResult } from '../domain/matching-engine';
 import styles from './SplitReconciliation.module.css';
@@ -21,7 +21,7 @@ export function SplitReconciliation({ suggestions, onApply, isMutating, ecartSol
     });
     return initial;
   });
-  const [manualMatches, setManualMatches] = useState<Map<string, string>>(new Map());
+  const [manualMatches] = useState<Map<string, string>>(new Map());
 
   const getSelectedTargetId = useCallback((mouvementId: string): string => {
     const manual = manualMatches.get(mouvementId);

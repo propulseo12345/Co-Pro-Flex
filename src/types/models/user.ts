@@ -1,4 +1,4 @@
-import { BaseEntity, ID } from '../common';
+import { BaseEntity } from '../common';
 import { UserRole } from '../enums';
 
 export interface IUser extends BaseEntity {

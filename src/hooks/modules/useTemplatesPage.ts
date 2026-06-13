@@ -22,7 +22,6 @@ export function useTemplatesPage() {
     setAsDefault,
     exportTemplate,
     importTemplate,
-    validateTemplate,
   } = usePVTemplates({
     organizationId: currentCoproId ?? '',
     userId: user?.id ?? '',

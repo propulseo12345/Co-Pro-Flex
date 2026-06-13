@@ -13,9 +13,9 @@ import {
     ExternalLink,
     Edit3
 } from 'lucide-react';
-import type { InterventionCardProps, Intervention } from '../types';
+import type { InterventionCardProps } from '../types';
 import { MenuActionsRapides } from '../MenuActionsRapides';
-import { STATUTS_INTERVENTION, COULEURS_STATUT, ACTIONS_PAR_STATUT, type ActionRapide } from '@/lib/constants/statuts-intervention';
+import { STATUTS_INTERVENTION, COULEURS_STATUT, ACTIONS_PAR_STATUT } from '@/lib/constants/statuts-intervention';
 import styles from './InterventionCard.module.css';
 
 const ICONES_STATUT = {

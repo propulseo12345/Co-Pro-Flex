@@ -80,7 +80,7 @@ export function genererOrdresPlanifies(
 
   const dates = calculerDatesInterventions(contrat, nombreMois);
 
-  return dates.map((date, index) => ({
+  return dates.map((date) => ({
     id: `osp-${contrat.id}-${date}`,
     contratId: contrat.id,
     contratNom: contrat.nom,

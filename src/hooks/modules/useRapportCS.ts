@@ -5,7 +5,6 @@ import { rapportCSService } from '@/lib/services/rapport-cs.service';
 import {
   RapportActiviteCS,
   SectionRapportCS,
-  AnnexeRapportCS,
   CreateSectionData,
   CreateAnnexeData,
   TypeAnnexeRapport,
@@ -59,7 +58,6 @@ interface UseRapportCSReturn {
 
 export function useRapportCS({
   rapportId,
-  coproprieteId,
   autoSave = true,
   autoSaveDelay = 3000,
 }: UseRapportCSOptions): UseRapportCSReturn {

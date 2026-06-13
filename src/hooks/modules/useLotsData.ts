@@ -18,7 +18,6 @@ import type {
   RepartitionKeyLineDetailed,
   RepartitionKeyLineUpsert,
   ValidationResult,
-  RepartitionBasis,
 } from '@/lib/lots/api';
 
 // ============================================================================

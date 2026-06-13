@@ -22,16 +22,16 @@ import clsx from 'clsx';
 
 export function AGQuickActions() {
   const { currentCoproId } = useCopro();
-  const { state, stateLabel, actionsRecommandees, joursAvantProchaine, alertes, isLoading } = useAGContext(currentCoproId);
+  const { state, stateLabel, actionsRecommandees, joursAvantProchaine, alertes } = useAGContext(currentCoproId);
 
   return (
     <div className={styles.container}>
       {/* Alertes contextuelles */}
       {alertes.length > 0 && (
         <div className={styles.alertes}>
-          {alertes.map((alerte, index) => (
+          {alertes.map((alerte) => (
             <div
-              key={index}
+              key={alerte.title}
               className={clsx(styles.alerte, styles[`alerte_${alerte.type}`])}
             >
               <div className={styles.alerteIcon}>

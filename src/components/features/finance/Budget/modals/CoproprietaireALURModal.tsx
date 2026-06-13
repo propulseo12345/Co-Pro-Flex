@@ -157,9 +157,9 @@ export function CoproprietaireALURModal({
               Historique des propriétaires du lot
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-              {selectedCoproprietaire.historiqueProprietaires.map((hist, index) => (
+              {selectedCoproprietaire.historiqueProprietaires.map((hist) => (
                 <div
-                  key={index}
+                  key={`${hist.proprietaire}-${hist.dateDebut}`}
                   style={{
                     padding: 'var(--space-md)',
                     background: hist.dateFin ? 'var(--bg-secondary)' : 'var(--success-light)',

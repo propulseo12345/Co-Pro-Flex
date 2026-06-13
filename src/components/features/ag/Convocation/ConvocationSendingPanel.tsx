@@ -1,11 +1,10 @@
 'use client';
 
-import { useCallback } from 'react';
 import {
   CheckCircle, Edit2, Save, X, Package, FileText, Mail, User, Home, Phone,
 } from 'lucide-react';
 import type { CoproprietaireEditable, SendingChoice, AdressePostale } from '@/hooks/modules/useConvocationData';
-import { SENDING_METHODS, SENDING_COSTS, type SendingMethod } from '@/lib/constants/convocation';
+import { SENDING_METHODS, type SendingMethod } from '@/lib/constants/convocation';
 import styles from './ConvocationSendingPanel.module.css';
 
 const METHOD_ICONS = {

@@ -2,7 +2,6 @@
 
 import { ArrowLeft, Save, Key, AlertTriangle, MoreVertical, RefreshCw } from 'lucide-react';
 import { useNewClePage } from '@/features/finance';
-import { LoadingState } from '@/components/ui/DataState/DataState';
 import styles from '../[id]/cle-detail.module.css';
 
 type CleType = 'GENERALE' | 'PERSONNALISEE';

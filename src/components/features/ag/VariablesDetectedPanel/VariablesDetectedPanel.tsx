@@ -11,7 +11,7 @@ import {
     Edit3,
     Clock
 } from 'lucide-react';
-import type { VariableInfo, VariableValidation } from '@/lib/utils/resolution-variables';
+import type { VariableInfo } from '@/lib/utils/resolution-variables';
 import styles from './VariablesDetectedPanel.module.css';
 
 interface VariablesDetectedPanelProps {
@@ -199,8 +199,10 @@ export function VariablesDetectedPanel({
                 {showHistory && (
                     <div className={styles.historyDropdown}>
                         <div className={styles.historyTitle}>Valeurs récentes</div>
+                        {/* Valeurs d'historique : simples chaînes pouvant se répéter, pas de clé stable disponible */}
                         {history.slice(0, 5).map((val, idx) => (
                             <button
+                                // eslint-disable-next-line react/no-array-index-key
                                 key={idx}
                                 type="button"
                                 onClick={() => selectFromHistory(varInfo.name, val)}

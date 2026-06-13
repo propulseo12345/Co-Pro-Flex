@@ -21,7 +21,6 @@ import {
     type WorkflowStep,
     type ExpertGroupId,
     getStepById,
-    getStepByNumber,
     getNextAvailableStep,
     getPreviousStep,
     calculateProgressPercentage,

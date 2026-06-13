@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { FileText, Download, RefreshCw, CheckCircle, AlertCircle, Clock, Eye, Archive } from 'lucide-react';
 import { useGenerateAgDocument, useDownloadAgDocument, useAgDocuments } from '@/hooks/modules/useAgData';
-import type { AgDocumentType, AgDocument } from '@/lib/ag/types';
+import type { AgDocumentType } from '@/lib/ag/types';
 import styles from './AgDocumentActions.module.css';
 
 // ============================================================================
@@ -40,7 +40,6 @@ const DOC_TYPE_ICONS: Record<AgDocumentType, typeof FileText> = {
 export function AgDocumentActions({
   agId,
   docType,
-  agStatus,
   title,
   description,
   showHistory = false,
@@ -49,7 +48,7 @@ export function AgDocumentActions({
 }: AgDocumentActionsProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const { documents, isLoading: isLoadingDocs, refresh: refreshDocs, getDocumentByType } = useAgDocuments(agId);
+  const { documents, refresh: refreshDocs, getDocumentByType } = useAgDocuments(agId);
   const { execute: generateDoc, isLoading: isGenerating, error: generateError, progress } = useGenerateAgDocument();
   const { downloadViaSignedUrl, getPreviewUrl, isLoading: isDownloading, error: downloadError } = useDownloadAgDocument();
 
@@ -273,11 +272,10 @@ interface AgDocumentQuickActionsProps {
 
 export function AgDocumentQuickActions({
   agId,
-  agStatus,
   compact = false,
   className,
 }: AgDocumentQuickActionsProps) {
-  const { documents, isLoading, refresh } = useAgDocuments(agId);
+  const { documents, refresh } = useAgDocuments(agId);
   const { execute: generateDoc, isLoading: isGenerating } = useGenerateAgDocument();
   const { downloadViaSignedUrl, isLoading: isDownloading } = useDownloadAgDocument();
 

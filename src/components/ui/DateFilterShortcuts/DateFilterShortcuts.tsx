@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './DateFilterShortcuts.module.css';
 
 export interface DateRange {
@@ -96,8 +95,6 @@ export function DateFilterShortcuts({
   shortcuts = DEFAULT_SHORTCUTS,
   className = '',
 }: DateFilterShortcutsProps) {
-  const today = useMemo(() => new Date(), []);
-
   const getShortcutRange = (key: ShortcutKey): DateRange => {
     const now = new Date();
 

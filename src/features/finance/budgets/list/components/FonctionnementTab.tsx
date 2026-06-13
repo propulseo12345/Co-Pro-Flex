@@ -47,24 +47,14 @@ interface FonctionnementTabProps {
 }
 
 export function FonctionnementTab({
-  budgets,
   selectedYear,
   onYearChange,
   budgetAnnuelVote,
   postesBudget,
   totals,
   postesEnAlerte,
-  posteActifChart,
   depensesFiltrees,
-  onEditBudget,
-  onLinkToAG,
-  onTransformBudget,
-  onDeleteBudget,
-  onSelectBudget,
-  onCreateBudget,
-  onSelectPoste,
   onSelectDepense,
-  onPosteChartSelect,
 }: FonctionnementTabProps) {
   return (
     <div>

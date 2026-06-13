@@ -175,6 +175,8 @@ export function SignatairesModal({
 
               {signataire.signature ? (
                 <div className={styles.signaturePreview}>
+                  {/* Signature = data-URI dynamique issue du pad de signature, dimensions inconnues → next/image inadapté */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={signataire.signature} alt="Signature" />
                   <button onClick={() => onClearSignature(signataire.id)} className={styles.removeSignatureBtn}>
                     <Trash2 size={14} aria-hidden="true" />

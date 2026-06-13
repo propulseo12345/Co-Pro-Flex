@@ -19,9 +19,7 @@ import { formatCurrency } from './utils';
 import {
   transformerBalancePourCopro,
   calculerTotauxCopro,
-  GroupeFamille,
-  FamilleBalance,
-  LigneBalanceCopro
+  FamilleBalance
 } from './balance-copro-transform';
 import styles from './Comptabilite.module.css';
 

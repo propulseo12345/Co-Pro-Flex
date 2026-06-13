@@ -47,7 +47,7 @@ export function parseDbDate(isoString: string | null | undefined): Date | null {
       return null;
     }
     return date;
-  } catch (err) {
+  } catch {
     // Failed to parse date
     return null;
   }
@@ -454,7 +454,7 @@ export function getCurrentQuarterBounds(): { start: Date; end: Date } {
 // EXPORT DEFAULT OBJECT FOR CONVENIENCE
 // ============================================================================
 
-export default {
+const dates = {
   // Parsing
   parseDbDate,
   parseDbDateOrNow,
@@ -499,3 +499,5 @@ export default {
   LOCALE,
   ANNEE_EXERCICE_ACTUEL,
 };
+
+export default dates;

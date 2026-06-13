@@ -278,9 +278,16 @@ export function AddPowerForm({ coproprietaires, onAdd, validate }: AddPowerFormP
                 <div className={styles.formErrors}>
                     <AlertCircle size={16} aria-hidden="true" />
                     <div className={styles.formErrorsList}>
+                        {/* Messages d'erreur transitoires : pas de clé stable, l'index suffit */}
                         {errors.length > 0
-                            ? errors.map((err, i) => <span key={i}>{err}</span>)
-                            : liveValidation?.errors.map((err, i) => <span key={i}>{err.message}</span>)}
+                            ? errors.map((err, i) => (
+                                  // eslint-disable-next-line react/no-array-index-key
+                                  <span key={i}>{err}</span>
+                              ))
+                            : liveValidation?.errors.map((err, i) => (
+                                  // eslint-disable-next-line react/no-array-index-key
+                                  <span key={i}>{err.message}</span>
+                              ))}
                     </div>
                 </div>
             )}

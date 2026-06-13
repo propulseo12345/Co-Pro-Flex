@@ -46,8 +46,6 @@ export function BudgetSection({
   editingError,
   postesDepenses,
   budgetPrecedent,
-  accounts = [],
-  repartitionKeys = [],
   error,
   readOnly = false,
   onToggle,

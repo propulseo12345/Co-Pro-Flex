@@ -2,7 +2,7 @@
 
 import { History, X, Download, FileText, Edit, AlertTriangle, CheckCircle, DollarSign, User } from 'lucide-react';
 import { HistoriqueModification } from '../types';
-import { getActionLabel, getActionColor, formatDateTime } from '../utils';
+import { getActionLabel, formatDateTime } from '../utils';
 import styles from '../Comptabilite.module.css';
 
 interface HistoriqueModalProps {

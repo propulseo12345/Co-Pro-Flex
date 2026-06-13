@@ -139,9 +139,6 @@ const TANTIEMES = {
   LOPEZ: 160,
 } as const;
 
-// TOTAL_TANTIEMES importé depuis assemblees.ts
-const TOTAL_TANTIEMES = 1818;
-
 // ============================================
 // DONNÉES MOCK - AG ORDINAIRE 2024
 // ============================================

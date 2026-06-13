@@ -170,8 +170,6 @@ export function useAppelsFondsPage(): UseAppelsFondsPageReturn {
 
   // ── Grouped calls for accordion view ──
   const groupedCalls = useMemo((): CallCategory[] => {
-    const budgetMap = new Map(budgets.map(b => [b.id, b]));
-
     const buildGroups = (calls: CallForFundsOverview[]): CallGroup[] => {
       const byBudget = new Map<string, CallForFundsOverview[]>();
       const trimestriels: CallForFundsOverview[] = [];

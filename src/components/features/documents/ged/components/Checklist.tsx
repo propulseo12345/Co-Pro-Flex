@@ -14,8 +14,8 @@ export function Checklist() {
         Documents obligatoires
       </h3>
       <div className={styles.checklistGrid}>
-        {DOCUMENTS_OBLIGATOIRES_CHECKLIST.map((item, idx) => (
-          <div key={idx} className={styles.checklistItem}>
+        {DOCUMENTS_OBLIGATOIRES_CHECKLIST.map((item) => (
+          <div key={item.nom} className={styles.checklistItem}>
             {item.present ? (
               <CheckCircle size={16} className={styles.checkPresent} aria-hidden="true" />
             ) : (

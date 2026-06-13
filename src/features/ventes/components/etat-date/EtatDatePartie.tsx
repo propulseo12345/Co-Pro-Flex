@@ -40,6 +40,9 @@ export function EtatDatePartie({ title, total, sections }: EtatDatePartieProps) 
       </div>
 
       {sections.map((section, idx) => (
+        // Sections dérivées à ordre figé (labels non garantis uniques par le type) :
+        // index acceptable, cohérent avec les lignes de détail ci-dessous
+        // eslint-disable-next-line react/no-array-index-key
         <div key={idx}>
           <div className={styles.partieRow} onClick={() => section.detail && section.detail.length > 0 && toggle(idx)}>
             <span className={styles.partieRowLabel}>
@@ -60,8 +63,12 @@ export function EtatDatePartie({ title, total, sections }: EtatDatePartieProps) 
                   {section.detail.map((row, ridx) => {
                     const values = Object.values(row);
                     return (
+                      // Lignes de détail dérivées (Record sans identifiant stable) : index acceptable
+                      // eslint-disable-next-line react/no-array-index-key
                       <tr key={ridx}>
                         {values.map((val, vidx) => (
+                          // Colonnes issues d'Object.values, ordre figé : index acceptable
+                          // eslint-disable-next-line react/no-array-index-key
                           <td key={vidx}>
                             {typeof val === 'number' ? fmt(val) : String(val ?? '-')}
                           </td>

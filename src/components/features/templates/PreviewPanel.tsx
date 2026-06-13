@@ -19,6 +19,8 @@ export function PreviewPanel({ html, errors, onRefresh }: PreviewPanelProps) {
       {errors.length > 0 && (
         <div className={styles.previewErrors}>
           {errors.map((err, i) => (
+            // Liste d'erreurs de validation sans id stable et potentiellement dupliquées : index assumé
+            // eslint-disable-next-line react/no-array-index-key
             <div key={i} className={styles.previewError}><AlertCircle size={14} />{err}</div>
           ))}
         </div>

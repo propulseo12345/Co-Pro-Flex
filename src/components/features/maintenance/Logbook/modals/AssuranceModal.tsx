@@ -128,8 +128,8 @@ export function AssuranceModal({ assurance, onClose }: AssuranceModalProps) {
                         <div className={styles.modalSection}>
                             <h4><CheckCircle size={16} aria-hidden="true" /> Garanties couvertes</h4>
                             <div className={styles.garantiesList}>
-                                {assurance.garanties.map((garantie, idx) => (
-                                    <span key={idx} className={styles.garantieTag}>{garantie}</span>
+                                {assurance.garanties.map((garantie) => (
+                                    <span key={garantie} className={styles.garantieTag}>{garantie}</span>
                                 ))}
                             </div>
                         </div>

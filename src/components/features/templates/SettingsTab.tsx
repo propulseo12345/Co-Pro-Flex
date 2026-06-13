@@ -1,6 +1,6 @@
 'use client';
 
-import { Palette, Layout, Image, X } from 'lucide-react';
+import { Palette, Layout, Image as ImageIcon, X } from 'lucide-react';
 import type { IPVTemplateSpec } from '@/types/models/pv-template';
 import styles from '@/app/(dashboard)/settings/templates/[id]/editor.module.css';
 
@@ -67,7 +67,7 @@ export function SettingsTab({ global: g, header, onUpdateGlobal, onUpdateHeader 
       </div>
 
       <div className={styles.settingsSection}>
-        <h3><Image size={18} /> Logo</h3>
+        <h3><ImageIcon size={18} /> Logo</h3>
         <div className={styles.logoUpload}>
           <p className={styles.hint}>Téléchargez votre logo au format PNG ou JPG (max 1Mo)</p>
           <input
@@ -86,6 +86,8 @@ export function SettingsTab({ global: g, header, onUpdateGlobal, onUpdateHeader 
           />
           {header.logo?.url && (
             <div className={styles.logoPreview}>
+              {/* data-URI dynamique (FileReader) sans dimensions connues : next/image inadapté */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={header.logo.url} alt="Logo" />
               <button onClick={() => onUpdateHeader({ logo: undefined })}><X size={16} /> Supprimer</button>
             </div>

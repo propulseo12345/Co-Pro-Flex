@@ -32,8 +32,8 @@ export function MutationTimeline({ steps, currentStatus }: MutationTimelineProps
         Workflow
       </h3>
       <div className={styles.timeline}>
-        {steps.map((step, idx) => (
-          <div key={idx} className={styles.timelineItem}>
+        {steps.map((step) => (
+          <div key={step.label} className={styles.timelineItem}>
             <div
               className={`${styles.timelineDot} ${
                 step.completed ? styles.completed : ''

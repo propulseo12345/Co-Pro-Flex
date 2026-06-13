@@ -9,7 +9,7 @@ import styles from './UserSwitcher.module.css';
 export function UserSwitcher() {
   const { userRole, isLoading } = useCopro();
   const [userName, setUserName] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [, setUserEmail] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

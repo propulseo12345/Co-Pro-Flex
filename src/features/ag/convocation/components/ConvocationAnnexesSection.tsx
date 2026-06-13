@@ -52,7 +52,7 @@ function getFileIcon(mimeType: string) {
 export function ConvocationAnnexesSection({
   annexes,
   onToggle,
-  agType,
+  agType: _agType,
   uploadedDocs,
 }: ConvocationAnnexesSectionProps) {
   const includedCount = annexes.filter((a) => a.included).length;

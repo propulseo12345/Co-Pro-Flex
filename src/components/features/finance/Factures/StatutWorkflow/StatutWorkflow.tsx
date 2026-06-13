@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Clock, Tag, CheckCircle, ArrowRight } from 'lucide-react';
-import { StatutFacture, StatutWorkflowProps } from '../types';
+import { StatutWorkflowProps } from '../types';
 import { STATUTS_FACTURE, getAllStatutsConfigs } from '../utils';
 import styles from './StatutWorkflow.module.css';
 

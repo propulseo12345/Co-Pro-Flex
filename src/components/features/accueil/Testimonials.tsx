@@ -93,7 +93,7 @@ export function Testimonials() {
           <div className={styles.authorsBar}>
             {TESTIMONIALS.map((t, index) => (
               <button
-                key={index}
+                key={t.author}
                 className={`${styles.authorBtn} ${index === activeIndex ? styles.authorBtnActive : ''}`}
                 onClick={() => setActiveIndex(index)}
                 aria-label={`Témoignage de ${t.author}`}

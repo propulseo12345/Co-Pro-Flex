@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Download, FileText, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+import { ArrowLeft, Download, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import styles from './minutes.module.css';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -16,11 +16,21 @@ interface AGData {
     adresseComplete?: string;
 }
 
+interface MinutesResolution {
+    id?: string;
+    resultat?: string;
+    titre?: string;
+    texte?: string;
+    pour?: number;
+    contre?: number;
+    abstention?: number;
+}
+
 export default function AGMinutesPage() {
     const params = useParams();
     const agId = params.id as string;
     const [agData, setAgData] = useState<AGData | null>(null);
-    const [resolutions, setResolutions] = useState<any[]>([]);
+    const [resolutions, setResolutions] = useState<MinutesResolution[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {

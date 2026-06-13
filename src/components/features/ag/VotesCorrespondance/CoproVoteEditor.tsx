@@ -277,8 +277,8 @@ export function CoproVoteEditor({
                 <div className={styles.validationErrors}>
                     <AlertTriangle size={18} aria-hidden="true" />
                     <div className={styles.validationErrorsList}>
-                        {validationErrors.map((error, i) => (
-                            <span key={i}>{error}</span>
+                        {validationErrors.map((error) => (
+                            <span key={error}>{error}</span>
                         ))}
                     </div>
                 </div>

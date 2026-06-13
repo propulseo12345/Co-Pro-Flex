@@ -5,7 +5,8 @@
 // ============================================================================
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -15,17 +16,6 @@ interface SendRelanceRequest {
   ag_id: string;
   coproprietaire_ids: string[];  // Liste des copropriétaires à relancer
   message_personnalise?: string; // Message personnalisé optionnel
-}
-
-interface SendRelanceResponse {
-  success: boolean;
-  error?: string;
-  summary?: {
-    total: number;
-    sent: number;
-    failed: number;
-  };
-  details?: RelanceResult[];
 }
 
 interface RelanceResult {
@@ -382,7 +372,7 @@ Deno.serve(async (req: Request) => {
       }
     );
   } catch (e) {
-    console.error("Error:", e);
+    log.error("Erreur inattendue", { error: e });
     return new Response(
       JSON.stringify({ success: false, error: String(e) }),
       { status: 500, headers: { "Content-Type": "application/json" } }

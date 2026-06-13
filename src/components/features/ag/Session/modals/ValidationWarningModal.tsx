@@ -25,8 +25,8 @@ export function ValidationWarningModal({
           Les champs suivants ne sont pas encore remplis pour cette résolution :
         </p>
         <ul className={modalsStyles.warningList}>
-          {missingVariables.map((varName, index) => (
-            <li key={index} className={modalsStyles.warningListItem}>
+          {missingVariables.map((varName) => (
+            <li key={varName} className={modalsStyles.warningListItem}>
               <span className={modalsStyles.warningVariable}>{varName}</span>
             </li>
           ))}

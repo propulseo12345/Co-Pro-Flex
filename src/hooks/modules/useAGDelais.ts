@@ -19,7 +19,6 @@ import {
     type JalonAG,
     type JalonType,
     type JalonStatus,
-    DELAIS_LEGAUX,
 } from '@/lib/constants/ag-delais-legaux';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -128,7 +127,7 @@ export function useAGDelais({
     const [jalonsCompletes, setJalonsCompletes] = useState<Set<JalonAG['type']>>(new Set());
     const [alertesDismissed, setAlertesDismissed] = useState<Set<string>>(new Set());
     const [now, setNow] = useState(() => new Date());
-    const [isLoading, setIsLoading] = useState(false);
+    const [, setIsLoading] = useState(false);
 
     // Vérifier si l'ID est un UUID valide (Supabase AG)
     const isValidUUID = useCallback((id: string): boolean => {

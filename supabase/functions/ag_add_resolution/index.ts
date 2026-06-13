@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // Types pour les paramètres d'entrée
 interface AddResolutionRequest {
@@ -256,7 +257,7 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (resError) {
-      console.error("Insert error:", resError);
+      log.error("Insert error", { error: resError });
 
       // Vérifier si c'est une erreur de doublon
       if (resError.code === "23505") {
@@ -300,7 +301,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (err) {
-    console.error("Unexpected error:", err);
+    log.error("Unexpected error", { error: err });
     return new Response(
       JSON.stringify({
         success: false,

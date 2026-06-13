@@ -584,13 +584,12 @@ export function useBudget() {
               tags: ['budget-travaux', id],
             });
             // Link document to budget
-            if (doc && (doc as any).id) {
+            if (doc?.id) {
               const supabase = createUntypedClient();
-              await supabase.from('documents').update({ budget_id: id }).eq('id', (doc as any).id);
+              await supabase.from('documents').update({ budget_id: id }).eq('id', doc.id);
             }
-          } catch (uploadErr) {
-            // Non-bloquant : le budget est créé, on log l'erreur upload
-            // Non-bloquant: erreur upload devis
+          } catch {
+            // Non-bloquant : le budget est créé, l'upload du devis a échoué
           }
         }
       }

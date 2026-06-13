@@ -39,7 +39,7 @@ export default function MouvementsBancairesPage() {
     hook.setCategorieFilter('TOUS');
   };
 
-  const handleImportMouvements = useCallback((mouvements: MouvementBancaireBase[]) => {
+  const handleImportMouvements = useCallback((_mouvements: MouvementBancaireBase[]) => {
     // For now, add imported mouvements to local state
     // Will be replaced by Supabase import when connected
     hook.setShowImportModal(false);

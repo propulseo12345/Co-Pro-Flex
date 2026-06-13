@@ -6,7 +6,6 @@ import {
   getTemplateById,
   applyRetention,
   computeAmounts,
-  RETENTION_PERCENTAGE,
 } from '@/lib/constants/payment-schedule-templates';
 import type { PaymentScheduleTemplate } from '@/lib/constants/payment-schedule-templates';
 import styles from './PaymentSchedulePreview.module.css';
@@ -126,6 +125,8 @@ export function PaymentSchedulePreview({
           : styles.row;
 
         return (
+          // Phases sans id stable, labels éditables et pouvant se répéter : l'index reste la clé la plus sûre
+          // eslint-disable-next-line react/no-array-index-key
           <div key={idx} className={rowClass}>
             {/* # */}
             <span className={`${styles.cell} ${styles.cellIndex}`}>{idx + 1}</span>

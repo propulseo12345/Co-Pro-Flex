@@ -53,8 +53,8 @@ export function CategoryBlock({
             </div>
 
             <div className={styles.blockKpis}>
-                {kpiItems.map((kpi, index) => (
-                    <div key={index} className={styles.kpiItem}>
+                {kpiItems.map((kpi) => (
+                    <div key={kpi.label} className={styles.kpiItem}>
                         <kpi.icon size={16} />
                         <span className={styles.kpiLabel}>{kpi.label}</span>
                         <span className={styles.kpiValue}>{kpi.value}</span>

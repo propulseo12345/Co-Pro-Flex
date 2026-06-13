@@ -150,12 +150,19 @@ export function Table<T>({
               const isActive = sortConfig?.key === column.key;
               const direction = isActive ? sortConfig.direction : null;
               const isSortable = column.sortable !== false;
+              const ariaSort: 'ascending' | 'descending' | 'none' =
+                direction === 'asc'
+                  ? 'ascending'
+                  : direction === 'desc'
+                    ? 'descending'
+                    : 'none';
 
               return (
                 <th
                   key={column.key}
                   className={`${isSortable ? styles.sortableHeader : styles.header} ${getAlignClass(column.align)} ${isActive ? styles.active : ''} ${column.headerClassName || ''}`}
                   style={column.width ? { width: column.width } : undefined}
+                  aria-sort={isSortable ? ariaSort : undefined}
                 >
                   {isSortable ? (
                     <button
@@ -163,13 +170,6 @@ export function Table<T>({
                       className={styles.headerButton}
                       onClick={() => handleSort(column.key)}
                       aria-label={`Trier par ${column.label}`}
-                      aria-sort={
-                        direction === 'asc'
-                          ? 'ascending'
-                          : direction === 'desc'
-                            ? 'descending'
-                            : 'none'
-                      }
                     >
                       <span className={styles.headerLabel}>{column.label}</span>
                       <span className={styles.sortIcon} aria-hidden="true">

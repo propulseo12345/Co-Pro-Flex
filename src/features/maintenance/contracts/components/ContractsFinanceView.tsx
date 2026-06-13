@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Download, Plus, FileText } from 'lucide-react';
+import { Search, Download, Plus } from 'lucide-react';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import type { ContratDetaille } from '@/types';
 import type { ContratSyndic } from '@/types/legacy';
@@ -114,8 +114,8 @@ export function ContractsFinanceView({
           { label: 'EXPIRENT < 90J', value: String(expirentBientot), color: expirentBientot > 0 ? 'var(--warning)' : undefined },
           { label: 'COÛT ANNUEL TOTAL', value: `${coutTotal.toLocaleString('fr-FR')} €`, color: undefined, mono: true },
           { label: 'PRESTATAIRES LIÉS', value: String(prestatairesCount), color: undefined },
-        ].map((kpi, i) => (
-          <div key={i} style={{
+        ].map((kpi) => (
+          <div key={kpi.label} style={{
             flex: 1, padding: '16px 20px', background: 'var(--surface)',
             border: '1px solid rgba(148,163,184,0.08)', borderRadius: 12,
           }}>

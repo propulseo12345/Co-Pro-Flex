@@ -26,7 +26,6 @@ import { getCategorieDocLabel, getTypeDocLabel, isDocumentExpired, isDocumentExp
 import { generateDocumentTechniquePDF } from '@/lib/pdf/generateDocumentTechniquePDF';
 import { useCopro } from '@/providers/CoproContext';
 import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
-import type { DocumentTechnique } from '@/types';
 import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
 export function DocumentsTab({

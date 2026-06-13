@@ -67,7 +67,6 @@ export function DesignationMultiplePanel({
     nombreMinimum,
     nombreMaximum,
     isMinimumAtteint,
-    isMaximumAtteint,
     canAddMore,
     personnesDesignees,
     creerPremiereSousResolution,

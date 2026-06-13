@@ -25,7 +25,6 @@ import {
   signAttendance,
   generateAgDocument,
   listAgDocuments,
-  getLatestAgDocument,
   getAgDocumentSignedUrl,
   downloadAgDocument,
   hasAgDocument,
@@ -225,8 +224,6 @@ export function useAgMeetings(initialFilters?: Partial<AgMeetingsFilters>) {
 // ============================================================================
 
 export function useAgDetail(agId: string | null) {
-  const { currentCoproId } = useCopro();
-
   const [meeting, setMeeting] = useState<AgMeeting | null>(null);
   const [resolutions, setResolutions] = useState<AgResolutionResult[]>([]);
   const [attendance, setAttendance] = useState<AgAttendanceSummary[]>([]);

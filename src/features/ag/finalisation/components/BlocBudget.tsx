@@ -132,7 +132,9 @@ export function BlocBudget({ agId, action }: BlocBudgetProps) {
       )}
 
       <div className={styles.postesList}>
+        {/* Postes de budget sans identifiant stable, libellés possiblement dupliqués : index conservé */}
         {postes.map((poste, idx) => (
+          // eslint-disable-next-line react/no-array-index-key
           <div key={idx} className={styles.posteItem}>
             <span className={styles.posteLabel}>
               {poste.label}

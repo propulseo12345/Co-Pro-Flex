@@ -10,6 +10,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 // ============================================================================
 // TYPES
@@ -237,7 +238,7 @@ async function getRecipients(
   });
 
   if (error) {
-    console.error("Error fetching recipients:", error);
+    log.error("Erreur lors de la récupération des destinataires", { error });
     return [];
   }
 
@@ -298,7 +299,7 @@ async function createNotification(
   });
 
   if (error) {
-    console.error("Error creating notification:", error);
+    log.error("Erreur lors de la création de la notification", { error });
     return null;
   }
 
@@ -385,7 +386,7 @@ async function sendEmailViaResend(
         ];
       }
     } catch (e) {
-      console.error("Error downloading attachment:", e);
+      log.error("Erreur lors du téléchargement de la pièce jointe", { error: e });
       // Continue sans pièce jointe
     }
   }
@@ -428,7 +429,7 @@ async function getSignedUrl(
     .createSignedUrl(storagePath, 60 * 60 * 24 * 7); // 7 jours
 
   if (error || !data) {
-    console.error("Error creating signed URL:", error);
+    log.error("Erreur lors de la création de l'URL signée", { error });
     return null;
   }
 
@@ -725,7 +726,7 @@ Deno.serve(async (req: Request) => {
       },
     });
   } catch (e) {
-    console.error("Error:", e);
+    log.error("Erreur inattendue", { error: e });
     return new Response(
       JSON.stringify({ success: false, error: String(e) }),
       { status: 500, headers: { "Content-Type": "application/json" } }

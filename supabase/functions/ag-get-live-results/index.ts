@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { log } from "../_shared/log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,7 +48,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (error) {
-      console.error("Database error:", error);
+      log.error("Erreur base de données", { error });
       return new Response(
         JSON.stringify({ success: false, error: error.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -66,7 +67,7 @@ Deno.serve(async (req: Request) => {
       },
     });
   } catch (err) {
-    console.error("Unexpected error:", err);
+    log.error("Erreur inattendue", { error: err });
     return new Response(
       JSON.stringify({ success: false, error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useCopro } from '@/providers/CoproContext';
 import { useCorrespondenceVotes } from '@/hooks/modules/useCorrespondenceVotes';
-import type { EligibleOwner } from '@/lib/ag/correspondence';
 import type { VoteDirection } from '@/lib/ag/types';
 
 export interface SubmitResult {
@@ -14,7 +13,6 @@ export interface SubmitResult {
 
 export function useVotesCorrespondancePage() {
   const params = useParams();
-  const router = useRouter();
   const agId = params.id as string;
   const { currentCoproId } = useCopro();
 

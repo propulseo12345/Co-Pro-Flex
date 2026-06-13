@@ -48,8 +48,8 @@ export function CoproFlexProviderCard({
                         )}
                     </h3>
                     <div className={styles.domaines}>
-                        {prestataire.domaines.map((d, i) => (
-                            <span key={i} className={styles.domaineBadge}>
+                        {prestataire.domaines.map((d) => (
+                            <span key={d} className={styles.domaineBadge}>
                                 {DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
                             </span>
                         ))}
@@ -107,8 +107,10 @@ export function CoproFlexProviderCard({
                                 <div key={a.id} className={styles.avisItem}>
                                     <div className={styles.avisHeader}>
                                         <div className={styles.avisStars}>
+                                            {/* Étoiles de notation : tableau statique de 5, pas de clé naturelle */}
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
+                                                    // eslint-disable-next-line react/no-array-index-key
                                                     key={i}
                                                     size={12}
                                                     fill={i < a.note ? '#F59E0B' : 'none'}

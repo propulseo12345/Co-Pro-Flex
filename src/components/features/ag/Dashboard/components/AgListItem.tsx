@@ -131,7 +131,7 @@ export function AgListItem({
       </div>
 
       <div className={styles.listActions}>
-        {actions.map((action, idx) => {
+        {actions.map((action) => {
           const isDanger = action.variant === 'danger';
           const linkClass = clsx(
             isDanger ? styles.listLinkDanger : styles.listLink,
@@ -140,7 +140,7 @@ export function AgListItem({
 
           if (action.href) {
             return (
-              <Link key={idx} href={action.href} className={linkClass} title={action.title}>
+              <Link key={action.title} href={action.href} className={linkClass} title={action.title}>
                 {action.icon}
                 {action.label && <span className={styles.listLinkText}>{action.label}</span>}
               </Link>
@@ -149,7 +149,7 @@ export function AgListItem({
 
           return (
             <button
-              key={idx}
+              key={action.title}
               onClick={action.onClick}
               className={linkClass}
               title={action.title}

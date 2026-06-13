@@ -76,29 +76,10 @@ export function validateVisioUrl(url: string): UrlValidationResult {
         return baseValidation;
     }
 
-    // Liste des domaines de visio connus (pour information, pas blocant)
-    const knownVisDomains = [
-        'zoom.us',
-        'zoom.com',
-        'teams.microsoft.com',
-        'teams.live.com',
-        'meet.google.com',
-        'webex.com',
-        'whereby.com',
-        'jitsi.org',
-        'meet.jit.si',
-    ];
-
     try {
-        const parsedUrl = new URL(url.trim());
-        const hostname = parsedUrl.hostname.toLowerCase();
+        // On valide juste que l'URL est parsable ; on ne bloque pas les domaines inconnus
+        new URL(url.trim());
 
-        // Vérifier si c'est un domaine de visio connu (optionnel, juste pour info)
-        const isKnownProvider = knownVisDomains.some(domain =>
-            hostname.includes(domain)
-        );
-
-        // On ne bloque pas les domaines inconnus, mais on pourrait logger
         return {
             isValid: true,
         };

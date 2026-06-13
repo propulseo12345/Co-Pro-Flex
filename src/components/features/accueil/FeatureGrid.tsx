@@ -66,10 +66,10 @@ export function FeatureGrid({
           </div>
         </div>
 
-        {cards.map((card, i) => {
+        {cards.map((card) => {
           if (card.type === 'large') {
             return (
-              <div key={i} className={styles.cardLarge}>
+              <div key={card.title} className={styles.cardLarge}>
                 {card.demo ? (
                   <DemoThemeWrapper className={styles.cardDemo}>
                     {card.demo}
@@ -92,7 +92,7 @@ export function FeatureGrid({
           }
           const IconComponent = card.icon;
           return (
-            <div key={i} className={styles.cardSmall}>
+            <div key={card.title} className={styles.cardSmall}>
               {IconComponent && <IconComponent size={24} className={styles.cardIcon} />}
               <h3>{card.title}</h3>
               {card.description && <p>{card.description}</p>}

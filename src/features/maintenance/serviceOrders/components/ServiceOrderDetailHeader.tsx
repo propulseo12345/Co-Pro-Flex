@@ -1,7 +1,7 @@
 'use client';
 
 import { OrdreService } from '@/types';
-import { getStatutLabel, getTypeLabel, generatePdfDownload } from '@/lib/utils/service-order';
+import { getTypeLabel, generatePdfDownload } from '@/lib/utils/service-order';
 import { ArrowLeft, Edit, Save, X, FileText, Mail, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import StatusBadge from '../../../../app/(dashboard)/maintenance/service-orders/components/StatusBadge';

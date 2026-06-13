@@ -26,7 +26,7 @@ interface UseRelevesIndividuelsReturn {
 export function useRelevesIndividuels(exercice: string): UseRelevesIndividuelsReturn {
   const { lots, isLoading: lotsLoading, error: lotsError, refresh: refreshLots } = useLotsWithOwners();
   const { data: unpaidData, isLoading: unpaidLoading, error: unpaidError, refresh: refreshUnpaid } = useUnpaid();
-  const { data: callsData, isLoading: callsLoading, error: callsError, refresh: refreshCalls } = useCalls();
+  const { isLoading: callsLoading, error: callsError, refresh: refreshCalls } = useCalls();
   const { data: paymentsData, isLoading: paymentsLoading, error: paymentsError, refresh: refreshPayments } = usePayments();
 
   const isLoading = lotsLoading || unpaidLoading || callsLoading || paymentsLoading;
@@ -79,16 +79,6 @@ export function useRelevesIndividuels(exercice: string): UseRelevesIndividuelsRe
     return map;
   }, [paymentsData]);
 
-  // Calculate calls total by lot from calls data
-  const callsTotalByLot = useMemo(() => {
-    const map = new Map<string, number>();
-
-    // This is a simplification - ideally we'd need call lines detail
-    // For now, we distribute call totals (this needs call_lines detail for accuracy)
-
-    return map;
-  }, []);
-
   // Build releves from aggregated data
   const releves = useMemo((): ReleveIndividuel[] => {
     const result: ReleveIndividuel[] = [];
@@ -126,7 +116,6 @@ export function useRelevesIndividuels(exercice: string): UseRelevesIndividuelsRe
 
       // Estimate total called (paid + unpaid)
       const totalAppeles = totalPaid + totalUnpaid;
-      const solde = totalPaid - totalAppeles; // Negative if owes money
 
       // Build coproprietaire object
       // Parse display name to extract first and last name

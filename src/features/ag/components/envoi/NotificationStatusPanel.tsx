@@ -91,9 +91,9 @@ function ProgressBar({ stats }: ProgressBarProps) {
   return (
     <div className={styles.progressContainer}>
       <div className={styles.progressBar}>
-        {segments.map((segment, i) => (
+        {segments.map((segment) => (
           <div
-            key={i}
+            key={segment.label}
             className={styles.progressSegment}
             style={{
               width: `${(segment.count / total) * 100}%`,
@@ -104,8 +104,8 @@ function ProgressBar({ stats }: ProgressBarProps) {
         ))}
       </div>
       <div className={styles.progressLegend}>
-        {segments.map((segment, i) => (
-          <span key={i} className={styles.legendItem}>
+        {segments.map((segment) => (
+          <span key={segment.label} className={styles.legendItem}>
             <span
               className={styles.legendDot}
               style={{ backgroundColor: segment.color }}

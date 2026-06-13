@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import type { Vente, VenteDocument, HistoriqueItem, OrdreService, WorkflowStep } from '@/components/features/ventes/VenteDetail/types';
+import type { Vente, VenteDocument, HistoriqueItem, OrdreService } from '@/components/features/ventes/VenteDetail/types';
 import { WORKFLOW_STEPS } from '@/components/features/ventes/VenteDetail/constants';
 import { getStatutStyle, getOsStatutLabel, getWorkflowStepIndex } from '@/components/features/ventes/VenteDetail/utils';
 

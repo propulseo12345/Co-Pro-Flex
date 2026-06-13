@@ -9,10 +9,8 @@ import {
   UploadResult,
   validateFile,
   validateUrl,
-  generatePJId,
 } from '@/components/features/finance/Factures/types';
 import * as documentsApi from '@/lib/documents/api';
-import { createClient } from '@/lib/supabase/client';
 
 // Constante pour cleanup legacy localStorage (one-shot en dev)
 const LEGACY_STORAGE_KEY = 'coproflex-factures-pj';
@@ -359,7 +357,7 @@ class FacturePJService {
   /**
    * Convertit un Document Supabase en PJFacture
    */
-  private documentToPJ(doc: documentsApi.Document, factureId: string): PJFacture {
+  private documentToPJ(doc: documentsApi.Document, _factureId: string): PJFacture {
     const isExternal = doc.file_path?.startsWith('http://') || doc.file_path?.startsWith('https://');
 
     return {

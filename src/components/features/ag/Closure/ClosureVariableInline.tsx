@@ -10,7 +10,7 @@ interface ClosureVariableInlineProps {
     onSave: (value: string) => Promise<void>;
 }
 
-export function ClosureVariableInline({ variableName, variableLabel, onSave }: ClosureVariableInlineProps) {
+export function ClosureVariableInline({ variableLabel, onSave }: ClosureVariableInlineProps) {
     const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);

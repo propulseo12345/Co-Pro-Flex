@@ -25,7 +25,6 @@ import {
   PLAN_COMPTABLE_ESSENTIEL,
 } from '../domain/constants';
 import { genererSuggestionsBatch, genererRapprochementsBatch } from '../domain/matching-engine';
-import type { SuggestionCategorieResult, SuggestionRapprochementResult } from '../domain/matching-engine';
 import {
   calculerSoldesAvecValidation,
   calculerAlertesNonCategorises,
@@ -192,7 +191,6 @@ export function useMouvementsBancairesPage() {
   const [ecrituresComptables, setEcrituresComptables] = useState<EcritureComptable[]>([]);
   const [selectedMouvementRapprochement, setSelectedMouvementRapprochement] = useState<MouvementBancaire | null>(null);
   const [suggestionsRapprochement, setSuggestionsRapprochement] = useState<SuggestionRapprochement[]>([]);
-  const [showRapprochementModal, setShowRapprochementModal] = useState(false);
 
   // Workflow state
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>('table');

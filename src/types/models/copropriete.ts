@@ -1,4 +1,4 @@
-import { BaseEntity, ID, Adresse } from '../common';
+import { BaseEntity, Adresse } from '../common';
 import { UserRole, TypeTantieme } from '../enums';
 
 export interface ICopropriete extends BaseEntity {

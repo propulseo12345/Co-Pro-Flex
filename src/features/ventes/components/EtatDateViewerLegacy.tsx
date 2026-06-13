@@ -281,7 +281,9 @@ export function EtatDateViewerLegacy({ snapshot, onViewDocument }: EtatDateViewe
                 </tr>
               </thead>
               <tbody>
+                {/* Snapshot comptable en lecture seule, sans id ni clé naturelle unique (deux opérations peuvent partager date/libellé/montant) ; l'ordre ne change jamais côté UI, l'index est donc une clé stable. */}
                 {payload.recent_transactions.map((tx, idx) => (
+                  // eslint-disable-next-line react/no-array-index-key
                   <tr key={idx}>
                     <td>{formatDate(tx.line_date)}</td>
                     <td>

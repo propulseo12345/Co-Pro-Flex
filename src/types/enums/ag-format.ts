@@ -84,7 +84,7 @@ export function detectVisioProvider(url: string): VisioProvider {
  * Vérifie si le format nécessite une adresse physique.
  * Conformément à la loi, une AG doit TOUJOURS avoir un lieu physique.
  */
-export function requiresAdresse(format: AGFormat): boolean {
+export function requiresAdresse(_format: AGFormat): boolean {
     // Toujours true - un lieu physique est obligatoire quelle que soit la modalité
     return true;
 }

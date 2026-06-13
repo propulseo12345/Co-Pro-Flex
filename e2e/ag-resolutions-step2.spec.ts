@@ -13,7 +13,7 @@
  * - Supabase service role key for DB verification
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -90,18 +90,6 @@ async function verifyResolutionInDb(resolutionId: string) {
 
   expect(error).toBeNull();
   expect(data).toBeTruthy();
-  return data;
-}
-
-async function verifyResolutionVariables(resolutionId: string) {
-  const supabase = getAdminClient();
-  const { data, error } = await supabase
-    .from('ag_resolutions')
-    .select('variables, is_customized')
-    .eq('id', resolutionId)
-    .single();
-
-  expect(error).toBeNull();
   return data;
 }
 
@@ -414,19 +402,13 @@ test.describe('AG Step 2 - Financing Schedule Persistence', () => {
       await page.waitForTimeout(1000);
     }
 
-    // Verify in database that variables are stored as JSONB
+    // Verify in database that variables are stored as JSONB (informational query)
     const supabase = getAdminClient();
-    const { data: resolutions } = await supabase
+    await supabase
       .from('ag_resolutions')
       .select('id, variables')
       .eq('ag_id', agId)
       .not('variables', 'is', null);
-
-    // At least some resolutions should have variables stored
-    const hasVariables = resolutions && resolutions.some(r => r.variables && Object.keys(r.variables).length > 0);
-
-    // This is informational - variables might be stored differently
-    console.log('Resolutions with variables:', resolutions?.length || 0);
   });
 
   test('3. Reload and verify financing schedule persists', async ({ page }) => {
@@ -452,7 +434,6 @@ test.describe('AG Step 2 - Financing Schedule Persistence', () => {
 });
 
 test.describe('AG Step 2 - No localStorage for Business Data', () => {
-  let agId: string;
   const testTitle = `${TEST_PREFIX}NOLS_${Date.now()}`;
 
   test.beforeAll(async () => {
@@ -480,14 +461,13 @@ test.describe('AG Step 2 - No localStorage for Business Data', () => {
     const url = page.url();
     const match = url.match(/\/ag\/([a-f0-9-]+)\//);
     expect(match).toBeTruthy();
-    agId = match![1];
 
     // Add a resolution via pre-fill
     await page.click('button:has-text("Pré-remplir les résolutions obligatoires")');
     await page.waitForTimeout(2000);
 
     // Check localStorage - should NOT contain resolution business data for Supabase AGs
-    const localStorageData = await page.evaluate(() => {
+    await page.evaluate(() => {
       const data: Record<string, string> = {};
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -499,12 +479,6 @@ test.describe('AG Step 2 - No localStorage for Business Data', () => {
     });
 
     // For Supabase AGs (UUID format), resolutions should NOT be in localStorage
-    const resolutionKeys = Object.keys(localStorageData).filter(k => k.includes('resolution'));
-
-    // Log for debugging
-    console.log('LocalStorage AG keys:', Object.keys(localStorageData));
-    console.log('Resolution keys in localStorage:', resolutionKeys);
-
     // For UUID-based AG IDs, we expect minimal or no localStorage usage
     // The exact behavior depends on implementation, but business data should be in Supabase
   });

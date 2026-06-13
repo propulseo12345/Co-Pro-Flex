@@ -10,7 +10,6 @@ import { useCopro } from '@/providers/CoproContext';
 import * as salesApi from '@/lib/sales/api';
 import type {
   CreateMutationInput,
-  UpdateMutationInput,
   DbMutationStatus,
   StepKey,
   SnapshotType,

@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, Calendar } from 'lucide-react';
-import { TabCompta, TypeDepense } from './types';
+import { TabCompta } from './types';
 import { TYPE_DEPENSE_LABELS } from './data';
 import styles from './Comptabilite.module.css';
 

@@ -18,7 +18,7 @@ interface EditModalProps {
   onSave: () => void;
 }
 
-export function EditModal({ facture, editForm, postesBudget, onEditFormChange, onClose, onSave }: EditModalProps) {
+export function EditModal({ editForm, postesBudget, onEditFormChange, onClose, onSave }: EditModalProps) {
   const [suggestedPoste, setSuggestedPoste] = useState<PosteBudget | null>(null);
 
   // Détection automatique du poste budgétaire quand le fournisseur change

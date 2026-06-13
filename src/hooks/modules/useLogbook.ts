@@ -12,7 +12,7 @@ import {
 import { useCopro } from '@/providers/CoproContext';
 import { useSyndicContract } from '@/hooks/useSyndicContract';
 import { createClient } from '@/lib/supabase/client';
-import type { LogbookOverview, LogbookAlert, LogbookEntryInsert } from '@/types/domain';
+import type { LogbookOverview, LogbookEntryInsert } from '@/types/domain';
 import type {
     Intervention,
     InterventionFormData,
@@ -24,15 +24,13 @@ import type {
     DocumentStats,
     LogbookKpis,
     DocumentsByCategory,
-    CATEGORIES_DOCUMENTS,
     FiltreKpi,
     PrestataireOption,
     ResultatCreationIntervention,
-    ToastCreationProps,
-    ToastType
+    ToastCreationProps
 } from '@/components/features/maintenance/Logbook/types';
-import { isDocumentExpired, isDocumentExpiringSoon, isEcheanceProche, isGarantieEnCours, getInitialInterventionForm } from '@/components/features/maintenance/Logbook/utils';
-import { DocumentTechnique, ContratAssurance, CategoriePrestataire, TypeDocumentTechnique, SousTypeAssurance, TravauxPrevisionnel } from '@/types';
+import { isDocumentExpired, isDocumentExpiringSoon, getInitialInterventionForm } from '@/components/features/maintenance/Logbook/utils';
+import { DocumentTechnique, ContratAssurance, TypeDocumentTechnique, SousTypeAssurance, TravauxPrevisionnel } from '@/types';
 import type { Prestataire } from '@/types';
 
 // ============================================================================
@@ -125,8 +123,6 @@ export function useLogbook() {
         entries: dbEntries,
         alerts: dbAlerts,
         isLoading: isLoadingEntries,
-        error: entriesError,
-        fetchEntries,
         createEntry,
         updateEntry,
     } = useLogbookSupabase();

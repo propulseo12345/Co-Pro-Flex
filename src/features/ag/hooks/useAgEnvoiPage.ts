@@ -346,7 +346,7 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
       const supabase = createUntypedClient();
 
       // Sauvegarder via RPC dédiée
-      const { data: savedData, error: saveError } = await supabase
+      const { error: saveError } = await supabase
         .rpc('save_ag_envoi_choices', {
           p_ag_id: agId,
           p_choices: choices
@@ -538,7 +538,6 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
           }));
 
           // a. Générer le PDF personnalisé
-          const agDateFormatted = new Date(bundle.agData.meeting_date).toLocaleDateString('fr-FR');
           const agDateISO = bundle.agData.meeting_date.split('T')[0];
 
           const pdfResult = generateConvocationPDF({

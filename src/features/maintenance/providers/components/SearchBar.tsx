@@ -2,7 +2,6 @@
 
 import { Search, X } from 'lucide-react';
 import { DOMAINES_ACTIVITE } from '@/lib/constants/domaines-activite';
-import { Prestataire } from '@/types';
 import clsx from 'clsx';
 import styles from './SearchBar.module.css';
 

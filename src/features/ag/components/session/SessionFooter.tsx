@@ -11,7 +11,7 @@ interface SessionFooterProps {
   onFinish: () => void;
 }
 
-export function SessionFooter({ onCancel, onSave, onOpenProjector, onExportCSV, onFinish }: SessionFooterProps) {
+export function SessionFooter({ onCancel, onSave: _onSave, onOpenProjector, onExportCSV, onFinish }: SessionFooterProps) {
   return (
     <div className={styles.footer}>
       <div className={styles.footerLeft}>

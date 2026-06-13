@@ -5,14 +5,12 @@
  * Source: Supabase (zero mock fallback)
  */
 
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useCallback, useMemo, ReactNode } from 'react';
 import { useCopro } from '@/providers/CoproContext';
 import { useSalesList } from '@/hooks/modules/useSalesData';
 import { useSalesMutations, type CreateSaleInput } from '@/hooks/modules/useSalesMutations';
-import * as salesApi from '@/lib/sales/api';
 import type {
   MutationOverview,
-  MutationDetail,
   StepKey,
   DbMutationStatus,
 } from '@/lib/sales/api';
@@ -255,7 +253,7 @@ export function VentesProvider({ children }: { children: ReactNode }) {
   }, [mutations]);
 
   const updateDocumentStatus = useCallback(
-    (venteId: string, documentId: string, statut: VenteDocument['statut'], signePar?: string) => {
+    (_venteId: string, _documentId: string, _statut: VenteDocument['statut'], _signePar?: string) => {
       // This would update the document in the step payload
       // For MVP, we just log this
       // updateDocumentStatus (no-op for MVP)
@@ -296,7 +294,7 @@ export function VentesProvider({ children }: { children: ReactNode }) {
   // ============================================
 
   const addHistorique = useCallback(
-    (venteId: string, action: string, utilisateur: string, details?: string) => {
+    (_venteId: string, _action: string, _utilisateur: string, _details?: string) => {
       // For MVP, history is not persisted separately
       // addHistorique (no-op for MVP)
     },

@@ -191,7 +191,6 @@ export function renderResolutionBody(
   const {
     showBracketsForMissing = false,
     warnOnMissing = false,
-    context = 'render',
   } = options;
 
   // Regex pour trouver tous les placeholders {xxx}

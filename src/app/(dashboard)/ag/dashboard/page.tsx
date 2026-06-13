@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2, Play, CheckCircle, Archive } from 'lucide-react';
+import { Calendar, Plus, FileText, ClipboardList, Copy, Eye, Edit3, Trash2, Play, Archive } from 'lucide-react';
 import { AGArchivesList, AgListItem, ConfirmModal } from '@/components/features/ag/Dashboard';
 import type { AgListItemAction } from '@/components/features/ag/Dashboard';
 import { archiveAg } from '@/lib/ag/api';
@@ -10,7 +10,7 @@ import { AgDocumentQuickActions } from '@/components/features/ag';
 import { AgStatusBadge } from '@/components/features/ag/Dashboard/components/AgStatusBadge';
 import { DataState, LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
 import { useCopro } from '@/providers/CoproContext';
-import { useAgDashboardPage, NextAgCard, getTypeLabel, getStatusBadge, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
+import { useAgDashboardPage, NextAgCard, getTypeLabel, getStepPath, type AgDraft, type AgOverview } from '@/features/ag/dashboard-page';
 import styles from './dashboard.module.css';
 import clsx from 'clsx';
 
@@ -150,7 +150,6 @@ export default function AGDashboardPage() {
                 <div className={styles.list}>
                   {activeMeetings.map((ag) => {
                     const typeLabel = getTypeLabel(ag.meeting_type);
-                    const statusInfo = getStatusBadge(ag.status);
                     const participantsCount = (ag.present_count || 0) + (ag.proxy_count || 0) + (ag.correspondence_count || 0);
                     const meta = [
                       new Date(ag.meeting_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),

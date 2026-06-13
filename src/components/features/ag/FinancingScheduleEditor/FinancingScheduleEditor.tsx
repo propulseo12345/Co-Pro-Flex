@@ -222,20 +222,6 @@ export function FinancingScheduleEditor({
     notifyChange(frequency, newEntries);
   }, [entries, totalBudget, frequency, notifyChange]);
 
-  // Format date for display
-  const formatDate = (dateStr: string): string => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>

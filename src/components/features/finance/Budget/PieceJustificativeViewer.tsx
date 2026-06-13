@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Image as ImageIcon, AlertCircle, Loader2 } from 'lucide-react';
+import { FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { PieceJustificative, estImage, estPDF } from '@/types/models/piece-justificative';
 import { piecesJustificativesService } from '@/lib/services/pieces-justificatives.service';
 import styles from './PieceJustificativeViewer.module.css';

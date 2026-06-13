@@ -26,7 +26,7 @@ interface SessionReadyScreenProps {
 }
 
 export function SessionReadyScreen({
-  agId,
+  agId: _agId,
   coproprietaires,
   presences,
   presencesEnrichies,

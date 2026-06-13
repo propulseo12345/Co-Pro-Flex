@@ -86,7 +86,6 @@ let contratSyndicState: ContratSyndic | null = null;
 // Cache pour éviter les nouvelles références à chaque appel
 let cachedContrats: ContratDetaille[] | null = null;
 let cachedContratSyndic: ContratSyndic | null = null;
-let version = 0;
 
 // Listeners pour notifier les changements
 type Listener = () => void;
@@ -96,7 +95,6 @@ function notifyListeners() {
     // Invalider le cache lors des changements
     cachedContrats = null;
     cachedContratSyndic = null;
-    version++;
     listeners.forEach(listener => listener());
 }
 

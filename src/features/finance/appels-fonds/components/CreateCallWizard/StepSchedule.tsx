@@ -101,6 +101,8 @@ export function StepSchedule({ state, updateField, setInstallmentCount, updateIn
                     ? Math.round((inst.amount / state.totalAmount) * 100)
                     : 0;
                   return (
+                    // Échéances = liste figée (2-4 lignes) sans identifiant, l'ordre est la donnée
+                    // eslint-disable-next-line react/no-array-index-key
                     <tr key={i}>
                       <td>{i + 1}/{state.installments.length}</td>
                       <td>
