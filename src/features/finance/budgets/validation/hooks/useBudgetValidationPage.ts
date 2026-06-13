@@ -49,7 +49,6 @@ export function useBudgetValidationPage() {
   // Supabase mutation hook
   const {
     createBudget,
-    updateBudgetStatus,
     isSaving,
     error: mutationError,
   } = useBudgetMutations({

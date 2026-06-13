@@ -24,8 +24,8 @@ export function VenteHistoryModal({ isOpen, onClose, vente }: VenteHistoryModalP
         </div>
         <div className={styles.modalContent}>
           <div className={styles.historyList}>
-            {vente.historique?.map((entry, index) => (
-              <div key={index} className={styles.historyItem}>
+            {vente.historique?.map((entry) => (
+              <div key={entry.id} className={styles.historyItem}>
                 <div className={styles.historyDot} />
                 <div className={styles.historyContent}>
                   <p className={styles.historyAction}>{entry.action}</p>

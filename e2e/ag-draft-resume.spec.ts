@@ -12,7 +12,7 @@
  * - Active copropriété selected in CoproContext
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;

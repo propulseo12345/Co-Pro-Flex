@@ -96,7 +96,7 @@ function calculateBalanceFromOperations(operations: OperationComptable[]): Ligne
 
 export function useLedger() {
     const { currentCoproId } = useCopro();
-    const { data: openPeriod } = useOpenPeriod();
+    useOpenPeriod();
     const { data: ledgerEntries, isLoading, error, refresh } = useGeneralLedger({ status: 'posted' });
 
     // Transform Supabase data to operations

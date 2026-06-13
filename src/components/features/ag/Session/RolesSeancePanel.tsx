@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   Crown,
   FileText,
@@ -85,11 +85,6 @@ export function RolesSeancePanel({
     }
     onRolesChange({ ...roles, scrutateurs: newScrutateurs.filter(Boolean) });
   }, [roles, onRolesChange]);
-
-  const addScrutateur = useCallback(() => {
-    // Ajouter un slot de scrutateur (sera rempli par la sélection)
-    // On ne fait rien ici car le RoleSelect gère l'ajout
-  }, []);
 
   // Fonction pour obtenir la raison d'exclusion pour le président
   const getPresidentExclusionReason = useCallback((id: string) => {
@@ -244,6 +239,8 @@ export function RolesSeancePanel({
               }
 
               return (
+                // Slots positionnels (Array.from length) : l'index EST l'identité du slot, manipulé par index dans handleScrutateurChange
+                // eslint-disable-next-line react/no-array-index-key
                 <div key={index} className={styles.scrutateurSlot}>
                   <RoleSelect
                     label={`Scrutateur ${index + 1}`}

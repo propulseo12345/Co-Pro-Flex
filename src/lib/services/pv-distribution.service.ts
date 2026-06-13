@@ -119,39 +119,6 @@ const GED_PV_CATEGORY: GEDCategory = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// EMAIL TEMPLATES
-// ═══════════════════════════════════════════════════════════════
-
-function getDefaultEmailSubject(agDate: string, agType: string): string {
-    const dateStr = new Date(agDate).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
-    return `Procès-verbal de l'Assemblée Générale ${agType} du ${dateStr}`;
-}
-
-function getDefaultEmailBody(coproprietaireName: string, agDate: string, agType: string, hasAttachment: boolean): string {
-    const dateStr = new Date(agDate).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
-
-    return `Madame, Monsieur ${coproprietaireName},
-
-Vous trouverez ${hasAttachment ? 'ci-joint' : 'via le lien ci-dessous'} le procès-verbal de l'Assemblée Générale ${agType} qui s'est tenue le ${dateStr}.
-
-Ce document récapitule l'ensemble des résolutions votées et leurs résultats.
-
-Conformément à l'article 17 du décret du 17 mars 1967, ce procès-verbal vous est notifié dans un délai d'un mois à compter de la tenue de l'assemblée générale.
-
-Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.
-
-Le syndic`;
-}
-
-// ═══════════════════════════════════════════════════════════════
 // SERVICE
 // ═══════════════════════════════════════════════════════════════
 
@@ -443,7 +410,7 @@ class PVDistributionService {
     /**
      * Récupère l'historique GED pour une AG via documents API
      */
-    async getGEDHistoryForAG(agId: string, coproId: string): Promise<GEDArchiveResult[]> {
+    async getGEDHistoryForAG(agId: string, _coproId: string): Promise<GEDArchiveResult[]> {
         initService();
 
         try {
@@ -469,11 +436,11 @@ class PVDistributionService {
     /**
      * Vérifie si le PV a déjà été archivé (via documents API)
      */
-    async isAlreadyArchived(agId: string, coproId: string): Promise<boolean> {
+    async isAlreadyArchived(agId: string, _coproId: string): Promise<boolean> {
         try {
             const documents = await documentsApi.getDocumentsForEntity('ag', agId);
             return documents.some(d => d.category === 'pv_ag');
-        } catch (error) {
+        } catch {
             // Vérifier en mémoire
             for (const job of activeDistributionJobs.values()) {
                 if (job.agId === agId && job.archiveResult?.success) {

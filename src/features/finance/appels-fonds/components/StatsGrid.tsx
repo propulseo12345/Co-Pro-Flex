@@ -35,8 +35,8 @@ const valueColorMap: Record<string, string> = {
 export function StatsGrid({ items }: StatsGridProps) {
   return (
     <div className={styles.grid}>
-      {items.map((item, i) => (
-        <div key={i} className={styles.card}>
+      {items.map((item) => (
+        <div key={item.label} className={styles.card}>
           <div className={clsx(styles.icon, iconColorMap[item.iconColor])}>
             {item.icon}
           </div>

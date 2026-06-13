@@ -2,7 +2,6 @@
  * Constantes pour le module Convocation
  */
 
-import { Package, FileText, Mail, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type SendingMethod =
@@ -72,14 +71,10 @@ export const SENDING_METHODS: SendingMethodInfo[] = [
   },
 ];
 
-export function getSendingMethodIcon(iconName: SendingMethodInfo['iconName'], size: number): ReactNode {
-  const icons = {
-    Package,
-    FileText,
-    Mail,
-    User,
-  };
-  const IconComponent = icons[iconName];
+export function getSendingMethodIcon(
+  _iconName: SendingMethodInfo['iconName'],
+  _size: number
+): ReactNode {
   // Note: on retourne null ici car les icônes seront rendues dans le composant
   return null;
 }

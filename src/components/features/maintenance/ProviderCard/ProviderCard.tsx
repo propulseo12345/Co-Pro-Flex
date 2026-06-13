@@ -19,8 +19,8 @@ export default function ProviderCard({ prestataire }: ProviderCardProps) {
                 <div className={styles.headerInfo}>
                     <h3 className={styles.nom}>{prestataire.nom}</h3>
                     <div className={styles.domaines}>
-                        {prestataire.domaines.slice(0, 2).map((domaine, index) => (
-                            <span key={index} className={styles.domaineBadge}>
+                        {prestataire.domaines.slice(0, 2).map((domaine) => (
+                            <span key={domaine} className={styles.domaineBadge}>
                                 {domaine}
                             </span>
                         ))}

@@ -229,8 +229,8 @@ export function LogbookContactsSection({ coproprieteInfo }: LogbookContactsSecti
 
                         {expandedSections.includes('cs-membres') && (
                             <div className={styles.membresList}>
-                                {autresMembres.map((membre, index) => (
-                                    <div key={index} className={styles.membreItem}>
+                                {autresMembres.map((membre) => (
+                                    <div key={`${membre.role}-${membre.nom}`} className={styles.membreItem}>
                                         <div className={styles.membreInfo}>
                                             <span className={styles.membreNom}>{membre.nom}</span>
                                             <span className={styles.membreRole}>{ROLE_LABELS[membre.role]}</span>
@@ -272,9 +272,9 @@ export function LogbookContactsSection({ coproprieteInfo }: LogbookContactsSecti
 
                     {expandedSections.includes('urgences') && (
                         <div className={styles.urgencesGrid}>
-                            {servicesUrgence.map((service, index) => (
+                            {servicesUrgence.map((service) => (
                                 <a
-                                    key={index}
+                                    key={`${service.type}-${service.telephone}`}
                                     href={`tel:${service.telephone.replace(/\s/g, '')}`}
                                     className={styles.urgenceCard}
                                 >
@@ -313,9 +313,9 @@ export function LogbookContactsSection({ coproprieteInfo }: LogbookContactsSecti
 
                     {expandedSections.includes('prestataires') && (
                         <div className={styles.contactsGrid}>
-                            {prestataires.map((prestataire, index) => (
+                            {prestataires.map((prestataire) => (
                                 <ContactCard
-                                    key={index}
+                                    key={`${prestataire.type}-${prestataire.nom}`}
                                     title={PRESTATAIRE_LABELS[prestataire.type]}
                                     name={prestataire.nom}
                                     telephone={prestataire.telephone}

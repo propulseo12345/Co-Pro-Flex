@@ -14,7 +14,7 @@ interface FactureSectionProps {
     facture: Facture | undefined;
 }
 
-export function ServiceOrderFactureSection({ ordreServiceId, currentData, facture }: FactureSectionProps) {
+export function ServiceOrderFactureSection({ currentData, facture }: FactureSectionProps) {
     return (
         <div className={styles.factureSection}>
             <div className={styles.factureCard}>

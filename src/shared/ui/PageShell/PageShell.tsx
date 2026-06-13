@@ -36,8 +36,8 @@ export function PageShell({
                 <Home size={14} />
               </a>
             </li>
-            {breadcrumbs.map((crumb, index) => (
-              <li key={index} className={styles.breadcrumbItem}>
+            {breadcrumbs.map((crumb) => (
+              <li key={crumb.label} className={styles.breadcrumbItem}>
                 <ChevronRight size={14} className={styles.breadcrumbSeparator} />
                 {crumb.href ? (
                   <a href={crumb.href} className={styles.breadcrumbLink}>

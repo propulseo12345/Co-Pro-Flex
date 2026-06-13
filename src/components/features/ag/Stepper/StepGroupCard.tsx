@@ -10,7 +10,7 @@ interface StepGroupCardProps {
     maxStepReached: number;
 }
 
-export function StepGroupCard({ group, maxStepReached }: StepGroupCardProps) {
+export function StepGroupCard({ group, maxStepReached: _maxStepReached }: StepGroupCardProps) {
     const { titre, icon: Icon, steps, completedCount, totalCount, isActive, isCompleted } = group;
 
     const moduleStateClass = isActive

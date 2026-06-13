@@ -62,7 +62,8 @@ export function useTemplateEditor(templateId: string) {
   const handleExpandSection = useCallback((sectionId: string) => {
     setExpandedSections(prev => {
       const next = new Set(prev);
-      next.has(sectionId) ? next.delete(sectionId) : next.add(sectionId);
+      if (next.has(sectionId)) next.delete(sectionId);
+      else next.add(sectionId);
       return next;
     });
   }, []);

@@ -31,8 +31,8 @@ export function ValidationCard({ validation }: ValidationCardProps) {
         </div>
         {validation.warnings.length > 0 && (
           <div className={styles.warningsList}>
-            {validation.warnings.map((warning, idx) => (
-              <div key={idx} className={styles.warningItem}>
+            {validation.warnings.map((warning) => (
+              <div key={warning} className={styles.warningItem}>
                 <AlertTriangle size={14} />{warning}
               </div>
             ))}

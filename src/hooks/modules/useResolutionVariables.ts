@@ -14,10 +14,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     parseVariables,
-    extractVariableNames,
     applyVariables,
     validateVariable,
-    getUnresolvedVariables,
     saveResolutionVariablesToHistory,
     getVariableHistory,
     formatDateFR,
@@ -202,7 +200,7 @@ function getSuggestionForVariable(
 export function useResolutionVariables(
     options: UseResolutionVariablesOptions
 ): UseResolutionVariablesReturn {
-    const { text, initialValues = {}, coproprieteId, template } = options;
+    const { text, initialValues = {}, coproprieteId } = options;
 
     // Extraire les variables du texte
     const parsedVariables = useMemo(() => parseVariables(text), [text]);
@@ -267,7 +265,7 @@ export function useResolutionVariables(
 
     // Construire les infos de variables
     const variables = useMemo((): VariableInfo[] => {
-        return parsedVariables.map(({ name, occurrences }) => {
+        return parsedVariables.map(({ name }) => {
             const value = state.values[name] || '';
             const status = state.sources[name] || 'missing';
             const validation = validateVariable(name, value);

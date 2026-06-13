@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, ReceiptText, FileText, Link2, AlertCircle } from 'lucide-react';
+import { X, ReceiptText, Link2, AlertCircle } from 'lucide-react';
 import { Facture, MotifAvoir, MOTIFS_AVOIR } from '../types';
 import { formatCurrency, formatDate } from '../utils';
 import styles from '../Factures.module.css';

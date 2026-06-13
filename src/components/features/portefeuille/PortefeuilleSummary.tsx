@@ -2,7 +2,7 @@
 
 import {
   TrendingUp, AlertCircle, Percent, ArrowLeftRight, Wrench,
-  Calendar, ClipboardList, PieChart,
+  Calendar, ClipboardList,
 } from 'lucide-react';
 import type { IPortefeuilleKPIs, ICoproprietePortefeuille } from '@/types/models/portefeuille';
 import styles from '../../../app/(gestionnaire)/portefeuille/portefeuille.module.css';

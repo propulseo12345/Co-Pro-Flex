@@ -79,7 +79,7 @@ export function usePVGeneration({
     const [job, setJob] = useState<PVJob | null>(null);
     const [document, setDocument] = useState<PVDocument | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [isPolling, setIsPolling] = useState(false);
+    const [, setIsPolling] = useState(false);
 
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
     const lastGenerationOptionsRef = useRef<Omit<GeneratePVOptions, 'agId'> | null>(null);

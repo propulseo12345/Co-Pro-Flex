@@ -203,7 +203,7 @@ class OnPremiseSignatureProvider implements SignatureProviderInterface {
         // Rappel non applicable pour signature sur place
     }
 
-    async getSignedDocument(requestId: string): Promise<Blob> {
+    async getSignedDocument(_requestId: string): Promise<Blob> {
         // Pour la signature sur place, le document est déjà local
         // On pourrait récupérer le PDF depuis le service de génération
         throw new Error('getSignedDocument non implémenté pour on_premise');
@@ -312,22 +312,22 @@ class DocuSignProvider implements SignatureProviderInterface {
         return requests[requestId];
     }
 
-    async voidSignatureRequest(requestId: string, reason?: string): Promise<void> {
+    async voidSignatureRequest(_requestId: string, _reason?: string): Promise<void> {
         // TODO: Appeler l'API DocuSign pour annuler l'envelope
         // DocuSign cancellation (stub)
     }
 
-    async sendReminder(requestId: string, recipientId?: string): Promise<void> {
+    async sendReminder(_requestId: string, _recipientId?: string): Promise<void> {
         // TODO: Appeler l'API DocuSign pour envoyer un rappel
         // DocuSign reminder sent (stub)
     }
 
-    async getSignedDocument(requestId: string): Promise<Blob> {
+    async getSignedDocument(_requestId: string): Promise<Blob> {
         // TODO: Télécharger le document signé depuis DocuSign
         throw new Error('[DocuSign] getSignedDocument non implémenté');
     }
 
-    async handleWebhook(payload: unknown): Promise<SignatureRequest> {
+    async handleWebhook(_payload: unknown): Promise<SignatureRequest> {
         // TODO: Parser le webhook DocuSign et mettre à jour le statut
         // DocuSign webhook received (stub)
         throw new Error('[DocuSign] handleWebhook non implémenté');
@@ -383,19 +383,19 @@ class YouSignProvider implements SignatureProviderInterface {
         return requests[requestId];
     }
 
-    async voidSignatureRequest(requestId: string, reason?: string): Promise<void> {
+    async voidSignatureRequest(_requestId: string, _reason?: string): Promise<void> {
         // Yousign cancellation (stub)
     }
 
-    async sendReminder(requestId: string, recipientId?: string): Promise<void> {
+    async sendReminder(_requestId: string, _recipientId?: string): Promise<void> {
         // Yousign reminder sent (stub)
     }
 
-    async getSignedDocument(requestId: string): Promise<Blob> {
+    async getSignedDocument(_requestId: string): Promise<Blob> {
         throw new Error('[Yousign] getSignedDocument non implémenté');
     }
 
-    async handleWebhook(payload: unknown): Promise<SignatureRequest> {
+    async handleWebhook(_payload: unknown): Promise<SignatureRequest> {
         // Yousign webhook received (stub)
         throw new Error('[Yousign] handleWebhook non implémenté');
     }

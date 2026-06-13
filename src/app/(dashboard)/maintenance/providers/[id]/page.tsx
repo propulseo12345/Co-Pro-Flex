@@ -84,9 +84,6 @@ function ProviderDetailContent({ id }: { id: string }) {
     );
   }
 
-  const mainDomain = prestataire.domaines?.[0] || 'AUTRE';
-  const mainColor = DOMAINE_COLORS[mainDomain] || 'var(--text-tertiary)';
-
   return (
     <>
       {/* Back link */}

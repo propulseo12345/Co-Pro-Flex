@@ -85,7 +85,7 @@ export function useDocumentPermissions() {
     if (rolePerms.includes('*')) return true;
     if (rolePerms.includes(permission)) return true;
 
-    const [module, action] = permission.split(':');
+    const [module] = permission.split(':');
     if (rolePerms.includes(`${module}:*`)) return true;
 
     return false;

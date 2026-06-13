@@ -98,7 +98,6 @@ export const logger = {
     if (!shouldLog('warn')) return;
     const entry = createLogEntry('warn', message, context);
     if (isDev) {
-      // eslint-disable-next-line no-console
       console.warn(formatLogEntry(entry));
     }
   },
@@ -118,7 +117,6 @@ export const logger = {
     const entry = createLogEntry('error', message, enrichedContext, error);
 
     if (isDev) {
-      // eslint-disable-next-line no-console
       console.error(formatLogEntry(entry));
     }
 

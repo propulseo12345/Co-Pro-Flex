@@ -38,13 +38,13 @@ export function SortableColumnHeader({
   return (
     <th
       className={`${styles.sortableHeader} ${styles[`align${align.charAt(0).toUpperCase() + align.slice(1)}`]} ${isActive ? styles.active : ''} ${className}`}
+      aria-sort={direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'}
     >
       <button
         type="button"
         className={styles.headerButton}
         onClick={handleClick}
         aria-label={`Trier par ${label}`}
-        aria-sort={direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'}
       >
         <span className={styles.headerLabel}>{label}</span>
         <span className={styles.sortIcon} aria-hidden="true">

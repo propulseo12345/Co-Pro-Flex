@@ -67,7 +67,7 @@ export function SimulationRepartitionModal({ postes, onClose }: SimulationRepart
   }, [lots]);
 
   // Calculate répartition from key lines
-  const calculerRepartition = useCallback(async (cleId: string, montant: number, cleNom: string): Promise<RepartitionLigne[]> => {
+  const calculerRepartition = useCallback(async (cleId: string, montant: number, _cleNom: string): Promise<RepartitionLigne[]> => {
     if (!currentCoproId) return [];
 
     const { data: lines, error } = await lotsApi.listRepartitionKeyLines(currentCoproId, cleId);

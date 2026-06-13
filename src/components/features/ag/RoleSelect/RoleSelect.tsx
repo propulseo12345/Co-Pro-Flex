@@ -29,7 +29,6 @@ interface RoleSelectProps {
 }
 
 export function RoleSelect({
-    role,
     roleLabel,
     coproprietairesPresents,
     gestionnaires = [],

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ContratAssurance, SousTypeAssurance } from '@/types';
+import { ContratAssurance } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
 import { DocumentAssurance, SousTypeAssuranceLiteral } from '@/types/models/maintenance';

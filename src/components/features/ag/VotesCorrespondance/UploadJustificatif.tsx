@@ -163,6 +163,8 @@ export function UploadJustificatif({
                                     title="Prévisualisation du justificatif"
                                 />
                             ) : (
+                                // Aperçu d'un justificatif uploadé (data-URI dynamique, dimensions inconnues) : next/image inadapté
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     src={justificatif.dataUrl}
                                     alt="Justificatif"

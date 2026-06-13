@@ -170,7 +170,10 @@ export const validateResolutionVariables = (resolution: Resolution, variableValu
     }
   }
 
-  return missing;
+  // Dédupliqué : un même placeholder peut apparaître plusieurs fois dans le texte
+  // d'une résolution, mais ne doit être signalé qu'une fois (et garantit des clés
+  // React uniques côté UI — cf. ValidationWarningModal).
+  return [...new Set(missing)];
 };
 
 export const isRoleVariable = (name: string): boolean => {

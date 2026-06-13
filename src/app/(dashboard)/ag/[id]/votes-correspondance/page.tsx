@@ -51,7 +51,7 @@ export default function VotesCorrespondancePage() {
 
   // AG data (meeting date)
   const [meetingDate, setMeetingDate] = useState<string | null>(null);
-  const [agTitle, setAgTitle] = useState('');
+  const [, setAgTitle] = useState('');
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Accordion states
@@ -443,7 +443,6 @@ export default function VotesCorrespondancePage() {
                       <div className={styles.resolutionsList}>
                         {resolutions.map((res) => {
                           const vote = pendingVotes.get(res.id);
-                          const hasVote = !!vote;
                           const existingVote = selectedOwner?.voted_resolutions?.find(
                             (v) => v.resolution_id === res.id
                           )?.vote;

@@ -1,5 +1,4 @@
 import type {
-  VenteEtapeWorkflowV2,
   VenteValidationRule,
   ValidationStatus,
   ClotureCompteVendeur,

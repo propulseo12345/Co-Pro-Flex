@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
-import { Upload, X, FileText, Image, File, Trash2 } from 'lucide-react';
+import { Upload, X, FileText, Image as ImageIcon, File, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import type { GEDFolder } from '../domain/types';
 import type { DocumentCategory, DocumentConfidentiality } from '@/lib/documents/api';
 import { detectCategory } from '@/lib/documents/detect-category';
 import { FolderTreeSelect } from './FolderTreeSelect';
-import { CATEGORY_LABELS } from '../domain/constants';
 import styles from './UploadDocumentModal.module.css';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 Mo
@@ -182,6 +181,8 @@ export function UploadDocumentModal({
           {files.length > 0 && (
             <div className={styles.fileList}>
               {files.map((entry, i) => (
+                // File d'attente manipulée par index (removeFile(i) / newFiles[i]) ; pas d'id stable sur File
+                // eslint-disable-next-line react/no-array-index-key
                 <div key={i} className={clsx(styles.fileRow, entry.error && styles.fileRowError)}>
                   <FileIcon type={entry.file.type} />
                   <div className={styles.fileInfo}>
@@ -289,6 +290,6 @@ export function UploadDocumentModal({
 
 function FileIcon({ type }: { type: string }) {
   if (type.includes('pdf')) return <FileText size={16} style={{ color: 'var(--danger)' }} />;
-  if (type.includes('image')) return <Image size={16} style={{ color: '#84CC16' }} />;
+  if (type.includes('image')) return <ImageIcon size={16} style={{ color: '#84CC16' }} aria-hidden="true" />;
   return <File size={16} style={{ color: 'var(--text-tertiary)' }} />;
 }

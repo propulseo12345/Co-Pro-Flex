@@ -112,11 +112,7 @@ export const RESOLUTION_IDS = {
 // CONSTANTES DE CALCUL
 // ============================================
 
-// Tantièmes votants AG 2024: 1218 présents + 440 représentés + 160 correspondance = 1818 (100%)
-const TANTIEMES_VOTANTS_AG_2024 = 1818;
-
 // Seuils de majorité AG 2024
-const SEUIL_ART_24_AG_2024 = Math.floor(TANTIEMES_VOTANTS_AG_2024 / 2) + 1; // 910
 const SEUIL_ART_25 = Math.floor(TOTAL_TANTIEMES / 2) + 1; // 910
 const SEUIL_ART_26 = Math.floor((TOTAL_TANTIEMES * 2) / 3) + 1; // 1213
 

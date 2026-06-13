@@ -19,8 +19,8 @@
 
 import { BaseEntity } from '../types';
 import { COPROPRIETE_IDS } from './coproprietes';
-import { PRESTATAIRE_IDS, PRESTATAIRES_ID_MAP } from './prestataires';
-import { CONTRAT_IDS, CONTRAT_ID_MAP } from './contrats';
+import { PRESTATAIRE_IDS } from './prestataires';
+import { CONTRAT_IDS } from './contrats';
 
 // ============================================
 // TYPES

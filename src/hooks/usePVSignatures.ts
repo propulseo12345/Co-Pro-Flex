@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { pvSignatureService } from '@/lib/services/pv-signature.service';
 import {
   SignatairePV,
-  SignaturePVData,
   ConfigurationSignature,
   ModeSignature,
   TypeSignataire,

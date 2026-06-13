@@ -1,6 +1,6 @@
 import {
   FileText,
-  Image,
+  Image as ImageIcon,
   FileSpreadsheet,
   FolderOpen,
   Folder,
@@ -95,7 +95,7 @@ export function calculateRelevanceScore(doc: DocumentWithRelevance, query: strin
 
 export function getFileIcon(type: string, nom: string) {
   if (type === 'IMAGE' || nom.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-    return <Image size={28} aria-hidden="true" />;
+    return <ImageIcon size={28} aria-hidden="true" />;
   }
   if (nom.match(/\.(xlsx?|csv)$/i)) {
     return <FileSpreadsheet size={28} aria-hidden="true" />;
@@ -116,7 +116,7 @@ export function getFolderIcon(iconName?: string, size = 24) {
     Map: <Map size={size} />,
     Mail: <Mail size={size} />,
     Wrench: <Wrench size={size} />,
-    Image: <Image size={size} />,
+    Image: <ImageIcon size={size} />,
     Calculator: <Calculator size={size} />,
   };
   return iconName && icons[iconName] ? icons[iconName] : <Folder size={size} />;

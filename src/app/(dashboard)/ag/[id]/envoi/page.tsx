@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { updateAgCurrentStep } from '@/lib/ag/api';
-import { ArrowLeft, ArrowRight, Info, AlertCircle, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Info, AlertCircle, Loader2, X } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';
 import { useAgEnvoiPage, SENDING_METHODS } from '@/features/ag/hooks/useAgEnvoiPage';
 import { SendProgressModal } from '@/features/ag/components/envoi/SendProgressModal';

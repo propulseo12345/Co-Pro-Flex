@@ -79,10 +79,9 @@ export function isInCurrentBusinessYear(date: Date | string): boolean {
  * Assertion: vérifie que la date est dans l'exercice courant
  * Log un warning en dev si ce n'est pas le cas
  */
-export function assertBusinessYear(date: Date | string, context?: string): void {
+export function assertBusinessYear(date: Date | string, _context?: string): void {
   if (process.env.NODE_ENV === 'development') {
     if (!isInCurrentBusinessYear(date)) {
-      const d = typeof date === 'string' ? new Date(date) : date;
       // Date hors exercice
     }
   }

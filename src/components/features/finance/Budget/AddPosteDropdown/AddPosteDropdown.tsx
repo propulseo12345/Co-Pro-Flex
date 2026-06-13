@@ -103,6 +103,7 @@ export function AddPosteDropdown({ onAddPoste, existingPosteIds = [] }: AddPoste
                   className={styles.dropdownItem}
                   onClick={() => handleSelectPoste(poste)}
                   role="option"
+                  aria-selected={false}
                 >
                   <span
                     className={styles.posteColor}

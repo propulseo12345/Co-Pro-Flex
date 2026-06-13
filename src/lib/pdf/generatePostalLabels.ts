@@ -116,7 +116,7 @@ export function generatePostalLabels(params: PostalLabelsParams): PostalLabelsRe
  * Génère un A4 avec plusieurs étiquettes par page (grille 2x4)
  */
 export function generatePostalLabelsSheet(params: PostalLabelsParams): PostalLabelsResult {
-  const { recipients, sender, sendType, agTitle } = params;
+  const { recipients, sender, sendType } = params;
 
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -134,7 +134,6 @@ export function generatePostalLabelsSheet(params: PostalLabelsParams): PostalLab
   const marginY = (pageHeight - labelsPerCol * labelHeight) / 2;
 
   let currentPage = 0;
-  let labelIndex = 0;
 
   recipients.forEach((recipient, index) => {
     const pageNum = Math.floor(index / (labelsPerRow * labelsPerCol));
@@ -188,8 +187,6 @@ export function generatePostalLabelsSheet(params: PostalLabelsParams): PostalLab
       destY + 12,
       { align: 'center' }
     );
-
-    labelIndex++;
   });
 
   const blob = doc.output('blob');

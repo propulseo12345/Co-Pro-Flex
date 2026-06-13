@@ -36,6 +36,8 @@ export function BentoPriorites({ todos, hasTodos }: BentoPrioritesProps) {
       {hasTodos ? (
         <div className={styles.priorityItems}>
           {todos.map((todo, index) => (
+            // Liste de tâches dérivée sans identifiant stable (agrégat) → index combiné au type
+            // eslint-disable-next-line react/no-array-index-key
             <div key={`${todo.todo_type}-${index}`} className={`${styles.miniCard} ${styles.priorityItem}`}>
               <div className={`${styles.priorityBar} ${getPriorityBarClass(todo.priority)}`} />
               <div className={styles.priorityContent}>

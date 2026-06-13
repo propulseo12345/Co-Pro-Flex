@@ -10,7 +10,6 @@ import {
   hasVotedByCorrespondance,
   generatePasserelleMentionPV,
 } from '@/components/features/ag/Session/utils';
-import { saveDraft } from '@/lib/ag/draft-persistence';
 
 export interface UseSessionVotingReturn {
   votes: VoteData[];
@@ -52,7 +51,6 @@ interface UseSessionVotingParams {
 }
 
 export function useSessionVoting({
-  agId,
   coproprietaires,
   presences,
   currentResolution,

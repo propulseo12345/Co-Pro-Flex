@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Download, Plus, Coins, ArrowRight } from 'lucide-react';
+import { Download, Plus, Coins } from 'lucide-react';
 import { useBudget } from '@/hooks/modules/useBudget';
 import {
   TravauxOverview,

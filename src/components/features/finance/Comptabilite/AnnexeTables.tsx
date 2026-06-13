@@ -74,7 +74,9 @@ interface Annexe1TableProps {
 }
 
 function renderCompteRows(lignes: LigneCompte[]) {
+  // Lignes comptables dérivées (un même n° de compte peut se répéter en sous-lignes) : pas de clé naturelle garantie unique
   return lignes.map((row, i) => (
+    // eslint-disable-next-line react/no-array-index-key
     <tr key={`${row.compte}-${i}`}>
       <td>{row.compte} - {row.libelle}</td>
       <td className={styles.textRight}>{formatCurrency(row.exercice_precedent)}</td>
@@ -238,7 +240,9 @@ export function Annexe1DetailCoprosTable({ data, coproName }: Annexe1DetailCopro
             </tr>
           </thead>
           <tbody>
+            {/* Liste de copropriétaires sans identifiant unique (homonymes possibles) : index conservé faute de clé naturelle fiable */}
             {data.copros.map((c, i) => (
+              // eslint-disable-next-line react/no-array-index-key
               <tr key={i}>
                 <td>{c.nom}</td>
                 <td className={styles.textRight}>{formatCurrency(c.solde_avant_regularisation)}</td>
@@ -381,7 +385,9 @@ export function Annexe2Table({ data, exercice, coproName, periodLabels }: Annexe
               </tr>
             </thead>
             <tbody>
+              {/* Lignes de travaux : compte/libellé optionnels, pas de clé naturelle garantie → index conservé */}
               {data.charges_travaux.map((row, i) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <tr key={`travaux-${i}`}>
                   <td>
                     {row.compte && <span className={styles.compteBadge}>{row.compte}</span>}
@@ -431,7 +437,7 @@ export function Annexe3Table({ data, exercice, coproName, periodLabels }: Annexe
       />
 
       {data.cles.map((cle, idx) => (
-        <div key={idx} className={styles.annexeSection}>
+        <div key={cle.nom} className={styles.annexeSection}>
           <h3 className={styles.annexeSectionTitle}>{cle.nom}</h3>
           <div className={styles.tableContainer}>
             <table className={styles.table}>

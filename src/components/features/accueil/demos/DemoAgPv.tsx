@@ -32,7 +32,7 @@ export function DemoAgPv() {
           <div className={styles.sectionTitle}>Aperçu du PV</div>
           <div className={styles.kpiCard} style={{ padding: 20 }}>
             {sections.map((s, i) => (
-              <div key={i} style={{ marginBottom: i < sections.length - 1 ? 16 : 0 }}>
+              <div key={s.title} style={{ marginBottom: i < sections.length - 1 ? 16 : 0 }}>
                 <div style={{
                   fontSize: 11, fontWeight: 700, color: 'var(--demo-secondary)',
                   marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px',

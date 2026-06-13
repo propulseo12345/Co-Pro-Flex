@@ -13,7 +13,7 @@
  * - Refresh page and verify UI rehydrates from DB (not localStorage)
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 
 // Test configuration
@@ -119,7 +119,6 @@ async function verifyAgStatus(agId: string, expectedStatus: string) {
 test.describe('AG Workflow E2E - Full Persistence Test', () => {
   const testAgTitle = `${TEST_PREFIX}${Date.now()}`;
   let agId: string;
-  let coproId: string;
 
   test.beforeAll(async () => {
     // Cleanup any previous test data
@@ -166,9 +165,6 @@ test.describe('AG Workflow E2E - Full Persistence Test', () => {
     const agData = await verifyAgInDb(agId);
     expect(agData.title).toContain(testAgTitle);
     expect(agData.status).toBe('draft');
-
-    // Store coproId for later tests
-    coproId = agData.copro_id;
   });
 
   test('STEP 2: Add Resolutions - should persist to ag_resolutions', async ({ page }) => {
@@ -289,9 +285,8 @@ test.describe('AG Workflow E2E - Full Persistence Test', () => {
       // Validate vote
       await page.click('[data-testid="validate-vote-btn"]');
 
-      // Verify votes in database
-      const votes = await verifyVotesExist(resolutionId);
-      // Votes should exist (count depends on attendance)
+      // Verify votes in database (count depends on attendance)
+      await verifyVotesExist(resolutionId);
     }
 
     // Navigate to next resolution or finish
@@ -357,7 +352,7 @@ test.describe('AG Draft Persistence - Unit-level DB Tests', () => {
 
     await page.goto('/ag'); // Any page to get authenticated context
 
-    const result = await page.evaluate(async (prefix) => {
+    const result = await page.evaluate(async (_prefix) => {
       // Import utilities (these would need to be exposed or we test via UI)
       // For now, this is a placeholder showing the test structure
 

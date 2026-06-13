@@ -1,6 +1,6 @@
 'use client';
 
-import { ContratDetaille, Prestataire } from '@/types';
+import { ContratDetaille } from '@/types';
 import { ArrowLeft, Edit2, Download, XCircle, Shield, Mail } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
@@ -19,7 +19,7 @@ interface ContractDetailHeaderProps {
 export function ContractDetailHeader({
     contrat,
     fromLogbook,
-    typeLabel,
+    typeLabel: _typeLabel,
     onModifier,
     onDownloadPDF,
     onResiliation,

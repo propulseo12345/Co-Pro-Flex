@@ -29,7 +29,6 @@ function getContratProgress(dateDebut: string, dateFin: string): ContratProgress
 
     // Calculer l'année en cours (basé sur les années civiles ou anniversaires)
     const anneeDebut = debut.getFullYear();
-    const anneeFin = fin.getFullYear();
     const anneeActuelle = aujourdhui.getFullYear();
 
     // Nombre d'années écoulées depuis le début

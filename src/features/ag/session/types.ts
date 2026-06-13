@@ -1,4 +1,3 @@
-import type { PasserelleMajorite } from '@/types';
 import type {
   Resolution,
   VoteData,
@@ -12,7 +11,7 @@ import type {
 import type { PresenceData } from '@/lib/utils/ag-session';
 import type { MajorityType } from '@/lib/constants/resolutions';
 import type { SessionPersistenceStatus, SessionPersistenceError, RestoreResult } from '@/hooks/modules/useAGSessionPersistence';
-import type { AgMeeting, AgResolutionResult, AgAttendanceSummary } from '@/lib/ag/types';
+import type { AgMeeting } from '@/lib/ag/types';
 
 export type { Resolution, VoteData, SessionState, VoteChoice, VoteSource, VoteStats, PasserelleVoteInitial, EditingVariable };
 export type { PresenceData, MajorityType };

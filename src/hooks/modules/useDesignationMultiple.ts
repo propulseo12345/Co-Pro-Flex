@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import type {
-  CategorieDesignation,
   PersonneDesignee,
   ConfigDesignationMultiple
 } from '@/types/models/ag';

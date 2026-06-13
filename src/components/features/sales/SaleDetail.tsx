@@ -1,7 +1,7 @@
 'use client';
 
 import { FileText, Download, Send, History, FileCheck, Building2, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import type { Sale, SaleDocument, DocumentType, DocumentStatut } from '@/types';
+import type { Sale, DocumentType, DocumentStatut } from '@/types';
 import { DOCUMENT_NAMES, STATUS_LABELS } from '@/hooks/modules/useSalesPage';
 import styles from '../../../app/(dashboard)/sales/sales.module.css';
 

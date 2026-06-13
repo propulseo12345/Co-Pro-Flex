@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  FileText, Folder, FolderOpen, Search, Upload, Download, Plus,
+  FileText, Folder, FolderOpen, Search, Upload, Download,
   ChevronDown, ChevronRight, Eye, Lock, Star, Clock, Image, File,
-  Link, Trash2, Shield, HardDrive, Edit3, FolderPlus, MoreVertical, X,
+  Link, Trash2, Shield, Edit3, FolderPlus, MoreVertical, X,
 } from 'lucide-react';
 import clsx from 'clsx';
 import DocumentViewerModal from '@/components/ui/DocumentViewerModal/DocumentViewerModal';
@@ -149,14 +149,13 @@ function SubFolderTree({
 export default function GEDPage() {
   const hook = useGedPageSupabase();
   const {
-    documents, folders, rootFolders, stats,
+    documents, folders, rootFolders,
     isLoading, error,
     showLinkModal, selectedDocForLink, detectedEntityType, extractedData,
     previewDocument, showAccessRightsModal, selectedDocForAccess, canManageAccess,
     handleOpenLinkModal, handleCloseLinkModal, handleCreateLink,
     handlePreviewDocument, handleClosePreview,
     handleOpenAccessRights, handleCloseAccessRights,
-    handleFilesSelected,
     handleCreateFolder, handleRenameFolder, handleDeleteFolder, handleDeleteDocument,
     toggleStarDocument,
     refreshData,
@@ -165,12 +164,7 @@ export default function GEDPage() {
   const { currentCoproId } = useCopro();
 
   const searchHook = useDocumentSearch({ documents, folders });
-  const { searchQuery, setSearchQuery, filters } = searchHook;
-
-  const filteredDocuments = useMemo(
-    () => hook.getFilteredDocuments(searchQuery, filters),
-    [hook.getFilteredDocuments, searchQuery, filters]
-  );
+  const { searchQuery, setSearchQuery } = searchHook;
 
   // Local state
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('dossiers');
@@ -282,7 +276,7 @@ export default function GEDPage() {
   const toggleFolder = useCallback((id: string) => {
     setExpandedFolders(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }, []);
@@ -596,6 +590,8 @@ export default function GEDPage() {
                   title={`Aperçu de ${selectedDoc.nom}`}
                 />
               ) : previewUrl && selectedDoc.type === 'IMAGE' ? (
+                // URL signée/dynamique aux dimensions inconnues : next/image n'apporte rien ici
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={previewUrl}
                   alt={selectedDoc.nom}

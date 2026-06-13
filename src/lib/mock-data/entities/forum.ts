@@ -21,7 +21,6 @@
 import { BaseEntity } from '../types';
 import { COPROPRIETE_IDS } from './coproprietes';
 import { USER_IDS } from './users';
-import { COPROPRIETAIRE_IDS } from './coproprietaires';
 
 // ============================================
 // TYPES

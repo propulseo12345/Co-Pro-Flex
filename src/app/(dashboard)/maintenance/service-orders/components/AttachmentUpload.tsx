@@ -90,6 +90,8 @@ export default function AttachmentUpload({
   };
 
   const getFileIcon = (type: string) => {
+    // Icône décorative lucide-react (pas une vraie balise <img>) : aria-hidden suffit, le composant n'accepte pas de prop alt
+    // eslint-disable-next-line jsx-a11y/alt-text
     if (type === 'IMAGE') return <Image size={16} aria-hidden="true" />;
     return <FileText size={16} aria-hidden="true" />;
   };

@@ -443,7 +443,6 @@ export function getImpayesEnContentieux(): Impaye[] {
 }
 
 export function getImpayesARelancer(): Impaye[] {
-  const now = new Date();
   return IMPAYES_MOCK.filter((i) => {
     if (i.statut === 'en_retard' && i.nb_jours_retard >= SEUILS_RELANCE.RELANCE_1) {
       return true;

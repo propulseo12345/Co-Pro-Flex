@@ -12,7 +12,7 @@
  * Zéro mock, zéro localStorage, zéro state comme vérité métier.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Users } from 'lucide-react';
 import Stepper from '@/components/features/ag/Stepper';

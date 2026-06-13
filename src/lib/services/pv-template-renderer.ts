@@ -14,7 +14,6 @@
  */
 
 import type { IPVRenderContext, IPVTemplateSpec, IPVSection } from '@/types/models/pv-template';
-import { isValidVariable, extractVariablesFromText } from '@/lib/constants/pv-variables';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES

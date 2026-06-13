@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Download, Plus, FileText, AlertTriangle, X, Edit3, Calendar, User, Wrench, Euro, Tag } from 'lucide-react';
+import { Search, Download, Plus, FileText, AlertTriangle, X, Edit3, Calendar, User, Wrench, Tag } from 'lucide-react';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import type { UseLogbookPageReturn } from '../hooks/useLogbookPage';
 import type { FiltreKpi, LogbookKpis, Intervention } from '@/components/features/maintenance/Logbook/types';

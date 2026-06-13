@@ -66,8 +66,8 @@ export function CertificationsSection({ certifications }: CertificationsSectionP
                 <Award size={20} aria-hidden="true" /> Certifications & Labels
             </h2>
             <div className={styles.certifications}>
-                {certifications.map((cert, i) => (
-                    <div key={i} className={styles.certifBadge}>
+                {certifications.map((cert) => (
+                    <div key={cert} className={styles.certifBadge}>
                         <Award size={16} aria-hidden="true" />
                         <span>{cert}</span>
                     </div>
@@ -282,8 +282,10 @@ export function AvisList({ avis }: AvisListProps) {
                     <div key={a.id} className={styles.avisCard}>
                         <div className={styles.avisHeader}>
                             <div className={styles.avisNote}>
+                                {/* Étoiles de notation : tableau statique de 5, pas de clé naturelle */}
                                 {[...Array(5)].map((_, i) => (
                                     <Star
+                                        // eslint-disable-next-line react/no-array-index-key
                                         key={i}
                                         size={16}
                                         fill={i < a.note ? '#F59E0B' : 'none'}

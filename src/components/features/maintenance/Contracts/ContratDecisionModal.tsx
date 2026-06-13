@@ -9,7 +9,6 @@ import {
     Calendar,
     Building2,
     FileText,
-    CheckCircle,
     Clock,
     Mail,
     Send,

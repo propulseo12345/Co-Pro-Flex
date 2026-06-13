@@ -5,7 +5,6 @@ import { piecesJustificativesService } from '@/lib/services/pieces-justificative
 import {
   PieceJustificative,
   RoleAccesPJ,
-  getDroitsAccesPJ,
   estImage,
   estPDF,
 } from '@/types/models/piece-justificative';

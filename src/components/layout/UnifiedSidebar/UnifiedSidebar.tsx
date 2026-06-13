@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import {
   Search, Settings, ChevronDown, ChevronRight,
-  Sun, Moon, PanelLeftClose, PanelLeftOpen, Bell, Globe, ArrowLeft,
+  Sun, Moon, PanelLeftClose, PanelLeftOpen, Globe, ArrowLeft,
 } from 'lucide-react';
 import { MODULES, getActiveModule } from '@/lib/config/navigation';
 import { searchRoutes, SearchableRoute } from '@/lib/config/search';

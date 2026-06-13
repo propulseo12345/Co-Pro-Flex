@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Clock, Check, AlertTriangle } from 'lucide-react';
 import clsx from 'clsx';
-import type { Vente, VenteDocument, WorkflowStep } from './types';
+import type { Vente, VenteDocument } from './types';
 import { WORKFLOW_STEPS } from './constants';
 import { getWorkflowStepIndex, canAdvanceWorkflow } from './utils';
 import styles from './VenteDetail.module.css';

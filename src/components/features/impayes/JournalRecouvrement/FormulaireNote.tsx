@@ -228,6 +228,7 @@ export function FormulaireNote({
           {fichiers.length > 0 && (
             <div className={styles.attachmentsList} style={{ marginTop: '0.5rem' }}>
               {fichiers.map((fichier, index) => (
+                // eslint-disable-next-line react/no-array-index-key -- objets File natifs sans id stable, noms potentiellement en doublon, et l'index sert au retrait
                 <span key={index} className={styles.attachmentItem}>
                   <Paperclip size={12} aria-hidden="true" />
                   {fichier.name}

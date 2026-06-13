@@ -44,10 +44,10 @@ export default function DocumentsPage() {
             <p className={styles.subtitle}>Accédez à tous les documents de la copropriété</p>
 
             <div className={styles.grid}>
-                {sections.map((section, idx) => {
+                {sections.map((section) => {
                     const Icon = section.icon;
                     return (
-                        <Link key={idx} href={section.href} className={styles.card} aria-hidden="true">
+                        <Link key={section.href} href={section.href} className={styles.card} aria-hidden="true">
                             <div className={styles.iconWrapper}>
                                 <Icon size={32} aria-hidden="true" />
                             </div>

@@ -95,7 +95,7 @@ function hasActiveFilters(filters: SearchFilters): boolean {
   );
 }
 
-function calculateRelevanceScore(doc: DocumentWithFolder, query: string, filters: SearchFilters): number {
+function calculateRelevanceScore(doc: DocumentWithFolder, query: string, _filters: SearchFilters): number {
   let score = 0;
   if (!query) return score;
 

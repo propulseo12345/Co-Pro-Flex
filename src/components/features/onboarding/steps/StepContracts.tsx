@@ -119,7 +119,7 @@ export function StepContracts({ coproId, onClose }: StepContractsProps) {
       ]);
 
       resetForm();
-    } catch (err) {
+    } catch (_err) {
       alert('Erreur inattendue');
     } finally {
       setIsSaving(false);

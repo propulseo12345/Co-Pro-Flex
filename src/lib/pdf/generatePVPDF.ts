@@ -361,7 +361,6 @@ export function generatePVPDF(params: GeneratePVPDFParams): jsPDF {
   y = sectionHeader(doc, 'Feuille de presence', y);
 
   // Table header
-  const colWidths = [55, 22, 28, 61];
   const colX = [MARGIN, MARGIN + 55, MARGIN + 77, MARGIN + 105];
 
   // Header row
@@ -457,9 +456,6 @@ export function generatePVPDF(params: GeneratePVPDFParams): jsPDF {
   // Individual resolutions
   for (const resolution of resolutions) {
     y = checkPage(doc, y, 45);
-
-    // Resolution card background
-    const resCardY = y - 2;
 
     // Number in navy circle
     const num = String(resolution.numero);

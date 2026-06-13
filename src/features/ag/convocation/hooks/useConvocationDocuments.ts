@@ -15,7 +15,6 @@ import {
   uploadDocument,
   downloadDocument,
   linkDocumentToEntity,
-  type Document,
 } from '@/lib/documents/api';
 import {
   renderAllDocumentsToPages,

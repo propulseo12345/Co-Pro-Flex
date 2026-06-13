@@ -1,15 +1,9 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useContracts, useProviders, useLogbook } from '@/hooks/modules/useMaintenanceData';
-import type {
-  ContractOverview,
-  Contract,
-  ProviderOverview,
-  LogbookOverview,
-  ContractType,
-} from '@/types/domain';
+import type { ContractType } from '@/types/domain';
 
 // Contract type labels - must match all values from ContractType enum
 const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
@@ -70,7 +64,6 @@ export interface ContractEditForm {
 }
 
 export function useContractDetailPage(id: string) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const fromLogbook = searchParams.get('from') === 'logbook';
 

@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import {
   FileText,
-  Image,
+  Image as ImageIcon,
   Link as LinkIcon,
   Star,
   Eye,
@@ -40,7 +40,7 @@ export function PJList({
     }
 
     if (pj.mimeType?.startsWith('image/')) {
-      return <Image size={20} aria-hidden="true" />;
+      return <ImageIcon size={20} aria-hidden="true" />;
     }
 
     return <FileText size={20} aria-hidden="true" />;

@@ -15,20 +15,7 @@
  */
 
 import type { ID, PaginatedResponse } from '@/types/common';
-import type {
-  MockCleRepartition,
-  MockCoproprietaire,
-  MockLot,
-  MockBudget,
-  MockAppelFonds,
-  MockPaiement,
-  MockFacture,
-  MockFournisseur,
-  MockExercice,
-  MockEcritureComptable,
-  MockMouvementBancaire,
-  MockCompteComptable,
-} from '@/shared/mock/finance';
+import type { MockCleRepartition } from '@/shared/mock/finance';
 
 // ============================================
 // API RESPONSE TYPES (kept for backward compat)

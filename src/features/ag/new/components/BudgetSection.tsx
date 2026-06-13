@@ -49,7 +49,6 @@ export function BudgetSection({
   editing,
   isImporting = false,
   importError = null,
-  availableBudgetYears,
   onBudgetChange,
   onExerciceChange,
   onNewPosteChange,

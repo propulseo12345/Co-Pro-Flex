@@ -233,9 +233,6 @@ export interface MockFournisseur {
 // SEED DATA - Temporally coherent for 2024/2025
 // ============================================
 
-const NOW = new Date();
-const CURRENT_YEAR = NOW.getFullYear();
-
 // Helper to create dates
 const date = (year: number, month: number, day: number): string => {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;

@@ -10,7 +10,6 @@ import {
   generateImpayesExportCSV,
 } from '@/lib/pdf/generateRelancePDF';
 import type { Impaye, HistoriqueItem, RelanceGroupeeStep } from '../domain/types';
-import { WORKFLOW_STEPS } from '../domain/constants';
 import {
   getNextStep,
   getWorkflowIndex,
@@ -31,7 +30,7 @@ import type { UnpaidWithReminders, PaymentReminderOverview } from '@/lib/impayes
 function mapDelayLevelToStatut(
   daysOverdue: number,
   lastReminderLevel: number | null,
-  totalRemindersSent: number
+  _totalRemindersSent: number
 ): Impaye['statut'] {
   // Map based on last reminder level and total reminders
   if (lastReminderLevel !== null) {

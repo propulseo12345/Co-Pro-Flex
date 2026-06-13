@@ -198,7 +198,7 @@ async function exportToPdf(
 
             let tableY = currentY;
 
-            rows.forEach((row, rowIndex) => {
+            rows.forEach((row, _rowIndex) => {
                 const cells = row.querySelectorAll('th, td');
                 const isHeader = row.querySelector('th') !== null;
 
@@ -412,7 +412,7 @@ async function exportToDocx(
  * Note: Ceci est une implémentation basique. Pour la production,
  * utiliser une bibliothèque comme docx ou docxtemplater
  */
-function htmlToSimpleDocx(html: string, template: IPVTemplate): string {
+function htmlToSimpleDocx(html: string, _template: IPVTemplate): string {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 

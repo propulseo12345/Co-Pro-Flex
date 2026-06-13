@@ -109,8 +109,8 @@ export function SearchBar({
                   <History size={14} />
                   <span>Recherches récentes</span>
                 </div>
-                {searchHistory.map((query, idx) => (
-                  <div key={idx} className={styles.dropdownItem}>
+                {searchHistory.map((query) => (
+                  <div key={query} className={styles.dropdownItem}>
                     <button
                       type="button"
                       className={styles.dropdownItemBtn}
@@ -138,9 +138,9 @@ export function SearchBar({
                   <TrendingUp size={14} />
                   <span>Suggestions</span>
                 </div>
-                {suggestions.map((suggestion, idx) => (
+                {suggestions.map((suggestion) => (
                   <button
-                    key={idx}
+                    key={`${suggestion.type}-${suggestion.value}`}
                     type="button"
                     className={styles.dropdownSuggestion}
                     onClick={() => onSuggestionClick(suggestion)}

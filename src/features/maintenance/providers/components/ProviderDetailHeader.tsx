@@ -23,8 +23,8 @@ export function ProviderDetailHeader({ prestataire, onEdit, onDelete, onAddInter
                         <span className={styles.categorieBadge}>{prestataire.categorie}</span>
                     </div>
                     <div className={styles.domaines}>
-                        {prestataire.domaines.map((d, i) => (
-                            <span key={i} className={styles.badge}>
+                        {prestataire.domaines.map((d) => (
+                            <span key={d} className={styles.badge}>
                                 {DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
                             </span>
                         ))}

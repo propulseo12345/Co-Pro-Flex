@@ -30,7 +30,6 @@ export default function AppelsFondsPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
-    calls,
     trimesterCards,
     travauxProjects,
     globalStats,

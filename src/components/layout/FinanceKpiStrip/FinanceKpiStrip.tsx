@@ -17,8 +17,8 @@ interface FinanceKpiStripProps {
 export function FinanceKpiStrip({ items }: FinanceKpiStripProps) {
   return (
     <div className={styles.strip}>
-      {items.map((item, i) => (
-        <div key={i} className={styles.kpiCard}>
+      {items.map((item) => (
+        <div key={item.label} className={styles.kpiCard}>
           <div className={styles.label}>{item.label}</div>
           <div className={styles.value} style={item.color ? { color: item.color } : undefined}>
             {item.value}

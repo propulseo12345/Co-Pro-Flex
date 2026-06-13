@@ -2,7 +2,7 @@
 
 import { use, Suspense } from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Mail, Edit2, XCircle, AlertTriangle, Building2, FileText, User, MapPin, Phone, Plus, X, Upload, Download, Trash2, Shield, PhoneCall, CheckCircle, Clock, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Mail, Edit2, XCircle, AlertTriangle, Building2, FileText, User, MapPin, Phone, Plus, X, Download, Trash2, Shield, PhoneCall, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import { ResiliationModal } from '@/components/features/maintenance';
@@ -62,9 +62,7 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
   const { id } = use(params);
   const {
     contrat,
-    contract,
     prestataire,
-    provider,
     allPrestataires,
     interventions,
     pieceJointes,
@@ -79,7 +77,6 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
     showContactModal,
     showAddAttachment,
     newAttachment,
-    formatMontant,
     setIsEditing,
     setEditForm,
     setShowResiliationModal,
@@ -140,19 +137,6 @@ function ContractDetailContent({ params }: { params: Promise<{ id: string }> }) 
   const domainColor = DOMAINE_COLORS[(contrat.type as string) || 'autre'] || 'var(--text-tertiary)';
   const isExpiring = statutKey === 'to_renew' || statutKey === 'A_RENOUVELER'
     || statutKey === 'expired' || statutKey === 'EXPIRE';
-
-  const handleDownloadPDF = () => {
-    const content = `CONTRAT DE MAINTENANCE\n\nRéférence : ${contrat.numeroContrat || 'N/A'}\nLibellé : ${contrat.nom}\nType : ${typeLabel}\nPrestataire : ${contrat.fournisseur}\nCoût annuel : ${formatMontant(contrat.coutAnnuel)}\n\nGénéré le ${new Date().toLocaleDateString('fr-FR')}`;
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `contrat_${contrat.id}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   const handleDownloadAttachment = (doc: DocumentContrat) => {
     const content = `PIÈCE JOINTE - ${doc.nom}\nType : ${doc.type}\nDate : ${new Date(doc.dateUpload).toLocaleDateString('fr-FR')}\nContrat : ${contrat.nom}`;

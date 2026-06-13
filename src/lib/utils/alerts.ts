@@ -605,7 +605,6 @@ function getAlerteMessageAssurance(contrat: ContratDetaille, joursDepasses: numb
 
 // Stats des contrats pour utilisation externe
 export function getContractStats() {
-    const today = new Date();
     const stats = {
         totalActifs: 0,
         expires: 0,

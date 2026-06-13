@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback } from 'react';
-import { Upload, Image, AlertCircle, Check } from 'lucide-react';
+import { Upload, Image as ImageIcon, AlertCircle, Check } from 'lucide-react';
 import styles from '../VenteDetail.module.css';
 
 interface ImportSignatureProps {
@@ -122,7 +122,7 @@ export function ImportSignature({ onImport, onCancel }: ImportSignatureProps) {
               onClick={handleReset}
               className="btn btn-secondary"
             >
-              <Image size={16} aria-hidden="true" style={{ marginRight: '0.5rem' }} />
+              <ImageIcon size={16} aria-hidden="true" style={{ marginRight: '0.5rem' }} />
               Changer l&apos;image
             </button>
             <button

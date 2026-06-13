@@ -44,7 +44,6 @@ const initialResult: UseConvocationAgResult = {
 
 export function useConvocationAg(): UseConvocationAgReturn {
   const [state, setState] = useState<UseConvocationAgResult>(initialResult);
-  const mountedRef = useRef(true);
 
   // Créer le client une seule fois
   const supabaseRef = useRef(createUntypedClient());

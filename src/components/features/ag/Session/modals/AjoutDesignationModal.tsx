@@ -21,7 +21,7 @@ interface AjoutDesignationModalProps {
 
 export function AjoutDesignationModal({
   isOpen,
-  onClose,
+  onClose: _onClose,
   onConfirm,
   onCancel,
   categorie,

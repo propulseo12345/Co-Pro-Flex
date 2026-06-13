@@ -3,7 +3,6 @@
 import { useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Stepper from '@/components/features/ag/Stepper';
-import { StepUnavailable } from '@/components/features/ag';
 import { useAGStepGuard } from '@/hooks/modules/useAGStepGuard';
 import {
   SessionReadyScreen,

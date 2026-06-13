@@ -8,7 +8,6 @@ import type {
   ProviderInsert,
   ProviderOverview,
   Contract,
-  ContractInsert,
   ContractOverview,
   ContractAlert,
   LogbookEntry,

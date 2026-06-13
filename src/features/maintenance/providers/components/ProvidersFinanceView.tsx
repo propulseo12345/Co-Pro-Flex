@@ -141,8 +141,8 @@ export function ProvidersFinanceView({
           { label: 'ACTIFS', value: String(actifsCount), color: 'var(--success)' },
           { label: 'INTERVENTIONS TOTAL', value: String(totalInterventions), color: 'var(--text-main)' },
           { label: 'NOTE MOYENNE', value: `${avgRating} ★`, color: 'var(--warning)' },
-        ].map((kpi, i) => (
-          <div key={i} style={{
+        ].map((kpi) => (
+          <div key={kpi.label} style={{
             flex: 1, padding: '16px 20px',
             background: 'var(--surface)',
             border: '1px solid rgba(148,163,184,0.08)',

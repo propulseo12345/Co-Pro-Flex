@@ -60,21 +60,6 @@ export function SendConvocationsModal({
   // Computed values
   const recipientsWithEmail = recipients.filter(r => r.email);
   const missingConvocations = recipientsWithEmail.filter(r => !r.hasConvocation);
-  const selectedRecipients = recipientsWithEmail.filter(r => selectedIds.includes(r.id));
-
-  // Get recipients to send to based on mode
-  const getTargetRecipients = () => {
-    switch (sendMode) {
-      case 'all':
-        return recipientsWithEmail;
-      case 'missing_only':
-        return missingConvocations;
-      case 'selected':
-        return selectedRecipients;
-      default:
-        return [];
-    }
-  };
 
   // Reset on open
   useEffect(() => {

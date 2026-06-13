@@ -14,12 +14,6 @@ interface Activity {
   link: string;
 }
 
-const ICON_MAP: Record<string, typeof Home> = {
-  vente: Home,
-  impaye: AlertTriangle,
-  default: CheckCircle2,
-};
-
 interface ActivitySectionProps {
   activities: Activity[];
 }

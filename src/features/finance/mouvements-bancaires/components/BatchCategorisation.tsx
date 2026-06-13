@@ -145,7 +145,7 @@ export function BatchCategorisation({ suggestions, onApply, isMutating }: BatchC
             </tr>
           </thead>
           <tbody>
-            {filtered.map(({ mouvement, suggestion, preChecked }) => (
+            {filtered.map(({ mouvement, suggestion }) => (
               <tr key={mouvement.id} className={checked.has(mouvement.id) ? styles.rowChecked : ''}>
                 <td className={styles.checkCol}>
                   <input

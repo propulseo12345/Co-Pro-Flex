@@ -1,6 +1,6 @@
 'use client';
 
-import { Scale, Users, Mail, UserCheck } from 'lucide-react';
+import { Scale, Mail, UserCheck } from 'lucide-react';
 import type { PresenceData } from '@/lib/utils/ag-session';
 import syntheseStyles from './styles/synthese.module.css';
 

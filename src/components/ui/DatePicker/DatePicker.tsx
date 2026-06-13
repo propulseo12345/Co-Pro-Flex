@@ -344,6 +344,7 @@ export function DatePicker({
                   <button
                     key={day.toISOString()}
                     type="button"
+                    role="gridcell"
                     className={`
                       ${styles.dayBtn}
                       ${!isCurrentMonth ? styles.otherMonth : ''}

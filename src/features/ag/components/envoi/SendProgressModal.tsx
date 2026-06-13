@@ -75,8 +75,8 @@ export function SendProgressModal({
             </div>
           ) : (
             <div className={styles.resultsList}>
-              {progress.results.map((r, i) => (
-                <ResultItem key={`${r.coproprietaireId}-${r.method}-${i}`} result={r} />
+              {progress.results.map((r) => (
+                <ResultItem key={`${r.coproprietaireId}-${r.method}`} result={r} />
               ))}
               {!isDone && progress.currentName && (
                 <div className={`${styles.resultItem} ${styles.active}`}>

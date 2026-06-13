@@ -1,6 +1,6 @@
 'use client';
 
-import { ContratDetaille, StatutContrat, TypeContrat } from '@/types';
+import { ContratDetaille, TypeContrat } from '@/types';
 import { useState, useEffect, useRef } from 'react';
 import { Search, ChevronDown, FileText, Calendar } from 'lucide-react';
 import styles from './ContractSelector.module.css';

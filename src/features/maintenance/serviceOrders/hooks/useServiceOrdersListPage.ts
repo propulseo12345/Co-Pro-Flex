@@ -64,9 +64,7 @@ export function useServiceOrdersListPage() {
     isLoading,
     error,
     fetchOrders,
-    updateOrderStatus,
     sendOrderEmail,
-    cancelOrder,
     deleteOrder,
   } = useServiceOrders();
 

@@ -3,7 +3,7 @@
 import { Check, Circle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import type { Vente, VenteDocument } from './types';
-import type { VenteWorkflowValidation, VenteStepValidationResult } from '@/types/models/vente-workflow';
+import type { VenteStepValidationResult } from '@/types/models/vente-workflow';
 import { WORKFLOW_STEPS_V2 } from './constants';
 import { validateFullWorkflow, getStepIndex } from '@/lib/services/vente-workflow-validation.service';
 import styles from './VenteDetail.module.css';
@@ -160,6 +160,8 @@ export function VenteChecklist({ vente, documents, onAdvanceWorkflow }: VenteChe
             <strong>Éléments requis pour finaliser :</strong>
             <ul>
               {validation.alertesBloquantes.slice(0, 3).map((alerte, idx) => (
+                // Liste d'affichage (3 alertes max, sans état local) : index acceptable
+                // eslint-disable-next-line react/no-array-index-key
                 <li key={idx}>{alerte}</li>
               ))}
               {validation.alertesBloquantes.length > 3 && (

@@ -2,7 +2,7 @@
 // API: AG Session - Présences, Quorum, Participants
 // ============================================================================
 
-import { createUntypedClient, invokeEdgeFunction } from './utils';
+import { createUntypedClient } from './utils';
 import type {
   AgAttendanceSummary,
   RegisterAttendanceInput,

@@ -181,7 +181,7 @@ export function useVotesCorrespondance({
     const [coproprietairesDB, setCoproprietairesDB] = useState<CoproprietaireDB[]>([]);
     const [selectedCoproId, setSelectedCoproId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [coproId, setCoproId] = useState<string | null>(null);
+    const [_coproId, setCoproId] = useState<string | null>(null);
 
     // Debounce save
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);

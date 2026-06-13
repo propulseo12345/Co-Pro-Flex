@@ -215,12 +215,6 @@ export function generateRelancePDF(params: RelanceParams): jsPDF {
   const doc = new jsPDF();
   generateRelancePDFContent(doc, params);
 
-  const typeLabel = {
-    relance_amiable_1: 'relance_1',
-    relance_amiable_2: 'relance_2',
-    mise_en_demeure: 'mise_en_demeure',
-  };
-
   return doc;
 }
 

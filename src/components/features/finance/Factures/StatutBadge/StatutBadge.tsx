@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Clock, Tag, CheckCircle } from 'lucide-react';
-import { StatutFacture, StatutBadgeProps } from '../types';
+import { StatutBadgeProps } from '../types';
 import { STATUTS_FACTURE } from '../utils';
 import styles from './StatutBadge.module.css';
 

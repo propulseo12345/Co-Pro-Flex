@@ -92,6 +92,8 @@ export function PresenceTable({
                   {isPresent && presenceType !== 'correspondence' && (
                     <div className={styles.signatureCell}>
                       {attendance?.signed && showSignatures && attendance.signatureData && (
+                        // Signature manuscrite : data-URI dynamique sans dimensions connues, next/image inadapté
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={attendance.signatureData}
                           alt="Signature"

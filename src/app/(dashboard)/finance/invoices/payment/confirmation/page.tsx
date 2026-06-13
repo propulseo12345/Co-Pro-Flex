@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import styles from './confirmation.module.css';
 import Link from 'next/link';
 

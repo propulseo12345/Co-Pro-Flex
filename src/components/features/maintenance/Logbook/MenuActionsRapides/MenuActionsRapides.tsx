@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical, CheckCircle, Calendar, Paperclip, XCircle } from 'lucide-react';
 import type { MenuActionsRapidesProps } from '../types';
-import { ACTIONS_CONFIG, type ActionRapide } from '@/lib/constants/statuts-intervention';
+import { ACTIONS_CONFIG } from '@/lib/constants/statuts-intervention';
 import styles from './MenuActionsRapides.module.css';
 
 const ICONES = {

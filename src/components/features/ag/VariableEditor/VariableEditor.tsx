@@ -3,8 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown, Search, AlertCircle, Check, X, User, Briefcase } from 'lucide-react';
 import {
-    type VariableType,
-    type VariableDefinition,
     type ResolutionTemplate,
     getVariableDefinition,
     MODALITES_PAIEMENT_OPTIONS,

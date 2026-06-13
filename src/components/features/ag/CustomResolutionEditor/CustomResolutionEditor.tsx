@@ -14,7 +14,6 @@ import {
   Save,
   Variable,
   Sparkles,
-  ChevronDown,
   ChevronUp,
 } from 'lucide-react';
 import {
@@ -321,9 +320,9 @@ export function CustomResolutionEditor({
             </button>
           </div>
           <div className={styles.templatesGrid}>
-            {STARTER_TEMPLATES.map((tpl, idx) => (
+            {STARTER_TEMPLATES.map((tpl) => (
               <button
-                key={idx}
+                key={tpl.titre}
                 className={styles.templateCard}
                 onClick={() => handleLoadTemplate(tpl)}
               >
@@ -386,8 +385,8 @@ export function CustomResolutionEditor({
           <div className={styles.legalWarning}>
             <AlertTriangle size={18} />
             <div>
-              {legalValidation.warnings.map((w, i) => (
-                <p key={i}>{w}</p>
+              {legalValidation.warnings.map((w) => (
+                <p key={w}>{w}</p>
               ))}
             </div>
           </div>

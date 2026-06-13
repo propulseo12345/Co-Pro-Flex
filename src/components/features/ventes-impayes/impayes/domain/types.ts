@@ -1,4 +1,4 @@
-import type { HistoriqueContenu, ModeEnvoi } from '@/types/models/impaye';
+import type { HistoriqueContenu } from '@/types/models/impaye';
 
 export interface HistoriqueItem {
   id: number;

@@ -9,44 +9,6 @@ import type {
 
 
 // =============================================================================
-// CRITICALITY SCORE
-// =============================================================================
-
-function calculateCriticalityScore(copro: Omit<ICoproprietePortefeuille, 'criticalityScore'>): number {
-  let score = 0;
-
-  if (copro.totalImpayes > 0) {
-    score += 30;
-    score += Math.min(copro.totalImpayes / 1000, 20);
-  }
-
-  if (copro.tauxRecouvrement < 90) {
-    score += 20;
-    score += (90 - copro.tauxRecouvrement) / 2;
-  }
-
-  if (copro.mouvementsNonRapproches > 0) {
-    score += 15;
-    score += Math.min(copro.mouvementsNonRapproches, 10);
-  }
-
-  if (copro.facturesEnRetard > 0) {
-    score += 15;
-    score += Math.min(copro.facturesEnRetard * 3, 10);
-  }
-
-  const budgetPct = copro.budgetTotal > 0
-    ? (copro.budgetConsomme / copro.budgetTotal) * 100
-    : 0;
-  if (budgetPct > 80) {
-    score += 10;
-    score += Math.min((budgetPct - 80) / 2, 10);
-  }
-
-  return Math.round(score);
-}
-
-// =============================================================================
 // KPIs
 // =============================================================================
 

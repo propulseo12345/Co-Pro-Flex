@@ -1,5 +1,5 @@
 import { BaseEntity, ID } from '../common';
-import { DocumentCategorie, DocumentStatut, DocumentType, DocumentTechniqueType, NiveauConfidentialite } from '../enums';
+import { DocumentCategorie, DocumentStatut, DocumentType, NiveauConfidentialite } from '../enums';
 
 /**
  * TypeDocumentTechnique - String literal union (legacy compatible)

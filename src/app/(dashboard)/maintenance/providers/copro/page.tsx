@@ -25,7 +25,7 @@ interface MappedPrestataire {
 export default function ProvidersCoproPage() {
     const router = useRouter();
     const { showToast } = useToast();
-    const { providers, isLoading, deleteProvider } = useProviders({ autoFetch: true });
+    const { providers, deleteProvider } = useProviders({ autoFetch: true });
 
     // Map Supabase providers to local format — filter copropriete category
     const prestataires = useMemo<MappedPrestataire[]>(() =>
@@ -153,6 +153,8 @@ export default function ProvidersCoproPage() {
                                 <td>
                                     <div className={styles.domaines}>
                                         {p.domaines.slice(0, 2).map((d, i) => (
+                                            // Badges d'affichage (2 max, sans état local) : index acceptable
+                                            // eslint-disable-next-line react/no-array-index-key
                                             <span key={i} className={styles.domaineBadge}>
                                                 {DOMAINES_ACTIVITE.find(da => da.value === d)?.label || d}
                                             </span>

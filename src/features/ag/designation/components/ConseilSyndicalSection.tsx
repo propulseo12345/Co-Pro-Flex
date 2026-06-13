@@ -1,7 +1,6 @@
 'use client';
 
 import { UserPlus, Users } from 'lucide-react';
-import type { RoleType } from '@/components/features/ag/RoleSelect';
 import styles from '@/app/(dashboard)/ag/[id]/designation-roles/designation-roles.module.css';
 
 interface MembreConseil {
@@ -42,7 +41,7 @@ export function ConseilSyndicalSection({
         {membres && membres.length > 0 ? (
           <div className={styles.membresList}>
             {membres.map((membre, index) => (
-              <div key={index} className={styles.membreCard}>
+              <div key={`${membre.type}-${membre.dateDesignation}-${membre.nom}`} className={styles.membreCard}>
                 <div className={styles.membreInfo}>
                   <div className={styles.membreName}>{membre.nom}</div>
                   <div className={styles.membreType}>

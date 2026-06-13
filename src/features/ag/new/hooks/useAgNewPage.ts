@@ -206,7 +206,7 @@ export function useAgNewPage() {
           ? `${formData.date}T${formData.heure}:00`
           : new Date().toISOString();
 
-        const meeting = await ensureRemoteMeeting({
+        await ensureRemoteMeeting({
           coproId: currentCoproId,
           agId: draftId,
           title: formData.type === 'ORDINAIRE' ? 'AG Ordinaire' : 'AG Extraordinaire',

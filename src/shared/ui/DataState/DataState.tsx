@@ -85,6 +85,8 @@ export function LoadingSkeleton({ rows = 5, className = '' }: LoadingSkeletonPro
   return (
     <div className={`${styles.skeleton} ${className}`}>
       {Array.from({ length: rows }).map((_, index) => (
+        // Skeleton de chargement : lignes purement décoratives sans donnée ni clé naturelle
+        // eslint-disable-next-line react/no-array-index-key
         <div key={index} className={styles.skeletonRow}>
           <div className={styles.skeletonCell} style={{ width: '30%' }} />
           <div className={styles.skeletonCell} style={{ width: '50%' }} />

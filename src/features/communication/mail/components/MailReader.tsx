@@ -135,9 +135,12 @@ export function MailReader({
 
       {/* Body */}
       <div className={styles.body}>
+        {/* Paragraphes issus d'un split de texte (pas d'identifiant naturel, ordre figé) : index acceptable */}
         {mail.body.split('\n').map((paragraph, index) => (
           paragraph.trim() === ''
+            // eslint-disable-next-line react/no-array-index-key
             ? <br key={index} />
+            // eslint-disable-next-line react/no-array-index-key
             : <p key={index} className={styles.bodyParagraph}>{paragraph}</p>
         ))}
       </div>

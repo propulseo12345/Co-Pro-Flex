@@ -5,7 +5,6 @@ import {
   StatutFacture,
   TransitionStatut,
   HistoriqueStatut,
-  ResultatChangementStatut,
 } from '@/components/features/finance/Factures/types';
 import {
   STATUTS_FACTURE,
@@ -130,7 +129,7 @@ export function useStatutFacture({
         onChangement?.(nouveauStatut);
 
         return true;
-      } catch (error) {
+      } catch {
         const message = 'Une erreur inattendue est survenue';
         setErreur(message);
         return false;

@@ -26,7 +26,6 @@ export function DPEEnergyScale({ classeActive }: DPEEnergyScaleProps) {
         const barWidth = 40 + i * 12;
         return (
           <div key={c.classe} className={clsx(styles.row, isActive && styles.rowActive)}>
-            {/* eslint-disable-next-line react/forbid-dom-props */}
             <div className={clsx(styles.bar, c.barClass)} style={{ width: barWidth }}>
               {c.label}
             </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   Building2, Home, User, Mail, Phone, Calendar,
   FileCheck, Wrench, FileText, CheckCircle,

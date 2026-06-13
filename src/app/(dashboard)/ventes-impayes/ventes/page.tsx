@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Plus, Search, Clock, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
 import { useMutations } from '@/features/ventes';
 import {
   MutationCard,
-  MutationStatusBadge,
   CreateMutationModal,
 } from '@/features/ventes/components';
 import { MUTATION_STATUS_LABELS, MUTATION_TYPE_LABELS } from '@/features/ventes/domain/types';

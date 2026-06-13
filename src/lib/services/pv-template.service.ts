@@ -13,10 +13,10 @@ import type {
     IPVTemplate,
     IPVTemplateSpec,
     PVTemplateStatus,
-    IPVSection,
     PVSectionType,
 } from '@/types/models/pv-template';
 import { createClient } from '@/lib/supabase/client';
+import { logger } from '@/lib/utils/logger';
 
 // Helper: Create untyped client to avoid deep type instantiation issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -359,7 +359,7 @@ class PVTemplateService {
 
             if (error) {
                 if (error.code === '42P01') {
-                    console.info('[PVTemplateService] Table pv_templates non disponible');
+                    logger.info('[PVTemplateService] Table pv_templates non disponible');
                     return templates;
                 }
                 throw error;
@@ -438,7 +438,7 @@ class PVTemplateService {
             }
 
             return this.mapFromDb(data);
-        } catch (error) {
+        } catch {
             return this.systemTemplate;
         }
     }

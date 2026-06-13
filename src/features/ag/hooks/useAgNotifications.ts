@@ -10,8 +10,6 @@ import type {
   SendRelanceRequest,
   SendRelanceResponse,
   RecipientWithStatus,
-  DeliveryStatus,
-  NotificationType,
 } from '../types/notifications';
 
 // ============================================================================
@@ -53,7 +51,7 @@ interface UseAgNotificationsReturn {
 // Hook
 // ============================================================================
 
-export function useAgNotifications({ agId, coproId }: UseAgNotificationsParams): UseAgNotificationsReturn {
+export function useAgNotifications({ agId }: UseAgNotificationsParams): UseAgNotificationsReturn {
   const { supabase } = useSupabase();
 
   const [notifications, setNotifications] = useState<AgNotification[]>([]);
@@ -265,7 +263,7 @@ export function useAgNotifications({ agId, coproId }: UseAgNotificationsParams):
 
       if (rpcError) throw rpcError;
 
-      const { meeting_date, is_valid, days_remaining, minimum_delay } = data;
+      const { is_valid, days_remaining, minimum_delay } = data;
 
       if (is_valid) {
         return {

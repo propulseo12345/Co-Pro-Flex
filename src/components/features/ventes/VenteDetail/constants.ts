@@ -1,6 +1,6 @@
 import { FileText, FileCheck, Send, PenTool, Wallet, ClipboardCheck, Edit2, CheckCircle2 } from 'lucide-react';
 import type { Vente, VenteDocument, HistoriqueItem, OrdreService, WorkflowStep } from './types';
-import type { VenteValidationRule, VenteEtapeWorkflowV2 } from '@/types/models/vente-workflow';
+import type { VenteEtapeWorkflowV2 } from '@/types/models/vente-workflow';
 
 // ============================================
 // NOUVEAU WORKFLOW V2 (6 étapes obligatoires)

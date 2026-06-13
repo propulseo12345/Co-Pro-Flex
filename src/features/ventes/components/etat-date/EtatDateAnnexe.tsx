@@ -29,8 +29,8 @@ export function EtatDateAnnexe({ annexe }: EtatDateAnnexeProps) {
               </tr>
             </thead>
             <tbody>
-              {annexe.historique_charges.map((h, i) => (
-                <tr key={i}>
+              {annexe.historique_charges.map((h) => (
+                <tr key={h.period_label}>
                   <td>{h.period_label}</td>
                   <td className="mono">{fmt(h.budget_previsionnel)}</td>
                   <td className="mono">{fmt(h.hors_budget)}</td>
@@ -59,7 +59,9 @@ export function EtatDateAnnexe({ annexe }: EtatDateAnnexeProps) {
               </tr>
             </thead>
             <tbody>
+              {/* Procédures sans identifiant stable : le titre peut se répéter, on garde l'index */}
               {annexe.procedures_judiciaires.map((p, i) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <tr key={i}>
                   <td>{p.title}</td>
                   <td>{NATURE_LABELS[p.nature] || p.nature}</td>

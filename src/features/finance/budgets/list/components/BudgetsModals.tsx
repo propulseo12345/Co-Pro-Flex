@@ -19,7 +19,6 @@ import type {
   FondsALUR,
   CoproprietaireALUR,
   NouveauBudgetForm,
-  NouvelAppelFondsForm,
   ResolutionAG,
 } from '@/components/features/finance/Budget/types';
 import type { BudgetWithStatus, BudgetN1Data } from '@/hooks/modules/useBudget';

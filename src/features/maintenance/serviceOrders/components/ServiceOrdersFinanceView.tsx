@@ -24,20 +24,6 @@ const STATUT_CONFIG: Record<string, { label: string; color: string; badgeClass: 
 const WORKFLOW_STEPS = ['BROUILLON', 'ENVOYE', 'EN_ATTENTE_PRESTATAIRE', 'INTERVENTION_PROGRAMMEE', 'EN_COURS', 'INTERVENTION_REALISEE', 'CLOTURE'];
 const WORKFLOW_LABELS = ['Brouillon', 'Envoyé', 'En attente', 'Programmé', 'En cours', 'Réalisé', 'Clôturé'];
 
-interface OrdreService {
-  id: string | null;
-  numero: string | null;
-  titre: string | null;
-  description?: string | null;
-  statut: string;
-  fournisseurNom: string | null;
-  montantEstime: number;
-  urgence: boolean;
-  date: string | null;
-  dateIntervention?: string | null;
-  [key: string]: unknown;
-}
-
 interface ServiceOrdersFinanceViewProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sortedOS: any[];

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, AlertTriangle, CheckCircle2, Play, Eye, X, ChevronDown, ChevronUp, FileText, Zap } from 'lucide-react';
+import { Calendar, Clock, Eye, X, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { ContratDetaille, OrdreServicePlanifie, FREQUENCE_LABELS } from '@/types';
 import {
   genererTousOrdresPlanifies,

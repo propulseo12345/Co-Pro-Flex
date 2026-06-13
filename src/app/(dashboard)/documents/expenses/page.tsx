@@ -19,7 +19,7 @@ export default function ExpensesPage() {
     const {
         statutFilter, setStatutFilter,
         showCoherenceReport, setShowCoherenceReport,
-        charges, filteredExpenses, filteredProduits,
+        charges, filteredExpenses,
         expensesByAccount, produitsByAccount,
         accountIds, produitAccountIds,
         coherenceData, stats, hasDataWarning, exercice,

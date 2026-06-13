@@ -125,8 +125,8 @@ export function ContractsAssurancesSection({
               <div className={styles.assuranceCardGaranties}>
                 <p>Garanties</p>
                 <div className={styles.assuranceTagsList}>
-                  {assurance.garanties.map((garantie, idx) => (
-                    <span key={idx} className={styles.assuranceTag}>{garantie}</span>
+                  {assurance.garanties.map((garantie) => (
+                    <span key={garantie} className={styles.assuranceTag}>{garantie}</span>
                   ))}
                 </div>
               </div>

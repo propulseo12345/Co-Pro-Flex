@@ -267,7 +267,7 @@ export function Step6AgAppels({ coproId, budgetId, periodId, onComplete, onBack 
               <span>Montant</span>
             </div>
             {callPreviews.map((p, idx) => (
-              <div key={idx} className={styles.previewRow}>
+              <div key={p.trimester} className={styles.previewRow}>
                 <span className={styles.previewPeriod}>
                   <CalendarDays size={14} />
                   {p.label}

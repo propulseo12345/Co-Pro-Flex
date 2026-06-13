@@ -142,9 +142,8 @@ function formatDate(dateStr: string): string {
 // État global partagé
 let interventionsState: InterventionCarnet[] = updateInterventionStatuts([...MOCK_INTERVENTIONS_CARNET]);
 
-// Cache et versioning
+// Cache
 let cachedInterventions: InterventionCarnet[] | null = null;
-let version = 0;
 
 // Listeners pour notifier les changements
 type Listener = () => void;
@@ -152,7 +151,6 @@ const listeners: Set<Listener> = new Set();
 
 function notifyListeners() {
     cachedInterventions = null;
-    version++;
     listeners.forEach(listener => listener());
 }
 

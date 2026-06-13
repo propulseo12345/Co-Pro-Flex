@@ -2,8 +2,6 @@
 
 import {
     Building2,
-    Eye,
-    EyeOff,
     Edit3,
     X,
     Save,
@@ -16,9 +14,7 @@ import {
     User,
 } from 'lucide-react';
 import { useState } from 'react';
-import clsx from 'clsx';
 import type { LogbookInfoSectionProps } from './types';
-import { LogbookContactsSection } from './LogbookContactsSection';
 import styles from '@/app/(dashboard)/maintenance/logbook/logbook.module.css';
 
 // Couleurs par type d'équipement
@@ -152,11 +148,9 @@ export function LogbookInfoSection({
     formData,
     coproprieteInfo,
     isEditing,
-    isSimplifiedView,
     equipementsPrincipaux,
     onFormDataChange,
     onToggleEdit,
-    onToggleSimplifiedView,
     onSaveInfo,
     onSelectEquipement
 }: LogbookInfoSectionProps) {

@@ -67,34 +67,6 @@ const THRESHOLDS = {
   mocks: 30, // Hors fichiers de test
 };
 
-function countMatches(pattern: string, searchPath: string): AuditStats {
-  try {
-    // Use ripgrep (rg) for fast searching
-    const cmd = process.platform === 'win32'
-      ? `rg "${pattern}" "${searchPath}" --type ts -c 2>nul || exit 0`
-      : `rg "${pattern}" "${searchPath}" --type ts -c 2>/dev/null || true`;
-
-    const result = execSync(cmd, {
-      encoding: 'utf-8',
-      cwd: path.resolve(__dirname, '..'),
-    });
-
-    const lines = result.trim().split('\n').filter(Boolean);
-    const count = lines.reduce((sum, line) => {
-      const match = line.match(/:(\d+)$/);
-      return sum + (match ? parseInt(match[1], 10) : 0);
-    }, 0);
-
-    return {
-      localStorage: 0,
-      mocks: 0,
-      files: lines.map((l) => l.split(':')[0]),
-    };
-  } catch {
-    return { localStorage: 0, mocks: 0, files: [] };
-  }
-}
-
 function auditModule(mod: ModuleAudit): { name: string; stats: AuditStats } {
   let totalLS = 0;
   let totalMock = 0;

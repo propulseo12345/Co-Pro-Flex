@@ -24,8 +24,8 @@ export function AutoFillConfirmModal({ isOpen, autoFillData, onClose, onApply }:
           Des données existent déjà pour certains signataires. Voulez-vous les remplacer avec les informations de l'AG ?
         </p>
         <div className={styles.previewData}>
-          {autoFillData.map((d, i) => (
-            <div key={i} className={styles.previewItem}>
+          {autoFillData.map((d) => (
+            <div key={d.role} className={styles.previewItem}>
               <span className={styles.previewRole}>{d.roleLabel}</span>
               <span className={styles.previewName}>{d.name || "Non défini dans l'AG"}</span>
               {d.coproprietaire && (

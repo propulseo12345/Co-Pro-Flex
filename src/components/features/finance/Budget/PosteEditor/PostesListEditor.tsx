@@ -53,7 +53,7 @@ export function PostesListEditor({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Load clés de répartition via Supabase hook
-  const { keys, isLoading: isLoadingCles } = useRepartitionKeys();
+  const { keys } = useRepartitionKeys();
   const clesRepartition = useMemo(() => (keys || []).map(mapToCleUI), [keys]);
 
   const existingPosteIds = useMemo(() => {

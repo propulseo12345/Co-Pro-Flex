@@ -73,7 +73,7 @@ export function StepDocuments({ coproId, onClose }: StepDocumentsProps) {
 
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch (err) {
+    } catch (_err) {
       alert('Erreur lors du téléversement du document');
     } finally {
       setIsUploading(false);

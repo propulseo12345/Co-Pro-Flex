@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { RolesAG } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import type { RoleType } from '@/components/features/ag/RoleSelect';

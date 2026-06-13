@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, AlertTriangle, Loader2 } from 'lucide-react';
-import { StatutFacture, StatutSelectProps, TransitionStatut } from '../types';
+import { StatutSelectProps, TransitionStatut } from '../types';
 import { STATUTS_FACTURE, getTransitionsAutorisees } from '../utils';
 import { StatutBadge } from '../StatutBadge';
 import styles from './StatutSelect.module.css';
@@ -107,7 +107,7 @@ export function StatutSelect({
             const configCible = STATUTS_FACTURE[transition.vers];
 
             return (
-              <li key={transition.vers} role="option">
+              <li key={transition.vers} role="option" aria-selected={false}>
                 <button
                   type="button"
                   onClick={() => handleTransitionClick(transition)}

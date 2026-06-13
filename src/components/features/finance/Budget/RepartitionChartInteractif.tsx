@@ -2,8 +2,20 @@
 
 import { useCallback } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import type { LegendPayload } from 'recharts';
 import { DonneesRepartition, PosteBudget } from './types';
 import styles from './RepartitionChartInteractif.module.css';
+
+/**
+ * Recharts injecte la donnée d'origine (DonneesRepartition) dans `entry.payload`,
+ * mais son type `LegendPayload` ne l'expose pas. On lit `posteId` de façon sûre.
+ */
+function getPosteIdFromPayload(payload: LegendPayload['payload']): PosteBudget | undefined {
+  if (payload && 'posteId' in payload) {
+    return (payload as { posteId?: PosteBudget }).posteId;
+  }
+  return undefined;
+}
 
 interface RepartitionChartInteractifProps {
   donnees: DonneesRepartition[];
@@ -58,7 +70,7 @@ export function RepartitionChartInteractif({
 }: RepartitionChartInteractifProps) {
   // Handler de clic sur un segment
   const handlePieClick = useCallback(
-    (_data: any, index: number) => {
+    (_data: unknown, index: number) => {
       const posteId = donnees[index].posteId;
 
       // Toggle : si même poste, désélectionner
@@ -73,8 +85,8 @@ export function RepartitionChartInteractif({
 
   // Handler de clic sur la légende
   const handleLegendClick = useCallback(
-    (data: any) => {
-      const posteId = data.payload?.posteId;
+    (data: LegendPayload) => {
+      const posteId = getPosteIdFromPayload(data.payload);
       if (!posteId) return;
 
       if (posteId === posteActif) {
@@ -114,9 +126,9 @@ export function RepartitionChartInteractif({
             }
             labelLine={{ stroke: 'var(--text-tertiary)', strokeWidth: 1 }}
           >
-            {donnees.map((entry, index) => (
+            {donnees.map((entry) => (
               <Cell
-                key={`cell-${index}`}
+                key={`cell-${entry.posteId}`}
                 fill={entry.couleur}
                 opacity={posteActif !== null && entry.posteId !== posteActif ? 0.35 : 1}
                 stroke={entry.posteId === posteActif ? entry.couleur : '#fff'}
@@ -137,8 +149,8 @@ export function RepartitionChartInteractif({
               cursor: 'pointer',
               paddingLeft: '20px',
             }}
-            formatter={(value, entry: any) => {
-              const isActive = entry.payload?.posteId === posteActif;
+            formatter={(value: string, entry: LegendPayload) => {
+              const isActive = getPosteIdFromPayload(entry.payload) === posteActif;
               return (
                 <span
                   className={styles.legendItem}

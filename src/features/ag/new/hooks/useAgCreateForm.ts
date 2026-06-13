@@ -44,7 +44,7 @@ export function useAgCreateForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Hook pour créer l'AG dans Supabase
-  const { execute: createAgInSupabase, isLoading: isCreatingAg, error: createAgError } = useCreateAg();
+  const { execute: createAgInSupabase, isLoading: isCreatingAg } = useCreateAg();
 
   const {
     jalons,

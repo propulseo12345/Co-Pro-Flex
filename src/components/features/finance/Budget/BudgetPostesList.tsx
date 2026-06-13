@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import type { PosteBudgetData, PosteBudget, DepenseBudget } from './types';
+import type { PosteBudgetData, DepenseBudget } from './types';
 import { POSTE_COLORS } from './types';
 import styles from './BudgetPostesList.module.css';
 
@@ -39,6 +39,8 @@ export function BudgetPostesList({ postesBudget, depenses = [], onSelectDepense 
         const posteDepenses = depenses.filter((d) => d.poste === poste.poste);
 
         return (
+          // poste.poste (code de poste) n'est pas garanti unique dans la liste : on conserve l'index pour la clé
+          // eslint-disable-next-line react/no-array-index-key
           <div key={`${poste.poste}-${index}`}>
             <div
               className={`${styles.row} ${isExpanded ? styles.rowExpanded : ''}`}

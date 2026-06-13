@@ -17,7 +17,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 // ============================================
 // TYPES
@@ -37,9 +37,6 @@ export interface FinanceStats {
 // ============================================
 // DEPRECATED WARNING HELPER
 // ============================================
-
-const DEPRECATED_MSG = (hookName: string, replacement: string) =>
-  `[${hookName}] DEPRECATED - Utiliser ${replacement} à la place`;
 
 function useDeprecatedHook<T>(
   hookName: string,
@@ -84,7 +81,7 @@ export function useCoproprietaires() {
 }
 
 /** @deprecated - Utiliser useCoproData.useCoproprietaire() */
-export function useCoproprietaire(id: string | null) {
+export function useCoproprietaire(_id: string | null) {
   return useDeprecatedHook('useCoproprietaire', '@/hooks/modules/useCoproData', null);
 }
 
@@ -103,7 +100,7 @@ export function useLots() {
 }
 
 /** @deprecated */
-export function useLotsByCoproprietaire(coproprietaireId: string | null) {
+export function useLotsByCoproprietaire(_coproprietaireId: string | null) {
   return useDeprecatedHook('useLotsByCoproprietaire', '@/hooks/modules/useLotsData', []);
 }
 
@@ -122,7 +119,7 @@ export function useCurrentExercice() {
 }
 
 /** @deprecated */
-export function useExercice(id: string | null) {
+export function useExercice(_id: string | null) {
   return useDeprecatedHook('useExercice', '@/hooks/modules/useBudgetData', null);
 }
 
@@ -136,12 +133,12 @@ export function useBudgets() {
 }
 
 /** @deprecated */
-export function useBudgetsByYear(annee: number) {
+export function useBudgetsByYear(_annee: number) {
   return useDeprecatedHook('useBudgetsByYear', '@/hooks/modules/useBudgetData', []);
 }
 
 /** @deprecated */
-export function useBudget(id: string | null) {
+export function useBudget(_id: string | null) {
   return useDeprecatedHook('useBudget', '@/hooks/modules/useBudgetData', null);
 }
 
@@ -160,17 +157,17 @@ export function useAppelsFondsPaginated() {
 }
 
 /** @deprecated */
-export function useAppelsFondsByBudget(budgetId: string | null) {
+export function useAppelsFondsByBudget(_budgetId: string | null) {
   return useDeprecatedHook('useAppelsFondsByBudget', '@/hooks/modules/useFinanceData', []);
 }
 
 /** @deprecated */
-export function useAppelsFondsByExercice(exerciceId: string | null) {
+export function useAppelsFondsByExercice(_exerciceId: string | null) {
   return useDeprecatedHook('useAppelsFondsByExercice', '@/hooks/modules/useFinanceData', []);
 }
 
 /** @deprecated */
-export function useAppelFonds(id: string | null) {
+export function useAppelFonds(_id: string | null) {
   return useDeprecatedHook('useAppelFonds', '@/hooks/modules/useFinanceData', null);
 }
 
@@ -189,12 +186,12 @@ export function usePaiementsPaginated() {
 }
 
 /** @deprecated */
-export function usePaiementsByCoproprietaire(coproprietaireId: string | null) {
+export function usePaiementsByCoproprietaire(_coproprietaireId: string | null) {
   return useDeprecatedHook('usePaiementsByCoproprietaire', '@/hooks/modules/useFinanceData', []);
 }
 
 /** @deprecated */
-export function usePaiementsByAppel(appelFondsId: string | null) {
+export function usePaiementsByAppel(_appelFondsId: string | null) {
   return useDeprecatedHook('usePaiementsByAppel', '@/hooks/modules/useFinanceData', []);
 }
 
@@ -213,12 +210,12 @@ export function useFacturesPaginated() {
 }
 
 /** @deprecated */
-export function useFacture(id: string | null) {
+export function useFacture(_id: string | null) {
   return useDeprecatedHook('useFacture', '@/hooks/modules/useFinanceData', null);
 }
 
 /** @deprecated */
-export function useFacturesByStatut(statut: string) {
+export function useFacturesByStatut(_statut: string) {
   return useDeprecatedHook('useFacturesByStatut', '@/hooks/modules/useFinanceData', []);
 }
 
@@ -237,7 +234,7 @@ export function useFournisseursPaginated() {
 }
 
 /** @deprecated */
-export function useFournisseur(id: string | null) {
+export function useFournisseur(_id: string | null) {
   return useDeprecatedHook('useFournisseur', '@/hooks/modules/useFinanceData', null);
 }
 
@@ -275,17 +272,17 @@ export function useEcrituresPaginated() {
 }
 
 /** @deprecated */
-export function useEcrituresByExercice(exerciceId: string | null) {
+export function useEcrituresByExercice(_exerciceId: string | null) {
   return useDeprecatedHook('useEcrituresByExercice', '@/hooks/modules/useFinanceData', []);
 }
 
 /** @deprecated */
-export function useEcrituresByJournal(journalCode: string) {
+export function useEcrituresByJournal(_journalCode: string) {
   return useDeprecatedHook('useEcrituresByJournal', '@/hooks/modules/useFinanceData', []);
 }
 
 /** @deprecated */
-export function useEcrituresByCompte(compteNumero: string) {
+export function useEcrituresByCompte(_compteNumero: string) {
   return useDeprecatedHook('useEcrituresByCompte', '@/hooks/modules/useFinanceData', []);
 }
 
@@ -299,12 +296,12 @@ export function useComptesComptables() {
 }
 
 /** @deprecated */
-export function useCompteComptable(id: string | null) {
+export function useCompteComptable(_id: string | null) {
   return useDeprecatedHook('useCompteComptable', '@/hooks/modules/useFinanceData', null);
 }
 
 /** @deprecated */
-export function useCompteComptableByNumero(numero: string) {
+export function useCompteComptableByNumero(_numero: string) {
   return useDeprecatedHook('useCompteComptableByNumero', '@/hooks/modules/useFinanceData', null);
 }
 
@@ -331,7 +328,7 @@ export function useFinanceStats() {
 // DEPRECATED HOOKS - MUTATIONS (stubs)
 // ============================================
 
-const deprecatedMutation = (name: string) => ({
+const deprecatedMutation = (_name: string) => ({
   mutate: async () => {
     // deprecated - no-op
     return null;

@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { substituteVariables } from '@/lib/utils/service-order';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import styles from './EmailEditor.module.css';
-import clsx from 'clsx';
 
 interface EmailEditorProps {
     typeOrdre: TypeOrdreService;

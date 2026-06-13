@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Plus, Filter, ChevronDown, FileText, Hammer } from 'lucide-react';
+import { Plus, Filter, ChevronDown, FileText } from 'lucide-react';
 import { BudgetStatut } from '@/types/enums/statuts';
 import { BudgetCard, BudgetCardData } from './BudgetCard';
 import styles from './Budget.module.css';
@@ -17,14 +17,6 @@ interface BudgetsListProps {
   onSelect?: (budget: BudgetCardData) => void;
   onCreateBudget?: () => void;
 }
-
-const STATUT_LABELS: Record<BudgetStatut, string> = {
-  [BudgetStatut.BROUILLON]: 'Brouillons',
-  [BudgetStatut.EN_ATTENTE_APPROBATION]: 'En attente AG',
-  [BudgetStatut.APPROUVE]: 'Approuves',
-  [BudgetStatut.REJETE]: 'Rejetes',
-  [BudgetStatut.CLOTURE]: 'Clotures',
-};
 
 export function BudgetsList({
   budgets,

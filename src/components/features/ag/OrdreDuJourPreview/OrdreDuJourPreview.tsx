@@ -27,7 +27,7 @@ export function OrdreDuJourPreview({
     agTitle = 'Assemblée Générale',
     agDate
 }: OrdreDuJourPreviewProps) {
-    const [copied, setCopied] = useMemo(() => {
+    const [, setCopied] = useMemo(() => {
         let timer: ReturnType<typeof setTimeout> | null = null;
         return [false, (val: boolean) => {
             if (timer) clearTimeout(timer);

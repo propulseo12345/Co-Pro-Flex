@@ -9,7 +9,7 @@
  * - Historique des versions
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   generateConvocationPDF,
   downloadConvocationPDF,
@@ -361,7 +361,7 @@ export function useConvocationPreview({
       }
 
       logger.info('PDF téléchargé', { agId, step: 'convocation', action: 'downloadPDF' });
-    } catch (error) {
+    } catch {
       logger.error('Erreur téléchargement PDF', {
         agId,
         step: 'convocation',
