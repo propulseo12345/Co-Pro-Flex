@@ -303,6 +303,21 @@ create policy p_mgr_all on public.pv_templates
 comment on table public.pv_templates is
   'Templates de mise en page des PV d''AG (spec jsonb) : système (copro_id NULL) ou par copro. Éditeur : settings/templates.';
 
+-- Compteur d'usage (appelé par pv-template.service à chaque génération).
+-- SECURITY INVOKER : la RLS s'applique (seul un gestionnaire de la copro peut
+-- incrémenter ; les templates système restent figés hors service_role).
+create or replace function public.increment_template_usage(template_id uuid)
+returns void
+language sql
+set search_path = public
+as $$
+  update public.pv_templates
+     set usage_count = usage_count + 1
+   where id = template_id;
+$$;
+revoke execute on function public.increment_template_usage(uuid) from public, anon;
+grant  execute on function public.increment_template_usage(uuid) to authenticated, service_role;
+
 -- Bascule env FAIL-SAFE (B1, registre central 0034) : ag_documents (0050, oubli
 -- corrigé) et pv_templates sont désormais DANS la liste de apply_rls_environment()
 -- (0034, protégés par to_regclass au rejeu). Ici les tables existent : on

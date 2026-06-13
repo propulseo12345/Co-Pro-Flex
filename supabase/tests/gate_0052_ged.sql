@@ -222,12 +222,16 @@ BEGIN
     EXCEPTION WHEN insufficient_privilege THEN NULL;
     END;
 
-    -- gestionnaire : écrit
+    -- gestionnaire : écrit + incrémente l'usage (RPC invoker sous RLS)
     PERFORM set_config('request.jwt.claims',
       json_build_object('sub', v_mgr, 'role','authenticated')::text, true);
     INSERT INTO public.pv_templates (copro_id, name, spec, created_by)
     VALUES (v_copro, 'Manager OK', '{}'::jsonb, v_mgr);
+    PERFORM public.increment_template_usage(v_tpl_copro);
     PERFORM set_config('role', 'service_role', true);
+    SELECT usage_count INTO v_n FROM public.pv_templates WHERE id = v_tpl_copro;
+    IF v_n <> 1 THEN
+      RAISE EXCEPTION 'ASSERT FAIL : increment_template_usage (% au lieu de 1)', v_n; END IF;
   END;
 
   RAISE EXCEPTION 'ROLLBACK_TEST_OK';
