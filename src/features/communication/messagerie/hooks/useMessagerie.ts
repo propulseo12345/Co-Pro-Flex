@@ -52,8 +52,8 @@ function mapConversationPreview(row: any): IConversationPreview {
     lastMessageAt: row.last_message_at ?? row.created_at,
     lastSenderName: row.last_sender_name ?? 'Admin CoProFlex',
     lastSenderRole: (row.last_sender_role as UserRole) ?? undefined,
-    unreadCount: row.unread_count ?? 0,
-    memberCount: 2,
+    unreadCount: row.my_unread_count ?? 0,
+    memberCount: Array.isArray(row.other_members) ? row.other_members.length + 1 : 2,
     isArchived: row.is_archived ?? false,
     isMuted: false,
   };
@@ -127,6 +127,30 @@ export function useMessagerie(): UseMessagerieReturn {
   const activeIdRef = useRef<string | null>(null);
   const fetchConvsRef = useRef<(() => Promise<void>) | null>(null);
   const fetchMsgsRef = useRef<((id: string) => Promise<void>) | null>(null);
+  const previewsRef = useRef<IConversationPreview[]>([]);
+  previewsRef.current = previews;
+
+  // ── Marquage lu durable (base) ──────────────────────────────────────────────
+  // Les builders supabase-js sont paresseux : sans then/await, AUCUNE requête ne
+  // part. On n'appelle le RPC que si la conversation porte des non-lus (un
+  // gestionnaire non membre est toujours à 0 → évite un 42501 de routine, la
+  // garde du RPC étant strictement membership).
+  const markReadInDb = useCallback(
+    (conversationId: string) => {
+      const preview = previewsRef.current.find((p) => p.id === conversationId);
+      if (!preview || preview.unreadCount === 0) return;
+      supabase
+        .rpc('mark_conversation_read', { p_conversation_id: conversationId })
+        .then(({ error }: { error: { message?: string } | null }) => {
+          if (error) {
+            console.error('mark_conversation_read', error);
+            // le zéro optimiste local est peut-être faux : resynchroniser
+            fetchConvsRef.current?.();
+          }
+        });
+    },
+    [supabase]
+  );
 
   // ── Charger la liste des conversations ─────────────────────────────────────
 
@@ -135,7 +159,7 @@ export function useMessagerie(): UseMessagerieReturn {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('conversations')
+        .from('v_conversations_overview')
         .select('*')
         .eq('copro_id', currentCoproId)
         .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -226,7 +250,6 @@ export function useMessagerie(): UseMessagerieReturn {
     return () => {
       supabase.removeChannel(channel);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConversation?.id, supabase]);
 
   // ── Conversations filtrées ─────────────────────────────────────────────────
@@ -256,8 +279,11 @@ export function useMessagerie(): UseMessagerieReturn {
     return list;
   }, [previews, filter, searchTerm]);
 
+  // Exclut les archivées : alignement avec le filtre 'all' (qui les masque) et
+  // le KPI du hub (is_archived=false) — sinon badge global N>0 sans conversation
+  // visible porteuse de badge.
   const totalUnread = useMemo(
-    () => previews.reduce((sum, c) => sum + c.unreadCount, 0),
+    () => previews.filter((c) => !c.isArchived).reduce((sum, c) => sum + c.unreadCount, 0),
     [previews]
   );
 
@@ -266,10 +292,11 @@ export function useMessagerie(): UseMessagerieReturn {
   const selectConversation = useCallback(
     (id: string) => {
       activeIdRef.current = id;
+      markReadInDb(id);
       setPreviews((prev) => prev.map((p) => (p.id === id ? { ...p, unreadCount: 0 } : p)));
       fetchMsgsRef.current?.(id);
     },
-    []
+    [markReadInDb]
   );
 
   const sendMessage = useCallback(
@@ -317,15 +344,8 @@ export function useMessagerie(): UseMessagerieReturn {
         );
       }
 
-      // Mettre à jour le dernier message dans la conversation
-      await supabase
-        .from('conversations')
-        .update({
-          last_message_at: now,
-          last_message_preview: content.trim().slice(0, 100),
-        })
-        .eq('id', convId);
-
+      // last_message_at/preview + unread des autres membres : posés par le
+      // trigger trg_conversation_last_message (0032) à l'insert du message.
       setPreviews((prev) =>
         prev.map((p) =>
           p.id === convId
@@ -338,10 +358,11 @@ export function useMessagerie(): UseMessagerieReturn {
   );
 
   const markAsRead = useCallback((conversationId: string) => {
+    markReadInDb(conversationId);
     setPreviews((prev) =>
       prev.map((p) => (p.id === conversationId ? { ...p, unreadCount: 0 } : p))
     );
-  }, []);
+  }, [markReadInDb]);
 
   const archiveConversation = useCallback(
     async (conversationId: string) => {

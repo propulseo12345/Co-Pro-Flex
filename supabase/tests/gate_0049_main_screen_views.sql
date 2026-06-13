@@ -42,8 +42,8 @@ BEGIN
   END IF;
   SELECT array_agg(column_name::text ORDER BY column_name) INTO v_arr
     FROM information_schema.columns WHERE table_schema='public' AND table_name='v_conversations_overview';
-  IF v_arr IS DISTINCT FROM ARRAY['copro_id','created_at','created_by','id','is_group',
-    'last_message_at','last_message_preview','my_last_read_at','my_unread_count',
+  IF v_arr IS DISTINCT FROM ARRAY['copro_id','created_at','created_by','id','is_archived',
+    'is_group','last_message_at','last_message_preview','my_last_read_at','my_unread_count',
     'other_members','subject'] THEN
     RAISE EXCEPTION 'ASSERT FAIL : contrat v_conversations_overview : %', v_arr;
   END IF;
@@ -176,8 +176,11 @@ BEGIN
   VALUES (v_copro, 'Event passé', 'autre', now() - interval '2 days', now() - interval '47 hours',
           false, 'all_members', v_user_a)
   RETURNING id INTO v_ev_past;
+  -- starts_at = now() EXACTEMENT : now() est figé par transaction -> is_today
+  -- (starts_at::date = current_date) et is_past (starts_at < now() = false) sont
+  -- stables même entre 23h et minuit UTC (now()+1h franchissait minuit -> flaky).
   INSERT INTO public.events (copro_id, title, event_type, starts_at, all_day, visibility, created_by)
-  VALUES (v_copro, 'Event du jour', 'reunion_cs', now() + interval '1 hour', false, 'all_members', v_user_a)
+  VALUES (v_copro, 'Event du jour', 'reunion_cs', now(), false, 'all_members', v_user_a)
   RETURNING id INTO v_ev_today;
 
   SELECT count(*) INTO v_n FROM public.v_events_overview
