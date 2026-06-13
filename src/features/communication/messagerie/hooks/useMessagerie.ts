@@ -127,6 +127,30 @@ export function useMessagerie(): UseMessagerieReturn {
   const activeIdRef = useRef<string | null>(null);
   const fetchConvsRef = useRef<(() => Promise<void>) | null>(null);
   const fetchMsgsRef = useRef<((id: string) => Promise<void>) | null>(null);
+  const previewsRef = useRef<IConversationPreview[]>([]);
+  previewsRef.current = previews;
+
+  // ── Marquage lu durable (base) ──────────────────────────────────────────────
+  // Les builders supabase-js sont paresseux : sans then/await, AUCUNE requête ne
+  // part. On n'appelle le RPC que si la conversation porte des non-lus (un
+  // gestionnaire non membre est toujours à 0 → évite un 42501 de routine, la
+  // garde du RPC étant strictement membership).
+  const markReadInDb = useCallback(
+    (conversationId: string) => {
+      const preview = previewsRef.current.find((p) => p.id === conversationId);
+      if (!preview || preview.unreadCount === 0) return;
+      supabase
+        .rpc('mark_conversation_read', { p_conversation_id: conversationId })
+        .then(({ error }: { error: { message?: string } | null }) => {
+          if (error) {
+            console.error('mark_conversation_read', error);
+            // le zéro optimiste local est peut-être faux : resynchroniser
+            fetchConvsRef.current?.();
+          }
+        });
+    },
+    [supabase]
+  );
 
   // ── Charger la liste des conversations ─────────────────────────────────────
 
@@ -255,8 +279,11 @@ export function useMessagerie(): UseMessagerieReturn {
     return list;
   }, [previews, filter, searchTerm]);
 
+  // Exclut les archivées : alignement avec le filtre 'all' (qui les masque) et
+  // le KPI du hub (is_archived=false) — sinon badge global N>0 sans conversation
+  // visible porteuse de badge.
   const totalUnread = useMemo(
-    () => previews.reduce((sum, c) => sum + c.unreadCount, 0),
+    () => previews.filter((c) => !c.isArchived).reduce((sum, c) => sum + c.unreadCount, 0),
     [previews]
   );
 
@@ -265,12 +292,11 @@ export function useMessagerie(): UseMessagerieReturn {
   const selectConversation = useCallback(
     (id: string) => {
       activeIdRef.current = id;
+      markReadInDb(id);
       setPreviews((prev) => prev.map((p) => (p.id === id ? { ...p, unreadCount: 0 } : p)));
-      // Reset durable côté base (conversation_members.unread_count + read_by)
-      void supabase.rpc('mark_conversation_read', { p_conversation_id: id });
       fetchMsgsRef.current?.(id);
     },
-    [supabase]
+    [markReadInDb]
   );
 
   const sendMessage = useCallback(
@@ -332,11 +358,11 @@ export function useMessagerie(): UseMessagerieReturn {
   );
 
   const markAsRead = useCallback((conversationId: string) => {
+    markReadInDb(conversationId);
     setPreviews((prev) =>
       prev.map((p) => (p.id === conversationId ? { ...p, unreadCount: 0 } : p))
     );
-    void supabase.rpc('mark_conversation_read', { p_conversation_id: conversationId });
-  }, [supabase]);
+  }, [markReadInDb]);
 
   const archiveConversation = useCallback(
     async (conversationId: string) => {
