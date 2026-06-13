@@ -591,8 +591,8 @@ export function useLogbook() {
                 if (found) providerName = found.nom;
             }
 
-            // Insert en DB
-            const entry: LogbookEntryInsert = {
+            // Insert en DB (copro_id injecté par createEntry depuis le contexte)
+            const entry: Omit<LogbookEntryInsert, 'copro_id'> = {
                 title: newInterventionForm.titre.trim(),
                 description: newInterventionForm.description || null,
                 happened_at: newInterventionForm.date || new Date().toISOString().split('T')[0],
@@ -603,7 +603,6 @@ export function useLogbook() {
                 provider_name_snapshot: providerName || null,
                 equipment_concerned: newInterventionForm.equipementConcerne || null,
                 cost: newInterventionForm.cout ? parseFloat(newInterventionForm.cout) : null,
-                copro_id: '', // sera rempli par createEntry
             };
 
             await createEntry(entry);

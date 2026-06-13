@@ -740,7 +740,9 @@ export function useLogbook(options: UseMaintenanceDataOptions = {}) {
   const fetchEntriesRef = useRef(fetchEntries);
   fetchEntriesRef.current = fetchEntries;
 
-  const createEntry = useCallback(async (entry: LogbookEntryInsert) => {
+  // copro_id est INJECTÉ ici depuis le contexte → l'appelant ne le fournit pas
+  // (évite le 'copro_id: '' + cast' trompeur des appelants).
+  const createEntry = useCallback(async (entry: Omit<LogbookEntryInsert, 'copro_id'>) => {
     if (!currentCoproId) throw new Error('No copro selected');
 
     const { data, error: insertError } = await supabase

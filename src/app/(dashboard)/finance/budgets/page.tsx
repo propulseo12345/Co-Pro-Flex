@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useBudget } from '@/hooks/modules/useBudget';
 import { FinanceTopBar, topBarStyles } from '@/components/layout/FinanceTopBar';
 import { BudgetNavBar } from '@/components/features/finance/Budget';
-import { Download, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
   FonctionnementTab,
   TravauxTab,
@@ -85,9 +85,7 @@ export default function BudgetsPage() {
           pill={{ label: `Exercice ${selectedYear}`, variant: 'blue', dotVariant: 'blue' }}
           actions={
             <>
-              <button className={topBarStyles.btnIcon} onClick={() => {}} title="Export PDF">
-                <Download size={16} />
-              </button>
+              {/* Export PDF retiré (audit 2026-06-12 : bouton mort) — export comptable réel en J5 */}
               <button className={topBarStyles.btnPrimary} onClick={() => setShowCreateBudgetModal(true)}>
                 <Plus size={16} />
                 Créer un budget
@@ -113,9 +111,7 @@ export default function BudgetsPage() {
           pill={{ label: `Exercice ${selectedYear}`, variant: 'blue', dotVariant: 'blue' }}
           actions={
             <>
-              <button className={topBarStyles.btnIcon} onClick={() => {}} title="Export PDF">
-                <Download size={16} />
-              </button>
+              {/* Export PDF retiré (audit 2026-06-12 : bouton mort) — export comptable réel en J5 */}
               <button className={topBarStyles.btnPrimary} onClick={() => setShowCreateBudgetModal(true)}>
                 <Plus size={16} />
                 Créer un budget
@@ -140,9 +136,7 @@ export default function BudgetsPage() {
         pill={{ label: `Exercice ${selectedYear}`, variant: 'blue', dotVariant: 'blue' }}
         actions={
           <>
-            <button className={topBarStyles.btnIcon} onClick={() => alert('Export PDF en cours...')} title="Export PDF">
-              <Download size={16} />
-            </button>
+            {/* Export PDF retiré (audit 2026-06-12 : bouton mort) — export comptable réel en J5 */}
             <button className={topBarStyles.btnPrimary} onClick={() => setShowCreateBudgetModal(true)}>
               <Plus size={16} />
               Créer un budget

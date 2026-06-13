@@ -17,7 +17,7 @@ import {
   Inbox,
 } from 'lucide-react';
 import { usePaymentSchedule } from '@/hooks/modules/usePaymentSchedule';
-import { createClient } from '@/lib/supabase/client';
+import { getDocumentsForEntity } from '@/lib/documents/api';
 import type { BudgetTravaux, PaymentPhase } from '../types';
 import styles from './TravauxDetailModal.module.css';
 
@@ -126,25 +126,22 @@ export function TravauxDetailModal({
     if (!travaux.id) return;
     setDocsLoading(true);
     try {
-      const supabase = createClient();
-      const { data, error } = await (supabase as unknown as {
-        from: (table: string) => {
-          select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              order: (col: string, opts: { ascending: boolean }) => Promise<{ data: SupabaseDocument[] | null; error: unknown }>;
-            };
-          };
-        };
-      }).from('documents')
-        .select('*')
-        .eq('budget_id', travaux.id)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setDocuments(data);
-      }
+      // Les justificatifs d'un poste de travaux sont liés via document_relations
+      // (entity_type='budget_expense') — l'ancienne requête .eq('budget_id') visait
+      // une colonne fantôme de `documents` et échouait silencieusement (audit 2026-06-12).
+      const docs = await getDocumentsForEntity('budget_expense', travaux.id);
+      setDocuments(
+        docs.map((d) => ({
+          id: d.id,
+          title: d.title ?? d.file_name,
+          file_path: d.file_path ?? null,
+          category: d.category ?? null,
+          created_at: d.created_at,
+          file_size: d.file_size ?? null,
+        }))
+      );
     } catch {
-      // silent
+      setDocuments([]);
     } finally {
       setDocsLoading(false);
     }
