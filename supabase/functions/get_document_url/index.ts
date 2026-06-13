@@ -27,7 +27,7 @@ interface GetDocumentUrlResponse {
   expires_at?: string;
   file_name?: string;
   mime_type?: string;
-  confidentiality?: string;
+  visibility?: string;
 }
 
 interface DocumentInfo {
@@ -36,7 +36,7 @@ interface DocumentInfo {
   file_path: string;
   file_name: string;
   mime_type: string | null;
-  confidentiality: string;
+  visibility: string;
   status: string;
   deletion_blocked: boolean;
 }
@@ -63,7 +63,7 @@ async function checkDocumentAccess(
   // Fetch document
   const { data: doc, error: docError } = await supabase
     .from("documents")
-    .select("id, copro_id, file_path, file_name, mime_type, confidentiality, status, deletion_blocked")
+    .select("id, copro_id, file_path, file_name, mime_type, visibility, status, deletion_blocked")
     .eq("id", documentId)
     .single();
 
@@ -76,8 +76,13 @@ async function checkDocumentAccess(
     return { allowed: false, reason: "Document non accessible pour cette copropriété" };
   }
 
+  // Soft-deleted : jamais servi
+  if (doc.status === "deleted") {
+    return { allowed: false, reason: "Document non trouvé" };
+  }
+
   // Check document status
-  if (doc.status === "archived" || doc.status === "expired") {
+  if (doc.status === "archived") {
     // Only managers can access archived docs
     const { data: membership } = await supabase
       .from("memberships")
@@ -103,36 +108,22 @@ async function checkDocumentAccess(
     return { allowed: false, reason: "Non membre de cette copropriété" };
   }
 
-  // Check confidentiality level
-  const confidentiality = doc.confidentiality || "public";
+  // Niveau de visibilité canonique (enum document_visibility) :
+  // gestionnaire_seul / conseil / tous_coproprietaires.
+  // L'ancien modèle document_access (ACL fine) est abandonné — décision 0020 §A4.
+  const visibility = doc.visibility || "gestionnaire_seul"; // défaut prudent
   const role = membership.role;
 
-  if (confidentiality === "restricted") {
-    // Only admins and specific grants
-    if (role !== "admin" && role !== "gestionnaire") {
-      // Check document_access table
-      const { data: accessGrant } = await supabase
-        .from("document_access")
-        .select("can_view")
-        .eq("document_id", documentId)
-        .eq("user_id", userId)
-        .single();
-
-      if (!accessGrant?.can_view) {
-        return { allowed: false, reason: "Accès restreint - document confidentiel" };
-      }
-    }
-  } else if (confidentiality === "manager") {
-    // Only gestionnaires and admins
+  if (visibility === "gestionnaire_seul") {
     if (!["gestionnaire", "admin"].includes(role)) {
       return { allowed: false, reason: "Accès réservé aux gestionnaires" };
     }
-  } else if (confidentiality === "council") {
-    // Gestionnaires, admins, and conseil syndical members
+  } else if (visibility === "conseil") {
     if (!["gestionnaire", "admin", "conseil"].includes(role)) {
       return { allowed: false, reason: "Accès réservé au conseil syndical et gestionnaires" };
     }
   }
+  // tous_coproprietaires : tout membre de la copro (membership déjà vérifié)
   // 'public' is accessible to all members
 
   return { allowed: true, doc: doc as DocumentInfo };
@@ -362,7 +353,7 @@ Deno.serve(async (req: Request) => {
         expires_at: expiresAt,
         file_name: docInfo?.file_name,
         mime_type: docInfo?.mime_type || undefined,
-        confidentiality: docInfo?.confidentiality,
+        visibility: docInfo?.visibility,
       } as GetDocumentUrlResponse),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

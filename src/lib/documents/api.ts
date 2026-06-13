@@ -22,6 +22,97 @@ export type DocumentConfidentiality = 'public' | 'council' | 'manager' | 'restri
 export type DocumentStatus = 'draft' | 'active' | 'archived' | 'expired';
 export type DocumentSource = 'ag' | 'finance' | 'maintenance' | 'communication' | 'legal' | 'manual';
 
+// ----------------------------------------------------------------------------
+// Traduction legacy → canonique (0052). Les LECTURES passent par les vues de
+// compat (qui re-mappent canonique → legacy) ; les ÉCRITURES doivent parler le
+// schéma canonique : visibility (enum document_visibility), pas de version /
+// is_current_version, liens dans document_relations.
+// ----------------------------------------------------------------------------
+
+const VISIBILITY_FROM_CONFIDENTIALITY: Record<DocumentConfidentiality, string> = {
+  public: 'tous_coproprietaires',
+  council: 'conseil',
+  manager: 'gestionnaire_seul',
+  restricted: 'gestionnaire_seul', // 'restricted' n'existe plus dans le modèle cible
+};
+
+// enum canonique document_source : manual, ag, finance, maintenance, mutation, system
+const SOURCE_FROM_LEGACY: Record<DocumentSource, string> = {
+  ag: 'ag',
+  finance: 'finance',
+  maintenance: 'maintenance',
+  communication: 'manual',
+  legal: 'mutation', // seul appelant legacy : documents de vente (VenteDocuments)
+  manual: 'manual',
+};
+
+// enum canonique document_entity_type
+const ENTITY_TYPE_FROM_LEGACY: Record<string, string> = {
+  ag: 'ag',
+  resolution: 'resolution',
+  service_order: 'service_order',
+  contract: 'contract',
+  contrat: 'contract',
+  facture: 'supplier_invoice',
+  invoice: 'supplier_invoice',
+  supplier_invoice: 'supplier_invoice',
+  depense: 'budget_expense',
+  budget_expense: 'budget_expense',
+  budget: 'budget',
+  mutation: 'mutation',
+  vente: 'mutation',
+  lot: 'lot',
+  coproprietaire: 'coproprietaire',
+  council: 'council',
+  event: 'event',
+};
+
+// enum canonique document_relation_kind : related, annexe, source, justificatif
+const RELATION_KIND_FROM_LINK_TYPE: Record<string, string> = {
+  main: 'source',
+  annexe: 'annexe',
+  related: 'related',
+  justificatif: 'justificatif',
+};
+
+const CANONICAL_STATUSES = ['active', 'archived', 'deleted'];
+
+/** Projette un payload legacy (interface Document) sur les colonnes canoniques. */
+function toCanonicalDocumentRow(doc: Partial<Document>): Record<string, unknown> {
+  const row: Record<string, unknown> = {};
+  const passthrough = [
+    'copro_id', 'lot_id', 'coproprietaire_id', 'file_name', 'file_path',
+    'file_size', 'mime_type', 'category', 'title', 'description', 'tags',
+    'document_date', 'year', 'folder_id', 'retention_years',
+    'is_archived', 'archived_at', 'created_by',
+  ] as const;
+  for (const k of passthrough) {
+    if (doc[k] !== undefined) row[k] = doc[k];
+  }
+  if (doc.status !== undefined && CANONICAL_STATUSES.includes(doc.status)) {
+    row.status = doc.status;
+  }
+  if (doc.confidentiality !== undefined) {
+    row.visibility = VISIBILITY_FROM_CONFIDENTIALITY[doc.confidentiality];
+  }
+  if (doc.source_module !== undefined) {
+    row.source_module = SOURCE_FROM_LEGACY[doc.source_module] ?? 'manual';
+  }
+  return row;
+}
+
+/** FK legacy du payload → liens document_relations (créés après l'insert). */
+function legacyFkRelations(doc: Partial<Document>): Array<{ entity_type: string; entity_id: string; relation_kind: string }> {
+  const out: Array<{ entity_type: string; entity_id: string; relation_kind: string }> = [];
+  if (doc.ag_id) out.push({ entity_type: 'ag', entity_id: doc.ag_id, relation_kind: 'related' });
+  if (doc.resolution_id) out.push({ entity_type: 'resolution', entity_id: doc.resolution_id, relation_kind: 'related' });
+  if (doc.service_order_id) out.push({ entity_type: 'service_order', entity_id: doc.service_order_id, relation_kind: 'related' });
+  if (doc.contract_id) out.push({ entity_type: 'contract', entity_id: doc.contract_id, relation_kind: 'related' });
+  if (doc.invoice_id) out.push({ entity_type: 'supplier_invoice', entity_id: doc.invoice_id, relation_kind: 'justificatif' });
+  if (doc.mutation_id) out.push({ entity_type: 'mutation', entity_id: doc.mutation_id, relation_kind: 'related' });
+  return out;
+}
+
 export interface DocumentFolder {
   id: string;
   copro_id: string;
@@ -88,20 +179,6 @@ export interface Document {
   folder_color?: string;
   parent_folder_name?: string;
   copro_name?: string;
-  created_by_name?: string;
-}
-
-export interface DocumentVersion {
-  id: string;
-  document_id: string;
-  version_number: number;
-  file_path: string;
-  file_name: string;
-  file_size?: number;
-  file_hash?: string;
-  change_summary?: string;
-  created_at: string;
-  created_by?: string;
   created_by_name?: string;
 }
 
@@ -304,11 +381,12 @@ export async function getDocumentsInFolder(coproId: string, folderId: string): P
 
 export async function searchDocuments(coproId: string, query: string): Promise<Document[]> {
   const supabase = createUntypedClient();
+  // Vue de compat : la table nue n'a pas is_current_version, et la vue exclut
+  // déjà les soft-deleted.
   const { data, error } = await supabase
-    .from('documents')
+    .from('v_documents_with_folder')
     .select('*')
     .eq('copro_id', coproId)
-    .eq('is_current_version', true)
     .textSearch('search_text', query, { type: 'websearch', config: 'french' })
     .order('created_at', { ascending: false })
     .limit(50);
@@ -321,11 +399,21 @@ export async function createDocument(doc: Partial<Document>): Promise<Document> 
   const supabase = createUntypedClient();
   const { data, error } = await supabase
     .from('documents')
-    .insert(doc)
+    .insert(toCanonicalDocumentRow(doc))
     .select()
     .single();
 
   if (error) throw error;
+
+  // Les FK legacy (ag_id, invoice_id…) deviennent des liens document_relations.
+  const relations = legacyFkRelations(doc);
+  if (relations.length > 0) {
+    const { error: relError } = await supabase
+      .from('document_relations')
+      .insert(relations.map((r) => ({ ...r, document_id: data.id, copro_id: data.copro_id })));
+    if (relError) throw relError;
+  }
+
   return data;
 }
 
@@ -333,7 +421,7 @@ export async function updateDocument(id: string, updates: Partial<Document>): Pr
   const supabase = createUntypedClient();
   const { data, error } = await supabase
     .from('documents')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...toCanonicalDocumentRow(updates), updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();
@@ -347,10 +435,13 @@ export async function archiveDocument(id: string): Promise<Document> {
 }
 
 export async function deleteDocument(id: string): Promise<void> {
+  // Soft delete canonique : status='deleted' (les vues de compat l'excluent,
+  // trg_prevent_document_deletion bloque de toute façon le DELETE des documents
+  // à conservation légale).
   const supabase = createUntypedClient();
   const { error } = await supabase
     .from('documents')
-    .delete()
+    .update({ status: 'deleted', updated_at: new Date().toISOString() })
     .eq('id', id);
 
   if (error) throw error;
@@ -393,22 +484,6 @@ export async function getExpiringDocuments(coproId: string): Promise<Document[]>
     .select('*')
     .eq('copro_id', coproId)
     .order('expiration_date');
-
-  if (error) throw error;
-  return data || [];
-}
-
-// ============================================================================
-// VERSIONS API
-// ============================================================================
-
-export async function getDocumentVersions(documentId: string): Promise<DocumentVersion[]> {
-  const supabase = createUntypedClient();
-  const { data, error } = await supabase
-    .from('v_document_versions')
-    .select('*')
-    .eq('document_id', documentId)
-    .order('version_number', { ascending: false });
 
   if (error) throw error;
   return data || [];
@@ -508,96 +583,86 @@ export async function downloadDocument(filePath: string): Promise<Blob> {
 // LINKS API
 // ============================================================================
 
+export interface DocumentLink {
+  id: string;
+  document_id: string;
+  copro_id: string;
+  entity_type: string;
+  entity_id: string;
+  /** relation_kind canonique re-mappé vers le vocabulaire legacy du front */
+  link_type: 'main' | 'annexe' | 'related' | 'justificatif';
+  label?: string | null;
+  created_at: string;
+}
+
+const LINK_TYPE_FROM_RELATION_KIND: Record<string, DocumentLink['link_type']> = {
+  source: 'main',
+  annexe: 'annexe',
+  related: 'related',
+  justificatif: 'justificatif',
+};
+
 export async function linkDocumentToEntity(
   documentId: string,
   entityType: string,
   entityId: string,
-  linkType: 'main' | 'annexe' | 'related' = 'related'
+  linkType: 'main' | 'annexe' | 'related' | 'justificatif' = 'related'
 ): Promise<void> {
   const supabase = createUntypedClient();
+
+  // document_relations exige copro_id : dérivé du document lié.
+  const { data: doc, error: docError } = await supabase
+    .from('documents')
+    .select('copro_id')
+    .eq('id', documentId)
+    .single();
+  if (docError) throw docError;
+
   const { error } = await supabase
-    .from('document_links')
+    .from('document_relations')
     .insert({
       document_id: documentId,
-      entity_type: entityType,
+      copro_id: doc.copro_id,
+      entity_type: ENTITY_TYPE_FROM_LEGACY[entityType] ?? 'other',
       entity_id: entityId,
-      link_type: linkType,
+      relation_kind: RELATION_KIND_FROM_LINK_TYPE[linkType] ?? 'related',
     });
 
   if (error) throw error;
 }
 
-export async function getDocumentLinks(documentId: string) {
+export async function getDocumentLinks(documentId: string): Promise<DocumentLink[]> {
   const supabase = createUntypedClient();
   const { data, error } = await supabase
-    .from('document_links')
+    .from('document_relations')
     .select('*')
     .eq('document_id', documentId);
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map((r: { relation_kind: string } & Omit<DocumentLink, 'link_type'>) => ({
+    ...r,
+    link_type: LINK_TYPE_FROM_RELATION_KIND[r.relation_kind] ?? 'related',
+  }));
 }
 
 export async function getDocumentsForEntity(entityType: string, entityId: string): Promise<Document[]> {
   const supabase = createUntypedClient();
   const { data: links, error: linksError }: { data: Array<{ document_id: string }> | null; error: unknown } = await supabase
-    .from('document_links')
+    .from('document_relations')
     .select('document_id')
-    .eq('entity_type', entityType)
+    .eq('entity_type', ENTITY_TYPE_FROM_LEGACY[entityType] ?? 'other')
     .eq('entity_id', entityId);
 
   if (linksError) throw linksError;
   if (!links?.length) return [];
 
   const documentIds = links.map((l: { document_id: string }) => l.document_id);
+  // Vue de compat : shape legacy (confidentiality, version…) + soft-deleted exclus.
   const { data, error } = await supabase
-    .from('documents')
+    .from('v_documents_with_folder')
     .select('*')
     .in('id', documentIds);
 
   if (error) throw error;
   return data || [];
-}
-
-// ============================================================================
-// ACCESS API
-// ============================================================================
-
-export async function grantDocumentAccess(
-  documentId: string,
-  options: {
-    userId?: string;
-    coproprietaireId?: string;
-    lotId?: string;
-    canView?: boolean;
-    canDownload?: boolean;
-    canEdit?: boolean;
-    expiresAt?: string;
-  }
-): Promise<void> {
-  const supabase = createUntypedClient();
-  const { error } = await supabase
-    .from('document_access')
-    .insert({
-      document_id: documentId,
-      user_id: options.userId,
-      coproprietaire_id: options.coproprietaireId,
-      lot_id: options.lotId,
-      can_view: options.canView ?? true,
-      can_download: options.canDownload ?? true,
-      can_edit: options.canEdit ?? false,
-      expires_at: options.expiresAt,
-    });
-
-  if (error) throw error;
-}
-
-export async function revokeDocumentAccess(accessId: string): Promise<void> {
-  const supabase = createUntypedClient();
-  const { error } = await supabase
-    .from('document_access')
-    .delete()
-    .eq('id', accessId);
-
-  if (error) throw error;
 }
