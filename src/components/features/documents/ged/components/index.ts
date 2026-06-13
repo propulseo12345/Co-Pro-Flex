@@ -10,8 +10,6 @@ export { Toolbar } from './Toolbar';
 export { ActiveFilters } from './ActiveFilters';
 export { FolderGrid } from './FolderGrid';
 export { SearchResults } from './SearchResults';
-export { DocumentGrid } from './DocumentGrid';
-export { DocumentList } from './DocumentList';
 export { Pagination } from './Pagination';
 export { EmptyState } from './EmptyState';
 export { LinkModal } from './LinkModal';
