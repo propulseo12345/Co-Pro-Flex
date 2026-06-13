@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Artefacts de planning / scratch (docs, scripts d'analyse jetables) :
+    // pas du code applicatif, ne pas linter (décision projet 2026-06-13).
+    ".planning/**",
   ]),
   {
     rules: {
@@ -20,6 +23,16 @@ const eslintConfig = defineConfig([
 
       // Avertir sur les any explicites
       "@typescript-eslint/no-explicit-any": "warn",
+
+      // Variables/params inutilisés : tolérer le préfixe `_` (convention pour un
+      // paramètre positionnel ou une erreur catch qu'on doit garder sans l'utiliser).
+      // Les vrais inutilisés (imports, locals) restent à supprimer.
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+      }],
 
       // Forcer les keys dans les listes
       "react/jsx-key": "error",
@@ -47,7 +60,7 @@ const eslintConfig = defineConfig([
     // CommonJS exécutés par Node, pas du code applicatif Next/TS. `require()` et
     // `console.log` y sont légitimes — désactivés ici pour ne pas appliquer les
     // règles de l'app à de l'outillage (décision projet 2026-06-13, J4 lint bloquant).
-    files: ["scripts/**/*.js"],
+    files: ["scripts/**/*.{js,cjs,mjs,ts}"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "no-console": "off",
