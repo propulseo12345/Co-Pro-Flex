@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Prestataire, InterventionDetaille, ContratDetaille, DomaineActivite } from '@/types';
-import type { Provider, LogbookOverview, ContractOverview } from '@/types/domain';
+import type { Provider, LogbookOverview, ContractOverview, LogbookEntryInsert } from '@/types/domain';
 import { useToast } from '@/providers/ToastProvider';
 import { useProviders, useLogbook, useContracts as useContractsSupabase } from '@/hooks/modules/useMaintenanceData';
 
@@ -128,16 +128,16 @@ export function useProviderDetailPage(id: string) {
 
     const handleAddIntervention = async (data: Partial<InterventionDetaille>) => {
         try {
+            // copro_id injecté par createEntry depuis le contexte (ne PAS le passer ici)
             await createEntry({
                 title: data.titre || '',
                 description: data.description || '',
                 happened_at: data.date || new Date().toISOString(),
-                status: data.statut?.toLowerCase() || 'planifiee',
+                status: (data.statut?.toLowerCase() || 'planifiee') as LogbookEntryInsert['status'],
                 tiers_id: data.prestataireId || id,
                 provider_name_snapshot: prestataire?.nom || '',
                 entry_type: 'intervention',
-                copro_id: '',
-            } as unknown as import('@/types/domain').LogbookEntryInsert);
+            });
             showToast({ type: 'success', message: 'Intervention ajoutée avec succès' });
         } catch (err) {
             console.error('[useProviderDetailPage] Supabase createEntry error:', err);

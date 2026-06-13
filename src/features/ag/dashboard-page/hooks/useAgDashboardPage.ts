@@ -171,8 +171,9 @@ export function useAgDashboardPage() {
   const handleRename = useCallback(async (id: string, newTitle: string) => {
     setRenamingId(id);
     try {
+      // createUntypedClient() est déjà `any` — pas besoin du cast ad-hoc redondant
       const supabase = createUntypedClient();
-      const { error } = await (supabase as unknown as { from: (t: string) => { update: (d: object) => { eq: (f: string, v: string) => Promise<{ error: unknown }> } } })
+      const { error } = await supabase
         .from('ag_meetings')
         .update({ title: newTitle })
         .eq('id', id);

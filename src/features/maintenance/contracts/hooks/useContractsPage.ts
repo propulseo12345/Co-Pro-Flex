@@ -85,7 +85,7 @@ export function useContractsPage() {
       await updateContract(contrat.id, {
         status: 'to_renew',
         end_date: nouvelleDateFin,
-      } as never);
+      });
     } catch {
       // Fallback localStorage si Supabase échoue
       const fallback = JSON.parse(localStorage.getItem('coproflex_pending_renewals') || '{}');
@@ -117,7 +117,7 @@ export function useContractsPage() {
         status: 'active',
         end_date: pending.nouvelleDateFin,
         start_date: new Date().toISOString().split('T')[0],
-      } as never);
+      });
     } catch (err) {
       console.error('[Supabase] Failed to confirm renewal:', err);
       // Fallback local
