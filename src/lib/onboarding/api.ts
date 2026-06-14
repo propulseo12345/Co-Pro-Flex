@@ -852,7 +852,7 @@ export async function postOnboardingOpeningBalances(
 export type OpeningBalanceNature = 'current' | 'works' | 'advance' | 'loan' | 'alur';
 
 export interface OpeningBalanceLine {
-  accountCode: string;            // '450' (+nature), '450-1', '103', '105', '401', '110', '120', '512000', '601', '701'…
+  accountCode: string;            // '450' (+nature), '450-1', '103', '105', '401', '12', '478', '512000', '601', '701'…
   lotId?: string | null;          // requis pour 450-x et 103 ; absent pour les comptes globaux
   amount: number;                 // signé : > 0 = au débit (l'actif/tiers doit) ; < 0 = au crédit
   nature?: OpeningBalanceNature;  // requis si accountCode === '450' (nu)

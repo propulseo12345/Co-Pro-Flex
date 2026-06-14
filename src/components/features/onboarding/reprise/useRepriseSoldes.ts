@@ -40,7 +40,7 @@ function num(raw: string | undefined): number {
 }
 
 /** Comptes globaux gérés en littéral par l'« Essentiel » (jamais dans la section « Autres »). */
-const ESSENTIAL_CODES = new Set(['105', '110', '120', '401']);
+const ESSENTIAL_CODES = new Set(['105', '12', '478', '401']); // B3 : 12 = ex-110 (travaux), 478 = ex-120 (courant)
 /** Un compte est-il un compte de trésorerie (banque/livret) ? Codes 512x / 502x. */
 function isBankCode(code: string): boolean {
   return code.startsWith('512') || code.startsWith('502');
@@ -52,10 +52,10 @@ interface AccountRef { id: string; code: string }
  * Index code → account_id, factorisé pour rester cohérent avec buildOpeningLines
  * et la classification de BalanceEntreeForm.
  *  - bank      : 512x/502x (résolus par account_id, jamais le code nu)
- *  - autres    : classes 1-5 hors essentiels (105/110/120/401), hors banque, hors 450/103
+ *  - autres    : classes 1-5 hors essentiels (105/12/478/401), hors banque, hors 450/103
  *  - charges   : 6xx
  *  - produits  : 7xx
- * Les comptes globaux essentiels (105/110/120/401) et 450/103 ne sont PAS indexés ici :
+ * Les comptes globaux essentiels (105/12/478/401) et 450/103 ne sont PAS indexés ici :
  * ils sont reconstruits par code littéral / par lot.
  */
 export interface CodeIndex {
@@ -135,9 +135,9 @@ export function rebuildFormFromLines(
       form.fondsAlur = String(Math.abs(ln.amount));
     } else if (code === '401') {
       form.fournisseurs = String(Math.abs(ln.amount));
-    } else if (code === '110') {
+    } else if (code === '12') {        // B3 : compte travaux (ex-110) ; champ report110 conservé
       form.report110 = String(ln.amount);
-    } else if (code === '120') {
+    } else if (code === '478') {       // B3 : compte d'attente courant (ex-120) ; champ report120 conservé
       form.report120 = String(ln.amount);
     } else if (isBankCode(code)) {
       const id = bankIdByCode[code];
@@ -182,11 +182,12 @@ export function buildOpeningLines(inputs: RepriseInputs, lots: LotRow[]): Openin
   }
 
   // 3) Globaux essentiels. Convention de signe : passifs (105 réserve, 401 dette) = crédit
-  //    -> montant négatif ; reports débiteurs (110/120) -> positif. Le moteur équilibre le résidu.
+  //    -> montant négatif ; reports débiteurs (12/478) -> positif. Le moteur équilibre le résidu.
+  // B3 : report110 -> compte travaux '12' (ex-110) ; report120 -> compte d'attente courant '478' (ex-120).
   const alur = num(form.fondsAlur);     if (alur !== 0) lines.push({ accountCode: '105', lotId: null, amount: -alur });
   const four = num(form.fournisseurs);  if (four !== 0) lines.push({ accountCode: '401', lotId: null, amount: -four });
-  const r110 = num(form.report110);     if (r110 !== 0) lines.push({ accountCode: '110', lotId: null, amount: r110 });
-  const r120 = num(form.report120);     if (r120 !== 0) lines.push({ accountCode: '120', lotId: null, amount: r120 });
+  const r110 = num(form.report110);     if (r110 !== 0) lines.push({ accountCode: '12', lotId: null, amount: r110 });
+  const r120 = num(form.report120);     if (r120 !== 0) lines.push({ accountCode: '478', lotId: null, amount: r120 });
 
   // 4) Autres comptes (classes 1-5), saisis tels quels (débit positif)
   for (const [accId, code] of Object.entries(inputs.autresCodeById)) {

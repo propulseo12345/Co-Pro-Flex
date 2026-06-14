@@ -41,7 +41,7 @@ describe('buildOpeningLines', () => {
     expect(lines).toContainEqual({ accountCode: '103', lotId: 'lot-2', amount: 300 });
   });
 
-  it('mappe les comptes globaux essentiels (105/401/110/120) sans lotId', () => {
+  it('mappe les comptes globaux essentiels (105/401/12/478) sans lotId', () => {
     const inputs: RepriseInputs = {
       form: { ...emptyForm, fondsAlur: '1000', fournisseurs: '200', report110: '50', report120: '80' },
       lotValues: {},
@@ -50,8 +50,8 @@ describe('buildOpeningLines', () => {
     const lines = buildOpeningLines(inputs, lots);
     expect(lines).toContainEqual({ accountCode: '105', lotId: null, amount: -1000 });
     expect(lines).toContainEqual({ accountCode: '401', lotId: null, amount: -200 });
-    expect(lines).toContainEqual({ accountCode: '110', lotId: null, amount: 50 });
-    expect(lines).toContainEqual({ accountCode: '120', lotId: null, amount: 80 });
+    expect(lines).toContainEqual({ accountCode: '12', lotId: null, amount: 50 });
+    expect(lines).toContainEqual({ accountCode: '478', lotId: null, amount: 80 });
   });
 
   it('mappe la banque par CODE résolu via account_id (B5), pas par 512 nu', () => {
@@ -118,8 +118,8 @@ describe('rebuildFormFromLines (P0-A : ré-hydratation complète)', () => {
     { accountCode: '103', lotId: 'lot-2', amount: 300 },
     { accountCode: '105', lotId: null, amount: -1000 },   // réserve ALUR (crédit)
     { accountCode: '401', lotId: null, amount: -200 },    // dette fournisseur (crédit)
-    { accountCode: '110', lotId: null, amount: 50 },
-    { accountCode: '120', lotId: null, amount: 80 },
+    { accountCode: '12', lotId: null, amount: 50 },
+    { accountCode: '478', lotId: null, amount: 80 },
     { accountCode: '512000', lotId: null, amount: 4200 }, // BANQUE
     { accountCode: '512100', lotId: null, amount: 900 },  // 2e BANQUE
     { accountCode: '468', lotId: null, amount: 75 },      // AUTRE
