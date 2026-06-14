@@ -41,6 +41,7 @@ const GATES = [
   'supabase/tests/gate_finance_loop_e2e.sql',
   'supabase/tests/gate_cloture_affectation_e2e.sql',
   'supabase/tests/gate_gel_travaux_e2e.sql',
+  'supabase/tests/gate_multicles_e2e.sql',
   'supabase/tests/gate_avoir_fournisseur_e2e.sql',
 ];
 
