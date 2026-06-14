@@ -428,6 +428,35 @@ export function useRecordPayment() {
   return { ...state, mutate };
 }
 
+// ============================================================================
+// B4 — OPÉRATIONS À APURER (solde travaux 12 gelé)
+// ============================================================================
+
+export function useWorksPendingSettlement() {
+  return useFinanceQuery(financeApi.listWorksPendingSettlement);
+}
+
+export function useSettleWorksBalance() {
+  const { currentCoproId } = useCopro();
+  const [state, setState] = useState<MutationState>({ isLoading: false, error: null });
+
+  const mutate = useCallback(async (periodId?: string | null) => {
+    if (!currentCoproId) {
+      return { data: null, error: 'Aucune copropriété sélectionnée' };
+    }
+
+    setState({ isLoading: true, error: null });
+
+    const result = await financeApi.settleWorksBalance(currentCoproId, periodId ?? null);
+
+    setState({ isLoading: false, error: result.error });
+
+    return result;
+  }, [currentCoproId]);
+
+  return { ...state, mutate };
+}
+
 export function useCreateSupplier() {
   const { currentCoproId } = useCopro();
   const [state, setState] = useState<MutationState>({ isLoading: false, error: null });

@@ -1,0 +1,23 @@
+/* B4 — Bandeau dashboard « opérations travaux à apurer » (découvrabilité anti-oubli) */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: var(--space-lg);
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  border-radius: 12px;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: all 0.12s ease;
+}
+.banner:hover {
+  background: rgba(251, 191, 36, 0.13);
+  transform: translateY(-1px);
+}
+.icon { color: var(--warning); flex-shrink: 0; }
+.text { flex: 1; font-size: 14px; }
+.text strong { color: var(--warning); font-weight: 700; }
+.sub { color: var(--text-secondary); }
+.chevron { color: var(--text-tertiary); flex-shrink: 0; }

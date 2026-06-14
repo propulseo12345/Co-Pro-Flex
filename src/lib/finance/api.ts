@@ -991,6 +991,62 @@ export async function closePeriod(periodId: string): Promise<ApiResult<boolean>>
   return { data: true, error: null };
 }
 
+// ============================================================================
+// B4 — OPÉRATIONS À APURER (solde travaux 12 gelé, déversé via settle_works_balance)
+// ============================================================================
+
+export interface WorksPendingSettlement {
+  copro_id: string;
+  period_id: string;
+  period_name: string;
+  period_start: string;
+  period_end: string;
+  period_status: 'open' | 'closed' | 'approved';
+  /** signé : > 0 = débiteur (à appeler), < 0 = créditeur (à rembourser) */
+  works_balance: number;
+  age_days: number;
+}
+
+export interface SettleWorksResult {
+  success: boolean;
+  settled?: number;
+  direction?: 'appel' | 'remboursement';
+  period_id?: string;
+  tx_id?: string;
+  skipped?: string;
+}
+
+/** Soldes travaux (compte 12) en attente d'affectation, par copro/exercice ouvert. */
+export async function listWorksPendingSettlement(coproId: string): Promise<ApiResult<WorksPendingSettlement[]>> {
+  const supabase = createUntypedClient(); // vue hors types générés
+  const { data, error } = await supabase
+    .from('v_works_pending_settlement')
+    .select('*')
+    .eq('copro_id', coproId)
+    .order('period_end', { ascending: true });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as WorksPendingSettlement[], error: null };
+}
+
+/** Apure le solde travaux 12 vivant (déverse vers 450-2 par quote-part) sur l'exercice ouvert. */
+export async function settleWorksBalance(coproId: string, periodId?: string | null): Promise<ApiResult<SettleWorksResult>> {
+  const supabase = createUntypedClient(); // rpc hors types générés
+  const { data, error } = await supabase.rpc('settle_works_balance', {
+    p_copro_id: coproId,
+    p_period_id: periodId ?? null,
+  });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as SettleWorksResult, error: null };
+}
+
 export async function findPeriodByDates(coproId: string, startDate: string, endDate: string): Promise<ApiResult<AccountingPeriod | null>> {
   const supabase = getSupabaseClient();
 

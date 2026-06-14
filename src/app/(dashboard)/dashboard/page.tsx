@@ -13,6 +13,7 @@ import {
   BentoPriorites,
   BentoActivite,
 } from '@/features/dashboard/main';
+import { WorksToSettleBanner } from './WorksToSettleBanner';
 import styles from './dashboard.module.css';
 
 export default function DashboardPage() {
@@ -55,6 +56,8 @@ export default function DashboardPage() {
         isRefreshing={isRefreshing}
         onRefresh={refresh}
       />
+
+      <WorksToSettleBanner />
 
       <div className={styles.bento}>
         <BentoTresorerie
