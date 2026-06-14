@@ -1,0 +1,224 @@
+/* B4 — Écran « Opérations à apurer » (rendu premium, design system dark CoProFlex) */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--highbar-height, 48px));
+  overflow: hidden;
+}
+
+.content {
+  padding: 24px 32px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Bandeau explicatif (pédagogie : le 12 se reporte, à apurer à la clôture d'opération) ── */
+.note {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+  padding: 14px 18px;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.noteIcon { color: var(--warning); flex-shrink: 0; margin-top: 1px; }
+.note strong { color: var(--text-main); font-weight: 600; }
+
+/* ── Carte + table ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead th {
+  text-align: left;
+  padding: 12px 20px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  background: rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+.table thead th.right { text-align: right; }
+
+.table tbody td {
+  padding: 14px 20px;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr { transition: background 0.12s ease; }
+.table tbody tr:hover { background: rgba(148, 163, 184, 0.03); }
+
+.exercice { font-weight: 600; }
+.exerciceMeta { color: var(--text-tertiary); font-size: 11px; margin-top: 2px; }
+
+.amount {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--warning);
+  white-space: nowrap;
+}
+
+/* ── Badge sens (à appeler / à rembourser) ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badgeCall { background: rgba(96, 165, 250, 0.12); color: var(--secondary); }
+.badgeRefund { background: rgba(52, 211, 153, 0.12); color: var(--success); }
+
+/* ── Bouton action en ligne ── */
+.actionBtn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.actionBtn:hover { text-decoration: underline; }
+
+.btnIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.btnIcon:hover { background: rgba(148, 163, 184, 0.12); color: var(--text-main); }
+
+/* ── États (loading / error / empty) ── */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: 64px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.stateIcon { color: var(--text-tertiary); }
+.stateTitle { color: var(--text-main); font-size: 16px; font-weight: 600; }
+.stateSub { font-size: 13px; max-width: 420px; line-height: 1.5; }
+.spin { animation: spin 1s linear infinite; color: var(--primary); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.errorCard {
+  padding: 16px 20px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: var(--radius-lg);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+/* ── Modal d'apurement ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+.modalTitle { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--text-main); }
+.modalTitleIcon { color: var(--primary); }
+.closeBtn { background: none; border: none; color: var(--text-tertiary); cursor: pointer; display: inline-flex; }
+.closeBtn:hover { color: var(--text-main); }
+
+.modalBody { padding: 24px; display: flex; flex-direction: column; gap: var(--space-lg); }
+
+.recap { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.recapRow { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.recapLabel { color: var(--text-secondary); }
+.recapValue { color: var(--text-main); font-weight: 600; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.recapValueWarn { color: var(--warning); }
+
+.warningBox {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: var(--radius-lg);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.warningBox strong { color: var(--warning); }
+.warnIcon { flex-shrink: 0; margin-top: 1px; color: var(--warning); }
+
+.modalFooter { display: flex; justify-content: flex-end; gap: 12px; padding: 18px 24px; border-top: 1px solid var(--border-light); }
+.cancelBtn { padding: 9px 18px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 8px; color: var(--text-main); font-size: 13px; font-weight: 500; cursor: pointer; }
+.cancelBtn:hover { background: var(--surface-hover); }
+.confirmBtn { padding: 9px 18px; background: var(--primary); border: none; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.12s ease; }
+.confirmBtn:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+.confirmBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.mutationError { color: var(--danger); font-size: 12.5px; padding-top: 4px; }
+
+@media (max-width: 768px) {
+  .content { padding: var(--space-md); }
+  .table thead th, .table tbody td { padding: 10px 12px; }
+}

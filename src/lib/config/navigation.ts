@@ -3,7 +3,7 @@ import {
   FileText, MessageSquare, Scale, Calendar,
   Calculator, Receipt, ArrowLeftRight, FolderOpen, Mail,
   AlertTriangle, BookOpen, ClipboardList, BarChart3,
-  ShieldCheck, Zap, FileCode,
+  ShieldCheck, Zap, FileCode, Layers,
   type LucideIcon
 } from 'lucide-react';
 
@@ -57,6 +57,7 @@ export const MODULES: ModuleConfig[] = [
     href: '/finance/comptabilite',
     subPages: [
       { label: 'Comptabilité', href: '/finance/comptabilite', icon: Calculator },
+      { label: 'Opérations à apurer', href: '/finance/operations-a-apurer', icon: Layers },
       { label: 'Budgets', href: '/finance/budgets', icon: FileText },
       { label: 'Factures', href: '/finance/factures', icon: Receipt },
       { label: 'Appels de fonds', href: '/finance/appels-fonds', icon: DollarSign },
