@@ -115,9 +115,10 @@ J0 hygiène + arbitrages ✅ ── J1 sécurité/RLS ✅ ── J2 ✅ (2.9/2.1
 
 ## J4 — Qualité & garde-fous *(2 sessions · effort `Max`)*
 
-- [ ] **Zod + React Hook Form** sur les formulaires critiques finance/AG (aucune validation aujourd'hui — confirmé absent des deps).
-- [ ] **CSP** : passer de Report-Only à enforced (après vérification des écrans).
-- [ ] Dette lint bloquante (13 erreurs) → job lint CI bloquant ; sweep final « aucun faux bouton ».
+- [x] **Zod + React Hook Form** sur les formulaires critiques finance/AG ✅ : infra `validation/` + `FormField` + pilote **PaymentModal** (#23 mergé) ; **finance** facture/budget/dépense (**PR #24**, gates verts) ; **AG** InlineResolutionEditor + socle `validation/ag/` (**PR #25**, gates verts). Décision « bon outil au bon endroit » : CustomResolutionEditor/AddPowerForm/BudgetEditModal laissés (déjà validés ailleurs ou inadéquats). Revue adversariale multi-agents → bugs réels corrigés (postes sur-déclarés, withRetention figé, race de soumission).
+- [x] **CSP** Report-Only → enforced ✅ (**#22 mergé**).
+- [x] Dette lint bloquante → **job lint CI bloquant** ✅ (**#21 mergé**, 549 warnings résorbés hors react-hooks).
+- [x] **Sweep « aucun faux bouton »** ✅ *(audit 2026-06-14)* : `.planning/AUDIT_FAUX_BOUTONS_2026-06-14.md` (workflow 5 agents) — **27 findings, 15 nets + 6 à trancher**. Lot **exports comptables** résorbé par la **PR #26** (export CSV). Reste : téléchargements GED / pièces jointes mail (même handler storage → bloc J2-bis/J9), et 6 décisions produit. (Pass exhaustif = J10.)
 
 ## J5 — Conformité légale & métier 1er client *(F7/F8/F9 · 5-7 sessions · effort `Max` + `ultracode` sur annexes)*
 

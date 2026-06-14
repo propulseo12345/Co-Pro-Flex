@@ -1,22 +1,23 @@
-# Session State — 2026-06-12 ~15:30 (lot 1 livré + mergé, lot 2 découverte faite)
+# Session State — 2026-06-14 — E4-cœur livré + bascule cloud live + tokenade retiré
 
 ## Branch / Commit
-`j2bis-lot2-ag-annexes` @ `a5f06fd` (= origin/main post-PR #13, clean hors parasites 0-octet)
+`e4-operation-id-ledger` @ `3423585` (E4 `bee14b4` + login 1-clic + playwright local). Pas encore poussé.
 
 ## Completed This Session
-- **Lot 1 J2-bis LIVRÉ + MERGÉ (PR #13)** : 0049 (4 vues écrans principaux + rename unpaid_lots_count + statuts AG alignés) + gate 14/14 ; spinners silencieux réparés (cause racine) ; purge mock impayés ; VentesProvider descendu ; badge facture OS. Preuves : tsc 0, gates 14/14, vitest 97/97.
-- **CI réparée** : CLI Supabase épinglée 2.105.0 (`latest` cassait main depuis le 11/06 sur TOUTES les branches).
-- **Codex acté HS** : règle inversée dans CLAUDE.md global (Claude exécute par défaut, Codex = second avis CLI direct seulement).
-- Lot 2 : découverte COMPLÈTE → périmètre réel 6 vues + 2 RPC + 1 table + 1 ALTER (8 RPC mortes à ne pas créer).
+- **E4-cœur** (migration 0060) : `operation_id` niveau ligne (FK budgets RESTRICT) + précédence `operation_id⇒travaux` (open_next_period, v_result_allocation_split) + garde multi-clés (settle_works_balance). Gate `gate_e4_operation_id_e2e` + db-test.mjs. Revue adversariale OK, **test cloud rollback vert**.
+- **Bascule CLOUD LIVE** : nouveau projet `qqfqrcolzmcbsvfaumiq` (59 migrations poussées, RLS ON+FORCE, base vierge), `.env.local` → cloud-only. Local abandonné (RAM).
+- **Compte démo 1-clic** `lyes.triki@coproflex.fr`/`password123` (bouton login).
+- **tokenade retiré** (hook + MCP + CLAUDE.md global) → redémarrage Claude Code requis.
 
 ## Next Task
-- **Écrire migration 0050 + gate_0050_ag_annexes** selon `.planning/PROGRESS_j2bis-lot2-ag-annexes.md` (TOUT le design y est : contrats, sources, pièges). Puis db:test, tsc, vitest, commits, PR.
-- Effort : `Max` pour l'écriture ; **`ultracode` à proposer pour la revue adversariale de fin de lot, AVANT merge**.
+- **Pousser la branche `e4-operation-id-ledger` + ouvrir la PR** (compte `lyestriki-29`, CI db:test) — push direct main bloqué.
+- Puis **E4 câblage écrivains** : facture/appel travaux qui RENSEIGNENT operation_id (param front→edge→RPC ; supplier_invoice_lines sans budget_line_id → saisie explicite de l'opération, décision UX à cadrer).
+- 👉 Effort conseillé : **Max** (cadrage UX + câblage séquentiel) ; `ultracode` ponctuel pour revue si on touche au GL.
 
 ## Blockers
-- None. (Push : `gh auth switch -u lyestriki-29` juste avant chaque push — le compte actif retombe seul sur Propulseo.)
+- Push GitHub : nécessite `lyestriki-29` (autres = 403). Supabase local KO (RAM 16 Go) → tests via cloud rollback (cf. mémoire).
 
 ## Key Context
-- vitest : lancer depuis `C:\Users\...` (C MAJUSCULE) sinon double chargement vitest → échec bidon (10 fichiers "reading 'config'").
-- Base docker locale déjà à jour 0049 ; `npm run dev -- -p 3010` (port 3000 = TropPayé).
-- Parasites 0-octet racine : `git clean -f` à faire par Lyes.
+- Cloud live ref `qqfqrcolzmcbsvfaumiq` ; token+db_password dans `.env.local` (gitignoré). Backup `.env.local.bak-local`.
+- ⚠️ Retirer le compte démo `password123` avant vrais clients. NE PAS pousser de migration au fil de l'eau sur le live (drift → PR/CI/déploiement délibéré).
+- Junk à la racine du repo (fichiers `?? ...`) + .planning non gitignoré : ne JAMAIS `git add .`.
