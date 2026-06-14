@@ -15,15 +15,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doLogin = async (emailValue: string, passwordValue: string) => {
     setError(null);
     setLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: emailValue,
+        password: passwordValue,
       });
 
       if (error) {
@@ -42,16 +41,20 @@ export default function LoginPage() {
     }
   };
 
-  // Comptes de démo pour faciliter le test
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await doLogin(email, password);
+  };
+
+  // Compte de démo — connexion en un clic
   const demoAccounts = [
-    { email: 'admin@coproflex.fr', role: 'Admin / Syndic' },
-    { email: 'gestionnaire@coproflex.fr', role: 'Gestionnaire' },
-    { email: 'jean.dupont@email.fr', role: 'Copropriétaire' },
+    { email: 'lyes.triki@coproflex.fr', name: 'Lyes Triki', role: 'Syndic / Gestionnaire' },
   ];
 
-  const fillDemo = (demoEmail: string) => {
+  const loginAsDemo = (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('password123');
+    void doLogin(demoEmail, 'password123');
   };
 
   return (
@@ -124,10 +127,11 @@ export default function LoginPage() {
               <button
                 key={account.email}
                 type="button"
-                onClick={() => fillDemo(account.email)}
+                onClick={() => loginAsDemo(account.email)}
+                disabled={loading}
                 className={styles.demoButton}
               >
-                <span className={styles.demoEmail}>{account.email}</span>
+                <span className={styles.demoEmail}>{account.name}</span>
                 <span className={styles.demoRole}>{account.role}</span>
               </button>
             ))}
