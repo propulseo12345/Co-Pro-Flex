@@ -1,7 +1,52 @@
-# PROGRESS — J2-bis lot 2 : AG annexes (découverte FAITE, écriture À FAIRE)
+# PROGRESS — J2-bis lot 2 : AG annexes — ✅ LIVRÉ + REVU + CORRIGÉ (PR #14, prête à merger)
 
-> Reprise : branche `j2bis-lot2-ag-annexes` @ a5f06fd (= origin/main post-PR #13).
-> Méthode identique 0049 (PR #13) : contrat strict + gate durcie + appelants réels.
+> **État 2026-06-12 ~21h40 : revue adversariale `ultracode` PASSÉE (95 agents,
+> 44 constats, 35 confirmés double contre-expertise) PUIS TOUS LES VRAIS CONSTATS
+> CORRIGÉS. 3 commits poussés (`8950a14` db+gate, `b7735b7` edge, `1d605fe` front)
+> sur `1d605fe`. CI PR #14 TOUTE VERTE (rejeu migrations à neuf + Gates SQL + tsc/lint/tests).
+> RESTE : merge USER.**
+>
+> ## Corrections appliquées (revue → fix)
+> - **BLOCKER** v_ag_drafts_progress : filtre `status='draft'` restauré (sinon toute
+>   AG convoquée/clôturée réapparaissait comme brouillon éditable + auto-resume cassé).
+> - **BLOCKER** create_ag_notification RECRÉÉE (signature edges p_copro_id/p_notification_type/
+>   p_document_id) : l'ancienne 0033 échouait silencieusement → notification_type jamais
+>   écrit, vue stats morte. `relance`/`pv` désormais possibles.
+> - **MAJOR** completion_ratio : décision USER = **jauge B** (étapes wizard /9, 0..100).
+> - **MAJOR** versionnage ag_documents : chemin storage unique par génération côté edge
+>   (avant : toutes les versions pointaient le même fichier écrasé).
+> - **MAJOR** correspondence_tantiemes : dérivé des votes `vote_source='correspondence'`
+>   (la RPC n'écrit jamais ag_attendance). total_tantiemes : **les deux** = vue alignée
+>   `limit 1` + index unique partiel (1 seule clé générale active/copro).
+> - **MAJOR** gate : refus 42501 register/delete sous non-gestionnaire + RLS ag_documents
+>   (flag/policies/visibilité) désormais prouvés.
+> - **MINORS** : advisory lock anti-collision version, delete_ag_draft anti-TOCTOU +
+>   restitution storage_path, generated_by_name figé, v_ag_notification_stats exclut
+>   'cancelled', index ag_notifications(ag_id), updated_at+trigger ag_documents,
+>   last_activity_at réintègre résolutions/présences, front remise_main→hand_delivery.
+> - **DETTE TRACÉE** : src/types/supabase.ts garde l'ancienne signature create_ag_notification
+>   (clients untyped, regen scratch déjà différée) ; p_document_id reçu mais non persisté
+>   (ag_notifications sans colonne dédiée — hors périmètre).
+>
+> Rapport revue complet (temporaire) : `tasks/wfp38lnlh.output`.
+>
+> ## Code review des fixes (27 agents, 2026-06-12 ~22h) → suites TRACÉES (non bloquantes)
+> Verdict : fixes solides, 0 régression nominale, 6/23 candidats réfutés. Constats confirmés,
+> tous LATENTS ou dette déjà connue (vérifié empiriquement : 0 indivision, 0 drift clé sur la base) :
+> - **MAJOR latent (à trancher MÉTIER)** : en indivision (share_percent<100), correspondence_tantiemes
+>   dérivé des votes vaut la quote-part pondérée (RPC 0030 : weight×share/100) alors que la feuille
+>   de présence/quorum compte le poids BRUT du lot. Ratio correspondance non comparable au quorum
+>   pour les indivisions. 0 ligne concernée aujourd'hui (toutes share=100). À arbitrer avec Lyes :
+>   poids correspondance d'un indivisaire = sa quote-part OU le poids plein (art.23 mandataire) ?
+> - **Deploy** : uq_one_active_general_key sans IF NOT EXISTS / pré-nettoyage casserait 0050 sur une
+>   base portant déjà 2 clés générales actives. 0 drift sur nos bases + CI rejeu neuf vert → OK pour
+>   notre modèle fresh-replay. À garder en tête si applique sur une base legacy driftée.
+> - **MINORS dette** : src/types/supabase.ts garde l'ancienne signature create_ag_notification (regen
+>   différée) ; delete_ag_draft renvoie deleted_storage_paths mais useAgDrafts ne câble pas encore
+>   storage.remove (orphelins bucket — quasi nul car un brouillon a rarement des docs) ; p_document_id
+>   reçu non persisté (pas de colonne) ; gate_0050 dépend implicitement du contexte service_role du runner.
+> ---
+> **Archive de référence (design initial) ci-dessous :**
 
 ## Périmètre RÉEL (après audit des appelants — bien plus petit que le plan)
 À CRÉER (migration **0050**) :
