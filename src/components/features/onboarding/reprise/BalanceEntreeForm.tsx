@@ -55,11 +55,11 @@ export function BalanceEntreeForm({ state, bankAccounts, planAccounts, onChange 
   }, [state, onChange]);
 
   // Classes 1-5 hors comptes déjà couverts ailleurs :
-  //  - « Essentiel » : 105, 110, 120, 401, banques
+  //  - « Essentiel » : 105, 12 (ex-110), 478 (ex-120), 401, banques
   //  - GÉRÉ PAR LOT : 103 (avance), saisi dans la colonne « Avance » de SoldesParLotTable
   //    -> ne JAMAIS l'exposer en champ global (sinon buildCodeIndex l'exclut côté save et la
   //    saisie globale est silencieusement perdue). Cohérent avec buildCodeIndex (useRepriseSoldes).
-  const excludedCodes = new Set(['105', '110', '120', '401', '103']);
+  const excludedCodes = new Set(['105', '12', '478', '401', '103']); // B3 : 12 = ex-110, 478 = ex-120
   const bankIds = new Set(bankAccounts.map(b => b.id));
   const autresAccounts = planAccounts.filter(a =>
     /^[1-5]/.test(a.code) && !excludedCodes.has(a.code) && !bankIds.has(a.id)
@@ -92,9 +92,9 @@ export function BalanceEntreeForm({ state, bankAccounts, planAccounts, onChange 
           value={state.fondsAlur} onChange={v => setScalar('fondsAlur', v)} />
         <Field label="Dettes fournisseurs" sub="401"
           value={state.fournisseurs} onChange={v => setScalar('fournisseurs', v)} />
-        <Field label="Report à nouveau — courant" sub="120"
+        <Field label="Report à nouveau — courant" sub="478"
           value={state.report120} onChange={v => setScalar('report120', v)} />
-        <Field label="Report à nouveau — travaux / exceptionnel" sub="110"
+        <Field label="Report à nouveau — travaux / exceptionnel" sub="12"
           value={state.report110} onChange={v => setScalar('report110', v)} />
       </section>
 

@@ -374,8 +374,12 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Désactivé en local : sous Windows/Docker Desktop, le conteneur `vector` ne peut pas joindre
+# le socket Docker (NetworkUnreachable) et crash-loop -> `supabase db reset` attend cette stack
+# analytics et sort en erreur, alors que migrations + seed s'appliquent correctement. Analytics =
+# uniquement le visualiseur de logs de Studio (logflare), aucun impact DB/app/migrations/tests.
 [analytics]
-enabled = true
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

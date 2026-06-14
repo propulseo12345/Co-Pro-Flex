@@ -49,6 +49,17 @@ Description claire du bug ou comportement inattendu.
 
 ---
 
+## REVUE DE CODE À CHAQUE GROS CHANTIER (OBLIGATOIRE)
+
+Tout **gros chantier** (feature large, migration à enjeu — surtout finance / grand livre —, refonte, changement structurant multi-fichiers) DOIT passer une **code review avant clôture / merge** :
+1. Lancer `/code-review` (ou une **revue adversariale multi-agents** sur le diff de la branche) une fois le code écrit et le type-check / les tests verts.
+2. Trier les retours : **vrai bug / faux positif / différé** ; corriger les vrais avant de merger.
+3. Ne **jamais** annoncer « terminé » tant que la revue n'est pas passée et les vrais retours traités.
+
+Une petite modif isolée (typo, rename local, fix évident) en est exemptée.
+
+---
+
 ## STACK
 
 | Tech | Version | Usage |

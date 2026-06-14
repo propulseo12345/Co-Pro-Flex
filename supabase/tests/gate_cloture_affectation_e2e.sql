@@ -2,27 +2,27 @@
 -- ============================================================================================
 -- Prouve le cycle d'exercice que le seed « boucle d'or » exclut VOLONTAIREMENT (incompatible avec
 -- la gate per-lot car v_owner_statement_by_lot agrège toutes les périodes, cf. en-tête 0029) :
---   close_period(N) -> open_next_period(N→N+1) -> regularize_period (affectation 110/120 → 450 par
+--   close_period(N) -> open_next_period(N→N+1) -> regularize_period (affectation 478/12 → 450 par
 --   quote-part). Ce gate N'UTILISE PAS audit_finance_integrity (son check LOT_GL_MISMATCH cross-période
 --   remonterait par construction après report d'à-nouveau) : il s'appuie sur le garde-fou DÉDIÉ
 --   v_result_allocation_split (0 ligne = conforme) + des réconciliations ciblées et date-indépendantes.
 --
 -- Invariants prouvés :
 --   1. close_period : l'exercice N passe à 'closed'.
---   2. open_next_period : N+1 créé et 'open' ; report du résultat courant en 120 ; report du bilan.
---   3. À-NOUVEAU : solde 120 de N+1 = −résultat courant de N (excédent → C120) ; banque 512 reportée
+--   2. open_next_period : N+1 créé et 'open' ; report du résultat courant en 478 ; report du bilan.
+--   3. À-NOUVEAU : solde 478 de N+1 = −résultat courant de N (excédent → C478) ; banque 512 reportée
 --      à l'identique (réconciliation du report de bilan, date-indépendante).
 --   4. N+1 équilibré (Σdébit = Σcrédit) après à-nouveau ET après affectation.
 --   5. regularize_period réussit : il appelle assert_result_allocation_split EN INTERNE (rollback si
---      l'invariant 110/120 est violé) — sa réussite est déjà une preuve forte.
---   6. Après affectation : solde 120 de N+1 = 0 (résultat entièrement déversé).
+--      l'invariant 478/12 est violé) — sa réussite est déjà une preuve forte.
+--   6. Après affectation : solde 478 de N+1 = 0 (résultat entièrement déversé).
 --   7. Garde-fou explicite : v_result_allocation_split = 0 ligne pour (copro, N+1).
 --   8. Affectation par QUOTE-PART : le résultat est crédité en 450-1 sur TOUS les lots (avec lot_id),
 --      Σ = résultat affecté.
 --   9. approve_period : l'exercice N passe à 'approved' (le cycle se referme, immutabilité figée).
 --
 -- LIMITE DE COUVERTURE : ce seed ne génère QUE du résultat COURANT (classes 6/7 courantes) → la
---   branche TRAVAUX (résultat 110 / affectation 450-2) n'est PAS exercée ici. Pour la couvrir, il
+--   branche TRAVAUX (résultat 12 / affectation 450-2) n'est PAS exercée ici. Pour la couvrir, il
 --   faudra un seed avec des comptes travaux/exceptionnels (671/672/.../702/705/706). assert_result_
 --   allocation_split la contrôlerait alors automatiquement.
 DO $$
@@ -65,7 +65,7 @@ BEGIN
     RAISE EXCEPTION 'ASSERT FAIL (1) : N attendu closed, trouvé %', v_n_status;
   END IF;
 
-  -- 2) Ouverture de N+1 (report à-nouveau + résultat ventilé 110/120).
+  -- 2) Ouverture de N+1 (report à-nouveau + résultat ventilé 478/12).
   v_open := open_next_period(v_copro, v_n, NULL, NULL, NULL);
   IF NOT (v_open->>'success')::boolean THEN
     RAISE EXCEPTION 'ASSERT FAIL (2) : open_next_period KO : %', v_open;
@@ -76,19 +76,19 @@ BEGIN
     RAISE EXCEPTION 'ASSERT FAIL (2) : N+1 absent ou non ouvert';
   END IF;
 
-  -- Non-vacuité : ce seed DOIT produire un résultat non nul (sinon les asserts de signe sur 120
+  -- Non-vacuité : ce seed DOIT produire un résultat non nul (sinon les asserts de signe sur 478
   -- trivialiseraient à 0=0). Le seed « boucle d'or » génère un excédent courant.
   IF v_result_courant = 0 THEN
     RAISE EXCEPTION 'ASSERT FAIL (3-pre) : résultat courant nul — le seed ne produit pas d''excédent/déficit, le test ne prouverait rien';
   END IF;
 
-  -- 3) À-NOUVEAU : 120 de N+1 = −résultat courant (excédent → C120) ; banque reportée à l'identique.
+  -- 3) À-NOUVEAU : 478 de N+1 = −résultat courant (excédent → C478) ; banque reportée à l'identique.
   SELECT coalesce(sum(CASE WHEN e.direction='credit' THEN e.amount ELSE -e.amount END), 0) INTO v_120_apres_an
   FROM ledger_entries e JOIN accounts a ON a.id = e.account_id
   JOIN ledger_transactions t ON t.id = e.tx_id AND t.status = 'posted'
-  WHERE a.copro_id = v_copro AND a.code = '120' AND e.period_id = v_np;
+  WHERE a.copro_id = v_copro AND a.code = '478' AND e.period_id = v_np;
   IF abs(v_120_apres_an + v_result_courant) > 0.01 THEN
-    RAISE EXCEPTION 'ASSERT FAIL (3) : 120 N+1 (%) ≠ −résultat courant (% )', v_120_apres_an, -v_result_courant;
+    RAISE EXCEPTION 'ASSERT FAIL (3) : 478 N+1 (%) ≠ −résultat courant (% )', v_120_apres_an, -v_result_courant;
   END IF;
 
   SELECT coalesce(sum(CASE WHEN e.direction='debit' THEN e.amount ELSE -e.amount END), 0) INTO v_512_np
@@ -114,13 +114,13 @@ BEGIN
     RAISE EXCEPTION 'ASSERT FAIL (5) : regularize_period KO : %', v_reg;
   END IF;
 
-  -- 6) 120 de N+1 entièrement déversé.
+  -- 6) 478 de N+1 entièrement déversé.
   SELECT coalesce(sum(CASE WHEN e.direction='credit' THEN e.amount ELSE -e.amount END), 0) INTO v_120_apres_aff
   FROM ledger_entries e JOIN accounts a ON a.id = e.account_id
   JOIN ledger_transactions t ON t.id = e.tx_id AND t.status = 'posted'
-  WHERE a.copro_id = v_copro AND a.code = '120' AND e.period_id = v_np;
+  WHERE a.copro_id = v_copro AND a.code = '478' AND e.period_id = v_np;
   IF abs(v_120_apres_aff) > 0.01 THEN
-    RAISE EXCEPTION 'ASSERT FAIL (6) : 120 N+1 non soldé après affectation, solde=%', v_120_apres_aff;
+    RAISE EXCEPTION 'ASSERT FAIL (6) : 478 N+1 non soldé après affectation, solde=%', v_120_apres_aff;
   END IF;
 
   -- 4b) N+1 toujours équilibré après affectation.
@@ -142,11 +142,11 @@ BEGIN
     RAISE EXCEPTION 'ASSERT FAIL (7-pre) : aucune écriture result_allocation en N+1 — regularize n''a rien affecté';
   END IF;
 
-  -- 7) Garde-fou dédié : aucune écriture d'affectation non conforme à l'invariant 110/120.
+  -- 7) Garde-fou dédié : aucune écriture d'affectation non conforme à l'invariant 478/12.
   SELECT count(*) INTO v_violations
   FROM v_result_allocation_split WHERE copro_id = v_copro AND period_id = v_np;
   IF v_violations <> 0 THEN
-    RAISE EXCEPTION 'ASSERT FAIL (7) : v_result_allocation_split remonte % violation(s) de l''invariant 110/120', v_violations;
+    RAISE EXCEPTION 'ASSERT FAIL (7) : v_result_allocation_split remonte % violation(s) de l''invariant 478/12', v_violations;
   END IF;
 
   -- 8) Affectation par QUOTE-PART : 450-1 crédité sur TOUS les lots, Σ = résultat affecté.
@@ -172,7 +172,7 @@ BEGIN
     RAISE EXCEPTION 'ASSERT FAIL (9) : N attendu approved, trouvé %', v_n_status;
   END IF;
 
-  RAISE NOTICE 'GATE CLÔTURE OK : N closed→approved, à-nouveau équilibré, excédent % affecté à % lots, 120 soldé, invariant 110/120 conforme',
+  RAISE NOTICE 'GATE CLÔTURE OK : N closed→approved, à-nouveau équilibré, excédent % affecté à % lots, 478 soldé, invariant 478/12 conforme',
     -v_result_courant, v_alloc_lots;
   RAISE EXCEPTION 'ROLLBACK_TEST_OK';
 EXCEPTION WHEN OTHERS THEN

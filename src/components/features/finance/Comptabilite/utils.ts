@@ -11,8 +11,8 @@ export const PLAN_COMPTABLE: Record<string, { libelle: string; type: TypeCompte 
   '102': { libelle: 'Provisions pour travaux', type: 'PASSIF' },
   '103': { libelle: 'Avances', type: 'PASSIF' },
   '105': { libelle: 'Fonds de travaux ALUR', type: 'PASSIF' },
-  '12': { libelle: 'Solde en attente sur travaux', type: 'PASSIF' },
-  '13': { libelle: 'Solde en attente sur opérations courantes', type: 'PASSIF' },
+  '12': { libelle: 'Solde en attente sur travaux et opérations exceptionnelles', type: 'PASSIF' },
+  '13': { libelle: 'Subventions', type: 'PASSIF' },
 
   // Classe 4 - Tiers
   '401': { libelle: 'Fournisseurs', type: 'PASSIF' },
@@ -27,6 +27,7 @@ export const PLAN_COMPTABLE: Record<string, { libelle: string; type: TypeCompte 
   '467': { libelle: 'Autres comptes débiteurs ou créditeurs', type: 'ACTIF' },
   '471': { libelle: 'Compte d\'attente', type: 'ACTIF' },
   '472': { libelle: 'Compte de répartition périodique', type: 'PASSIF' },
+  '478': { libelle: 'Solde en attente sur opérations courantes', type: 'PASSIF' }, // B3 : sas affectation résultat courant (ex-120)
   '486': { libelle: 'Charges constatées d\'avance', type: 'ACTIF' },
   '487': { libelle: 'Produits constatés d\'avance', type: 'PASSIF' },
 

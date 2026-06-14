@@ -27,10 +27,7 @@ export const PLAN_COMPTABLE_COPROPRIETE: Record<string, CompteComptable> = {
   '1032': { numero: '1032', libelle: 'Avance travaux (art. 18)', description: 'Avances pour travaux non encore votés' },
   '1033': { numero: '1033', libelle: 'Autres avances', description: 'Toute autre avance décidée en AG' },
   '105': { numero: '105', libelle: 'Fonds de travaux ALUR (art. 14-2 II)', description: 'Cotisations obligatoires loi ALUR (min. 5% budget)' },
-  '11': { numero: '11', libelle: 'Solde en attente sur travaux', description: 'Régularisation travaux' },
-  '110': { numero: '110', libelle: 'Solde en attente sur travaux et opérations exceptionnelles', description: 'Excédent ou insuffisance non encore affecté' },
-  '12': { numero: '12', libelle: 'Solde en attente sur opérations courantes', description: 'Régularisation charges courantes' },
-  '120': { numero: '120', libelle: 'Solde en attente sur opérations courantes', description: 'Différence provisions/dépenses réelles après clôture' },
+  '12': { numero: '12', libelle: 'Solde en attente sur travaux et opérations exceptionnelles', description: 'Report du résultat travaux/exceptionnel non encore affecté (B3 : ex-110)' },
   '13': { numero: '13', libelle: 'Subventions', description: 'Subventions reçues ou en attente' },
   '131': { numero: '131', libelle: 'Subventions accordées, en instance de versement', description: 'Subventions notifiées non reçues' },
   '132': { numero: '132', libelle: 'Subventions encaissées', description: 'Subventions effectivement reçues' },
@@ -75,6 +72,7 @@ export const PLAN_COMPTABLE_COPROPRIETE: Record<string, CompteComptable> = {
   // 47x - Comptes d'attente
   '471': { numero: '471', libelle: 'Attente d\'imputation débiteur', description: 'Mouvement bancaire non identifié (débit)' },
   '472': { numero: '472', libelle: 'Attente d\'imputation créditeur', description: 'Mouvement bancaire non identifié (crédit)' },
+  '478': { numero: '478', libelle: 'Solde en attente sur opérations courantes', description: 'Sas d\'affectation du résultat courant (clôture → approbation AG, art. 45-1) — compte technique hors racine 12x (B3 : ex-120)' },
 
   // 48x - Comptes de régularisation
   '486': { numero: '486', libelle: 'Charges constatées d\'avance', description: 'Charges payées sur N mais concernant N+1' },
