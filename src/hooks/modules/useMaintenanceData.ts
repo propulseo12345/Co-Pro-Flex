@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { useCopro } from '@/providers/CoproContext';
 import type {
   Provider,
-  ProviderInsert,
   ProviderOverview,
   Contract,
   ContractOverview,
@@ -22,77 +21,26 @@ import type {
   ProviderCategory,
   ServiceOrderStatus,
 } from '@/types/domain';
+import {
+  createProvider as createProviderWrite,
+  createContract as createContractWrite,
+  createLogbookEntry as createLogbookEntryWrite,
+  translateProviderWrite,
+  translateContractWrite,
+  type ProviderWriteInput,
+  type ContractWriteInput,
+} from '@/lib/maintenance/writes';
+
+// Re-export pour compat des consommateurs qui importent ces types depuis ce hook.
+export type { ProviderWriteInput, ContractWriteInput };
 
 // Helper: Create untyped client for tables/views not yet in generated types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createUntypedClient = () => createClient() as any;
 
 // ============================================================================
-// ÉCRITURES — traduction du contrat legacy du front vers le schéma cible
-// (providers -> tiers, slugs work_domain -> domain_ids/domain_id,
-//  title/contract_number/provider_id/description -> label/reference/tiers_id/observations)
+// ÉCRITURES — extraites dans @/lib/maintenance/writes (source unique, importées ci-dessus).
 // ============================================================================
-
-/** Écriture prestataire : colonnes `tiers` + domaines en slugs work_domain. */
-export type ProviderWriteInput = Omit<ProviderInsert, 'domain_ids' | 'category'> & {
-  category?: ProviderCategory | 'coproflex';
-  domains?: string[];
-};
-
-/** Écriture contrat : colonnes cibles OU alias legacy encore utilisés par le front. */
-export type ContractWriteInput = Partial<Contract> & {
-  title?: string;            // -> label
-  contract_number?: string;  // -> reference
-  contract_type?: string;    // slug work_domain -> domain_id
-  provider_id?: string;      // -> tiers_id
-  description?: string;      // -> observations
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function resolveDomainIds(supabase: any, slugs: string[]): Promise<string[]> {
-  if (slugs.length === 0) return [];
-  const { data, error } = await supabase
-    .from('work_domain')
-    .select('id, slug')
-    .in('slug', slugs);
-  if (error) throw error;
-  const found = (data || []) as { id: string; slug: string }[];
-  const missing = slugs.filter((s) => !found.some((d) => d.slug === s));
-  if (missing.length > 0) {
-    // Pas de null silencieux : un slug UI non seedé doit échouer FORT.
-    throw new Error(`Domaine(s) d'intervention inconnu(s) : ${missing.join(', ')} (référentiel work_domain)`);
-  }
-  return found.map((d) => d.id);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function translateProviderWrite(supabase: any, input: Partial<ProviderWriteInput>) {
-  const { domains, category, ...rest } = input;
-  const out: Record<string, unknown> = { ...rest };
-  if (category !== undefined) out.category = category === 'coproflex' ? 'externe' : category;
-  // domains: [] est une désélection EXPLICITE -> domain_ids = [] ;
-  // domains absent (undefined) -> on ne touche pas à la colonne.
-  if (domains !== undefined) out.domain_ids = await resolveDomainIds(supabase, domains);
-  return out;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function translateContractWrite(supabase: any, input: ContractWriteInput) {
-  const { title, contract_number, contract_type, provider_id, description, ...rest } = input;
-  const out: Record<string, unknown> = { ...rest };
-  if (title !== undefined) out.label = title;
-  if (contract_number !== undefined) out.reference = contract_number;
-  if (provider_id !== undefined) out.tiers_id = provider_id;
-  if (description !== undefined) out.observations = description;
-  if (contract_type !== undefined) {
-    if (!contract_type) {
-      throw new Error('Type de contrat manquant (domain_id est obligatoire)');
-    }
-    const ids = await resolveDomainIds(supabase, [contract_type]);
-    out.domain_id = ids[0];
-  }
-  return out;
-}
 
 // ============================================================================
 // TYPES
@@ -191,18 +139,9 @@ export function useProviders(options: UseMaintenanceDataOptions = {}) {
 
   const createProvider = useCallback(async (provider: ProviderWriteInput) => {
     if (!currentCoproId) throw new Error('No copro selected');
-
-    const translated = await translateProviderWrite(supabase, provider);
-    const { data, error: insertError } = await supabase
-      .from('tiers')
-      .insert({ ...translated, copro_id: currentCoproId, is_provider: true })
-      .select()
-      .single();
-
-    if (insertError) throw insertError;
-
+    const data = await createProviderWrite(supabase, currentCoproId, provider);
     await fetchProvidersRef.current();
-    return data as Provider;
+    return data;
   }, [currentCoproId, supabase]);
 
   const updateProvider = useCallback(async (id: string, updates: Partial<ProviderWriteInput>) => {
@@ -326,18 +265,9 @@ export function useContracts(options: UseMaintenanceDataOptions = {}) {
 
   const createContract = useCallback(async (contract: ContractWriteInput) => {
     if (!currentCoproId) throw new Error('No copro selected');
-
-    const translated = await translateContractWrite(supabase, contract);
-    const { data, error: insertError } = await supabase
-      .from('contracts')
-      .insert({ ...translated, copro_id: currentCoproId })
-      .select()
-      .single();
-
-    if (insertError) throw insertError;
-
+    const data = await createContractWrite(supabase, currentCoproId, contract);
     await fetchContractsRef.current();
-    return data as Contract;
+    return data;
   }, [currentCoproId, supabase]);
 
   const updateContract = useCallback(async (id: string, updates: ContractWriteInput) => {
@@ -743,17 +673,9 @@ export function useLogbook(options: UseMaintenanceDataOptions = {}) {
   // (évite le 'copro_id: '' + cast' trompeur des appelants).
   const createEntry = useCallback(async (entry: Omit<LogbookEntryInsert, 'copro_id'>) => {
     if (!currentCoproId) throw new Error('No copro selected');
-
-    const { data, error: insertError } = await supabase
-      .from('logbook_entries')
-      .insert({ ...entry, copro_id: currentCoproId })
-      .select()
-      .single();
-
-    if (insertError) throw insertError;
-
+    const data = await createLogbookEntryWrite(supabase, currentCoproId, entry);
     await fetchEntriesRef.current();
-    return data as LogbookEntry;
+    return data;
   }, [currentCoproId, supabase]);
 
   const updateEntry = useCallback(async (id: string, updates: Partial<LogbookEntry>) => {
