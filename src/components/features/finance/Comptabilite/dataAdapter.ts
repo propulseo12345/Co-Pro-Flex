@@ -48,6 +48,10 @@ export function transformLedgerToOperations(entries: GeneralLedgerEntry[]): Oper
       credit,
       solde: runningBalance,
       numeroPiece: entry.source_id?.slice(0, 8) || undefined,
+      txId: entry.tx_id,
+      sourceType: entry.source_type,
+      isReversed: entry.is_reversed,
+      reversalOf: entry.reversal_of,
     };
   });
 }

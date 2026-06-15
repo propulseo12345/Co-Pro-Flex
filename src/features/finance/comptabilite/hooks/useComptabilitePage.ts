@@ -139,6 +139,21 @@ export function useComptabilitePage() {
   const [selectedOperation, setSelectedOperation] = useState<OperationComptable | null>(null);
   const [selectedDepense, setSelectedDepense] = useState<Depense | null>(null);
 
+  // Contre-passation (0071)
+  const [isReversing, setIsReversing] = useState(false);
+  const [reverseError, setReverseError] = useState<string | null>(null);
+  // Une contre-passation atterrit dans la période OUVERTE — disponible tant qu'IL EXISTE une période
+  // ouverte, même si la période AFFICHÉE est close (c'est justement là que l'extourne est utile).
+  const hasOpenPeriod = useMemo(() => (allPeriods ?? []).some(p => p.status === 'open'), [allPeriods]);
+  // Écritures régénérables (clôture/à-nouveau/affectation) : on les régénère, on ne les contre-passe pas.
+  const canReverseSelected = useMemo(() => {
+    const op = selectedOperation;
+    // Bloqué si : pas de tx, déjà extournée, est elle-même une extourne (reversalOf), aucune période ouverte.
+    if (!op?.txId || op.isReversed || op.reversalOf || !hasOpenPeriod) return false;
+    const REGENERABLE = ['opening_balance', 'closing', 'opening_onboarding', 'result_allocation'];
+    return !REGENERABLE.includes(op.sourceType ?? '');
+  }, [selectedOperation, hasOpenPeriod]);
+
   // Derive approval status from period
   const etatCloture: EtatCloture = useMemo(
     () => {
@@ -203,8 +218,25 @@ export function useComptabilitePage() {
   const handleViewOperationDetail = useCallback((operation: OperationComptable) => {
     setSelectedOperation(operation);
     setSelectedDepense(null);
+    setReverseError(null);
     setShowDetailModal(true);
   }, []);
+
+  // Contre-passe la TRANSACTION de l'opération sélectionnée (écriture inverse dans la période ouverte).
+  const handleReverseOperation = useCallback(async (reason: string) => {
+    if (!selectedOperation?.txId) return;
+    setIsReversing(true);
+    setReverseError(null);
+    const result = await financeApi.reverseLedgerTransaction(selectedOperation.txId, reason);
+    setIsReversing(false);
+    if (result.error) {
+      setReverseError(result.error);
+      return;
+    }
+    setShowDetailModal(false);
+    setSelectedOperation(null);
+    await Promise.all([refreshLedger(), refreshBalance()]);
+  }, [selectedOperation, refreshLedger, refreshBalance]);
 
   const handleValiderCloture = useCallback(async () => {
     const anneeCloture = etatCloture.annee;
@@ -342,5 +374,11 @@ export function useComptabilitePage() {
     handleViewOperationDetail,
     handleValiderCloture,
     exportCSV,
+
+    // Contre-passation (0071)
+    isReversing,
+    reverseError,
+    canReverseSelected,
+    handleReverseOperation,
   };
 }

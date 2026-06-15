@@ -199,6 +199,10 @@ export default function ComptabilitePage() {
         onClose={() => page.setShowDetailModal(false)}
         selectedOperation={page.selectedOperation}
         selectedDepense={page.selectedDepense}
+        canReverse={page.canReverseSelected}
+        isReversing={page.isReversing}
+        reverseError={page.reverseError}
+        onReverse={page.handleReverseOperation}
       />
       {!page.isReadOnly && (
         <ClotureModal

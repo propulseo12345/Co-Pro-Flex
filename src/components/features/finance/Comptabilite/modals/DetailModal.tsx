@@ -1,6 +1,7 @@
 'use client';
 
-import { Link as LinkIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Link as LinkIcon, RotateCcw } from 'lucide-react';
 import { OperationComptable, Depense } from '../types';
 import { TYPE_DEPENSE_LABELS } from '../data';
 import { formatCurrency, formatDate } from '../utils';
@@ -11,14 +12,26 @@ interface DetailModalProps {
   onClose: () => void;
   selectedOperation: OperationComptable | null;
   selectedDepense: Depense | null;
+  // Contre-passation (0071) — optionnel (non passé dans les contextes lecture seule).
+  canReverse?: boolean;
+  isReversing?: boolean;
+  reverseError?: string | null;
+  onReverse?: (reason: string) => void;
 }
 
 export function DetailModal({
   isOpen,
   onClose,
   selectedOperation,
-  selectedDepense
+  selectedDepense,
+  canReverse = false,
+  isReversing = false,
+  reverseError = null,
+  onReverse,
 }: DetailModalProps) {
+  const [reason, setReason] = useState('');
+  const [confirming, setConfirming] = useState(false);
+
   if (!isOpen || (!selectedOperation && !selectedDepense)) return null;
 
   return (
@@ -92,6 +105,12 @@ export function DetailModal({
                   </span>
                 </div>
               )}
+              {selectedOperation.isReversed && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Statut</span>
+                  <span className={styles.reversedBadge}>Écriture contre-passée</span>
+                </div>
+              )}
             </>
           )}
 
@@ -154,6 +173,44 @@ export function DetailModal({
             </>
           )}
         </div>
+
+        {/* Contre-passation : disponible sur une écriture postée non régénérable, pas déjà extournée,
+            tant qu'une période ouverte existe (gate calculé en amont dans le hook). */}
+        {selectedOperation && canReverse && onReverse && (
+          <div className={styles.reverseSection}>
+            {!confirming ? (
+              <button
+                type="button"
+                className={styles.reverseButton}
+                onClick={() => setConfirming(true)}
+              >
+                <RotateCcw size={14} /> Contre-passer cette écriture
+              </button>
+            ) : (
+              <>
+                <span className={styles.reverseHint}>
+                  Une écriture inverse sera créée dans la période ouverte (le grand livre est immuable,
+                  l&apos;écriture d&apos;origine est conservée). Motif :
+                </span>
+                <textarea
+                  className={styles.reverseTextarea}
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Motif de la contre-passation (ex. erreur de saisie)"
+                />
+                {reverseError && <span className={styles.reverseError}>{reverseError}</span>}
+                <button
+                  type="button"
+                  className={styles.reverseButton}
+                  disabled={isReversing || reason.trim().length === 0}
+                  onClick={() => onReverse(reason.trim())}
+                >
+                  {isReversing ? 'Contre-passation…' : 'Confirmer la contre-passation'}
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <div className={styles.modalFooter}>
           <button className={styles.closeButton} onClick={onClose}>
