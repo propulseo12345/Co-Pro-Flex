@@ -310,21 +310,77 @@ export interface CreateMutationInput {
   copro_id: string;
   lot_id: string;
   seller_owner_id: string;
+  period_id?: string;
   mutation_type?: MutationType;
+  /** Acquéreur saisi librement (pas encore copropriétaire) -> mutations.buyer_draft */
   buyer_name?: string;
   buyer_email?: string;
   buyer_is_company?: boolean;
+  /** Notaire saisi librement -> tiers(is_notary) via upsert_mutation_notary -> notaire_id */
   notary_name?: string;
   notary_email?: string;
   notary_reference?: string;
   notes?: string;
 }
 
+/** Acquéreur saisi avant validation (l'acquéreur n'est pas encore copropriétaire). */
+type BuyerDraft = { name?: string; email?: string; is_company?: boolean };
+
+/** Construit le tiroir buyer_draft à partir des champs acquéreur libres (null si vide). */
+function buildBuyerDraft(input: {
+  buyer_name?: string;
+  buyer_email?: string;
+  buyer_is_company?: boolean;
+}): BuyerDraft | null {
+  const draft: BuyerDraft = {};
+  if (input.buyer_name) draft.name = input.buyer_name;
+  if (input.buyer_email) draft.email = input.buyer_email;
+  if (input.buyer_is_company !== undefined) draft.is_company = input.buyer_is_company;
+  return Object.keys(draft).length > 0 ? draft : null;
+}
+
+/**
+ * Crée (ou réutilise) le tiers notaire pour une copro à partir du notaire saisi
+ * librement, et renvoie son id (ou null si aucun nom fourni).
+ * find-or-create atomique côté serveur (upsert_mutation_notary, migration 0064).
+ */
+async function resolveNotaryTiersId(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  coproId: string,
+  input: { notary_name?: string; notary_email?: string; notary_reference?: string }
+): Promise<string | null> {
+  if (!input.notary_name) return null;
+
+  const { data, error } = await supabase.rpc('upsert_mutation_notary', {
+    p_copro_id: coproId,
+    p_name: input.notary_name,
+    p_email: input.notary_email ?? null,
+    p_office_name: null,
+    p_notary_reference: input.notary_reference ?? null,
+  });
+
+  if (error) {
+    console.error('Error resolving notary tiers:', error);
+    throw new Error(error.message);
+  }
+
+  return (data as string) ?? null;
+}
+
 /**
  * Create a new mutation (sale)
+ *
+ * Le modèle réel `mutations` (migration 0019) ne porte PAS de colonnes acquéreur/
+ * notaire libres : l'acquéreur saisi va dans `buyer_draft` (jsonb) tant qu'il n'est
+ * pas copropriétaire, et le notaire est matérialisé comme un `tiers` (is_notary)
+ * référencé par `notaire_id`. `buyer_owner_id` reste NULL jusqu'à la validation.
  */
 export async function createMutation(input: CreateMutationInput): Promise<string> {
   const supabase = createUntypedClient();
+
+  const notaireId = await resolveNotaryTiersId(supabase, input.copro_id, input);
+  const buyerDraft = buildBuyerDraft(input);
 
   const { data, error } = await supabase
     .from('mutations')
@@ -332,13 +388,10 @@ export async function createMutation(input: CreateMutationInput): Promise<string
       copro_id: input.copro_id,
       lot_id: input.lot_id,
       seller_owner_id: input.seller_owner_id,
+      period_id: input.period_id ?? null,
       mutation_type: input.mutation_type || 'sale',
-      buyer_name: input.buyer_name,
-      buyer_email: input.buyer_email,
-      buyer_is_company: input.buyer_is_company || false,
-      notary_name: input.notary_name,
-      notary_email: input.notary_email,
-      notary_reference: input.notary_reference,
+      notaire_id: notaireId,
+      buyer_draft: buyerDraft,
       notes: input.notes,
       status: 'draft',
     })
@@ -369,6 +422,10 @@ export interface UpdateMutationInput {
 
 /**
  * Update a mutation
+ *
+ * Même traduction que createMutation : les champs acquéreur/notaire libres ne
+ * correspondent à aucune colonne réelle. On ne pousse vers `mutations` que des
+ * colonnes existantes (notaire_id, buyer_draft, buyer_owner_id, dates, notes).
  */
 export async function updateMutation(
   mutationId: string,
@@ -376,9 +433,37 @@ export async function updateMutation(
 ): Promise<void> {
   const supabase = createUntypedClient();
 
+  const patch: Record<string, unknown> = {};
+
+  // Colonnes réelles directes
+  if (input.buyer_owner_id !== undefined) patch.buyer_owner_id = input.buyer_owner_id;
+  if (input.signature_date !== undefined) patch.signature_date = input.signature_date;
+  if (input.effective_date !== undefined) patch.effective_date = input.effective_date;
+  if (input.notes !== undefined) patch.notes = input.notes;
+
+  // Acquéreur libre -> buyer_draft (uniquement si au moins un champ est fourni)
+  const buyerDraft = buildBuyerDraft(input);
+  if (buyerDraft) patch.buyer_draft = buyerDraft;
+
+  // Notaire libre -> tiers(is_notary) -> notaire_id (besoin de la copro de la mutation)
+  if (input.notary_name) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('mutations')
+      .select('copro_id')
+      .eq('id', mutationId)
+      .single();
+    if (fetchError) {
+      console.error('Error loading mutation for update:', fetchError);
+      throw new Error(fetchError.message);
+    }
+    patch.notaire_id = await resolveNotaryTiersId(supabase, existing.copro_id, input);
+  }
+
+  if (Object.keys(patch).length === 0) return;
+
   const { error } = await supabase
     .from('mutations')
-    .update(input)
+    .update(patch)
     .eq('id', mutationId);
 
   if (error) {
