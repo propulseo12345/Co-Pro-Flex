@@ -19,6 +19,27 @@ export interface MembreCSDisplay {
   email: string;
 }
 
+// L'enum council_role est en ANGLAIS en base (president/secretary/treasurer/
+// member/observer) ; l'affichage attend des libellés français. observer est
+// rabattu sur 'membre' (pas de rôle d'observateur dans MembreCSDisplay).
+const ROLE_EN_TO_FR: Record<string, MembreCSDisplay['role']> = {
+  president: 'president',
+  secretary: 'secretaire',
+  treasurer: 'tresorier',
+  member: 'membre',
+  observer: 'membre',
+};
+
+// Forme d'une ligne de la vue v_council_members_detail (client non typé).
+interface CouncilMemberDetailRow {
+  id: string;
+  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  role: string | null;
+}
+
 export function useConseilSyndicalPage() {
   const { currentCoproId } = useCopro();
   const { user } = useSupabase();
@@ -33,24 +54,31 @@ export function useConseilSyndicalPage() {
     if (!currentCoproId) return;
 
     async function loadData() {
-      // Charger les membres
+      // Charger les membres depuis la vue qui résout l'identité (nom/prénom/
+      // email) depuis coproprietaires (coproprietaire_id) ou profiles (user_id) ;
+      // council_members seul ne porte ni nom ni email (cf. migration 0061).
       const { data: membersData } = await supabase
-        .from('council_members')
-        .select('*')
+        .from('v_council_members_detail')
+        .select('id, full_name, first_name, last_name, email, role')
         .eq('copro_id', currentCoproId)
         .eq('is_active', true)
         .order('role', { ascending: true });
 
       if (membersData) {
         setMembres(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          membersData.map((m: any) => ({
-            id: m.id,
-            nom: m.last_name ?? '',
-            prenom: m.first_name ?? '',
-            role: m.role ?? 'membre',
-            email: m.email ?? '',
-          }))
+          (membersData as CouncilMemberDetailRow[]).map((m) => {
+            // first/last sont NULL quand l'identité vient d'un profile ou d'une
+            // société : on retombe sur full_name pour ne jamais afficher vide.
+            const nom = m.last_name ?? m.full_name ?? '';
+            const prenom = m.first_name ?? '';
+            return {
+              id: m.id,
+              nom,
+              prenom,
+              role: ROLE_EN_TO_FR[m.role ?? 'member'] ?? 'membre',
+              email: m.email ?? '',
+            };
+          })
         );
       }
 
