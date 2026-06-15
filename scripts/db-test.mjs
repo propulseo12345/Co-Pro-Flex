@@ -58,6 +58,8 @@ const GATES = [
   'supabase/tests/gate_0073_e9_operation_id.sql',
   'supabase/tests/gate_0075_annexes_coherence.sql',
   'supabase/tests/gate_0076_etat_date_h2h3.sql',
+  'supabase/tests/gate_0077_opening_residual.sql',
+  'supabase/tests/gate_0078_supplier_advance.sql',
 ];
 
 // Gates DIFFÉRÉES — phase sécurité (NON bloquantes).
