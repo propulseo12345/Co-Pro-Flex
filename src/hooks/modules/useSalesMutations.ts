@@ -8,6 +8,11 @@
 import { useState, useCallback } from 'react';
 import { useCopro } from '@/providers/CoproContext';
 import * as salesApi from '@/lib/sales/api';
+import { createClient } from '@/lib/supabase/client';
+
+// Client non typé pour les RPC canoniques mutations/état daté (pas encore dans les types générés).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rpcClient = () => createClient() as any;
 import type {
   CreateMutationInput,
   DbMutationStatus,
@@ -235,13 +240,20 @@ export function useSalesMutations(
       documentId?: string
     ): Promise<string | null> => {
       return withSaving(async () => {
-        return salesApi.createEtatDateSnapshot({
-          copro_id: currentCoproId!,
-          mutation_id: mutationId,
-          snapshot_type: snapshotType,
-          payload,
-          document_id: documentId,
+        // Route canonique : create_etat_date_snapshot (RPC) — fige un snapshot IMMUABLE dont le payload
+        // est calculé côté SQL (generate_etat_date_payload). Remplace l'INSERT client brut qui plantait
+        // sur effective_date NOT NULL et contournait l'immutabilité. payload/documentId ignorés (le SQL
+        // est la source de vérité). Cf. PLAN_J5 T5 #18/#19.
+        void payload; void documentId;
+        const { data, error } = await rpcClient().rpc('create_etat_date_snapshot', {
+          p_copro_id: currentCoproId,
+          p_mutation_id: mutationId,
+          p_snapshot_type: snapshotType,
         });
+        if (error) throw new Error(error.message);
+        const res = (data ?? {}) as { success?: boolean; snapshot_id?: string; error?: string };
+        if (!res.success || !res.snapshot_id) throw new Error(res.error ?? "Échec de la génération de l'état daté");
+        return res.snapshot_id;
       });
     },
     [currentCoproId, withSaving]
@@ -292,39 +304,25 @@ export function useSalesMutations(
         buyerAccountId?: string;
       }
     ): Promise<boolean> => {
+      // Route canonique : validate_mutation (RPC) — bascule lot_owners (le lot change de propriétaire,
+      // lot-centric) et NE POSTE AUCUN GL (le fonds ALUR 450-5 reste attaché au lot). L'ancien chemin
+      // faisait un UPDATE status='validated' SANS basculer lot_owners ET postait une écriture ALUR
+      // (double violation). ledgerOptions est désormais IGNORÉ. Cf. PLAN_J5 T5 #18 (BLOCKER).
+      void ledgerOptions;
       const result = await withSaving(async () => {
-        await salesApi.updateMutation(mutationId, { effective_date: effectiveDate });
-        await salesApi.updateMutationStatus(mutationId, 'validated');
-        await salesApi.completeStep(mutationId, 'cloture_compte', {
-          effective_date: effectiveDate,
-          closed_at: new Date().toISOString(),
+        const { data, error } = await rpcClient().rpc('validate_mutation', {
+          p_mutation_id: mutationId,
+          p_signature_date: effectiveDate,
+          p_effective_date: effectiveDate,
         });
-
-        // Create ledger entry for ALUR fund transfer if applicable
-        if (ledgerOptions && ledgerOptions.alurFundAmount && currentCoproId) {
-          try {
-            await salesApi.createSaleCompletionLedgerEntry(
-              currentCoproId,
-              mutationId,
-              {
-                periodId: ledgerOptions.periodId,
-                lotId: ledgerOptions.lotId,
-                alurFundAmount: ledgerOptions.alurFundAmount,
-                sellerAccountId: ledgerOptions.sellerAccountId,
-                buyerAccountId: ledgerOptions.buyerAccountId,
-              }
-            );
-          } catch (err) {
-            // Log but don't fail the sale validation
-            console.error('Failed to create ledger entry for sale:', err);
-          }
-        }
-
+        if (error) throw new Error(error.message);
+        const res = (data ?? {}) as { success?: boolean; error?: string };
+        if (!res.success) throw new Error(res.error ?? 'Échec de la validation de la mutation');
         return true;
       });
       return result === true;
     },
-    [withSaving, currentCoproId]
+    [withSaving]
   );
 
   const cancelSale = useCallback(
