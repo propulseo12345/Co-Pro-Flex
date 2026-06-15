@@ -51,6 +51,8 @@ const GATES = [
   'supabase/tests/gate_0064_mutations_create.sql',
   'supabase/tests/gate_0065_ag_pouvoirs.sql',
   'supabase/tests/gate_0066_bank_reconcile.sql',
+  'supabase/tests/gate_0067_charge_nature_corrective.sql',
+  'supabase/tests/gate_0068_set_account_charge_nature.sql',
 ];
 
 // Gates DIFFÉRÉES — phase sécurité (NON bloquantes).
