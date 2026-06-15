@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Link2, X, Sparkles, Check, ExternalLink } from 'lucide-react';
-import { getDocumentLinks, getLinkableModule, LINKABLE_MODULES } from '@/lib/services/document-linking.service';
+import { getDocumentLinks, type DocumentLink } from '@/lib/documents/api';
+import { getLinkableModule, LINKABLE_MODULES, linkedEntityTypeFromCanonical } from '@/lib/documents/linking';
 import type { DocumentWithFolder, DetectedEntityType, ExtractedDocumentData, LinkedEntityType } from '../domain/types';
 import { getFileIcon, getCategoryColor, getCategoryLabel, getLinkedEntityIcon } from '../domain/utils';
 import styles from '../../../../../app/(dashboard)/documents/ged/ged.module.css';
@@ -22,7 +24,21 @@ export function LinkModal({
   onClose,
   onCreateLink,
 }: LinkModalProps) {
-  const existingLinks = getDocumentLinks(document.id);
+  const [existingLinks, setExistingLinks] = useState<DocumentLink[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getDocumentLinks(document.id)
+      .then((links) => {
+        if (active) setExistingLinks(links);
+      })
+      .catch(() => {
+        if (active) setExistingLinks([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [document.id]);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -121,13 +137,14 @@ export function LinkModal({
               <h4>Liaisons existantes</h4>
               <div className={styles.linkExistingList}>
                 {existingLinks.map((link) => {
-                  const mod = getLinkableModule(link.entityType);
-                  return mod ? (
+                  const legacyType = linkedEntityTypeFromCanonical(link.entity_type);
+                  const mod = legacyType ? getLinkableModule(legacyType) : undefined;
+                  return mod && legacyType ? (
                     <div key={link.id} className={styles.linkExistingItem}>
-                      <span style={{ color: mod.color }}>{getLinkedEntityIcon(link.entityType, 16)}</span>
+                      <span style={{ color: mod.color }}>{getLinkedEntityIcon(legacyType, 16)}</span>
                       <span>{mod.label}</span>
                       <Link
-                        href={`${mod.routeBase}/${link.entityId}`}
+                        href={`${mod.routeBase}/${link.entity_id}`}
                         className={styles.linkExistingAction}
                       >
                         Voir <ExternalLink size={12} />

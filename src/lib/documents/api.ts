@@ -46,7 +46,12 @@ const SOURCE_FROM_LEGACY: Record<DocumentSource, string> = {
   manual: 'manual',
 };
 
-// enum canonique document_entity_type
+// enum canonique document_entity_type :
+// ag | resolution | service_order | contract | supplier_invoice | mutation |
+// budget | lot | coproprietaire | council | event | other
+// Les clés acceptent le vocabulaire legacy minuscule ET les LinkedEntityType
+// front (MAJUSCULES, cf. @/lib/documents/linking) pour éviter le rabattement
+// silencieux sur 'other' (ex. getDocumentsForEntity('FACTURE', …)).
 const ENTITY_TYPE_FROM_LEGACY: Record<string, string> = {
   ag: 'ag',
   resolution: 'resolution',
@@ -56,8 +61,8 @@ const ENTITY_TYPE_FROM_LEGACY: Record<string, string> = {
   facture: 'supplier_invoice',
   invoice: 'supplier_invoice',
   supplier_invoice: 'supplier_invoice',
-  depense: 'budget_expense',
-  budget_expense: 'budget_expense',
+  depense: 'budget',
+  budget_expense: 'budget',
   budget: 'budget',
   mutation: 'mutation',
   vente: 'mutation',
@@ -65,6 +70,19 @@ const ENTITY_TYPE_FROM_LEGACY: Record<string, string> = {
   coproprietaire: 'coproprietaire',
   council: 'council',
   event: 'event',
+  // --- LinkedEntityType front (MAJUSCULES) ---
+  FACTURE: 'supplier_invoice',
+  CONTRAT: 'contract',
+  ASSEMBLEE_GENERALE: 'ag',
+  ORDRE_SERVICE: 'service_order',
+  VENTE: 'mutation',
+  COPROPRIETAIRE: 'coproprietaire',
+  // Pas de valeur d'enum dédiée pour ces trois entités : INTERVENTION est suivie
+  // via les ordres de service ; APPEL_FONDS et IMPAYE n'ont pas d'équivalent
+  // canonique (faute de migration enum) et restent volontairement 'other'.
+  INTERVENTION: 'service_order',
+  APPEL_FONDS: 'other',
+  IMPAYE: 'other',
 };
 
 // enum canonique document_relation_kind : related, annexe, source, justificatif
@@ -664,6 +682,38 @@ export async function getDocumentsForEntity(entityType: string, entityId: string
     .from('v_documents_with_folder')
     .select('*')
     .in('id', documentIds);
+
+  if (error) throw error;
+  return data || [];
+}
+
+// ============================================================================
+// VERSIONING API (vue v_document_versions — migration 0031, source unique)
+// ============================================================================
+
+/** Une ligne d'historique de version d'un document (vue v_document_versions). */
+export interface DocumentVersionRow {
+  document_id: string;
+  version_number: number;
+  file_path: string;
+  file_name: string;
+  file_size: number | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+/**
+ * Historique des versions d'un document (plus récent d'abord).
+ * Le versioning suit le modèle POINTEUR : chaque snapshot est une ligne de
+ * `document_versions`, le document courant pointant sur la dernière version.
+ */
+export async function getDocumentVersions(documentId: string): Promise<DocumentVersionRow[]> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase
+    .from('v_document_versions')
+    .select('*')
+    .eq('document_id', documentId)
+    .order('version_number', { ascending: false });
 
   if (error) throw error;
   return data || [];

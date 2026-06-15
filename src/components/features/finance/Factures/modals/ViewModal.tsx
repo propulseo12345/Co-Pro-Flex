@@ -1,11 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { X, FileText, ExternalLink, Download, FileEdit, ClipboardCheck, CheckCircle2, Clock, CheckCircle, FolderOpen, Link2 } from 'lucide-react';
 import { Facture, StatutFacture } from '../types';
 import { getStatutBadgeClass, getStatutLabel, formatCurrency, formatDate } from '../utils';
 import { MOCK_COMPTES, TYPE_DEPENSE_LABELS } from '../data';
-import { getEntityDocuments } from '@/lib/services/document-linking.service';
+import { getDocumentsForEntity, type Document } from '@/lib/documents/api';
 import styles from '../Factures.module.css';
 
 interface ViewModalProps {
@@ -33,8 +34,22 @@ function getStatutIcon(statut: StatutFacture) {
 export function ViewModal({ facture, onClose, onOpenFull }: ViewModalProps) {
   const badgeClassName = getStatutBadgeClass(facture.statut);
 
-  // Récupérer les documents GED liés à cette facture
-  const linkedDocuments = getEntityDocuments('FACTURE', facture.id);
+  // Récupérer les documents GED réellement liés à cette facture (Supabase)
+  const [linkedDocuments, setLinkedDocuments] = useState<Document[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getDocumentsForEntity('FACTURE', facture.id)
+      .then((docs) => {
+        if (active) setLinkedDocuments(docs);
+      })
+      .catch(() => {
+        if (active) setLinkedDocuments([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [facture.id]);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -134,12 +149,12 @@ export function ViewModal({ facture, onClose, onOpenFull }: ViewModalProps) {
                 <h3>Documents liés (GED)</h3>
               </div>
               <div className={styles.linkedDocsList}>
-                {linkedDocuments.map((link) => (
-                  <div key={link.documentId} className={styles.linkedDocItem}>
+                {linkedDocuments.map((doc) => (
+                  <div key={doc.id} className={styles.linkedDocItem}>
                     <FileText size={16} aria-hidden="true" />
-                    <span className={styles.linkedDocName}>Document #{link.documentId.slice(0, 8)}</span>
+                    <span className={styles.linkedDocName}>{doc.title || doc.file_name}</span>
                     <Link
-                      href={`/documents/ged?doc=${link.documentId}`}
+                      href={`/documents/ged?doc=${doc.id}`}
                       className={styles.linkedDocLink}
                     >
                       Voir dans la GED

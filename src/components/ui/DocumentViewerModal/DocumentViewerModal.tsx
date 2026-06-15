@@ -9,27 +9,18 @@ import {
   Eye, Calendar, HardDrive, Tag, User, ExternalLink,
   Image as ImageIcon, FileSpreadsheet, FolderOpen, Receipt, FileSignature,
   Users, ClipboardList, Banknote, AlertTriangle, Wrench, Home,
-  History, GitBranch, Plus, CheckCircle, Archive, FileEdit, XCircle,
+  History, GitBranch, Plus, CheckCircle, FileEdit,
   Upload, BarChart3, Lock, Globe, Shield, Type,
   ArrowRight, Loader2
 } from 'lucide-react';
 import * as documentsApi from '@/lib/documents/api';
+import type { DocumentLink, DocumentVersionRow } from '@/lib/documents/api';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import {
-  getDocumentLinks,
   getLinkableModule,
-  LinkedEntityType,
-} from '@/lib/services/document-linking.service';
-import {
-  getDocumentVersioning,
-  getDocumentVersionHistory,
-  isDocumentObsolete,
-  needsReview,
-  isOverdueForReview,
-  getStatusLabel,
-  getStatusColor,
-  getModificationTypeLabel,
-} from '@/lib/services/document-versioning.service';
+  linkedEntityTypeFromCanonical,
+  type LinkedEntityType,
+} from '@/lib/documents/linking';
 import {
   getDocumentMetadata,
   getDocumentActions,
@@ -205,23 +196,43 @@ export default function DocumentViewerModal({
   const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(document.nom);
   const isPreviewable = isPdf || isImage;
 
-  // Documents liés
-  const linkedEntities = useMemo(() => {
-    return getDocumentLinks(document.id);
+  // Documents/entités liés (Supabase — document_relations)
+  const [linkedEntities, setLinkedEntities] = useState<DocumentLink[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    documentsApi
+      .getDocumentLinks(document.id)
+      .then((links) => {
+        if (active) setLinkedEntities(links);
+      })
+      .catch(() => {
+        if (active) setLinkedEntities([]);
+      });
+    return () => {
+      active = false;
+    };
   }, [document.id]);
 
-  // Données de versioning
-  const versioningData = useMemo(() => {
-    return getDocumentVersioning(document.id);
+  // Historique des versions (Supabase — vue v_document_versions, plus récent d'abord)
+  const [documentVersions, setDocumentVersions] = useState<DocumentVersionRow[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    documentsApi
+      .getDocumentVersions(document.id)
+      .then((versions) => {
+        if (active) setDocumentVersions(versions);
+      })
+      .catch(() => {
+        if (active) setDocumentVersions([]);
+      });
+    return () => {
+      active = false;
+    };
   }, [document.id]);
 
-  const versionHistory = useMemo(() => {
-    return getDocumentVersionHistory(document.id);
-  }, [document.id]);
-
-  const documentIsObsolete = useMemo(() => isDocumentObsolete(document.id), [document.id]);
-  const documentNeedsReview = useMemo(() => needsReview(document.id), [document.id]);
-  const documentIsOverdue = useMemo(() => isOverdueForReview(document.id), [document.id]);
+  const currentVersion = documentVersions[0];
 
   // Métadonnées complètes
   const metadata = useMemo(() => getDocumentMetadata(document.id), [document.id]);
@@ -923,26 +934,25 @@ export default function DocumentViewerModal({
                 <div className={styles.linkedEntitiesList}>
                   <h3>Entités liées à ce document</h3>
                   {linkedEntities.map((link) => {
-                    const mod = getLinkableModule(link.entityType);
-                    return mod ? (
+                    const legacyType = linkedEntityTypeFromCanonical(link.entity_type);
+                    const mod = legacyType ? getLinkableModule(legacyType) : undefined;
+                    return mod && legacyType ? (
                       <div key={link.id} className={styles.linkedEntityCard}>
                         <div
                           className={styles.linkedEntityIcon}
                           style={{ backgroundColor: `${mod.color}15`, color: mod.color }}
                         >
-                          {getLinkedEntityIcon(link.entityType, 20)}
+                          {getLinkedEntityIcon(legacyType, 20)}
                         </div>
                         <div className={styles.linkedEntityInfo}>
                           <span className={styles.linkedEntityType}>{mod.label}</span>
-                          <span className={styles.linkedEntityId}>ID: {link.entityId}</span>
-                          {link.extractedData?.objet && (
-                            <span className={styles.linkedEntityDesc}>
-                              {link.extractedData.objet}
-                            </span>
+                          <span className={styles.linkedEntityId}>ID: {link.entity_id}</span>
+                          {link.label && (
+                            <span className={styles.linkedEntityDesc}>{link.label}</span>
                           )}
                         </div>
                         <Link
-                          href={`${mod.routeBase}/${link.entityId}`}
+                          href={`${mod.routeBase}/${link.entity_id}`}
                           className={styles.linkedEntityLink}
                         >
                           Voir <ExternalLink size={14} />
@@ -968,104 +978,28 @@ export default function DocumentViewerModal({
           {/* Versions Tab */}
           {activeTab === 'versions' && (
             <div className={styles.versionsTab}>
-              {/* Alerte si document obsolète ou à réviser */}
-              {(documentIsObsolete || documentIsOverdue || documentNeedsReview) && (
-                <div
-                  className={`${styles.versionAlert} ${
-                    documentIsObsolete || documentIsOverdue
-                      ? styles.versionAlertDanger
-                      : styles.versionAlertWarning
-                  }`}
-                >
-                  <AlertTriangle size={20} />
-                  <div className={styles.versionAlertContent}>
-                    {documentIsObsolete && (
-                      <>
-                        <strong>Document obsolète</strong>
-                        <p>Ce document n'est plus à jour et devrait être remplacé par une nouvelle version.</p>
-                      </>
-                    )}
-                    {documentIsOverdue && !documentIsObsolete && (
-                      <>
-                        <strong>Révision en retard</strong>
-                        <p>
-                          Ce document aurait dû être révisé le{' '}
-                          {versioningData?.prochainExamen &&
-                            new Date(versioningData.prochainExamen).toLocaleDateString('fr-FR')}
-                        </p>
-                      </>
-                    )}
-                    {documentNeedsReview && !documentIsObsolete && !documentIsOverdue && (
-                      <>
-                        <strong>Révision à prévoir</strong>
-                        <p>
-                          Ce document devra être révisé avant le{' '}
-                          {versioningData?.prochainExamen &&
-                            new Date(versioningData.prochainExamen).toLocaleDateString('fr-FR')}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Informations de version actuelles */}
-              {versioningData ? (
+              {currentVersion ? (
                 <>
                   <div className={styles.versionCurrent}>
                     <div className={styles.versionHeader}>
                       <h3>Version actuelle</h3>
-                      <div
-                        className={styles.versionStatus}
-                        style={{ backgroundColor: `${getStatusColor(versioningData.statut)}15`, color: getStatusColor(versioningData.statut) }}
-                      >
-                        {versioningData.statut === 'VALIDE' && <CheckCircle size={14} />}
-                        {versioningData.statut === 'OBSOLETE' && <XCircle size={14} />}
-                        {versioningData.statut === 'ARCHIVE' && <Archive size={14} />}
-                        {versioningData.statut === 'BROUILLON' && <FileEdit size={14} />}
-                        {getStatusLabel(versioningData.statut)}
-                      </div>
                     </div>
 
                     <div className={styles.versionDetails}>
                       <div className={styles.versionDetailItem}>
                         <span className={styles.versionDetailLabel}>Version</span>
-                        <span className={styles.versionDetailValue}>v{versioningData.version}</span>
+                        <span className={styles.versionDetailValue}>v{currentVersion.version_number}</span>
                       </div>
-                      {versioningData.dateValidite && (
-                        <div className={styles.versionDetailItem}>
-                          <span className={styles.versionDetailLabel}>Valide jusqu'au</span>
-                          <span className={styles.versionDetailValue}>
-                            {new Date(versioningData.dateValidite).toLocaleDateString('fr-FR')}
-                          </span>
-                        </div>
-                      )}
-                      {versioningData.derniereVerification && (
-                        <div className={styles.versionDetailItem}>
-                          <span className={styles.versionDetailLabel}>Dernière vérification</span>
-                          <span className={styles.versionDetailValue}>
-                            {new Date(versioningData.derniereVerification).toLocaleDateString('fr-FR')}
-                          </span>
-                        </div>
-                      )}
-                      {versioningData.prochainExamen && (
-                        <div className={styles.versionDetailItem}>
-                          <span className={styles.versionDetailLabel}>Prochain examen</span>
-                          <span
-                            className={`${styles.versionDetailValue} ${
-                              documentIsOverdue ? styles.versionDetailValueDanger : ''
-                            }`}
-                          >
-                            {new Date(versioningData.prochainExamen).toLocaleDateString('fr-FR')}
-                          </span>
-                        </div>
-                      )}
-                      {versioningData.motifModification && (
-                        <div className={styles.versionDetailItem}>
-                          <span className={styles.versionDetailLabel}>Motif dernière modification</span>
-                          <span className={styles.versionDetailValue}>{versioningData.motifModification}</span>
-                        </div>
-                      )}
+                      <div className={styles.versionDetailItem}>
+                        <span className={styles.versionDetailLabel}>Fichier</span>
+                        <span className={styles.versionDetailValue}>{currentVersion.file_name}</span>
+                      </div>
+                      <div className={styles.versionDetailItem}>
+                        <span className={styles.versionDetailLabel}>Créée le</span>
+                        <span className={styles.versionDetailValue}>
+                          {new Date(currentVersion.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
                     </div>
 
                     <button
@@ -1077,25 +1011,25 @@ export default function DocumentViewerModal({
                     </button>
                   </div>
 
-                  {/* Historique des versions */}
-                  {versionHistory && versionHistory.versions.length > 0 && (
+                  {/* Historique des versions (vue v_document_versions) */}
+                  {documentVersions.length > 0 && (
                     <div className={styles.versionHistorySection}>
                       <h3>
                         <History size={18} />
                         Historique des versions
                       </h3>
                       <div className={styles.versionTimeline}>
-                        {versionHistory.versions.slice().reverse().map((version) => (
+                        {documentVersions.map((version) => (
                           <div
-                            key={version.documentId}
+                            key={version.version_number}
                             className={`${styles.versionTimelineItem} ${
-                              version.version === versioningData.version
+                              version.version_number === currentVersion.version_number
                                 ? styles.versionTimelineItemCurrent
                                 : ''
                             }`}
                           >
                             <div className={styles.versionTimelineDot}>
-                              {version.version === versioningData.version ? (
+                              {version.version_number === currentVersion.version_number ? (
                                 <CheckCircle size={16} />
                               ) : (
                                 <GitBranch size={14} />
@@ -1103,9 +1037,9 @@ export default function DocumentViewerModal({
                             </div>
                             <div className={styles.versionTimelineContent}>
                               <div className={styles.versionTimelineHeader}>
-                                <span className={styles.versionNumber}>v{version.version}</span>
+                                <span className={styles.versionNumber}>v{version.version_number}</span>
                                 <span className={styles.versionDate}>
-                                  {new Date(version.dateCreation).toLocaleDateString('fr-FR', {
+                                  {new Date(version.created_at).toLocaleDateString('fr-FR', {
                                     day: 'numeric',
                                     month: 'long',
                                     year: 'numeric',
@@ -1113,21 +1047,8 @@ export default function DocumentViewerModal({
                                 </span>
                               </div>
                               <div className={styles.versionTimelineMeta}>
-                                <span className={styles.versionAuthor}>
-                                  <User size={12} /> {version.creePar}
-                                </span>
-                                <span className={styles.versionType}>
-                                  {getModificationTypeLabel(version.modificationType)}
-                                </span>
+                                <span className={styles.versionType}>{version.file_name}</span>
                               </div>
-                              {version.motif && (
-                                <p className={styles.versionMotif}>
-                                  <strong>Motif :</strong> {version.motif}
-                                </p>
-                              )}
-                              {version.changements && (
-                                <p className={styles.versionChangements}>{version.changements}</p>
-                              )}
                             </div>
                           </div>
                         ))}
@@ -1139,7 +1060,7 @@ export default function DocumentViewerModal({
                 <div className={styles.noVersioningState}>
                   <GitBranch size={48} className={styles.noVersioningIcon} />
                   <h3>Pas de versioning</h3>
-                  <p>Ce document n'a pas encore d'informations de version.</p>
+                  <p>Ce document n'a pas encore d'historique de version.</p>
                   <button
                     className={styles.initVersionBtn}
                     onClick={() => setShowNewVersionModal(true)}
@@ -1327,10 +1248,10 @@ export default function DocumentViewerModal({
                   {/* Version info */}
                   <div className={styles.newVersionInfo}>
                     <span>Version actuelle :</span>
-                    <strong>v{versioningData?.version || '1.0'}</strong>
+                    <strong>v{currentVersion?.version_number ?? 1}</strong>
                     <span className={styles.versionArrow}>→</span>
                     <span>Nouvelle version :</span>
-                    <strong className={styles.newVersionNumber}>v{versioningData ? `${parseInt(versioningData.version)}.${parseInt(versioningData.version.split('.')[1] || '0') + 1}` : '1.0'}</strong>
+                    <strong className={styles.newVersionNumber}>v{(currentVersion?.version_number ?? 0) + 1}</strong>
                   </div>
                 </div>
 
