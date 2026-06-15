@@ -55,6 +55,7 @@ const GATES = [
   'supabase/tests/gate_0068_set_account_charge_nature.sql',
   'supabase/tests/gate_0071_reverse_ledger.sql',
   'supabase/tests/gate_0072_payment_cloisonnement.sql',
+  'supabase/tests/gate_0073_e9_operation_id.sql',
 ];
 
 // Gates DIFFÉRÉES — phase sécurité (NON bloquantes).
