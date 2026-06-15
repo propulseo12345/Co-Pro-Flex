@@ -851,23 +851,19 @@ export interface CategorizeBankMovementPayload {
   account_category: string;
 }
 
-export async function categorizeBankMovement(payload: CategorizeBankMovementPayload): Promise<ApiResult<{ success: boolean }>> {
-  const supabase = getSupabaseClient();
-
-  const { error } = await supabase
-    .from('bank_movements')
-    .update({
-      account_code: payload.account_code,
-      account_category: payload.account_category,
-    })
-    .eq('id', payload.bank_movement_id)
-    .eq('copro_id', payload.copro_id);
-
-  if (error) {
-    return { data: null, error: error.message };
-  }
-
-  return { data: { success: true }, error: null };
+// NOTE (T9) : la table `bank_movements` ne porte AUCUNE colonne de catégorie.
+// Les colonnes `account_code` / `account_category` ont été supprimées en migration 0014
+// (dénormalisation retirée — cf. blueprint §1.8). L'ancienne implémentation faisait un
+// UPDATE de ces colonnes mortes : requête vouée à l'échec (colonne inexistante).
+// La catégorisation d'un mouvement passe désormais par le rapprochement (reconcileBankMovement),
+// qui relie le mouvement à un objet métier déjà saisi (paiement copro / règlement fournisseur).
+// Cette fonction est neutralisée (contrat conservé pour ne pas casser le hook appelant) et
+// renvoie une erreur explicite plutôt qu'un faux succès.
+export async function categorizeBankMovement(_payload: CategorizeBankMovementPayload): Promise<ApiResult<{ success: boolean }>> {
+  return {
+    data: null,
+    error: 'Catégorisation directe non supportée : utilisez le rapprochement (reconcileBankMovement). Les colonnes de catégorie ont été retirées en 0014.',
+  };
 }
 
 // ============================================================================
