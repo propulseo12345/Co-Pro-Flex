@@ -30,6 +30,7 @@ DECLARE
   v_status      text;
   v_match1      uuid;
   v_match2      uuid;
+  v_movp        uuid;  -- mouvement pour le test de pointage partiel (0070, Option A)
 BEGIN
   PERFORM set_config('request.jwt.claims', '{"role":"service_role"}', false);
 
@@ -138,7 +139,33 @@ BEGIN
   EXCEPTION WHEN sqlstate '42501' THEN NULL;  -- rejet attendu
   END;
 
-  RAISE NOTICE 'GATE 0066 OK : import=2/skip=1, pointage pur (ledger inchangé %=%/%=%)',
+  -- ========================================================================================
+  -- (5) POINTAGE PARTIEL (0070, Option A) : Σ pointé < |montant| -> 'unmatched' ; complément -> 'matched'.
+  -- ========================================================================================
+  -- Mouvement de 300 ; on pointe 100 (payment) puis 200 (other) -> Σ=300=|montant| -> matched.
+  v_res := public.import_bank_movements(
+    v_copro, v_period, v_acct512,
+    jsonb_build_array(jsonb_build_object('bank_date', current_date::text, 'amount_signed', 300.00,
+                      'label', 'Vir partiel', 'bank_ref', 'REF-G66-PART'))
+  );
+  IF (v_res->>'imported')::int <> 1 THEN RAISE EXCEPTION 'ASSERT FAIL (5) : import mouvement partiel KO (%)', v_res::text; END IF;
+  SELECT id INTO v_movp FROM public.bank_movements WHERE copro_id = v_copro AND bank_ref = 'REF-G66-PART';
+
+  -- Partiel 1 : 100 / 300 -> le mouvement DOIT rester 'unmatched'.
+  v_res := public.reconcile_bank_movement(v_copro, v_movp, 'payment', v_pay, 100.00);
+  IF (v_res->>'movement_status') <> 'unmatched' THEN
+    RAISE EXCEPTION 'ASSERT FAIL (5) : pointage partiel (100/300) attendu unmatched, obtenu %', v_res->>'movement_status'; END IF;
+
+  -- Complément : 200 (cible 'other') -> Σ=300 -> 'matched'.
+  v_res := public.reconcile_bank_movement(v_copro, v_movp, 'other', NULL, 200.00);
+  IF (v_res->>'movement_status') <> 'matched' THEN
+    RAISE EXCEPTION 'ASSERT FAIL (5) : complément (Σ=300) attendu matched, obtenu %', v_res->>'movement_status'; END IF;
+
+  -- 2 matches distincts sur ce mouvement (payment + other).
+  SELECT count(*) INTO v_n FROM public.bank_matches WHERE bank_movement_id = v_movp;
+  IF v_n <> 2 THEN RAISE EXCEPTION 'ASSERT FAIL (5) : 2 matches attendus sur le mouvement partiel, trouvé %', v_n; END IF;
+
+  RAISE NOTICE 'GATE 0066 OK : import=2/skip=1, pointage pur (ledger inchangé %=%/%=%), pointage partiel 100+200/300 -> unmatched puis matched',
     v_le_before, v_le_after, v_lt_before, v_lt_after;
   RAISE EXCEPTION 'ROLLBACK_TEST_OK';
 EXCEPTION WHEN OTHERS THEN
