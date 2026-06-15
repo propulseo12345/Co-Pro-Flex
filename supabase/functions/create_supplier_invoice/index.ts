@@ -22,6 +22,7 @@ interface InvoiceLine {
   amount_ht?: number;
   amount_tva?: number;
   taux_pct?: number;
+  operation_id?: string; // budget travaux rattaché (E9) — forwardé tel quel dans p_lines
 }
 
 interface CreateInvoiceRequest {
