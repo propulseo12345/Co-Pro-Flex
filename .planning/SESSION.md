@@ -13,7 +13,7 @@
 - 👉 Effort : `Max` (dialogue/cadrage) · `ultracode` pour E9 / annexes (revue GL).
 
 ## Blockers
-- Manque **fac-similés annexes 2 à 5** (Lyes va chercher) pour finir le calage annexes.
+- ~~Fac-similés annexes 2 à 5~~ ✅ **TROUVÉS** (4 docs dans `Document Etat daté Annexe/`, diaporama ARC 2019 le + complet) → réf. `.planning/FACSIMILE_ANNEXES_2026-06-15.md`. Reste **validation expert** : point **662 agios = COURANT** (contredit décision nuit 661/662/704→travaux, corriger via set_account_charge_nature).
 - `supabase start` complet crashe (OOM) → DB seule `docker start supabase_db_Co-Pro-Flex` (cf. [[local_db_seule_supabase_start_oom]]).
 
 ## Key Context
