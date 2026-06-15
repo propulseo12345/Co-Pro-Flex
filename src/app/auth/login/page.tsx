@@ -6,6 +6,10 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import styles from './login.module.css';
 
+// Compte de démo UNIQUE réellement provisionné sur le projet live.
+const DEMO_EMAIL = 'lyes.triki@coproflex.fr';
+const DEMO_PASSWORD = 'password123';
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -15,22 +19,18 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const signIn = async (signInEmail: string, signInPassword: string) => {
     setError(null);
     setLoading(true);
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: signInEmail,
+        password: signInPassword,
       });
-
       if (error) {
         setError(error.message);
         return;
       }
-
       if (data.user) {
         router.push('/portefeuille');
         router.refresh();
@@ -42,16 +42,16 @@ export default function LoginPage() {
     }
   };
 
-  // Comptes de démo pour faciliter le test
-  const demoAccounts = [
-    { email: 'admin@coproflex.fr', role: 'Admin / Syndic' },
-    { email: 'gestionnaire@coproflex.fr', role: 'Gestionnaire' },
-    { email: 'jean.dupont@email.fr', role: 'Copropriétaire' },
-  ];
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    signIn(email, password);
+  };
 
-  const fillDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('password123');
+  // Connexion démo en 1 clic (renseigne les champs + connecte directement).
+  const handleDemoLogin = () => {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    signIn(DEMO_EMAIL, DEMO_PASSWORD);
   };
 
   return (
@@ -117,21 +117,15 @@ export default function LoginPage() {
         </div>
 
         <div className={styles.demo}>
-          <p className={styles.demoTitle}>Comptes de démonstration</p>
-          <p className={styles.demoPassword}>Mot de passe : <code>password123</code></p>
-          <div className={styles.demoAccounts}>
-            {demoAccounts.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                onClick={() => fillDemo(account.email)}
-                className={styles.demoButton}
-              >
-                <span className={styles.demoEmail}>{account.email}</span>
-                <span className={styles.demoRole}>{account.role}</span>
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            className={styles.demoButton}
+            disabled={loading}
+          >
+            <span className={styles.demoEmail}>Connexion démo — Gestionnaire</span>
+            <span className={styles.demoRole}>{DEMO_EMAIL}</span>
+          </button>
         </div>
       </div>
     </div>
