@@ -1,4 +1,4 @@
-import type { LinkedEntityType, ExtractedDocumentData } from '@/lib/services/document-linking.service';
+import type { LinkedEntityType, ExtractedDocumentData } from '@/lib/documents/linking';
 import type { NiveauConfidentialite } from '@/types/enums/misc';
 
 // ============================================================================

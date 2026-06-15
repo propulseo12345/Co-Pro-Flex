@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { DOCUMENT_CATEGORIES, CATEGORY_COLORS } from './constants';
 import type { SearchFilters, DocumentWithRelevance } from './types';
-import type { LinkedEntityType } from '@/lib/services/document-linking.service';
+import type { LinkedEntityType } from '@/lib/documents/linking';
 
 export function fuzzyMatch(text: string, query: string): { matches: boolean; score: number } {
   const textLower = text.toLowerCase();

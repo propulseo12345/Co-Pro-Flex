@@ -47,8 +47,8 @@ const MODULES: ModuleAudit[] = [
       'src/components/features/documents',
       'src/hooks/modules/useDocumentsData.ts',
       'src/lib/services/document-metadata.service.ts',
-      'src/lib/services/document-versioning.service.ts',
-      'src/lib/services/document-linking.service.ts',
+      'src/lib/documents/api.ts',
+      'src/lib/documents/linking.ts',
     ],
   },
   {

@@ -8,7 +8,7 @@ import {
   detectDocumentEntityType,
   extractDataFromFileName,
   getLinkableModule,
-} from '@/lib/services/document-linking.service';
+} from '@/lib/documents/linking';
 import { useDocumentPermissions } from '@/hooks/modules/useDocumentPermissions';
 import type {
   SortField,
