@@ -57,12 +57,14 @@ export function SyntheseTantiemes({
     // Total des tantièmes participants (présents + correspondance)
     const tantièmesTotalParticipants = tantièmesPresents + tantièmesCorrespondance;
 
-    // Calcul du pourcentage
+    // Calcul du pourcentage de PARTICIPATION (tantièmes présents/représentés/correspondance ÷ total copro).
+    // C'est un taux de participation, PAS un taux de « pour » : il ne préjuge pas de l'adoption d'une résolution.
     const pourcentage = total > 0 ? (tantièmesTotalParticipants / total) * 100 : 0;
 
-    // Vérification des seuils atteints
-    const seuilArt24Atteint = pourcentage >= 50;
-    const seuilArt26Atteint = pourcentage >= 66.67;
+    // Art. 25 / 26 portent sur une fraction du TOTAL des tantièmes : on indique ici si la participation
+    // rend la majorité seulement ATTEIGNABLE (assez de voix présentes), pas si elle est acquise.
+    const art25Atteignable = pourcentage >= 50;
+    const art26Atteignable = pourcentage >= 66.67;
 
     return (
         <div className={syntheseStyles.syntheseTantiemes}>
@@ -118,37 +120,36 @@ export function SyntheseTantiemes({
 
                 {/* Indicateurs de seuils de majorité */}
                 <div className={syntheseStyles.seuilsContainer}>
-                    <div className={`${syntheseStyles.seuilItem} ${seuilArt24Atteint ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
+                    {/* Art. 24 : décidé au vote (pour > contre, abstentions exclues), sans seuil de présence */}
+                    <div className={syntheseStyles.seuilItem}>
                         <div className={syntheseStyles.seuilHeader}>
                             <span className={syntheseStyles.seuilArticle}>Art. 24</span>
-                            <span className={syntheseStyles.seuilStatus}>
-                                {seuilArt24Atteint ? '✓' : '○'}
-                            </span>
+                            <span className={syntheseStyles.seuilStatus}>i</span>
                         </div>
                         <span className={syntheseStyles.seuilDescription}>Majorité simple</span>
-                        <span className={syntheseStyles.seuilValeur}>{Math.ceil(total / 2)} tantièmes</span>
+                        <span className={syntheseStyles.seuilValeur}>Décidé au vote (pour &gt; contre)</span>
                     </div>
 
-                    <div className={`${syntheseStyles.seuilItem} ${seuilArt24Atteint ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
+                    <div className={`${syntheseStyles.seuilItem} ${art25Atteignable ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
                         <div className={syntheseStyles.seuilHeader}>
                             <span className={syntheseStyles.seuilArticle}>Art. 25</span>
                             <span className={syntheseStyles.seuilStatus}>
-                                {seuilArt24Atteint ? '✓' : '○'}
+                                {art25Atteignable ? '✓' : '○'}
                             </span>
                         </div>
                         <span className={syntheseStyles.seuilDescription}>Majorité absolue</span>
-                        <span className={syntheseStyles.seuilValeur}>{Math.ceil(total / 2) + 1} tantièmes</span>
+                        <span className={syntheseStyles.seuilValeur}>{Math.floor(total / 2) + 1} tantièmes</span>
                     </div>
 
-                    <div className={`${syntheseStyles.seuilItem} ${seuilArt26Atteint ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
+                    <div className={`${syntheseStyles.seuilItem} ${art26Atteignable ? syntheseStyles.seuilAtteint : syntheseStyles.seuilNonAtteint}`}>
                         <div className={syntheseStyles.seuilHeader}>
                             <span className={syntheseStyles.seuilArticle}>Art. 26</span>
                             <span className={syntheseStyles.seuilStatus}>
-                                {seuilArt26Atteint ? '✓' : '○'}
+                                {art26Atteignable ? '✓' : '○'}
                             </span>
                         </div>
                         <span className={syntheseStyles.seuilDescription}>Double majorité</span>
-                        <span className={syntheseStyles.seuilValeur}>{Math.ceil(total * 2 / 3)} tantièmes</span>
+                        <span className={syntheseStyles.seuilValeur}>{Math.floor(total * 2 / 3) + 1} tantièmes</span>
                     </div>
                 </div>
 

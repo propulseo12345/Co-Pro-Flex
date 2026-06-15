@@ -61,7 +61,10 @@ export interface QuorumStats {
 }
 
 export interface QuorumThresholds {
-  art24: { threshold: number; reached: boolean; label: string };
+  // art24 n'a PAS de seuil en tantièmes calculable depuis la présence : l'adoption se décide
+  // au moment du vote par « pour > contre » (abstentions exclues), sur les voix des seuls présents,
+  // représentés ou votants par correspondance (art. 24 loi 65-557). On expose une note, pas un seuil.
+  art24: { label: string; note: string };
   art25: { threshold: number; reached: boolean; label: string };
   art26: { threshold: number; reached: boolean; label: string };
 }
@@ -245,9 +248,6 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
     const { totalTantiemes, presentTantiemes } = quorumStats;
     if (totalTantiemes === 0) return null;
 
-    // Art. 24: Majorité simple des présents/représentés (50%+1 des présents)
-    const art24Threshold = Math.floor(presentTantiemes / 2) + 1;
-
     // Art. 25: Majorité absolue de tous (50%+1 du total)
     const art25Threshold = Math.floor(totalTantiemes / 2) + 1;
 
@@ -255,10 +255,12 @@ export function useFeuillePresence({ agId }: UseFeuillePresenceParams) {
     const art26Threshold = Math.floor((totalTantiemes * 2) / 3) + 1;
 
     return {
+      // Art. 24 : pas de seuil en tantièmes lié à la présence. La résolution est adoptée si
+      // « pour > contre » parmi les voix exprimées (abstentions exclues) des présents/représentés/
+      // votants par correspondance — calcul fait à la clôture du vote, pas sur la feuille de présence.
       art24: {
-        threshold: art24Threshold,
-        reached: presentTantiemes >= art24Threshold,
         label: 'Art. 24 - Majorité simple',
+        note: 'Décidé au vote : pour > contre (abstentions exclues)',
       },
       art25: {
         threshold: art25Threshold,

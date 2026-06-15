@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import styles from '@/app/(dashboard)/ag/[id]/feuille-presence/feuille-presence.module.css';
 
 interface ThresholdData {
@@ -9,8 +9,14 @@ interface ThresholdData {
   reached: boolean;
 }
 
+// Art. 24 n'a pas de seuil en tantièmes : adoption décidée au vote (pour > contre).
+interface InfoThresholdData {
+  label: string;
+  note: string;
+}
+
 interface QuorumThresholdsData {
-  art24: ThresholdData;
+  art24: InfoThresholdData;
   art25: ThresholdData;
   art26: ThresholdData;
 }
@@ -32,9 +38,19 @@ export function QuorumThresholds({ thresholds }: QuorumThresholdsProps) {
     </div>
   );
 
+  const renderInfoCard = (data: InfoThresholdData) => (
+    <div className={styles.thresholdCard}>
+      <Info size={20} />
+      <div>
+        <div className={styles.thresholdLabel}>{data.label}</div>
+        <div className={styles.thresholdValue}>{data.note}</div>
+      </div>
+    </div>
+  );
+
   return (
     <div className={styles.thresholdsGrid}>
-      {renderThresholdCard(thresholds.art24)}
+      {renderInfoCard(thresholds.art24)}
       {renderThresholdCard(thresholds.art25)}
       {renderThresholdCard(thresholds.art26)}
     </div>
