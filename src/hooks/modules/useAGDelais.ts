@@ -145,9 +145,7 @@ export function useAGDelais({
             try {
                 const supabase = createUntypedClient();
                 const { data: milestones, error } = await supabase
-                    .from('ag_milestones')
-                    .select('milestone_type')
-                    .eq('ag_id', agId);
+                    .rpc('get_ag_milestones', { p_ag_id: agId });
 
                 if (error) {
                     console.error('[useAGDelais] Error loading milestones:', error);
@@ -155,7 +153,9 @@ export function useAGDelais({
                 }
 
                 if (milestones && Array.isArray(milestones)) {
-                    const types = milestones.map((m: { milestone_type: string }) => m.milestone_type as JalonType);
+                    const types = milestones
+                        .filter((m: { milestone_key: string | null; done: boolean }) => m.done)
+                        .map((m: { milestone_key: string | null; done: boolean }) => m.milestone_key as JalonType);
                     setJalonsCompletes(new Set(types));
                 }
             } catch (error) {
@@ -374,7 +374,8 @@ export function useAGDelais({
                 const supabase = createUntypedClient();
                 const { error } = await supabase.rpc('save_ag_milestone', {
                     p_ag_id: agId,
-                    p_milestone_type: jalonType,
+                    p_milestone_key: jalonType,
+                    p_done: true,
                 });
 
                 if (error) {

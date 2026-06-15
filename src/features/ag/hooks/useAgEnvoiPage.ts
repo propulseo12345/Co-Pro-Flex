@@ -73,13 +73,11 @@ export interface EnvoiError {
   details?: string;
 }
 
-interface SentMilestoneValue {
-  value: boolean;
-  sentAt?: string;
-}
-
-interface EnvoiMilestones {
-  sent?: SentMilestoneValue | boolean; // Peut être un objet {value, sentAt} ou un boolean legacy
+interface AgMilestoneRow {
+  id: string;
+  milestone_key: string | null;
+  due_date: string | null;
+  done: boolean;
 }
 
 // ============================================================================
@@ -291,11 +289,12 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
       const { data: milestones, error: milestonesError } = await supabase
         .rpc('get_ag_milestones', { p_ag_id: agId });
 
-      if (!milestonesError && milestones) {
-        const m = milestones as EnvoiMilestones;
-        // Gérer les deux formats: {sent: {value: true}} ou {sent: true}
-        const sentValue = m.sent;
-        if (sentValue === true || (typeof sentValue === 'object' && sentValue?.value === true)) {
+      if (!milestonesError && Array.isArray(milestones)) {
+        // get_ag_milestones renvoie une liste de jalons ; l'envoi est fait si le
+        // jalon 'sent' existe et est marqué done.
+        const rows = milestones as AgMilestoneRow[];
+        const sentDone = rows.some(m => m.milestone_key === 'sent' && m.done);
+        if (sentDone) {
           setIsSent(true);
         }
       }
@@ -629,13 +628,7 @@ export function useAgEnvoiPage({ agId }: UseAgEnvoiPageParams) {
         await supabase.rpc('save_ag_milestone', {
           p_ag_id: agId,
           p_milestone_key: 'sent',
-          p_milestone_value: {
-            value: true,
-            sentAt: new Date().toISOString(),
-            totalSent: allResults.filter(r => r.status === 'sent').length,
-            totalQueued: allResults.filter(r => r.status === 'queued').length,
-            totalErrors: allResults.filter(r => r.status === 'error').length,
-          },
+          p_done: true,
         });
         setIsSent(true);
         await updateAgCurrentStep(agId, 5);
