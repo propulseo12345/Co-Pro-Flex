@@ -448,8 +448,55 @@ export interface RecordPaymentPayload {
   nature_filter?: PaymentNatureFilter;
 }
 
-export async function recordPayment(payload: RecordPaymentPayload): Promise<ApiResult<{ payment_id: string; ledger_tx_id: string; allocations: Array<{ call_line_id: string; amount_allocated: number }> }>> {
+/**
+ * Retour RÉEL de la RPC post_owner_payment (forwardée par l'edge record_payment) :
+ * montant imputé + trop-perçu (porté en avance 450-3). `idempotent_replay` si la clé a déjà servi.
+ * (L'ancien type exposait `allocations` — champ INEXISTANT côté serveur.)
+ */
+export interface RecordPaymentResult {
+  success?: boolean;
+  payment_id: string;
+  ledger_tx_id: string | null;
+  allocated?: number;
+  overpayment?: number;
+  idempotent_replay?: boolean;
+}
+
+export async function recordPayment(payload: RecordPaymentPayload): Promise<ApiResult<RecordPaymentResult>> {
   return invokeEdgeFunction('record_payment', payload);
+}
+
+/** Solde d'avance (450-3) disponible pour UN lot. Filtré copro_id + RLS (jamais sur le seul lotId). */
+export async function getLotAdvanceBalance(coproId: string, lotId: string): Promise<ApiResult<number>> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('v_lot_advance_balance')
+    .select('advance_balance')
+    .eq('copro_id', coproId)
+    .eq('lot_id', lotId)
+    .maybeSingle();
+  if (error) {
+    return { data: null, error: error.message };
+  }
+  return { data: ((data as { advance_balance: number } | null)?.advance_balance ?? 0), error: null };
+}
+
+export interface LotAdvance {
+  lot_id: string;
+  advance_balance: number;
+}
+
+/** Soldes d'avance (450-3) de TOUS les lots d'une copro (filtré copro_id + RLS). */
+export async function listLotAdvances(coproId: string): Promise<ApiResult<LotAdvance[]>> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('v_lot_advance_balance')
+    .select('lot_id, advance_balance')
+    .eq('copro_id', coproId);
+  if (error) {
+    return { data: null, error: error.message };
+  }
+  return { data: (data as LotAdvance[]) ?? [], error: null };
 }
 
 // ============================================================================

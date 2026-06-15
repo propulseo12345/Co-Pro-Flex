@@ -5,7 +5,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { X, Loader2, CheckCircle2 } from 'lucide-react';
-import type { ApiResult, PaymentNatureFilter, RecordPaymentPayload } from '@/lib/finance/api';
+import type { ApiResult, PaymentNatureFilter, RecordPaymentPayload, RecordPaymentResult as RecordPaymentData } from '@/lib/finance/api';
 import { paymentSchema, PAYMENT_METHODS, PAYMENT_NATURES } from '@/lib/validation/finance/paiement';
 import { FormField, FormSelect } from '@/components/ui/FormField';
 import type { CallLotRow } from '../hooks/useAppelsFondsDetail';
@@ -29,11 +29,7 @@ const NATURE_LABELS: Record<PaymentNatureFilter, string> = {
   alur: 'ALUR (fonds travaux)',
 };
 
-type RecordPaymentResult = ApiResult<{
-  payment_id: string;
-  ledger_tx_id: string;
-  allocations: Array<{ call_line_id: string; amount_allocated: number }>;
-}>;
+type RecordPaymentResult = ApiResult<RecordPaymentData>;
 
 // Valeurs telles que saisies (entrée) vs validées/coercées (sortie du schéma).
 type PaymentInput = z.input<typeof paymentSchema>;
@@ -81,8 +77,10 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
     },
   });
 
-  // Avertissement « trop-perçu » : warning d'UI (le surplus est porté en avance 450-3),
-  // PAS une erreur de validation — il ne bloque pas la soumission.
+  // Avertissement « trop-perçu » : warning d'UI PUREMENT INFORMATIF (le surplus est TOUJOURS porté
+  // en avance 450-3, sans perte) — PAS une erreur de validation, il ne bloque pas la soumission.
+  // NB : `remaining` est le restant dû de CET appel (mono-nature) ; si l'utilisateur force un filtre
+  // de nature différent, le seuil est approximatif — le reliquat réel ira de toute façon en 450-3.
   const watchedLotId = useWatch({ control, name: 'lotId' });
   const numericAmount = Number(useWatch({ control, name: 'amount' }));
   const selectedLot = lots.find((l) => l.lot_id === watchedLotId) ?? null;
@@ -187,13 +185,19 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
                   error={errors.natureFilter?.message}
                   {...register('natureFilter')}
                 >
-                  <option value="">Toutes natures (FIFO)</option>
+                  <option value="">Cloisonné par défaut (courant puis travaux)</option>
                   {PAYMENT_NATURES.map((n) => (
                     <option key={n} value={n}>
                       {NATURE_LABELS[n]}
                     </option>
                   ))}
                 </FormSelect>
+
+                {selectedLot && selectedLot.advanceBalance > 0.005 && (
+                  <div className={styles.hint}>
+                    Avance disponible sur ce lot : {formatEuros(selectedLot.advanceBalance)} (compte 450-3).
+                  </div>
+                )}
 
                 {showOverpayHint && selectedLot && (
                   <div className={styles.hint}>
@@ -202,7 +206,8 @@ export function PaymentModal({ lots, periodId, isSubmitting, recordPayment, onCl
                 )}
 
                 <div className={styles.allocNote}>
-                  L&apos;encaissement est lettré automatiquement sur les échéances les plus anciennes du lot (FIFO).
+                  L&apos;encaissement est imputé par nature (courant puis travaux), sur les échéances les plus
+                  anciennes de chaque nature ; le fonds ALUR n&apos;est imputé que sur sélection explicite.
                 </div>
 
                 {submitError && <div className={styles.error}>{submitError}</div>}

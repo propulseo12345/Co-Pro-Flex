@@ -37,6 +37,8 @@ export interface CallLotRow {
   breakdown: CallKeyBreakdown[];
   /** Ligne synthétique (montants agrégés du lot) pour alimenter la relance */
   relanceLine: CallLineDetailed;
+  /** Solde d'avance disponible (450-3) du lot — informatif dans la modale de paiement. */
+  advanceBalance: number;
 }
 
 function useCallById(callId: string) {
@@ -85,16 +87,36 @@ function useReminderLevels(coproId: string | undefined) {
   return { levelsByLot, isLoading };
 }
 
+/** Charge les soldes d'avance (450-3) par lot pour la copro (informatif dans la modale). */
+function useLotAdvances(coproId: string | undefined, reloadToken: number) {
+  const [advanceByLot, setAdvanceByLot] = useState<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    if (!coproId) return;
+    let cancelled = false;
+    financeApi.listLotAdvances(coproId).then(result => {
+      if (cancelled || !result.data) return;
+      setAdvanceByLot(new Map(result.data.map(a => [a.lot_id, a.advance_balance])));
+    });
+    return () => { cancelled = true; };
+  }, [coproId, reloadToken]);
+
+  return advanceByLot;
+}
+
 export function useAppelsFondsDetail(callId: string) {
   const { data: call, isLoading: callLoading, refresh: refreshCall } = useCallById(callId);
   const { data: lines, isLoading: linesLoading, refresh: refreshLines } = useCallLines(callId);
   const { mutate: doRecordPayment, isLoading: paymentLoading } = useRecordPayment();
+  const [advanceToken, setAdvanceToken] = useState(0);
 
   const refresh = useCallback(async () => {
     refreshCall();
+    setAdvanceToken(t => t + 1); // recharge les avances après un paiement (le trop-perçu a pu bouger)
     await refreshLines();
   }, [refreshCall, refreshLines]);
   const { levelsByLot, isLoading: remindersLoading } = useReminderLevels(call?.copro_id);
+  const advanceByLot = useLotAdvances(call?.copro_id, advanceToken);
 
   const stats: DetailStats = useMemo(() => {
     if (!lines) return { called: 0, paid: 0, remaining: 0, paidCount: 0, totalCount: 0 };
@@ -180,6 +202,7 @@ export function useAppelsFondsDetail(callId: string) {
         reminderLevel,
         breakdown,
         relanceLine,
+        advanceBalance: advanceByLot.get(lotId) ?? 0,
       });
     }
 
@@ -190,7 +213,7 @@ export function useAppelsFondsDetail(callId: string) {
       if (b.reminderLevel !== a.reminderLevel) return b.reminderLevel - a.reminderLevel;
       return a.lot_ref.localeCompare(b.lot_ref);
     });
-  }, [lines, levelsByLot]);
+  }, [lines, levelsByLot, advanceByLot]);
 
   return {
     call,
