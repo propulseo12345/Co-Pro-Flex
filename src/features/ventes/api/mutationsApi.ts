@@ -127,22 +127,64 @@ export async function fetchAvailableLots(coproId: string) {
 // MUTATIONS (CRUD)
 // ============================================================================
 
+/** Acquéreur saisi avant validation (pas encore copropriétaire) -> buyer_draft. */
+type BuyerDraft = { name?: string; email?: string; is_company?: boolean };
+
+/** Construit buyer_draft à partir des champs acquéreur libres (null si vide). */
+function buildBuyerDraft(input: {
+  buyer_name?: string | null;
+  buyer_email?: string | null;
+  buyer_is_company?: boolean | null;
+}): BuyerDraft | null {
+  const draft: BuyerDraft = {};
+  if (input.buyer_name) draft.name = input.buyer_name;
+  if (input.buyer_email) draft.email = input.buyer_email;
+  if (input.buyer_is_company !== undefined && input.buyer_is_company !== null) {
+    draft.is_company = input.buyer_is_company;
+  }
+  return Object.keys(draft).length > 0 ? draft : null;
+}
+
 /**
- * Crée une nouvelle mutation
+ * Crée (ou réutilise) le tiers notaire d'une copro à partir du notaire saisi
+ * librement, et renvoie son id (find-or-create atomique, migration 0064).
+ */
+async function resolveNotaryTiersId(
+  coproId: string,
+  input: { notary_name?: string | null; notary_email?: string | null; notary_reference?: string | null }
+): Promise<string | null> {
+  if (!input.notary_name) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc('upsert_mutation_notary', {
+    p_copro_id: coproId,
+    p_name: input.notary_name,
+    p_email: input.notary_email ?? null,
+    p_office_name: null,
+    p_notary_reference: input.notary_reference ?? null,
+  });
+  if (error) throw new Error(error.message);
+  return (data as string) ?? null;
+}
+
+/**
+ * Crée une nouvelle mutation.
+ *
+ * Le modèle réel `mutations` (0019) n'a pas de colonnes acquéreur/notaire libres :
+ * l'acquéreur saisi va dans `buyer_draft` (jsonb), le notaire devient un `tiers`
+ * (is_notary) référencé par `notaire_id`. `buyer_owner_id` reste NULL avant validation.
  */
 export async function createMutation(input: CreateMutationInput): Promise<Mutation> {
+  const notaireId = await resolveNotaryTiersId(input.copro_id, input);
+  const buyerDraft = buildBuyerDraft(input);
+
   const { data, error } = await fromUntyped('mutations')
     .insert({
       copro_id: input.copro_id,
       lot_id: input.lot_id,
       seller_owner_id: input.seller_owner_id,
       mutation_type: input.mutation_type,
-      buyer_name: input.buyer_name,
-      buyer_email: input.buyer_email,
-      buyer_is_company: input.buyer_is_company ?? false,
-      notary_name: input.notary_name,
-      notary_email: input.notary_email,
-      notary_reference: input.notary_reference,
+      notaire_id: notaireId,
+      buyer_draft: buyerDraft,
       notes: input.notes,
       status: 'draft',
     })
@@ -154,17 +196,36 @@ export async function createMutation(input: CreateMutationInput): Promise<Mutati
 }
 
 /**
- * Met à jour une mutation
+ * Met à jour une mutation (mêmes garde-fous que createMutation : on ne pousse que
+ * des colonnes réelles, les champs acquéreur/notaire libres sont traduits).
  */
 export async function updateMutation(
   mutationId: string,
   updates: Partial<Mutation>
 ): Promise<Mutation> {
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+  if (updates.buyer_owner_id !== undefined) patch.buyer_owner_id = updates.buyer_owner_id;
+  if (updates.signature_date !== undefined) patch.signature_date = updates.signature_date;
+  if (updates.effective_date !== undefined) patch.effective_date = updates.effective_date;
+  if (updates.notes !== undefined) patch.notes = updates.notes;
+  if (updates.status !== undefined) patch.status = updates.status;
+  if (updates.mutation_type !== undefined) patch.mutation_type = updates.mutation_type;
+
+  const buyerDraft = buildBuyerDraft(updates);
+  if (buyerDraft) patch.buyer_draft = buyerDraft;
+
+  if (updates.notary_name) {
+    const { data: existing, error: fetchError } = await fromUntyped('mutations')
+      .select('copro_id')
+      .eq('id', mutationId)
+      .single();
+    if (fetchError) throw new Error(fetchError.message);
+    patch.notaire_id = await resolveNotaryTiersId(existing.copro_id, updates);
+  }
+
   const { data, error } = await fromUntyped('mutations')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
+    .update(patch)
     .eq('id', mutationId)
     .select()
     .single();
