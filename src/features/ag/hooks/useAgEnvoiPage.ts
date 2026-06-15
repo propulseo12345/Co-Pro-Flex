@@ -9,7 +9,12 @@
  * Charge depuis Supabase:
  * - Copropriétaires via rpc_get_ag_coproprietaires (scoping sécurisé ag_id -> copro_id)
  * - Données AG via ag_meetings
- * - Choix d'envoi via get_ag_envoi_choices / save_ag_envoi_choices
+ * - Choix d'envoi via get_ag_envoi_choices / save_ag_envoi_choices (migration 0063,
+ *   stockés dans ag_meetings.envoi_choices = BROUILLON éditable, DISTINCT des traces
+ *   d'envoi ag_envoi_tracking qui font foi). Contrat: tableau SendingChoice
+ *   ({ coproprietaireId, methods: SendingMethod[] }) conservé tel quel ; le mapping
+ *   SendingMethod -> notification_channel se fait à l'ENVOI réel (dispatch), pas ici.
+ *   save remplace le brouillon ; ag_envoi_tracking n'est JAMAIS touché par les choix.
  * - Milestones via get_ag_milestones / save_ag_milestone
  *
  * Garanties:
