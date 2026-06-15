@@ -48,26 +48,28 @@ BEGIN
   END IF;
 
   -- ════ NON-COMPENSATION : lot1 débiteur (D450-1), lot2 créditeur (C450-1) ════
+  -- Montants VOLONTAIREMENT GRANDS (1 000 000) pour DOMINER tout solde seedé du lot (l'ordre des lots
+  -- est aléatoire) : lot2 devient créditeur quoi qu'il arrive -> test déterministe.
   PERFORM create_ledger_transaction(v_copro, v_n, current_date, 'Appel lot1', 'call_for_funds', NULL,
     jsonb_build_array(
-      jsonb_build_object('account_id',v_a450_1,'lot_id',v_lot1,'direction','debit','amount',100,'entry_label','appel'),
-      jsonb_build_object('account_id',v_a701,'lot_id',NULL,'direction','credit','amount',100,'entry_label','produit')
+      jsonb_build_object('account_id',v_a450_1,'lot_id',v_lot1,'direction','debit','amount',1000000,'entry_label','appel'),
+      jsonb_build_object('account_id',v_a701,'lot_id',NULL,'direction','credit','amount',1000000,'entry_label','produit')
     ), true);
   PERFORM create_ledger_transaction(v_copro, v_n, current_date, 'Avoir lot2', 'od', NULL,
     jsonb_build_array(
-      jsonb_build_object('account_id',v_a701,'lot_id',NULL,'direction','debit','amount',50,'entry_label','annul'),
-      jsonb_build_object('account_id',v_a450_1,'lot_id',v_lot2,'direction','credit','amount',50,'entry_label','avoir')
+      jsonb_build_object('account_id',v_a701,'lot_id',NULL,'direction','debit','amount',1000000,'entry_label','annul'),
+      jsonb_build_object('account_id',v_a450_1,'lot_id',v_lot2,'direction','credit','amount',1000000,'entry_label','avoir')
     ), true);
 
   r := fn_annexe_1(v_copro, v_n);
-  v_crea_before := (r->'section_ii'->'total_creances'->>'exercice_clos')::numeric;
-  -- Vérifier la LIGNE '45' spécifiquement (pas le total, qui inclut 46/47/48 seedés) : non-compensation.
+  -- Vérifier la LIGNE '45' spécifiquement (pas le total, qui inclut 46/47/48 seedés) : non-compensation
+  -- = un lot débiteur ET un lot créditeur coexistent (jamais nettés en un seul solde).
   SELECT (x->>'exercice_clos')::numeric INTO v_crea_before
   FROM jsonb_array_elements(r->'section_ii'->'creances') x WHERE x->>'compte'='45';
   SELECT (x->>'exercice_clos')::numeric INTO v_det
   FROM jsonb_array_elements(r->'section_ii'->'dettes') x WHERE x->>'compte'='45';
-  IF coalesce(v_crea_before,0) < 100 THEN RAISE EXCEPTION 'NON-COMPENSATION : ligne créances 45 (%) ne contient pas le lot débiteur (>=100)', v_crea_before; END IF;
-  IF coalesce(v_det,0) < 50 THEN RAISE EXCEPTION 'NON-COMPENSATION : ligne dettes 45 (%) ne contient pas le lot créditeur (>=50)', v_det; END IF;
+  IF coalesce(v_crea_before,0) < 1000000 THEN RAISE EXCEPTION 'NON-COMPENSATION : ligne créances 45 (%) ne contient pas le lot débiteur (>=1000000)', v_crea_before; END IF;
+  IF coalesce(v_det,0) < 900000 THEN RAISE EXCEPTION 'NON-COMPENSATION : ligne dettes 45 (%) ne contient pas le lot créditeur (>=900000)', v_det; END IF;
   -- mémoriser le total créances pour le test E7 (450-5 ne doit pas le bouger).
   v_crea_before := (r->'section_ii'->'total_creances'->>'exercice_clos')::numeric;
 
