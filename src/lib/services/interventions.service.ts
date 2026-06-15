@@ -9,7 +9,7 @@
 
 import { InterventionCarnet } from '@/types';
 
-// TODO: Replace with Supabase query / listLogbookEntries from @/lib/maintenance/api
+// TODO: Replace with Supabase query (useMaintenanceData / v_logbook_overview).
 const MOCK_INTERVENTIONS_CARNET: InterventionCarnet[] = [];
 
 // Types pour les alertes d'interventions

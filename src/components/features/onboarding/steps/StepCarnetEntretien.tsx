@@ -3,7 +3,8 @@
 import { useState, useCallback } from 'react';
 import { BookOpen, Trash2 } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
-import { createLogbookEntry, type LogbookEntryCreate } from '@/lib/maintenance/api';
+import { createClient } from '@/lib/supabase/client';
+import { createLogbookEntry } from '@/lib/maintenance/writes';
 import styles from './StepCarnetEntretien.module.css';
 
 interface StepCarnetEntretienProps {
@@ -35,6 +36,23 @@ const ENTRY_TYPES: { value: string; label: string }[] = [
   { value: 'autre', label: 'Autre' },
 ];
 
+// Le formulaire mélange nature et domaine (ancien modèle). On mappe vers l'enum
+// logbook_entry_type ('intervention' | 'controle' | 'incident' | 'maintenance' | 'autre').
+const ENTRY_TYPE_TO_DB: Record<string, 'intervention' | 'controle' | 'incident' | 'maintenance' | 'autre'> = {
+  maintenance: 'maintenance',
+  diagnostic: 'controle',
+  reparation: 'intervention',
+  remplacement: 'intervention',
+  ravalement: 'intervention',
+  toiture: 'intervention',
+  ascenseur: 'intervention',
+  chauffage: 'intervention',
+  plomberie: 'intervention',
+  electricite: 'intervention',
+  parties_communes: 'intervention',
+  autre: 'autre',
+};
+
 export function StepCarnetEntretien({ coproId, onClose }: StepCarnetEntretienProps) {
   const [entries, setEntries] = useState<LogbookEntry[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -60,25 +78,17 @@ export function StepCarnetEntretien({ coproId, onClose }: StepCarnetEntretienPro
     if (!canAdd) return;
     setIsSaving(true);
 
+    const supabase = createClient();
     try {
-      const payload: LogbookEntryCreate = {
-        copro_id: coproId,
-        entry_type: entryType,
+      const data = await createLogbookEntry(supabase, coproId, {
+        entry_type: ENTRY_TYPE_TO_DB[entryType] ?? 'autre',
         category: 'courante',
         title: title.trim(),
-        description: description.trim() || undefined,
+        description: description.trim() || null,
         happened_at: happenedAt,
-        cost: cost ? parseFloat(cost) : undefined,
-        status: 'realisee',
-      };
-
-      const { data, error } = await createLogbookEntry(payload);
-
-      if (error || !data) {
-        alert('Erreur lors de l\'ajout: ' + (error?.message || 'erreur inconnue'));
-        setIsSaving(false);
-        return;
-      }
+        cost: cost ? parseFloat(cost) : null,
+        status: 'terminee',
+      });
 
       const typeLabel = ENTRY_TYPES.find(t => t.value === entryType)?.label || entryType;
 
@@ -95,8 +105,8 @@ export function StepCarnetEntretien({ coproId, onClose }: StepCarnetEntretienPro
       ]);
 
       resetForm();
-    } catch (_err) {
-      alert('Erreur inattendue');
+    } catch (err) {
+      alert('Erreur lors de l\'ajout : ' + (err instanceof Error ? err.message : 'erreur inconnue'));
     } finally {
       setIsSaving(false);
     }

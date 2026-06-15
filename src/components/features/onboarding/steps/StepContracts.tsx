@@ -4,7 +4,8 @@ import { useState, useCallback } from 'react';
 import { Wrench, Trash2 } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
 import { TYPES_CONTRAT } from '@/lib/constants/categories-contrat';
-import { createProvider, createContract, type ContractCreate } from '@/lib/maintenance/api';
+import { createClient } from '@/lib/supabase/client';
+import { createProvider, createContract } from '@/lib/maintenance/writes';
 import styles from './StepContracts.module.css';
 
 interface StepContractsProps {
@@ -50,27 +51,20 @@ export function StepContracts({ coproId, onClose }: StepContractsProps) {
     if (!canAdd) return;
     setIsSaving(true);
 
+    const supabase = createClient();
     try {
-      // Create the provider first (or find existing)
-      const { data: provider, error: providerError } = await createProvider({
-        copro_id: coproId,
+      // Crée d'abord le prestataire (tiers is_provider), puis le contrat.
+      const provider = await createProvider(supabase, coproId, {
         name: prestataireName.trim(),
         category: 'copropriete',
+        domains: [],
       });
 
-      if (providerError || !provider) {
-        // Provider might already exist, try to continue
-        // For onboarding simplicity, we use a basic error handling
-        alert('Erreur lors de la creation du prestataire: ' + (providerError?.message || 'erreur inconnue'));
-        setIsSaving(false);
-        return;
-      }
-
-      // Map frontend contract type to DB value
+      // Type de contrat UI -> slug work_domain (référentiel des domaines).
       const typeMap: Record<string, string> = {
         ASCENSEUR: 'ascenseur',
         CHAUFFAGE: 'chauffage',
-        MENAGE: 'nettoyage',
+        MENAGE: 'menage',
         EAU: 'eau',
         ELECTRICITE: 'electricite',
         ASSURANCE: 'assurance',
@@ -83,8 +77,7 @@ export function StepContracts({ coproId, onClose }: StepContractsProps) {
         AUTRE: 'autre',
       };
 
-      const contractPayload: ContractCreate = {
-        copro_id: coproId,
+      await createContract(supabase, coproId, {
         provider_id: provider.id,
         title: title.trim(),
         contract_type: typeMap[contractType] || 'autre',
@@ -92,15 +85,7 @@ export function StepContracts({ coproId, onClose }: StepContractsProps) {
         end_date: endDate,
         annual_amount: annualAmount ? parseFloat(annualAmount) : undefined,
         status: 'active',
-      };
-
-      const { error: contractError } = await createContract(contractPayload);
-
-      if (contractError) {
-        alert('Erreur lors de la creation du contrat: ' + contractError.message);
-        setIsSaving(false);
-        return;
-      }
+      });
 
       const typeLabel = TYPES_CONTRAT.find(t => t.value === contractType)?.label || contractType;
 
@@ -119,8 +104,8 @@ export function StepContracts({ coproId, onClose }: StepContractsProps) {
       ]);
 
       resetForm();
-    } catch (_err) {
-      alert('Erreur inattendue');
+    } catch (err) {
+      alert('Erreur lors de l\'enregistrement : ' + (err instanceof Error ? err.message : 'erreur inconnue'));
     } finally {
       setIsSaving(false);
     }
