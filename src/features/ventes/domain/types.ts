@@ -7,6 +7,7 @@ export type MutationStatus =
   | 'draft'              // Brouillon
   | 'pre_etat_generated' // Pré-état daté généré
   | 'etat_generated'     // État daté final généré
+  | 'sent_to_notary'     // Dossier envoyé au notaire (jalon 0079)
   | 'signed'             // Acte signé
   | 'validated'          // Mutation validée (transfert effectué)
   | 'cancelled';         // Annulée
@@ -20,6 +21,7 @@ export const MUTATION_STATUS_LABELS: Record<MutationStatus, string> = {
   draft: 'Notifiée',
   pre_etat_generated: 'Pré-état envoyé',
   etat_generated: 'État daté généré',
+  sent_to_notary: 'Envoyé au notaire',
   signed: 'En attente acte',
   validated: 'Validée',
   cancelled: 'Annulée',
@@ -313,6 +315,7 @@ export interface MutationsStats {
   draft: number;
   pre_etat_generated: number;
   etat_generated: number;
+  sent_to_notary: number;
   signed: number;
   validated: number;
   cancelled: number;

@@ -94,6 +94,7 @@ export function useMutations(initialFilters?: Partial<MutationsFilters>) {
     const draft = mutations.filter((m) => m.status === 'draft').length;
     const pre_etat_generated = mutations.filter((m) => m.status === 'pre_etat_generated').length;
     const etat_generated = mutations.filter((m) => m.status === 'etat_generated').length;
+    const sent_to_notary = mutations.filter((m) => m.status === 'sent_to_notary').length;
     const signed = mutations.filter((m) => m.status === 'signed').length;
     const validated = mutations.filter((m) => m.status === 'validated').length;
     const cancelled = mutations.filter((m) => m.status === 'cancelled').length;
@@ -108,10 +109,11 @@ export function useMutations(initialFilters?: Partial<MutationsFilters>) {
       draft,
       pre_etat_generated,
       etat_generated,
+      sent_to_notary,
       signed,
       validated,
       cancelled,
-      enCours: draft + pre_etat_generated + etat_generated + signed,
+      enCours: draft + pre_etat_generated + etat_generated + sent_to_notary + signed,
       documentsManquants,
     };
   }, [mutations]);
