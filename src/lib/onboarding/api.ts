@@ -14,6 +14,7 @@ export interface CoproCreate {
   postal_code: string;
   annee_construction?: number; // millésime (ex 1987) ; int2 en base (contrôle 1700..année+5)
   siret?: string;
+  previous_syndic_name?: string; // nom du syndic sortant (reprise de mandat) — copros.previous_syndic_name
   exercice_debut?: number; // mois de début d'exercice (1..12), défaut 1 = janvier (exercice civil)
 }
 
@@ -42,6 +43,7 @@ export async function createCopropriete(payload: CoproCreate) {
       postal_code: payload.postal_code.trim(),
       annee_construction: payload.annee_construction ?? null,
       siret: payload.siret?.trim() || null,
+      previous_syndic_name: payload.previous_syndic_name?.trim() || null,
       exercice_debut: payload.exercice_debut ?? 1,
       onboarding_step: 2,
       onboarding_max_step: 2,
