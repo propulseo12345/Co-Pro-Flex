@@ -11,10 +11,10 @@ export function generateEtatDatePDF(payload: EtatDatePayloadV2): void {
   const doc = new jsPDF();
 
   renderHeader(doc, payload);
-  renderPartie1(doc, payload.partie1_vendeur_doit);
-  renderPartie2(doc, payload.partie2_syndicat_doit);
-  renderPartie3(doc, payload.partie3_acquereur);
-  renderAnnexe(doc, payload.annexe, payload.copro, payload.snapshot_date);
+  renderPartie1(doc, payload.partie_1_sommes_dues_vendeur);
+  renderPartie2(doc, payload.partie_2_dues_par_syndicat);
+  renderPartie3(doc, payload.partie_3_charge_acquereur);
+  renderAnnexe(doc, payload.annexe_quote_part, payload.syndic, payload.effective_date);
 
   const totalPages = doc.getNumberOfPages();
   const pw = doc.internal.pageSize.getWidth();
@@ -29,7 +29,7 @@ export function generateEtatDatePDF(payload: EtatDatePayloadV2): void {
   }
 
   const type = payload.snapshot_type === 'pre' ? 'pre-etat-date' : 'etat-date';
-  const lotRef = payload.lot.ref.replace(/\s+/g, '-');
-  const date = fmtDateShort(payload.snapshot_date).replace(/\//g, '-');
+  const lotRef = (payload.lot.ref ?? 'lot').replace(/\s+/g, '-');
+  const date = fmtDateShort(payload.effective_date).replace(/\//g, '-');
   doc.save(type + '-' + lotRef + '-' + date + '.pdf');
 }

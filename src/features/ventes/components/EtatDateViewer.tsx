@@ -11,8 +11,8 @@ import { EtatDateViewerLegacy } from './EtatDateViewerLegacy';
 import { EtatDateHeader } from './etat-date/EtatDateHeader';
 import { EtatDateSummary } from './etat-date/EtatDateSummary';
 import { EtatDatePartie } from './etat-date/EtatDatePartie';
+import type { PartieLine } from './etat-date/EtatDatePartie';
 import { EtatDateAnnexe } from './etat-date/EtatDateAnnexe';
-import { EtatDateTransactions } from './etat-date/EtatDateTransactions';
 import { EtatDateJsonViewer } from './etat-date/EtatDateJsonViewer';
 import { generateEtatDatePDF } from '../pdf/generateEtatDatePDF';
 import { isPayloadV2 } from '../domain/types';
@@ -34,6 +34,14 @@ export function EtatDateViewer({ snapshot, onViewDocument }: EtatDateViewerProps
   return <EtatDateViewerV2 snapshot={snapshot} payload={payload} />;
 }
 
+/** Construit les lignes d'une partie 45x (P1/P2) à partir de ses `items`. */
+function itemsToLines(items: EtatDatePayloadV2['partie_1_sommes_dues_vendeur']['items']): PartieLine[] {
+  return items.map((it) => ({
+    label: it.nature ? `${it.code} · ${it.nature}` : it.code,
+    amount: it.amount,
+  }));
+}
+
 function EtatDateViewerV2({ snapshot, payload }: { snapshot: EtatDateSnapshot; payload: EtatDatePayloadV2 }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -50,6 +58,19 @@ function EtatDateViewerV2({ snapshot, payload }: { snapshot: EtatDateSnapshot; p
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
   };
+
+  const p1 = payload.partie_1_sommes_dues_vendeur;
+  const p2 = payload.partie_2_dues_par_syndicat;
+  const p3 = payload.partie_3_charge_acquereur;
+
+  // Partie 3 : lignes plates issues des champs dédiés (pas d'items).
+  const p3Lines: PartieLine[] = [
+    { label: 'Reconstitution des avances', amount: p3.reconstitution_avances },
+    { label: 'Provisions appelées non échues', amount: p3.provisions_appelees_non_echues },
+    { label: 'Provisions votées non appelées — courant', amount: p3.provisions_votees_non_appelees_courant },
+    { label: 'Provisions votées non appelées — travaux', amount: p3.provisions_votees_non_appelees_travaux },
+    { label: 'Cotisation ALUR à venir', amount: p3.alur_a_venir },
+  ];
 
   return (
     <div className={styles.container}>
@@ -80,57 +101,39 @@ function EtatDateViewerV2({ snapshot, payload }: { snapshot: EtatDateSnapshot; p
 
       {/* Summary KPIs */}
       <EtatDateSummary
-        partie1Total={payload.partie1_vendeur_doit.total}
-        partie2Total={payload.partie2_syndicat_doit.total}
-        partie3Total={payload.partie3_acquereur.total}
+        partie1Total={p1.total}
+        partie2Total={p2.total}
+        partie3Total={p3.total}
       />
 
-      {/* Header details */}
-      <EtatDateHeader payload={payload} snapshotDate={snapshot.generated_at} />
+      {/* Header details (identité gelée) */}
+      <EtatDateHeader payload={payload} />
 
-      {/* Partie 1 */}
+      {/* Partie 1 — sommes dues par le vendeur */}
       <EtatDatePartie
-        title="Partie 1 — Sommes dues par le vendeur au syndicat"
-        total={payload.partie1_vendeur_doit.total}
-        sections={[
-          { label: 'Provisions budget prévisionnel', amount: payload.partie1_vendeur_doit.provisions_budget.amount, detail: payload.partie1_vendeur_doit.provisions_budget.detail },
-          { label: 'Provisions travaux', amount: payload.partie1_vendeur_doit.provisions_travaux.amount, detail: payload.partie1_vendeur_doit.provisions_travaux.detail },
-          { label: 'Arriérés exercices antérieurs', amount: payload.partie1_vendeur_doit.arrieres.amount, detail: payload.partie1_vendeur_doit.arrieres.detail },
-          { label: 'Emprunts collectifs', amount: payload.partie1_vendeur_doit.emprunts_collectifs.amount, detail: payload.partie1_vendeur_doit.emprunts_collectifs.detail },
-          { label: 'Avances exigibles', amount: payload.partie1_vendeur_doit.avances_exigibles.amount, detail: payload.partie1_vendeur_doit.avances_exigibles.detail },
-        ]}
+        title={p1.label}
+        total={p1.total}
+        lines={itemsToLines(p1.items)}
       />
 
-      {/* Partie 2 */}
+      {/* Partie 2 — sommes dues au vendeur par le syndicat */}
       <EtatDatePartie
-        title="Partie 2 — Sommes dues par le syndicat au vendeur"
-        total={payload.partie2_syndicat_doit.total}
-        sections={[
-          { label: 'Avances versées restituables', amount: payload.partie2_syndicat_doit.avances_versees.amount, detail: payload.partie2_syndicat_doit.avances_versees.detail },
-          { label: 'Provisions post-mutation', amount: payload.partie2_syndicat_doit.provisions_post_mutation.amount },
-          { label: 'Trop-perçus (régularisation)', amount: payload.partie2_syndicat_doit.trop_percus.amount },
-        ]}
+        title={p2.label}
+        total={p2.total}
+        lines={itemsToLines(p2.items)}
+        note={p2.note}
       />
 
-      {/* Partie 3 */}
+      {/* Partie 3 — à la charge de l'acquéreur */}
       <EtatDatePartie
-        title="Partie 3 — Sommes incombant à l'acquéreur"
-        total={payload.partie3_acquereur.total}
-        sections={[
-          { label: 'Reconstitution des avances', amount: payload.partie3_acquereur.reconstitution_avances.amount, detail: payload.partie3_acquereur.reconstitution_avances.detail },
-          { label: 'Provisions non exigibles', amount: payload.partie3_acquereur.provisions_non_exigibles.amount },
-          { label: 'Travaux votés non appelés', amount: payload.partie3_acquereur.travaux_votes_non_appeles.amount, detail: payload.partie3_acquereur.travaux_votes_non_appeles.detail },
-          { label: 'Fonds travaux ALUR', amount: payload.partie3_acquereur.fonds_travaux_alur.balance },
-        ]}
+        title={p3.label}
+        total={p3.total}
+        lines={p3Lines}
+        note={p3.alur_note}
       />
 
-      {/* Annexe */}
-      <EtatDateAnnexe annexe={payload.annexe} />
-
-      {/* Transactions */}
-      {payload.annexe.recent_transactions.length > 0 && (
-        <EtatDateTransactions transactions={payload.annexe.recent_transactions} />
-      )}
+      {/* Annexe — bases de calcul de la quote-part */}
+      <EtatDateAnnexe annexe={payload.annexe_quote_part} />
 
       {/* JSON toggle */}
       <EtatDateJsonViewer payload={payload} />

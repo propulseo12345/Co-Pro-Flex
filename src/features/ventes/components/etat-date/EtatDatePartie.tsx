@@ -1,35 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import styles from './etat-date.module.css';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
 
-interface PartieSection {
+export interface PartieLine {
+  /** Texte affiché à gauche (ex. « 450-1 · Provisions exigibles »). */
   label: string;
   amount: number;
-  detail?: Array<Record<string, unknown>>;
 }
 
 interface EtatDatePartieProps {
   title: string;
   total: number;
-  sections: PartieSection[];
+  lines: PartieLine[];
+  /** Note légale facultative affichée sous les lignes (ex. mention ALUR / hors 450-5). */
+  note?: string | null;
+  /** Texte affiché quand il n'y a aucune ligne. */
+  emptyLabel?: string;
 }
 
-export function EtatDatePartie({ title, total, sections }: EtatDatePartieProps) {
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
-
-  const toggle = (idx: number) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
-      return next;
-    });
-  };
-
+export function EtatDatePartie({ title, total, lines, note, emptyLabel = 'Aucune somme' }: EtatDatePartieProps) {
   const totalClass = total > 0 ? styles.partieTotalDanger : total < 0 ? styles.partieTotalSuccess : styles.partieTotal;
 
   return (
@@ -39,49 +30,22 @@ export function EtatDatePartie({ title, total, sections }: EtatDatePartieProps) 
         <span className={totalClass}>{fmt(total)}</span>
       </div>
 
-      {sections.map((section, idx) => (
-        // Sections dérivées à ordre figé (labels non garantis uniques par le type) :
-        // index acceptable, cohérent avec les lignes de détail ci-dessous
-        // eslint-disable-next-line react/no-array-index-key
-        <div key={idx}>
-          <div className={styles.partieRow} onClick={() => section.detail && section.detail.length > 0 && toggle(idx)}>
-            <span className={styles.partieRowLabel}>
-              {section.detail && section.detail.length > 0 && (
-                expanded.has(idx) ? <ChevronDown size={14} /> : <ChevronRight size={14} />
-              )}
-              {section.label}
-            </span>
-            <span className={section.amount === 0 ? styles.partieRowAmountZero : styles.partieRowAmount}>
-              {fmt(section.amount)}
+      {lines.length === 0 ? (
+        <p className={styles.emptyNote}>{emptyLabel}</p>
+      ) : (
+        lines.map((line, idx) => (
+          // Lignes dérivées du payload à ordre figé (codes non garantis uniques) : index acceptable
+          // eslint-disable-next-line react/no-array-index-key
+          <div className={styles.partieRow} key={idx}>
+            <span className={styles.partieRowLabel}>{line.label}</span>
+            <span className={line.amount === 0 ? styles.partieRowAmountZero : styles.partieRowAmount}>
+              {fmt(line.amount)}
             </span>
           </div>
+        ))
+      )}
 
-          {expanded.has(idx) && section.detail && section.detail.length > 0 && (
-            <div className={styles.partieRowDetail}>
-              <table className={styles.detailTable}>
-                <tbody>
-                  {section.detail.map((row, ridx) => {
-                    const values = Object.values(row);
-                    return (
-                      // Lignes de détail dérivées (Record sans identifiant stable) : index acceptable
-                      // eslint-disable-next-line react/no-array-index-key
-                      <tr key={ridx}>
-                        {values.map((val, vidx) => (
-                          // Colonnes issues d'Object.values, ordre figé : index acceptable
-                          // eslint-disable-next-line react/no-array-index-key
-                          <td key={vidx}>
-                            {typeof val === 'number' ? fmt(val) : String(val ?? '-')}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      ))}
+      {note && note.trim() !== '' && <p className={styles.partieNote}>{note}</p>}
     </div>
   );
 }

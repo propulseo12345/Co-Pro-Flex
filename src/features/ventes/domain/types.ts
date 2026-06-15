@@ -174,110 +174,100 @@ export interface EtatDatePayloadV1 {
   };
 }
 
-// Payload V2 — conforme Décret 67-223 du 17 mars 1967, Art. 5 et 5-1
+// Payload V2 — SORTIE RÉELLE de la RPC generate_etat_date_payload (migrations 0076 + 0080).
+// Forme PLATE adossée au grand livre + identité des parties GELÉE dans le snapshot (Option B).
+// Art. 5 décret 67-223. Toute évolution doit rester synchronisée avec le `jsonb_build_object` SQL.
 export interface EtatDatePayloadV2 {
   version: '2.0';
-  legal_reference: 'Décret 67-223 du 17 mars 1967, Art. 5 et 5-1';
+  legal_reference: string;
   snapshot_type: SnapshotType;
-  generated_at: string;
-  snapshot_date: string;
+  effective_date: string;
 
+  // ── Identité gelée à la génération (valeur probante) ──
   copro: {
     id: string;
-    name: string;
-    address: string;
+    name: string | null;
+    address: string | null;
     siret: string | null;
-    syndic_name: string;
-    syndic_address: string;
+    num_immatriculation: string | null;
   };
-
+  syndic: {
+    name: string | null;
+    siret: string | null;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+  } | null;
   lot: {
     id: string;
-    ref: string;
-    type: string;
-    building: string | null;
+    ref: string | null;
+    type: string | null;
     floor: number | null;
     surface: number | null;
-    tantiemes_generaux: number;
-    total_tantiemes: number;
-    repartition_keys: Array<{
-      key_name: string;
-      tantiemes: number;
-      total: number;
-    }>;
   };
-
   seller: {
     id: string;
-    name: string;
+    name: string | null;
+    civility: string | null;
+    is_company: boolean | null;
     email: string | null;
     address: string | null;
-    is_company: boolean;
   };
+  notaire: {
+    name: string | null;
+    office_name: string | null;
+    notary_reference: string | null;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+  } | null;
 
-  mutation: {
-    id: string;
-    type: MutationType;
-    requested_at: string;
-    signature_date: string | null;
-    notary_name: string | null;
-    notary_email: string | null;
-  };
+  // ── Cédant(s) : tous les propriétaires actifs du lot à la date d'effet (H2 multi-cédants) ──
+  cedants: Array<{
+    coproprietaire_id: string;
+    nom: string;
+    share_percent: number;
+    start_date: string;
+    end_date: string | null;
+  }>;
 
-  partie1_vendeur_doit: {
-    provisions_budget: {
-      amount: number;
-      detail: Array<{ label: string; due_date: string; amount_due: number; amount_paid: number; remaining: number; }>;
-    };
-    provisions_travaux: {
-      amount: number;
-      detail: Array<{ label: string; due_date: string; amount_due: number; amount_paid: number; remaining: number; }>;
-    };
-    arrieres: {
-      amount: number;
-      detail: Array<{ period_label: string; amount: number; }>;
-    };
-    emprunts_collectifs: {
-      amount: number;
-      detail: Array<{ label: string; lender: string; total_loan: number; seller_share: number; remaining: number; }>;
-    };
-    avances_exigibles: {
-      amount: number;
-      detail: Array<{ label: string; amount_due: number; amount_paid: number; }>;
-    };
+  // ── Partie 1 : sommes dues PAR le vendeur (comptes 45x débiteurs) ──
+  partie_1_sommes_dues_vendeur: {
+    label: string;
+    items: Array<{ code: string; nature: string; amount: number }>;
     total: number;
   };
 
-  partie2_syndicat_doit: {
-    avances_versees: {
-      amount: number;
-      detail: Array<{ label: string; type: string; amount: number; }>;
-    };
-    provisions_post_mutation: { amount: number; note: string; };
-    trop_percus: { amount: number; note: string; };
+  // ── Partie 2 : sommes dues AU vendeur (45x créditeurs, hors 450-5 ALUR) ──
+  partie_2_dues_par_syndicat: {
+    label: string;
+    items: Array<{ code: string; nature: string; amount: number }>;
+    total: number;
+    note: string;
+  };
+
+  // ── Partie 3 : à la charge de l'acquéreur ──
+  partie_3_charge_acquereur: {
+    label: string;
+    reconstitution_avances: number;
+    provisions_appelees_non_echues: number;
+    provisions_votees_non_appelees_courant: number;
+    provisions_votees_non_appelees_travaux: number;
+    alur_a_venir: number;
+    alur_note: string | null;
     total: number;
   };
 
-  partie3_acquereur: {
-    reconstitution_avances: {
-      amount: number;
-      detail: Array<{ label: string; amount: number; }>;
-    };
-    provisions_non_exigibles: { amount: number; note: string; };
-    travaux_votes_non_appeles: {
-      amount: number;
-      detail: Array<{ label: string; ag_date: string; total_vote: number; lot_share: number; }>;
-    };
-    fonds_travaux_alur: { balance: number; note: string; };
-    total: number;
+  // ── Annexe : bases de calcul de la quote-part (art. 5) ──
+  annexe_quote_part: {
+    label: string;
+    tantiemes_lot: number;
+    tantiemes_total: number;
+    owner_share_pct: number;
   };
 
-  annexe: {
-    historique_charges: Array<{ period_label: string; budget_previsionnel: number; hors_budget: number; total: number; }>;
-    procedures_judiciaires: Array<{ title: string; nature: string; opposing_party: string; amount_at_stake: number; status: string; court: string; }>;
-    solde_compte: number;
-    recent_transactions: Array<{ line_date: string; line_type: 'call' | 'payment'; label: string; debit: number; credit: number; running_balance: number; }>;
-  };
+  // Soldes 45x par compte (diagnostic).
+  balance_45x_by_nature: Record<string, number>;
 }
 
 export type EtatDatePayload = EtatDatePayloadV1 | EtatDatePayloadV2;

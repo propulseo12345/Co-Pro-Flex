@@ -1,81 +1,38 @@
 'use client';
 
-import { Scale, BarChart3 } from 'lucide-react';
+import { Scale } from 'lucide-react';
 import type { EtatDatePayloadV2 } from '../../domain/types';
 import styles from './etat-date.module.css';
 
-const fmt = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
-const NATURE_LABELS: Record<string, string> = { litigation: 'Contentieux', recovery: 'Recouvrement', other: 'Autre' };
-const STATUS_LABELS: Record<string, string> = { pending: 'En attente', in_progress: 'En cours', closed: 'Clôturé', won: 'Gagné', lost: 'Perdu' };
+const fmtNum = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
+const fmtPct = (n: number) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 4 }).format(n) + ' %';
 
 interface EtatDateAnnexeProps {
-  annexe: EtatDatePayloadV2['annexe'];
+  annexe: EtatDatePayloadV2['annexe_quote_part'];
 }
 
 export function EtatDateAnnexe({ annexe }: EtatDateAnnexeProps) {
   return (
-    <>
-      {/* Historique charges */}
-      <div className={styles.annexeSection}>
-        <h4 className={styles.annexeTitle}><BarChart3 size={14} /> Historique des charges</h4>
-        {annexe.historique_charges.length > 0 ? (
-          <table className={styles.annexeTable}>
-            <thead>
-              <tr>
-                <th>Exercice</th>
-                <th>Prévisionnel</th>
-                <th>Hors budget</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {annexe.historique_charges.map((h) => (
-                <tr key={h.period_label}>
-                  <td>{h.period_label}</td>
-                  <td className="mono">{fmt(h.budget_previsionnel)}</td>
-                  <td className="mono">{fmt(h.hors_budget)}</td>
-                  <td className="mono">{fmt(h.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className={styles.emptyNote}>Aucun historique disponible</p>
-        )}
-      </div>
-
-      {/* Procédures judiciaires */}
-      <div className={styles.annexeSection}>
-        <h4 className={styles.annexeTitle}><Scale size={14} /> Procédures judiciaires</h4>
-        {annexe.procedures_judiciaires.length > 0 ? (
-          <table className={styles.annexeTable}>
-            <thead>
-              <tr>
-                <th>Objet</th>
-                <th>Nature</th>
-                <th>Partie adverse</th>
-                <th>Enjeu</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Procédures sans identifiant stable : le titre peut se répéter, on garde l'index */}
-              {annexe.procedures_judiciaires.map((p, i) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <tr key={i}>
-                  <td>{p.title}</td>
-                  <td>{NATURE_LABELS[p.nature] || p.nature}</td>
-                  <td>{p.opposing_party}</td>
-                  <td className="mono">{fmt(p.amount_at_stake)}</td>
-                  <td>{STATUS_LABELS[p.status] || p.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className={styles.emptyNote}>Aucune procédure en cours</p>
-        )}
-      </div>
-    </>
+    <div className={styles.annexeSection}>
+      <h4 className={styles.annexeTitle}>
+        <Scale size={14} /> {annexe.label}
+      </h4>
+      <table className={styles.annexeTable}>
+        <tbody>
+          <tr>
+            <td>Tantièmes du lot</td>
+            <td className="mono">{fmtNum(annexe.tantiemes_lot)}</td>
+          </tr>
+          <tr>
+            <td>Tantièmes totaux de la copropriété</td>
+            <td className="mono">{fmtNum(annexe.tantiemes_total)}</td>
+          </tr>
+          <tr>
+            <td>Quote-part du lot</td>
+            <td className="mono">{fmtPct(annexe.owner_share_pct)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }
