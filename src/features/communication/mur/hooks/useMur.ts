@@ -118,36 +118,22 @@ export function useMur(): UseMurReturn {
     if (!currentCoproId) return;
     setIsLoading(true);
     try {
+      // v_wall_feed (0049) : auteur résolu (profiles), rôle dérivé (memberships),
+      // is_liked_by_me contextuel (auth.uid()), compteurs dénormalisés (triggers 0032).
       const { data, error } = await supabase
-        .from('wall_posts')
+        .from('v_wall_feed')
         .select('*')
         .eq('copro_id', currentCoproId)
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        // Charger les likes de l'utilisateur courant en une requête
-        const { data: likes } = currentUserId
-          ? await supabase
-              .from('wall_likes')
-              .select('post_id')
-              .eq('copro_id', currentCoproId)
-              .eq('user_id', currentUserId)
-          : { data: [] as { post_id: string }[] };
-
-        const likedIds = new Set((likes ?? []).map((l: { post_id: string }) => l.post_id));
-
-        setAllPosts(
-          data.map((row: unknown) => ({
-            ...mapPost(row),
-            isLikedByMe: likedIds.has((row as { id: string }).id),
-          }))
-        );
+        setAllPosts(data.map(mapPost));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [currentCoproId, currentUserId, supabase]);
+  }, [currentCoproId, supabase]);
 
   fetchPostsRef.current = fetchPosts;
 
@@ -229,16 +215,12 @@ export function useMur(): UseMurReturn {
       .insert({
         copro_id: currentCoproId,
         author_id: currentUserId,
-        author_name: currentUserName,
-        author_role: CURRENT_USER_ROLE,
         title: data.title,
         content: data.content,
         category: data.category,
         visibility: 'all_members',
         is_pinned: data.isPinned,
         is_locked: false,
-        likes_count: 0,
-        comments_count: 0,
         created_at: now,
         updated_at: now,
       })
@@ -246,7 +228,17 @@ export function useMur(): UseMurReturn {
       .single();
 
     if (!error && inserted) {
-      setAllPosts((prev) => [{ ...mapPost(inserted), isLikedByMe: false }, ...prev]);
+      // author_name/author_role ne sont pas stockés (dérivés par v_wall_feed) : on les pose
+      // localement depuis la session pour l'affichage optimiste immédiat.
+      setAllPosts((prev) => [
+        {
+          ...mapPost(inserted),
+          authorName: currentUserName,
+          authorRole: CURRENT_USER_ROLE,
+          isLikedByMe: false,
+        },
+        ...prev,
+      ]);
     }
     setIsEditorOpen(false);
   }, [currentCoproId, currentUserId, currentUserName, supabase]);
@@ -275,26 +267,19 @@ export function useMur(): UseMurReturn {
       )
     );
 
+    // likes_count est maintenu par le trigger trg_wall_likes_count (0032) — pas de maj manuelle.
     if (liked) {
       await supabase.from('wall_likes').insert({
         copro_id: currentCoproId,
         post_id: id,
         user_id: currentUserId,
       });
-      await supabase
-        .from('wall_posts')
-        .update({ likes_count: post.likesCount + 1 })
-        .eq('id', id);
     } else {
       await supabase
         .from('wall_likes')
         .delete()
         .eq('post_id', id)
         .eq('user_id', currentUserId);
-      await supabase
-        .from('wall_posts')
-        .update({ likes_count: Math.max(0, post.likesCount - 1) })
-        .eq('id', id);
     }
   }, [allPosts, currentCoproId, currentUserId, supabase]);
 
@@ -319,7 +304,6 @@ export function useMur(): UseMurReturn {
         copro_id: currentCoproId,
         post_id: postId,
         author_id: currentUserId,
-        author_name: currentUserName,
         content,
         parent_comment_id: null,
         created_at: now,
@@ -329,20 +313,14 @@ export function useMur(): UseMurReturn {
       .single();
 
     if (!error && inserted) {
-      setAllComments((prev) => [...prev, mapComment(inserted)]);
+      // author_name dérivé (non stocké) : posé depuis la session pour l'affichage optimiste.
+      // comments_count est incrémenté par le trigger trg_wall_comments_count (0032) — pas de maj manuelle.
+      setAllComments((prev) => [...prev, { ...mapComment(inserted), authorName: currentUserName }]);
       setAllPosts((prev) =>
         prev.map((p) => (p.id === postId ? { ...p, commentsCount: p.commentsCount + 1 } : p))
       );
-      // Synchroniser le compteur en DB
-      const post = allPosts.find((p) => p.id === postId);
-      if (post) {
-        await supabase
-          .from('wall_posts')
-          .update({ comments_count: post.commentsCount + 1 })
-          .eq('id', postId);
-      }
     }
-  }, [allPosts, currentCoproId, currentUserId, currentUserName, supabase]);
+  }, [currentCoproId, currentUserId, currentUserName, supabase]);
 
   const openEditor = useCallback(() => setIsEditorOpen(true), []);
   const closeEditor = useCallback(() => setIsEditorOpen(false), []);
