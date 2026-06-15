@@ -43,8 +43,14 @@ const WHITE: RGB = [255, 255, 255];
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
-    .format(n)
+    .format(n ?? 0)
     .replace(/\u202F/g, ' ');
+}
+
+/** Garde d\u00E9fensive : si une cl\u00E9 d'annexe n'est pas un tableau (donn\u00E9es partielles / RPC en \u00E9chec),
+ *  rendre vide plut\u00F4t que crasher au .map (le SQL 0075 renvoie d\u00E9j\u00E0 des tableaux ; ceinture+bretelles). */
+function arr<T>(x: T[] | null | undefined): T[] {
+  return Array.isArray(x) ? x : [];
 }
 
 /**
@@ -225,7 +231,7 @@ export function renderAnnexe1(
   // Section I - Tresorerie
   y = addSubTitle(doc, 'I - SITUATION FINANCIERE ET TRESORERIE', y);
 
-  const tresoBody = data.section_i.tresorerie.map((r) => [
+  const tresoBody = arr(data.section_i.tresorerie).map((r) => [
     `${r.compte} - ${r.libelle}`,
     fmt(r.exercice_precedent),
     fmt(r.exercice_clos),
@@ -246,7 +252,7 @@ export function renderAnnexe1(
   y = result.finalY + 5;
 
   // Provisions
-  const provBody = data.section_i.provisions.map((r) => [
+  const provBody = arr(data.section_i.provisions).map((r) => [
     `${r.compte} - ${r.libelle}`,
     fmt(r.exercice_precedent),
     fmt(r.exercice_clos),
@@ -269,7 +275,7 @@ export function renderAnnexe1(
   // Section II - Creances et dettes
   y = addSubTitle(doc, 'II - CREANCES ET DETTES', y);
 
-  const creancesBody = data.section_ii.creances.map((r) => [
+  const creancesBody = arr(data.section_ii.creances).map((r) => [
     `${r.compte} - ${r.libelle}`,
     fmt(r.exercice_precedent),
     fmt(r.exercice_clos),
@@ -289,7 +295,7 @@ export function renderAnnexe1(
   );
   y = result.finalY + 5;
 
-  const dettesBody = data.section_ii.dettes.map((r) => [
+  const dettesBody = arr(data.section_ii.dettes).map((r) => [
     `${r.compte} - ${r.libelle}`,
     fmt(r.exercice_precedent),
     fmt(r.exercice_clos),
@@ -353,7 +359,7 @@ export function renderAnnexe2(
   // Charges courantes
   y = addSubTitle(doc, 'CHARGES POUR OPERATIONS COURANTES', y);
 
-  const chargesBody = data.charges_courantes.map((r) => [
+  const chargesBody = arr(data.charges_courantes).map((r) => [
     r.compte ? `${r.compte} ${r.libelle || ''}` : r.libelle || '',
     fmt(r.ex_precedent_approuve),
     fmt(r.ex_clos_budget_vote),
@@ -384,7 +390,7 @@ export function renderAnnexe2(
   // Produits courants
   y = addSubTitle(doc, 'PRODUITS POUR OPERATIONS COURANTES', y);
 
-  const produitsBody = data.produits_courants.map((r) => [
+  const produitsBody = arr(data.produits_courants).map((r) => [
     r.compte ? `${r.compte} ${r.libelle || ''}` : r.libelle || '',
     fmt(r.ex_precedent_approuve),
     fmt(r.ex_clos_budget_vote),
@@ -408,7 +414,7 @@ export function renderAnnexe2(
   if (data.charges_travaux.length > 0) {
     y = addSubTitle(doc, 'CHARGES POUR TRAVAUX ET OPERATIONS EXCEPTIONNELLES', y);
 
-    const travauxBody = data.charges_travaux.map((r) => [
+    const travauxBody = arr(data.charges_travaux).map((r) => [
       r.compte ? `${r.compte} ${r.libelle || ''}` : r.libelle || '',
       fmt(r.ex_precedent_approuve),
       fmt(r.ex_clos_budget_vote),
@@ -466,7 +472,7 @@ export function renderAnnexe3(
     ],
   ];
 
-  data.cles.forEach((cle) => {
+  arr(data.cles).forEach((cle) => {
     if (y > 235) {
       doc.addPage();
       y = MARGIN;
@@ -474,7 +480,7 @@ export function renderAnnexe3(
 
     y = addSubTitle(doc, cle.nom, y);
 
-    const body = cle.lignes.map((r) => [
+    const body = arr(cle.lignes).map((r) => [
       r.compte ? `${r.compte} ${r.libelle || ''}` : r.libelle || '',
       fmt(r.ex_precedent_approuve),
       fmt(r.ex_clos_budget_vote),
@@ -532,7 +538,7 @@ export function renderAnnexe4(
     y
   );
 
-  const body = data.operations.map((op) => [
+  const body = arr(data.operations).map((op) => [
     op.libelle,
     fmt(op.depenses_votees),
     fmt(op.depenses_realisees),
@@ -579,7 +585,7 @@ export function renderAnnexe5(
     y
   );
 
-  const body = data.operations.map((op) => [
+  const body = arr(data.operations).map((op) => [
     op.libelle,
     fmt(op.travaux_votes_a),
     fmt(op.travaux_payes_b),
