@@ -57,6 +57,7 @@ const GATES = [
   'supabase/tests/gate_0072_payment_cloisonnement.sql',
   'supabase/tests/gate_0073_e9_operation_id.sql',
   'supabase/tests/gate_0075_annexes_coherence.sql',
+  'supabase/tests/gate_0076_etat_date_h2h3.sql',
 ];
 
 // Gates DIFFÉRÉES — phase sécurité (NON bloquantes).
