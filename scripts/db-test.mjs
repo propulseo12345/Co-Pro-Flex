@@ -43,6 +43,7 @@ const GATES = [
   'supabase/tests/gate_gel_travaux_e2e.sql',
   'supabase/tests/gate_multicles_e2e.sql',
   'supabase/tests/gate_charge_nature_e2e.sql',
+  'supabase/tests/gate_e4_operation_id_e2e.sql',
   'supabase/tests/gate_avoir_fournisseur_e2e.sql',
 ];
 
