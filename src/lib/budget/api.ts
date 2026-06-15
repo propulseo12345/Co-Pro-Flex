@@ -364,6 +364,34 @@ export async function updateBudgetStatus(
   const supabase = createUntypedClient();
   const dbStatus = mapBudgetStatusToDb(status);
 
+  // CLÔTURE d'un budget TRAVAUX = clôture d'OPÉRATION : passe par close_works_operation (garde dure
+  // E9 : refuse s'il reste une charge travaux non rattachée à une opération). Un budget non-travaux
+  // se clôture par simple bascule de statut. Cf. PLAN_J5 T3 décision #8.
+  if (dbStatus === 'closed') {
+    const { data: budget, error: bErr } = await supabase
+      .from('budgets')
+      .select('copro_id, budget_type')
+      .eq('id', budgetId)
+      .single();
+    if (bErr) {
+      throw new Error(`Failed to load budget before close: ${bErr.message}`);
+    }
+    if (budget?.budget_type === 'works') {
+      const { data, error } = await supabase.rpc('close_works_operation', {
+        p_copro_id: budget.copro_id,
+        p_budget_id: budgetId,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      const res = (data ?? {}) as { success?: boolean; error?: string };
+      if (!res.success) {
+        throw new Error(res.error ?? "Échec de la clôture de l'opération travaux");
+      }
+      return;
+    }
+  }
+
   const updates: Record<string, unknown> = { status: dbStatus };
 
   if (status === BudgetStatut.APPROUVE) {

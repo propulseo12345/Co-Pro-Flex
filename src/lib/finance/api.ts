@@ -665,6 +665,8 @@ export interface CreateSupplierInvoicePayload {
     label: string;
     amount: number;
     repartition_key_id?: string;
+    /** Opération (budget travaux) rattachée à la ligne — porte operation_id sur la ligne 6xx du GL (E9). */
+    operation_id?: string;
   }>;
   document_id?: string;
   post_immediately?: boolean;
