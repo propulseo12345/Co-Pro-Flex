@@ -1,22 +1,24 @@
-# Session State — 2026-06-12 ~15:30 (lot 1 livré + mergé, lot 2 découverte faite)
+# Session State — 2026-06-15 (cadrage J2-bis/J5 + nettoyage Mur & Maintenance)
 
 ## Branch / Commit
-`j2bis-lot2-ag-annexes` @ `a5f06fd` (= origin/main post-PR #13, clean hors parasites 0-octet)
+`j2bis-nettoyage-front` @ `f5dbe17` (dirty : `.planning/PLAN_MAITRE` modifié + non-suivis). Branchée sur `main` (`c604f30`, E3). **Non poussée** (seul `lyestriki-29` peut pousser).
 
 ## Completed This Session
-- **Lot 1 J2-bis LIVRÉ + MERGÉ (PR #13)** : 0049 (4 vues écrans principaux + rename unpaid_lots_count + statuts AG alignés) + gate 14/14 ; spinners silencieux réparés (cause racine) ; purge mock impayés ; VentesProvider descendu ; badge facture OS. Preuves : tsc 0, gates 14/14, vitest 97/97.
-- **CI réparée** : CLI Supabase épinglée 2.105.0 (`latest` cassait main depuis le 11/06 sur TOUTES les branches).
-- **Codex acté HS** : règle inversée dans CLAUDE.md global (Claude exécute par défaut, Codex = second avis CLI direct seulement).
-- Lot 2 : découverte COMPLÈTE → périmètre réel 6 vues + 2 RPC + 1 table + 1 ALTER (8 RPC mortes à ne pas créer).
+- **2 commits** : `edc9576` fix(mur) · `f5dbe17` refactor(maintenance) — `tsc` 0, vitest 4/4.
+- **Cadrage validé** (13 décisions métier + 3 annexes) → `.planning/DECISIONS_CADRAGE_2026-06-15.md`.
+- **Audits** : `.planning/AUDIT_ETAT_AVANT_J3_2026-06-14.md` + `.planning/ANALYSE_ANNEXES_2026-06-14.md` (annexes = lecture seule, GL intact, PROUVÉ).
+- **Vérif migration `providers→tiers`** : saine ; manques mineurs → backlog (cf. DECISIONS_CADRAGE).
 
 ## Next Task
-- **Écrire migration 0050 + gate_0050_ag_annexes** selon `.planning/PROGRESS_j2bis-lot2-ag-annexes.md` (TOUT le design y est : contrats, sources, pièges). Puis db:test, tsc, vitest, commits, PR.
-- Effort : `Max` pour l'écriture ; **`ultracode` à proposer pour la revue adversariale de fin de lot, AVANT merge**.
+- Reprendre le **nettoyage J2-bis** : (a) **GED** = à CADRER (brainstorming en attente : recherche + questions) ; (b) **Conseil onglet Membres** = vue SQL `v_council_members_detail` (lot migrations). Puis **lot SQL** (AG pouvoirs/envoi/jalons + `v_wall_comments` + ajouter `is_locked` à `v_wall_feed`, cf. revue) puis **J5**.
+- 👉 Effort conseillé : **Max** (cadrage GED en dialogue) ; **ultracode** ponctuel pour revue adversariale des migrations GL (J5).
 
 ## Blockers
-- None. (Push : `gh auth switch -u lyestriki-29` juste avant chaque push — le compte actif retombe seul sur Propulseo.)
+- Migrations : je n'applique RIEN sur le live (Option A) → Lyes applique. Tests sur branche jetable.
+- `git switch` bloque tant que `PLAN_MAITRE` modifié non commité (stash si besoin).
 
 ## Key Context
-- vitest : lancer depuis `C:\Users\...` (C MAJUSCULE) sinon double chargement vitest → échec bidon (10 fichiers "reading 'config'").
-- Base docker locale déjà à jour 0049 ; `npm run dev -- -p 3010` (port 3000 = TropPayé).
-- Parasites 0-octet racine : `git clean -f` à faire par Lyes.
+- ⚠️ NE PAS `git add .` (54 fichiers-déchets à la racine). Commits ciblés.
+- Push : `gh auth switch -u lyestriki-29` juste avant (le compte actif retombe sur Propulseo).
+- Pattern réutilisable : `src/lib/maintenance/writes.ts` (écritures partagées hook+onboarding).
+- Code review NON encore lancée sur les 2 commits (proposée à Lyes).

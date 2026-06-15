@@ -88,16 +88,18 @@ J0 hygiène + arbitrages ✅ ── J1 sécurité/RLS ✅ ── J2 ✅ (2.9/2.1
 ### J2-bis — Drift restant front↔base (~50 objets, par module — sweep 2026-06-11)
 
 > Méthode et liste : `AUDIT_DRIFT_HORS_FINANCE_2026-06-10.md` (re-validée au 2026-06-11). Ces écrans sont câblés Supabase mais interrogent des objets ABSENTS de la base cible → à traiter **module par module, même méthode que 2.10** (vues de compat + gate + rebranch front). Non typés (client `as any`), donc invisibles à tsc.
+>
+> ✅ **AUDIT D'ÉTAT RÉEL FAIT (2026-06-14)** → détail complet, restes précis, ordre d'attaque et 10 décisions à trancher dans **`.planning/AUDIT_ETAT_AVANT_J3_2026-06-14.md`**. Verdict : **J2-bis ≈ 80 %** (cœurs livrés, restent des trous ciblés + rapprochement bancaire écriture + bug mutation), **J5 ≈ 20 %** (gros morceau devant). Cochage ci-dessous mis à jour ; les domaines `partial` gardent `[ ]` (cœur fait, restes listés dans le fichier d'audit).
 
-- [ ] **AG annexes** *(le plus gros)* : pouvoirs, jalons, brouillons UI, choix d'envoi, stats notifications, feuille de présence (7 vues `v_ag_*` + 11 RPC `*_ag_*`).
-- [ ] **Communication avancée** : campagnes mail, dossiers, boîte de réception, templates (5 tables `mail_*` + 6 vues + `generate_campaign_recipients`). *Le mur/messagerie/mails de base (J1) fonctionnent.*
-- [ ] **GED avancée** : `ged`, `dossiers`, `document_links`/`document_access`, `pv_templates` + 6 vues `v_documents_*`/`v_folders_*`/`v_recent_documents`.
-- [ ] **Conseil syndical** : rapports d'activité (3 tables `*_cs`) + 3 vues `v_council_*`.
-- [ ] **Dashboard restes** : `v_dashboard_recent_activity`, `v_dashboard_todos`.
-- [ ] **Mutations** : `v_mutations_overview` (la base a `v_mutation_detail`).
-- [ ] **Divers** : `increment_template_usage` (compteur banque de résolutions) ; `post_call_for_funds` = différé F4 (J9).
-- [ ] **Retours revue 0047 tranchés 2026-06-11** : renommer `critical_unpaid_count` → `unpaid_lots_count` (vue + `usePortefeuille` + fin du `0` en dur de `lib/dashboard/api.ts` + statuts AG alignés) ; OS : retirer les boutons FACTURE/PAYE (no-op) + badge dérivé de la facture liée (`invoices_count`/`invoiced_total`).
-- [ ] **Retours audit tranchés 2026-06-12** *(rapport `.planning/AUDIT_2026-06-12_SECU_FONCTIONNEL.md`)* : **purger le fallback MOCK des pages impayés** (lot 1) ; **rapprochement bancaire : créer la voie d'écriture** (`import_bank_movement` + `reconcile_bank_movement`, en RPC gardées esprit 0046, + table `bank_requisitions` pour le lien copro) ; **relances impayés AUTOMATIQUES avant J7** (pg_cron + wrapper multi-copros ou Vercel Cron — décision Lyes : automatique) ; debug **spinners silencieux AG + copropriétaires** ; `useSalesList` descendu du layout ; TravauxDetailModal (`documents.budget_id` fantôme → `document_relations`) ; suppression `src/lib/maintenance/api.ts` + 2 steps orphelins.
+- [ ] **AG annexes** *(cœur ✅ #14/0050 — reste 3 RPC fantômes)* : 6 vues `v_ag_*` + table `ag_documents` + RPC notif/document/draft livrées. **Reste** : RPC pouvoirs / jalons / choix d'envoi appelées par des pages live mais absentes du canonique → décision modèle + migration + resync types.
+- [ ] **Communication avancée** *(cœur ✅ #15 — reste 2 bugs mur)* : conversations/mur/events/mail câblés. **Reste** : double-comptage likes/comments (trigger 0032 + ré-incrément front), `author_name` inséré dans `wall_comments` (colonne supprimée 0022) → ajout commentaire cassé.
+- [ ] **GED avancée** *(cœur ✅ #16/#27/0052 — reste mocks)* : 5 tables + 6 vues + bucket + RPC. **Reste** : rebrancher 4 composants UI encore sur `document-linking`/`document-versioning` mock → `lib/documents/api.ts`, supprimer les 2 mocks, `v_document_versions` orpheline, `AccessBadge` mort.
+- [ ] **Conseil syndical** *(cœur ✅ #17/0053 — reste bug Membres)* : 3 tables `*_cs` + RLS + service câblé. **Reste** : onglet Membres lit `last_name/first_name/email` sur `council_members` (colonnes absentes) → noms vides ; JOIN coproprietaires/profiles. (v_council_* legacy = hors périmètre à confirmer.)
+- [x] **Dashboard restes** ✅ *(#18)* : `v_dashboard_recent_activity`, `v_dashboard_todos` câblées au rendu, gate strict.
+- [ ] **Mutations** *(lecture OK — reste bug d'écriture)* : `v_mutations_overview` en lecture OK, mais `createMutation` INSERT des colonnes absentes (`buyer_*`/`notary_*` déplacées en 0019) → bouton « Nouvelle mutation » jette une erreur Postgres. Corriger (FK `seller_owner_id`/`notaire_id`) ou masquer (décision).
+- [x] **Divers** ✅ : `increment_template_usage` en base + câblée (`4a1f054`) ; `post_call_for_funds` = différé F4 (J9).
+- [x] **Retours revue 0047** ✅ *(#13)* : renommer `critical_unpaid_count` → `unpaid_lots_count` (vue + `usePortefeuille` + fin du `0` en dur de `lib/dashboard/api.ts` + statuts AG alignés) ; OS : retirer les boutons FACTURE/PAYE (no-op) + badge dérivé de la facture liée (`invoices_count`/`invoiced_total`).
+- [ ] **Retours audit 2026-06-12** *(a/c/d/e/f ✅ — reste (b) rapprochement bancaire écriture + (g) suppression `lib/maintenance/api.ts`)* — rapport `.planning/AUDIT_2026-06-12_SECU_FONCTIONNEL.md` : **purger le fallback MOCK des pages impayés** (lot 1) ; **rapprochement bancaire : créer la voie d'écriture** (`import_bank_movement` + `reconcile_bank_movement`, en RPC gardées esprit 0046, + table `bank_requisitions` pour le lien copro) ; **relances impayés AUTOMATIQUES avant J7** (pg_cron + wrapper multi-copros ou Vercel Cron — décision Lyes : automatique) ; debug **spinners silencieux AG + copropriétaires** ; `useSalesList` descendu du layout ; TravauxDetailModal (`documents.budget_id` fantôme → `document_relations`) ; suppression `src/lib/maintenance/api.ts` + 2 steps orphelins.
 
 **Test Lyes** : un parcours type par module ; focus = parcours facture (saisie brouillon → validation → écriture GL → paiement) + **maintenance réparée** (prestataires, contrats, OS, carnet : listes non vides, création OK) — checklist détaillée `.planning/TESTS_F10_J0-J2.md`.
 
@@ -123,13 +125,13 @@ J0 hygiène + arbitrages ✅ ── J1 sécurité/RLS ✅ ── J2 ✅ (2.9/2.1
 
 Exécution des arbitrages **tranchés le 2026-06-10** (verdicts : `DECISIONS.md` B/C/E + §H) :
 - [ ] **Annexes** : vérif fac-similé puis gel des libellés SQL+front+PDF (E2, clôt E1) ; refonte annexe 1 sans compensation, par lot et par sens, 450-5 isolé (E7) ; annexe 2 en 2 blocs officiels (E8).
-- [ ] **Schéma comptable** : colonne `charge_nature` + CHECK + seed sourcé arrêté (E3) ; `operation_id` niveau ligne FK budgets (E4) ; défauts 662 travaux / 711-718 courant (E5/E6) ; rattachement travaux obligatoire + filet « non rattachés » + blocage clôture d'opération (E9).
-- [ ] **Clôture/affectation** : renommage 110→12 + compte d'attente courant hors racine 12x (B3, REQUIS avant 1ᵉʳ client) ; gel du 110 + écran « opérations à apurer » (B4) ; assertion bloquante multi-clés dans `regularize_period` (B5).
-- [ ] **Paiements** : cloisonnement par nature PAR DÉFAUT (C2) ; reprise auto du trop-perçu + mention sur l'avis d'appel, 103 intouché (C3) ; correction doc/enums/seuil feuille de présence art. 24 (C6).
-- [ ] **État daté & mutations** : tableau d'acquéreurs Σ=100 (H1) ; tous les cédants nommés (H2) ; partie 3 complète — provisions restantes + ALUR (H3) ; index unique clé générale (H4).
+- [ ] **Schéma comptable** *(partiel)* : colonne `charge_nature` + CHECK + seed sourcé arrêté (**E3 ✅ #32 mergé**) ; `operation_id` niveau ligne FK budgets (**E4-cœur ✅** branche `e4-operation-id-ledger`, `bee14b4`, **merge en attente**) ; **reste** défauts 662 travaux / 711-718 courant (E5/E6) ; rattachement travaux obligatoire + filet « non rattachés » + blocage clôture d'opération (E9).
+- [x] **Clôture/affectation** ✅ *(mergé)* : renommage 110→12 + compte d'attente courant hors racine 12x (**B3 #29**) ; gel du compte 12 + écran « opérations à apurer » (**B4 #30**) ; assertion bloquante multi-clés dans `regularize_period` (**B5 #31**).
+- [ ] **Paiements** *(C6 moteur SQL déjà conforme art.24 — reste C2/C3 finance + doc C6)* : cloisonnement par nature PAR DÉFAUT (C2) ; reprise auto du trop-perçu + mention sur l'avis d'appel, 103 intouché (C3) ; correction doc/enums/seuil feuille de présence art. 24 (C6).
+- [ ] **État daté & mutations** *(H4 ✅ 0050 — reste H1/H2/H3 + recâblage front sur RPC)* : tableau d'acquéreurs Σ=100 (H1) ; tous les cédants nommés (H2) ; partie 3 complète — provisions restantes + ALUR (H3) ; index unique clé générale (**H4 ✅**). ⚠️ builder SQL non branché (INSERT brut côté client) + edge `validate_mutation` inexistante.
 - [ ] **UX contre-passation guidée** (F9) — un syndic qui se trompe ne reste jamais bloqué.
-- [ ] **Export comptable CSV** *(décision Lyes 2026-06-12)* : grand livre + balance + journaux (généré côté client depuis les données chargées) — transmission CS/expert-comptable, art. 18-1. Les boutons PDF/Excel morts restent masqués d'ici là.
-- [ ] **Reprise de mandat fiabilisée** (F8) : unifier les 2 chemins front (B6), traçabilité 471/472 ligne-par-ligne (art. 10), import balance Excel, acompte 409.
+- [x] **Export comptable CSV** ✅ *(`d7e0b35`)* : grand livre + balance + journaux (généré côté client depuis les données chargées) — transmission CS/expert-comptable, art. 18-1. Les boutons PDF/Excel morts restent masqués d'ici là.
+- [ ] **Reprise de mandat fiabilisée** (F8) *(socle moteur A→D ✅ mergé main, B6 résolu — reste 3 briques)* : traçabilité 471/472 ligne-par-ligne (art. 10), import balance Excel, acompte 409.
 
 ## J6 — Déploiement + parcours bêta réel *(2-3 sessions · effort `Max` + `ultracode` pré-push)*
 
