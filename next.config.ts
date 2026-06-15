@@ -22,7 +22,8 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  // data.geopf.fr : géocodeur BAN/IGN (gratuit) de l'autocomplétion d'adresse (useGoogleMapsAutocomplete).
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://data.geopf.fr",
   "worker-src 'self' blob:",
   "frame-ancestors 'self'",
   "base-uri 'self'",
