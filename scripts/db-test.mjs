@@ -49,6 +49,8 @@ const GATES = [
   'supabase/tests/gate_0062_ag_milestones_rpc.sql',
   'supabase/tests/gate_0063_ag_envoi_choices.sql',
   'supabase/tests/gate_0064_mutations_create.sql',
+  'supabase/tests/gate_0065_ag_pouvoirs.sql',
+  'supabase/tests/gate_0066_bank_reconcile.sql',
 ];
 
 // Gates DIFFÉRÉES — phase sécurité (NON bloquantes).
