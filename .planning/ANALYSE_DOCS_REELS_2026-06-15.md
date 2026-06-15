@@ -46,3 +46,10 @@
 ## E. Ce qui me manque encore
 - **Fac-similés des annexes 2, 3, 4, 5** (le PDF guide s'arrête à l'annexe 1). Idéal = un jeu réel anonymisé, ou les pages 31–77 du guide ARC.
 - Point de vigilance juridique : le pré-état daté cite « Loi art. 18 alinéa 6 » là où l'état daté CSN cite « alinéa 15 » pour les provisions spéciales → vérifier la bonne référence d'alinéa en vigueur (à trancher côté expert).
+
+## F. 4ᵉ document — Fiche INC J255 « Les comptes du syndicat » (ajouté 2026-06-15)
+Guide pédagogique général (Institut National de la Consommation), PAS des fac-similés vierges (les pages tableaux V→X ne sont pas extractibles en texte). Apports concrets pour nous :
+- **Règle de cohérence croisée clé (annexes)** : le **compte 12** (solde des travaux à cheval sur 2 exercices) = **annexe 5, colonne E** = somme **102 (annexe 1) + 702 + 671 (annexe 2) + éventuellement 712-718**. → à transformer en **gate de cohérence** sur `fn_annexe_5` ↔ compte 12 (cf. décisions cadrage annexes).
+- **Classements confirmés** : `6221` = honoraires travaux exceptionnels (sous-compte de 622) = travaux ✅ ; `671` = travaux ✅. (Ce doc parle de 671, pas 661 — garder l'œil sur 661/662 à confirmer.)
+- **Trop-perçu / régularisation** : « pas de report des provisions d'un exercice sur l'autre » et « le syndic doit rembourser l'excédent perçu » à l'approbation des comptes ; les **avances** sont remboursées au vendeur en cas de vente. → nuance à intégrer dans la mécanique trop-perçu (régularisation à la clôture vs avance/crédit reporté sur l'appel suivant).
+- Confirme les sources : **décret 2005-240 + arrêté 14 mars 2005** (nomenclature & fonctionnement des comptes).
