@@ -2,12 +2,15 @@
 
 import { useCallback, useState } from 'react';
 import { useCreateCall } from '@/hooks/modules/useFinanceData';
-import { updateCallStatus } from '@/lib/finance/api';
+import { updateCallStatus, cancelCallForFunds } from '@/lib/finance/api';
 import type { CreateCallPayload } from '@/lib/finance/api';
+
+type CallStatus = 'draft' | 'issued' | 'partially_paid' | 'paid' | 'cancelled';
 
 export function useAppelsFondsActions() {
   const { mutate: createCall, isLoading: createLoading } = useCreateCall();
   const [emitLoading, setEmitLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const emitCall = useCallback(async (callId: string) => {
@@ -25,18 +28,25 @@ export function useAppelsFondsActions() {
     }
   }, []);
 
-  const cancelCall = useCallback(async (callId: string) => {
-    setEmitLoading(true);
+  // Annulation : un appel encore en BROUILLON n'a pas d'écriture -> simple bascule de statut. Un appel
+  // ÉMIS porte une écriture immuable -> on passe par cancel_call_for_funds qui la CONTRE-PASSE (refus
+  // strict si des paiements sont imputés). Sans ce branchement, annuler un appel posté laisserait son
+  // écriture orpheline dans le grand livre (écart relevé/GL).
+  const cancelCall = useCallback(async (callId: string, status: CallStatus, reason = 'Annulation appel de fonds') => {
+    setCancelLoading(true);
     setError(null);
     try {
-      const result = await updateCallStatus(callId, 'cancelled');
-      if (!result.data?.success) {
-        setError(result.error ?? "Erreur lors de l'annulation");
+      const result =
+        status === 'draft'
+          ? await updateCallStatus(callId, 'cancelled')
+          : await cancelCallForFunds(callId, reason);
+      if (result.error) {
+        setError(result.error);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
-      setEmitLoading(false);
+      setCancelLoading(false);
     }
   }, []);
 
@@ -58,7 +68,7 @@ export function useAppelsFondsActions() {
     emitCall,
     cancelCall,
     generateCalls,
-    isLoading: createLoading || emitLoading,
+    isLoading: createLoading || emitLoading || cancelLoading,
     error,
   };
 }

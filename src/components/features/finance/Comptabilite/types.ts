@@ -33,6 +33,11 @@ export interface OperationComptable {
   mouvementBancaireLie?: string;
   reference?: string;
   numeroPiece?: string; // Numéro de pièce comptable (AF, FAC, REG, OD, AN...)
+  // Contre-passation (0071) — portés au niveau de la transaction du grand livre.
+  txId?: string; // id de la transaction (ledger_transactions) pour contre-passer
+  sourceType?: string | null; // source_type de la tx (régénérables non contre-passables)
+  isReversed?: boolean; // la transaction a déjà été contre-passée
+  reversalOf?: string | null; // si renseigné, CETTE écriture EST une extourne (pas re-contre-passable)
 }
 
 export interface Depense {

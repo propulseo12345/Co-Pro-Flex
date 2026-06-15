@@ -308,6 +308,9 @@ export function useCreateCallWizard({ selectedPeriod, onSuccess, onClose }: UseC
             label: `${state.label} — ${i + 1}/${total}`,
             due_date: inst.dueDate,
             total_amount: inst.amount,
+            // La RPC post_budget_call_for_funds fractionne le budget voté par échéance (i/N).
+            installment_index: i + 1,
+            installment_count: total,
           });
           if (result.error) {
             throw new Error(

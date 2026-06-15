@@ -343,28 +343,36 @@ export interface CreateCallPayload {
   total_amount: number;
   budget_id?: string;
   description?: string;
+  /** Échéance i/N (appels semestriels/trimestriels) : la RPC fractionne le budget par échéance. */
+  installment_index?: number;
+  installment_count?: number;
 }
 
 export async function createCall(payload: CreateCallPayload): Promise<ApiResult<{ call_id: string; ledger_tx_id: string }>> {
   const supabase = createUntypedClient();
-  const { copro_id, period_id, budget_id, repartition_key_id, label, trimester, issue_date, due_date, total_amount, description } = payload;
+  const { copro_id, period_id, budget_id, label, trimester, issue_date, due_date, installment_index, installment_count } = payload;
 
-  // Route canonique : la RPC post_call_for_funds crée l'appel mono-clé ET son
-  // écriture au grand livre (D 450-x par lot avec lot_id / C 701·702·105 selon
-  // la nature du budget). Remplace l'ancien chemin client qui écrivait à tort sur
-  // un compte « 450 » sans lot_id (cassé). Les appels budgétaires agrégés
-  // multi-clés passent, eux, par post_budget_call_for_funds (chemin AG).
-  const { data, error } = await supabase.rpc('post_call_for_funds', {
+  // Route canonique : `post_budget_call_for_funds` crée l'appel agrégé multi-clés à partir d'un
+  // budget voté ET son écriture au grand livre (D 450-x par lot avec lot_id / C 701·702·105 selon la
+  // nature du budget). L'ancien chemin appelait `post_call_for_funds` — RPC INEXISTANTE (drift) — donc
+  // la création d'appel échouait systématiquement. Le montant est dérivé du budget (× fraction ou par
+  // échéance index/count) ; `total_amount`/`repartition_key_id` du payload deviennent informatifs
+  // (un appel = fraction d'un budget voté, pas un montant arbitraire). Cf. PLAN_J5 T1 décision #4.
+  if (!budget_id) {
+    return { data: null, error: 'Un appel de fonds doit être rattaché à un budget voté (budget_id requis).' };
+  }
+
+  const { data, error } = await supabase.rpc('post_budget_call_for_funds', {
     p_copro_id: copro_id,
     p_period_id: period_id,
-    p_budget_id: budget_id ?? null,
-    p_repartition_key_id: repartition_key_id,
+    p_budget_id: budget_id,
     p_label: label,
     p_trimester: trimester ?? null,
     p_issue_date: issue_date,
     p_due_date: due_date,
-    p_total_amount: total_amount,
-    p_description: description ?? null,
+    p_fraction: 1.0,
+    p_installment_index: installment_index ?? null,
+    p_installment_count: installment_count ?? null,
   });
 
   if (error) {
@@ -469,6 +477,60 @@ export async function updateCallStatus(
   }
 
   return { data: { success: true }, error: null };
+}
+
+// ============================================================================
+// CONTRE-PASSATION (F9) — extourne d'écriture + annulation d'appel
+// ============================================================================
+
+/**
+ * Contre-passe une écriture POSTÉE du grand livre : crée une écriture inverse dans la période
+ * ouverte courante (le grand livre est immuable, on n'efface jamais une écriture). Refuse si la tx
+ * est régénérable, déjà extournée, ou si aucune période n'est ouverte.
+ */
+export async function reverseLedgerTransaction(
+  txId: string,
+  reason: string,
+  reversalDate?: string
+): Promise<ApiResult<{ reversal_tx_id: string; reversed_tx_id: string }>> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase.rpc('reverse_ledger_transaction', {
+    p_tx_id: txId,
+    p_reason: reason,
+    p_reversal_date: reversalDate ?? null,
+  });
+  if (error) {
+    return { data: null, error: error.message };
+  }
+  const res = (data ?? {}) as { success?: boolean; reversal_tx_id?: string; reversed_tx_id?: string; error?: string };
+  if (!res.success || !res.reversal_tx_id) {
+    return { data: null, error: res.error ?? 'Échec de la contre-passation' };
+  }
+  return { data: { reversal_tx_id: res.reversal_tx_id, reversed_tx_id: res.reversed_tx_id ?? txId }, error: null };
+}
+
+/**
+ * Annule un appel de fonds POSTÉ : contre-passe son écriture puis bascule l'appel en 'cancelled'.
+ * Refuse si l'appel a des paiements imputés (refus strict, désimputer d'abord). NE PAS utiliser pour
+ * un appel encore en brouillon (utiliser `updateCallStatus(callId, 'cancelled')` dans ce cas).
+ */
+export async function cancelCallForFunds(
+  callId: string,
+  reason: string
+): Promise<ApiResult<{ call_id: string; reversal_tx_id: string }>> {
+  const supabase = createUntypedClient();
+  const { data, error } = await supabase.rpc('cancel_call_for_funds', {
+    p_call_id: callId,
+    p_reason: reason,
+  });
+  if (error) {
+    return { data: null, error: error.message };
+  }
+  const res = (data ?? {}) as { success?: boolean; call_id?: string; reversal_tx_id?: string; error?: string };
+  if (!res.success || !res.call_id) {
+    return { data: null, error: res.error ?? "Échec de l'annulation de l'appel" };
+  }
+  return { data: { call_id: res.call_id, reversal_tx_id: res.reversal_tx_id ?? '' }, error: null };
 }
 
 // ============================================================================
@@ -1174,6 +1236,10 @@ export interface GeneralLedgerEntry {
   direction: 'debit' | 'credit';
   amount: number;
   entry_label: string | null;
+  /** tx d'origine contre-passée PAR cette écriture (sur les extournes 'od'). 0071. */
+  reversal_of: string | null;
+  /** TRUE si cette écriture a déjà été contre-passée. 0071. */
+  is_reversed: boolean;
 }
 
 export async function getGeneralLedger(
