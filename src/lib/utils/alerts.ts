@@ -1,6 +1,5 @@
 // NEUTRALIZED: Mock imports removed - will be replaced by Supabase data
 import { Impaye, ContratDetaille, OrdreService } from '@/types';
-import { getAllInterventions, getInterventionAlerts } from '@/lib/services/interventions.service';
 
 // Placeholder empty arrays until Supabase integration
 const MOCK_DEPENSES_BUDGETS: Array<{ poste: string; montant: number }> = [];
@@ -768,37 +767,16 @@ export function getOrdreServiceBrouillonStats() {
     return stats;
 }
 
-// Convertir les alertes d'interventions du service vers le format Alert
-export function getInterventionAlertsForDisplay(): Alert[] {
-    const interventions = getAllInterventions();
-    const interventionAlerts = getInterventionAlerts(interventions);
-
-    return interventionAlerts.map(alert => ({
-        id: alert.id,
-        type: alert.type as AlertType,
-        severity: alert.severity,
-        title: alert.titre,
-        message: alert.message,
-        link: '/maintenance/logbook',
-        data: {
-            interventionId: alert.intervention.id,
-            interventionTitre: alert.intervention.titre,
-            intervenant: alert.intervention.intervenant,
-            dateIntervention: alert.intervention.date,
-            joursDepuis: alert.joursDepuis
-        }
-    }));
-}
-
 // Fonction principale pour obtenir toutes les alertes
+// Les alertes du carnet d'entretien (interventions) sont désormais servies
+// directement par la vue Supabase v_logbook_alerts via le hook useLogbook.
 export function getAllAlerts(): Alert[] {
     return [
         ...getBudgetAlerts(),
         ...getImpayesAlerts(),
         ...getRecouvrementAlerts(),
         ...getContractAlerts(),
-        ...getOrdreServiceAlerts(),
-        ...getInterventionAlertsForDisplay()
+        ...getOrdreServiceAlerts()
     ];
 }
 
