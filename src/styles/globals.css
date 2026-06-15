@@ -1,4 +1,6 @@
 :root {
+  /* Rendu sombre des contrôles natifs (select, date-picker, scrollbars). */
+  color-scheme: dark;
   /* Colors - Primary (blue accent — nav V1) */
   --primary: #2563eb; /* Blue-600 */
   --primary-hover: #1d4ed8; /* Blue-700 */
@@ -728,6 +730,8 @@ textarea:focus-visible,
    Sidebar conserve ses couleurs dark (--sidebar-*, --nav-*)
    ============================================= */
 [data-theme="light"] {
+  /* Contrôles natifs en clair quand le thème clair est actif. */
+  color-scheme: light;
   /* Surfaces */
   --background: #faf8f5;
   --bg-secondary: #f5f0e8;
