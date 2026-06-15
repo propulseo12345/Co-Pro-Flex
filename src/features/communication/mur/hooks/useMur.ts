@@ -78,7 +78,9 @@ function mapComment(row: any): IWallComment {
     id: row.id,
     postId: row.post_id,
     authorId: row.author_id,
-    authorName: row.author_name ?? 'Utilisateur',
+    // wall_comments ne stocke pas le nom (snapshot supprimé en 0022, jointure profiles) :
+    // le nom est posé localement à la création ; au fetch on retombe sur le fallback.
+    authorName: 'Utilisateur',
     authorRole: 'copro' as AuthorRole,
     content: row.content,
     parentId: row.parent_comment_id ?? null,
@@ -159,6 +161,33 @@ export function useMur(): UseMurReturn {
   }, [supabase]);
 
   fetchCommentsRef.current = fetchComments;
+
+  // ── Resynchronisation ciblée des compteurs ───────────────────────────────────
+  // Les triggers SQL (0032) maintiennent likes_count/comments_count : on ne les
+  // incrémente jamais côté front (sinon double-comptage). Après une action, on relit
+  // la valeur réelle de la ligne via v_wall_feed et on remplace le compteur local.
+
+  const refetchPostCounts = useCallback(async (postId: string) => {
+    const { data, error } = await supabase
+      .from('v_wall_feed')
+      .select('likes_count, comments_count')
+      .eq('id', postId)
+      .single();
+
+    if (error || !data) return;
+
+    setAllPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              likesCount: data.likes_count ?? p.likesCount,
+              commentsCount: data.comments_count ?? p.commentsCount,
+            }
+          : p
+      )
+    );
+  }, [supabase]);
 
   // ── Filtrage ────────────────────────────────────────────────────────────────
 
@@ -258,16 +287,13 @@ export function useMur(): UseMurReturn {
 
     const liked = !post.isLikedByMe;
 
-    // Optimistic update
+    // Optimistic update : on ne bascule QUE l'état visuel du bouton (liked/pas liké).
+    // likesCount n'est PAS touché ici — le trigger trg_wall_likes_count (0032) s'en charge,
+    // un +1/-1 local doublerait le compteur. La valeur réelle est resynchronisée après.
     setAllPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, isLikedByMe: liked, likesCount: liked ? p.likesCount + 1 : p.likesCount - 1 }
-          : p
-      )
+      prev.map((p) => (p.id === id ? { ...p, isLikedByMe: liked } : p))
     );
 
-    // likes_count est maintenu par le trigger trg_wall_likes_count (0032) — pas de maj manuelle.
     if (liked) {
       await supabase.from('wall_likes').insert({
         copro_id: currentCoproId,
@@ -281,7 +307,10 @@ export function useMur(): UseMurReturn {
         .eq('post_id', id)
         .eq('user_id', currentUserId);
     }
-  }, [allPosts, currentCoproId, currentUserId, supabase]);
+
+    // Compteur réel (trigger appliqué) relu depuis la source.
+    await refetchPostCounts(id);
+  }, [allPosts, currentCoproId, currentUserId, supabase, refetchPostCounts]);
 
   const togglePin = useCallback(async (id: string) => {
     const post = allPosts.find((p) => p.id === id);
@@ -314,13 +343,12 @@ export function useMur(): UseMurReturn {
 
     if (!error && inserted) {
       // author_name dérivé (non stocké) : posé depuis la session pour l'affichage optimiste.
-      // comments_count est incrémenté par le trigger trg_wall_comments_count (0032) — pas de maj manuelle.
       setAllComments((prev) => [...prev, { ...mapComment(inserted), authorName: currentUserName }]);
-      setAllPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, commentsCount: p.commentsCount + 1 } : p))
-      );
+      // comments_count est incrémenté par le trigger trg_wall_comments_count (0032) :
+      // pas de +1 local (double-comptage) — on relit la valeur réelle depuis la source.
+      await refetchPostCounts(postId);
     }
-  }, [currentCoproId, currentUserId, currentUserName, supabase]);
+  }, [currentCoproId, currentUserId, currentUserName, supabase, refetchPostCounts]);
 
   const openEditor = useCallback(() => setIsEditorOpen(true), []);
   const closeEditor = useCallback(() => setIsEditorOpen(false), []);
