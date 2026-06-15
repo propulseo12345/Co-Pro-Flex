@@ -9,6 +9,7 @@ import {
   cancelMutation,
   generateEtatDate,
   validateMutation,
+  sendToNotary,
 } from '../api/mutationsApi';
 import type {
   MutationOverview,
@@ -185,6 +186,25 @@ export function useMutationDetail({ mutationId }: UseMutationDetailOptions) {
     }
   }, [mutationId, loadData]);
 
+  // Envoyer au notaire (jalon 0079 : etat_generated -> sent_to_notary)
+  const handleSendToNotary = useCallback(async () => {
+    if (!mutationId) return;
+
+    setIsProcessing(true);
+    try {
+      await sendToNotary(mutationId);
+      setToast({ message: 'Dossier envoyé au notaire', type: 'success' });
+      await loadData();
+    } catch (err) {
+      setToast({
+        message: err instanceof Error ? err.message : 'Erreur',
+        type: 'error',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [mutationId, loadData]);
+
   // Marquer comme signé
   const handleMarkAsSigned = useCallback(
     async (signatureDate: string) => {
@@ -206,7 +226,8 @@ export function useMutationDetail({ mutationId }: UseMutationDetailOptions) {
     canGeneratePreEtat: mutation?.status === 'draft',
     canGenerateFinalEtat:
       mutation?.status === 'pre_etat_generated' || mutation?.status === 'etat_generated',
-    canMarkAsSigned: mutation?.status === 'etat_generated',
+    canSendToNotary: mutation?.status === 'etat_generated',
+    canMarkAsSigned: mutation?.status === 'sent_to_notary',
     canValidate: mutation?.status === 'signed',
     canCancel:
       mutation?.status !== 'validated' && mutation?.status !== 'cancelled',
@@ -232,6 +253,7 @@ export function useMutationDetail({ mutationId }: UseMutationDetailOptions) {
     validateMutation: handleValidateMutation,
     updateMutation: handleUpdateMutation,
     cancelMutation: handleCancelMutation,
+    sendToNotary: handleSendToNotary,
     markAsSigned: handleMarkAsSigned,
     refresh: loadData,
     hideToast,

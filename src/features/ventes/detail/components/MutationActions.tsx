@@ -1,11 +1,12 @@
 'use client';
 
-import { FileText, FileCheck, Pen, CheckCircle2, XCircle } from 'lucide-react';
+import { FileText, FileCheck, Pen, CheckCircle2, XCircle, Send } from 'lucide-react';
 import styles from '@/app/(dashboard)/ventes-impayes/ventes/[id]/detail-vente.module.css';
 
 interface AvailableActions {
   canGeneratePreEtat: boolean;
   canGenerateFinalEtat: boolean;
+  canSendToNotary: boolean;
   canMarkAsSigned: boolean;
   canValidate: boolean;
   canCancel: boolean;
@@ -16,6 +17,7 @@ interface MutationActionsProps {
   isProcessing: boolean;
   onGeneratePreEtat: () => void;
   onGenerateFinalEtat: () => void;
+  onSendToNotary: () => void;
   onMarkAsSigned: () => void;
   onValidate: () => void;
   onCancel: () => void;
@@ -26,6 +28,7 @@ export function MutationActions({
   isProcessing,
   onGeneratePreEtat,
   onGenerateFinalEtat,
+  onSendToNotary,
   onMarkAsSigned,
   onValidate,
   onCancel,
@@ -53,6 +56,17 @@ export function MutationActions({
           >
             <FileCheck size={18} />
             Générer l&apos;état daté final
+          </button>
+        )}
+
+        {availableActions.canSendToNotary && (
+          <button
+            className={`${styles.actionBtn} ${styles.actionPrimary}`}
+            onClick={onSendToNotary}
+            disabled={isProcessing}
+          >
+            <Send size={18} />
+            Envoyer au notaire
           </button>
         )}
 

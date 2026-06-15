@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, FileCheck, FileText, Pen, CheckCircle2, XCircle } from 'lucide-react';
+import { Clock, FileCheck, FileText, Pen, CheckCircle2, XCircle, Send } from 'lucide-react';
 import type { MutationStatus } from '../domain/types';
 import { MUTATION_STATUS_LABELS } from '../domain/types';
 import styles from './MutationStatusBadge.module.css';
@@ -14,6 +14,7 @@ const STATUS_CONFIG: Record<MutationStatus, { icon: typeof Clock; className: str
   draft: { icon: Clock, className: styles.draft },
   pre_etat_generated: { icon: FileText, className: styles.preEtat },
   etat_generated: { icon: FileCheck, className: styles.etatGenerated },
+  sent_to_notary: { icon: Send, className: styles.sentToNotary },
   signed: { icon: Pen, className: styles.signed },
   validated: { icon: CheckCircle2, className: styles.validated },
   cancelled: { icon: XCircle, className: styles.cancelled },

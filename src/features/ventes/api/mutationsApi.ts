@@ -248,6 +248,26 @@ export async function cancelMutation(mutationId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Envoie le dossier au notaire : passe le statut à 'sent_to_notary' (jalon 0079) et
+ * complète l'étape de workflow 'envoi_notaire' via la RPC canonique upsert_mutation_step.
+ */
+export async function sendToNotary(mutationId: string): Promise<void> {
+  const { error } = await fromUntyped('mutations')
+    .update({ status: 'sent_to_notary', updated_at: new Date().toISOString() })
+    .eq('id', mutationId);
+  if (error) throw new Error(error.message);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: stepError } = await (supabase as any).rpc('upsert_mutation_step', {
+    p_mutation_id: mutationId,
+    p_step_key: 'envoi_notaire',
+    p_status: 'completed',
+    p_payload: { sent_at: new Date().toISOString() },
+  });
+  if (stepError) throw new Error(stepError.message);
+}
+
 // ============================================================================
 // EDGE FUNCTIONS
 // ============================================================================

@@ -36,6 +36,7 @@ export default function DetailMutationPage() {
     toast,
     hideToast,
     generateEtatDate,
+    sendToNotary,
     markAsSigned,
     validateMutation,
     cancelMutation,
@@ -82,8 +83,9 @@ export default function DetailMutationPage() {
 
   const timelineSteps = [
     { label: 'Notifiée', status: mutation?.status, completed: true, date: mutation?.requested_at },
-    { label: 'Pré-état généré', status: 'pre_etat_generated', completed: ['pre_etat_generated', 'etat_generated', 'signed', 'validated'].includes(mutation?.status || ''), date: preEtatSnapshot?.generated_at },
-    { label: 'État daté final', status: 'etat_generated', completed: ['etat_generated', 'signed', 'validated'].includes(mutation?.status || ''), date: finalEtatSnapshot?.generated_at },
+    { label: 'Pré-état généré', status: 'pre_etat_generated', completed: ['pre_etat_generated', 'etat_generated', 'sent_to_notary', 'signed', 'validated'].includes(mutation?.status || ''), date: preEtatSnapshot?.generated_at },
+    { label: 'État daté final', status: 'etat_generated', completed: ['etat_generated', 'sent_to_notary', 'signed', 'validated'].includes(mutation?.status || ''), date: finalEtatSnapshot?.generated_at },
+    { label: 'Envoyé au notaire', status: 'sent_to_notary', completed: ['sent_to_notary', 'signed', 'validated'].includes(mutation?.status || ''), date: undefined },
     { label: 'Acte signé', status: 'signed', completed: ['signed', 'validated'].includes(mutation?.status || ''), date: mutation?.signature_date },
     { label: 'Validée', status: 'validated', completed: mutation?.status === 'validated', date: mutation?.effective_date },
   ];
@@ -141,6 +143,7 @@ export default function DetailMutationPage() {
                   isProcessing={isProcessing}
                   onGeneratePreEtat={() => generateEtatDate('pre')}
                   onGenerateFinalEtat={() => generateEtatDate('final')}
+                  onSendToNotary={() => sendToNotary()}
                   onMarkAsSigned={() => setShowSignModal(true)}
                   onValidate={() => setShowValidateModal(true)}
                   onCancel={handleCancel}
