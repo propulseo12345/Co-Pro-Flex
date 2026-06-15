@@ -91,9 +91,11 @@ export function useConvocationAccountingData({
 
       // 2. Charger toutes les annexes en parallèle
       const [r1, r2, r3, r4, r5] = await Promise.allSettled([
+        // fn_annexe_2/3 : prev/next période AUTO-DÉRIVÉES côté SQL (0075) -> on ne passe plus de
+        // p_next_period_id (l'ancien code passait periodId = faux ; le SQL le neutralise par nullif).
         supabase.rpc('fn_annexe_1', { p_copro_id: coproId, p_period_id: periodId }),
-        supabase.rpc('fn_annexe_2', { p_copro_id: coproId, p_period_id: periodId, p_next_period_id: periodId }),
-        supabase.rpc('fn_annexe_3', { p_copro_id: coproId, p_period_id: periodId, p_next_period_id: periodId }),
+        supabase.rpc('fn_annexe_2', { p_copro_id: coproId, p_period_id: periodId }),
+        supabase.rpc('fn_annexe_3', { p_copro_id: coproId, p_period_id: periodId }),
         supabase.rpc('fn_annexe_4', { p_copro_id: coproId, p_period_id: periodId }),
         supabase.rpc('fn_annexe_5', { p_copro_id: coproId, p_period_id: periodId }),
       ]);
