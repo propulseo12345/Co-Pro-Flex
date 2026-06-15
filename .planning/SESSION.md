@@ -1,24 +1,24 @@
-# Session State — 2026-06-15 (cadrage J2-bis/J5 + nettoyage Mur & Maintenance)
+# Session State — 2026-06-15 (nuit autonome : J2-bis soldé + fondations J5)
 
 ## Branch / Commit
-`j2bis-nettoyage-front` @ `f5dbe17` (dirty : `.planning/PLAN_MAITRE` modifié + non-suivis). Branchée sur `main` (`c604f30`, E3). **Non poussée** (seul `lyestriki-29` peut pousser).
+`nuit-2026-06-15` (depuis `j2bis-nettoyage-front` + E4). Clean hors ~35 déchets racine non suivis. **NON poussée** (Option A : rien sur le live).
 
-## Completed This Session
-- **2 commits** : `edc9576` fix(mur) · `f5dbe17` refactor(maintenance) — `tsc` 0, vitest 4/4.
-- **Cadrage validé** (13 décisions métier + 3 annexes) → `.planning/DECISIONS_CADRAGE_2026-06-15.md`.
-- **Audits** : `.planning/AUDIT_ETAT_AVANT_J3_2026-06-14.md` + `.planning/ANALYSE_ANNEXES_2026-06-14.md` (annexes = lecture seule, GL intact, PROUVÉ).
-- **Vérif migration `providers→tiers`** : saine ; manques mineurs → backlog (cf. DECISIONS_CADRAGE).
+## Completed This Session (nuit autonome, 15 commits)
+- **J2-bis SOLDÉ** : T1 mur · T2 conseil (0061) · T3 maintenance · T4 jalons (0062) · T5 GED · T6 envoi (0063) · T7 mutations (0064) · T8 pouvoirs (0065) · T9 banque (0066).
+- **Fondations J5** : T10 charge_nature (0067) · T11 set_account (0068) · C6 art.24. + E4 (0060) intégré.
+- **Preuves** : `npm run db:test` 27/27, `tsc` 0, rejeu reproductible. Revue adversariale/tranche → 2 cascades graves évitées (T6 preuves d'envoi, T9 double encaissement).
 
 ## Next Task
-- Reprendre le **nettoyage J2-bis** : (a) **GED** = à CADRER (brainstorming en attente : recherche + questions) ; (b) **Conseil onglet Membres** = vue SQL `v_council_members_detail` (lot migrations). Puis **lot SQL** (AG pouvoirs/envoi/jalons + `v_wall_comments` + ajouter `is_locked` à `v_wall_feed`, cf. revue) puis **J5**.
-- 👉 Effort conseillé : **Max** (cadrage GED en dialogue) ; **ultracode** ponctuel pour revue adversariale des migrations GL (J5).
+- **LIRE `.planning/RAPPORT_REVEIL_2026-06-15.md`** (TL;DR + arbitrages + reste).
+- **Trancher 3 arbitrages** : C2/C3 + C4/B7 (paiements), 661/662 travaux (confirmer), annexes/état daté (expert).
+- **Puis E9** (rattachement travaux `operation_id`, prospectif — design red team prêt).
+- 👉 Effort : `Max` (arbitrages en dialogue) ; `ultracode` pour E9 / annexes (revue GL).
 
 ## Blockers
-- Migrations : je n'applique RIEN sur le live (Option A) → Lyes applique. Tests sur branche jetable.
-- `git switch` bloque tant que `PLAN_MAITRE` modifié non commité (stash si besoin).
+- Migrations NON appliquées sur le live → **Lyes applique**. Push = `gh auth switch -u lyestriki-29`.
+- `supabase start` complet crashe (OOM) → **DB seule** : `docker start supabase_db_Co-Pro-Flex`.
 
 ## Key Context
-- ⚠️ NE PAS `git add .` (54 fichiers-déchets à la racine). Commits ciblés.
-- Push : `gh auth switch -u lyestriki-29` juste avant (le compte actif retombe sur Propulseo).
-- Pattern réutilisable : `src/lib/maintenance/writes.ts` (écritures partagées hook+onboarding).
-- Code review NON encore lancée sur les 2 commits (proposée à Lyes).
+- ⚠️ NE PAS `git add .` (~35 déchets racine, artefacts shell). Commits ciblés uniquement.
+- T14 régénérer types = différé (risque cascade tsc). E9 = JAMAIS de backfill du posté (immuabilité GL).
+- Edge functions bancaires écrites mais non testées en runtime Deno.
