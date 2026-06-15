@@ -24,7 +24,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
   const [ville, setVille] = useState('');
   const [moisDebutExercice, setMoisDebutExercice] = useState(1);
   const [anneeConstruction, setAnneeConstruction] = useState('');
-  const [siretSyndic, setSiretSyndic] = useState('');
+  const [syndicSortant, setSyndicSortant] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -73,7 +73,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
       city: ville.trim(),
       postal_code: codePostal.trim(),
       annee_construction: anneeConstruction ? Number(anneeConstruction) : undefined,
-      siret: siretSyndic || undefined,
+      previous_syndic_name: syndicSortant.trim() || undefined,
       exercice_debut: moisDebutExercice,
     });
     setIsSaving(false);
@@ -85,7 +85,7 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
     if (data) {
       onComplete(data.id, data.name);
     }
-  }, [validate, existingCoproId, nom, adresse, ville, codePostal, moisDebutExercice, anneeConstruction, siretSyndic, onComplete]);
+  }, [validate, existingCoproId, nom, adresse, ville, codePostal, moisDebutExercice, anneeConstruction, syndicSortant, onComplete]);
 
   return (
     <div>
@@ -194,12 +194,12 @@ export function Step1Copropriete({ onComplete, existingCoproId }: Step1Props) {
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>SIRET du syndic</label>
+          <label className={styles.label}>Nom du syndic sortant</label>
           <input
             className={styles.input}
-            value={siretSyndic}
-            onChange={e => setSiretSyndic(e.target.value.replace(/\D/g, '').slice(0, 14))}
-            placeholder="123 456 789 00012"
+            value={syndicSortant}
+            onChange={e => setSyndicSortant(e.target.value)}
+            placeholder="Ex. Cabinet Ancien Syndic (laisser vide si nouvelle copropriété)"
           />
         </div>
 
