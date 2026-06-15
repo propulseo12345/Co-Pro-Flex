@@ -60,6 +60,7 @@ const GATES = [
   'supabase/tests/gate_0076_etat_date_h2h3.sql',
   'supabase/tests/gate_0077_opening_residual.sql',
   'supabase/tests/gate_0078_supplier_advance.sql',
+  'supabase/tests/gate_0080_etat_date_identity.sql',
 ];
 
 // Gates DIFFÉRÉES — phase sécurité (NON bloquantes).

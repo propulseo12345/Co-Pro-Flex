@@ -262,36 +262,25 @@ export async function generateEtatDate(
 ): Promise<{
   success: boolean;
   snapshot_id?: string;
-  document_id?: string;
-  mutation_status?: string;
   payload?: unknown;
   error?: string;
 }> {
-  const { data: { session } } = await supabase.auth.getSession();
+  // RPC canonique (l'edge function `generate_etat_date` n'existe pas dans le dépôt) :
+  // create_etat_date_snapshot fige le payload (generate_etat_date_payload) dans
+  // etat_date_snapshots (immuable) et fait avancer le workflow de la mutation.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc('create_etat_date_snapshot', {
+    p_copro_id: coproId,
+    p_mutation_id: mutationId,
+    p_snapshot_type: snapshotType,
+  });
 
-  if (!session?.access_token) {
-    throw new Error('Non authentifié');
-  }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/generate_etat_date`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      },
-      body: JSON.stringify({
-        copro_id: coproId,
-        mutation_id: mutationId,
-        snapshot_type: snapshotType,
-      }),
-    }
-  );
-
-  const result = await response.json();
-  return result;
+  if (error) return { success: false, error: error.message };
+  return {
+    success: data?.success ?? true,
+    snapshot_id: data?.snapshot_id,
+    payload: data?.payload,
+  };
 }
 
 /**
@@ -307,27 +296,29 @@ export async function validateMutation(
   message?: string;
   error?: string;
 }> {
-  const { data: { session } } = await supabase.auth.getSession();
+  // RPC canonique (l'edge function `validate_mutation` n'existe pas dans le dépôt) :
+  // bascule lot_owners (lot-centric) — ZÉRO écriture au grand livre. L'acquéreur peut être
+  // fourni par id, sinon réutilisé depuis mutations.buyer_owner_id (fallback côté SQL).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc('validate_mutation', {
+    p_mutation_id: input.mutation_id,
+    p_signature_date: input.signature_date,
+    p_effective_date: null,
+    p_buyer_owner_id: input.buyer_owner_id ?? null,
+    p_buyer_first_name: input.buyer_first_name ?? null,
+    p_buyer_last_name: input.buyer_last_name ?? null,
+    p_buyer_company_name: null,
+    p_buyer_email: input.buyer_email ?? null,
+    p_buyer_is_company: input.buyer_is_company ?? false,
+  });
 
-  if (!session?.access_token) {
-    throw new Error('Non authentifié');
-  }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/validate_mutation`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      },
-      body: JSON.stringify(input),
-    }
-  );
-
-  const result = await response.json();
-  return result;
+  if (error) return { success: false, error: error.message };
+  return {
+    success: data?.success ?? true,
+    mutation_id: data?.mutation_id,
+    buyer_owner_id: data?.buyer_owner_id,
+    new_status: 'validated',
+  };
 }
 
 /**
