@@ -342,6 +342,21 @@ export async function validateMutation(
 }
 
 /**
+ * Solde réel des comptes copropriétaires (45x) d'un lot, lu du grand livre.
+ * Source unique = RPC get_lot_balance_45x (migration 0082). Débiteur > 0 (le vendeur doit),
+ * créditeur < 0 (le syndicat lui doit). Sert à l'avertissement avant validation (ne bloque pas).
+ */
+export async function getLotBalance45x(coproId: string, lotId: string): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc('get_lot_balance_45x', {
+    p_copro_id: coproId,
+    p_lot_id: lotId,
+  });
+  if (error) throw new Error(error.message);
+  return typeof data === 'number' ? data : Number(data ?? 0);
+}
+
+/**
  * Obtient une URL signée pour télécharger un document de la GED
  */
 export async function getDocumentSignedUrl(

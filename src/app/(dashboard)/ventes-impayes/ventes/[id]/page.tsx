@@ -41,6 +41,8 @@ export default function DetailMutationPage() {
     validateMutation,
     cancelMutation,
     availableActions,
+    sellerBalance,
+    loadSellerBalance,
   } = useMutationDetail({ mutationId });
 
   const [showSignModal, setShowSignModal] = useState(false);
@@ -145,7 +147,10 @@ export default function DetailMutationPage() {
                   onGenerateFinalEtat={() => generateEtatDate('final')}
                   onSendToNotary={() => sendToNotary()}
                   onMarkAsSigned={() => setShowSignModal(true)}
-                  onValidate={() => setShowValidateModal(true)}
+                  onValidate={() => {
+                    void loadSellerBalance();
+                    setShowValidateModal(true);
+                  }}
                   onCancel={handleCancel}
                 />
                 <MutationTimeline steps={timelineSteps} currentStatus={mutation.status} />
@@ -198,6 +203,7 @@ export default function DetailMutationPage() {
                 onClose={() => setShowValidateModal(false)}
                 isProcessing={isProcessing}
                 showBuyerForm={!mutation.buyer_name}
+                sellerBalance={sellerBalance}
               />
             )}
 

@@ -1238,6 +1238,28 @@
   white-space: pre-wrap;
 }
 
+/* Avertissement solde vendeur (validation mutation) — informe, ne bloque pas */
+.balanceWarning,
+.balanceInfo {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.balanceWarning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #b45309;
+}
+
+.balanceInfo {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #1d4ed8;
+}
+
 /* Modal Field */
 .modalField {
   margin-bottom: 1rem;

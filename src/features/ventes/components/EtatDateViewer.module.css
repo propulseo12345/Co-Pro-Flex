@@ -77,6 +77,11 @@
   cursor: not-allowed;
 }
 
+.archiveMsg {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
 .viewDocBtn {
   display: flex;
   align-items: center;
