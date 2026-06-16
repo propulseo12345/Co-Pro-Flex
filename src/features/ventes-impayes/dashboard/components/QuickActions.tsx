@@ -17,7 +17,7 @@ export function QuickActions({ onPlanifierRelances }: QuickActionsProps) {
           <Plus size={20} aria-hidden="true" />
           Nouvelle vente
         </Link>
-        <Link href="/ventes-impayes/impayes" className={styles.quickLink}>
+        <Link href="/contentieux/impayes" className={styles.quickLink}>
           <AlertTriangle size={20} aria-hidden="true" />
           Gérer les impayés
         </Link>

@@ -163,7 +163,7 @@ export function useVentesImpayesDashboard(): UseVentesImpayesDashboardReturn {
         value: totalImpayes,
         icon: AlertTriangle,
         color: '#ef4444',
-        link: '/ventes-impayes/impayes',
+        link: '/contentieux/impayes',
         subInfo: nbContentieux > 0 ? `${nbContentieux} en contentieux` : undefined
       },
       {
@@ -172,7 +172,7 @@ export function useVentesImpayesDashboard(): UseVentesImpayesDashboardReturn {
         value: montantTotalImpayes.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }),
         icon: Euro,
         color: '#f59e0b',
-        link: '/ventes-impayes/impayes',
+        link: '/contentieux/impayes',
         subInfo: `Retard moyen: ${avgRetard} jours`
       }
     ];

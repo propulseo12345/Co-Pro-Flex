@@ -30,7 +30,7 @@ export function ImpayesCritiquesSection({
           </div>
           <h2 className={styles.sectionTitle}>Impayés critiques</h2>
         </div>
-        <Link href="/ventes-impayes/impayes" className={styles.viewAllLink}>
+        <Link href="/contentieux/impayes" className={styles.viewAllLink}>
           Voir tout <ArrowRight size={14} aria-hidden="true" />
         </Link>
       </div>
@@ -39,7 +39,7 @@ export function ImpayesCritiquesSection({
         {breakdown.map((item) => (
           <Link
             key={item.statut}
-            href={`/ventes-impayes/impayes?statut=${item.statut}`}
+            href={`/contentieux/impayes?statut=${item.statut}`}
             className={styles.breakdownItem}
             style={{ background: item.color }}
           >
@@ -102,7 +102,7 @@ export function ImpayesCritiquesSection({
                   <Mail size={16} aria-hidden="true" />
                 </button>
                 <Link
-                  href={`/ventes-impayes/impayes?id=${impaye.id}`}
+                  href={`/contentieux/impayes?id=${impaye.id}`}
                   className={styles.iconButton}
                   title="Voir détails"
                 >
