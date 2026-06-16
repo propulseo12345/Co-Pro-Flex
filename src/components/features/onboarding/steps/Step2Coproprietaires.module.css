@@ -15,11 +15,12 @@
 
 .addRow input {
   flex: 1;
+  min-width: 0;
   padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid var(--border-light);
-  background: var(--border-light);
-  color: var(--text-main, var(--text-main));
+  border: 1px solid var(--border-dark, var(--border));
+  background: var(--surface, var(--bg-secondary));
+  color: var(--text-main);
   font-size: 13px;
   font-family: inherit;
   outline: none;
@@ -34,6 +35,9 @@
 }
 
 .btnAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
@@ -45,6 +49,16 @@
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
+}
+
+.addError {
+  margin: -8px 0 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+  font-size: 13px;
 }
 
 .btnAdd:hover {
