@@ -135,7 +135,7 @@ export const LINKABLE_MODULES: LinkableModule[] = [
     pluralLabel: 'Dossiers Impayés',
     icon: 'AlertTriangle',
     color: '#EF4444',
-    routeBase: '/ventes-impayes/impayes',
+    routeBase: '/contentieux/impayes',
     documentCategories: ['CORRESPONDANCE'],
     filePatterns: [
       /impayé/i,

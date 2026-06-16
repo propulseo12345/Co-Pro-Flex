@@ -2,6 +2,7 @@
 
 import styles from './impayes.module.css';
 import { useImpayesPage } from '@/components/features/ventes-impayes/impayes/hooks/useImpayesPage';
+import { LoadingState, ErrorState } from '@/components/ui/DataState/DataState';
 import {
   Header,
   StatsGrid,
@@ -25,6 +26,8 @@ export default function ImpayesPage() {
     selectedImpaye,
     selectedStatut,
     stats,
+    isLoadingData,
+    loadError,
     selectedIds,
     selectedImpayes,
     showDetailModal,
@@ -104,15 +107,20 @@ export default function ImpayesPage() {
         onStatutChange={setSelectedStatut}
       />
 
-      <ImpayesList
-        impayes={filteredImpayes}
-        selectedIds={selectedIds}
-        selectedStatut={selectedStatut}
-        onToggleSelection={toggleSelection}
-        onOpenDetail={openDetailModal}
-        onOpenRelance={openRelanceModal}
-        onOpenRegle={openRegleModal}
-      />
+      {/* Données réelles uniquement : l'erreur s'affiche, pas de mock (audit 2026-06-12) */}
+      {isLoadingData && <LoadingState message="Chargement des impayés..." />}
+      {loadError && !isLoadingData && <ErrorState message={loadError} />}
+      {!isLoadingData && !loadError && (
+        <ImpayesList
+          impayes={filteredImpayes}
+          selectedIds={selectedIds}
+          selectedStatut={selectedStatut}
+          onToggleSelection={toggleSelection}
+          onOpenDetail={openDetailModal}
+          onOpenRelance={openRelanceModal}
+          onOpenRegle={openRegleModal}
+        />
+      )}
 
       <DetailModal
         isOpen={showDetailModal}
