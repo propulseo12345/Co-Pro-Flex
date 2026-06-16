@@ -26,7 +26,9 @@ export function OnboardingStepper({
       {steps.map((step, index) => {
         const isCompleted = step.id < maxStepReached;
         const isActive = step.id === currentStep;
-        const isClickable = step.id <= maxStepReached;
+        // L'étape 1 (création de la copro) se fait hors wizard (/onboarding/create) : non
+        // navigable ici. Les étapes 2→max déjà atteintes restent cliquables (retour arrière).
+        const isClickable = step.id >= 2 && step.id <= maxStepReached;
 
         return (
           <div key={step.id} className={styles.stepWrapper}>

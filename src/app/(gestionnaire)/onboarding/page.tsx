@@ -12,6 +12,7 @@ export default function OnboardingManagePage() {
   const [copros, setCopros] = useState<OnboardingCopro[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const loadCopros = useCallback(async () => {
     setIsLoading(true);
@@ -27,8 +28,14 @@ export default function OnboardingManagePage() {
   const handleDelete = useCallback(async (id: string, name: string) => {
     if (!confirm(`Supprimer « ${name} » et toutes ses données ? Cette action est irréversible.`)) return;
     setDeletingId(id);
-    await deleteOnboardingCopro(id);
-    setCopros(prev => prev.filter(c => c.id !== id));
+    setDeleteError(null);
+    const { success, error } = await deleteOnboardingCopro(id);
+    if (success) {
+      setCopros(prev => prev.filter(c => c.id !== id));
+    } else {
+      // Pas de retrait optimiste trompeur : on garde la carte et on affiche la vraie erreur.
+      setDeleteError(error?.message ?? 'Échec de la suppression.');
+    }
     setDeletingId(null);
   }, []);
 
@@ -58,6 +65,8 @@ export default function OnboardingManagePage() {
           Nouvelle copropriété
         </Link>
       </div>
+
+      {deleteError && <div className={styles.deleteError}>{deleteError}</div>}
 
       {isLoading && (
         <div className={styles.loading}>Chargement...</div>

@@ -106,16 +106,11 @@ export async function completeOnboarding(coproId: string) {
 
 export async function deleteOnboardingCopro(coproId: string) {
   const supabase = createUntypedClient();
-  // Vérifier que c'est bien un onboarding en cours
-  const { data: copro } = await supabase
-    .from('copros')
-    .select('onboarding_step')
-    .eq('id', coproId)
-    .single();
-  if (!copro || copro.onboarding_step === null) {
-    return { success: false, error: new Error('Cette copropriété n\'est pas en cours d\'onboarding') };
-  }
-  const { error } = await supabase.from('copros').delete().eq('id', coproId);
+  // Suppression côté serveur (RPC delete_onboarding_copro, SECURITY DEFINER, migration 0084) :
+  // purge les enfants RESTRICT (plan comptable, périodes, écritures…) dans l'ordre FK-safe puis la
+  // copro. Une suppression directe échouait sur la FK accounts→copros (RESTRICT). La RPC vérifie
+  // que la copro est bien EN ONBOARDING (jamais une compta live).
+  const { error } = await supabase.rpc('delete_onboarding_copro', { p_copro_id: coproId });
   if (error) return { success: false, error: new Error(error.message) };
   return { success: true, error: null };
 }

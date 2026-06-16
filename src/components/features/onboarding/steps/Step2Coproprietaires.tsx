@@ -35,6 +35,7 @@ export function Step2Coproprietaires({ coproId, onComplete, onBack }: Step2Props
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   // Charger les copropriétaires existants
   useEffect(() => {
@@ -49,14 +50,22 @@ export function Step2Coproprietaires({ coproId, onComplete, onBack }: Step2Props
   const handleAdd = useCallback(async () => {
     if (!nom.trim()) return;
     setIsAdding(true);
+    setAddError(null);
 
-    const { data } = await createCoproprietaire({
+    const { data, error } = await createCoproprietaire({
       copro_id: coproId,
       last_name: nom.trim(),
       first_name: prenom.trim() || undefined,
       email: email.trim() || undefined,
       phone: telephone.trim() || undefined,
     });
+
+    if (error) {
+      // Ne jamais échouer en silence : on affiche la vraie raison.
+      setAddError(error.message);
+      setIsAdding(false);
+      return;
+    }
 
     if (data) {
       setRows(prev => [...prev, {
@@ -126,8 +135,11 @@ export function Step2Coproprietaires({ coproId, onComplete, onBack }: Step2Props
           disabled={!nom.trim() || isAdding}
         >
           <UserPlus size={14} />
+          {isAdding ? 'Ajout…' : 'Ajouter'}
         </button>
       </div>
+
+      {addError && <div className={styles.addError}>{addError}</div>}
 
       {/* Tableau */}
       {rows.length > 0 ? (
