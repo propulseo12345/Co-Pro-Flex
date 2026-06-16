@@ -21,78 +21,29 @@ export interface CoproCreate {
 export async function createCopropriete(payload: CoproCreate) {
   const supabase = createUntypedClient();
 
-  // copros.cabinet_id est NOT NULL (schéma cible multi-cabinet) : on rattache la copro au
-  // cabinet du gestionnaire courant (profiles.cabinet_id). La création de cabinet (signup) est différée.
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { data: null, error: new Error('Non authentifié : impossible de créer une copropriété.') };
-  const { data: profile, error: profileErr } = await supabase
-    .from('profiles').select('cabinet_id').eq('id', user.id).single();
-  if (profileErr) return { data: null, error: new Error(profileErr.message) };
-  const cabinetId = (profile as { cabinet_id: string | null } | null)?.cabinet_id ?? null;
-  if (!cabinetId) {
-    return { data: null, error: new Error("Votre compte n'est rattaché à aucun cabinet : impossible de créer une copropriété.") };
-  }
-
-  const { data, error } = await supabase
-    .from('copros')
-    .insert({
-      cabinet_id: cabinetId,
-      name: payload.name.trim(),
-      address: payload.address.trim(),
-      city: payload.city.trim(),
-      postal_code: payload.postal_code.trim(),
-      annee_construction: payload.annee_construction ?? null,
-      siret: payload.siret?.trim() || null,
-      previous_syndic_name: payload.previous_syndic_name?.trim() || null,
-      exercice_debut: payload.exercice_debut ?? 1,
-      onboarding_step: 2,
-      onboarding_max_step: 2,
-    })
-    .select('id, name')
-    .single();
+  // Création TRANSACTIONNELLE côté serveur via la RPC create_copro (SECURITY DEFINER, migration 0083) :
+  // crée la copro (cabinet = celui du gestionnaire connecté) + la membership 'gestionnaire' + le plan
+  // comptable canonique, EN UNE SEULE TRANSACTION, en contournant proprement la RLS. L'insertion
+  // directe est impossible (la policy copros exige une membership 'gestionnaire' qui n'existe pas
+  // encore au moment de l'INSERT — amorçage poule & œuf). L'autorisation (authentifié + rattaché à
+  // un cabinet) est vérifiée DANS la RPC ; toute erreur annule l'ensemble (plus de nettoyage manuel).
+  const { data, error } = await supabase.rpc('create_copro', {
+    p_name: payload.name,
+    p_address: payload.address,
+    p_city: payload.city,
+    p_postal_code: payload.postal_code,
+    p_annee_construction: payload.annee_construction ?? null,
+    p_siret: payload.siret ?? null,
+    p_previous_syndic_name: payload.previous_syndic_name ?? null,
+    p_exercice_debut: payload.exercice_debut ?? 1,
+  });
   if (error) return { data: null, error: new Error(error.message) };
 
-  // Rattachement du gestionnaire + provisionnement du plan comptable. En cas d'échec APRÈS
-  // l'insert copro, on nettoie (best-effort) pour ne pas laisser une copro orpheline ou sans
-  // plan comptable — qui pourrait devenir la copro active (getActiveCopro prend la plus ancienne).
-  // NB : création non atomique → RPC create_copro transactionnelle = amélioration différée.
-  if (data) {
-    const newCoproId = (data as { id: string }).id;
-    // Nettoyage : on retire les comptes (FK accounts→copros = RESTRICT) PUIS la copro
-    // (cascade → membership). Sur un échec précoce les comptes n'existent pas encore (no-op).
-    const cleanupOrphan = async () => {
-      await supabase.from('accounts').delete().eq('copro_id', newCoproId);
-      await supabase.from('copros').delete().eq('id', newCoproId);
-    };
-
-    const { error: memErr } = await supabase.from('memberships').insert({
-      user_id: user.id,
-      copro_id: newCoproId,
-      role: 'gestionnaire',
-    });
-    if (memErr) {
-      await cleanupOrphan();
-      return { data: null, error: new Error(`Création de la copropriété échouée (rattachement du gestionnaire) : ${memErr.message}`) };
-    }
-
-    // Provisionner le plan comptable canonique (82 comptes, 450-1..5, chapeau non-postable).
-    const { error: chartErr } = await supabase.rpc('provision_copro_chart', { p_copro_id: newCoproId });
-    if (chartErr) {
-      await cleanupOrphan();
-      return { data: null, error: new Error(`Plan comptable non provisionné : ${chartErr.message}`) };
-    }
-
-    // provision_copro_chart est idempotent : vérifier le compte sentinelle 450-1 confirme le plan.
-    const { count: sentinel, error: chkErr } = await supabase
-      .from('accounts').select('id', { count: 'exact', head: true })
-      .eq('copro_id', newCoproId).eq('code', '450-1');
-    if (chkErr || !sentinel) {
-      await cleanupOrphan();
-      return { data: null, error: new Error('Plan comptable incomplet après provisionnement (450-1 absent).') };
-    }
+  const result = data as { id: string; name: string } | null;
+  if (!result?.id) {
+    return { data: null, error: new Error('Création de la copropriété échouée : réponse inattendue du serveur.') };
   }
-
-  return { data: data as { id: string; name: string }, error: null };
+  return { data: { id: result.id, name: result.name }, error: null };
 }
 
 // ═══ ONBOARDING STATE ═══
