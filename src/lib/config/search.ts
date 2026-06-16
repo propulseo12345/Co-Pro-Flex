@@ -96,8 +96,8 @@ export const searchableRoutes: SearchableRoute[] = [
     },
     {
         title: 'États datés',
-        description: 'Pré-états datés et états datés',
-        path: '/finance/etats-dates',
+        description: 'Pré-états datés et états datés (mutations de lots)',
+        path: '/ventes-impayes/ventes',
         keywords: ['état', 'daté', 'datés', 'mutation', 'vente', 'finance'],
         category: 'Finance'
     },
