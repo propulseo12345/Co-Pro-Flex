@@ -10,6 +10,7 @@ import {
   generateEtatDate,
   validateMutation,
   sendToNotary,
+  getLotBalance45x,
 } from '../api/mutationsApi';
 import type {
   MutationOverview,
@@ -32,6 +33,8 @@ export function useMutationDetail({ mutationId }: UseMutationDetailOptions) {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  // Solde réel du vendeur (45x du lot) — sert à AVERTIR avant validation, jamais à bloquer.
+  const [sellerBalance, setSellerBalance] = useState<number | null>(null);
 
   // Charger les données
   const loadData = useCallback(async () => {
@@ -63,6 +66,21 @@ export function useMutationDetail({ mutationId }: UseMutationDetailOptions) {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Charger le solde réel du vendeur (lecture live du grand livre). À appeler juste avant
+  // d'ouvrir la validation pour avoir un solde frais. Échec silencieux = pas d'avertissement.
+  const loadSellerBalance = useCallback(async () => {
+    if (!currentCoproId || !mutation?.lot_id) {
+      setSellerBalance(null);
+      return;
+    }
+    try {
+      const bal = await getLotBalance45x(currentCoproId, mutation.lot_id);
+      setSellerBalance(bal);
+    } catch {
+      setSellerBalance(null);
+    }
+  }, [currentCoproId, mutation?.lot_id]);
 
   // Obtenir le dernier snapshot par type
   const getLatestSnapshot = useCallback(
@@ -243,6 +261,8 @@ export function useMutationDetail({ mutationId }: UseMutationDetailOptions) {
     error,
     isProcessing,
     toast,
+    sellerBalance,
+    loadSellerBalance,
 
     // Snapshots helpers
     preEtatSnapshot: getLatestSnapshot('pre'),

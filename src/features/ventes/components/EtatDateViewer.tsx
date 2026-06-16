@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   FileText,
   Calendar,
@@ -15,6 +15,7 @@ import type { PartieLine } from './etat-date/EtatDatePartie';
 import { EtatDateAnnexe } from './etat-date/EtatDateAnnexe';
 import { EtatDateJsonViewer } from './etat-date/EtatDateJsonViewer';
 import { generateEtatDatePDF } from '../pdf/generateEtatDatePDF';
+import { autoFileToGED } from '@/lib/services/auto-file-ged.service';
 import { isPayloadV2 } from '../domain/types';
 import type { EtatDateSnapshot, EtatDatePayloadV2 } from '../domain/types';
 import styles from './EtatDateViewer.module.css';
@@ -44,11 +45,37 @@ function itemsToLines(items: EtatDatePayloadV2['partie_1_sommes_dues_vendeur']['
 
 function EtatDateViewerV2({ snapshot, payload }: { snapshot: EtatDateSnapshot; payload: EtatDatePayloadV2 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [archiveMsg, setArchiveMsg] = useState<string | null>(null);
+  // L'archivage GED est asynchrone (fire-and-forget) : ne pas setState si le composant est démonté.
+  const isMounted = useRef(true);
+  useEffect(() => () => { isMounted.current = false; }, []);
 
   const handleDownloadPDF = () => {
     setIsGenerating(true);
+    setArchiveMsg(null);
     try {
-      generateEtatDatePDF(payload);
+      const { doc, fileName } = generateEtatDatePDF(payload);
+      const blob = doc.output('blob'); // extraire AVANT save()
+      doc.save(fileName);
+
+      // Archivage GED (fire-and-forget) — l'état daté est une pièce légale.
+      const year = new Date(payload.effective_date).getFullYear();
+      const yearLabel = Number.isNaN(year) ? '' : String(year);
+      void autoFileToGED({
+        blob,
+        fileName,
+        coproId: snapshot.copro_id,
+        category: 'etat_date',
+        sourceModule: 'legal',
+        entityId: snapshot.mutation_id,
+        entityType: 'mutation',
+        linkType: 'main',
+        documentDate: payload.effective_date,
+        year: Number.isNaN(year) ? undefined : year,
+        subFolderName: `États datés ${yearLabel}`.trim(),
+        onSuccess: () => { if (isMounted.current) setArchiveMsg('Archivé dans la GED'); },
+        onError: () => { if (isMounted.current) setArchiveMsg("Échec de l'archivage GED (PDF téléchargé)"); },
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -96,6 +123,7 @@ function EtatDateViewerV2({ snapshot, payload }: { snapshot: EtatDateSnapshot; p
             {isGenerating ? <Loader2 size={14} className={styles.spinner} /> : <Download size={14} />}
             Télécharger PDF
           </button>
+          {archiveMsg && <span className={styles.archiveMsg}>{archiveMsg}</span>}
         </div>
       </div>
 
