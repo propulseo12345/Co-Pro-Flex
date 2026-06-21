@@ -49,11 +49,17 @@ Tables `opening_balance_residual_items` (0077) + `supplier_advances` (0078).
 - Livrables prêts : `.planning/prepared/0087_rpc_correction_comptable.sql` + `.planning/prepared/0087_NOTES.md` (câblage front, plan de tests, risques).
 - **À FAIRE avec Lyes** : seeder une copro de test → dérouler T0→T10 en BEGIN/ROLLBACK → trancher l'arbitrage → appliquer `0087` + câbler le front.
 
-### Étape 6 — Conformité annexes — ⏳ À FAIRE
-Gate d'équilibre annexe 1, ligne « Solde affecté aux copropriétaires » + bloc travaux annexe 2, réalisé par clé annexe 3. (Note mémoire `annexes_drift_readonly` à corriger : câblage OK, contenu en cause.)
+### Étape 6 — Conformité annexes — 🟦 PRÉPARÉE (non appliquée — arbitrage métier)
+- Workflow design + revue → verdict **corrections_mineures** MAIS **désaccord de fond** synthèse vs revues : **l'annexe 1 « après répartition » s'équilibre-t-elle (créances=dettes) ?** → arbitrage EXPERT COPRO requis (un gate dur mal calibré bloquerait l'envoi de TOUTES les convocations, y compris la boucle d'or).
+- **NON APPLIQUÉE** : légalement sensible + gate non testable (cloud vierge) + SQL non auto-suffisant.
+- Livrable : `.planning/prepared/0088_annexes_NOTES.md` (3 arbitrages métier, corrections par annexe, garde-fous).
+- **Corrections SÛRES isolables** (sans le gate) : élargir couverture comptes annexe 1, rendre la ligne « Solde affecté » annexe 2 (déjà calculée), fallback défensif TS.
+- ⚠️ Mémoire `annexes_drift_readonly` CONFIRMÉE obsolète sur le câblage (annexe 1 câblée) ; c'est le CONTENU qui pèche.
 
-### Étape 7 — Vérif bout en bout — ⏳ À FAIRE
-Rejouer les cas P0 (Playwright front + SQL RPC/RLS) sur la golden loop.
+### Étape 7 — Vérif bout en bout — 🔴 BLOQUÉE (cloud vierge)
+- Nécessite des DONNÉES (rejouer les cas P0 sur une copro avec cycle complet). Le cloud est **vierge** (0 transaction, 2 copros en onboarding).
+- **BLOCAGE CENTRAL de toute la suite (étapes 5, 6, 7 + campagne de test)** : aucune donnée de test sur le cloud.
+- **Voie de déblocage** : seeder une copro de test (boucle d'or / `create_test_copro_seeded` si dispo) OU dérouler un onboarding complet → puis dérouler les tests des RPC (0087), des annexes, et les 327 cas.
 
 ---
 
