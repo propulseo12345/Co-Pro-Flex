@@ -43,8 +43,11 @@ Tables `opening_balance_residual_items` (0077) + `supplier_advances` (0078).
 - ⏳ **Leaked password protection** : toggle **dashboard Supabase Auth → Settings** (pas d'API MCP) → **action manuelle Lyes**.
 - ✅ Compte démo `password123` GARDÉ (besoin tests) — à retirer avant vrai client.
 
-### Étape 5 — Intégrité comptable — ⏳ À FAIRE
-`reverse_payment` (nettoie payment_allocations + amount_paid), `cancel_supplier_invoice`, `unallocate_payment` + bridage gate front `canReverseSelected`.
+### Étape 5 — Intégrité comptable — 🟦 PRÉPARÉE (non appliquée — décision responsable)
+- Workflow design + revue adversariale (6 agents) → verdict **corrections_mineures** ; immutabilité GL SOLIDE (les RPC délèguent à l'extourne 'od', jamais de réécriture du GL). 3 corrections intégrées (F-A scope `unallocate_payment`, F-B TOCTOU avoir/règlement, F-C avoir annulable).
+- **NON APPLIQUÉE** car : (1) **cloud vierge** (0 paiement/facture postés) → plan de tests T0→T10 **impossible** à dérouler, or la revue impose « pas d'application sans tests verts » ; (2) **arbitrage métier** à trancher (`reverse_payment` sur appel en période approuvée — reco : AUTORISER).
+- Livrables prêts : `.planning/prepared/0087_rpc_correction_comptable.sql` + `.planning/prepared/0087_NOTES.md` (câblage front, plan de tests, risques).
+- **À FAIRE avec Lyes** : seeder une copro de test → dérouler T0→T10 en BEGIN/ROLLBACK → trancher l'arbitrage → appliquer `0087` + câbler le front.
 
 ### Étape 6 — Conformité annexes — ⏳ À FAIRE
 Gate d'équilibre annexe 1, ligne « Solde affecté aux copropriétaires » + bloc travaux annexe 2, réalisé par clé annexe 3. (Note mémoire `annexes_drift_readonly` à corriger : câblage OK, contenu en cause.)
