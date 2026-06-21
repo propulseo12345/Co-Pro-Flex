@@ -30,8 +30,12 @@ Tables `opening_balance_residual_items` (0077) + `supplier_advances` (0078).
 - ⚠️ À exécuter **contre le CLOUD** (RLS ON), PAS `db:test` local (RLS off volontaire en dev, décision F5 — c'est pourquoi les gates RLS sont déjà en `DEFERRED_GATES` non bloquantes).
 - **TODO infra (non bloquant)** : brancher `select public.assert_public_tables_have_rls();` (ou `get_advisors security`) dans un check **cloud pré-déploiement / job CI cloud** pour automatiser la prévention.
 
-### Étape 3 — Séparation des rôles (layouts dashboard/gestionnaire) — ⏳ À FAIRE
-Un copropriétaire connecté peut charger l'UI gestionnaire (layouts ne testent que `user != null`).
+### Étape 3 — Séparation des rôles (espace gestionnaire) — ✅ FAIT (code + type-check ; runtime copro différé)
+- `src/app/(gestionnaire)/layout.tsx` : garde de rôle ajoutée — user authentifié sans membership `gestionnaire`/`platform_admin` → redirigé vers `/dashboard`.
+- **Préconditions vérifiées en base (anti-régression)** : `lyes.triki` a bien `role=gestionnaire` (passe) ; RLS `memberships` a `p_own_select (user_id=auth.uid())` → self-read OK ; `/dashboard` existe (≠ `/portefeuille-immobilier` qui N'existe PAS — erreur du sous-agent évitée) → pas de 404 ni boucle.
+- `(dashboard)` NON modifié (espace partagé copro+gestionnaire, RLS filtre les données).
+- **type-check : 0 erreur**.
+- ⚠️ **Test runtime différé** : aucun user `coproprietaire` n'existe (portail pas construit) → garde préventive ; à prouver via Playwright quand un user copro existera.
 
 ### Étape 4 — Hygiène comptes — ⏳ À FAIRE
 Reset mot de passe (absent), leaked password protection, valider `next` du callback. (Démo gardé.)

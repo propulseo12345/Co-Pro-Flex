@@ -19,6 +19,22 @@ export default async function GestionnaireLayout({
     redirect('/auth/login');
   }
 
+  // Garde de RÔLE (audit fondations 2026-06-21) : cet espace est réservé aux gestionnaires.
+  // Un utilisateur authentifié SANS rôle gestionnaire/platform_admin (ex. copropriétaire) ne
+  // doit PAS charger l'UI gestionnaire — on ne se repose pas uniquement sur la RLS des données.
+  // Lecture de SES propres memberships via la policy `p_own_select` (user_id = auth.uid()).
+  // Cible /dashboard : sous (dashboard), accessible aux copros, hors (gestionnaire) -> pas de boucle.
+  const { data: managerMembership } = await supabase
+    .from('memberships')
+    .select('role')
+    .eq('user_id', user.id)
+    .in('role', ['gestionnaire', 'platform_admin'])
+    .limit(1)
+    .maybeSingle();
+  if (!managerMembership) {
+    redirect('/dashboard');
+  }
+
   return (
     <ThemeProvider>
       <SidebarProvider>
