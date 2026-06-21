@@ -1,24 +1,22 @@
-# Session State — 2026-06-16 (V1/V2/V3 câblage + onboarding débloqué)
+# Session State — 2026-06-21 (campagne de test Playwright + correctif lots)
 
 ## Branch / Commit
-`chantier-vente-cablage` @ `c1b0e1f` (clean) — **57 commits d'avance sur origin/main, NON poussée**
+`chantier-vente-cablage` @ `941a370` (dirty : 65 fichiers — chantier étape 3 + .planning/tests + .agents/skills + fichiers parasites)
 
 ## Completed This Session
-- **V1** (`f3ae6a0`) : `/finance/etats-dates` mock → redirige vers parcours canonique mutations + menu/recherche repointés.
-- **V2** (`f2addc3`) : état daté PDF complet (signature + certificat art.20 conditionnel au solde), archivage GED, **avertissement solde vendeur** (RPC `get_lot_balance_45x`, mig **0082**) — revue adversariale passée.
-- **V3** (`3d59226`) : écran impayés dé-dupliqué → `/contentieux/impayes` (gardes loading/error portées, liens repointés).
-- **Onboarding débloqué** : cabinet créé + profil rattaché (data live) ; `create_copro` (mig **0083**) ; fixes ajout copropriétaire (erreur visible) + suppression copro réparée (`delete_onboarding_copro`, mig **0084**) + stepper (`1484888`, `c1b0e1f`).
-- **Migrations 0082/0083/0084 APPLIQUÉES au cloud live** (MCP apply_migration) ; 2 copros test en double supprimées.
+- **Correctif étape 3 onboarding « Lots & Clés »** (10 fichiers, tsc vert, NON commité) : amorçage 1 lot/copropriétaire ; fusion colonne Tantièmes = clé générale (source unique) ; clés « certains lots » (subset) + fix `category` ; fix inserts colonnes dérivées (createLot/updateLot/initializeRepartitionKeyLines) ; surfaçage erreur Step2. Revue adversariale passée.
+- **Catalogue de test** : `.planning/tests/` = `PLAN_TEST_MASTER.md` + 13 fichiers `TC_*.md` = **327 cas** (P0=104/P1=127/P2=85/P3=11).
+- **Skills installés** : `qa-test-planner` (audit Gen High Risk — scripts inoffensifs, inspectés) + `playwright-generate-test` (safe). Dans `.agents/skills/`.
+- **PILOTE Playwright** déroulé en vrai (MCP) sur Résidence Martin → correctif lots **validé en client réel** + **4 incohérences** trouvées → `.planning/tests/PILOTE_FINDINGS_2026-06-21.md`.
 
 ## Next Task
-- **NOUVELLE SESSION** : audit anti-cascade exhaustif (read-only) **+** harnais de cycle de vie dans `db:test`.
-- Tout le cadrage + ce que j'ai déjà trouvé : **`.planning/PROMPT_AUDIT_CASCADE.md`** (à ouvrir en 1er).
-- Effort conseillé : **ultracode** (fan-out audit schéma + scan front).
+- **Figer l'infra Playwright** (helper login `lyes.triki`, charger `.env.local`, baseURL :3100) + **spec pilote lots**, puis dérouler les domaines (UI + base + **prisme expert copro**, alerte immédiate). Cf. mémoire [[playwright-first-testing]].
+- Effort conseillé : `ultracode` (fan-out specs par domaine) — activé.
 
 ## Blockers
-- Aucun. Onboarding à re-tester par USER (créer copro → ajouter copropriétaires → étapes → suppression).
+- **Port 3000 occupé par une AUTRE app « TropPayé »** → CoProFlex lancé sur **:3100** (`npm run dev -- -p 3100`, log `.planning/dev-3100.log`). Adapter playwright baseURL.
+- Specs e2e existantes : login défaut `admin@coproflex.fr` = INEXISTANT (seul user = `lyes.triki@coproflex.fr`).
 
 ## Key Context
-- Cloud live `qqfqrcolzmcbsvfaumiq` **à 0084** ; demo `lyes.triki@coproflex.fr` / `password123`.
-- Dump `get_advisors` (sécurité, 188k car.) sauvé dans `.claude/.../tool-results/mcp-supabase-get_advisors-*.txt`.
-- Push branche (57 commits) toujours en attente d'une stratégie USER.
+- Cloud live `qqfqrcolzmcbsvfaumiq`. Résidence Martin `c0edd2b9` + Paris Ivry `7e17ea99` = TOUTES DEUX en onboarding (step 3) → d'où compteurs 0 + 406 dashboard (voir PILOTE_FINDINGS).
+- Reste en attente : commit/push chantier étape 3 ; re-test onboarding 4→8 ; audit cascade ; ménage ~30 fichiers parasites racine.
