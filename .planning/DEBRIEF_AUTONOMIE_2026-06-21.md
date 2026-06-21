@@ -43,11 +43,12 @@ Tables `opening_balance_residual_items` (0077) + `supplier_advances` (0078).
 - ⏳ **Leaked password protection** : toggle **dashboard Supabase Auth → Settings** (pas d'API MCP) → **action manuelle Lyes**.
 - ✅ Compte démo `password123` GARDÉ (besoin tests) — à retirer avant vrai client.
 
-### Étape 5 — Intégrité comptable — 🟦 PRÉPARÉE (non appliquée — décision responsable)
-- Workflow design + revue adversariale (6 agents) → verdict **corrections_mineures** ; immutabilité GL SOLIDE (les RPC délèguent à l'extourne 'od', jamais de réécriture du GL). 3 corrections intégrées (F-A scope `unallocate_payment`, F-B TOCTOU avoir/règlement, F-C avoir annulable).
-- **NON APPLIQUÉE** car : (1) **cloud vierge** (0 paiement/facture postés) → plan de tests T0→T10 **impossible** à dérouler, or la revue impose « pas d'application sans tests verts » ; (2) **arbitrage métier** à trancher (`reverse_payment` sur appel en période approuvée — reco : AUTORISER).
-- Livrables prêts : `.planning/prepared/0087_rpc_correction_comptable.sql` + `.planning/prepared/0087_NOTES.md` (câblage front, plan de tests, risques).
-- **À FAIRE avec Lyes** : seeder une copro de test → dérouler T0→T10 en BEGIN/ROLLBACK → trancher l'arbitrage → appliquer `0087` + câbler le front.
+### Étape 5 — Intégrité comptable — ✅ APPLIQUÉE + PROUVÉE
+- Workflow design + revue adversariale (6 agents) → verdict **corrections_mineures** ; immutabilité GL SOLIDE (délègue à l'extourne 'od'). 3 corrections intégrées (F-A scope, F-B TOCTOU, F-C avoir).
+- **DÉBLOCAGE** : `create_test_copro_seeded` existe sur le cloud → test en `BEGIN/ROLLBACK` (rien persisté) sur copro seedée (3 paiements postés + 6 allocations).
+- **`reverse_payment` PROUVÉE (T1)** : status=reversed, allocations=0, **`v_lot_vs_gl_mismatch` 0→0 (plus de créance fantôme)**, extourne 'od'=1. Re-test sur fonctions persistées : idem. Grants F-A OK (`unallocate_payment` inaccessible à `authenticated`).
+- **Migration `0087` appliquée sur le live** (3 RPC). Repo : `supabase/migrations/0087_rpc_correction_comptable.sql`.
+- ⏳ **Reste** : `cancel_supplier_invoice` appliquée mais NON testée fonctionnellement (0 facture dans le seed → T6-T9) ; **câblage front** (gate + routage, cf. `0087_NOTES.md`) ; arbitrage métier (reco AUTORISER) à confirmer.
 
 ### Étape 6 — Conformité annexes — 🟦 PRÉPARÉE (non appliquée — arbitrage métier)
 - Workflow design + revue → verdict **corrections_mineures** MAIS **désaccord de fond** synthèse vs revues : **l'annexe 1 « après répartition » s'équilibre-t-elle (créances=dettes) ?** → arbitrage EXPERT COPRO requis (un gate dur mal calibré bloquerait l'envoi de TOUTES les convocations, y compris la boucle d'or).

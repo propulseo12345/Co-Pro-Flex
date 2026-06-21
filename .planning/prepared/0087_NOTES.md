@@ -1,8 +1,9 @@
 # 0087 — RPC correction comptable : câblage front, tests, risques (PRÉPARÉ, NON APPLIQUÉ)
 
-> Workflow design + revue adversariale du 2026-06-21. Verdict : **corrections_mineures** (design solide,
-> 3 corrections F-A/F-B/F-C intégrées). **NON appliqué** : cloud vierge (0 paiement/facture postés) → tests
-> impossibles + 1 arbitrage métier à trancher. SQL : `0087_rpc_correction_comptable.sql`.
+> ✅ SQL **APPLIQUÉ** le 2026-06-21 (`supabase/migrations/0087_rpc_correction_comptable.sql`) —
+> `reverse_payment` **PROUVÉE** (test T1 via `create_test_copro_seeded` en BEGIN/ROLLBACK : mismatch 0→0).
+> Ce document = ce qui RESTE à faire : **câblage front** + tests `cancel_supplier_invoice` (T6-T9, pas de
+> facture dans le seed) + **arbitrage métier** (reco AUTORISER).
 
 ## 2 barrières AVANT d'appliquer
 
