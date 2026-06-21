@@ -23,8 +23,12 @@ Tables `opening_balance_residual_items` (0077) + `supplier_advances` (0078).
 - **Advisor sécurité** : les 2 `rls_disabled_in_public` ont DISPARU. Reste `security_definer_view` ×3 = vue `tiers_directory` → **faux-positif assumé** (DEFINER délibéré qui masque les RIB, filtre `user_has_copro_access`).
 - ✅ **Faille fermée.**
 
-### Étape 2 — Garde-fou anti-récidive RLS — ⏳ À FAIRE
-Ajouter les 2 tables au registre `apply_rls_environment()` (0034) + gate « toute table public sans RLS = échec » + advisor à zéro.
+### Étape 2 — Garde-fou anti-récidive RLS — ✅ FAIT (appliqué LIVE + testé)
+- Migration `0086` : fonction `assert_public_tables_have_rls()` (lève si une table `public` n'a pas la RLS).
+- **Choix de sécurité** : j'ai écarté la reco du sous-agent de RÉÉCRIRE `apply_rls_environment` (liste de 88 tables reconstituée de mémoire = trop risqué : une omission désactiverait une RLS) ET la liste de tables attendues (fragile). → vérif directe de la propriété, **liste blanche vide** (0 table sans RLS aujourd'hui).
+- **Appliquée** + **testée** : positif (passe) ET négatif (table sonde sans RLS → détectée `42501`, sonde droppée).
+- ⚠️ À exécuter **contre le CLOUD** (RLS ON), PAS `db:test` local (RLS off volontaire en dev, décision F5 — c'est pourquoi les gates RLS sont déjà en `DEFERRED_GATES` non bloquantes).
+- **TODO infra (non bloquant)** : brancher `select public.assert_public_tables_have_rls();` (ou `get_advisors security`) dans un check **cloud pré-déploiement / job CI cloud** pour automatiser la prévention.
 
 ### Étape 3 — Séparation des rôles (layouts dashboard/gestionnaire) — ⏳ À FAIRE
 Un copropriétaire connecté peut charger l'UI gestionnaire (layouts ne testent que `user != null`).
