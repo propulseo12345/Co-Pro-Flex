@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { RepartitionKeyWithTotals, RepartitionKeyUpdate, RepartitionBasis } from '@/lib/lots/api';
+import type { RepartitionKeyWithTotals, RepartitionKeyUpdate, RepartitionBasis, CoverageMode } from '@/lib/lots/api';
 import styles from './CreateLotModal.module.css';
 
 const BASIS_OPTIONS: { value: RepartitionBasis; label: string }[] = [
   { value: 'tantiemes', label: 'Tantièmes — basé sur les tantièmes généraux' },
   { value: 'custom', label: 'Personnalisé — poids définis manuellement' },
+];
+
+const COVERAGE_OPTIONS: { value: CoverageMode; label: string }[] = [
+  { value: 'subset', label: 'Certains lots — seuls les lots avec un tantième' },
+  { value: 'all_lots', label: 'Tous les lots — l\'ensemble des lots' },
 ];
 
 interface EditKeyModalProps {
@@ -21,12 +26,14 @@ interface EditKeyModalProps {
 export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating }: EditKeyModalProps) {
   const [name, setName] = useState('');
   const [basis, setBasis] = useState<RepartitionBasis>('tantiemes');
+  const [coverageMode, setCoverageMode] = useState<CoverageMode>('all_lots');
   const [description, setDescription] = useState('');
 
   useEffect(() => {
     if (keyData) {
       setName(keyData.name);
       setBasis(keyData.basis);
+      setCoverageMode(keyData.coverage_mode);
       setDescription(keyData.description || '');
     }
   }, [keyData]);
@@ -37,6 +44,7 @@ export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating 
     const updates: RepartitionKeyUpdate = {
       name: name.trim(),
       basis,
+      coverage_mode: coverageMode,
       description: description.trim() || null,
     };
 
@@ -65,6 +73,15 @@ export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating 
               onChange={e => setName(e.target.value)}
               placeholder="ex: Charges générales"
             />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label>Portée de la clé</label>
+            <select value={coverageMode} onChange={e => setCoverageMode(e.target.value as CoverageMode)}>
+              {COVERAGE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
 
           <div className={styles.fieldGroup}>

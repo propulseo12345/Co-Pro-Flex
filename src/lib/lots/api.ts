@@ -85,6 +85,7 @@ export interface LotUpdate {
 
 export type RepartitionBasis = 'tantiemes' | 'surface' | 'custom';
 export type CoverageMode = 'all_lots' | 'subset';
+export type RepartitionCategory = 'general' | 'special' | 'alur';
 
 export interface RepartitionKey {
   id: string;
@@ -116,6 +117,7 @@ export interface RepartitionKeyCreate {
   name: string;
   description?: string | null;
   basis: RepartitionBasis;
+  category?: RepartitionCategory;
   coverage_mode?: CoverageMode;
   is_active?: boolean;
 }
@@ -216,13 +218,24 @@ export async function createLot(
 ): Promise<{ data: { id: string } | null; error: Error | null }> {
   const supabase = createUntypedClient();
 
+  // Les tantièmes (généraux, ascenseur, chauffage, escalier) ne sont PAS des
+  // colonnes de `lots` : ils sont dérivés des lignes de clé (repartition_key_lines).
+  // On n'insère donc que les colonnes réelles de la table.
+  const lotRow: Record<string, unknown> = {
+    copro_id: payload.copro_id,
+    ref: payload.ref,
+    floor: payload.floor ?? null,
+    surface: payload.surface ?? null,
+    description: payload.description ?? null,
+    building_id: payload.building_id ?? null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  if (payload.type) lotRow.type = payload.type;
+
   const { data, error } = await supabase
     .from('lots')
-    .insert({
-      ...payload,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
+    .insert(lotRow)
     .select('id')
     .single();
 
@@ -270,17 +283,48 @@ export async function updateLot(
 ): Promise<{ success: boolean; error: Error | null }> {
   const supabase = createUntypedClient();
 
+  // Les tantièmes ne sont pas des colonnes de `lots` (dérivés des lignes de clé).
+  // On ne met à jour que les vraies colonnes ici.
+  const lotUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (updates.ref !== undefined) lotUpdates.ref = updates.ref;
+  if (updates.type !== undefined) lotUpdates.type = updates.type;
+  if (updates.floor !== undefined) lotUpdates.floor = updates.floor;
+  if (updates.surface !== undefined) lotUpdates.surface = updates.surface;
+  if (updates.description !== undefined) lotUpdates.description = updates.description;
+  if (updates.building_id !== undefined) lotUpdates.building_id = updates.building_id;
+
   const { error } = await supabase
     .from('lots')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
+    .update(lotUpdates)
     .eq('copro_id', coproId)
     .eq('id', lotId);
 
   if (error) {
     return { success: false, error: new Error(error.message) };
+  }
+
+  // Le tantième général se range sur la ligne de la clé générale (category=general).
+  if (updates.tantiemes_generaux !== undefined && updates.tantiemes_generaux !== null) {
+    const { data: genKey } = await supabase
+      .from('repartition_keys')
+      .select('id')
+      .eq('copro_id', coproId)
+      .eq('category', 'general')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+
+    if (genKey?.id) {
+      const { error: lineError } = await supabase
+        .from('repartition_key_lines')
+        .upsert(
+          { copro_id: coproId, key_id: genKey.id, lot_id: lotId, weight: updates.tantiemes_generaux },
+          { onConflict: 'key_id,lot_id' }
+        );
+      if (lineError) {
+        return { success: false, error: new Error(lineError.message) };
+      }
+    }
   }
 
   return { success: true, error: null };
@@ -369,6 +413,10 @@ export async function createRepartitionKey(
     .from('repartition_keys')
     .insert({
       ...payload,
+      // La clé générale (tantièmes) doit être 'general' ; toute clé ajoutée par
+      // l'utilisateur est 'special'. À défaut, on retombait sur le défaut SQL
+      // 'general', ce qui rendait toutes les clés indistinguables.
+      category: payload.category ?? 'special',
       coverage_mode: payload.coverage_mode || 'all_lots',
       is_active: payload.is_active ?? true,
       created_at: new Date().toISOString(),
@@ -401,6 +449,18 @@ export async function updateRepartitionKey(
 
   if (error) {
     return { success: false, error: new Error(error.message) };
+  }
+
+  // Passage en 'subset' : une clé partielle ne compte que ses lignes existantes
+  // (cf. v_repartition_key_totals). Les lignes à poids 0 héritées d'un ancien
+  // mode 'all_lots' fausseraient le compteur (« 3/7 » au lieu de « 3/3 ») → on les purge.
+  if (updates.coverage_mode === 'subset') {
+    await supabase
+      .from('repartition_key_lines')
+      .delete()
+      .eq('copro_id', coproId)
+      .eq('key_id', keyId)
+      .eq('weight', 0);
   }
 
   return { success: true, error: null };
@@ -550,9 +610,10 @@ export async function initializeRepartitionKeyLines(
 ): Promise<{ success: boolean; error: Error | null }> {
   const supabase = createUntypedClient();
 
-  // Récupérer tous les lots de la copro
+  // Récupérer tous les lots de la copro depuis la VUE : `lots.tantiemes_generaux`
+  // n'existe pas (colonne dérivée). v_lots_with_owners expose le tantième calculé.
   const { data: lots, error: lotsError } = await supabase
-    .from('lots')
+    .from('v_lots_with_owners')
     .select('id, tantiemes_generaux, surface')
     .eq('copro_id', coproId);
 

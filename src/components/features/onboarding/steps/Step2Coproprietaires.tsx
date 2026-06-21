@@ -28,6 +28,7 @@ interface CoproRow {
 export function Step2Coproprietaires({ coproId, onComplete, onBack }: Step2Props) {
   const [rows, setRows] = useState<CoproRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Champs du formulaire d'ajout rapide
   const [nom, setNom] = useState('');
@@ -40,8 +41,12 @@ export function Step2Coproprietaires({ coproId, onComplete, onBack }: Step2Props
   // Charger les copropriétaires existants
   useEffect(() => {
     async function load() {
-      const { data } = await listCoproprietaires(coproId);
-      if (data) setRows(data);
+      setLoadError(null);
+      const { data, error } = await listCoproprietaires(coproId);
+      // Ne jamais échouer en silence : une erreur (ex. session expirée) doit être
+      // affichée, sinon on confond « aucun copropriétaire » et « chargement KO ».
+      if (error) setLoadError(error.message);
+      else if (data) setRows(data);
       setIsLoading(false);
     }
     load();
@@ -140,6 +145,12 @@ export function Step2Coproprietaires({ coproId, onComplete, onBack }: Step2Props
       </div>
 
       {addError && <div className={styles.addError}>{addError}</div>}
+      {loadError && (
+        <div className={styles.addError}>
+          Impossible de charger les copropriétaires : {loadError}. Essayez de recharger la page
+          (ou de vous reconnecter si votre session a expiré).
+        </div>
+      )}
 
       {/* Tableau */}
       {rows.length > 0 ? (

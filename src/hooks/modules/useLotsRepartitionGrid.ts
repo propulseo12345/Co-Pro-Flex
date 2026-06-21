@@ -5,7 +5,7 @@ import { useLots } from '@/hooks/modules/useLotsData';
 import { useRepartitionKeys } from '@/hooks/modules/useLotsData';
 import { useCoproSafe } from '@/providers/CoproContext';
 import { createClient } from '@/lib/supabase/client';
-import type { LotWithOwner, RepartitionKeyWithTotals, RepartitionKeyLineDetailed } from '@/lib/lots/api';
+import type { LotWithOwner, RepartitionKeyWithTotals, RepartitionKeyLineDetailed, CoverageMode } from '@/lib/lots/api';
 import * as lotsApi from '@/lib/lots/api';
 import { listCoproprietaires, type CoproprietaireOverview } from '@/lib/owners/api';
 
@@ -13,6 +13,7 @@ export interface GridKeyColumn {
   key_id: string;
   name: string;
   basis: string;
+  coverage_mode: CoverageMode;
   total_weight: number;
   lots_count: number;
   lots_with_weight_count: number;
@@ -36,6 +37,7 @@ export function useLotsRepartitionGrid(coproIdParam?: string) {
   const [allLines, setAllLines] = useState<RepartitionKeyLineDetailed[]>([]);
   const [linesLoading, setLinesLoading] = useState(true);
   const [owners, setOwners] = useState<CoproprietaireOverview[]>([]);
+  const [generalKeyId, setGeneralKeyId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateLotModal, setShowCreateLotModal] = useState(false);
   const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
@@ -47,6 +49,25 @@ export function useLotsRepartitionGrid(coproIdParam?: string) {
     if (!currentCoproId) return;
     const { data } = await listCoproprietaires(currentCoproId, { type: 'COPROPRIETAIRE' });
     if (data) setOwners(data);
+  }, [currentCoproId]);
+
+  // Identifie LA clé générale (tantièmes) = la plus ancienne category='general'.
+  // Elle alimente la colonne TANTIÈMES (éditable, source unique) et est exclue
+  // des colonnes de clés (sinon doublon avec TANTIÈMES).
+  const loadGeneralKey = useCallback(async () => {
+    if (!currentCoproId) { setGeneralKeyId(null); return; }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = createClient() as any;
+    const { data } = await supabase
+      .from('repartition_keys')
+      .select('id')
+      .eq('copro_id', currentCoproId)
+      .eq('category', 'general')
+      .eq('is_active', true)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    setGeneralKeyId(data?.id ?? null);
   }, [currentCoproId]);
 
   // Fetch all key lines at once
@@ -75,19 +96,29 @@ export function useLotsRepartitionGrid(coproIdParam?: string) {
     loadOwners();
   }, [fetchAllLines, loadOwners]);
 
-  // Key columns (exclude the "charges générales" if it matches tantièmes)
+  // Recharger l'id de la clé générale quand la liste des clés change
+  // (ex : après sa création automatique à l'étape onboarding).
+  useEffect(() => {
+    loadGeneralKey();
+  }, [loadGeneralKey, keys.length]);
+
+  // Colonnes de clés = clés SPÉCIALES uniquement.
+  // La clé générale est exclue : elle est représentée par la colonne TANTIÈMES.
   const keyColumns = useMemo((): GridKeyColumn[] => {
-    return keys.map((k, idx) => ({
-      key_id: k.key_id,
-      name: k.name,
-      basis: k.basis,
-      total_weight: k.total_weight,
-      lots_count: k.lots_count,
-      lots_with_weight_count: k.lots_with_weight_count,
-      is_complete: k.is_complete,
-      color: KEY_COLORS[idx % KEY_COLORS.length],
-    }));
-  }, [keys]);
+    return keys
+      .filter(k => k.key_id !== generalKeyId)
+      .map((k, idx) => ({
+        key_id: k.key_id,
+        name: k.name,
+        basis: k.basis,
+        coverage_mode: k.coverage_mode,
+        total_weight: k.total_weight,
+        lots_count: k.lots_count,
+        lots_with_weight_count: k.lots_with_weight_count,
+        is_complete: k.is_complete,
+        color: KEY_COLORS[idx % KEY_COLORS.length],
+      }));
+  }, [keys, generalKeyId]);
 
   // Grid rows
   const gridRows = useMemo((): GridRow[] => {
@@ -137,16 +168,25 @@ export function useLotsRepartitionGrid(coproIdParam?: string) {
   }, [deleteLot, fetchAllLines, refreshKeys]);
 
   // Update a weight
+  // refreshLots aussi : la colonne TANTIÈMES dérive de la vue v_lots_with_owners
+  // (lot.tantiemes_generaux), qui resterait figée sans ce refresh.
   const updateWeight = useCallback(async (keyId: string, lotId: string, weight: number) => {
     if (!currentCoproId) return;
-    await lotsApi.upsertRepartitionKeyLine({
-      copro_id: currentCoproId,
-      key_id: keyId,
-      lot_id: lotId,
-      weight,
-    });
-    await Promise.all([fetchAllLines(), refreshKeys()]);
-  }, [currentCoproId, fetchAllLines, refreshKeys]);
+    // Poids 0 = le lot ne fait plus partie de la clé → supprimer la ligne.
+    // Essentiel pour les clés 'subset' (périmètre = lignes existantes) ; inoffensif
+    // pour 'all_lots' (la vue ré-injecte le lot avec poids 0 via le join).
+    if (weight === 0) {
+      await lotsApi.deleteRepartitionKeyLine(currentCoproId, keyId, lotId);
+    } else {
+      await lotsApi.upsertRepartitionKeyLine({
+        copro_id: currentCoproId,
+        key_id: keyId,
+        lot_id: lotId,
+        weight,
+      });
+    }
+    await Promise.all([fetchAllLines(), refreshKeys(), refreshLots()]);
+  }, [currentCoproId, fetchAllLines, refreshKeys, refreshLots]);
 
   const assignOwner = useCallback(async (lotId: string, coproprietaireId: string | null) => {
     if (!currentCoproId) return;
@@ -199,6 +239,10 @@ export function useLotsRepartitionGrid(coproIdParam?: string) {
     // Owners
     owners,
     assignOwner,
+
+    // Clé générale (colonne TANTIÈMES éditable, source unique) + total des clés
+    generalKeyId,
+    keysCount: keys.length,
 
     // Refresh
     refresh: refreshAll,

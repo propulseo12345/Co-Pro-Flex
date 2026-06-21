@@ -17,6 +17,7 @@ export default function LotsPage() {
     createKey, updateKey, deleteKey, editingKey, setEditingKey, showCreateKeyModal, setShowCreateKeyModal,
     updateWeight, refresh,
     owners, assignOwner,
+    generalKeyId,
   } = useLotsRepartitionGrid();
 
   const ownerOptions = owners.map(o => ({ id: o.id, display_name: o.display_name }));
@@ -35,7 +36,7 @@ export default function LotsPage() {
     name: editingKey.name,
     description: null,
     basis: editingKey.basis as 'tantiemes' | 'surface' | 'custom',
-    coverage_mode: 'all_lots',
+    coverage_mode: editingKey.coverage_mode,
     is_active: true,
     total_weight: editingKey.total_weight,
     lots_count: editingKey.lots_count,
@@ -109,13 +110,14 @@ export default function LotsPage() {
         <LotsRepartitionGrid
           rows={gridRows}
           keyColumns={keyColumns}
+          generalKeyId={generalKeyId}
           onEditLot={setEditingLot}
           onEditKey={({ color: _color, ...key }) => setEditingKey({
             ...key,
             basis: key.basis as RepartitionBasis,
             copro_id: currentCoproId,
             description: null,
-            coverage_mode: 'all_lots' as const,
+            coverage_mode: key.coverage_mode,
             is_active: true,
           })}
           onUpdateWeight={updateWeight}

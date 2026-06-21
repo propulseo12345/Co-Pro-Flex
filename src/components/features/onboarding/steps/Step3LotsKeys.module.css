@@ -19,19 +19,29 @@
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  background: #3b82f6;
+  background: var(--primary, #3b82f6);
   color: white;
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .btnAddLot:hover {
-  background: #2563eb;
+  background: var(--primary-hover, #2563eb);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btnAddLot:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btnAddLot:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
 }
 
 .btnAddKey {
@@ -53,6 +63,16 @@
 .btnAddKey:hover {
   border-color: rgba(59, 130, 246, 0.3);
   color: var(--text-main);
+}
+
+.btnAddKey:active {
+  background: rgba(148, 163, 184, 0.1);
+  transform: translateY(1px);
+}
+
+.btnAddKey:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
 }
 
 /* ═══ KPI strip ═══ */
@@ -130,6 +150,39 @@
   margin: 0;
 }
 
+/* ═══ Loading skeleton ═══ */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.skeletonRow {
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.04) 25%,
+    rgba(148, 163, 184, 0.08) 50%,
+    rgba(148, 163, 184, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonRow {
+    animation: none;
+  }
+}
+
 /* ═══ Grid ═══ */
 
 .gridWrapper {
@@ -164,23 +217,42 @@
   color: var(--text-main);
 }
 
+.btnBack:active {
+  transform: translateY(1px);
+}
+
+.btnBack:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
+}
+
 .btnNext {
   padding: 10px 24px;
   border-radius: 8px;
   border: none;
-  background: #3b82f6;
+  background: var(--primary, #3b82f6);
   color: white;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .btnNext:hover {
-  background: #2563eb;
+  background: var(--primary-hover, #2563eb);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btnNext:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btnNext:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
 }
 
 .btnNext:disabled {

@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import type { RepartitionKeyCreate, RepartitionBasis } from '@/lib/lots/api';
+import type { RepartitionKeyCreate, RepartitionBasis, CoverageMode } from '@/lib/lots/api';
 import styles from './CreateLotModal.module.css';
 
 const BASIS_OPTIONS: { value: RepartitionBasis; label: string; description: string }[] = [
   { value: 'tantiemes', label: 'Tantièmes', description: 'Basé sur les tantièmes généraux de chaque lot' },
   { value: 'custom', label: 'Personnalisé', description: 'Poids définis manuellement pour chaque lot' },
+];
+
+const COVERAGE_OPTIONS: { value: CoverageMode; label: string }[] = [
+  { value: 'subset', label: 'Certains lots — seuls les lots à qui vous donnez un tantième' },
+  { value: 'all_lots', label: 'Tous les lots — la clé concerne l\'ensemble des lots' },
 ];
 
 interface CreateKeyModalProps {
@@ -20,6 +25,7 @@ interface CreateKeyModalProps {
 export function CreateKeyModal({ isOpen, onClose, onCreate, isMutating }: CreateKeyModalProps) {
   const [name, setName] = useState('');
   const [basis, setBasis] = useState<RepartitionBasis>('tantiemes');
+  const [coverageMode, setCoverageMode] = useState<CoverageMode>('subset');
   const [description, setDescription] = useState('');
 
   const handleSubmit = async () => {
@@ -28,13 +34,15 @@ export function CreateKeyModal({ isOpen, onClose, onCreate, isMutating }: Create
     const result = await onCreate({
       name: name.trim(),
       basis,
+      category: 'special',
       description: description.trim() || null,
-      coverage_mode: 'all_lots',
+      coverage_mode: coverageMode,
     });
 
     if (result) {
       setName('');
       setBasis('tantiemes');
+      setCoverageMode('subset');
       setDescription('');
       onClose();
     }
@@ -61,6 +69,15 @@ export function CreateKeyModal({ isOpen, onClose, onCreate, isMutating }: Create
               onChange={e => setName(e.target.value)}
               placeholder="ex: Charges générales, Ascenseur bât. A..."
             />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label>Portée de la clé</label>
+            <select value={coverageMode} onChange={e => setCoverageMode(e.target.value as CoverageMode)}>
+              {COVERAGE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
 
           <div className={styles.fieldGroup}>

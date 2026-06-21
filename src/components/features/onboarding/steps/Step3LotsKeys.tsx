@@ -1,7 +1,7 @@
 // src/components/features/onboarding/steps/Step3LotsKeys.tsx
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
 import { LotsRepartitionGrid, CreateLotModal, EditLotModal, CreateKeyModal, EditKeyModal } from '@/components/features/lots';
@@ -26,20 +26,53 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
     showCreateKeyModal, setShowCreateKeyModal,
     updateWeight,
     owners, assignOwner,
+    generalKeyId, keysCount,
     refresh,
   } = useLotsRepartitionGrid(coproId);
 
-  // Auto-créer la clé "Charges générales" si aucune clé n'existe
+  // Auto-créer la clé "Charges générales" (category=general) si aucune clé n'existe.
+  // Garde sur keysCount (toutes clés) : isLoading couvre le chargement, donc pas de
+  // double création même si la clé générale n'est pas encore identifiée.
   const defaultKeyCreated = useRef(false);
   useEffect(() => {
-    if (defaultKeyCreated.current || isLoading || keyColumns.length > 0) return;
+    if (defaultKeyCreated.current || isLoading) return;
+    if (keysCount > 0) return; // au moins une clé existe déjà
     defaultKeyCreated.current = true;
     createKey({
       name: 'Charges générales',
       basis: 'tantiemes' as RepartitionBasis,
+      category: 'general',
       coverage_mode: 'all_lots',
     }).then(() => refresh());
-  }, [isLoading, keyColumns.length, createKey, refresh]);
+  }, [isLoading, keysCount, createKey, refresh]);
+
+  // Amorçage : créer automatiquement 1 lot par copropriétaire (une seule fois par montage).
+  // Conditions : clé générale prête, des copropriétaires existent, aucun lot encore.
+  // La garde useRef évite la double-exécution dans un même montage ; comme on ne
+  // s'amorce que s'il y a 0 lot, aucun risque de re-création une fois les lots créés.
+  const lotsSeeded = useRef(false);
+  const [seeding, setSeeding] = useState(false);
+  useEffect(() => {
+    if (lotsSeeded.current || seeding) return;
+    if (isLoading || isMutating) return;
+    if (!generalKeyId) return; // attendre la clé générale (sa ligne sera créée par lot)
+    if (gridRows.length > 0) return; // des lots existent déjà
+    if (owners.length === 0) return; // rien à amorcer
+
+    lotsSeeded.current = true;
+    setSeeding(true);
+    (async () => {
+      try {
+        for (let i = 0; i < owners.length; i++) {
+          const created = await createLot({ ref: `Lot ${i + 1}`, tantiemes_generaux: 0 });
+          if (created?.id) await assignOwner(created.id, owners[i].id);
+        }
+        await refresh();
+      } finally {
+        setSeeding(false);
+      }
+    })();
+  }, [seeding, isLoading, isMutating, generalKeyId, gridRows.length, owners, createLot, assignOwner, refresh]);
 
   const ownerOptions = owners.map(o => ({ id: o.id, display_name: o.display_name }));
   const lotCount = gridRows?.length ?? 0;
@@ -52,7 +85,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
     name: editingKey.name,
     description: null,
     basis: editingKey.basis as RepartitionBasis,
-    coverage_mode: 'all_lots',
+    coverage_mode: editingKey.coverage_mode,
     is_active: true,
     total_weight: editingKey.total_weight,
     lots_count: editingKey.lots_count,
@@ -66,7 +99,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
       basis: key.basis as RepartitionBasis,
       copro_id: coproId,
       description: null,
-      coverage_mode: 'all_lots' as const,
+      coverage_mode: key.coverage_mode,
       is_active: true,
     });
   }, [setEditingKey, coproId]);
@@ -109,14 +142,33 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
             <span className={styles.kpiValueSuccess}>{stats.totalTantiemes.toLocaleString('fr-FR')}</span>
           </div>
           <div className={styles.kpi}>
-            <span className={styles.kpiLabel}>Clés</span>
+            <span className={styles.kpiLabel}>Clés spéciales</span>
             <span className={styles.kpiValueBlue}>{keyColumns.length}</span>
           </div>
         </div>
       )}
 
+      {/* Loading skeleton : chargement initial avant amorçage */}
+      {isLoading && !seeding && !hasLots && (
+        <div className={styles.loading} aria-hidden="true">
+          <div className={styles.skeletonRow} />
+          <div className={styles.skeletonRow} />
+          <div className={styles.skeletonRow} />
+        </div>
+      )}
+
+      {/* Seeding state : amorçage des lots en cours */}
+      {seeding && !hasLots && (
+        <div className={styles.empty}>
+          <p className={styles.emptyText}>Préparation des lots…</p>
+          <p className={styles.emptyHint}>
+            Un lot est créé pour chaque copropriétaire saisi à l&apos;étape précédente.
+          </p>
+        </div>
+      )}
+
       {/* Empty state */}
-      {!isLoading && !hasLots && (
+      {!isLoading && !seeding && !hasLots && (
         <div className={styles.empty}>
           <p className={styles.emptyText}>Aucun lot pour l&apos;instant.</p>
           <p className={styles.emptyHint}>
@@ -132,6 +184,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
           <LotsRepartitionGrid
             rows={gridRows}
             keyColumns={keyColumns}
+            generalKeyId={generalKeyId}
             onEditLot={setEditingLot}
             onEditKey={handleEditKey}
             onUpdateWeight={updateWeight}

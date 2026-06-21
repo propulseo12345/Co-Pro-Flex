@@ -22,12 +22,14 @@ const TYPE_BADGE_CLASS: Record<string, string> = {
 interface LotsRepartitionGridProps {
   rows: GridRow[];
   keyColumns: GridKeyColumn[];
+  /** Clé générale (tantièmes) : rend la colonne TANTIÈMES éditable, source unique. */
+  generalKeyId?: string | null;
   onEditLot: (lot: LotWithOwner) => void;
   onEditKey: (key: GridKeyColumn) => void;
   onUpdateWeight: (keyId: string, lotId: string, weight: number) => void;
 }
 
-export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, onUpdateWeight }: LotsRepartitionGridProps) {
+export function LotsRepartitionGrid({ rows, keyColumns, generalKeyId, onEditLot, onEditKey, onUpdateWeight }: LotsRepartitionGridProps) {
 
   const handleWeightBlur = useCallback((keyId: string, lotId: string, originalWeight: number, e: React.FocusEvent<HTMLInputElement>) => {
     const newWeight = parseInt(e.target.value, 10);
@@ -36,14 +38,11 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
     }
   }, [onUpdateWeight]);
 
-  // Compute column totals
-  const columnTotals = keyColumns.map(col => {
-    const total = rows.reduce((sum, row) => sum + (row.weights[col.key_id]?.weight || 0), 0);
-    const lotsWithWeight = rows.filter(row => (row.weights[col.key_id]?.weight || 0) > 0).length;
-    return { total, lotsWithWeight, totalLots: rows.length };
-  });
-
-  const totalTantiemes = rows.reduce((sum, row) => sum + row.lot.tantiemes_generaux, 0);
+  // Total tantièmes = somme de la clé générale (source unique) si dispo, sinon la vue.
+  const totalTantiemes = rows.reduce(
+    (sum, row) => sum + (generalKeyId ? (row.weights[generalKeyId]?.weight ?? 0) : row.lot.tantiemes_generaux),
+    0
+  );
 
   return (
     <div className={styles.grid}>
@@ -73,7 +72,12 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
             </tr>
           </thead>
           <tbody>
-            {rows.map(row => (
+            {rows.map(row => {
+              // Tantièmes = poids de la clé générale (source unique) si dispo, sinon la vue.
+              const genWeight = generalKeyId
+                ? (row.weights[generalKeyId]?.weight ?? row.lot.tantiemes_generaux)
+                : row.lot.tantiemes_generaux;
+              return (
               <tr key={row.lot.id}>
                 <td><span className={styles.cellRef}>{row.lot.ref}</span></td>
                 <td>
@@ -84,7 +88,17 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
                 <td>
                   <div className={styles.cellOwner}>{row.lot.owner_display_name || '—'}</div>
                 </td>
-                <td className={styles.cellTantiemes}>{row.lot.tantiemes_generaux}</td>
+                <td className={styles.cellTantiemes}>
+                  {generalKeyId ? (
+                    <input
+                      key={`gen-${row.lot.id}-${genWeight}`}
+                      className={styles.tantiemesInput}
+                      type="number"
+                      defaultValue={genWeight}
+                      onBlur={(e) => handleWeightBlur(generalKeyId, row.lot.id, genWeight, e)}
+                    />
+                  ) : genWeight}
+                </td>
 
                 {keyColumns.map(col => {
                   const data = row.weights[col.key_id];
@@ -94,6 +108,10 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
                     <td key={col.key_id} className={styles.keyCell}>
                       <div className={styles.keyValueWrap}>
                         <input
+                          /* key indexée sur le poids committé : force le remount
+                             quand la valeur change après coup (création/seed/refresh),
+                             sinon l'input non contrôlé garderait sa valeur initiale. */
+                          key={`${col.key_id}-${w}`}
                           className={w === 0 ? styles.weightInputZero : styles.weightInput}
                           type="number"
                           defaultValue={w}
@@ -113,7 +131,8 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
 
             {/* Total row */}
             <tr className={styles.totalRow}>
@@ -121,17 +140,16 @@ export function LotsRepartitionGrid({ rows, keyColumns, onEditLot, onEditKey, on
               <td className={styles.cellTantiemes} style={{ fontSize: 15, color: 'var(--success)' }}>
                 {totalTantiemes.toLocaleString('fr-FR')}
               </td>
-              {columnTotals.map((ct, idx) => {
-                const isComplete = ct.lotsWithWeight === ct.totalLots;
-                const color = isComplete ? 'var(--success)' : 'var(--warning)';
+              {keyColumns.map(col => {
+                const color = col.is_complete ? 'var(--success)' : 'var(--warning)';
                 return (
-                  <td key={keyColumns[idx].key_id} className={styles.keyCell}>
+                  <td key={col.key_id} className={styles.keyCell}>
                     <div className={styles.keyValueWrap}>
                       <span className={styles.totalNum} style={{ color }}>
-                        {ct.total.toLocaleString('fr-FR')}
+                        {col.total_weight.toLocaleString('fr-FR')}
                       </span>
                       <span className={styles.totalSub} style={{ color }}>
-                        {ct.lotsWithWeight}/{ct.totalLots}{isComplete ? ' ✓' : ''}
+                        {col.lots_with_weight_count}/{col.lots_count}{col.is_complete ? ' ✓' : ''}
                       </span>
                     </div>
                   </td>
