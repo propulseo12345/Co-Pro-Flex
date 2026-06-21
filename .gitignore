@@ -60,3 +60,9 @@ supabase/.temp/
 /Pr*sentation*/
 playwright-report/
 test-results/
+
+# Tooling local (npx skills, annexes binaires) — non versionne
+.agents/
+.claude/skills/
+skills-lock.json
+.planning/refs-annexes/
