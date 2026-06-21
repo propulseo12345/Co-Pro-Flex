@@ -3,6 +3,28 @@
 > Travail mené en autonomie pendant l'absence de Lyes. Mandat : corriger les bloquants de
 > l'audit `AUDIT_FONDATIONS_ROUGES_2026-06-21.md`, **dans l'ordre recommandé, le plus loin possible**.
 
+## ⭐ SYNTHÈSE (état final)
+
+| # | Étape | État |
+|---|---|---|
+| 1 | Faille RLS (2 tables ouvertes à anon en lecture **et suppression**) | ✅ appliqué + prouvé (advisor → 0 finding) |
+| 2 | Garde-fou anti-récidive RLS | ✅ appliqué + testé (positif/négatif) |
+| 3 | Séparation des rôles (espace gestionnaire) | ✅ code + type-check + préconditions en base |
+| 4 | Hygiène comptes (open-redirect callback) | ✅ ; reset mdp + leaked password → à faire |
+| 5 | Intégrité comptable (`reverse_payment`…) | ✅ appliqué + **PROUVÉ** (T1 : mismatch 0→0, plus de créance fantôme) |
+| 6 | Annexes légales | 🟦 préparé — **arbitrage expert copro requis** |
+| 7 | Vérif bout en bout / 327 cas | ⏳ débloqué (`create_test_copro_seeded`) mais à dérouler |
+
+**Migrations appliquées sur le live : `0085` (RLS), `0086` (garde-fou), `0087` (RPC comptables, reverse_payment prouvée).**
+
+### 👉 À toi (Lyes) au retour
+1. **Activer « leaked password protection »** dans Supabase (Auth → Settings) — pas d'API MCP.
+2. **Trancher l'arbitrage annexe 1** (s'équilibre-t-elle créances = dettes ? cf. `prepared/0088_annexes_NOTES.md`) avant de poser le gate.
+3. **Confirmer l'arbitrage comptable** (`reverse_payment` sur un appel en période approuvée — reco : AUTORISER).
+4. Reste à coder : reset mot de passe, câblage front des RPC `0087`, corrections annexes (gate + lignes légales), déroulé des 327 cas (via `create_test_copro_seeded`).
+
+---
+
 ## Règles de la session (rappel)
 - **Au fil de l'eau, y compris sur le LIVE** (`qqfqrcolzmcbsvfaumiq`), avec un **test à chaque correction**.
 - **GROSSE REVUE D'IMPACT EN CASCADE AVANT CHAQUE MIGRATION** (consigne Lyes) — voir mémoire `cascade_review_before_migration`.
