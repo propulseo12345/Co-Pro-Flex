@@ -14,7 +14,7 @@
  * Pré-requis (env, identiques aux specs AG existantes) :
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY      (assertions DB en service-role)
- *   - E2E_USER_EMAIL / E2E_USER_PASSWORD (optionnel : sinon compte démo admin)
+ *   - E2E_USER_EMAIL / E2E_USER_PASSWORD (optionnel : sinon compte démo lyes.triki@coproflex.fr)
  *   - serveur dev lancé (webServer Playwright) + comptes démo seedés
  *
  * NOTE : post-as-you-go. Les appels sont POSTÉS à la validation de Step 6 (route
@@ -25,49 +25,8 @@
  * banque) -> net 471/472 = 0 -> audit propre -> redirection /portefeuille.
  */
 
-import { test, expect, type Page, type Locator } from '@playwright/test';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Identifiants de test : env dédiées, sinon compte de démonstration (cf. /auth/login).
-const LOGIN_EMAIL = process.env.E2E_USER_EMAIL ?? 'admin@coproflex.fr';
-const LOGIN_PASSWORD = process.env.E2E_USER_PASSWORD ?? 'password123';
-
-// Client admin (service-role) pour les assertions DB directes — pattern repris des specs AG.
-function getAdminClient(): SupabaseClient {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { persistSession: false },
-  });
-}
-
-/**
- * Connexion via la VRAIE page de login de l'app (aucun helper d'auth n'existe dans le repo).
- * Reproduit le formulaire de src/app/auth/login/page.tsx (#email, #password, "Se connecter")
- * qui redirige vers /portefeuille en cas de succès.
- */
-async function login(page: Page): Promise<void> {
-  await page.goto('/auth/login');
-  await page.locator('#email').fill(LOGIN_EMAIL);
-  await page.locator('#password').fill(LOGIN_PASSWORD);
-  await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page).toHaveURL(/\/portefeuille/, { timeout: 30000 });
-}
-
-/**
- * Le wizard rend toutes les étapes déjà atteintes mais masque les inactives via
- * `display:none` (cf. /onboarding/[id]/page.tsx). Pour éviter les violations strict-mode
- * (boutons dupliqués "Continuer"/"Retour"), on scope chaque action sur le bloc d'étape
- * VISIBLE en s'appuyant sur le titre (StepHeader -> <h2>).
- */
-function stepBlock(page: Page, headingText: string): Locator {
-  return page
-    .locator('div')
-    .filter({ has: page.getByRole('heading', { name: headingText }) })
-    .filter({ visible: true })
-    .last();
-}
+import { test, expect } from '@playwright/test';
+import { getAdminClient, login, stepBlock } from './support/helpers';
 
 test.describe('Onboarding — chemin propre (audit = 0)', () => {
   const uniqueName = `CLEAN-E2E-${Date.now()}`;

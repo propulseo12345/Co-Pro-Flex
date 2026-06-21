@@ -14,21 +14,10 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
-
-// Test configuration
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+import { getAdminClient } from './support/helpers';
 
 // Test data prefix for cleanup
 const TEST_PREFIX = 'E2E_AG_TEST_';
-
-// Helper: Create Supabase admin client for direct DB verification
-function getAdminClient() {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { persistSession: false },
-  });
-}
 
 // Helper: Clean up test data
 async function cleanupTestData(agTitle: string) {

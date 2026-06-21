@@ -13,17 +13,9 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from './support/helpers';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const TEST_PREFIX = 'E2E_DRAFT_RESUME_';
-
-function getAdminClient() {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { persistSession: false },
-  });
-}
 
 async function cleanupTestData() {
   const supabase = getAdminClient();
