@@ -37,8 +37,11 @@ Tables `opening_balance_residual_items` (0077) + `supplier_advances` (0078).
 - **type-check : 0 erreur**.
 - ⚠️ **Test runtime différé** : aucun user `coproprietaire` n'existe (portail pas construit) → garde préventive ; à prouver via Playwright quand un user copro existera.
 
-### Étape 4 — Hygiène comptes — ⏳ À FAIRE
-Reset mot de passe (absent), leaked password protection, valider `next` du callback. (Démo gardé.)
+### Étape 4 — Hygiène comptes — 🟡 PARTIEL
+- ✅ **Open-redirect callback OAuth corrigé** : `src/app/auth/callback/route.ts` n'accepte plus qu'un `next` interne (chemin `/…` sans `//` ni `/\`) — bloque `https://app@evil.com`.
+- ⏳ **Reset mot de passe** : ABSENT (un vrai syndic en a besoin). Mini-feature front (page « mot de passe oublié » → `resetPasswordForEmail` + page de mise à jour `updateUser`). NON faite (runtime email à valider) → passe dédiée.
+- ⏳ **Leaked password protection** : toggle **dashboard Supabase Auth → Settings** (pas d'API MCP) → **action manuelle Lyes**.
+- ✅ Compte démo `password123` GARDÉ (besoin tests) — à retirer avant vrai client.
 
 ### Étape 5 — Intégrité comptable — ⏳ À FAIRE
 `reverse_payment` (nettoie payment_allocations + amount_paid), `cancel_supplier_invoice`, `unallocate_payment` + bridage gate front `canReverseSelected`.
