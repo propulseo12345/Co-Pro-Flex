@@ -1,24 +1,24 @@
-# Session State — 2026-06-22 (campagne test E2E : infra + Acte 1 héros + BUG-001)
+# Session State — 2026-06-22 (décision migration TanStack Start + POC concluant)
 
 ## Branch / Commit
-`test/campagne-onboarding-e2e` @ `3b184fa` (poussé)
-PR **#35** ouverte vers `chantier-vente-cablage`. **Code review high-effort passée** : 0 bug CONFIRMED, 2 fix appliqués (order posted_at NULLS LAST + docstring), 4 dettes notées (`BUGS.md`). Héros Acte 1 re-VERT après fix.
+`refonte-wizard-onboarding` @ `3858e34` (dirty : 14 fichiers — dont fixes BUG-003/005 non commités)
 
 ## Completed This Session
-- Cadrage campagne (grilling, 7 décisions) → mémoire [[test_campaign_cadrage]] ; gouvernance migrations → [[migration_governance_test_campaign]].
-- Infra Playwright débloquée (1.61, navigateur OK), `workers:1`, helper `onboardCopro`, héros `cycle-annuel-hero` **Acte 1 VERT**.
-- **BUG-001 corrigé** : `ledger_transactions.created_at` inexistant → `posted_at` (onboarding était bloqué à l'étape Budget pour tout syndic). tsc 0.
-- Script purge `purge_test_copros.sql` (replica admin, préfixe E2E-/HARNESS) testé vert.
-- Leçons L01→L08 (`.planning/tests/LECONS.md`) ; **BUG-002 documenté** (`BUGS.md`).
+- **BUG-002** (portefeuille listait les copros en onboarding) : corrigé + revue cascade + **prouvé via MCP Playwright** + 3 commits (`bba090b` idempotence onboarding, `766c746` enum lot_type+a11y, `3858e34` portefeuille).
+- **BUG-003** (`/ag/new` crée 2 brouillons AG, StrictMode) + **BUG-005** (406 `.single`→`.maybeSingle` sur useAgDraftEdit + useAgEditPage) : corrigés, **type-check vert, NON commités**.
+- **BUG-004** (dates AG calculées via l'horloge au lieu de l'AG, pattern ~14 endroits) : cartographié + fiché BUGS.md, **non corrigé** (rattaché au rebuild).
+- Campagne golden : BUG-002 fiché résolu, listeners diag retirés de `onboardGolden.ts`. Acte 2 (AGO) suspendu.
+- **DÉCISION MAJEURE** : migrer le front Next.js → **TanStack Start** (Supabase conservé). **POC concluant** (`Flex/poc-tanstack-start/`) : auth Supabase SSR + data réelle (RLS) + CSS Modules + build, tous ✅ sur le live.
 
 ## Next Task
-- **BUG-002 (portefeuille) EN PRIORITÉ** : filtrer `onboarding_step IS NULL` (`usePortefeuille`, `getActiveCopro`) + garde dashboard → redirige copro en onboarding vers `/onboarding/{id}` ; masquer du portefeuille. PR dédiée + test E2E.
-- Puis **Acte 2 du héros** (encaissement D512/C450) — en session neuve.
-- 👉 Effort conseillé : `Max` (fix front ciblé + garde + 1 spec E2E).
+- Écrire la **spec de migration TanStack Start** (`docs/superpowers/specs/`) puis le plan (par zones, strangler, golden = filet de parité).
+- 👉 Effort conseillé : **Max** (cadrage en dialogue ; fan-out inutile à ce stade).
 
 ## Blockers
-- Lyes : activer « leaked password » (Supabase Auth) avant vrais clients.
-- 9 copros `E2E-CYCLE-*` en onboarding à purger (sauf la verte) via le script de purge.
+- None (le POC a levé le risque n°1 : auth SSR fonctionne).
 
 ## Key Context
-- Cloud `qqfqrcolzmcbsvfaumiq`. Copro finalisée de test = `E2E-CYCLE-1782134483715` (onboarding_step NULL). Push via `gh auth switch lyestriki-29`. Tests SQL en BEGIN/ROLLBACK via MCP `execute_sql` + `set local request.jwt.claims='{"role":"service_role"}'`. PAS de vibe-library avant l'Acte 6 (décision Lyes).
+- POC : `Flex/poc-tanstack-start` (hors Co-Pro-Flex), serveur dev **en background sur :3002 — à couper**. TanStack Start est **alpha** (épingler les versions au vrai projet ; retirer Tailwind ; garder CSS Modules + RHF/Zod).
+- Co-Pro-Flex inchangé : le Next **vit pendant la migration**. Fixes BUG-003/005 à committer (`useAgDraftEdit.ts`, `useAgEditPage.ts`).
+- Live Supabase `qqfqrcolzmcbsvfaumiq` (18 copros). Golden Acte 1 sur `E2E-GOLDEN-1782149200395`. Brouillon AG orphelin `b1644229` à supprimer via l'UI.
+- Durable → mémoires [[migration_tanstack_start]], [[golden_exhaustif_plan]], [[verify_before_create_db]].

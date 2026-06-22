@@ -26,7 +26,7 @@
 
 ---
 
-### BUG-002 : Le portefeuille affiche les copros EN onboarding + clic vers dashboard (au lieu de la reprise du wizard) — 🔴 À CORRIGER
+### BUG-002 : Le portefeuille affiche les copros EN onboarding + clic vers dashboard (au lieu de la reprise du wizard) — ✅ CORRIGÉ + PROUVÉ
 
 - **Domaine / cas :** Portefeuille (TC_11) + Onboarding.
 - **Sévérité :** **Majeur** (un syndic voit des copros « en configuration » dans son espace live ; cliquer dessus ouvre un dashboard sans période comptable → état cassé/vide).
@@ -38,13 +38,18 @@
   - `src/app/(gestionnaire)/portefeuille/page.tsx` (~l.40) `handleSelectCopro` : `setActiveCopro` + `router.push('/dashboard')` **sans** vérifier `onboarding_step`.
   - Convention fiable : `completeOnboarding` (étape 8) met `onboarding_step = NULL`. Vérifié en base : seule la copro finalisée est NULL.
   - **Cascade** : `src/lib/copro/activeCopro.ts` `getActiveCopro()` (~l.76) sélectionne la 1ʳᵉ copro **sans** filtre → peut activer une copro en onboarding par défaut ; pas de garde côté dashboard.
-- **Correctif proposé (front, ciblé) :**
-  1. `usePortefeuille.ts` : fetch `onboarding_step` + filtre `.is('onboarding_step', null)`.
-  2. `getActiveCopro()` : même filtre (sécurité défaut).
-  3. **Garde espace gestionnaire/dashboard** : si la copro active a `onboarding_step` non NULL → `redirect('/onboarding/{id}')` (filet pour liens directs / sessionStorage).
-  4. (option) `handleSelectCopro` : router vers `/onboarding/{id}` si non NULL (défense en profondeur).
-- **À trancher (produit) :** masquer totalement les copros en onboarding du portefeuille (reco) **vs** les afficher marquées « en configuration ». L'utilisateur a demandé : **ne montrer que les finies**.
-- **Vérif de sortie :** test E2E — portefeuille ne liste que les copros finalisées ; clic copro onboarding → `/onboarding/{id}` ; copro onboarding active → redirigée hors dashboard.
+- **Décision produit (tranchée) :** masquer totalement les copros en onboarding du portefeuille (demande utilisateur : ne montrer que les finies).
+- **Correctif appliqué (commit `3858e34`) :**
+  1. `usePortefeuille.ts` : `.is('onboarding_step', null)` → la liste ne montre que les copros finalisées.
+  2. `getActiveCopro()` (`activeCopro.ts`) : même filtre → défaut sain, ne jamais activer une copro en onboarding.
+  3. `CoproContext.tsx` : expose `onboarding_step` (interface `Copro` + select) pour que la garde dispose de l'état RÉEL (DB), pas du cache sessionStorage.
+  4. `OnboardingRedirect.tsx` : si la copro active a `onboarding_step` non NULL → `router.push('/onboarding/{id}')` (filet contre un cache pollué par un onboarding à moitié fait).
+  - Point 4 « handleSelectCopro » du plan initial abandonné : devenu inutile une fois la liste filtrée (la carte ne reçoit que des copros finies).
+- **Revue de cascade :** le flux d'onboarding ne dépend pas de `getActiveCopro` (le wizard prend l'id dans l'URL) → filtrer ne le casse pas. `tsc --noEmit` vert.
+- **PROUVÉ (MCP Playwright, navigateur réel, 2026-06-22) :**
+  - Portefeuille : 4 copros finalisées affichées / 14 en onboarding masquées (confirmé en base : `count(*) FILTER (onboarding_step IS NULL)=4`, `NOT NULL=14`, total 18).
+  - Garde : copro en onboarding rendue active (clic « Reprendre ») puis accès direct `/dashboard` → redirigé vers `/onboarding/{id}`.
+  - Pas de faux positif : copro finalisée sélectionnée → reste sur `/dashboard`, contenu plein (budget 50 000 €). 0 erreur console sur tous les écrans.
 
 ---
 
@@ -57,3 +62,35 @@ Aucun bug CONFIRMED (le fix BUG-001 est correct). Retours PLAUSIBLE traités à 
 - ⚪ **DETTE-2 — altitude sélecteurs (app)** : les champs montant/clé de `Step5Budget.tsx` n'ont aucun nom accessible → le helper cible par position (`spinbutton.first`, `combobox.first`). Ajouter des `aria-label` (gain a11y + sélecteurs stables) ; ancrer les tantièmes par lot (pas `nth(0/1)`). À faire quand on étend les Actes 2-6.
 - ⚪ **DETTE-3 — `readOnboardingPeriod` multi-exercices** : sélectionne la période sur tout le `copro_id` triée par `posted_at` sans `period_id` ; pour le pluriannuel (Actes 5-6) préférer `status='open'` / `tx_date`. À revoir AVANT l'Acte 5.
 - ⚪ **DETTE-4 — `workers:1`** sérialise toute la suite (volontaire base partagée) ; plus tard, projet Playwright séparé write/read pour paralléliser les read-only.
+
+---
+
+### BUG-003 : `/ag/new` crée DEUX brouillons d'AG en double — 🔴 À CORRIGER
+
+- **Domaine / cas :** Assemblées générales (TC_04) — planification d'une AG.
+- **Sévérité :** **Majeur** (chaque création d'AG laisse un brouillon orphelin sur le live ; pollution de données + liste de brouillons faussée).
+- **Priorité :** P1.
+- **Repro :** ouvrir `/ag/new` (espace gestionnaire) → 2 lignes `ag_meetings` status `draft` créées à ~20 ms d'intervalle.
+- **Preuve (golden, 2026-06-22) :** `b1644229…` (adresse vide, step 1) + `d2b4e0cd…` (adresse remplie, step 2), tous deux `created_at = 17:48:02.90/.92`, même copro.
+- **Cause probable :** `useEffect` de création de brouillon joué 2× par React StrictMode (même pattern que `ensureAccountingPeriod` / BUG-001). À rendre idempotent (créer le brouillon à l'action explicite, ou garde anti-double-effet).
+- **Vérif de sortie :** une seule ligne `ag_meetings` après une visite `/ag/new`.
+
+---
+
+### BUG-004 : le wizard AG affiche « Exercice comptable non configuré pour 2026 » alors qu'il existe — 🔴 À CORRIGER
+
+- **Domaine / cas :** AG (TC_04), étape Ordre du jour.
+- **Sévérité :** **Majeur** (les dates d'exercice ne sont pas pré-remplies ; risque de fausser le pré-remplissage des dates d'appels générés par l'AG).
+- **Priorité :** P1.
+- **Résultat OBTENU :** bandeau « Exercice comptable non configuré pour l'année 2026 ».
+- **Résultat ATTENDU :** l'exercice 2026 (ouvert) est détecté.
+- **Preuve base :** `accounting_periods` golden = `Exercice 2026` / `open` / 2026-01-01→2026-12-31, **couvre le 22/07/2026** (date de l'AG). La détection du wizard ne le trouve pas → requête de détection à auditer (filtre année/copro/dates ou source erronée).
+
+---
+
+### BUG-005 : 406 sur `ag_resolutions` (recherche « approbation du budget prévisionnel ») — 🟡 À CORRIGER (mineur)
+
+- **Domaine / cas :** AG — chargement `/ag/new`.
+- **Sévérité :** Mineur (erreur avalée, sans blocage visible).
+- **Preuve :** `GET …/ag_resolutions?select=id,variables&ag_id=eq.<id>&title=ilike.%approbation du budget prévisionnel%&limit=1` → **406**.
+- **Cause probable :** appel `.single()` (header `Accept: …pgrst.object+json`) sur 0 ligne → 406 ; devrait être `.maybeSingle()` + gestion d'erreur (règle « jamais de refus silencieux »).
