@@ -1,22 +1,24 @@
-# Session State — 2026-06-21 (campagne de test Playwright + correctif lots)
+# Session State — 2026-06-22 (campagne test E2E : infra + Acte 1 héros + BUG-001)
 
 ## Branch / Commit
-`chantier-vente-cablage` @ `941a370` (dirty : 65 fichiers — chantier étape 3 + .planning/tests + .agents/skills + fichiers parasites)
+`test/campagne-onboarding-e2e` @ `3b184fa` (poussé)
+PR **#35** ouverte vers `chantier-vente-cablage`. **Code review high-effort passée** : 0 bug CONFIRMED, 2 fix appliqués (order posted_at NULLS LAST + docstring), 4 dettes notées (`BUGS.md`). Héros Acte 1 re-VERT après fix.
 
 ## Completed This Session
-- **Correctif étape 3 onboarding « Lots & Clés »** (10 fichiers, tsc vert, NON commité) : amorçage 1 lot/copropriétaire ; fusion colonne Tantièmes = clé générale (source unique) ; clés « certains lots » (subset) + fix `category` ; fix inserts colonnes dérivées (createLot/updateLot/initializeRepartitionKeyLines) ; surfaçage erreur Step2. Revue adversariale passée.
-- **Catalogue de test** : `.planning/tests/` = `PLAN_TEST_MASTER.md` + 13 fichiers `TC_*.md` = **327 cas** (P0=104/P1=127/P2=85/P3=11).
-- **Skills installés** : `qa-test-planner` (audit Gen High Risk — scripts inoffensifs, inspectés) + `playwright-generate-test` (safe). Dans `.agents/skills/`.
-- **PILOTE Playwright** déroulé en vrai (MCP) sur Résidence Martin → correctif lots **validé en client réel** + **4 incohérences** trouvées → `.planning/tests/PILOTE_FINDINGS_2026-06-21.md`.
+- Cadrage campagne (grilling, 7 décisions) → mémoire [[test_campaign_cadrage]] ; gouvernance migrations → [[migration_governance_test_campaign]].
+- Infra Playwright débloquée (1.61, navigateur OK), `workers:1`, helper `onboardCopro`, héros `cycle-annuel-hero` **Acte 1 VERT**.
+- **BUG-001 corrigé** : `ledger_transactions.created_at` inexistant → `posted_at` (onboarding était bloqué à l'étape Budget pour tout syndic). tsc 0.
+- Script purge `purge_test_copros.sql` (replica admin, préfixe E2E-/HARNESS) testé vert.
+- Leçons L01→L08 (`.planning/tests/LECONS.md`) ; **BUG-002 documenté** (`BUGS.md`).
 
 ## Next Task
-- **Figer l'infra Playwright** (helper login `lyes.triki`, charger `.env.local`, baseURL :3100) + **spec pilote lots**, puis dérouler les domaines (UI + base + **prisme expert copro**, alerte immédiate). Cf. mémoire [[playwright-first-testing]].
-- Effort conseillé : `ultracode` (fan-out specs par domaine) — activé.
+- **BUG-002 (portefeuille) EN PRIORITÉ** : filtrer `onboarding_step IS NULL` (`usePortefeuille`, `getActiveCopro`) + garde dashboard → redirige copro en onboarding vers `/onboarding/{id}` ; masquer du portefeuille. PR dédiée + test E2E.
+- Puis **Acte 2 du héros** (encaissement D512/C450) — en session neuve.
+- 👉 Effort conseillé : `Max` (fix front ciblé + garde + 1 spec E2E).
 
 ## Blockers
-- **Port 3000 occupé par une AUTRE app « TropPayé »** → CoProFlex lancé sur **:3100** (`npm run dev -- -p 3100`, log `.planning/dev-3100.log`). Adapter playwright baseURL.
-- Specs e2e existantes : login défaut `admin@coproflex.fr` = INEXISTANT (seul user = `lyes.triki@coproflex.fr`).
+- Lyes : activer « leaked password » (Supabase Auth) avant vrais clients.
+- 9 copros `E2E-CYCLE-*` en onboarding à purger (sauf la verte) via le script de purge.
 
 ## Key Context
-- Cloud live `qqfqrcolzmcbsvfaumiq`. Résidence Martin `c0edd2b9` + Paris Ivry `7e17ea99` = TOUTES DEUX en onboarding (step 3) → d'où compteurs 0 + 406 dashboard (voir PILOTE_FINDINGS).
-- Reste en attente : commit/push chantier étape 3 ; re-test onboarding 4→8 ; audit cascade ; ménage ~30 fichiers parasites racine.
+- Cloud `qqfqrcolzmcbsvfaumiq`. Copro finalisée de test = `E2E-CYCLE-1782134483715` (onboarding_step NULL). Push via `gh auth switch lyestriki-29`. Tests SQL en BEGIN/ROLLBACK via MCP `execute_sql` + `set local request.jwt.claims='{"role":"service_role"}'`. PAS de vibe-library avant l'Acte 6 (décision Lyes).

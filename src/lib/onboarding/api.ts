@@ -319,7 +319,12 @@ async function readOnboardingPeriod(
     .select('period_id')
     .eq('copro_id', coproId)
     .eq('source_type', 'opening_onboarding')
-    .order('created_at', { ascending: false })
+    // ledger_transactions N'A JAMAIS eu de colonne created_at (le code app l'ignorait : 400 PostgREST
+    // qui bloquait toute la résolution de période -> onboarding figé à l'étape Budget). Colonne réelle
+    // horodatée = posted_at (timestamptz). NULLS LAST : posted_at est NULL pour un brouillon (status
+    // 'draft') ; sans ça un brouillon remonterait en tête (Postgres = NULLS FIRST en DESC). Aligné sur
+    // get_opening_balance (migration 0027 : `tx_date desc, posted_at desc NULLS LAST`).
+    .order('posted_at', { ascending: false, nullsFirst: false })
     .limit(1)
     .maybeSingle();
   if (txErr) return { data: null, error: new Error(txErr.message) };

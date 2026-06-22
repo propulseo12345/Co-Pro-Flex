@@ -17,14 +17,19 @@ const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:3100';
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  // Base cloud PARTAGÉE (cf. LECONS L03) : exécution sérialisée pour éviter que deux specs
+  // écrivent en même temps (collisions) ou qu'une lecture tombe pendant l'écriture d'une autre.
+  // fullyParallel=false garantit aussi l'ordre de déclaration au sein d'un fichier.
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: 'html',
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',
+    // Échec rapide sur un sélecteur faux (15 s) au lieu d'attendre le timeout du test entier.
+    actionTimeout: 15_000,
   },
   projects: [
     {

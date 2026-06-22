@@ -5,7 +5,7 @@
  * d'onboarding (fusion Tantièmes / clé générale) :
  *   - UNE seule colonne d'en-tête « Tantièmes » (= la clé générale, source unique),
  *   - AUCUN doublon « Charges générales » en colonne,
- *   - les 2 clés spéciales (« Bâtiment A », « Bâtiment B ») apparaissent en colonnes.
+ *   - les 2 clés spéciales (« Batiment A », « Batiment B », sans accent = donnée réelle) apparaissent en colonnes.
  *
  * Double preuve : le RENDU (en-têtes de la grille) ET la VÉRITÉ en base (service-role) :
  *   - la clé `category='general'` couvre les 7 lots pour 1000 tantièmes au total,
@@ -57,8 +57,10 @@ test.describe('Lots & Répartition — pilote lecture seule (Résidence Martin)'
       page.getByRole('columnheader', { name: 'Charges générales' }),
     ).toHaveCount(0);
     // Les 2 clés spéciales apparaissent en colonnes (en-tête = nom + statut « N/M lots »).
-    await expect(page.getByRole('columnheader', { name: /Bâtiment A/ })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: /Bâtiment B/ })).toBeVisible();
+    // NB : le nom RÉEL de la clé en base est « Batiment » (sans accent circonflexe) — le test
+    // reflète la donnée telle qu'elle est saisie/seedée, pas l'orthographe présumée (cf. LECONS L02).
+    await expect(page.getByRole('columnheader', { name: /Batiment A/ })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: /Batiment B/ })).toBeVisible();
 
     // ── Preuve BASE : la clé générale couvre 7 lots = 1000 tantièmes ───────────
     const { data: generalKey, error: genErr } = await admin
