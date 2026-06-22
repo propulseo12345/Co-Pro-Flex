@@ -10,8 +10,8 @@ import styles from './lot-detail.module.css';
 
 const LOT_TYPE_LABELS: Record<string, string> = {
   appartement: 'Appartement', studio: 'Studio', parking: 'Parking',
-  cave: 'Cave', local_commercial: 'Commerce', bureau: 'Bureau',
-  garage: 'Garage', box: 'Box', autre: 'Autre',
+  cave: 'Cave', commerce: 'Commerce', bureau: 'Bureau',
+  garage: 'Garage', local_technique: 'Local technique', autre: 'Autre',
 };
 
 export default function LotDetailPage({ params }: { params: Promise<{ id: string }> }) {

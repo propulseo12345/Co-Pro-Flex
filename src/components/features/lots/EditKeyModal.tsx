@@ -57,7 +57,7 @@ export function EditKeyModal({ keyData, onClose, onUpdate, onDelete, isMutating 
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Modifier la clé" onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>Modifier la clé</h2>
           <button className={styles.closeBtn} onClick={onClose}>

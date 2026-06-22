@@ -9,16 +9,12 @@ import styles from './LotTable.module.css';
 const LOT_TYPE_LABELS: Record<string, string> = {
   appartement: 'Appartement',
   studio: 'Studio',
-  parking: 'Parking',
-  cave: 'Cave',
-  local_commercial: 'Commerce',
+  commerce: 'Commerce',
   bureau: 'Bureau',
+  cave: 'Cave',
+  parking: 'Parking',
   garage: 'Garage',
-  box: 'Box',
-  jardin: 'Jardin',
-  terrasse: 'Terrasse',
-  balcon: 'Balcon',
-  loggia: 'Loggia',
+  local_technique: 'Local technique',
   autre: 'Autre',
 };
 

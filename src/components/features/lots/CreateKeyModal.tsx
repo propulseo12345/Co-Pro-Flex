@@ -53,7 +53,7 @@ export function CreateKeyModal({ isOpen, onClose, onCreate, isMutating }: Create
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Nouvelle clé de répartition" onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>Nouvelle clé de répartition</h2>
           <button className={styles.closeBtn} onClick={onClose}>

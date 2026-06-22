@@ -13,19 +13,17 @@ const createUntypedClient = () => createClient() as any;
 // TYPES - LOTS
 // ============================================================================
 
+// Aligné sur l'enum SQL `lot_type` (0003_enums_domaines) — source de vérité.
+// Toute autre valeur (ex. l'ancien 'local_commercial') est rejetée par la base (22P02).
 export type LotType =
   | 'appartement'
   | 'studio'
-  | 'parking'
-  | 'cave'
-  | 'local_commercial'
+  | 'commerce'
   | 'bureau'
+  | 'cave'
+  | 'parking'
   | 'garage'
-  | 'box'
-  | 'jardin'
-  | 'terrasse'
-  | 'balcon'
-  | 'loggia'
+  | 'local_technique'
   | 'autre';
 
 export interface LotWithOwner {

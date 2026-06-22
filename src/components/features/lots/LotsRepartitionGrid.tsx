@@ -8,15 +8,15 @@ import styles from './LotsRepartitionGrid.module.css';
 
 const LOT_TYPE_LABELS: Record<string, string> = {
   appartement: 'Appart.', studio: 'Studio', parking: 'Parking',
-  cave: 'Cave', local_commercial: 'Commerce', bureau: 'Bureau',
-  garage: 'Garage', box: 'Box', autre: 'Autre',
+  cave: 'Cave', commerce: 'Commerce', bureau: 'Bureau',
+  garage: 'Garage', local_technique: 'Local tech.', autre: 'Autre',
 };
 
 const TYPE_BADGE_CLASS: Record<string, string> = {
   parking: styles.badgeBlue,
   cave: styles.badgeDim,
   garage: styles.badgeDim,
-  box: styles.badgeDim,
+  local_technique: styles.badgeDim,
 };
 
 interface LotsRepartitionGridProps {

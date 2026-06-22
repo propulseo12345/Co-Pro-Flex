@@ -8,12 +8,12 @@ import styles from './CreateLotModal.module.css';
 const LOT_TYPES: { value: LotType; label: string }[] = [
   { value: 'appartement', label: 'Appartement' },
   { value: 'studio', label: 'Studio' },
-  { value: 'parking', label: 'Parking' },
-  { value: 'cave', label: 'Cave' },
-  { value: 'local_commercial', label: 'Commerce' },
+  { value: 'commerce', label: 'Commerce' },
   { value: 'bureau', label: 'Bureau' },
+  { value: 'cave', label: 'Cave' },
+  { value: 'parking', label: 'Parking' },
   { value: 'garage', label: 'Garage' },
-  { value: 'box', label: 'Box' },
+  { value: 'local_technique', label: 'Local technique' },
   { value: 'autre', label: 'Autre' },
 ];
 
@@ -72,7 +72,7 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating, owners =
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Nouveau lot" onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>Nouveau lot</h2>
           <button className={styles.closeBtn} onClick={onClose}>
