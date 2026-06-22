@@ -284,7 +284,20 @@ export async function ensureAccountingPeriod(coproId: string, year: number) {
     .insert({ copro_id: coproId, name, start_date: start, end_date: end, status: 'open' })
     .select('id')
     .single();
-  if (error) return { data: null, error: new Error(error.message) };
+  if (error) {
+    // Idempotence : entre le SELECT ci-dessus et cet INSERT, la période a pu être créée par
+    // un appel concurrent (effet React StrictMode joué 2×, double-clic, retry réseau). Sur
+    // violation d'unicité (uq_period_copro_name, 23505), on relit et on renvoie l'existante
+    // au lieu de propager l'erreur — sinon la création du budget échoue silencieusement.
+    const { data: raced } = await supabase
+      .from('accounting_periods')
+      .select('id')
+      .eq('copro_id', coproId)
+      .eq('name', name)
+      .maybeSingle();
+    if (raced) return { data: { id: raced.id as string, start, end }, error: null };
+    return { data: null, error: new Error(error.message) };
+  }
   return { data: { id: data.id as string, start, end }, error: null };
 }
 
