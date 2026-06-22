@@ -261,13 +261,16 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
 
       // Charger les postes depuis la résolution budget
       try {
-        const { data: budgetRes } = await supabase
+        const { data: budgetRes, error: budgetErr } = await supabase
           .from('ag_resolutions')
           .select('id, variables')
           .eq('ag_id', draftId)
           .ilike('title', '%approbation du budget prévisionnel%')
           .limit(1)
-          .single();
+          .maybeSingle();
+        if (budgetErr) {
+          console.error('[useAgDraftEdit] Échec lecture résolution budget:', budgetErr);
+        }
 
         if (budgetRes) {
           budgetEnabled = true;
@@ -297,8 +300,8 @@ export function useAgDraftEdit(draftId: string | null): UseAgDraftEditReturn {
             if (yearMatch) budgetExercice = yearMatch[1];
           }
         }
-      } catch {
-        // Pas de résolution budget
+      } catch (budgetLoadErr) {
+        console.error('[useAgDraftEdit] Erreur inattendue chargement budget:', budgetLoadErr);
       }
 
       const loadedData: AGFormData = {
@@ -483,12 +486,17 @@ export function useAgDraftAutoCreate() {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasCreatedRef = useRef(false);
 
   useEffect(() => {
     if (!currentCoproId) {
       setIsLoading(false);
       return;
     }
+    // Idempotence : neutralise le double-effet React StrictMode (dev) et tout
+    // remount rapide — un seul brouillon créé par montage de /ag/new.
+    if (hasCreatedRef.current) return;
+    hasCreatedRef.current = true;
 
     const createNewDraft = async () => {
       setIsLoading(true);
@@ -520,6 +528,7 @@ export function useAgDraftAutoCreate() {
       } catch (err) {
         console.error('[useAgDraftAutoCreate] Error:', err);
         setError(err instanceof Error ? err.message : 'Erreur lors de la création');
+        hasCreatedRef.current = false; // autoriser un nouvel essai après échec
       } finally {
         setIsLoading(false);
       }

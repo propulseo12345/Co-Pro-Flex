@@ -232,13 +232,16 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
 
             // Charger les postes depuis la résolution budget (source de vérité)
             try {
-              const { data: budgetRes } = await supabase
+              const { data: budgetRes, error: budgetErr } = await supabase
                 .from('ag_resolutions')
                 .select('id, variables')
                 .eq('ag_id', agId)
                 .ilike('title', '%approbation du budget prévisionnel%')
                 .limit(1)
-                .single();
+                .maybeSingle();
+              if (budgetErr) {
+                console.error('[useAgEditPage] Échec lecture résolution budget:', budgetErr);
+              }
 
               if (budgetRes) {
                 budgetResolutionIdRef.current = budgetRes.id;
@@ -271,8 +274,8 @@ export function useAgEditPage({ agId }: UseAgEditPageParams) {
                   if (yearMatch) budgetExercice = yearMatch[1];
                 }
               }
-            } catch {
-              // Pas de résolution budget
+            } catch (budgetLoadErr) {
+              console.error('[useAgEditPage] Erreur inattendue chargement budget:', budgetLoadErr);
             }
 
             const loadedData: AGFormData = {
