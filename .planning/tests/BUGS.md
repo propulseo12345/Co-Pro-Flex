@@ -45,3 +45,15 @@
   4. (option) `handleSelectCopro` : router vers `/onboarding/{id}` si non NULL (défense en profondeur).
 - **À trancher (produit) :** masquer totalement les copros en onboarding du portefeuille (reco) **vs** les afficher marquées « en configuration ». L'utilisateur a demandé : **ne montrer que les finies**.
 - **Vérif de sortie :** test E2E — portefeuille ne liste que les copros finalisées ; clic copro onboarding → `/onboarding/{id}` ; copro onboarding active → redirigée hors dashboard.
+
+---
+
+## Retours de code review (PR #35, revue high-effort 32 agents) — différés
+
+Aucun bug CONFIRMED (le fix BUG-001 est correct). Retours PLAUSIBLE traités à part :
+
+- ✅ **Corrigé immédiatement** : `api.ts` `order('posted_at', nullsFirst:false)` (aligné sur `get_opening_balance` 0027) + wording « drift » corrigé ; docstring accent `lots-repartition`.
+- 🟡 **DETTE-1 — `onboarding-clean-path.spec.ts` doublon** : ré-implémente le wizard (avec les sélecteurs bugués stepBlock/`getByPlaceholder('0.00')`/pas de clé explicite → probablement cassé) et fait DOUBLON avec `onboardCopro` + redondant avec le héros Acte 1. → **migrer vers `onboardCopro`** (ne garder que ses assertions DB) **ou supprimer**. Règle CLAUDE.md « ne pas laisser deux patterns coexister ». `stepBlock` (helpers.ts) à retirer une fois clean-path migré.
+- ⚪ **DETTE-2 — altitude sélecteurs (app)** : les champs montant/clé de `Step5Budget.tsx` n'ont aucun nom accessible → le helper cible par position (`spinbutton.first`, `combobox.first`). Ajouter des `aria-label` (gain a11y + sélecteurs stables) ; ancrer les tantièmes par lot (pas `nth(0/1)`). À faire quand on étend les Actes 2-6.
+- ⚪ **DETTE-3 — `readOnboardingPeriod` multi-exercices** : sélectionne la période sur tout le `copro_id` triée par `posted_at` sans `period_id` ; pour le pluriannuel (Actes 5-6) préférer `status='open'` / `tx_date`. À revoir AVANT l'Acte 5.
+- ⚪ **DETTE-4 — `workers:1`** sérialise toute la suite (volontaire base partagée) ; plus tard, projet Playwright séparé write/read pour paralléliser les read-only.

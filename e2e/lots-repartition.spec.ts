@@ -5,7 +5,7 @@
  * d'onboarding (fusion Tantièmes / clé générale) :
  *   - UNE seule colonne d'en-tête « Tantièmes » (= la clé générale, source unique),
  *   - AUCUN doublon « Charges générales » en colonne,
- *   - les 2 clés spéciales (« Bâtiment A », « Bâtiment B ») apparaissent en colonnes.
+ *   - les 2 clés spéciales (« Batiment A », « Batiment B », sans accent = donnée réelle) apparaissent en colonnes.
  *
  * Double preuve : le RENDU (en-têtes de la grille) ET la VÉRITÉ en base (service-role) :
  *   - la clé `category='general'` couvre les 7 lots pour 1000 tantièmes au total,
