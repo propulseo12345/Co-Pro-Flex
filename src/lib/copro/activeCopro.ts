@@ -79,6 +79,9 @@ export async function getActiveCopro(): Promise<ActiveCopro | null> {
   const { data: copro, error: selectError } = await supabase
     .from('copros')
     .select('id, name')
+    // Défaut sain : ne jamais activer une copro encore en onboarding
+    // (onboarding_step != null) — elle n'a pas d'exercice et casserait le dashboard.
+    .is('onboarding_step', null)
     .order('created_at', { ascending: true })
     .limit(1)
     .single();

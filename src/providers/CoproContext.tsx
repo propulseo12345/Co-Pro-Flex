@@ -15,6 +15,8 @@ export interface Copro {
   city: string | null;
   postal_code: string | null;
   annee_construction: number | null;
+  // null = onboarding terminé (copro exploitable) ; un nombre = encore en cours
+  onboarding_step: number | null;
 }
 
 export interface CoproContextValue {
@@ -92,7 +94,7 @@ export function CoproProvider({ children }: CoproProviderProps) {
 
       const { data, error: fetchError } = await supabase
         .from('copros')
-        .select('id, name, address, city, postal_code, annee_construction')
+        .select('id, name, address, city, postal_code, annee_construction, onboarding_step')
         .eq('id', coproId)
         .single();
 

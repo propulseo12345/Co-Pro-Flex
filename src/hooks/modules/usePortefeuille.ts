@@ -86,6 +86,10 @@ export function usePortefeuille(): UsePortefeuilleReturn {
           supabase
             .from('copros')
             .select('id, name, address, city, postal_code')
+            // Ne lister que les copros finalisées : une copro encore en
+            // onboarding (onboarding_step != null) n'a pas d'exercice comptable
+            // et ouvrirait un dashboard vide. Sa reprise passe par /onboarding.
+            .is('onboarding_step', null)
             .order('created_at', { ascending: true }),
           supabase
             .from('v_dashboard_kpis')
