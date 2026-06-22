@@ -1,8 +1,8 @@
 # Session State — 2026-06-22 (campagne test E2E : infra + Acte 1 héros + BUG-001)
 
 ## Branch / Commit
-`test/campagne-onboarding-e2e` @ `29aaad6` (dirty : BUGS.md BUG-002 + ce SESSION.md, à committer)
-PR **#35** ouverte vers `chantier-vente-cablage` (4 commits : fix + infra test).
+`test/campagne-onboarding-e2e` @ `3b184fa` (poussé)
+PR **#35** ouverte vers `chantier-vente-cablage`. **Code review high-effort passée** : 0 bug CONFIRMED, 2 fix appliqués (order posted_at NULLS LAST + docstring), 4 dettes notées (`BUGS.md`). Héros Acte 1 re-VERT après fix.
 
 ## Completed This Session
 - Cadrage campagne (grilling, 7 décisions) → mémoire [[test_campaign_cadrage]] ; gouvernance migrations → [[migration_governance_test_campaign]].
