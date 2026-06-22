@@ -57,8 +57,10 @@ test.describe('Lots & Répartition — pilote lecture seule (Résidence Martin)'
       page.getByRole('columnheader', { name: 'Charges générales' }),
     ).toHaveCount(0);
     // Les 2 clés spéciales apparaissent en colonnes (en-tête = nom + statut « N/M lots »).
-    await expect(page.getByRole('columnheader', { name: /Bâtiment A/ })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: /Bâtiment B/ })).toBeVisible();
+    // NB : le nom RÉEL de la clé en base est « Batiment » (sans accent circonflexe) — le test
+    // reflète la donnée telle qu'elle est saisie/seedée, pas l'orthographe présumée (cf. LECONS L02).
+    await expect(page.getByRole('columnheader', { name: /Batiment A/ })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: /Batiment B/ })).toBeVisible();
 
     // ── Preuve BASE : la clé générale couvre 7 lots = 1000 tantièmes ───────────
     const { data: generalKey, error: genErr } = await admin
