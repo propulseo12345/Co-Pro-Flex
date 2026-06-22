@@ -319,7 +319,10 @@ async function readOnboardingPeriod(
     .select('period_id')
     .eq('copro_id', coproId)
     .eq('source_type', 'opening_onboarding')
-    .order('created_at', { ascending: false })
+    // ledger_transactions n'a PAS de colonne created_at (drift schéma) -> 400 PostgREST qui faisait
+    // échouer toute la résolution de période (onboarding BLOQUÉ à l'étape Budget). posted_at = la
+    // colonne horodatée réelle (timestamptz), sémantiquement correcte pour « la tx la plus récente ».
+    .order('posted_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   if (txErr) return { data: null, error: new Error(txErr.message) };
