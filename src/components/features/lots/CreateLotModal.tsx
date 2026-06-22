@@ -24,21 +24,26 @@ interface CreateLotModalProps {
   isMutating: boolean;
   owners?: Array<{ id: string; display_name: string }>;
   onAssignOwner?: (lotId: string, ownerId: string | null) => Promise<void>;
+  buildings?: Array<{ id: string; name: string }>;
 }
 
-export function CreateLotModal({ isOpen, onClose, onCreate, isMutating, owners = [], onAssignOwner }: CreateLotModalProps) {
+export function CreateLotModal({ isOpen, onClose, onCreate, isMutating, owners = [], onAssignOwner, buildings = [] }: CreateLotModalProps) {
   const [ref, setRef] = useState('');
   const [type, setType] = useState<LotType>('appartement');
   const [floor, setFloor] = useState('');
+  const [surface, setSurface] = useState('');
   const [tantiemes, setTantiemes] = useState('');
   const [ownerId, setOwnerId] = useState<string>('');
+  const [buildingId, setBuildingId] = useState<string>('');
 
   const resetForm = useCallback(() => {
     setRef('');
     setType('appartement');
     setFloor('');
+    setSurface('');
     setTantiemes('');
     setOwnerId('');
+    setBuildingId('');
   }, []);
 
   const handleSubmit = async () => {
@@ -48,6 +53,8 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating, owners =
       ref: ref.trim(),
       type,
       floor: floor ? parseInt(floor, 10) : null,
+      surface: surface ? parseFloat(surface) : null,
+      building_id: buildingId || null,
       tantiemes_generaux: parseInt(tantiemes, 10),
     };
 
@@ -94,15 +101,40 @@ export function CreateLotModal({ isOpen, onClose, onCreate, isMutating, owners =
             </div>
           </div>
 
-          <div className={styles.fieldGroup}>
-            <label>Étage</label>
-            <input
-              type="number"
-              value={floor}
-              onChange={e => setFloor(e.target.value)}
-              placeholder="ex: 3"
-            />
+          <div className={styles.fieldRow}>
+            <div className={styles.fieldGroup}>
+              <label>Étage</label>
+              <input
+                type="number"
+                value={floor}
+                onChange={e => setFloor(e.target.value)}
+                placeholder="ex: 3"
+              />
+            </div>
+            <div className={styles.fieldGroup}>
+              <label>Surface (m²)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={surface}
+                onChange={e => setSurface(e.target.value)}
+                placeholder="ex: 65"
+              />
+            </div>
           </div>
+
+          {buildings.length > 0 && (
+            <div className={styles.fieldGroup}>
+              <label>Bâtiment</label>
+              <select value={buildingId} onChange={e => setBuildingId(e.target.value)}>
+                <option value="">— Aucun bâtiment —</option>
+                {buildings.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className={styles.fieldGroup}>
             <label>Tantièmes généraux *</label>

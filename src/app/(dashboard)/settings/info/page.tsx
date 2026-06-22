@@ -7,6 +7,9 @@ import {
   LotsSection,
   GlobalActions,
 } from '@/features/settings/info/components';
+import { useCopro } from '@/providers/CoproContext';
+import { useBuildings } from '@/hooks/modules/useBuildings';
+import { BuildingsManager } from '@/components/features/lots';
 import styles from './info.module.css';
 
 export default function InfoCoproPage() {
@@ -30,11 +33,26 @@ export default function InfoCoproPage() {
     getCoproprietaireNom,
   } = useInfoCoproPage();
 
+  const { currentCoproId } = useCopro();
+  const {
+    buildings,
+    isMutating: buildingsMutating,
+    create: createBuilding,
+    remove: removeBuilding,
+  } = useBuildings(currentCoproId ?? '');
+
   return (
     <div className="container">
       <PageHeader />
 
       <div className={styles.content}>
+        <BuildingsManager
+          buildings={buildings.map(b => ({ id: b.id, name: b.name, floors_count: b.floors_count }))}
+          isMutating={buildingsMutating}
+          onCreate={createBuilding}
+          onDelete={removeBuilding}
+        />
+
         <ClesRepartitionSection
           clesRepartition={clesRepartition}
           nouvelleCle={nouvelleCle}

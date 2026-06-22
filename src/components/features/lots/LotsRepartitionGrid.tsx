@@ -94,6 +94,7 @@ export function LotsRepartitionGrid({ rows, keyColumns, generalKeyId, onEditLot,
                       key={`gen-${row.lot.id}-${genWeight}`}
                       className={styles.tantiemesInput}
                       type="number"
+                      aria-label={`Tantièmes ${row.lot.ref}`}
                       defaultValue={genWeight}
                       onBlur={(e) => handleWeightBlur(generalKeyId, row.lot.id, genWeight, e)}
                     />
@@ -114,6 +115,7 @@ export function LotsRepartitionGrid({ rows, keyColumns, generalKeyId, onEditLot,
                           key={`${col.key_id}-${w}`}
                           className={w === 0 ? styles.weightInputZero : styles.weightInput}
                           type="number"
+                          aria-label={`${col.name} ${row.lot.ref}`}
                           defaultValue={w}
                           onBlur={(e) => handleWeightBlur(col.key_id, row.lot.id, w, e)}
                         />

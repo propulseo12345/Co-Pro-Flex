@@ -4,8 +4,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { StepHeader } from '../shared/StepHeader';
-import { LotsRepartitionGrid, CreateLotModal, EditLotModal, CreateKeyModal, EditKeyModal } from '@/components/features/lots';
+import { LotsRepartitionGrid, CreateLotModal, EditLotModal, CreateKeyModal, EditKeyModal, BuildingsManager } from '@/components/features/lots';
 import { useLotsRepartitionGrid } from '@/hooks/modules/useLotsRepartitionGrid';
+import { useBuildings } from '@/hooks/modules/useBuildings';
 import type { RepartitionKeyWithTotals, RepartitionBasis } from '@/lib/lots/api';
 import styles from './Step3LotsKeys.module.css';
 
@@ -29,6 +30,14 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
     generalKeyId, keysCount,
     refresh,
   } = useLotsRepartitionGrid(coproId);
+
+  const {
+    buildings,
+    isMutating: buildingsMutating,
+    create: createBuilding,
+    remove: removeBuilding,
+  } = useBuildings(coproId);
+  const buildingOptions = buildings.map(b => ({ id: b.id, name: b.name }));
 
   // Auto-créer la clé "Charges générales" (category=general) si aucune clé n'existe.
   // Garde sur keysCount (toutes clés) : isLoading couvre le chargement, donc pas de
@@ -110,6 +119,13 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
         title="Lots & Clés de répartition"
         description="Créez les lots, assignez-les à leurs propriétaires et définissez les tantièmes."
         count={hasLots ? `${lotCount} lot${lotCount > 1 ? 's' : ''}` : undefined}
+      />
+
+      <BuildingsManager
+        buildings={buildings.map(b => ({ id: b.id, name: b.name, floors_count: b.floors_count }))}
+        isMutating={buildingsMutating}
+        onCreate={createBuilding}
+        onDelete={removeBuilding}
       />
 
       {/* Actions */}
@@ -212,6 +228,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
         isMutating={isMutating}
         owners={ownerOptions}
         onAssignOwner={assignOwner}
+        buildings={buildingOptions}
       />
       <EditLotModal
         lot={editingLot}
@@ -222,6 +239,7 @@ export function Step3LotsKeys({ coproId, onComplete, onBack }: Step3Props) {
         owners={ownerOptions}
         onAssignOwner={assignOwner}
         currentOwnerId={editingLot?.coproprietaire_id}
+        buildings={buildingOptions}
       />
       <CreateKeyModal
         isOpen={showCreateKeyModal}
