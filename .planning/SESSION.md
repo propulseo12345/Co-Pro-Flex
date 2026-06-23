@@ -1,7 +1,7 @@
 # Session State — 2026-06-23 (grilling refonte v2 : C / B / E)
 
 ## Branch / Commit
-`refonte-wizard-onboarding` @ `50842e0` — **dirty (24 fichiers, RIEN commité cette session)** : `settings.json` + `CLAUDE.md` modifiés ; `.claude/hooks/*`, `.claude/skills/methodo-coproflex/`, `REFONTE_*`, `design/`, `v2/` non suivis.
+`refonte-v2-cadrage` (créée depuis `refonte-wizard-onboarding` @ `50842e0`) — **4 commits ce jour** : dispositif anti-dérive · docs grilling C/B/E + maquette · scaffold `v2-tanstack/` + e2e · renommage `v2/`→`v2-tanstack/`. Reste non commité = **scratch** (`forms-rollout`, `lint-*`). Skill `methodo-coproflex` gardé **local** (gitignoré).
 
 ## Completed This Session
 - Grilling **D6→D70** soldé ; **C design/UX** complet (slugs `UX-*`/`VIS-*` ; `UX-HUBS` 6 hubs + `UX-WORKLIST` validés sur MAQUETTE `.planning/design/maquette-accueil-copro.html`) ; **B1→B10** châssis technique ; **E1–E9 + E12/E13** bloquants.

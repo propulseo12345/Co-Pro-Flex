@@ -3,7 +3,7 @@
 Plateforme SaaS de gestion de copropriété (marché français).
 Frontend Next.js 16 + React 19 + TypeScript 5 + CSS Modules. Backend Supabase (prévu).
 
-> ⚙️ **Refonte v2 en cours** dans `v2/` (TanStack Start, from-scratch). Le `v2/` est la cible ; l'ancien front Next reste **gelé en référence**. Décisions : `.planning/REFONTE_DECISIONS_2026-06-23.md`.
+> ⚙️ **Refonte v2 en cours** dans `v2-tanstack/` (TanStack Start, from-scratch). Le `v2-tanstack/` est la cible ; l'ancien front Next reste **gelé en référence**. Décisions : `.planning/REFONTE_DECISIONS_2026-06-23.md`.
 
 ---
 

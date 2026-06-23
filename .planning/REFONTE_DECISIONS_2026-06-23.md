@@ -6,7 +6,7 @@
 - **On ne copie JAMAIS v1 bêtement** : chaque feature reconstruite = occasion de **corriger les bugs et améliorer** (UX manager-first, justesse comptable, dette, conformité). La **parité** porte sur le **résultat comptable** (le moteur sort la même chose ou mieux), pas sur la reproduction des défauts.
 
 ## Structure & stratégie
-- Reconstruction **from-scratch** dans `v2/` (même repo ; `e2e/` et `supabase/` partagés à la racine). Ancien `src/` **gelé** (référence, jeté au go-live). **Bascule d'un bloc au go-live** (pas d'utilisateurs aujourd'hui).
+- Reconstruction **from-scratch** dans `v2-tanstack/` (même repo ; `e2e/` et `supabase/` partagés à la racine). Ancien `src/` **gelé** (référence, jeté au go-live). **Bascule d'un bloc au go-live** (pas d'utilisateurs aujourd'hui).
 - **Moteur Supabase identique/partagé** = parité au niveau base. **UI entièrement redessinée** (manager-first).
 - **« Feature finie » = écran neuf + test e2e de parité** (clic réel Playwright sur v2 → `audit_finance_integrity = 0` + montants attendus en base).
 - **Deux phases** : (1) valider/réparer le **moteur sans UI** (SQL, BEGIN/ROLLBACK) ; (2) reconstruire **écran par écran**.
@@ -19,7 +19,7 @@
 - Supabase (`@supabase/ssr` + `supabase-js`), **React Hook Form + Zod**, **`@tanstack/react-query` natif** (le `useAsyncData` maison meurt).
 - Polices self-hostées (`@fontsource-variable` Inter/Manrope + Fira Code).
 - **Server functions TanStack par défaut** pour les opérations déclenchées par clic ; **Edge Functions réservées** au cron (relances) + webhooks ; vérif feature par feature.
-- ✅ `v2/` échafaudé (100 dossiers + châssis Supabase/auth), **installe et build vert** (client + SSR).
+- ✅ `v2-tanstack/` échafaudé (100 dossiers + châssis Supabase/auth), **installe et build vert** (client + SSR).
 
 ## Cadrage (A)
 - **A1** : 3 espaces **avant go-live**, ordre **gestionnaire → copropriétaire → conseil** ; sécurité 3-rôles figée dès le départ.
@@ -34,7 +34,7 @@
 ## Châssis & technique (B) — grilling 2026-06-23
 - **B1 — Versions = ÉPINGLAGE EXACT complet** : retirer les `^` sur toute la chaîne critique (cœur TanStack déjà figé + **Vite, TypeScript, react-query, vitest, React**) ; `npm ci` en CI ; MAJ par **lots manuels validés par le golden**. *(Constat POC : cœur TanStack épinglé ✅ mais build — Vite 8 / TS 6 / react-query / vitest — encore flottant.)*
 - **B2 — Couche data = react-query PARTOUT + loaders TanStack Start** : **un seul pattern** (décision #7), natif au framework ; **0 `useAsyncData` copié** de v1. *(POC quasi vierge côté data → liberté totale.)*
-- **B3 — Auth = MIDDLEWARE GLOBAL deny-by-default** (liste blanche, refuse tout sauf login/vitrine), validation serveur `getUser()`. Les `beforeLoad` restent pour le **confort UI**, pas la sécurité. Ferme la faille **0085**. *(TODO déjà inscrit dans `v2/src/routes/_app/route.tsx`.)*
+- **B3 — Auth = MIDDLEWARE GLOBAL deny-by-default** (liste blanche, refuse tout sauf login/vitrine), validation serveur `getUser()`. Les `beforeLoad` restent pour le **confort UI**, pas la sécurité. Ferme la faille **0085**. *(TODO déjà inscrit dans `v2-tanstack/src/routes/_app/route.tsx`.)*
 - **B4 — Critère de démarrage du châssis = 3 tests e2e BLOQUANTS** : (1) anonyme sur **toutes** les routes protégées → redirige login, 0 contenu ; (2) route bidon **sans garde** → anonyme redirigé quand même (preuve middleware) ; (3) RLS : vrai user > 0, faux user 0. **Rouge → on ne migre rien.**
 - **B5 — RLS ON + FORCE** sur les tables sensibles **dès la baseline v2** *(constat live : 82/87 en ON SANS force)* **+ 2ᵉ cabinet de test PERMANENT** (étanchéité prouvée en réel) **+ fermer la faille `platform_admin`** (E1) avant tout vrai 2ᵉ tenant.
 - **B6 — Hébergeur = REPORTÉ, build PORTABLE** (Docker/Node, 0 lock-in Vercel). **Supabase = backend dans TOUS les cas** (la DB, pas l'hébergeur du front). Vercel pour les aperçus pendant la reconstruction ; **VPS OVH dédié = candidat cible** à trancher **avant les vrais clients**. **Souveraineté réelle = région EU du projet Supabase** (pas Vercel/OVH). *(Docker ≠ Supabase : Docker = emballage standard universel.)*
