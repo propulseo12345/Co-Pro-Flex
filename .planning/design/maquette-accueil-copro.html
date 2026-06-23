@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoProFlex — Accueil copro (maquette v2 manager-first)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Fonds */
+    --bg:#0f1117; --bg-2:#131620; --surface:#1a1d2e; --surface-hover:#252b3b; --topbar:#161822;
+    /* Texte */
+    --t-main:#e2e8f0; --t-sec:#94a3b8; --t-ter:#64748b; --t-muted:#475569;
+    /* Sémantique */
+    --primary:#3b82f6; --primary-h:#2563eb; --secondary:#60a5fa;
+    --success:#22c55e; --danger:#ef4444; --warning:#f59e0b;
+    /* Badges */
+    --bd-success-bg:rgba(34,197,94,.1); --bd-success:#4ade80;
+    --bd-danger-bg:rgba(239,68,68,.1); --bd-danger:#f87171;
+    --bd-warning-bg:rgba(245,158,11,.1); --bd-warning:#fbbf24;
+    --bd-info-bg:rgba(59,130,246,.1); --bd-info:#60a5fa;
+    --bd-neutral-bg:rgba(148,163,184,.1); --bd-neutral:#94a3b8;
+    /* Borders */
+    --border:rgba(148,163,184,.08); --border-light:rgba(148,163,184,.04); --border-dark:rgba(148,163,184,.12);
+    --mono:'JetBrains Mono','SF Mono','Fira Code',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg); color:var(--t-main);
+    font-size:13px; line-height:1.45; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:rgba(59,130,246,.3)}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:4px}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---------- Shell ---------- */
+  .app{display:grid;grid-template-columns:244px 1fr;min-height:100vh}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    background:var(--bg-2); border-right:1px solid var(--border);
+    display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 10px 22px}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#7c3aed);
+    display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px}
+  .brand-name{font-weight:700;font-size:15px;letter-spacing:-.2px}
+  .brand-name small{display:block;font-size:10px;font-weight:500;color:var(--t-ter);letter-spacing:.3px}
+  .nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t-muted);padding:14px 12px 6px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;color:var(--t-sec);
+    font-weight:500;font-size:13px;transition:background .12s,color .12s;position:relative}
+  .nav-item svg{width:17px;height:17px;flex:none;stroke-width:1.7}
+  .nav-item:hover{background:var(--surface-hover);color:var(--t-main)}
+  .nav-item.active{background:rgba(59,130,246,.12);color:#fff}
+  .nav-item.active::before{content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+    width:3px;height:18px;border-radius:0 3px 3px 0;background:var(--primary)}
+  .nav-badge{margin-left:auto;font-size:10px;font-weight:600;background:var(--bd-danger-bg);color:var(--bd-danger);
+    padding:1px 7px;border-radius:9999px}
+  .nav-spacer{flex:1}
+  .nav-foot{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}
+
+  /* ---------- Topbar ---------- */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{position:sticky;top:0;z-index:5;background:var(--topbar);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:18px;padding:12px 28px}
+  .back{display:flex;align-items:center;gap:5px;color:var(--t-ter);font-size:12px;font-weight:500;white-space:nowrap}
+  .back:hover{color:var(--t-sec)}
+  .copro-switch{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface)}
+  .copro-switch:hover{background:var(--surface-hover);border-color:var(--border-dark)}
+  .copro-switch .nm{font-weight:700;font-size:14px}
+  .copro-switch .sub{font-size:11px;color:var(--t-ter);font-weight:500}
+  .copro-switch .chev{color:var(--t-ter)}
+  .search{flex:1;max-width:380px;margin-left:6px;display:flex;align-items:center;gap:9px;padding:8px 13px;
+    background:var(--bg-2);border:1px solid var(--border);border-radius:8px;color:var(--t-ter)}
+  .search input{background:none;border:none;outline:none;color:var(--t-main);font-size:13px;width:100%}
+  .search input::placeholder{color:var(--t-muted)}
+  .top-actions{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .icon-btn{position:relative;width:36px;height:36px;border-radius:8px;display:grid;place-items:center;color:var(--t-sec)}
+  .icon-btn:hover{background:var(--surface-hover);color:var(--t-main)}
+  .icon-btn .dot{position:absolute;top:6px;right:6px;min-width:15px;height:15px;border-radius:9999px;background:var(--danger);
+    color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;padding:0 3px}
+  .user{display:flex;align-items:center;gap:9px}
+  .avatar{width:32px;height:32px;border-radius:9999px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+    display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff}
+  .user .un{font-size:13px;font-weight:600}
+  .user .ur{font-size:11px;color:var(--t-ter)}
+
+  /* ---------- Content ---------- */
+  .content{padding:26px 28px 48px;max-width:1240px;width:100%}
+  .page-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px}
+  .page-h h1{font-size:24px;font-weight:700;letter-spacing:-.3px}
+  .page-h p{font-size:13px;color:var(--t-sec);margin-top:3px}
+  .page-h .today{font-size:12px;color:var(--t-ter);white-space:nowrap}
+
+  /* Bandeau conformité légale (signature urgence) */
+  .legal{display:flex;align-items:center;gap:16px;padding:15px 20px;border-radius:12px;margin-bottom:22px;
+    background:linear-gradient(90deg,rgba(239,68,68,.13),rgba(239,68,68,.04));border:1px solid rgba(239,68,68,.22);
+    border-left:3px solid var(--danger)}
+  .legal .lic{width:38px;height:38px;border-radius:10px;background:var(--bd-danger-bg);color:var(--bd-danger);
+    display:grid;place-items:center;flex:none}
+  .legal .lt{flex:1;min-width:0}
+  .legal .le{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--bd-danger);margin-bottom:2px}
+  .legal .lh{font-size:14px;font-weight:600;color:var(--t-main)}
+  .legal .lh b{color:#fff}
+  .countdown{font-family:var(--mono);font-weight:600;font-size:12px;color:var(--bd-danger);background:var(--bd-danger-bg);
+    padding:4px 10px;border-radius:8px;white-space:nowrap}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;border-radius:8px;padding:9px 16px;
+    transition:transform .12s,box-shadow .12s,background .12s;white-space:nowrap}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-h);transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3)}
+  .btn-ghost{background:var(--bd-neutral-bg);color:var(--t-sec);border:1px solid var(--border)}
+  .btn-ghost:hover{background:var(--surface-hover);color:var(--t-main)}
+  .btn-sm{padding:6px 12px;font-size:12px}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;transition:transform .12s,border-color .12s}
+  .kpi:hover{transform:translateY(-1px);border-color:var(--border-dark)}
+  .kpi .kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t-ter);
+    display:flex;align-items:center;gap:6px;margin-bottom:11px}
+  .kpi .kv{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.5px}
+  .kpi .ks{font-size:12px;color:var(--t-sec);margin-top:5px}
+  .kv.good{color:var(--success)} .kv.bad{color:var(--bd-danger)}
+  .bar{height:6px;border-radius:9999px;background:rgba(148,163,184,.12);margin-top:11px;overflow:hidden}
+  .bar span{display:block;height:100%;border-radius:9999px;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+  /* KPI fonds travaux — 2 faces */
+  .kpi-2{display:flex;align-items:stretch;gap:0;margin-top:4px}
+  .kpi-2 .face{flex:1}
+  .kpi-2 .face .fl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t-ter);margin-bottom:4px}
+  .kpi-2 .face .fv{font-family:var(--mono);font-size:16px;font-weight:700}
+  .kpi-2 .divider{width:1px;background:var(--border);margin:0 14px}
+  .reco-warn{margin-top:11px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;
+    color:var(--bd-warning);background:var(--bd-warning-bg);padding:3px 9px;border-radius:8px}
+
+  /* Grid principal */
+  .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:20px;align-items:start}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+  .panel-h h2{font-size:15px;font-weight:700}
+  .panel-h .cnt{font-size:11px;font-weight:600;color:var(--t-ter)}
+  .panel-h a{font-size:12px;font-weight:500;color:var(--secondary)}
+  .panel-h a:hover{text-decoration:underline}
+
+  /* À traiter — file de travail */
+  .todo{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--border-light);transition:background .12s}
+  .todo:last-child{border-bottom:none}
+  .todo:hover{background:rgba(148,163,184,.03)}
+  .pri{width:8px;height:8px;border-radius:9999px;flex:none}
+  .pri.p1{background:var(--danger);box-shadow:0 0 0 4px rgba(239,68,68,.12)}
+  .pri.p2{background:var(--warning);box-shadow:0 0 0 4px rgba(245,158,11,.1)}
+  .pri.p3{background:var(--secondary);box-shadow:0 0 0 4px rgba(59,130,246,.1)}
+  .todo .tx{flex:1;min-width:0}
+  .todo .th{font-size:13px;font-weight:600;color:var(--t-main)}
+  .todo .tsub{font-size:11px;color:var(--t-ter);margin-top:2px}
+  .todo .amt{font-family:var(--mono);font-size:13px;font-weight:600;white-space:nowrap}
+  .todo .amt.bad{color:var(--bd-danger)}
+  .due{font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px;white-space:nowrap;font-family:var(--mono)}
+  .due.u{background:var(--bd-danger-bg);color:var(--bd-danger)}
+  .due.w{background:var(--bd-warning-bg);color:var(--bd-warning)}
+  .due.i{background:var(--bd-info-bg);color:var(--bd-info)}
+
+  /* Activité récente */
+  .act{display:flex;gap:12px;padding:13px 22px;border-bottom:1px solid var(--border-light)}
+  .act:last-child{border-bottom:none}
+  .act .ad{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .act .ad svg{width:15px;height:15px;stroke-width:1.8}
+  .ad.green{background:var(--bd-success-bg);color:var(--bd-success)}
+  .ad.blue{background:var(--bd-info-bg);color:var(--bd-info)}
+  .ad.neutral{background:var(--bd-neutral-bg);color:var(--bd-neutral)}
+  .act .al{font-size:12.5px;color:var(--t-main);font-weight:500}
+  .act .at{font-size:11px;color:var(--t-muted);margin-top:2px}
+
+  @media(max-width:1100px){
+    .app{grid-template-columns:64px 1fr}
+    .brand-name,.nav-item span,.nav-label,.nav-badge{display:none}
+    .nav-item{justify-content:center}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .grid{grid-template-columns:1fr}
+    .search{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR : 6 hubs métier -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div class="brand-name">CoProFlex<small>Cabinet Durand</small></div>
+    </div>
+
+    <div class="nav-label">Copropriété active</div>
+    <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span>Accueil</span></a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M9 7h1M9 11h1M14 7h1M14 11h1"/></svg><span>Copropriété</span></a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg><span>Assemblées</span></a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"/><path d="M16 12h.01M3 10h18"/></svg><span>Finance</span></a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2 2.1-2.1Z"/></svg><span>Maintenance</span></a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2Z"/></svg><span>Documents &amp; comm.</span></a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M5 7l14 10M19 7 5 17"/><circle cx="12" cy="12" r="9"/></svg><span>Recouvrement</span><span class="nav-badge">3</span></a>
+
+    <div class="nav-spacer"></div>
+    <div class="nav-foot">
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 14H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 8.6l-.33-.33a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 4.6h.09A2 2 0 0 1 13 4.5a1.65 1.65 0 0 0 1.4 1.5h.1A2 2 0 0 1 19.4 9a1.65 1.65 0 0 0 .33 1.82"/></svg><span>Paramètres cabinet</span></a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span>Aide</span></a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <a class="back" href="#">‹ Portefeuille</a>
+      <button class="copro-switch">
+        <div>
+          <div class="nm">Le Clos Saint-Michel</div>
+          <div class="sub">24 lots · Exercice 2026</div>
+        </div>
+        <span class="chev">▾</span>
+      </button>
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input placeholder="Rechercher un lot, un copropriétaire, une facture…">
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="dot">3</span>
+        </button>
+        <div class="user">
+          <div class="avatar">CR</div>
+          <div><div class="un">Camille Roux</div><div class="ur">Gestionnaire</div></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-h">
+        <div>
+          <h1>Bonjour Camille</h1>
+          <p>Voici ce qui demande votre attention sur Le Clos Saint-Michel.</p>
+        </div>
+        <div class="today">Mardi 23 juin 2026</div>
+      </div>
+
+      <!-- Conformité légale (priorité absolue) -->
+      <div class="legal">
+        <div class="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.3 3.1 2 17a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.1a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+        <div class="lt">
+          <div class="le">Échéance légale · Art. 64</div>
+          <div class="lh">Assemblée d'approbation des comptes à convoquer avant le <b>30/06/2026</b> (clôture du 31/12/2025).</div>
+        </div>
+        <span class="countdown">J-7</span>
+        <button class="btn btn-primary">Convoquer l'AG</button>
+      </div>
+
+      <!-- KPIs (grand livre = source unique) -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kl">Trésorerie courante</div>
+          <div class="kv good">42 350,18&nbsp;€</div>
+          <div class="ks">Compte courant 512</div>
+        </div>
+        <div class="kpi">
+          <div class="kl">Impayés</div>
+          <div class="kv bad">8 420,00&nbsp;€</div>
+          <div class="ks">3 lots concernés</div>
+        </div>
+        <div class="kpi">
+          <div class="kl">Budget réalisé</div>
+          <div class="kv">63&nbsp;%</div>
+          <div class="ks">54 180 € / 86 000 €</div>
+          <div class="bar"><span style="width:63%"></span></div>
+        </div>
+        <div class="kpi">
+          <div class="kl">Fonds travaux</div>
+          <div class="kpi-2">
+            <div class="face"><div class="fl">Réserve</div><div class="fv">48 000&nbsp;€</div></div>
+            <div class="divider"></div>
+            <div class="face"><div class="fl">En banque</div><div class="fv">45 000&nbsp;€</div></div>
+          </div>
+          <div class="reco-warn">⚠ Écart −3 000 € à vérifier</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- À TRAITER : la file de travail -->
+        <section class="panel">
+          <div class="panel-h">
+            <h2>À traiter</h2>
+            <span class="cnt">5 actions · triées par priorité</span>
+          </div>
+
+          <div class="todo">
+            <span class="pri p1"></span>
+            <div class="tx"><div class="th">3 lots en impayé depuis plus de 60 jours</div><div class="tsub">Lots 4, 11 et 18 · relance amiable possible</div></div>
+            <span class="amt bad">8 420 €</span>
+            <span class="due u">+60 j</span>
+            <button class="btn btn-ghost btn-sm">Relancer</button>
+          </div>
+          <div class="todo">
+            <span class="pri p2"></span>
+            <div class="tx"><div class="th">2 factures fournisseur à valider</div><div class="tsub">Ascensoriste Otis · Espaces verts Vertcité</div></div>
+            <span class="amt">3 240 €</span>
+            <span class="due w">à faire</span>
+            <button class="btn btn-ghost btn-sm">Vérifier</button>
+          </div>
+          <div class="todo">
+            <span class="pri p2"></span>
+            <div class="tx"><div class="th">5 mouvements bancaires à rapprocher</div><div class="tsub">Encaissements reçus, à pointer sur les appels</div></div>
+            <span class="amt">6 110 €</span>
+            <span class="due w">à faire</span>
+            <button class="btn btn-ghost btn-sm">Rapprocher</button>
+          </div>
+          <div class="todo">
+            <span class="pri p2"></span>
+            <div class="tx"><div class="th">Contrat d'entretien ascenseur à renouveler</div><div class="tsub">Otis · arrive à échéance</div></div>
+            <span class="amt mono" style="color:var(--t-sec)">15/07</span>
+            <span class="due w">J+22</span>
+            <button class="btn btn-ghost btn-sm">Renouveler</button>
+          </div>
+          <div class="todo">
+            <span class="pri p3"></span>
+            <div class="tx"><div class="th">DPE du bâtiment B bientôt expiré</div><div class="tsub">À replanifier avant décembre 2026</div></div>
+            <span class="amt mono" style="color:var(--t-sec)">12/2026</span>
+            <span class="due i">à planifier</span>
+            <button class="btn btn-ghost btn-sm">Planifier</button>
+          </div>
+        </section>
+
+        <!-- Activité récente (secondaire, discret) -->
+        <section class="panel">
+          <div class="panel-h">
+            <h2>Activité récente</h2>
+            <a href="#">Tout voir</a>
+          </div>
+          <div class="act">
+            <div class="ad green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div><div class="al">Paiement reçu — Lot 7 (M. Bernard)</div><div class="at">1 240 € · il y a 2 h</div></div>
+          </div>
+          <div class="act">
+            <div class="ad blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg></div>
+            <div><div class="al">PV de l'AG du 12/05 diffusé</div><div class="at">24 destinataires · hier</div></div>
+          </div>
+          <div class="act">
+            <div class="ad neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></div>
+            <div><div class="al">Facture saisie — Vertcité</div><div class="at">1 080 € · hier</div></div>
+          </div>
+          <div class="act">
+            <div class="ad green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div><div class="al">Appel de fonds T2 émis</div><div class="at">24 lots · 18/06</div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
