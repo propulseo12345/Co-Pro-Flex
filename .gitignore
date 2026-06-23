@@ -66,3 +66,21 @@ test-results/
 .claude/skills/
 skills-lock.json
 .planning/refs-annexes/
+
+# --- Hygiene repo (HY-3, 2026-06-23) ---
+# Scratch lourd archive SUR DISQUE mais hors git (regenerable, chantiers merges)
+.planning/_archive/2026-06-23/forms-rollout/
+.planning/_archive/2026-06-23/lint-batches/
+.planning/_archive/2026-06-23/lint-*.json
+.planning/_archive/2026-06-23/lint-*.mjs
+# Anti-recidive : artefacts de session a la racine du repo (screenshots de verif, logs, dumps)
+/*.png
+/*.jpg
+/*.log
+/tmp-*.md
+# Anti-recidive : scratch / dumps / types regeneres dans .planning
+.planning/lint-*.json
+.planning/lint-*.mjs
+.planning/*.log
+.planning/_schema_dump.sql
+.planning/supabase_types_regenerated.ts

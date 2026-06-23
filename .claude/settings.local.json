@@ -3,9 +3,14 @@
     "allow": [
       "Bash(rm -f test-ag-roles.mjs debug-ag-roles.html)",
       "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__list_tables",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(graphify:*)",
+      "Bash(C:/Users/cleme/.local/bin/graphify.exe:*)",
+      "Bash(C:/Users/cleme/.local/bin/graphify-mcp.exe:*)",
+      "Bash(C:/Users/cleme/AppData/Roaming/Python/Python314/Scripts/uv.exe tool install:*)"
     ],
     "deny": [],
     "ask": []
