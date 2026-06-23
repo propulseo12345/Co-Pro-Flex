@@ -1,0 +1,14 @@
+node_modules
+.output
+.nitro
+.tanstack
+.vite
+dist
+
+# Variables d'environnement (jamais committées)
+.env
+.env.*
+!.env.local.example
+
+# Route tree généré par TanStack Router
+src/routeTree.gen.ts
