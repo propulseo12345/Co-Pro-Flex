@@ -3,6 +3,23 @@
 Plateforme SaaS de gestion de copropriété (marché français).
 Frontend Next.js 16 + React 19 + TypeScript 5 + CSS Modules. Backend Supabase (prévu).
 
+> ⚙️ **Refonte v2 en cours** dans `v2/` (TanStack Start, from-scratch). Le `v2/` est la cible ; l'ancien front Next reste **gelé en référence**. Décisions : `.planning/REFONTE_DECISIONS_2026-06-23.md`.
+
+---
+
+## ⭐ RÈGLES v2 (refonte from-scratch) — PRIORITÉ
+
+Rappelées aussi automatiquement à chaque message (hook `UserPromptSubmit` → `.claude/hooks/rules-v2.md`). **Méthode complète = skill `methodo-coproflex`.**
+
+1. **From-scratch** : on ne **reproduit pas** l'ancien ; jamais « supprimer le code v1 » (il meurt gelé). **Corriger > copier.**
+2. **Grand livre = source unique** des chiffres ; solutionner la **cause**, **jamais maquiller** (ni « skip »/truquer un test).
+3. **Français vulgarisé** : le pourquoi avant le comment, métaphores du quotidien.
+4. **Stack réelle v2** : CSS Modules (**jamais Tailwind**) ; react-query + server functions → **RPC SQL** ; edge = cron/webhooks only.
+5. **Confirmer avant gros changement** ; petites modifs évidentes = agir.
+6. **DoD stricte** (toute feature) : tsc 0 · unit · **e2e Playwright qui PROUVE en base** · **non-régression** · lint · `/simplify` · **code review multi-agents** · vérif navigateur · PR + push. *(+ base : revue cascade + BEGIN/ROLLBACK + Advisor 0 ; + finance : audit = 0 + équilibre GL + golden inchangé.)*
+
+**Maintenance** : décision de **méthode** → mettre à jour le skill `methodo-coproflex` + `rules-v2.md` ; décision **produit** → `REFONTE_DECISIONS`.
+
 ---
 
 ## SUIVI CONTEXTE
