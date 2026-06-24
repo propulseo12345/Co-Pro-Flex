@@ -1,22 +1,22 @@
-# Session State — 2026-06-24 (audit contexte v2 + grilling cadrage)
+# Session State — 2026-06-24 (grilling cartographie : 5 écarts + bloquants transverses)
 
 ## Branch / Commit
-`refonte-v2-cadrage` @ `c5e54a7` (dirty: 6 fichiers — 4 nouveaux .planning/specs + 2 modifiés ; ménage hygiène déjà committé/poussé)
+`refonte-v2-cadrage` @ `92fc623` (dirty : REFONTE_DECISIONS + rules-v2 + methodo SKILL modifiés, HYGIENE_REPO ; non committés)
 
 ## Completed This Session
-- **Audit de contexte v2** (workflow 18 agents) : **147 trous / 18 domaines** → `AUDIT_CONTEXTE_v2_2026-06-24.json` (brut) + `CARTOGRAPHIE_CONTEXTE_v2_2026-06-24.md` (lisible, 3 parties = feuille de route de demain).
-- **Grilling cadrage** : **11 décisions** → `GRILLING_CONTEXTE_v2_2026-06-24.md` (B0 boussole « simple mais conforme » · S1-S8 structure/onboarding/multi-bâtiment · PLAN-1 minimum légal en V1 · F1 comptes bancaires · TECH-1 PDF = HTML→PDF).
-- **Glossaires v2** : spec écrite + auto-revue + audit adversarial (7 findings corrigés) → `docs/superpowers/specs/2026-06-24-glossaires-v2-design.md`. **Chantier EN PAUSE** (non committé).
+- **Grilling cartographie — Partie A + B COMPLET** (questions cliquables, effort Max) : 5 écarts (G24-1→5) + scope **syndics pros only** + bloquants transverses **T5/T6/T7/T8/T9/T10/T11** + méta-planning + **8 angles morts A.3** (G24-AM2/3/4/5/7/8 ; AM1 PDF & AM6 perf déjà tranchés).
+- Doctrine T11 (états calculés vs événementiels) reportée dans `methodo-coproflex` + `rules-v2.md`.
+- **Consigné** dans `REFONTE_DECISIONS_2026-06-23.md` → 2 salves « Grilling cartographie 2026-06-24 » (préfixe G24-).
 
 ## Next Task
-- **DEMAIN — gros grilling structuré** sur la CARTOGRAPHIE, domaine par domaine. Démarrer par les **5 écarts à recroiser** (Partie B : usufruit / personne morale / lot annexe / reprise travaux+ancienneté / signataire cabinet), puis les bloquants T1→T12.
-- Reprendre le **glossaire** (committer la spec → `writing-plans`) après le cadrage.
-- Effort conseillé : **Max** (dialogue d'expert, arbitrages métier).
+- **Partie C** : les **147 trous fins** de `CARTOGRAPHIE_CONTEXTE_v2_2026-06-24.md`, domaine par domaine (18 fiches). Gros morceau → à étaler sur plusieurs sessions.
+- **G24-T12** = action technique Phase 1 (pas un arbitrage) : tester `regularize_period` multi-clés sur le golden 6 clés AVANT toute UI.
+- **À committer** : la salve non committée (REFONTE_DECISIONS + methodo SKILL + rules-v2 + SESSION) quand le grilling sera stabilisé.
+- Effort conseillé : **Max** (dialogue d'expert).
 
 ## Blockers
 - None.
 
 ## Key Context
-- **Leçon clé** : vérifier `REFONTE_DECISIONS_2026-06-23.md` AVANT chaque question de grilling (ne pas re-trancher l'acquis — ex. PDF v2 était déjà orienté HTML→PDF, l.204/250).
-- Carte lisible = `CARTOGRAPHIE_CONTEXTE_v2_2026-06-24.md` · brut = `AUDIT_CONTEXTE_v2_2026-06-24.json` · décisions du jour = `GRILLING_CONTEXTE_v2_2026-06-24.md`.
-- `.planning/` non gitignoré → les 4 nouveaux fichiers + la spec sont **untracked** (à committer si on veut les sécuriser sur git).
+- Réf grilling : `CARTOGRAPHIE_CONTEXTE_v2_2026-06-24.md` (Partie A = bloquants, B = écarts, C = 147 trous). Toujours vérifier `REFONTE_DECISIONS` avant de re-trancher un acquis.
+- Penser à committer la salve (decisions + skill + rules) quand le grilling sera stabilisé.
