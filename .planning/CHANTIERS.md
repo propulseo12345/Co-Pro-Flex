@@ -36,6 +36,7 @@
 - **Chart** : ajouter le compte `718` « Produits exceptionnels » (absent du seed) + vérifier `677` (dans la règle `charge_nature` 0059 mais absent du seed). *(C.7-P5, 2026-06-24)*
 - **Annexe 6** : implémenter la liste individualisée des copropriétaires au format légal 7 colonnes. *(C.7-P1, 2026-06-24)*
 - **RPC à créer** : `record_legal_proceeding` (table `legal_proceedings` sans fonction d'écriture). *(C.5-P3)*
+- **GED unifiée** : inventorier TOUS les générateurs de documents + toute table parallèle (au-delà de `ag_documents`) → router via un helper unique `register_generated_document` ; `documents` = référentiel unique ; `ag_documents.document_id` → NOT NULL. *(C.10-P2, 2026-06-24)*
 - **Mémoire** : `MEMORY.md` dépasse la limite (25,1 KB > 24,4 KB) → compacter (1 ligne/entrée, fusionner/élaguer les entrées périmées). *(2026-06-24)*
 
 ### Drifts repérés par l'enrichissement glossaire (ultracode, 2026-06-24)
