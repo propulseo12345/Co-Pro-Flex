@@ -491,3 +491,15 @@
 - **P1 (sous-rôles cabinet + périmètre gestionnaire)** → couvert par **G24-C16-2** (rôle `admin_cabinet` + `responsible_manager_id` + affectation gestionnaire↔copros ; RLS fine P1).
 - **P2 (identité multi-copro du compte)** → couvert par **G24-C15** (1 compte auth/personne + 1 membership/copro + switcher D66).
 - **P3 (éligibilité CS / incompatibilité syndic-CS)** → couvert par **G24-C13-1** (liste copros + ajout de noms ; incompatibilités fines P1).
+
+### C.4 — Budget & appels (lot G24-C4-P)
+
+- **P1 (avance de trésorerie / fonds de roulement art.35).** (1) Dépassement du **plafond légal de 1/6 du budget** (art.35-1) = **avertissement non bloquant** (l'app signale, n'empêche pas). (2) **Restitution de l'avance au vendeur = P1** (l'avance suit le lot pour l'instant, comme l'ALUR). *Fond. : art.35 / 35-1 loi 65-557.*
+- **P2 (révision vs régularisation de budget).** **Régularisation de fin d'exercice = INDISPENSABLE en V1** (comparer charges réelles vs provisions appelées, ajuster chaque compte — cœur légal art.14-1). **Révision / budget rectificatif en cours d'année = P1** (plus rare). Ne pas fusionner les deux logiques (ni avec l'affectation du résultat). *Fond. : art.14-1 loi 65-557.*
+
+### C.5 — Recouvrement / impayés (lot G24-C5-P)
+
+- **P1 (reclassement en créance douteuse 459).** Action **manuelle** « reclasser en créance douteuse » (déplace 450→459, simple présentation, montant inchangé), **motif obligatoire**, **non bloquante**, ancrée aux stades de recouvrement avancés (jugement/risque avéré). Intégrée à la boîte à outils de correction (E4-q, 5ᵉ voie). *Fond. : art.5 décret 2005-240, compte 459.*
+- **P2 (frais de recouvrement art.10-1).** Imputés au débiteur sur un **sous-compte dédié (450-6), séparé de ses charges** (hors file d'imputation FIFO) ; contrepartie **produit dédié (714)** ; **fonction comptable atomique avec motif** ; **barème configurable par cabinet**. *Fond. : art.10-1 loi 65-557.*
+- **P3 (procédure judiciaire) — fonction à CRÉER.** État réel vérifié : table `legal_proceedings` riche (court, lawyer, debtor_owner_id, nature, status, amount_at_stake…) mais **aucune fonction d'écriture** (seul `tr_legal_copro_consistency`). **Créer `record_legal_proceeding`** (fonction serveur gardée, doctrine G24-T11) pour les stades judiciaires ; stades amiables déduits des relances ; frais huissier/avocat = sortie de trésorerie puis refacturés (route art.10-1) ; passage au contentieux = geste manuel après MED, **sans effet comptable**. *Fond. : G24-T11, art.10-1.*
+- **P4 (grain de relance en indivision).** **Relance amiable → au seul contact principal (mandataire)** ; **mise en demeure → à CHAQUE coïndivisaire tenu de la dette** (sinon inopposable à ceux qui ne l'ont pas reçue). *Fond. : solidarité art.815-17 CC.*
