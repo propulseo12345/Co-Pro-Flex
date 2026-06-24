@@ -13,8 +13,12 @@
    • Si FINANCE/GL : audit_finance_integrity = 0 · équilibre GL · golden inchangé (parité résultat).
    • Boucle autonome (nuit) : jamais skip/désactiver/truquer un test (sinon ROUGE + signal) · LIMITE de tentatives par point puis on passe · « code faux » = corrige+reboucle / « attendu ambigu/comptable » = STOP + question à Lyes · compte-rendu au réveil.
 
+7. GLOSSAIRES (vocabulaire canonique) : avant de nommer un concept, lire CONTEXT.md (métier+compta) et docs/claude/glossaire-technique.md (technique). Si tu croises OU renommes un terme ambigu → ajoute-le (ou tranche son `_Avoid_`) dans le bon glossaire, DANS LA MÊME PR — règle TRANSVERSE, y compris aux PR de rename/typo (l'exemption « rename pur » ne s'y applique pas).
+
 🔧 MAINTENANCE (ne rien laisser se périmer) :
    • Décision de MÉTHODE (nouvelle règle de travail) → mettre à jour le skill methodo-coproflex ET ce fichier rules-v2.md.
    • Décision PRODUIT/MÉTIER → la consigner au fil dans .planning/REFONTE_DECISIONS_2026-06-23.md.
+   • TERME métier/technique ambigu croisé ou renommé → CONTEXT.md / glossaire-technique.md (même PR).
+   • CHANTIERS : tenir à jour .planning/CHANTIERS.md (registre des chantiers, statuts) — le consulter au début de session, ne jamais laisser un « design validé » ou « parké » sans prochaine action.
 
 💾 SAUVEGARDE : consigner les décisions au fil ; avant une compaction de contexte ou en fin de session → point dans .planning/SESSION.md + proposer /token-saver save (ne rien perdre).

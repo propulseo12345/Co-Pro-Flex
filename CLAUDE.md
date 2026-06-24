@@ -114,6 +114,8 @@ src/
 
 ## DÉTAILS (imports automatiques)
 
+@CONTEXT.md
+@docs/claude/glossaire-technique.md
 @docs/claude/conventions.md
 @docs/claude/business-rules.md
 @docs/claude/modules.md
