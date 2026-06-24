@@ -370,7 +370,16 @@
 
 - **G24-C8-4 (feuille de présence) — les 3 règles en V1.** Données déjà présentes (`ag_attendance` : `signed`/`signature_data`/`arrived_at`/`left_at`/`tantiemes`/proxy). V1 = (1) **feuille émargée + certifiée par le président = annexe obligatoire du PV** (art.14 décret) ; (2) **`left_at` bloque les votes postérieurs au départ** (sauf pouvoir donné avant de partir) ; (3) **asymétrie indivision conservée** (présence via mandataire unique, vote sur quote-part réelle, jamais ventilé par tête — cohérent G24-2). *Fond. : décret 67-223 art.14 ; G24-2 (indivision).*
 
-> **Domaine C.8 (AG) = CADRÉ** : G24-C8-1 (hors V1/V2), G24-C8-2, G24-C8-3, G24-C8-4. Les 7 PARTIAL C.8 (dénominateur art.24, clé spéciale, opposabilité pièces, PV, mandats art.22, seconde lecture, éligibilité CS) restent à confirmer en lot PARTIAL.
+**PARTIAL C.8 confirmés (lot G24-C8-P, 2026-06-24) :**
+- **P1 (calcul majorité art.24) — ACTION.** Auditer le moteur de calcul du « c'est voté » sur le golden : doit exiger **OUI ≥ plus de la moitié des voix présentes** (présents/représentés), **jamais** un simple `pour > contre`. Corriger si dérive. Point le plus grave (validité de chaque AG).
+- **P2 (orchestration 2ᵉ lecture) — assistée.** Le système propose le second vote immédiat (passerelle ≥1/3, art.25-1/26-1), **le président déclenche**, même séance.
+- **P3 (vote ciblé / clé spéciale art.24 II) — oui.** Une résolution ne concernant qu'un groupe se vote **sur la clé de répartition liée** à la résolution ; majorité/quorum calculés sur cette clé ; un copro hors-clé ne peut pas voter cette résolution.
+- **P4 (pièces obligatoires de convocation) — AVERTISSEMENT non bloquant (USER).** L'app **n'empêche pas** la convocation mais **avertit avec la liste des documents manquants** (devis des travaux votés, 5 annexes comptables). *(Override de la position « bloquant » du triage ; risque de nullité assumé, l'avertissement doit être visible.)*
+- **P5 (PV) — 3 règles + ajouts USER.** PV généré depuis les données (opposants/absents nommés) ; **signé** seulement après signature du **bureau, scrutateur(s) inclus** si élu(s) ; envoi tracé (départ du délai 2 mois). **UX : bouton « secrétaire = le gestionnaire »** qui pré-remplit ses infos en 1 clic.
+- **P6 (pouvoirs art.22) — loi stricte, non bloquant.** Avertir seulement si **plus de 3 pouvoirs ET total des voix > 10 %** (≤3 toujours OK) ; **jamais bloquant**, proposer de **répartir les pouvoirs sur d'autres personnes**.
+- **P7 (éligibilité CS à l'élection) — déjà tranché** par G24-C13-1.
+
+> **Domaine C.8 (AG) = ENTIÈREMENT CADRÉ** (OPEN G24-C8-1..4 + PARTIAL G24-C8-P).
 
 ### Salve 5 — OPEN importants Partie C : C.5 Recouvrement / impayés (2026-06-24)
 
@@ -457,3 +466,28 @@
 - **G24-C11-1 (notifications in-app / cloche) — table dédiée V1, temps réel P1.** Vraie table **`notifications` générique** dès la V1 (1 événement → **0..N notifs + 0..1 email**), **distincte du canal email**, alimentée par l'auto-population existante (D31/D32/D69/D70). Distinction actée : **worklist = « quoi faire »** ≠ **notification = « on m'a informé de X »** (X peut ne demander aucune action) → ne pas confondre. **Temps réel (push instantané) = P1** (V1 = rafraîchissement normal). *Fond. : besoin produit ; auto-population D31/D32/D69/D70.*
 
 > **🎉 LES 30 TROUS OPEN DE LA PARTIE C SONT CADRÉS.** Salves 3→12. Récap : 6 critiques (C1/C6/C9/C14-RGPD/C14-FS/C15) + C.8 (×4) + C.5 (×3) + C.12 (×2) + C.4 (×2) + C.7 (×2) + C.10 (×3) + C.13 (×2) + C.16 (×2) + C.11 (×1). **Reste : les 83 PARTIAL** (souvent de simples confirmations), à balayer par lots.
+
+---
+
+## PARTIAL Partie C — confirmations par domaine (2026-06-24)
+
+> Lot des résiduels PARTIAL, validés un par un. C.8-P déjà consigné dans la Salve 4. Préfixe **G24-C\<n\>-P**.
+
+### C.1 — Onboarding & reprise de mandat (lot G24-C1-P)
+
+- **P1 (écriture d'ouverture) — corrigé.** (1) solde de chaque copropriétaire sur son compte perso (450) ; (2) tiroir « report » (478 courant / 12 travaux) **UNIQUEMENT pour un dernier exercice clôturé mais pas encore approuvé en AG** (un exercice approuvé a déjà son résultat réparti sur les 450) ; (3) comptes d'attente (471/472) = tampon pour sommes non rattachables (paiement non identifié, transfert flou), **devant tendre vers zéro, jamais un fourre-tout**.
+- **P2 (fonds ALUR) — part par lot dès la reprise.** Capter la ventilation du fonds travaux ALUR **par lot** dès la reprise (nécessaire pour l'état daté) ; UI d'édition fine = P1 ; repli = total global + note par lot.
+- **P3 (immatriculation RNIC) — jamais bloquant + tâche de conformité.** Jamais de blocage du démarrage ; tâche « renseigner le RNIC » visible tant qu'il manque (très fortement demandée en reprise, simple rappel en création). *(Affine la position « obligatoire en reprise » du triage.)*
+- **P4 (factures fournisseurs) — reprises individuellement** (réglables/pointables une à une), jamais un 401 global.
+- **P5 (minimum pour démarrer).** Minimum = **clé générale renseignée** (tantièmes/lot) + ≥1 lot + ≥1 propriétaire/lot + ≥1 compte bancaire ; clés spéciales optionnelles. **Bloquant DUR seulement si écriture comptable impossible** (ex. clé générale absente) ; lot à 0 sur la clé générale = **avertissement** ; lot à 0 sur une clé spéciale = **normal**.
+- **P6 (date d'effet + comparatif N-1) — précisé (USER).** Deux modes de date d'effet (1er jour d'exercice OU en cours d'année avec charges courues). En reprise, **importer les VRAIS totaux par poste de l'exercice précédent** (comptes approuvés **dus par l'ancien syndic, art.18-2**) pour un comparatif N-1 réel ; détail complet = **PDF en GED** (G24-AM5). « Pas de comparatif » = exception (copro neuve ou non-transmission). **Jamais de faux chiffres.**
+
+### C.2 — Structure (lot G24-C2-P)
+
+- **P1 (mutation en indivision / démembrement) — option A.** À la **vente**, l'écran accepte directement **N acheteurs** (parts = 100 %, un contact principal/mandataire art.23) + repère démembrement, en **réutilisant le moteur d'indivision existant** (D8/G24-2). Couvre les couples sans étape supplémentaire ; **cérémonie de vente guidée pas à pas = V1+**. *Fond. : art.23 loi 65-557.*
+
+### C.3 — Personnes & rôles (lot G24-C3-P) — COUVERT par décisions antérieures
+
+- **P1 (sous-rôles cabinet + périmètre gestionnaire)** → couvert par **G24-C16-2** (rôle `admin_cabinet` + `responsible_manager_id` + affectation gestionnaire↔copros ; RLS fine P1).
+- **P2 (identité multi-copro du compte)** → couvert par **G24-C15** (1 compte auth/personne + 1 membership/copro + switcher D66).
+- **P3 (éligibilité CS / incompatibilité syndic-CS)** → couvert par **G24-C13-1** (liste copros + ajout de noms ; incompatibilités fines P1).
