@@ -1,22 +1,23 @@
-# Session State — 2026-06-24 (Partie C : 30 trous OPEN cadrés)
+# Session State — 2026-06-24 (Partie C : 30 OPEN + 23 PARTIAL cadrés)
 
 ## Branch / Commit
-`refonte-v2-cadrage` (commit en cours). **Non poussé.**
+`refonte-v2-cadrage` @ `edc6e6d` — **poussé** sur origin (à jour). Seul `HYGIENE_REPO_2026-06-23.md` reste dirty (modif antérieure, hors session).
 
 ## Completed This Session
-- **Grilling des 30 trous OPEN de la Partie C = TOUS CADRÉS** (skill `methodo-coproflex` + grill, une question à la fois). Consignés dans `REFONTE_DECISIONS_2026-06-23.md`, **Salves 3→12**, préfixes `G24-C<n>` :
-  - 6 critiques (C1 reprise chantier, C6 mvt bancaire sans facture, C9 mise en concurrence, C14-RGPD, C14-FS, C15 invitations portail) + C.8 AG (×4) + C.5 Recouvrement (×3) + C.12 Ventes (×2) + C.4 Budget (×2) + C.7 Clôture (×2) + C.10 GED (×3) + C.13 CS (×2) + C.16 Cabinet (×2) + C.11 Comm (×1).
-- **Vérif base réelle systématique** (MCP Supabase) → corrections actées : 627=frais AG, agios=662, produits financiers=716, 624/706 existent, GED/invitations/`ag_votes.is_excluded` déjà modélisés.
+- **30 trous OPEN Partie C = TOUS CADRÉS** (Salves 3→12, préfixes `G24-C<n>`). Commits `d9cdc76`.
+- **23 PARTIAL confirmés** (un par un, vulgarisés) : C.8 (7, lot G24-C8-P), C.1 (6, G24-C1-P), C.2 (1), C.3 (3 = couverts par G24-C16-2/C15/C13-1), C.4 (2), C.5 (4). Commits `0d11146`, `edc6e6d`.
+- Méthode : skill `methodo-coproflex` + grilling, UNE question à la fois, vérif base réelle (MCP Supabase) avant chaque position.
 
 ## Next Task
-- **Balayer les 83 PARTIAL** de `TRIAGE_PARTIE_C_2026-06-24.md` (§🟠) par lots — souvent de simples confirmations, plus rapide.
-- Aussi en attente : **G24-T12** (action technique Phase 1 : tester `regularize_period` multi-clés sur golden 6 clés AVANT toute UI).
-- Effort conseillé : `Max` (dialogue d'expert ; passer `ultracode` pour une revue adversariale au moment des migrations).
+- **Reprendre les PARTIAL restants (~60)** dans `TRIAGE_PARTIE_C_2026-06-24.md` (§🟠), domaine par domaine, dans l'ordre : **C.6** (5), puis C.7 (5), C.9, C.10 (4), C.11 (6), C.12 (6), C.13 (5), C.14 (5), C.15, C.16, C.17 (8).
+- Cadence validée : tableau « point résiduel → ma position » vulgarisé + `AskUserQuestion` (valider / à discuter), une question à la fois.
+- Aussi en attente : **G24-T12** (action Phase 1 : tester `regularize_period` multi-clés sur golden 6 clés AVANT toute UI).
+- Effort conseillé : `Max`.
 
 ## Blockers
 - None.
 
 ## Key Context
-- Référentiel décisions = `REFONTE_DECISIONS_2026-06-23.md` (Salves 3→12 = Partie C OPEN). Triage source = `TRIAGE_PARTIE_C_2026-06-24.md`. Vérifier ce référentiel avant de re-trancher.
-- Gouvernance : Claude applique les migrations sur le live (qqfqrcolzmcbsvfaumiq), tests branche jetable. `HYGIENE_REPO_2026-06-23.md` reste dirty (modif antérieure, hors session).
-- Pousser la branche (`gh auth switch lyestriki-29`) pour sécuriser sur GitHub.
+- Référentiel = `REFONTE_DECISIONS_2026-06-23.md` (Salves 3→12 = OPEN ; section « PARTIAL Partie C » = résiduels). Vérifier avant de re-trancher.
+- Action à créer repérée au passage : RPC `record_legal_proceeding` (C.5-P3, table `legal_proceedings` existe sans fonction d'écriture).
+- Push via `gh auth switch lyestriki-29`. Gouvernance : Claude applique les migrations sur le live (qqfqrcolzmcbsvfaumiq), tests branche jetable.
