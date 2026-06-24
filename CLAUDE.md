@@ -112,10 +112,16 @@ src/
 
 ---
 
+## GLOSSAIRES (lecture à la demande — NON auto-importés)
+
+Vocabulaire canonique du projet, à **consulter AVANT de nommer/renommer un concept** (règle déjà réinjectée à chaque message) :
+- `CONTEXT.md` (racine) — glossaire **métier + comptabilité**.
+- `docs/claude/glossaire-technique.md` — glossaire **technique** (jargon projet).
+
+Volontairement **non importés** ici (référentiels volumineux) pour ne pas alourdir chaque session — on les lit au besoin.
+
 ## DÉTAILS (imports automatiques)
 
-@CONTEXT.md
-@docs/claude/glossaire-technique.md
 @docs/claude/conventions.md
 @docs/claude/business-rules.md
 @docs/claude/modules.md
