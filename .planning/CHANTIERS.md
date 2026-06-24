@@ -20,7 +20,7 @@
 |---|---|---|---|---|
 | **Grilling cadrage PARTIE C** (PARTIAL résiduels) | 🚧 En cours | 2026-06-24 : C.6 ✅, C.7 ✅, C.9 en cours (P1-P3 faits) | Finir C.9 (P4 Chatel, P5 statuts OS) puis C.10→C.17 + PARTIAL restants | `TRIAGE_PARTIE_C_2026-06-24.md` · `REFONTE_DECISIONS_2026-06-23.md` |
 | **GLOSS- Glossaires v2 — phase 1 (socle)** | 🚧 Commité, à pousser | 2026-06-24 : `CONTEXT.md` + `glossaire-technique.md` + câblage commités (`9d93046`) | **push** (`gh auth switch lyestriki-29`) | `docs/superpowers/specs/2026-06-24-glossaires-v2-design.md` |
-| **GLOSS- phase 2 — enrichissement a posteriori** | ✅ Livré (à committer) | 2026-06-24 : workflow 41 agents, 230 termes vérifiés → +42 métier / +41 technique, condensés ; auto-import retiré (lecture à la demande) | committer | spec §5 ; output `w7oi1i5l8` |
+| **GLOSS- phase 2 — enrichissement a posteriori** | ✅ Livré, à pousser | 2026-06-24 : workflow 41 agents, 230 termes vérifiés → +42 métier / +41 technique, condensés (commit `eeeb360`) ; auto-import retiré | **push** | spec §5 ; output `w7oi1i5l8` |
 | **Anti-fragmentation du code** (modules profonds, deletion test) | 💡 Idée | 2026-06-24 : noté hors-scope du glossaire | brainstorming → spec dédiée | spec glossaire §8.1 |
 | **Capitaliser les 5 principes de conception** dans `methodo-coproflex` | 💡 Idée | 2026-06-24 : noté hors-scope du glossaire | brainstorming → spec dédiée | spec glossaire §8.2 |
 | **Golden exhaustif « Domaine des Tilleuls »** (tests) | 📐 Design validé | grilling 2026-06-22 : plan + valeurs attendues | EN ATTENTE GO USER pour dérouler | `.planning/tests/PLAN_GOLDEN_EXHAUSTIF.md` |
