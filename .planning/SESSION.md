@@ -1,22 +1,22 @@
-# Session State — 2026-06-24 (grilling cartographie A+B soldé + triage Partie C)
+# Session State — 2026-06-24 (Partie C : 30 trous OPEN cadrés)
 
 ## Branch / Commit
-`refonte-v2-cadrage` @ `006228d` (dirty : seul HYGIENE_REPO_2026-06-23.md, modif antérieure non issue de cette session). **Non poussé.**
+`refonte-v2-cadrage` (commit en cours). **Non poussé.**
 
 ## Completed This Session
-- **Grilling cartographie Partie A + B COMPLET** (cliquable, Max) : 5 écarts (G24-1..5) + **scope syndics pros only** + bloquants T5-T12, T9 + 8 angles morts (G24-AM2..AM8). Consigné dans `REFONTE_DECISIONS` (préfixe G24-), commit `e1accac`. Doctrine T11 dans `rules-v2.md` (`006228d`) + skill `methodo-coproflex` (local, gitignoré).
-- **Triage multi-agents Partie C** (workflow, 18 agents) → `TRIAGE_PARTIE_C_2026-06-24.md` : 146 trous = **33 COVERED / 83 PARTIAL / 30 OPEN** (dont **6 critiques**).
+- **Grilling des 30 trous OPEN de la Partie C = TOUS CADRÉS** (skill `methodo-coproflex` + grill, une question à la fois). Consignés dans `REFONTE_DECISIONS_2026-06-23.md`, **Salves 3→12**, préfixes `G24-C<n>` :
+  - 6 critiques (C1 reprise chantier, C6 mvt bancaire sans facture, C9 mise en concurrence, C14-RGPD, C14-FS, C15 invitations portail) + C.8 AG (×4) + C.5 Recouvrement (×3) + C.12 Ventes (×2) + C.4 Budget (×2) + C.7 Clôture (×2) + C.10 GED (×3) + C.13 CS (×2) + C.16 Cabinet (×2) + C.11 Comm (×1).
+- **Vérif base réelle systématique** (MCP Supabase) → corrections actées : 627=frais AG, agios=662, produits financiers=716, 624/706 existent, GED/invitations/`ag_votes.is_excluded` déjà modélisés.
 
-## Next Task — DEMAIN
-- **Griller les 6 trous CRITIQUES OPEN** (voir TRIAGE §🔴) : C.1 reprise chantier en cours (102/1032/operation_id) · C.6 mouvements bancaires sans facture (3e voie) · C.9 mise en concurrence RFQ · C.14 socle RGPD · C.14 fiche synthétique copro · C.15 flux invitations portail.
-- Puis les **24 OPEN importants** (surtout C.8 AG, C.12 Ventes, C.5 Recouvrement), puis balayer les **83 PARTIAL** par lots (souvent de simples confirmations).
-- **G24-T12** = action technique Phase 1 : tester `regularize_period` multi-clés sur golden 6 clés AVANT toute UI.
-- Effort conseillé : **Max** (dialogue d'expert).
+## Next Task
+- **Balayer les 83 PARTIAL** de `TRIAGE_PARTIE_C_2026-06-24.md` (§🟠) par lots — souvent de simples confirmations, plus rapide.
+- Aussi en attente : **G24-T12** (action technique Phase 1 : tester `regularize_period` multi-clés sur golden 6 clés AVANT toute UI).
+- Effort conseillé : `Max` (dialogue d'expert ; passer `ultracode` pour une revue adversariale au moment des migrations).
 
 ## Blockers
 - None.
 
 ## Key Context
-- Rapport de triage = `TRIAGE_PARTIE_C_2026-06-24.md` (§OPEN = à griller, §PARTIAL = résiduels, §COVERED = décompte). Cartographie source = `CARTOGRAPHIE_CONTEXTE_v2_2026-06-24.md`.
-- Vérifier `REFONTE_DECISIONS_2026-06-23.md` (G24-* + D/E/S) avant de re-trancher un acquis.
-- **À faire** : pousser la branche (`gh auth switch lyestriki-29`) si on veut sécuriser sur GitHub.
+- Référentiel décisions = `REFONTE_DECISIONS_2026-06-23.md` (Salves 3→12 = Partie C OPEN). Triage source = `TRIAGE_PARTIE_C_2026-06-24.md`. Vérifier ce référentiel avant de re-trancher.
+- Gouvernance : Claude applique les migrations sur le live (qqfqrcolzmcbsvfaumiq), tests branche jetable. `HYGIENE_REPO_2026-06-23.md` reste dirty (modif antérieure, hors session).
+- Pousser la branche (`gh auth switch lyestriki-29`) pour sécuriser sur GitHub.

@@ -302,3 +302,158 @@
 - **Déjà tranchés (rappel)** : AM1 stratégie PDF = **TECH-1 HTML→PDF** ; AM6 perf des vues GL = **différée** (cf. G24-T5).
 
 > **Scope de haut niveau du grilling cartographie = COMPLET** (Partie A + B). Reste pour de prochaines sessions : les **147 trous fins de la Partie C** (18 domaines), domaine par domaine.
+
+### Salve 3 — trous critiques Partie C (2026-06-24)
+
+> Grilling des 6 trous **🔴 OPEN critiques** du `TRIAGE_PARTIE_C_2026-06-24.md`. Préfixe **G24-C\<n\>** (n = numéro de domaine C), sans collision avec G24-1..5 / G24-AM* / G24-T*.
+
+- **G24-C1 (reprise d'un chantier de travaux en cours — face comptable ; complète G24-AM5)** : à la reprise d'un mandat avec chantier voté non clôturé, une étape **« Travaux en cours »** :
+  - **crée une vraie OPÉRATION** (`operation_id`) par chantier repris → indispensable pour **annexe 5** (en cours), **annexe 4** (à la clôture) et `settle_works_balance` ; sans opération ces annexes sont impossibles à produire ;
+  - **réalisé = solde net obligatoire** (voté / déjà dépensé / reste), **détail par marché-entreprise optionnel et progressif** ; on ne rejoue **jamais** l'historique d'écritures du prédécesseur ;
+  - **102 (provision art.14-2 I) + 1032 (avance art.18) = 1 champ principal + 1 optionnel** (en pratique un seul mobilisé), rattachés à l'`operation_id`, jamais en fourre-tout ;
+  - **repli = AVERTISSEMENT NON BLOQUANT** : sans le détail, soldes 102/1032 en **comptes globaux** (chemin par défaut) + avertissement « chantier en cours non détaillé → annexes 4/5 incomplètes » ; découpage en opérations plus tard ; jamais bloquant, jamais noyé dans « autres comptes » ;
+  - **saisie = écran guidé (chemin principal, données reçues en PDF/papier)** + **gabarit Excel « travaux en cours » optionnel** ré-importable (1 ligne = 1 opération : libellé, AG, voté, réalisé, 102, 1032) — l'Excel n'est **pas** le chemin principal (le confrère fournit surtout du PDF/papier) ;
+  - **invariant de contrôle** : Σ(102 affecté aux opérations) ≤ solde 102 global importé ; reliquat non ventilé reste en global + avertissement maintenu.
+  *Fond. : décret art.14-2 I (provision travaux décidés), art.18 loi 65-557 (avances), annexes 4/5 arrêté 14/03/2005. S'appuie sur le socle `operation_id` (E4) ; complète G24-AM5 (volet extra-comptable : contrats/OS/recouvrement).*
+
+- **G24-C6 (3ᵉ voie : comptabiliser un mouvement bancaire sans facture)** : 3ᵉ action **« Comptabiliser ce mouvement »** sur la ligne de relevé, distincte du *pointage* (1ʳᵉ voie) et de la *création de paiement copro* (2ᵉ voie). Pose une **écriture équilibrée** (512x + contrepartie) via **RPC SQL atomique** puis **pointe automatiquement** la ligne ; voie qui écrit au GL → **revue adversariale**.
+  - **Défauts intelligents éditables** (le gestionnaire valide/corrige ; pas de config par cabinet en V1), mapping sur **codes réels de la base** :
+    - **Sorties** : frais de compte / commissions / **agios → 662** · échéance d'emprunt → **661** (intérêts) + **164** (capital) · impôt/taxe prélevé → **632/633/634**.
+    - **Entrées** : intérêts compte courant → **716** · subvention → **132** · indemnité d'assurance → **713** · produit divers → **714**.
+    - **Intérêts Livret A / fonds travaux → défaut SELON LE COMPTE SOURCE** : fonds travaux (502/512100) → **C 105** (l'intérêt grossit la réserve, reste dans le fonds) ; compte courant (512000) → **C 716**. **Jamais de dilution du fonds dans le courant.**
+    - **Mouvement interne** (alimentation du fonds : 512000 → 502/512100) = D/C banque, **zéro charge/produit** (traité comme transfert).
+    - **Frais de relance refacturés → HORS 3ᵉ voie** : route art.10-1 (sous-compte 450-6, cf. C.5).
+  - ⚠️ Correctifs de mémoire actés au passage (codes vérifiés en base) : **627 = Frais d'AG** (pas « services bancaires ») ; **agios = 662** ; **661 = annuités d'emprunt** uniquement ; **produits financiers = 716** (pas de 762).
+  *Fond. : décret 2005-240 art.14-3 (toute opération génère une écriture) ; plan de comptes copro (arrêté 14/03/2005) ; loi ALUR art.14-2 II (intérêts acquis au fonds travaux). Complète la doctrine bancaire existante (pointage + création de paiement).*
+
+- **G24-C9 (mise en concurrence / demande de devis — modèle OS-centré, USER)** : **pas d'entité « consultation » séparée** — l'**ordre de service est central**. À la création, le gestionnaire sélectionne **1 ou N prestataires**.
+  - **Table fille `service_order_quotes`** : 1 ligne par prestataire consulté (`tiers_id`, montant, `document_id` PDF, statut reçu/retenu/écarté, trace d'envoi qui/quand).
+  - **Devis retenu** → remonte sur l'OS (`tiers_id` + `quoted_amount`) + crée une ligne dans `commitments` (engagé, G24-T6). Les **devis écartés restent** = preuve de mise en concurrence (art. 21).
+  - **1 seul prestataire = OS direct** (pas de concurrence) ; **plusieurs = mode demande de devis + comparaison**.
+  - **Envoi facilité** : l'app **génère** la demande de devis (descriptif du travail + coordonnées/accès copro) et l'**envoie par email** (système de communication) aux prestataires cochés, avec **trace d'envoi par ligne**. Le presta répond **hors-app** → le gestionnaire saisit le montant + joint le PDF reçu. **Portail prestataire (dépôt en ligne) = P1.**
+  - `service_orders.tiers_id` = **nullable** tant qu'aucun devis n'est retenu.
+  - Alimente le **gate CS / seuils art.21 (G24-T8)** en devis comparables structurés. **Marketplace nationale (D42) = backlog.**
+  *Fond. : art.21 loi 65-557 (mise en concurrence + avis CS). S'appuie sur G24-T8 (seuils/gate) et G24-T6 (commitments) ; distinct de D42 (marketplace). État réel vérifié : `service_orders` porte déjà `estimated/quoted/actual_amount` + `tiers_id` singulier ; aucune table de devis multiples n'existait.*
+
+- **G24-C14-RGPD (socle RGPD — palier minimal V1)** :
+  - **V1** : (a) **registre des traitements** statique/pré-rempli (art.30) ; (b) **durée de conservation par catégorie de donnée** ; (c) **export « mes données »** (art.15) déclenché par le **GESTIONNAIRE pour un copropriétaire** (fichier PDF/JSON) — self-service portail = P1.
+  - **Partage des rôles** : syndic = **responsable de traitement**, CoProFlex = **sous-traitant** → **DPA art.28** (brique contractuelle à acter, hors code).
+  - **Conservation séparée (clé)** : un effacement RGPD = **pseudonymiser les coordonnées** (nom/email/tél) **en CONSERVANT les écritures comptables** (10 ans). Deux durées distinctes : données personnelles (minimisation art.5) vs écritures (obligation légale).
+  - **P1** : purge/pseudonymisation automatique à l'expiration. **Plus tard** : module DPO complet.
+  *Fond. : RGPD art.5/15/17/28/30 ; décret 2005-240 (conservation comptable). Dépasse la micro-traçabilité B7/D65-b.*
+
+- **G24-C14-FS (fiche synthétique de copropriété — hybride live + snapshot)** :
+  - **Vue live** dérivée du GL + identité, consultable à tout moment (au fil de l'eau), toujours à jour. Les ~15 rubriques (décret 2016-1822) se dérivent à ~90 % : GL (chiffres), identité, **RNIC (D65)**, **ALUR (D67)**, **impayés (vue unique G24-T5)**, lots principaux/annexes (**G24-4**). Aucune re-saisie.
+  - **Snapshot figé daté** capturé **automatiquement à chaque clôture d'exercice** (photo de la vue live) → **opposable et reproductible**, même logique que l'état daté (D33). Petite table de snapshots.
+  - **Rendu HTML→PDF** (AM1) ; annexable en cas de vente.
+  *Fond. : loi 65-557 art.8-2, décret 2016-1822 (15 rubriques). Source unique = GL.*
+
+- **G24-C15 (flux d'invitations au portail copropriétaire)** :
+  - **État réel** : `copro_invitations` (token, status, expires_at, coproprietaire_id, email) + `memberships` (user_id, copro_id, role) + `link_coproprietaire_account` (acceptation) **existent déjà** ; manquaient les RPC d'**émission**.
+  - **Identité multi-copro (confirmée par le schéma)** : **1 compte auth par personne** + **1 membership par copro** → multi-copro natif via le switcher (D66).
+  - **Cycle complet en V1** : création **unitaire + en masse** · **envoi email (Brevo, E3-q)** · **expiration auto** du token · **renvoi** · **révocation d'une invitation EN ATTENTE** · **ET révocation de l'ACCÈS d'un membre déjà inscrit** (désactivation du membership : vendeur parti / erreur).
+  - RPC à créer : `create_copro_invitation` (unitaire + masse), `resend_copro_invitation`, `revoke_copro_invitation`, désactivation de membership.
+  - **Indivision / email partagé** : inviter par défaut le **mandataire `is_primary`** (cohérent G24-2 + résiduel C.3), autres indivisaires en option.
+  *Fond. : décret 67-223 art.64-2, loi ALUR art.18 I 5° (extranet). S'appuie sur D66 (switcher), E3-q (Brevo), G24-2 (indivision). Corrige A3 : l'acceptation seule ne suffit pas, le P0 « extranet » exige le flux d'émission.*
+
+> **6 trous 🔴 CRITIQUES de la Partie C = CADRÉS** (G24-C1, G24-C6, G24-C9, G24-C14-RGPD, G24-C14-FS, G24-C15). Reste : les **24 OPEN importants** (surtout C.8 AG, C.12 Ventes, C.5 Recouvrement) puis les **83 PARTIAL** par lots.
+
+### Salve 4 — OPEN importants Partie C : C.8 Assemblées générales (2026-06-24)
+
+> État réel vérifié : le schéma AG est déjà riche. `ag_votes` porte **`is_excluded` + `exclusion_reason`** ; `ag_attendance` porte **`signed`/`signature_data`/`arrived_at`/`left_at`/`tantiemes`/proxy** ; `ag_correspondence_votes(+_details)` existent. Manquent surtout des **règles/UX** et 1-2 champs. Préfixe **G24-C8-\<n\>**.
+
+- **G24-C8-1 (seconde convocation / nouvelle AG art.25-1) — HORS V1, crochet V2.** Précision légale actée : l'art.25-1 a **deux branches** — (a) projet **≥ 1/3** des voix → **même AG, second vote immédiat** à l'art.24 (= « seconde lecture », **déjà couvert** D31, on n'y touche pas) ; (b) projet **< 1/3** → **nouvelle AG dans 3 mois** pouvant statuer à l'art.24. Seule la branche (b) était le trou. **Décision USER : hors V1** (cas rare), **à garder pour V2** : crochet = champ `re_convocation_of_ag_id` + assistant de reprise des résolutions non adoptées (bascule art.24) + alerte délai 3 mois. *Fond. : art.25-1 (et 26-1) loi 65-557.*
+
+- **G24-C8-2 (exclusion du droit de vote) — V1 minimal manuel.** Les champs **existent déjà** (`ag_votes.is_excluded` + `exclusion_reason`). V1 = surfacer une **case « exclure de ce vote » + motif obligatoire** repris au PV ; **rien d'automatique** (détection de conflit = P1). **Garde-fous légaux actés** : (1) **pas de privation de vote pour impayé** (n'existe pas en droit copro) ; (2) la « privation » art.24 II au sens « décision ne concernant que certains » = gérée par la **clé spéciale** (`repartition_key_id` sur la résolution, cf. D9 / partiel C.8), pas par un drapeau ; (3) l'exclusion sert au seul **conflit d'intérêt** (copro partie au contrat voté, syndic candidat…). Valeur = rendre l'AG inattaquable sur ce point. *Fond. : art.24 II loi 65-557 + jurisprudence.*
+
+- **G24-C8-3 (neutralisation votes correspondance sur résolution amendée, art.17-1 A) — V1 manuel.** Rappel légal : dès qu'une résolution est amendée en séance, **TOUS** les votes par correspondance sur cette résolution sont neutralisés (votant = défaillant), la loi ne distingue pas pour/contre. **Décision USER : V1 manuel** — ajout d'un flag `is_amended` (traçabilité/PV) ; quand la résolution est marquée amendée, **le gestionnaire change/neutralise lui-même** les votes des copropriétaires ayant voté par correspondance (via `is_excluded`/motif). **Rappel non bloquant** affiché (« N votes par correspondance sur cette résolution amendée ») pour éviter l'oubli. Neutralisation automatique = amélioration P1 possible. *Fond. : art.17-1 A al.3 loi 65-557.*
+
+- **G24-C8-4 (feuille de présence) — les 3 règles en V1.** Données déjà présentes (`ag_attendance` : `signed`/`signature_data`/`arrived_at`/`left_at`/`tantiemes`/proxy). V1 = (1) **feuille émargée + certifiée par le président = annexe obligatoire du PV** (art.14 décret) ; (2) **`left_at` bloque les votes postérieurs au départ** (sauf pouvoir donné avant de partir) ; (3) **asymétrie indivision conservée** (présence via mandataire unique, vote sur quote-part réelle, jamais ventilé par tête — cohérent G24-2). *Fond. : décret 67-223 art.14 ; G24-2 (indivision).*
+
+> **Domaine C.8 (AG) = CADRÉ** : G24-C8-1 (hors V1/V2), G24-C8-2, G24-C8-3, G24-C8-4. Les 7 PARTIAL C.8 (dénominateur art.24, clé spéciale, opposabilité pièces, PV, mandats art.22, seconde lecture, éligibilité CS) restent à confirmer en lot PARTIAL.
+
+### Salve 5 — OPEN importants Partie C : C.5 Recouvrement / impayés (2026-06-24)
+
+> État réel : `legal_proceedings`, `payment_reminders(+_rules)`, `reminder_settings` existent ; comptes **459/491/492** présents ; **aucune** table `payment_plan`, aucune RPC dépréciation/intérêts. Préfixe **G24-C5-\<n\>**.
+
+- **G24-C5-1 (dépréciation créances douteuses 491/492) — V1 visibilité, écriture P1.** Deux étages distincts : (1) **reclasser** la créance en **459** (déjà via E4-q) ; (2) **écriture de dépréciation** D68x/C491 (mise de côté d'une perte probable, **charge collective**). **Décision : V1 = visibilité seule** (afficher solde **459** + voyant « créance à risque »), **aucune écriture**. La dotation D68x/C491 = **P1, toujours MANUELLE** (jamais barème d'ancienneté auto ; pèse sur le budget courant). *Fond. : décret 2005-240 (prudence), comptes 49x ; prérequis = reclassement 459 (E4-q).*
+
+- **G24-C5-2 (intérêts de retard art.36 / clause pénale) — V1 = tracer la date de MED uniquement.** Règle d'or : **ne rien afficher de faux**. **Décision USER (plus sobre que la reco)** : V1 enregistre **seulement la date de mise en demeure** (point de départ légal des intérêts) ; **pas de calculateur** indicatif en V1. **Reportés P1** : calcul indicatif (taux légal versionné par semestre), **écriture comptable des intérêts** (touche le GL), **clause pénale** (champ optionnel par copro). *Fond. : CC art.1231-6, décret 67-223 art.36.*
+
+- **G24-C5-3 (plan d'apurement / échéancier négocié) — V1 minimal.** Table **`payment_plan`** : échéances datées + statut **actif / respecté / rompu**. **Un seul effet métier** : tant que respecté → **pause ciblée des relances auto** ; **rupture** → **alerte + reprise de l'escalade** (D59) au stade atteint. **AUCUNE écriture comptable** (seul un vrai encaissement réduit le solde 45x ; le plan = calendrier + interrupteur de relances). Rappels auto/suivi visuel = enrichissement P1. *Fond. : CC art.1342-10.*
+
+> **Domaine C.5 (Recouvrement) = CADRÉ** : G24-C5-1, G24-C5-2, G24-C5-3. Restent les PARTIAL C.5 (reclass 459 E4-q, écriture frais 10-1, legal_proceedings RPC, grain relance indivision).
+
+### Salve 6 — OPEN importants Partie C : C.12 Ventes & état daté (2026-06-24)
+
+> Préfixe **G24-C12-\<n\>**.
+
+- **G24-C12-1 (frais d'état daté, plafond 380 € TTC) — champ informatif HORS GL copro.** Les honoraires d'état daté = **recette du SYNDIC**, **pas du syndicat** → **aucune écriture** dans le grand livre copro. **Décision : Option A** — champ `etat_date_fee_amount` plafonné à **380 € TTC**, affiché sur l'état daté, **défaut configurable par cabinet**. **À NE PAS confondre** avec les frais de recouvrement art.10-1 (eux au 450 du débiteur). *Fond. : décret 2020-153 ; art.10-1 II loi 65-557.*
+
+- **G24-C12-2 (créances opposables art.20 — montant « liquide et exigible ») — calcul AUTO.** `record_mutation_opposition` **ne recopie PAS la Partie 1 brute** de l'état daté. **Montant opposable = calculé auto** = solde 450 du vendeur **EXIGIBLE à la date d'avis**, **provisions futures EXCLUES**, causes détaillées par nature (jsonb).
+  - **Sources de données (aucune nouvelle)** : (1) **vue unique d'ancienneté G24-T5** (dérivée du **GL = source du montant**) ; (2) **`call_for_funds.due_date`** pour le cutoff échu/non-échu (reste dû ligne = `amount_due − amount_paid`) ; (3) **statut des exercices** pour les reliquats approuvés ; (4) **frais art.10-1** (sous-compte **450-6**).
+  - **Privilégié vs chirographaire** : tri par **année d'origine** (fenêtre privilège = année en cours + ~4 ans → privilégié ; au-delà → chirographaire) ; **affiché** depuis la P1, raffinement fin = P1.
+  - ⚠️ **Garde-fou** : ne JAMAIS calculer sur `call_for_funds_lines` seul (divergence GL↔lines constatée à l'audit) — le **GL tranche le montant**, les `due_date` ne servent qu'à dater l'échéance.
+  *Fond. : art.20/19/19-1 loi 65-557, art.2374 CC ; s'appuie sur G24-T5.*
+
+> **Domaine C.12 (Ventes) = CADRÉ** (volets OPEN) : G24-C12-1, G24-C12-2. Restent les PARTIAL C.12 (RPC opposition record/settle, pré-état daté, répartition art.6-2, clôture compte vendeur, enum mutation_status, RLS gestionnaire-only).
+
+### Salve 7 — OPEN importants Partie C : C.4 Budget & appels (2026-06-24)
+
+> Préfixe **G24-C4-\<n\>**.
+
+- **G24-C4-1 (provision travaux décidés 102 vs appel travaux 702) — V1 = 702 seul, 102 en P1.** Trois tiroirs distincts : **702** = appels travaux votés/exécutés **dans l'exercice** (cas courant) ; **102** = provision **pluriannuelle** pour travaux décidés non encore appelés (art.14-2 I) ; **105** = fonds travaux ALUR (art.14-2 II, autre mécanisme). **Décision : V1 garde travaux → 702** ; le mécanisme **102 = P1**, branché via `operation_id` (cf. G24-C1/E4). **Documenter 102 ≠ 105 ≠ 702** (garde-fou anti-erreur d'imputation faussant l'annexe 5). *Fond. : loi 65-557 art.14-2 I/II, art.14-1.*
+
+- **G24-C4-2 (garde « appel sur budget voté » + reconduction) — verrou RPC + case provisoire.** **(1)** Le contrôle de statut descend **DANS la RPC** `post_budget_call_for_funds` : elle **REFUSE** si le budget ≠ `validated` (verrou serveur incontournable, cohérent B3/D24/D30 ; un appel sur budget non voté = créance illégale art.14-1). **(2)** **Reconduction provisoire art.14-1 al.3** = **drapeau explicite et tracé** sur l'appel/exercice (cas de l'AG en retard : appeler sur la base du budget précédent en attendant le vote), **jamais un bypass du verrou**. *Fond. : loi 65-557 art.14-1 al.3.*
+
+> **Domaine C.4 (Budget & appels) = CADRÉ** (volets OPEN) : G24-C4-1, G24-C4-2. Restent les PARTIAL C.4 (avance art.35 plafond/restitution, révision vs régularisation de budget).
+
+### Salve 8 — OPEN importants Partie C : C.7 Clôture & annexes (2026-06-24)
+
+> Préfixe **G24-C7-\<n\>**.
+
+- **G24-C7-1 (quitus au syndic) — simple résolution AG, aucun lien outil (USER).** Le quitus est **purement moral**, sans effet comptable, indépendant de l'approbation des comptes. **Décision USER (plus sobre que la reco)** : le quitus = **une résolution d'AG comme les autres** (moteur de résolutions/votes existant, tracée au PV), **PAS de champ/entité dédié** sur l'exercice, **PAS de voyant d'alerte** spécifique, **aucun effet GL**. Garde acquise implicite : jamais couplé à `approve_period`. *Fond. : approbation des comptes ≠ quitus (deux votes distincts).*
+
+- **G24-C7-2 (annexe 2 + cohérence 12/478) — courant seul + invariant AVERTISSEMENT avec diagnostic.** **Annexe 2 = résultat COURANT seul** (travaux détaillés en annexes 4/5, jamais dans le résultat de l'annexe 2). **Invariant de contrôle à la clôture = NON BLOQUANT (avertissement)** : vérifie *résultat courant annexe 2 == part reportée en 478* (ex-120) et *total travaux 4/5 == part en 12* (ex-110) vs l'écriture d'à-nouveau. **Décision USER** : ne bloque pas la clôture, mais **affiche l'écart ET localise la source** (quel poste/compte ne colle pas) pour faciliter la correction. *Fond. : décret 2005-240, arrêté 14/03/2005, annexes 2/4/5 ; codes 12/478 (cf. B3).*
+
+> **Domaine C.7 (Clôture & annexes) = CADRÉ** (volets OPEN) : G24-C7-1, G24-C7-2. Restent les PARTIAL C.7 (annexe 1 régularisation, annexe 3 charges/clé, traçabilité AG↔exercice, vote budget par catégorie, régularisation N+1 672/772).
+
+### Salve 9 — OPEN importants Partie C : C.10 GED (2026-06-24)
+
+> État réel : GED **déjà très complète** — `documents` (file_hash, current_version_no, retention_years, deletion_blocked, category, visibility), `document_versions` (version_number, change_summary, file_hash), `document_relations` (entity/relation_kind), `document_folders` (is_system, category_default). Les 3 trous = **capacités dormantes à activer**. Préfixe **G24-C10-\<n\>**.
+
+- **G24-C10-1 (versioning) — version = même acte ; acte neuf = document relié.** **Nouvelle version** = re-upload du **MÊME acte** (`change_summary` obligatoire, ancienne version conservée, **zéro écrasement**). **Acte juridiquement neuf** (RCP modificatif, PV rectificatif) = **NOUVEAU document** relié via `document_relations` ; l'original **reste consultable** (immutabilité, jamais réécrire l'histoire). *Fond. : décret 67-223 art.17/33 ; immutabilité calquée sur le GL.*
+
+- **G24-C10-2 (arborescence dossiers système) — activer.** Semer **~8 dossiers système** non supprimables par copro (AG, Comptabilité, Appels de fonds, Contrats, Diagnostics, Assurances, Mutations, Correspondance), chacun avec un `category_default` ; le **rangement se déduit de la catégorie** du document (surchargeable). Exploite `document_folders.is_system`/`category_default` déjà présents. *Enjeu juridique nul, gain UX.*
+
+- **G24-C10-3 (empreinte SHA-256 / file_hash) — doublons + sceau actes probants.** Calcul **SHA-256 à l'upload** (server function, stocké dans `file_hash` déjà présent) : (1) **doublon exact dans la même copro → avertissement NON bloquant** ; (2) **actes probants** (PV signé, état daté) → **sceau d'intégrité affiché et figé**, re-vérifiable. Limites actées : n'attrape que les doublons exacts ; le sceau ≠ horodatage légal certifié. *Filet anti-doublon + anti-altération, coût quasi nul.*
+
+> **Domaine C.10 (GED) = CADRÉ** : G24-C10-1, G24-C10-2, G24-C10-3. Restent les PARTIAL C.10 (durée de conservation/purge, auto-classement helper register_generated_document, checklist pièces obligatoires, document_access_log).
+
+### Salve 10 — OPEN importants Partie C : C.13 Conseil syndical (2026-06-24)
+
+> Préfixe **G24-C13-\<n\>**.
+
+- **G24-C13-1 (éligibilité au CS) — V1 simplifié (USER) : liste copros + ajout de noms.** Écran d'élection (`ELECT_COUNCIL`) = **liste des copropriétaires cochable** + **champ d'ajout de noms libres** (couvre le cercle élargi : conjoint/PACS, ascendants/descendants, représentant de PM, usufruitier/NP). **Décision USER (plus sobre que la reco)** : pas de blocage dur programmé du syndic (inutile — syndic pro **non copropriétaire**, absent de la liste, cf. G24-SCOPE) ; pas d'avertissement structuré sur le cercle élargi. **Reportés P1 léger** : alerte de retrait non silencieuse quand un membre du CS vend (branchée côté mutation, jamais de delete auto — cohérent D51) ; contrôle fin des incompatibilités art.21. *Fond. : loi 65-557 art.21.*
+
+- **G24-C13-2 (usage comptable du CS, 624/706) — généraliste (USER).** Constat métier : le CS (organe bénévole) **n'a quasiment jamais de frais propres**. **Décision USER : généraliste** — les rares frais du CS = **charge d'administration ordinaire** ventilée sur la clé générale, **pas de traitement spécial**. Le compte **624 « Frais du conseil syndical » existe dans le plan, disponible mais NON imposé** (utilisable pour isoler un coût si le syndic le souhaite). Le **706 « Provisions délégation de pouvoirs au CS » reste dormant** jusqu'à activation de la délégation (D52 = P1). **Aucun module comptable CS dédié.** *Fond. : plan de comptes décret 2005-240 (624/706 vérifiés en base).*
+
+> **Domaine C.13 (Conseil syndical) = CADRÉ** : G24-C13-1, G24-C13-2. Restent les PARTIAL C.13 (FK council_decisions, élection président CS, accès CS aux pièces, délégation de pouvoir dormante, annexion avis CS).
+
+### Salve 11 — OPEN importants Partie C : C.16 Multi-cabinet & pilotage (2026-06-24)
+
+> Préfixe **G24-C16-\<n\>**.
+
+- **G24-C16-1 (facturation SaaS éditeur↔cabinet) — hors V1 + 2 briques.** Billing complet (abonnement/plan + Stripe) = **P1/P2**. **Posé dès maintenant (sans coût)** : (1) **unité tarifaire actée = par lot principal géré** (cohérent G24-4) ; (2) champ **`cabinets.status`** (actif/suspendu/résilié) **nullable**. Décision sans dette technique. *Fond. : modèle SaaS ; G24-4 (lots principaux).*
+
+- **G24-C16-2 (équipe cabinet & rôles internes) — V1 simple + 2 crochets.** **V1** : tous les gestionnaires voient **tout le portefeuille** (cabinet souvent petit au départ). **Posés dès la baseline** (car structurent la RLS, douloureuse à rétro-installer) : (1) **rôle `admin_cabinet`** distinct (réglages sensibles : honoraires, white-label, gestion d'équipe — recoupe `platform_admin`) ; (2) **`responsible_manager_id`** nullable sur la copro (référent / filtre « mes copros »). **Répartition fine des accès (RLS par gestionnaire) = P1.** *Fond. : RGPD (minimisation) ; B5 (RLS baseline) ; recoupe C.3 résiduel (affectation gestionnaire↔copros).*
+
+> **Domaine C.16 (Multi-cabinet) = CADRÉ** : G24-C16-1, G24-C16-2. Restent les PARTIAL C.16 (pilotage portefeuille, indicateurs cross-copro).
+
+### Salve 12 — OPEN important Partie C : C.11 Communication (2026-06-24)
+
+> Préfixe **G24-C11-\<n\>**. État réel : seules `ag_notifications`/`ag_notification_events` existent (AG-spécifiques), aucune table générique.
+
+- **G24-C11-1 (notifications in-app / cloche) — table dédiée V1, temps réel P1.** Vraie table **`notifications` générique** dès la V1 (1 événement → **0..N notifs + 0..1 email**), **distincte du canal email**, alimentée par l'auto-population existante (D31/D32/D69/D70). Distinction actée : **worklist = « quoi faire »** ≠ **notification = « on m'a informé de X »** (X peut ne demander aucune action) → ne pas confondre. **Temps réel (push instantané) = P1** (V1 = rafraîchissement normal). *Fond. : besoin produit ; auto-population D31/D32/D69/D70.*
+
+> **🎉 LES 30 TROUS OPEN DE LA PARTIE C SONT CADRÉS.** Salves 3→12. Récap : 6 critiques (C1/C6/C9/C14-RGPD/C14-FS/C15) + C.8 (×4) + C.5 (×3) + C.12 (×2) + C.4 (×2) + C.7 (×2) + C.10 (×3) + C.13 (×2) + C.16 (×2) + C.11 (×1). **Reste : les 83 PARTIAL** (souvent de simples confirmations), à balayer par lots.
