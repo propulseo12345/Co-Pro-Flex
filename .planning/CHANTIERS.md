@@ -18,7 +18,7 @@
 
 | Chantier | Statut | Dernière activité | Prochaine action | Réf |
 |---|---|---|---|---|
-| **Grilling cadrage PARTIE C** (PARTIAL résiduels) | 🚧 En cours | 2026-06-24 : C.6 ✅, C.7 ✅, C.9 en cours (P1-P3 faits) | Finir C.9 (P4 Chatel, P5 statuts OS) puis C.10→C.17 + PARTIAL restants | `TRIAGE_PARTIE_C_2026-06-24.md` · `REFONTE_DECISIONS_2026-06-23.md` |
+| **Grilling cadrage PARTIE C** (PARTIAL résiduels) | 🚧 En cours | 2026-06-24 : C.6→C.10 ✅ ; **C.11 P1-P3 faits** (P1 horodatages preuve, P2 tracking agnostique + **Brevo**, P3 opt-out RGPD) | Reprendre **C.11-P4** (idempotence/anti double-convocation) → P5 (source unique destinataires) → P6 (modération mur soft-delete) ; puis C.12→C.17 + PARTIAL restants | `TRIAGE_PARTIE_C_2026-06-24.md` · `REFONTE_DECISIONS_2026-06-23.md` |
 | **GLOSS- Glossaires v2 — phase 1 (socle)** | 🚧 Commité, à pousser | 2026-06-24 : `CONTEXT.md` + `glossaire-technique.md` + câblage commités (`9d93046`) | **push** (`gh auth switch lyestriki-29`) | `docs/superpowers/specs/2026-06-24-glossaires-v2-design.md` |
 | **GLOSS- phase 2 — enrichissement a posteriori** | ✅ Livré, à pousser | 2026-06-24 : workflow 41 agents, 230 termes vérifiés → +42 métier / +41 technique, condensés (commit `eeeb360`) ; auto-import retiré | **push** | spec §5 ; output `w7oi1i5l8` |
 | **Anti-fragmentation du code** (modules profonds, deletion test) | 💡 Idée | 2026-06-24 : noté hors-scope du glossaire | brainstorming → spec dédiée | spec glossaire §8.1 |

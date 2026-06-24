@@ -1,21 +1,24 @@
-# Session State — 2026-06-24 (PARTIE C: C.6/C.7/C.9/C.10 cadrés + glossaires)
+# Session State — 2026-06-24 (PARTIE C : C.11 Communication P1-P3 cadrés)
 
 ## Branch / Commit
-`refonte-v2-cadrage` @ `e18b47c` — **poussé** (synchronisé origin). Seul `HYGIENE_REPO_2026-06-23.md` dirty (antérieur, hors session).
+`refonte-v2-cadrage` @ `f35da48` (dirty: 2 fichiers — `REFONTE_DECISIONS_2026-06-23.md` + `HYGIENE_REPO` antérieur). **Non commité, non poussé.**
 
 ## Completed This Session
-- **Grilling PARTIE C — 19 PARTIAL cadrés** : C.6 (banque, 5), C.7 (clôture/annexes, 5, croisé avec une vraie convocation LCM + sources officielles), C.9 (maintenance, 5), C.10 (GED, 4). Tout dans `REFONTE_DECISIONS_2026-06-23.md` (préfixe `G24-C<n>-P`).
-- **Glossaires v2 (GLOSS-)** : `CONTEXT.md` (métier) + `docs/claude/glossaire-technique.md` (technique) créés, enrichis par **workflow ultracode** (41 agents, 230 termes vérifiés contre le code), auto-import retiré (lecture à la demande via règle réinjectée).
-- **Registre des chantiers** `.planning/CHANTIERS.md` créé (anti-oubli) + carte des drifts au backlog. Pratique gravée en mémoire.
+- **C.11 Communication, 3 PARTIAL cadrés** (lot `G24-C11-P`, dans `REFONTE_DECISIONS_2026-06-23.md`) :
+  - **P1** — preuve d'envoi : 3 horodatages distincts (`sent_at` app / `proof_deposited_at`+`proof_provider` LRE qualifié / `delivered_at`), alimentés par API+webhook prestataire, jamais inventés ; délai 21 j francs = `coalesce(proof_deposited_at, sent_at)` via horloge métier.
+  - **P2** — tracking **fournisseur-agnostique** : couple `provider`+`provider_message_id`, table unique `delivery_events`, 1 adaptateur/prestataire. **⚠️ Prestataire V1 = Brevo (remplace « Resend câblé » de D41).**
+  - **P3** — opt-out RGPD : séparer canal (routage) / consentement ; **1 drapeau global `accepts_optional_comms` par personne** ; légal jamais désinscriptible ; extensible par-catégorie en P1.
+- Registre `CHANTIERS.md` mis à jour.
 
 ## Next Task
-- Reprendre le grilling : **C.11 — Communication** (puis C.12, C.13, C.14, C.15, C.16, C.17). Cadence : 1 question à la fois, vérif base réelle, ma reco + `AskUserQuestion`.
+- Reprendre **C.11-P4** (idempotence & reprise des envois en masse — anti double-convocation, clé d'idempotence calquée D32), puis **P5** (source unique des destinataires) et **P6** (modération du mur : soft-delete auditable). Puis C.12→C.17.
+- Cadence : 1 question, vérif base réelle, ma reco + `AskUserQuestion`.
 - Effort conseillé : `Max`.
 
 ## Blockers
 - None.
 
 ## Key Context
-- Tour de contrôle = `CHANTIERS.md` (à consulter/MAJ). Backlog actions : ajouter compte **718** (légal, vérifié Legifrance) + vérifier 677 ; **annexe 6** ; **GED unifiée** (helper `register_generated_document`) ; **compacter `MEMORY.md`** (>24,4 KB).
-- ⚠️ Leçon : un agent peut « corriger » faux en confondant « absent de notre code » et « illégal » (cas 718→714 rattrapé via l'arrêté). Recroiser la loi pour les points comptables.
-- Push via compte gh actif `lyestriki-29`.
+- Tour de contrôle = `CHANTIERS.md`. Triage des trous = `TRIAGE_PARTIE_C_2026-06-24.md` (PARTIAL C.11 = lignes 260-267).
+- ⚠️ **2 fichiers dirty non commités** — penser à `git add` + commit + push (`gh auth switch lyestriki-29`) avant ou en début de prochaine session.
+- Backlog inchangé : compte 718, annexe 6, GED unifiée, `MEMORY.md` > limite à compacter.
