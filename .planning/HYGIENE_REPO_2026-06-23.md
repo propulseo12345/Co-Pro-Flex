@@ -47,6 +47,10 @@ au code (v1 gelé, v2-tanstack en cours). Cadré par grilling (méthode `methodo
 - [x] HY-3 .gitignore : scratch lourd neutralisé (forms-rollout/lint-* ~2,5 Mo, sur disque hors git) + anti-récidive (screenshots/logs/dumps).
 - [ ] HY-4 bascule : Lyes rouvre l'éditeur dans Co-Pro-Flex/ (active le hook).
 
-## Commit (en attente GO Lyes)
-Proposé : `chore(hygiene): archive 83 fichiers .planning perimes + gitignore scratch + doc HY-*`
-(75 renames git, .gitignore, HYGIENE_REPO, _archive/poc-tanstack-src/, settings.local.json)
+## Commit
+✅ `c5e54a7` poussé sur `origin/refonte-v2-cadrage` (99 fichiers : 75 renames + .gitignore +
+HYGIENE_REPO + _archive/poc-tanstack-src/ + settings.local.json).
+
+## Reste (à la main de Lyes)
+- **HY-4 Bascule** : fermer/rouvrir l'éditeur **dans `Co-Pro-Flex/`** (et non `Flex/`) → active le
+  hook `UserPromptSubmit` et sort de la coquille. C'est le bon dossier de travail désormais.
