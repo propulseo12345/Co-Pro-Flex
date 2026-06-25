@@ -18,7 +18,8 @@
 
 | Chantier | Statut | Dernière activité | Prochaine action | Réf |
 |---|---|---|---|---|
-| **Grilling cadrage PARTIE C** (PARTIAL résiduels) | 🚧 En cours | 2026-06-24 : C.6→C.10 ✅ ; **C.11 P1-P3 faits** (P1 horodatages preuve, P2 tracking agnostique + **Brevo**, P3 opt-out RGPD) | Reprendre **C.11-P4** (idempotence/anti double-convocation) → P5 (source unique destinataires) → P6 (modération mur soft-delete) ; puis C.12→C.17 + PARTIAL restants | `TRIAGE_PARTIE_C_2026-06-24.md` · `REFONTE_DECISIONS_2026-06-23.md` |
+| **Grilling cadrage PARTIE C** (PARTIAL résiduels) | 🚧 En cours | 2026-06-24/25 : C.6→C.10 ✅ ; C.11 P1-P3 faits ; nuit : 45 dossiers pré-grillés → `PRE_GRILLING_PACK_2026-06-25.md`. **2026-06-25 : socle C.17 COMPLET (C17-1/2/3/4/7) + EXP-7 tranché** (GL = source unique des montants, séquencé réalisé→impayés ; ANOM-03/12) — tout consigné | Ordre conseillé du pack : **C17-6** (cohérence machines à états SQL), puis C17-8, C17-5, EXP-4…, puis C.16/C.15/C.12/C.13/C.14, finir C.11 P5-P6. ⚠️ 6 arbitrages strictement USER (créances↔GL, mandat V1, annexe 1, état daté, ALUR, multi-rôle) | `PRE_GRILLING_PACK_2026-06-25.md` · `REFONTE_DECISIONS_2026-06-23.md` (salve Socle C.17) · `AUDIT_COHERENCE_CADRAGE_2026-06-24.md` |
+| **Audit cohérence + complétude cadrage** | ✅ Livré (nuit 2026-06-25) | Workflow recon 7 lecteurs → 26 anomalies (6 bloquantes), registre supersedes, ordre 13 paliers ; + drift HORS-FINANCE audité (comble ANOM-25) | Résoudre les anomalies pendant le grilling (cf. plan Phase 3) | `AUDIT_COHERENCE_CADRAGE_2026-06-24.md` · `AUDIT_DRIFT_HORS_FINANCE_2026-06-25.md` · plan `docs/superpowers/plans/2026-06-24-cadrage-base-saine.md` |
 | **GLOSS- Glossaires v2 — phase 1 (socle)** | 🚧 Commité, à pousser | 2026-06-24 : `CONTEXT.md` + `glossaire-technique.md` + câblage commités (`9d93046`) | **push** (`gh auth switch lyestriki-29`) | `docs/superpowers/specs/2026-06-24-glossaires-v2-design.md` |
 | **GLOSS- phase 2 — enrichissement a posteriori** | ✅ Livré, à pousser | 2026-06-24 : workflow 41 agents, 230 termes vérifiés → +42 métier / +41 technique, condensés (commit `eeeb360`) ; auto-import retiré | **push** | spec §5 ; output `w7oi1i5l8` |
 | **Anti-fragmentation du code** (modules profonds, deletion test) | 💡 Idée | 2026-06-24 : noté hors-scope du glossaire | brainstorming → spec dédiée | spec glossaire §8.1 |
@@ -26,6 +27,8 @@
 | **Golden exhaustif « Domaine des Tilleuls »** (tests) | 📐 Design validé | grilling 2026-06-22 : plan + valeurs attendues | EN ATTENTE GO USER pour dérouler | `.planning/tests/PLAN_GOLDEN_EXHAUSTIF.md` |
 | **Portail copropriétaire** (8 pages, server-first) | 📐 Design validé | 2026-06-10 : design validé, zéro implémentation | `/writing-plans` session dédiée | `docs/superpowers/specs/2026-06-10-portail-coproprietaire-design.md` |
 | **Refonte UI/UX manager-first** + espaces copro/CS | 💡 Idée (direction) | direction posée | brainstorming → frontend-design (stack réelle CSS Modules) | mémoire `ui_ux_refonte_direction` |
+| **S0 — Faille RLS anon du live** | ✅ Vérifié 2026-06-25 | Vérif empirique MCP (lecture seule) : **87 tables, 0 sans RLS, 0 anon-exploitable** ; les 2 tables nominatives ont RLS ON + 0 grant anon ; advisor = 0 finding RLS. **Fausse alerte** (déjà bouché par 0085/0086, 21 juin). Mémoire `coproflex-cloud-live` corrigée | Aucune — **clos**. Reliquat de durcissement → ligne dédiée ci-dessous | `AUDIT_COHERENCE_CADRAGE_2026-06-24.md` ANOM-01 (périmé) · mémoire `coproflex-cloud-live` |
+| **Durcissement sécurité** (FORCE généralisé + advisors) | 💡 Idée (non urgent) | 2026-06-25 : issu de la vérif S0 — FORCE sur **5/87** seulement (cœur finance), 82 ON-sans-FORCE ; advisor = 169 WARN + 1 ERROR (vue `tiers_directory` DEFINER **voulue**) | Cadrer plus tard **avec revue cascade** (FORCE touche aux 154 RPC definer) : FORCE généralisé + tri advisors (13 `search_path`, `pg_net` hors `public`, activer protection mots de passe compromis) | mémoire `coproflex-cloud-live` MAJ 2026-06-25 |
 | **Migration TanStack Start** (`v2-tanstack/`) | 🚧 En cours | from-scratch en cours, moteur=parité | dérouler features par catégorie + ordre de dépendance | `REFONTE_CARTOGRAPHIE/CHAINES/VERIFICATIONS_2026-06-22.md` |
 
 ---
@@ -69,4 +72,5 @@
 ---
 
 ## Journal des changements d'état
+- **2026-06-25** : S0 « faille RLS anon » **vérifié empiriquement = fausse alerte** (déjà bouché 0085/0086) → **clos** ; reliquat de durcissement (FORCE généralisé + advisors) versé en chantier séparé non urgent. Mémoire `coproflex-cloud-live` corrigée (FORCE = 5/87 cœur finance, pas 87 ni 0).
 - **2026-06-24** : création du registre. GLOSS- phase 1 (socle) + phase 2 (enrichissement ultracode, 230 termes) livrées ; auto-import retiré. Grilling PARTIE C : C.6 + C.7 + **C.9 entièrement cadrés** (P1-P5). Drifts versés au backlog.
