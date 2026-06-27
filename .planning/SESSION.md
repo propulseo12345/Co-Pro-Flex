@@ -1,21 +1,23 @@
-# Session State — 2026-06-25 (socle C.17 bouclé 8/8 + EXP-4)
+# Session State — 2026-06-26 (repo v2 dédié : infra migrée, purge à venir)
 
 ## Branch / Commit
-`refonte-v2-cadrage` @ `cbabd20` (+ ce snapshot)
+- **ANCIEN repo** (v1 gelé + cadrage) : `refonte-v2-cadrage` @ `4501b05` (dirty : `.planning/CHANTIERS.md`, `SUPERSEDES.md`, `AUDIT_CONTRADICTIONS_2026-06-26.md`, `business-rules.md`, `SESSION.md` modifiés/créés — **non commités**)
+- **NOUVEAU repo v2** : `Desktop/Code/coproflex-v2` → `propulsFlex/Coproflex`, `main` @ `8b46139` (**pushed**, propre)
 
 ## Completed This Session
-- **Socle C.17 BOUCLÉ 8/8** : **C17-6** (machines à états : enum EN / libellé FR, **statut dérivé** OS↔facture, refusé≠annulé, signé≠validé, période 3 temps + refus AG), **C17-8** (super-admin **lecture seule + break-glass dès V1** + anti-cumul en base + flag `profiles.is_platform_admin`), **C17-5** (cron robuste : **rattrapage 2 vitesses** émission/relance, mode émission **au choix gestionnaire**, registre `cron_runs`, alertes non bloquantes).
-- **EXP-4** (équilibre annexe 1) : **égalité GLOBALE** + **pop-up à 2 visages** (🟢 pédago avant affectation / 🔴 alarmant après) **JAMAIS bloquant** + **trace du passage outre** (branché C17-2).
-- Décisions consignées dans `REFONTE_DECISIONS_2026-06-23.md` (commit `cbabd20`). Backlog vocabulaire créé : `.planning/GLOSSAIRE_A_FAIRE.md` (**option A** : passe `ultracode` en fin de cadrage).
+- Mémoire migrée (104 fiches) vers la clé du nouveau chemin projet.
+- **Audit cohérence exhaustif** (2 vagues, ~310 agents) → `.planning/AUDIT_CONTRADICTIONS_2026-06-26.md` : **107 findings** (🔴18 🟠54 🟡28 ⚪7), À RATIFIER.
+- **Décision : repo v2 dédié** (supersède « même repo », [[migration_tanstack_start]]). **Phases 1-2 FAITES** : `v2-tanstack/`→repo indépendant, `typecheck`+`vite build` verts, poussé GitHub (HTTPS, compte `propulsFlex`). `.env.local` gitignoré (prouvé).
 
 ## Next Task
-- Reprendre le grilling à **EXP-5** (puis EXP-3, EXP-6, EXP-1, C16-1, C15-5… ordre conseillé `PRE_GRILLING_PACK_2026-06-25.md` **ligne 28**).
-- Effort conseillé : **`Max`** (cadrage séquentiel).
+- **Phase 3** : créer `coproflex-v2/docs/` = base canonique v2 (« lis seulement ici ») en y faisant ATTERRIR la purge des 107 findings (decisions ledger + schéma cible db-cible nettoyé + glossaires nettoyés + design-system + plan golden, corrigés EN ENTRANT). Puis **Phase 4** (`CLAUDE.md` v2 + hook `rules-v2` + re-clé mémoire vers `coproflex-v2` + corriger les 4-5 mémoires empoisonnées), **Phase 5** (pointeur ancien repo = v1 gelé).
+- Effort conseillé : **`Max`** (curation/correction en dialogue ; ponctuellement 1 sous-agent par thème).
 
 ## Blockers
-- None.
+- None. (gh CLI absent → push via git HTTPS + GCM, URL `https://propulsFlex@github.com/propulsFlex/Coproflex.git` ; auteur commits = Lyes Triki/propulseo.)
 
 ## Key Context
-- **Méthode grilling** (à reprendre telle quelle) : par dossier, je sépare « **ta décision métier** » vs « **ma plomberie** » ; questions via **AskUserQuestion** (ma reco en 1er) ; explication FR vulgarisée si tu demandes. Décisions → `REFONTE_DECISIONS` (sections « Socle C.17 » + « Arbitrages expert ») ; vocabulaire ratifié → `GLOSSAIRE_A_FAIRE.md` (**NE PAS** intégrer les termes des dossiers non grillés).
-- **Arbitrages strictement USER restants** : mandat syndic V1, période de l'état daté, minimum ALUR, multi-rôle (créances↔GL déjà cadré via EXP-7/EXP-4).
-- **REPRISE SUR AUTRE PC** : `git pull` la branche `refonte-v2-cadrage`, puis `/token-saver start`. Tout l'état est **dans le repo** (`.planning/SESSION.md` + `REFONTE_DECISIONS`) — pas besoin de la mémoire locale.
+- 107 findings ≈ **12 thèmes** : RLS-off auto-chargé · super-admin=rôle (vs table) · pv_* UPDATE front · « patch live » périmé · Resend→Brevo · finance via Edge · réalisé hors GL · plan comptable inventé · statuts/enum · impayés=statut · stack Next.js · reprise données live. À challenger : ANOM-008/023/028/030.
+- Traitement PAR TYPE : docs vivants→corriger sur place ; specs v1 pré-refonte→bannière SUPERSEDED (pas de réécriture) ; snapshots→registre.
+- Backend Supabase cloud `qqfqrcolzmcbsvfaumiq` **inchangé**. Base neuve = baseline 0001 fraîche (Palier 0, APRÈS la purge).
+- ⚠️ Mémoires à re-clé vers `c--Users-lyest-Desktop-Code-coproflex-v2` quand Lyes ouvrira Claude depuis le nouveau repo (Phase 4).

@@ -1,3 +1,5 @@
+> ⛔ **DOCUMENT HISTORIQUE — STACK PÉRIMÉE (archivé 2026-06-26).** Ancré sur Next.js + « RLS à réactiver » : faux pour la v2 (TanStack Start, from-scratch, RLS FORCE native, base sur projet vierge dédié). Le **contenu design** du portail reste une référence d'inspiration ; l'**archi/stack** est obsolète → voir `REFONTE_DECISIONS` (bloc C15 portail) + `SUPERSEDES.md`.
+
 # PLAN MAÎTRE — CoProFlex · Vue Copropriétaire (ancré dans le réel)
 
 > Réécriture du brouillon initial **après l'audit du 2026-06-01** (`AUDIT_COPROFLEX.md` + interrogation live de la base `iyfesbjnkpynmwlsmxnp`). Tous les `⚠️ À CONFIRMER` du brouillon ont été remplacés par des faits vérifiés : ✅ réel · 🔁 diverge du brouillon · ❌ n'existe pas (gap).

@@ -63,5 +63,5 @@ draft → convoked → session_active → closed → pv_generated → pv_signed 
 - **Ordre impératif à la clôture : `close_ag` PUIS `prepare_ag_decisions`.** `close_ag` est ce qui passe les résolutions en `approved` ; `prepare_ag_decisions` ne matérialise QUE les `approved`. Inverser l'ordre matérialise 0 décision (échec silencieux).
 - **L'activation se fait une seule fois, à l'étape PV** (`activate_ag_decisions`). La page « Finalisation » est une **revue lecture seule** des décisions déjà activées (pas d'activation manuelle par bloc).
 - `finalize_ag` est ouvert dès `pv_signed` (la signature du PV est le fait juridique déterminant ; `pv_sent` = diffusion administrative).
-- `in_progress` = repli en cas d'annulation de séance. `pv_*` sont posés par UPDATE front (transitions de gestion). Aucune valeur d'enum n'est retirée (retrait jugé risqué/inutile).
+- `in_progress` = repli en cas d'annulation de séance. **⚠️ v2 (C17-1) : TOUS les statuts AG — y compris les `pv_*` — passent EXCLUSIVEMENT par la RPC gardée unique `set_ag_status` (verrou base anti-UPDATE direct). La doctrine v1 « `pv_*` posés par UPDATE front » est ABANDONNÉE (piège à copie).** Aucune valeur d'enum n'est retirée (retrait jugé risqué/inutile).
 - `finalize_ag` ne relance **jamais** `activate_ag_decisions` (immuabilité du grand livre).
