@@ -1,24 +1,23 @@
-# Session State — 2026-06-29 (terrain 0001 assaini + brouillons migrations 0001/0002 + plan)
+# Session State — 2026-06-29 (baseline v2 : 0001-0003 écrits/poussés, 0004-0007 = workflow d'authoring)
 
 ## Branch / Commit
-- **Co-Pro-Flex** (docs) : `refonte-v2-cadrage` @ `b0e422b` (+ commit SESSION/CHANTIERS en cours) — poussé.
-- **coproflex-v2** (code) : `socle-connaissance-v2` @ `c0bbe5b` — poussé (brouillons 0001/0002 + plan).
+- **Co-Pro-Flex** (docs) : `refonte-v2-cadrage` @ `78b3dd8` (+ ce commit SESSION) — poussé.
+- **coproflex-v2** (code) : `socle-connaissance-v2` @ `220ea55` — poussé.
 
 ## Completed This Session
-- **Garde-fou anti-copie** (cause pb session précédente) : plan pilote ADDITIF + bannières voie 1/2 sur qqfq-extract.
-- **Registre d'inclusion 0001 tranché** (workflow ultracode `wwidv6rkf`, 403 retenus/229 exclus) ; 3 blockers + flags factuels résolus par lecture des corps de RPC qqfq ; **4 décisions métier** (avoir inclus · budget complémentaire=version · état daté différé · payment_method 4 valeurs). Consigné REFONTE_DECISIONS/CHANTIERS.
-- **Brouillons migrations** poussés : `0001_enums_and_socle.sql` (20 enums + 13 tables socle), `0002_finance_tables.sql` (14 tables finance bigint), `PLAN_MIGRATION_0001-0004.md` (recette complète 0003/0004). **NON appliqués.**
+- **Garde-fou anti-copie** + **registre d'inclusion 0001 tranché** (403/229) + **décisions métier** (avoir inclus · budget=version · état daté différé · payment_method 4 · **reprise de mandat TOUT différée**) + factuel résolu par lecture des corps qqfq.
+- **Migrations écrites + poussées (brouillons, NON appliqués)** : `0001` (19 enums + 13 tables socle), `0002` (14 tables finance bigint), `0003` (sécurité C16-4 + intégrité GL). Plan = `coproflex-v2/.planning/PLAN_MIGRATION_0001-0004.md` (réorganisé 0001→0007).
 
-## Next Task
-- **Écrire 0003** (`0003_finance_rpc.sql`) : helpers sécurité (C16-4) + triggers d'intégrité GL + RPC finance — **fetch des corps qqfq (boucle principale)** + adaptation `numeric(14,2) → bigint` centimes. Puis **0004** (RLS FORCE + policies + revoke anon + vues de preuve, dont `v_call_lines_by_lot_gl`).
-- PUIS **revue cascade ultracode** (au retour de Lyes) → BEGIN/ROLLBACK → revue Lyes → apply `oio`.
-- Effort : `Max` (rédaction 0003/0004) ; `ultracode` pour la revue cascade.
+## Next Task — RESUME PROPRE (session fraîche conseillée)
+- **Workflow d'authoring** des RPC (Lyes a choisi cette voie) en **2 rounds** : round 1 = `0004` (GL core/périodes/plan de comptes/répartition) + `0005` (appels/paiements) ; round 2 = `0006` (fournisseurs/cut-off/audit) + `0007` (RLS/vues).
+- **Recette** : (1) prélever les corps qqfq en BOUCLE PRINCIPALE (les sous-agents sont bloqués sur la prod) — requêtes `pg_get_functiondef` par groupe ; (2) poser les corps dans des fichiers locaux ; (3) workflow où chaque agent lit son fichier de corps + le plan + le registre → écrit la migration (copie + **adaptation numeric→bigint centimes** + réécritures : `create_ledger_transaction` retirer WHEN OTHERS, `validate_supplier_invoice` fin double-posting, `allocate_payment`/`reverse_payment` sans cache `amount_paid`, `resolve_lot_tiers_account` 4 natures). NE PAS copier `update_call_status` (statut dérivé en vue).
+- ⚠️ `provision_copro_chart` : seeder les **codes légaux** (601 eau, 602 élec, 603 chauffage, 621 syndic, 624 CS) — la version qqfq a déjà 601/602/603 corrects MAIS garde 450-4/459 (loan/doubtful) → **les retirer** (natures différées). Argent du chart = pas concerné (pas de montant), mais convertir tous les `amount` des RPC en bigint.
+- PUIS **revue cascade ultracode** (avec Lyes) → BEGIN/ROLLBACK → apply `oio`.
 
 ## Blockers
-- 3 points à CONFIRMER en revue cascade (flagués dans le SQL + plan) : (A) `opening_balance_residual_items` déféré vs registre · (B) `call_for_funds_lines` sans `amount_paid`/`status` (dérivés vue) · (C) avoir fournisseur inclus.
+- 3 points à confirmer en revue cascade (déjà flagués dans le SQL + plan) : (A) reprise différée [TRANCHÉ défer] · (B) `call_for_funds_lines` sans `amount_paid`/`status` · (C) avoir inclus.
 
 ## Key Context
-- Migrations = `coproflex-v2/supabase/migrations/0001..0004` ; recette = `coproflex-v2/.planning/PLAN_MIGRATION_0001-0004.md` ; spec objets = `REGISTRE_INCLUSION_0001.md`.
-- **Argent = bigint centimes** (REGLES_CODE F1) → toute RPC qqfq copiée doit être adaptée à l'arithmétique entière.
-- `oio` = base neuve cible (vide) · `qqfq` = live gelé (lecture corps RPC = **boucle principale only**).
-- Mineurs ouverts : set final `ledger_source_type` (vs 0003) · `lot_type` valeurs/garage↔parking · `budget_lines.code` · montants HT/TVA informatifs.
+- `oio` = base neuve cible (vide) · `qqfq` = live gelé (lecture corps = **boucle principale only**).
+- Migrations = `coproflex-v2/supabase/migrations/0001..` · spec objets = `REGISTRE_INCLUSION_0001.md` · recette = `PLAN_MIGRATION_0001-0004.md`.
+- **Argent = bigint centimes** (REGLES_CODE F1) : toute RPC copiée doit passer en arithmétique entière.
