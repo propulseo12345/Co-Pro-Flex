@@ -75,7 +75,7 @@
 
 Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = **10 000**. ✔
 
-### 2.4 Les 7 clés de répartition
+### 2.4 Les clés de répartition (6 réelles + assiette ALUR informative)
 
 | # | Clé | category | basis | coverage | Σ poids |
 |---|-----|----------|-------|----------|---------|
@@ -427,7 +427,7 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 La copro est **créée vierge depuis l'UI** puis parcourt toute la timeline §4 dans l'ordre, acte par acte. À chaque acte : double preuve (écran + GL) et `audit_finance_integrity = 0`. C'est la **colonne vertébrale** de la campagne ; sérielle (un acte dépend de l'état laissé par le précédent).
 
 ### 7.2 Fixture seedée + garde-fou anti-dérive
-- **Mettre à jour `create_test_copro_seeded` à la forme golden** (18 lots / base 10 000 / 7 clés / 10 copros, le pilote actuel est en base 1 000 / 7 lots). Création des lignes `repartition_key_lines` (1 ligne clé générale par lot + lignes subset sans `weight=0`).
+- **Mettre à jour `create_test_copro_seeded` à la forme golden** (18 lots / base 10 000 / **6 clés réelles** (K1-K6 ; PAS de clé ALUR) / 10 copros, le pilote actuel est en base 1 000 / 7 lots). Création des lignes `repartition_key_lines` (1 ligne clé générale par lot + lignes subset sans `weight=0`).
 - **Garde-fou anti-dérive `seed-vs-ui.spec.ts`** : assert que la copro **seedée ≈ la copro construite par l'UI** (mêmes lots, clés, poids, soldes initiaux). Empêche que le seed et le chemin UI divergent silencieusement.
 
 ### 7.3 Specs ciblées par domaine (hors golden)
@@ -465,7 +465,7 @@ La copro est **créée vierge depuis l'UI** puis parcourt toute la timeline §4 
 
 ## 9. Risques connus / points à confirmer (open questions)
 
-1. **[RÉSOLU 2026-06-22 — TRIMESTRIEL + tolérance ± 1 cent]** Cents par lot du courant non déterministes (K1 par trimestre 0,64375 ; K5 surface 1037,50/830) → demi-cent résiduel placé selon l'ordre `lot_id`. **Décision USER : garder l'échéancier trimestriel (réaliste).** Les specs asserteront les cents par lot **uniquement sur les lots à division propre** (A-101, A-201, B-RDC-1/2, B-101/102) + les **totaux et soldes par propriétaire** ; les lots à résidu (A-RDC-C1/C2, A-102, A-202, A-302, caves, parkings) **tolèrent ± 1 cent**. Totaux assertés exacts (T1 = 12 500 ; annuel = 50 000 ; grand total = 115 160). (verdict appels)
+1. **[RÉSOLU 2026-06-22 / affiné audit 2026-06-28 — TRIMESTRIEL + tolérance ± 1 cent]** Cents par lot du courant non déterministes : **seul K1** (0,64375/tantième, lots dont le tantième n'est PAS multiple de 8) laisse un demi-cent résiduel placé selon l'ordre `lot_id` (**K5 eau = 1,25/m² EXACT → aucun résidu**, contrairement à une note antérieure). **Décision USER : garder l'échéancier trimestriel (réaliste).** Les specs asserteront les cents par lot **uniquement sur les lots à division propre** (A-101, A-201, B-RDC-1/2, B-101/102) + les **totaux et soldes par propriétaire** ; les **12 lots à résidu K1** (A-RDC-C1/C2, A-102, A-202, **A-301**, A-302, 4 caves, 2 parkings) **tolèrent ± 1 cent**. Totaux assertés exacts (T1 = 12 500 ; annuel = 50 000 ; grand total = 115 160). (verdict appels)
 2. **[RÉSOLU 2026-06-28]** Impayé GL strict fin 2026 = **10 337,50** (Hugo A-201 7 892,50 + Thomas B-101 2 445). L'ancien « 10 207,50 / Hugo 6 907,50 / Thomas 3 300 » était **arithmétiquement impossible** (Thomas, Bât B sans travaux, a un dû total de 2 445 < 3 300). Hyp. tranchée USER : toiture (37 600) encaissée avant clôture par tous SAUF Hugo → §6.2 (6 337,50 hors toiture) + Hugo toiture 4 000 = 10 337,50. (verdict clôture)
 3. **Cumul LEDGER CHECK corrigé à 219 157,50** (et non 218 157,50). Vérifier que la spec asserte la bonne valeur. (verdict clôture)
 4. **[RÉSOLU 2026-06-28, option A]** État daté B-101 : base 2027 = 536,25/trim reconduit ; T1 2027 échu (entre en P1), T2 2027 NON échu (due_date figé > 15/04 → P3 = 536,25) ; budget 2026 plus `validated` (provisions non appelées = 0). **P1 450-1 = 2 681,25** (plus de double-compte du T2 ; Total P1 = 3 281,25). Le seed fige les `due_date`. (verdict état_daté)
