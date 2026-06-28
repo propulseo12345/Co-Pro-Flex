@@ -31,6 +31,8 @@
 | `db-cible/08-communication` | provider e-mail **Resend** | **C11-P2** : Brevo + couple neutre `provider`+`provider_message_id` |
 | `spec/ENTITIES_MAP/08` | GED 4 niveaux de confidentialité / `can_access_document` | **C14** : visibilité 3 niveaux + `user_can_view_document` (4e branche cloisonnement) |
 | `REFONTE_DECISIONS` (stratégie PDF, « à trancher ») | doublon « à trancher » | **AM1/TECH-1** : HTML→PDF via Chrome headless (tranché) |
+| `db-cible/AUTORISATION.md` | `platform_admin` **englobé dans `user_is_copro_manager`** (= capacité écriture partout) | **C16-4 / C17-8** : super-admin **lecture seule** par défaut, table dédiée `platform_admins` hors-tenant, **retiré du portier d'écriture** (⚠️ générer les helpers d'autorisation depuis ce fichier **recréerait la faille d'escalade**) |
+| `docs/claude/glossaire-technique.md` (terme statut AG, ~L52) | `_Avoid_` proscrit la bonne pratique — jumeau encore fautif de `business-rules.md:66` (ANOM-035) | **C17-1** : tous les statuts AG via `set_ag_status`. À corriger **au palier AG** (hors scope finance-first). |
 
 ## D. Mémoires auto à corriger
 

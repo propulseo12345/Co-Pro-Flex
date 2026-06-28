@@ -81,13 +81,13 @@
 - **Palier 9 — Ventes/mutations/état daté.** Opposition art.20 + clôture compte vendeur + état daté 3 parties lu du GL. *DoD : état daté juste vs GL.*
 - **Palier 10 — GED/conservation/PV.** GED refondue + numérotation sans trou + registre PV. *DoD : PV généré avec numéro coté sans trou.*
 - **Palier 11 — Communication.** `notifications` + soft-delete mur + e-mails Brevo + calendrier. *DoD : e-mail réellement envoyé et tracé.*
-- **Palier 12 — Portail/RGPD/front.** Invitations + cloisonnement docs (gate go-live) + socle RGPD + écrans v2 CSS Modules. *DoD : un copro voit ses docs et RIEN des autres.*
+- **Palier 12 — Portail/RGPD/front.** Invitations + cloisonnement docs (gate go-live) + socle RGPD + écrans v2 **Tailwind+shadcn**. *DoD : un copro voit ses docs et RIEN des autres.*
 
 ---
 
 ## 4. Outils nécessaires
 
-**Techniques** : TanStack Start (front, server functions) · Supabase cloud (base + auth) · RPC SQL (seule porte d'écriture gardée) · CSS Modules (jamais Tailwind) · MCP Supabase (`apply_migration`/`execute_sql`/`get_advisors`=0) · protocole BEGIN/ROLLBACK · gates SQL (RLS+FORCE, intégrité finance=0) · golden « Domaine des Tilleuls » (à seeder) · Playwright e2e (preuve en base) · Vitest (unitaires purs) · workflows multi-agents/ultracode + code-review (revue adversariale par migration).
+**Techniques** : TanStack Start (front, server functions) · Supabase cloud (base + auth) · RPC SQL (seule porte d'écriture gardée) · **Tailwind v4 + shadcn/ui** (bascule actée 2026-06-28 ; tokens sémantiques = source unique, zéro couleur en dur) · MCP Supabase (`apply_migration`/`execute_sql`/`get_advisors`=0) · protocole BEGIN/ROLLBACK · gates SQL (RLS+FORCE, intégrité finance=0) · golden « Domaine des Tilleuls » (à seeder) · Playwright e2e (preuve en base) · Vitest (unitaires purs) · workflows multi-agents/ultracode + code-review (revue adversariale par migration).
 
 **Méthode** : skill `methodo-coproflex` · DoD stricte par feature · registre `CHANTIERS.md` · revue cascade avant migration · glossaires `CONTEXT.md`/`glossaire-technique.md` · **registre des supersedes (à créer)**.
 
