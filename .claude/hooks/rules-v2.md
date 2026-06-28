@@ -4,7 +4,7 @@
 2. GRAND LIVRE = source unique des chiffres ; solutionner la CAUSE, JAMAIS maquiller (ni « skip »/truquer un test).
    2-bis. DOCTRINE ÉTATS (G24-T11) : statuts « conséquence des comptes » (payé/impayé, soldé, réalisé) = TOUJOURS calculés depuis le GL, jamais un drapeau stocké ; statuts « événementiels » (AG, ordre de service, stade de recouvrement) = stockés mais changés UNIQUEMENT par une fonction de transition serveur unique et gardée (jamais d'UPDATE direct éparpillé).
 3. FRANÇAIS VULGARISÉ : le pourquoi avant le comment, métaphores du quotidien, zéro jargon nu.
-4. STACK RÉELLE : CSS Modules (JAMAIS Tailwind) ; react-query + server functions → RPC SQL ; edge = cron/webhooks only.
+4. STACK RÉELLE : Tailwind CSS + shadcn/ui (composants copiés/possédés dans le repo, thème = NOS tokens ; JAMAIS de couleur en dur → toujours un token) ; react-query + server functions → RPC SQL ; edge = cron/webhooks only. *(Bascule CSS Modules → Tailwind actée le 2026-06-28, cf. FRONT-* dans REFONTE_DECISIONS.)*
 5. CONFIRMER avant tout gros changement ; petites modifs évidentes = agir.
 
 6. DoD STRICTE (toute feature ; typo/rename pur exempté) :

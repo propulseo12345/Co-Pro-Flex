@@ -15,7 +15,7 @@
 
 ## Stack (verrouillée)
 - TanStack Start **1.168.26** + react-router **1.170.16** (famille `@tanstack/*` épinglée EXACTE), React 19, Vite 8, TypeScript strict (jamais `any`).
-- **CSS Modules uniquement** (zéro Tailwind). Tokens = `globals.css` (source unique).
+- **Tailwind CSS + shadcn/ui** (bascule CSS Modules → Tailwind actée le 2026-06-28 — cf. § FRONT en fin de doc). Tokens sémantiques (thème Tailwind / `DESIGN_TOKENS.md`) = source unique ; jamais de couleur en dur.
 - Supabase (`@supabase/ssr` + `supabase-js`), **React Hook Form + Zod**, **`@tanstack/react-query` natif** (le `useAsyncData` maison meurt).
 - Polices self-hostées (`@fontsource-variable` Inter/Manrope + Fira Code).
 - **Server functions TanStack par défaut** pour les opérations déclenchées par clic ; **Edge Functions réservées** au cron (relances) + webhooks ; vérif feature par feature.
@@ -655,6 +655,21 @@
   - **(e) Anti-cumul admin/gestionnaire = AU NIVEAU BASE (trigger), pas seulement applicatif (USER)** : jamais juge (éditeur) ET partie (gestionnaire). Trigger sur `memberships` (refuser INSERT `gestionnaire` si `is_platform_admin`) ET sur `profiles` (refuser `is_platform_admin` si déjà gestionnaire). **Vaut aussi pour le fondateur → comptes séparés** (un admin + un gestionnaire).
   - **(f) Compte admin = authenticated NORMAL soumis à la RLS, JAMAIS service_role** (cohérent C17-7) ; **prérequis ANOM-01 : RLS en FORCE généralisé** (sinon lecture seule sans valeur — owner/service contourne).
   - **(g) Front** : **espace support lecture-seule séparé** (bandeau « mode support ») ; **retirer platform_admin** des gardes `requireCoproManager`/`requireAnyManager` (`authz.ts`) + layout gestionnaire (un admin n'est PAS un gestionnaire).
+
+---
+
+## FRONT — Bascule stack de style + refonte DA (grilling 2026-06-28)
+
+> Décision de **méthode + produit**. Critère directeur (Lyes) : **optimiser le codeur IA** (Claude), même logique que le passage Next.js → TanStack Start. Préfixe de chantier : `FRONT-`. Inventaire des impacts = workflow `wfmayn3fw`.
+
+- **FRONT-0 — Bascule CSS Modules → Tailwind CSS v4 + shadcn/ui** (sur TanStack Start). Raison : l'app est construite **par une IA** → Tailwind produit plus fiablement (densité d'entraînement) ; co-location style/markup = moins de bugs de désync ; shadcn = composants **a11y possédés dans le repo** (copiés, pas une dépendance opaque) ; tourne nativement avec TanStack (install shadcn dédiée). *(Ma reco initiale « garder CSS Modules » RENVERSÉE : Lyes ne lit pas le code, il valide au rendu → l'argument « lisibilité humaine » tombe ; le bon critère = la qualité de ce que l'IA produit.)*
+- **FRONT-1 — Refonte DA COMPLÈTE** (pas un simple portage des tokens v1) : nouvelle direction visuelle définie avant d'écrire les tokens.
+- **FRONT-2 — Direction « Indy »** : clair/chaleureux (fonds crème), cartes très arrondies, ombres douces, **accent corail franc**, typo ronde, ton amical mais pro. Principe : **coque chaleureuse** enrobant des **zones de données denses** (le chaud rassure, le dense reste sérieux). Validation à l'œil sur prototype AVANT code.
+- **FRONT-3 — Pilote = écran finance gestionnaire** (TopBar + bandeau KPI + tableau d'appels de fonds) : motif le plus réutilisé et le plus difficile → sert de **golden path** (« l'exemple à copier »).
+- **FRONT-4 — Docs de bonnes pratiques FROM-SCRATCH** dans `coproflex-v2/docs/` (les docs v1 pollués `design-system.md`/`conventions.md` meurent gelés, **pas réutilisés**) : `DESIGN_TOKENS.md` (source unique, thème `@theme`), `UI_COMPONENTS.md` (shadcn + `cn()` + variants + pilote désigné), section C de `REGLES_CODE.md` réécrite (✅ fait), éventuel `PRATIQUES_AGENTIQUES.md`.
+- **FRONT-5 — Outillage design** : prototype HTML local (localhost) pour verrouiller la DA, PUIS, une fois le socle de composants posé, **`/design-sync` → Claude Design** (toile interactive, variantes, handoff vers le code à partir des **vrais composants**). `/design` + `/design-sync` sont accessibles depuis Claude Code (corrige une idée fausse antérieure).
+- **FRONT-6 — Garde-fous agentiques retenus** : gates métier figés en **CI bloquante** ; **gate « token »** (lint interdisant `text-[#…]` → forcer les tokens sémantiques) ; hooks déterministes (anti-secret `PreToolUse`, `Stop` = tsc/lint) ; un seul exemple canonique (le pilote) ; dégonfler `MEMORY.md`.
+- **Ordre** : (1) **aligner les règles actives réinjectées** (hook `rules-v2`, `CLAUDE.md`, skill `methodo`, mémoire, anti-piège v2) — ✅ **FAIT 2026-06-28** ; (2) verrouiller la DA sur le prototype ; (3) docs neufs + semer composants shadcn ; (4) `/design-sync` + design des écrans ; (5) handoff → build du pilote.
   - **Dépendances** : E1 (livrable technique) + B5 (RLS ON+FORCE + 2e cabinet) ; ANOM-01 (FORCE) ; **C17-2** (le break-glass écrit dans ce journal) ; C.15 multi-rôle (switcher) ; C.16 (admin_cabinet ≠ platform_admin).
   - **Fond.** : loi 65-557 art.18 (le **syndic seul** tient les comptes → écriture éditeur = hors mandat, sans valeur) + art.18-2/20 (conservation des pièces) ; décret 2005-240 (GL = pièce légale ; intangibilité de l'exercice approuvé) ; RGPD art.5-1-f/32 (moindre privilège, traçabilité des accès support) + 5-1-c/25 (minimisation, privacy by default = lecture seule native). *Honnêteté : `profiles.is_platform_admin`, les tables d'audit/break-glass et la distinction lecture/écriture sont ABSENTES de notre code (objets à créer), pas des obligations légales déjà violées.*
   - **Objets à créer** : colonne `profiles.is_platform_admin` + retrait `platform_admin` de l'enum `membership_role` ; refonte helpers 0023 (bypass lecture only) ; triggers anti-cumul (memberships + profiles) ; table `support_session` + RPC break-glass ; **journal d'audit (prérequis V1, cf C17-2)** ; FORCE RLS généralisé ; espace front support + nettoyage `authz.ts`/`layout.tsx`. **Termes glossaire** : « support éditeur / super-admin », « break-glass », « anti-cumul admin/gestionnaire », « journal d'audit ».

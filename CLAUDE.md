@@ -1,9 +1,9 @@
 # CLAUDE.md - CoProFlex
 
 Plateforme SaaS de gestion de copropriété (marché français).
-Frontend Next.js 16 + React 19 + TypeScript 5 + CSS Modules. Backend Supabase (prévu).
+Frontend **v2 = TanStack Start + React 19 + TypeScript 5 + Tailwind CSS + shadcn/ui** (repo dédié `coproflex-v2`). Backend Supabase. *(L'ancien front **Next.js 16 + CSS Modules = v1 GELÉ en référence, remplacé — ne plus y construire**.)*
 
-> ⚙️ **Refonte v2 en cours** dans `v2-tanstack/` (TanStack Start, from-scratch). Le `v2-tanstack/` est la cible ; l'ancien front Next reste **gelé en référence**. Décisions : `.planning/REFONTE_DECISIONS_2026-06-23.md`.
+> ⚙️ **Refonte v2** dans le **repo dédié `coproflex-v2`** (TanStack Start + Tailwind + shadcn/ui, from-scratch). L'ancien front **Next.js est gelé en référence (remplacé, on n'y construit plus)**. Décisions : `.planning/REFONTE_DECISIONS_2026-06-23.md`.
 
 ---
 
@@ -14,7 +14,7 @@ Rappelées aussi automatiquement à chaque message (hook `UserPromptSubmit` → 
 1. **From-scratch** : on ne **reproduit pas** l'ancien ; jamais « supprimer le code v1 » (il meurt gelé). **Corriger > copier.**
 2. **Grand livre = source unique** des chiffres ; solutionner la **cause**, **jamais maquiller** (ni « skip »/truquer un test).
 3. **Français vulgarisé** : le pourquoi avant le comment, métaphores du quotidien.
-4. **Stack réelle v2** : CSS Modules (**jamais Tailwind**) ; react-query + server functions → **RPC SQL** ; edge = cron/webhooks only.
+4. **Stack réelle v2** : **Tailwind CSS + shadcn/ui** (composants possédés, thème = nos tokens ; jamais de couleur en dur) ; react-query + server functions → **RPC SQL** ; edge = cron/webhooks only. *(Bascule CSS Modules → Tailwind, 2026-06-28.)*
 5. **Confirmer avant gros changement** ; petites modifs évidentes = agir.
 6. **DoD stricte** (toute feature) : tsc 0 · unit · **e2e Playwright qui PROUVE en base** · **non-régression** · lint · `/simplify` · **code review multi-agents** · vérif navigateur · PR + push. *(+ base : revue cascade + BEGIN/ROLLBACK + Advisor 0 ; + finance : audit = 0 + équilibre GL + golden inchangé.)*
 
