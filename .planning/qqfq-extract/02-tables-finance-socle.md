@@ -1,5 +1,7 @@
 # Extract qqfq — TABLES (scope socle + finance)
 
+> 🛑 **VOIE 2 — RÉFÉRENCE DE PÉRIMÈTRE, JAMAIS UN GABARIT À COPIER.** Ce fichier liste ce qui EXISTE dans qqfq (gelé). Sur la base neuve v2 on part de RIEN et on n'ajoute QUE le justifié (golden l'exerce / FK-vue le requiert / doctrine l'exige / pilote en a besoin) — cf. registre `coproflex-v2/.planning/REGISTRE_INCLUSION_0001.md`. **Ne JAMAIS recopier en bloc** tables/colonnes « parce qu'elles sont là » : chaque table ET chaque colonne se justifient. *(Copie à deux voies, BL 2026-06-28.)*
+
 > Source : projet **live `qqfqrcolzmcbsvfaumiq`** (gelé), extrait 2026-06-28 (boucle principale).
 > Matière première baseline v2 (BL-03). **0 donnée.** `NN` = NOT NULL. Type = type Postgres réel.
 > À confronter à `.planning/db-cible/01-*`, `02-*`, `03-*` pendant la consolidation (BL-08).

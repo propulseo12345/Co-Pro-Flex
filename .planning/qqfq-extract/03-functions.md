@@ -1,5 +1,7 @@
 # Extract qqfq — FONCTIONS & TRIGGERS (signatures)
 
+> ✅ **VOIE 1 — ALGORITHME : le CORPS d'une RPC retenue se copie quasi-littéral** (rouages éprouvés au centime, réécrire = risque de bug). **MAIS** le **CHOIX** des RPC/triggers à inclure reste VOIE 2 : périmètre justifié par le golden via le registre `coproflex-v2/.planning/REGISTRE_INCLUSION_0001.md`. Copier le CORPS d'une fonction **retenue**, jamais la LISTE entière « parce qu'elles sont là ». *(Copie à deux voies, BL 2026-06-28.)*
+
 > Source : projet **live `qqfqrcolzmcbsvfaumiq`** (gelé), extrait 2026-06-28 (boucle principale).
 > `args` = arguments réels ; `→ ret` = type retour ; `[DEF]` = SECURITY DEFINER, `[INV]` = INVOKER.
 > Corps complets à extraire à la demande (`pg_get_functiondef`) au moment d'écrire la baseline (BL-03).

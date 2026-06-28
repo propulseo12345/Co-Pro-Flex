@@ -945,3 +945,26 @@
 - **BL-MIN — flags mineurs tranchés (USER 2026-06-28)** : **TVA** = on GARDE `montant_ht`/`montant_tva`/`taux` sur factures (en-tête + lignes) et on aligne le golden (C14-4 Factur-X) · **`cutoff_kind`** = les 4 valeurs (CAP/CCA/PCA/PAR, référentiel comptable stable) · **`amount_paid` + statut de ligne d'appel = DÉRIVÉS** du GL, PAS stockés (doctrine G24-T11 ; garder `amount_due` seul = le fait appelé ; **adapter `allocate_payment`/`reverse_payment`** = réécriture assumée) · **`total_tantiemes`** = garde-fou déclaré (assertion `Sum(weight clé générale) == total`) **mais JAMAIS bloquant** (avertit, ne verrouille pas — principe transverse, cf. mémoire `coherence_guards_non_blocking` + « alerter > verrouiller ») ; le tantième VIT dans `repartition_key_lines` · **`lot_type`** = aligner sur le glossaire, défaut `commerce` (valeur qqfq), corriger le golden. ⚠️ `garage` vs `parking` NON tranché : l'audit le disait « doublon » mais en copro un **garage (box fermé) ≠ une place de parking** — question de taxonomie ouverte à confirmer (NE PAS dropper `garage` à l'aveugle).
 
 > **Flags restants AVANT d'écrire `0003`** (cf. `BL_AUDIT_FROMSCRATCH`) — à résoudre par LECTURE DE CORPS de RPC (boucle principale, factuel) : set exact `ledger_source_type` · `post_alur_transfer`/`settle_alur_transfer_cash` (table `alur_transfers` gardée ou GL-pur ?) · `commitments` poster prouvé (408) vs confort (486) · séquences de pièces réellement consommées · `validate_budget_expense` disparaît (PE-1). **+ corriger les codes classe 6 du PLAN_GOLDEN** (eau 602→601, chauffage 606→603, syndic 622→621, **frais CS 618→624 TRANCHÉ** ; montants inchangés). Les flags mineurs sont TRANCHÉS (BL-MIN ci-dessus).
+
+### BL — Résolution du registre d'inclusion 0001 + lecture des corps de RPC (2026-06-29, USER)
+
+> Registre d'inclusion généré (workflow ultracode) puis tranché : **403 objets retenus / 229 exclus / 36 questions, 3 blockers résolus**. Source d'écriture de `0001` = `coproflex-v2/.planning/REGISTRE_INCLUSION_0001.md` (section « Décisions tranchées 2026-06-29 » en tête). Garde-fou anti-rechute « copier les migrations » posé : `PLAN_PILOTE_FINANCE` retourné en mode **additif** (plus « squash du live ») + bannières **voie 1 / voie 2** sur `.planning/qqfq-extract/`.
+
+**Factuel (lecture des corps de RPC qqfq, boucle principale) — complète BL-PE-4 :**
+- **`ledger_source_type` ouverture/clôture FIGÉ** : garder `opening_balance` (à-nouveau, `open_next_period`) **ET `closing`** (cut-off, `post_period_cutoff`) ; **bannir `opening` nu** ; garder `opening_onboarding`. *(Correction : le robot supposait `od` pour le cut-off — c'est `closing`. Reste du set à confirmer au fil des RPC de 0003.)*
+- **`resolve_lot_tiers_account` prend du TEXTE** (pas l'enum) → retirer `loan`/`doubtful` de `account_receivable_nature` ne casse pas la compilation ; set cible = **{current, works, advance, alur}**, branche morte `loan→450-4` nettoyée à la copie. Pas de seed 450-4/459.
+- **Clôture** : `open_next_period` ventile courant → **478**, travaux → **12** (via `charge_nature` `courant`/`travaux`) ; `cutoff_kind` = **4 sens** confirmés (le cast `::cutoff_kind` les exige).
+
+**Métier (tranché Lyes) :**
+- **Avoir fournisseur INCLUS en 0001** (`post_supplier_credit_note` + `supplier_doc_kind=credit_note`, cohérent avec `cancel_supplier_invoice`).
+- **Budget complémentaire = version du même budget** (`budgets.version` CONSERVÉ ; rectificatif voté en cours d'exercice = incrément de version, l'appel complémentaire réclame le delta — golden chauffage 11 500→13 500).
+- **État daté art.5 DIFFÉRÉ** de 0001 → **priorité n°1 du module ventes/mutations** (le golden l'exerce au centime, vente B-101).
+- **`payment_method` = {transfer, check, direct_debit, other}** (drop `cash`/`card`).
+
+**Statuts d'appel (confirme BL-MIN, doctrine G24-T11) :** payé/partiel **dérivés en vue** `v_call_lines_by_lot_gl`, jamais stockés ; `call_for_funds_status` stocké = **{draft, issued, cancelled}** ; on **ne copie pas** `update_call_status` ni le trigger de statut de ligne.
+
+**Plomberie (défaut, à rediscuter si besoin) :** `accounts.charge_nature` en **liste fermée** (`courant`/`travaux`, conservées pour ne pas casser la copie) ; **colonne `reversal_of_tx_id`** (FK self) pour l'audit d'annulation C17-2 ; `total_tantiemes` = garde-fou non bloquant (= BL-MIN).
+
+**Confirme la direction MAIGRE :** `commitments` (l'engagé) **différé** — le golden ne formalise aucun engagé devis/OS, seul le réalisé classe 6 (via `post_supplier_invoice`) est exercé ; `alur_transfers` **hors baseline** (faux-mort BL-06 ; ALUR dérivé du GL via `v_alur_fund_balance`).
+
+> **Reste AVANT `0001`** : écrire le plan de migration (paliers `0001-0004`) depuis le registre tranché → revue cascade multi-agents → BEGIN/ROLLBACK → revue Lyes → apply `oio`. Flags mineurs encore ouverts (non bloquants) : **séquences de pièces**, **`garage` ↔ `parking`** (valeurs `lot_type`), **définition exacte de `v_call_lines_by_lot_gl`** (Palier 1.1).

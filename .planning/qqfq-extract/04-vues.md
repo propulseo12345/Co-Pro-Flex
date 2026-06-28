@@ -1,5 +1,7 @@
 # Extract qqfq — VUES (classées par source)
 
+> 🛑 **VOIE 2 — RÉFÉRENCE DE PÉRIMÈTRE, JAMAIS UN GABARIT À COPIER.** Ce fichier liste ce qui EXISTE dans qqfq (gelé). Sur la base neuve v2 on part de RIEN et on n'ajoute QUE le justifié (golden l'exerce / objet inclus la requiert pour la preuve / doctrine) — cf. registre `coproflex-v2/.planning/REGISTRE_INCLUSION_0001.md`. **Ne JAMAIS recopier en bloc** les vues : seules les vues de PREUVE (famille A+C) entrent en baseline, le reste est reporté. *(Copie à deux voies, BL 2026-06-28.)*
+
 > Source : projet **live `qqfqrcolzmcbsvfaumiq`** (gelé), extrait 2026-06-28 (boucle principale).
 > Colonnes : quelles tables-source la vue lit (✅=oui). Définitions complètes à extraire à la demande (`pg_get_viewdef`).
 > À confronter à `.planning/db-cible/02 §5bis` et au tri BL-06.
