@@ -116,13 +116,13 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 ### 2.5 Checks de cohérence des clés (à vérifier dans le seed et en spec)
 
 1. **K1 = 10 000 = `copros.total_tantiemes`** (exact). Couvre les 18 lots.
-2. **K7 (ALUR) = 10 000, identique à K1** (cotisation au prorata des tantièmes).
+2. **Cotisation ALUR = au prorata des tantièmes (assiette = clé générale K1, Σ = 10 000), 0,50/tantième — PAS une clé K7 distincte** (cf. [CORRECTION 2026-06-22] : l'ALUR vient du `budget_type='alur'`, jamais d'une clé de catégorie 'alur'). La colonne K7 du tableau §2.4 est **informative (= K1)**, pas un `repartition_key`.
 3. **Partition bâtiments stricte : K3 (7 520) + K4 (2 480) = 10 000.** Aucun lot dans les deux, tous couverts.
 4. **K2 (ascenseur) = 6 lots = apparts Bât A étage ≥1**, pondération étage (1→100, 2→200, 3→300), Σ = 1 200. Les 12 autres exclus.
 5. **K5 (eau) : base surface (≠ tantièmes), Σ = 830 m².** Caves et parkings exclus.
 6. **K6 (chauffage) = 6 apparts Bât A, Σ = 5 750** (= somme de leurs tantièmes K1).
 7. **Inclusions : K6 (6 apparts) = couverture K2 (6 apparts) ⊂ K3 (14 lots Bât A).** Cohérent.
-8. **Modèle de données :** `tantiemes_generaux` **n'est PAS** une colonne de `lots`. Il est dérivé de `repartition_key_lines.weight` sur la clé `category='general'`. Le seed crée 1 ligne (clé générale, lot, weight) par lot + lignes des clés spéciales/ALUR **uniquement pour les lots couverts** (jamais de `weight=0` en mode subset, sinon le compteur « N/M lots » est faussé).
+8. **Modèle de données :** `tantiemes_generaux` **n'est PAS** une colonne de `lots`. Il est dérivé de `repartition_key_lines.weight` sur la clé `category='general'`. Le seed crée 1 ligne (clé générale, lot, weight) par lot + lignes des **clés spéciales uniquement** (K2-K6 ; **PAS de clé ALUR** — l'ALUR se calcule depuis le `budget_type` sur l'assiette générale) **pour les lots couverts** (jamais de `weight=0` en mode subset, sinon le compteur « N/M lots » est faussé). **6 clés réelles**, pas 7.
 
 ---
 
@@ -142,7 +142,7 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 | Facture — paiement | 401 | 512 | `post_supplier_payment` | 0026:881-979 |
 | Avoir fournisseur | 401 | 6xx (écriture inverse) | `post_supplier_credit_note` | 0044:40-161 |
 | Cut-off droits constatés (art.14-3) | 6x/7x ou contrepartie | 408 / 486 / 487 / 421… **jamais 45x** | `post_period_cutoff` / extourne `reverse_period_cutoff` | 0027:233-489 |
-| Dépense budgétaire → réalisé | 6xx (compte de la ligne) | 401 | `validate_budget_expense` | 0027:912-997 |
+| Engagement (devis/OS voté, non facturé) | *(aucune écriture GL)* | *(aucune)* | `commitments` (BL-PE-1, table neuve) | l'engagé ne touche PAS le GL ; le **réalisé** classe 6 vient EXCLUSIVEMENT de `validate_supplier_invoice` (ci-dessus). `budget_expenses`/`validate_budget_expense` SUPPRIMÉES (BL-PE-1/BL-05, fin du double-posting). |
 | Affectation fonds ALUR à un budget travaux | 105 | 705 | `post_alur_transfer` | 0037:17-121 |
 | Règlement cash ALUR (Livret A→courant) | 512 | 502 | `settle_alur_transfer_cash` | 0037:126-201 |
 | Clôture technique | *(bascule statut)* | — | `close_period` / `approve_period` / `reopen_period` | 0027:77-223 |
@@ -168,7 +168,7 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 4. **Trop-perçu** = `round(p_amount − v_allocated, 2)` → 450-3 (0026:707).
 5. Toute l'arithmétique en `numeric(14,2)`, **égalité stricte, aucun epsilon** (0025:476-477).
 
-> **[CORRIGÉ — conséquence majeure des verdicts adversariaux]** Le télescopage est order-invariant **uniquement** quand la clé divise proprement. Or par **trimestre**, K1 → 0,64375 EUR/tantième et K5 (surface) → 1037,50/830 produisent un **demi-cent résiduel** dont le placement dépend de l'ordre des lots (`lot_id` UUID). **Les cents par lot du courant trimestriel/annuel ne sont donc PAS déterministes** et ne doivent jamais être figés comme « sortie GL canonique ». Voir §6.1 et la recommandation de test (appel courant en **1 seul appel annuel** pour rendre le seed déterministe).
+> **[CORRIGÉ — conséquence majeure des verdicts adversariaux + audit golden 2026-06-28]** Le télescopage est order-invariant **uniquement** quand la clé divise proprement. Par **trimestre**, **seule K1** (0,64375 EUR/tantième, sur les lots dont le tantième K1 n'est PAS multiple de 8) produit un **demi-cent résiduel** dont le placement dépend de l'ordre des lots (`lot_id` UUID). **K5 (eau) = 1,25 EUR/m² EXACT** (1037,50/830, surfaces entières) → divise proprement, **AUCUN résidu** ; idem toutes les autres clés. Donc les cents par lot du courant trimestriel ne sont pas déterministes **pour les seuls lots à résidu K1** et ne doivent pas y être figés comme « sortie GL canonique » ; partout ailleurs ils sont assertables au centime. Échéancier = **TRIMESTRIEL** (D14/BL-09 ; l'« appel annuel unique » est ABANDONNÉ — contournement banni). Voir §6.1 et §9 risque #1.
 
 ### 3.3 Ce que vérifie `audit_finance_integrity` (0028:657-758)
 
@@ -181,19 +181,27 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 
 **Limites (NON couvert par l'audit) :** solde du fonds 105/ALUR, comptes d'attente 12/478, cohérence facture/paiement fournisseur, invariant 478/12 (ce dernier a son propre garde-fou bloquant `assert_result_allocation_split` en fin de `regularize_period`).
 
-### 3.4 Fonctions cassées / non câblées à contourner
+### 3.4 Invariants v2 encore vrais + statut v2 des anciennes fonctions
 
-| Symptôme | Détail | Contournement |
-|----------|--------|---------------|
-| `createCall` (api.ts:351-388) | appelait `post_call_for_funds` (inexistante) → **migré** vers `post_budget_call_for_funds` ; exige désormais `budget_id` | passer par le budget voté ; `total_amount`/`repartition_key_id` du payload devenus informatifs |
-| `categorizeBankMovement` (api.ts:973) | NEUTRALISÉE (colonnes supprimées en 0014) | utiliser `reconcileBankMovement` |
-| `approvePeriod` / `rejectPeriod` (api.ts:1184-1224) | UPDATE direct `status='approved'/'rejected'` ; `'rejected'`/`'locked'` sont des valeurs **mortes** (enum = open/closed/approved) | utiliser la RPC `approve_period` (0027:119), pas l'UPDATE nu |
-| `listUnmatchedPayments` (api.ts:1886) | filtre `status='validated'` inexistant (enum = recorded/reconciled/reversed) | ne remonte rien — requête à corriger |
-| `fn_annexe_*` | versions 0028 = scalaires (crash `.map` / PDF blanc) → **réécrites format riche en 0075** | **vérifier que le live est ≥ 0075** ; annexe 1 convocation historiquement cassée |
-| Relances impayés | moteur codé (cron 0055) mais UI ventes non entièrement câblée | **ne pas supprimer `useImpayesMutations`** |
-| `unallocate_payment` (0087) | inaccessible à `authenticated` (interne) | appelée seulement par `reverse_payment` |
-| `cancel_supplier_invoice` (0087) | appliquée mais **non testée fonctionnellement**, gate front `canReverseSelected` non câblée | à éprouver en spec ciblée |
-| `reverse_payment` sur appel en période **approuvée** | mute `amount_paid` de l'appel clos (GL préservé via extourne en période ouverte) | **arbitrage métier à confirmer** (cf. §9) |
+> Réécrit 2026-06-28 (BL-03 « corriger > copier » + « solutionner, JAMAIS contourner »). La baseline v2 est NEUVE : on ne « contourne » plus rien. Ci-dessous les **invariants comptables à préserver** et le **statut v2** des anciennes fonctions v1. Les références aux numéros de migration du live qqfq (0014, 0026, 0055, 0075, 0087…) sont **sans objet sur la base neuve oio**.
+
+**Invariants à préserver (voie 1 : copie du corps éprouvé) :**
+- **FIFO d'imputation** : `issue_date asc, id asc`, cloisonné par nature (450-x).
+- **Mapping nature → 450-x** : current→450-1, works→450-2, advance→450-3, loan→450-4, alur→450-5 ; 459 (douteux) hors FIFO.
+- **Garde de routage 12/478** : `assert_result_allocation_split` en fin de `regularize_period` (**bloquante**).
+- **Émission d'appel** : route unique `post_budget_call_for_funds` (exige `budget_id`) ; `post_call_for_funds` mono-clé **BANNIE**.
+- **`amount_paid` + statut de ligne d'appel = DÉRIVÉS du GL** (BL-MIN, G24-T11), jamais mutés en cache → l'ancien souci « `reverse_payment` mute `amount_paid` d'un appel clos » **disparaît à la source**.
+
+**Statut v2 des anciennes fonctions v1 (cf. décisions BL) :**
+| Ancienne fonction / table v1 | Statut v2 |
+|------------------------------|-----------|
+| `budget_expenses` / `validate_budget_expense` | **SUPPRIMÉES** (BL-PE-1) — engagé = `commitments` (no GL), réalisé = `validate_supplier_invoice` |
+| Relances impayés (`useImpayesMutations`, cron) | **DIFFÉRÉES** (BL-PE-2) — la baseline détecte l'impayé via le GL, n'envoie rien |
+| `fn_annexe_*` / annexes légales | **DIFFÉRÉES hors baseline** (BL-06) — preuve via `audit_finance_integrity` + vues de solde |
+| Bancaire (`categorizeBankMovement` / `reconcileBankMovement` / `bank_movements`) | **DIFFÉRÉ** (BL-06, faux-morts) |
+| `approve_period` / `reopen_period` | **RPC gardées** ; jamais d'UPDATE nu de `status` ; valeurs `rejected`/`locked` mortes RETIRÉES de l'enum `period_status` (BL-AUDIT) |
+| `create_ledger_transaction` | **RÉÉCRITE** (retrait du `WHEN OTHERS THEN success:false`, BL-03) |
+| `cancel_supplier_invoice` / contre-passations | **à éprouver en spec ciblée** (`corrections-contre-passation.spec.ts`) |
 
 ---
 
@@ -203,14 +211,14 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 |------|-----------|-------------|
 | 2026-01-15 | **AGO 2026** : budget courant 50 000, ALUR 5 000, ravalement façade A (art.25, K3) 22 560 ; échéancier trimestriel | — |
 | 2026-01-01 | **Appel T1** : courant 12 500 + ALUR 5 000 (en 1 fois) | 17 500 |
-| 2026-01-10 | **Facture F1 Otis** (entretien ascenseur, 615, K2) saisie | 3 600 |
+| 2026-01-10 | **Facture F1 Otis** (contrat maintenance ascenseur, 614, K2) saisie | 3 600 |
 | 2026-01-15 | F1 payée (D401/C512) | 3 600 |
 | 2026-04-01 | **Appel T2** : courant 12 500 + travaux ravalement 22 560 | 35 060 |
 | 2026-06-15 | **AGE 2026** : toiture A (art.25, K3) 37 600 + appel except. (exig. 01/09) + budget complémentaire chauffage +2 000 (K6) | — |
 | 2026-07-01 | **Appel T3** : courant 12 500 | 12 500 |
 | 2026-09-01 | **Appel exceptionnel toiture** exigible | 37 600 |
 | 2026-10-01 | **Appel T4** : courant 12 500 | 12 500 |
-| 2026-12-28 | **Facture F2 Veolia** (eau, 602, K5) reçue, **non payée** → cut-off 408 | 1 037,50 |
+| 2026-12-28 | **Facture F2 Veolia** (eau, 601, K5) reçue, **non payée** → cut-off 408 | 1 037,50 |
 | 2026-12-31 | **Clôture provisoire 2026**. Impayés : Hugo partiel, Thomas total | — |
 | 2027-01-12 | Paiement F2 Veolia (en 2027) | 1 037,50 |
 | 2027-01-01 / 04-01 | **Appels T1/T2 2027** : courant 13 000/trim + ALUR | 13 000 +ALUR |
@@ -289,9 +297,9 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 | K6 (chauffage) | 11 500 | 2 875,00 |
 | **Total** | **50 000** | **12 500,00** |
 
-> Détail des 9 postes du budget 2026 : Assurance 616/K1 10 000 ; Honoraires syndic 622/K1 8 000 ; Nettoyage+élec 615+606/K1 7 000 ; Ascenseur 615/K2 3 600 ; Eau 602/K5 4 150 ; Chauffage 606/K6 11 500 ; Espaces verts A 615/K3 3 760 ; Entretien B 615/K4 1 240 ; Honoraires CS 618/K1 750. **Σ = 50 000.**
+> Détail des 9 postes du budget 2026 (codes alignés arrêté 14 mars 2005, cf. BL-CHART) : Assurance 616/K1 10 000 ; Honoraires syndic 621/K1 8 000 ; Nettoyage 611 + élec 602/K1 7 000 ; Ascenseur (contrat Otis) 614/K2 3 600 ; Eau 601/K5 4 150 ; Chauffage 603/K6 11 500 ; Espaces verts A 615/K3 3 760 ; Entretien B 615/K4 1 240 ; Honoraires CS 624/K1 750. **Σ = 50 000.**
 
-**⚠️ NON DÉTERMINABLE au centime sans l'ordre `lot_id` :** par trimestre, K1 (0,64375/tantième) et K5 (surface, 1037,50/830) laissent un demi-cent résiduel placé selon l'ordre des lots. **Ne JAMAIS figer les cents par lot du courant comme valeur canonique.** Pour chaque lot à résidu (A-RDC-C1, A-RDC-C2, A-102, A-202, A-302, caves, parkings) → noter « quote-part théorique = `round(part exacte)`, ± 1 cent selon ordre, **total garanti** ».
+**⚠️ NON DÉTERMINABLE au centime sans l'ordre `lot_id` :** par trimestre, **seule K1** (0,64375/tantième) laisse un demi-cent résiduel placé selon l'ordre des lots, sur les lots dont le tantième K1 n'est pas multiple de 8 (**K5 eau = 1,25/m² EXACT → aucun résidu**). **Ne JAMAIS figer les cents par lot du courant K1 comme valeur canonique** sur ces lots. Lots à résidu K1 (**12 lots**) : A-RDC-C1, A-RDC-C2, A-102, A-202, **A-301**, A-302 + 4 caves + 2 parkings → noter « quote-part théorique = `round(part exacte)`, ± 1 cent selon ordre, **total garanti** ». (Lots à division propre, assertables au centime : A-101, A-201, B-RDC-1/2, B-101/102.)
 
 **Valeurs ROBUSTES (division propre, déterministes) :**
 
@@ -324,7 +332,7 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 
 **Équilibre GL [CONFIRMÉ] :** débit total = crédit total = **115 160,00** ; chaque opération équilibrée ; conforme LEDGER_UNBALANCED et LOT_ID_MISSING_45X.
 
-> **Recommandation de test (issue de la vérif) :** pour un seed/test **déterministe**, appeler le courant en **UN SEUL appel annuel** (`fraction=1`), ce qui annule l'artefact `4·round ≠ round·4`. À défaut, figer l'ordre des lignes et accepter ± 1 cent par lot (l'audit ne le détecte pas, `call_for_funds_lines` portant les mêmes valeurs dérivées).
+> **Recommandation de test (issue de la vérif, alignée D14/BL-09) :** échéancier **TRIMESTRIEL** (l'« appel annuel unique » est ABANDONNÉ — contournement banni). Le seed asserte les cents par lot **uniquement sur les lots à division propre** (A-101, A-201, B-RDC-1/2, B-101/102) + les **totaux et soldes par propriétaire** (exacts) ; les **12 lots à résidu K1 tolèrent ± 1 cent** (l'audit ne le détecte pas, `call_for_funds_lines` portant les mêmes valeurs dérivées). Voir §9 risque #1.
 
 ### 6.2 Encaissements — **[OK, verdict « ok » — valeurs validées au centime]**
 
@@ -344,7 +352,7 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 | Emma Fontaine | 2 445,00 | total | 0 |
 | **Total impayés fin 2026** | | | **6 337,50** |
 
-> Σ des dus par propriétaire = **77 560,00**. (Ce « 77 560 » est le périmètre encaissé/impayé ; le grand total appelé reste 115 160 toiture incluse.)
+> Σ des dus par propriétaire = **77 560,00** (périmètre courant + ALUR + ravalement, **hors toiture AGE**). **Toiture exceptionnelle (37 600, exigible 01/09/2026) : encaissée avant clôture par TOUS les lots Bât A SAUF Hugo (A-201)**, qui laisse sa part de 4 000 impayée (USER 2026-06-28). D'où l'impayé GL strict TOTAL §6.4 = 6 337,50 (hors toiture) + 4 000 (toiture Hugo) = **10 337,50**. Le grand total appelé reste 115 160 toiture incluse.
 
 **Détails FIFO validés :**
 - **Hugo A-201**, dû 7 785,00 = courant 4 985,00 + ALUR 400,00 + ravalement 2 400,00. Versement 3 892,50 → FIFO multi-nature : courant 2 492,50 + ALUR 400,00 + ravalement 1 000,00. **Résiduel : 450-1 = 2 492,50 ; 450-2 = 1 400,00 ; 450-5 = 0,00.**
@@ -360,14 +368,14 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 
 ### 6.3 Factures fournisseur — **[OK, verdict « ok »]**
 
-**F1 Otis (3 600,00 TTC, TVA non récup → ligne = TTC) :**
-- Validation 10/01 : **D 615 = 3 600,00 / C 401 = 3 600,00** (équilibrée).
+**F1 Otis (3 600,00 TTC, contrat maintenance ascenseur, TVA non récup → ligne = TTC) :**
+- Validation 10/01 : **D 614 = 3 600,00 / C 401 = 3 600,00** (équilibrée).
 - Paiement 15/01 : **D 401 = 3 600,00 / C 512 = 3 600,00** → facture `paid`.
 
 **F2 Veolia (1 037,50 TTC) :**
-- Cut-off 31/12/2026 (CAP) : **D 602 = 1 037,50 / C 408 = 1 037,50** (rattache à 2026).
-- Extourne auto 01/01/2027 (`open_next_period` → `reverse_period_cutoff`) : **D 408 = 1 037,50 / C 602 = 1 037,50**.
-- Facture 2027 + paiement 12/01/2027 : **D 602/C 401** puis **D 401 = 1 037,50 / C 512 = 1 037,50**.
+- Cut-off 31/12/2026 (CAP) : **D 601 = 1 037,50 / C 408 = 1 037,50** (rattache à 2026).
+- Extourne auto 01/01/2027 (`open_next_period` → `reverse_period_cutoff`) : **D 408 = 1 037,50 / C 601 = 1 037,50**.
+- Facture 2027 + paiement 12/01/2027 : **D 601/C 401** puis **D 401 = 1 037,50 / C 512 = 1 037,50**.
 - **Charge eau nette : 2026 = +1 037,50 ; 2027 = 0** (extourne −1037,50 + facture +1037,50). Conforme art.14-3.
 
 > Le « D408/C512 » du scénario est un raccourci de modélisation : effet net identique (charge 2026, décaissement 2027, 408 soldé). Les valeurs livrées suivent le **comportement réel du code** (auto_reverse).
@@ -382,9 +390,9 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 | Quote-part travaux | **6,016 EUR/tantième** | [CONFIRMÉ] |
 | Invariant affectation | **478 + 12 = 105 522,50** = net source | [CONFIRMÉ] |
 | À-nouveau | **111 560,00 = 111 560,00** (équilibré) | [CONFIRMÉ] |
-| **Impayé GL strict** | **10 207,50** (Hugo A-201 6 907,50 + Thomas B-101 3 300,00) | [CONFIRMÉ — prime sur les chiffres scénario 7 785/2 445] |
+| **Impayé GL strict** | **10 337,50** (Hugo A-201 7 892,50 [courant 2 492,50 + ravalement 1 400 + toiture 4 000] + Thomas B-101 2 445,00 [courant 2 145 + ALUR 300]) | [CORRIGÉ 2026-06-28 — l'ancien « 10 207,50 / Hugo 6 907,50 / Thomas 3 300 » était arithmétiquement IMPOSSIBLE : Thomas (Bât B, 0 travaux) a un dû TOTAL de 2 445 < 3 300. Hyp. toiture encaissée sauf Hugo (USER)] |
 
-**Détail à-nouveau (équilibre) :** 512 = 101 352,50 + 45x = 10 207,50 **|** 105 (ALUR) = 5 000 + 408 = 1 037,50 + 478 = 45 362,50 + 12 = 60 160,00. → **111 560,00 = 111 560,00.**
+**Détail à-nouveau (équilibre) :** 512 = 101 222,50 + 45x = 10 337,50 **|** 105 (ALUR) = 5 000 + 408 = 1 037,50 + 478 = 45 362,50 + 12 = 60 160,00. → **111 560,00 = 111 560,00.**
 
 > **[CORRIGÉ — erreur arithmétique du cumul]** Le **LEDGER CHECK global** (somme des 5 écritures de clôture) vaut **219 157,50 EUR** débit = **219 157,50 EUR** crédit, **et NON 218 157,50** (écart d'exactement 1 000 dans le rapport initial). Détail : 1 037,50 (cut-off F2) + 111 560,00 (à-nouveau) + 1 037,50 (extourne) + 45 362,50 (affect. courant) + 60 160,00 (affect. travaux) = **219 157,50**. Les débits restent = crédits ; seule la somme cumulée affichée était fausse.
 
@@ -398,18 +406,18 @@ Cross-check : 1 550 + 910 + 2 160 + 950 + 800 + 1 150 + 640 + 640 + 600 + 600 = 
 
 | Partie | Poste | Montant |
 |--------|-------|---------|
-| **Partie 1** (dû par le vendeur) | 450-1 débiteur | **3 217,50** |
+| **Partie 1** (dû par le vendeur) | 450-1 débiteur (2026 impayé 2 145 + T1 2027 échu 536,25) | **2 681,25** |
 | | 450-5 (ALUR, **inclus en P1** — exclu seulement de P2) | **600,00** |
-| | **Total P1** | **3 817,50** |
+| | **Total P1** | **3 281,25** |
 | **Partie 2** (dû par le syndicat au vendeur) | — (450-5 ALUR exclu, non remboursable) | **0,00** |
 | **Partie 3** (charge acquéreur Garnier) | provisions appelées non échues (T2 2027 non échu) | **536,25** |
 | | autres postes P3 | 0,00 |
 | | **Total P3** | **536,25** |
 | Quote-part B-101 | 600/10 000 | **6,0000 %** |
 
-> Équilibre des appels sous-jacents : 3 817,50 D = C. **[CONFIRMÉ]**
+> Équilibre des appels sous-jacents : 3 281,25 D = C. **[CONFIRMÉ — corrigé 2026-06-28 : l'ancien 3 817,50 double-comptait le T2 2027 (à la fois P1 échu et P3 non échu)]**
 >
-> **Réserves (hypothèses, pas des erreurs) :** (1) P3 = 536,25 **suppose T2 2027 due_date > 2027-04-15** ; si T2 échu, P3 → 0. (2) `provisions_votees_non_appelees_courant = 0` **suppose** que le budget 2026 n'est plus `status='validated'` au 15/04/2027 ; sinon ce poste deviendrait 1 072,50. → arbitrages données, voir §9.
+> **Hypothèses TRANCHÉES (USER 2026-06-28, option A) :** base 2027 = **trimestriel 2026 reconduit (536,25/trim)** ; **T1 2027 échu** (due_date < 15/04 → entre en P1), **T2 2027 NON échu** (due_date figé > 2027-04-15 → P3 = 536,25). Plus de double-compte du T2 (P1 450-1 = 2 681,25). Le seed FIGE les `due_date` T1/T2 2027 + le montant trimestriel 2027 de B-101 ; `generate_etat_date_payload` calcule P1/P3 (incohérence supprimée à la source). `provisions_votees_non_appelees_courant = 0` (budget 2026 plus `validated` au 15/04/2027).
 
 ---
 
@@ -458,9 +466,9 @@ La copro est **créée vierge depuis l'UI** puis parcourt toute la timeline §4 
 ## 9. Risques connus / points à confirmer (open questions)
 
 1. **[RÉSOLU 2026-06-22 — TRIMESTRIEL + tolérance ± 1 cent]** Cents par lot du courant non déterministes (K1 par trimestre 0,64375 ; K5 surface 1037,50/830) → demi-cent résiduel placé selon l'ordre `lot_id`. **Décision USER : garder l'échéancier trimestriel (réaliste).** Les specs asserteront les cents par lot **uniquement sur les lots à division propre** (A-101, A-201, B-RDC-1/2, B-101/102) + les **totaux et soldes par propriétaire** ; les lots à résidu (A-RDC-C1/C2, A-102, A-202, A-302, caves, parkings) **tolèrent ± 1 cent**. Totaux assertés exacts (T1 = 12 500 ; annuel = 50 000 ; grand total = 115 160). (verdict appels)
-2. **Impayé GL strict ≠ chiffres scénario.** Le GL donne **10 207,50** (Hugo 6 907,50 + Thomas 3 300,00) alors que le scénario annonçait 6 337,50 (7 785/2 445). Le GL prime ; **réconcilier le récit du scénario** avec la base. (verdict clôture)
+2. **[RÉSOLU 2026-06-28]** Impayé GL strict fin 2026 = **10 337,50** (Hugo A-201 7 892,50 + Thomas B-101 2 445). L'ancien « 10 207,50 / Hugo 6 907,50 / Thomas 3 300 » était **arithmétiquement impossible** (Thomas, Bât B sans travaux, a un dû total de 2 445 < 3 300). Hyp. tranchée USER : toiture (37 600) encaissée avant clôture par tous SAUF Hugo → §6.2 (6 337,50 hors toiture) + Hugo toiture 4 000 = 10 337,50. (verdict clôture)
 3. **Cumul LEDGER CHECK corrigé à 219 157,50** (et non 218 157,50). Vérifier que la spec asserte la bonne valeur. (verdict clôture)
-4. **État daté P3 dépend d'hypothèses de dates :** échéance T2 2027 (échu ou non → 536,25 vs 0) et statut du budget 2026 au 15/04/2027 (`validated` ou non → 0 vs 1 072,50). **Figer les `due_date` et le statut budget dans le seed.** (verdict état_daté)
+4. **[RÉSOLU 2026-06-28, option A]** État daté B-101 : base 2027 = 536,25/trim reconduit ; T1 2027 échu (entre en P1), T2 2027 NON échu (due_date figé > 15/04 → P3 = 536,25) ; budget 2026 plus `validated` (provisions non appelées = 0). **P1 450-1 = 2 681,25** (plus de double-compte du T2 ; Total P1 = 3 281,25). Le seed fige les `due_date`. (verdict état_daté)
 5. **Garde « AGE + budget » non prouvée** (`validate_budget 0026:1047-1049` non vérifiable). À éprouver en `BEGIN/ROLLBACK`. (verdict ag_layout)
 6. **`reverse_payment` sur appel en période approuvée** mute `amount_paid` de l'appel clos (GL préservé) → **arbitrage métier à confirmer**. (conventions, openOrphans)
 7. **`cancel_supplier_invoice` non testée fonctionnellement** + gate front `canReverseSelected` non câblée → spec ciblée + câblage à décider. (conventions)
