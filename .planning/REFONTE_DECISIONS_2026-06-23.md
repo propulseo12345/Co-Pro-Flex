@@ -968,3 +968,16 @@
 **Confirme la direction MAIGRE :** `commitments` (l'engagé) **différé** — le golden ne formalise aucun engagé devis/OS, seul le réalisé classe 6 (via `post_supplier_invoice`) est exercé ; `alur_transfers` **hors baseline** (faux-mort BL-06 ; ALUR dérivé du GL via `v_alur_fund_balance`).
 
 > **Reste AVANT `0001`** : écrire le plan de migration (paliers `0001-0004`) depuis le registre tranché → revue cascade multi-agents → BEGIN/ROLLBACK → revue Lyes → apply `oio`. Flags mineurs encore ouverts (non bloquants) : **séquences de pièces**, **`garage` ↔ `parking`** (valeurs `lot_type`), **définition exacte de `v_call_lines_by_lot_gl`** (Palier 1.1).
+
+### BL-R1 — Découpage des migrations RPC finance (grilling 2026-06-29, suite)
+
+> Chantier = écrire les RPC du cœur finance depuis les corps qqfq (copie à 2 voies). Extraction faite (19 corps → `coproflex-v2/.planning/rpc-qqfq/qqfq-rpc-bodies.sql`). Détail vivant : `PROGRESS_v2-migrations.md`.
+
+**R1-01 — Périmètre R1 = MAIGRE, chemin courant dans l'année (12 fn)** [tranché Lyes]. R1 = `0004` (create/post_ledger_transaction · get_period_for_date · **get_open_period neuve** · provision_copro_chart · resolve_lot_tiers_account · set_account_charge_nature · compute_repartition_shares) + `0005` (post_budget_call_for_funds + helper `repartition_key_is_complete` · post_owner_payment · allocate_payment · get_lot_balance_45x). Prouvé SEUL par le golden 2026 (appels + encaissements), sans dépendance cut-off/corrections/reprise.
+- **Différé → 0006 (avec cut-off)** : close/approve/reopen_period + `open_next_period`. **Raison dure** : `open_next_period` appelle `reverse_period_cutoff` (cut-off) → l'y mettre en R1 = scope creep.
+- **Différé → tranche corrections** : `reverse_ledger_transaction` · `cancel_call_for_funds` · `reverse_payment` (hors golden narratif, spec `corrections-contre-passation`).
+- **Différé → tranche reprise** : `set_opening_balance` (reprise de mandat « TOUT différée »).
+
+**Plomberie confirmée (lecture des corps, boucle principale) :** `create_ledger_transaction` qqfq est DÉJÀ propre (aucun anti-pattern `WHEN OTHERS→success:false`) → voie1+bigint, **pas rewrite**. `post_budget_call_for_funds` = **générique 3 natures** (current→701, works→702, alur→105). `repartition_key_is_complete` = **garde dur** à l'émission (refuse si la clé ne couvre pas tous les lots) → adapter `coverage_mode`→`repartition_category` (general = tous lots / special = subset ≥1 ligne weight>0). Reconfirme (déjà BL-MIN) : `reversal_of_tx_id` = colonne (pas `metadata`), `call_for_funds_lines` sans `amount_paid`/`status`.
+
+**TRANCHÉ (2026-06-29, suite) :** **Q3 — Gate 1 = monde budgété complet 77 560** = courant 50 000 (C701) + travaux 22 560 (C702) + ALUR 5 000 (C105) via `post_budget_call_for_funds` + encaissements + impayé hors toiture **6 337,50** + `audit_finance_integrity`=0 + équilibre GL + golden inchangé ; toiture exceptionnelle 37 600 (`post_exceptional_call`) hors R1. **Q4 — Workflow B = pipeline par fonction + filet de cohérence** (chaque fn : auteur → auto-vérif vs 0001-0003 ; rewrites = agents dédiés ; assemblage + cohérence globale par migration). Design détaillé : `PROGRESS_v2-migrations.md` (§ Phase B). Extraction R1 **complète** (`rpc-qqfq/qqfq-rpc-bodies.sql` + `helpers-r1.sql`).
