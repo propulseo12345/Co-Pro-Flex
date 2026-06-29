@@ -1,24 +1,26 @@
-# Session State — 2026-06-29 (R1 0004/0005 écrites + COMPILE-TEST VERT → prochaine étape = APPLY oio)
+# Session State — 2026-06-29 (R1 finance : APPLIQUÉ sur oio + audit + reset propre + glossaire + commits)
 
 ## Branch / Commit
-- **Co-Pro-Flex** (docs) : `refonte-v2-cadrage` @ `47bdd1c` (dirty : SESSION/PROGRESS/REFONTE/CHANTIERS modifiés ; untracked `env.vitrine.example`).
-- **coproflex-v2** (code) : `socle-connaissance-v2` @ `6eab1ad`. **RIEN commité, RIEN appliqué en base.** Untracked/modifié : migrations `0004`/`0005`, `.planning/rpc-qqfq/`, `scripts/db/`, `.env.local` (gitignoré).
+- **coproflex-v2** (code) : `socle-connaissance-v2` @ `1a1124d` (propre ; reste untracked `.planning/rpc-qqfq/` = scratch d'extraction). **4 commits R1 créés, NON poussés.**
+- **Co-Pro-Flex** (docs) : `refonte-v2-cadrage` @ `<dernier docs(session)>` ; glossaire R1 commité (`ac3875d`). CHANTIERS/SESSION à committer. **NON poussé.**
 
 ## Completed This Session
-- Workflow ultracode → **`0004` (6 fn) + `0005` (5 fn)** écrites ; audit cascade adversarial (8 dim) + tri Lyes → **4 corrections** (doublons get_period/get_open retirés de 0004 ; garde `p_nature_filter` ; fail-loud auto_post ; Hugo = imputation ciblée à câbler dans Gate 1).
-- **COMPILE-TEST BEGIN/ROLLBACK VERT sur `oio`** : `0001→0005` s'appliquent proprement (**functions=30 tables=26 triggers=33 policies=0**), ROLLBACK → oio reste **0/0**. Voie = **connexion directe Postgres** (le MCP ne peut PAS pousser ~100 Ko inline).
-- **Outillage durable prêt** : `coproflex-v2/scripts/db/runner.mjs` (dry défaut / `--apply` = COMMIT) ; `pg` installé (node_modules gitignoré) ; `OIO_DB_URL` dans `.env.local` ; CA Supabase `.planning/rpc-qqfq/supabase-ca.crt`.
+- **APPLY réel `0001→0005` sur `oio`** (carnet option 2 : le runner inscrit `schema_migrations` dans la transaction). 26 tables RLS / 31 fn / 28 triggers.
+- **Advisors triés avec Lyes** : `rls_disabled=0` ✅ ; **2 vrais défauts corrigés à la source + prouvés** (search_path `set_updated_at` ; `revoke is_ledger_regen_exempt FROM PUBLIC` — anon/auth seul était inopérant) ; **84 alertes différées** = future migration RLS+droits.
+- **Audit adversarial** (workflow `wa4miyfis`, 17 agents) → verdict **`minor_only`, rien de cassé**. Triés : Q1=reset+reapply, Q2=garde-fou runner.
+- **Reset + ré-apply propre d'`oio`** → carnet **fidèle** (0001=15973, 0003=19818), **Gate 1 re-vert**, 0 donnée. Apply à neuf PROUVÉ.
+- **Runner durci** : garde-fou mono-shot (refuse si version au carnet) + cause d'échec affichée ; **scenario.mjs `--applied`**.
+- **Glossaire R1** (CONTEXT « Imputation proposer/valider/graver » recadré + 2 entrées technique). **5 commits** (4 coproflex-v2 + 1 docs).
 
-## Next Task (SESSION NEUVE)
-- **APPLIQUER `0001→0005` sur oio** après feu vert Lyes : `node coproflex-v2/scripts/db/runner.mjs --apply`.
-- ⚠️ **Décider AVANT apply** : tracking migrations Supabase (apply raw node-pg = PAS de `schema_migrations` ; OK pour oio neuf mais à acter vs `supabase db push`).
-- PUIS : **scénario Gate 1** (golden, 77 560 ; Hugo en imputation ciblée) = preuve du comportement au centime. Effort : `ultracode` possible.
+## Next Task
+- **PUSH + PR** : décision de stratégie de branche EN ATTENTE (branches très en avance de main : v2=~22 commits, docs=126). Push via `gh auth switch lyestriki-29` (seul autorisé).
+- PUIS prochaine grande tranche DB = **migration RLS + droits** (policies + `revoke execute from public` généralisé + FORCE) = périmètre des 84 advisors différés.
+- Effort : `Max`.
 
 ## Blockers
-- None.
+- None (R1 socle sain et prouvé ; reste = décision push/PR).
 
 ## Key Context
-- `oio`=`oiozjlvlsfzvkmvltiue` (cible, VIDE 0/0) · `qqfq` = live gelé.
-- Comptes : claude.ai = **lyestriki@yahoo.fr** ; Supabase (oio+qqfq) = **lyes.triki@propulseo-site.com** ; ancien `iyfes…` = compte `contact@coproflex.fr` (NE PAS supprimer sans backup, contient GED/Edge).
-- MCP Supabase = OK pour **requêtes**, PAS pour pousser de gros fichiers → migrations via **runner direct** (`scripts/db/runner.mjs`, lit OIO_DB_URL + CA).
-- Détail vivant = `PROGRESS_v2-migrations.md` (§ Phase B + Phase C).
+- `oio` (oiozjlvlsfzvkmvltiue) appliqué à `0001→0005`, carnet fidèle, Gate 1 vert. Lanceurs : `runner.mjs` (apply mono-shot) · `scenario.mjs --applied <gate>` (preuve BEGIN/ROLLBACK). Gate 1 = `supabase/tests/gate1_golden_r1.sql`.
+- Différés à rejuger : RLS+droits (84 WARN advisor) · `478 vs 120` · `711` · format carnet « bloc » (acté : on applique via le runner, pas la CLI).
+- Détail vivant = `PROGRESS_v2-migrations.md`.
