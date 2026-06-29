@@ -12,10 +12,13 @@
 - **Runner durci** : garde-fou mono-shot (refuse si version au carnet) + cause d'échec affichée ; **scenario.mjs `--applied`**.
 - **Glossaire R1** (CONTEXT « Imputation proposer/valider/graver » recadré + 2 entrées technique). **5 commits** (4 coproflex-v2 + 1 docs).
 
-## Next Task
-- **PUSH + PR** : décision de stratégie de branche EN ATTENTE (branches très en avance de main : v2=~22 commits, docs=126). Push via `gh auth switch lyestriki-29` (seul autorisé).
-- PUIS prochaine grande tranche DB = **migration RLS + droits** (policies + `revoke execute from public` généralisé + FORCE) = périmètre des 84 advisors différés.
-- Effort : `Max`.
+## Next Task — DRAFTER LA GOLDEN ÉLARGIE (session NEUVE, à froid)
+- **Catalogue FAIT** : `wz781klp6` → `.planning/CATALOGUE_OPERATIONS_SYNDIC.md` (158 opérations ; 26 bâti / 96 conçu / 37 manquant). **Champ golden tranché = TOUT (P0+P1+P2 = 10 enrichissements)** : travaux facturés, grosses charges réalisées, recouvrement (450-6/459), opposition art.20 vente, annexes+balance, rapprochement bancaire, fonds ALUR affecté, poste en déficit.
+- **PROCHAINE ACTION = drafter la golden élargie COMPLÈTE en doc** (tous domaines + montants recalculés cohérents depuis la base lockée) → Lyes relit section par section et valide → PUIS construire les briques finance STANDARD-COMPLÈTES (dépenses → cut-off → clôture/à-nouveau) prouvées contre la golden élargie. RLS + pilote front APRÈS.
+- **Domaine A déjà LOCKÉ** (charges 2026) : tous postes ≈ budget, **chauffage 10 500** → résultat courant **+1 000** ; ravalement facturé **22 000** + toiture **37 600** → résultat travaux **+560**. (2027 portera le **déficit courant** + travaux à cheval.)
+- **Forks comptables tranchés** : 450-6 (frais recouvrement) = sous-compte débiteur hors-FIFO + contrepartie **714** · honoraires état daté + plan d'apurement = **hors GL** (recette syndic ≠ syndicat) · travaux à cheval = **2e temps** (d'abord opé soldée dans l'exercice).
+- Effort : `Max` (dérivation comptable soignée — chiffres interdépendants, PAS un fan-out).
+- Branches R1 **poussées** ✅ ; PR-vers-main différée. Doctrine exhaustivité gravée dans `rules-v2.md` (1-ter) ; **TODO : synchroniser le skill methodo-coproflex** (emplacement non trouvé par glob).
 
 ## Blockers
 - None (R1 socle sain et prouvé ; reste = décision push/PR).
