@@ -1,3 +1,5 @@
+> ❄️ **v1 GELÉ — NE PLUS CONSTRUIRE ICI.** Le produit v2 vit dans le repo **`coproflex-v2`** (TanStack + Tailwind + shadcn), avec ses propres `CLAUDE.md`, règles (`.claude/hooks/rules-v2.md`), glossaires (`CONTEXT.md` + `docs/glossaire-technique.md`) et plan finance (`.planning/PLAN_FINANCE_BUILD.md`). Ce repo Next.js reste en **référence morte** (historique de cadrage `.planning`). Le hook `rules-v2` a été retiré d'ici le 2026-06-30 (bascule v2).
+
 # CLAUDE.md - CoProFlex
 
 Plateforme SaaS de gestion de copropriété (marché français).
