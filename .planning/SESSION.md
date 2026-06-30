@@ -1,24 +1,24 @@
-# Session State — 2026-06-30 (Golden élargie COMPLÈTE, poussée dans coproflex-v2)
+# Session State — 2026-06-30 (docs v2 PRÉPARÉS — action basculée vers coproflex-v2)
 
 ## Branch / Commit
-- **coproflex-v2** (code + golden) : `socle-connaissance-v2` @ `4580469` — **golden poussée** (`docs(golden): golden élargie`). R1 `0001→0005` toujours prouvé sur `oio`.
-- **Co-Pro-Flex** (docs/trackers) : `refonte-v2-cadrage` — trackers (REFONTE_DECISIONS EXH-6/7 + CHANTIERS + SESSION) commités + poussés.
+- **Co-Pro-Flex** : `refonte-v2-cadrage` — 3 bandeaux « périmé » committés (conventions / design-system / PLAN_GOLDEN_EXHAUSTIF) ; push en attente.
+- **coproflex-v2** : `socle-connaissance-v2` — câblage + référentiel v2 committés ; push en attente.
 
 ## Completed This Session
-- **Golden élargie = brouillon COMPLET, validé section par section** : `coproflex-v2/.planning/GOLDEN_ELARGIE_DRAFT.md` (§0 invariants Gate 1, §1 décor, §2 exercice 2026 locké/équilibré 126 197,50, §3 exercice 2027 conçu, §4 annexes, §9 forks).
-- **2 revues adversariales triées par Lyes** : Domaine A (`wwh2e0rxy`, EXH-6) + §3 2027 (`w0egx0uel`, EXH-7, 14 findings). Correction notable : intérêts livret ALUR → **105** (relevé par Lyes).
-- **Décision repo** : golden = canonique dans **coproflex-v2** (collée au code + Gate 1) ; trackers restent ici ; migration complète du corpus `.planning` = chantier dédié (phase 3 repo dédié), PAS fait ce soir (risqué : refs croisées + hooks + skill token-saver câblés sur Co-Pro-Flex).
+- Préparé TOUS les docs v2 (depuis ce repo = contexte riche) et écrits **direct dans coproflex-v2** : `CLAUDE.md`, `.claude/` (hooks/settings/commands), `CONTEXT.md`, `glossaire-technique`, catalogue, `PLAN_FINANCE_BUILD`, C8, `SUPERSEDES`, `CHANTIERS`, `REFONTE_DECISIONS` (DOCV2 = 14 décisions).
+- **Dette P0** : mensonge stack purgé dans `~/.claude` (skill `token-saver` rendu agnostique + mémoires). Vérifié 0 résidu.
+- 3 rondes de revue adversariale + QC final ; tous les findings triés par Lyes et corrigés.
+- Bandeaux « périmé » sur les docs v1 superseded (ici).
 
-## Next Task (SESSION NEUVE)
-- **Ouvrir la session dans `coproflex-v2`** (code + golden + Gate 1 + futures migrations).
-- **Bâtir les briques finance** (migrations `0006+`) prouvées contre la golden : dépenses/factures → cut-off 408/486 → clôture/à-nouveau + affectation 478/12 → recouvrement 450-6/459 → vente/opposition art.20 → affectation ALUR 105/705. Comptes à créer : 450-6 (C714), 459, 486, 705, 716, 502.
-- Méthode : `Max` par migration + **revue cascade `ultracode` AVANT apply** · BEGIN/ROLLBACK · gate par brique (golden inchangée).
+## Next Task
+- **PUSH** (après ta relecture) puis chantier **« bascule v2 »** : re-clé mémoire · pancarte v1 gelé + **couper le hook `rules-v2` d'ICI** · bascule du dossier de travail vers coproflex-v2.
+- Le **build continue dans coproflex-v2** (cf son `SESSION.md` + `PLAN_FINANCE_BUILD.md`).
+- Effort : `Max`.
 
 ## Blockers
 - None.
 
 ## Key Context
-- **Golden CANONIQUE = `coproflex-v2/.planning/GOLDEN_ELARGIE_DRAFT.md`** (poussée). ⚠️ La copie dans `Co-Pro-Flex/.planning/GOLDEN_ELARGIE_DRAFT.md` est une **copie locale orpheline** (untracked) — à **supprimer** (attendre OK Lyes).
-- `gh` indisponible ; push direct via remotes (coproflex-v2 → compte `propulsFlex` · Co-Pro-Flex → `lyestriki-29`).
-- Base de faits/revues = `…/scratchpad/factbase_*.md` + `revueA_synthese.md` / `revueB_synthese.md` (temporaires).
-- Doctrine actée : garde-fous légaux (dates, MED, solde vendeur) = **alertes non bloquantes**, jamais verrous.
+- À partir d'ici, l'action vit dans **coproflex-v2**. Ce repo (Next.js) = **v1 GELÉ**.
+- 14 décisions DOCV2 = `coproflex-v2/.planning/REFONTE_DECISIONS_2026-06-23.md`.
+- `gh` indispo ; push via remotes (`propulsFlex` / `lyestriki-29`).
