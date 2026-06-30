@@ -1,3 +1,5 @@
+> ⚠️ **PÉRIMÉ (v1 gelé).** Les conventions de code canoniques sont désormais dans **`coproflex-v2/docs/REGLES_CODE.md`** (+ `ORGANISATION.md`), à la stack v2 (Tailwind + shadcn/TanStack). Ce fichier décrit la stack v1 (CSS Modules) et ne sert plus qu'à l'historique. Seul ajout repris en v2 : la règle C8 (interdit `style={{}}` inline). Voir `coproflex-v2/.planning/SUPERSEDES.md`.
+
 # Conventions de Code — CoProFlex
 
 ## Nommage

@@ -1,3 +1,5 @@
+> ⚠️ **PÉRIMÉ (v1 gelé).** La direction visuelle canonique v2 vit dans **`coproflex-v2/docs/DESIGN_TOKENS.md`** (tokens Tailwind/shadcn, DA « Indy »). Ce fichier décrit la DA v1 (tokens CSS, thème sombre) et ne sert plus qu'à l'historique. Voir `coproflex-v2/.planning/SUPERSEDES.md`.
+
 # Design System — CoProFlex
 
 Direction artistique de référence. Ce document est lu automatiquement par le skill `apply-design-system` à chaque création/modification de composant UI.

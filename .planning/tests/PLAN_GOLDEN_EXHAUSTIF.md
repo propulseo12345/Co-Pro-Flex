@@ -1,3 +1,5 @@
+> ⚠️ **PÉRIMÉ — golden canonique = `coproflex-v2/.planning/GOLDEN_ELARGIE_DRAFT.md`.** La partie *résultat* de ce plan est obsolète (cf. §0.5 de la golden élargie) et le mapping « 602 = eau » y est erroné (le décret = 601 eau / 602 électricité / 603 chauffage). Conservé pour l'historique de cadrage. Voir `coproflex-v2/.planning/SUPERSEDES.md`.
+
 # PLAN DE REFERENCE — Campagne de test exhaustive CoProFlex
 ## Golden « E2E-GOLDEN Domaine des Tilleuls » (exercices 2026 → 2027)
 
